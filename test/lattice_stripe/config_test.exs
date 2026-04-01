@@ -1,0 +1,84 @@
+defmodule LatticeStripe.ConfigTest do
+  use ExUnit.Case, async: true
+
+  alias LatticeStripe.Config
+
+  describe "validate!/1" do
+    test "returns validated keyword list with defaults when required fields present" do
+      result = Config.validate!(api_key: "sk_test_123", finch: MyFinch)
+      assert is_list(result)
+      assert result[:api_key] == "sk_test_123"
+      assert result[:finch] == MyFinch
+    end
+
+    test "raises NimbleOptions.ValidationError mentioning :api_key when missing" do
+      assert_raise NimbleOptions.ValidationError, ~r/api_key/, fn ->
+        Config.validate!(finch: MyFinch)
+      end
+    end
+
+    test "raises NimbleOptions.ValidationError mentioning :finch when missing" do
+      assert_raise NimbleOptions.ValidationError, ~r/finch/, fn ->
+        Config.validate!(api_key: "sk_test_123")
+      end
+    end
+
+    test "raises when api_key is not a string" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate!(api_key: 123, finch: MyFinch)
+      end
+    end
+
+    test "defaults applied: base_url, timeout, transport, json_codec, max_retries, telemetry_enabled" do
+      result = Config.validate!(api_key: "sk_test_123", finch: MyFinch)
+      assert result[:base_url] == "https://api.stripe.com"
+      assert result[:timeout] == 30_000
+      assert result[:transport] == LatticeStripe.Transport.Finch
+      assert result[:json_codec] == LatticeStripe.Json.Jason
+      assert result[:max_retries] == 0
+      assert result[:telemetry_enabled] == true
+    end
+
+    test "custom values override defaults" do
+      result =
+        Config.validate!(
+          api_key: "sk_test",
+          finch: MyFinch,
+          timeout: 60_000,
+          base_url: "http://localhost:12111"
+        )
+
+      assert result[:timeout] == 60_000
+      assert result[:base_url] == "http://localhost:12111"
+    end
+
+    test "stripe_account accepts string" do
+      result =
+        Config.validate!(api_key: "sk_test_123", finch: MyFinch, stripe_account: "acct_123")
+
+      assert result[:stripe_account] == "acct_123"
+    end
+
+    test "stripe_account accepts nil" do
+      result = Config.validate!(api_key: "sk_test_123", finch: MyFinch, stripe_account: nil)
+      assert result[:stripe_account] == nil
+    end
+
+    test "api_version defaults to a string (pinned Stripe version)" do
+      result = Config.validate!(api_key: "sk_test_123", finch: MyFinch)
+      assert is_binary(result[:api_version])
+      assert String.length(result[:api_version]) > 0
+    end
+  end
+
+  describe "validate/1" do
+    test "returns {:ok, validated} on success" do
+      assert {:ok, result} = Config.validate(api_key: "sk_test_123", finch: MyFinch)
+      assert result[:api_key] == "sk_test_123"
+    end
+
+    test "returns {:error, %NimbleOptions.ValidationError{}} on failure" do
+      assert {:error, %NimbleOptions.ValidationError{}} = Config.validate([])
+    end
+  end
+end
