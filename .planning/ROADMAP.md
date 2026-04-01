@@ -39,7 +39,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 5 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project scaffolding, dependencies, test infrastructure
+- [x] 01-01-PLAN.md — Project scaffolding, dependencies, test infrastructure
 - [ ] 01-02-PLAN.md — JSON codec behaviour + Jason adapter + form encoder
 - [ ] 01-03-PLAN.md — Transport behaviour + Error struct + Request struct
 - [ ] 01-04-PLAN.md — NimbleOptions config validation + Finch adapter
