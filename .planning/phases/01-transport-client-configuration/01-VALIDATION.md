@@ -18,7 +18,7 @@ created: 2026-03-31
 | Property | Value |
 |----------|-------|
 | **Framework** | ExUnit (stdlib, ships with Elixir) |
-| **Config file** | `test/test_helper.exs` (Wave 0 creation) |
+| **Config file** | `test/test_helper.exs` (Plan 01 creation) |
 | **Quick run command** | `mix test --max-failures 1` |
 | **Full suite command** | `mix test` |
 | **Estimated runtime** | ~2 seconds |
@@ -36,28 +36,30 @@ created: 2026-03-31
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 01-01-01 | 01 | 0 | -- | setup | `mix test` | Wave 0 | ⬜ pending |
-| 01-02-01 | 02 | 1 | JSON-01, JSON-02 | unit | `mix test test/lattice_stripe/json_test.exs` | Wave 0 | ⬜ pending |
-| 01-02-02 | 02 | 1 | TRNS-04 | unit | `mix test test/lattice_stripe/request_test.exs` | Wave 0 | ⬜ pending |
-| 01-02-03 | 02 | 1 | TRNS-01 | unit | `mix test test/lattice_stripe/transport_test.exs` | Wave 0 | ⬜ pending |
-| 01-02-04 | 02 | 1 | CONF-01, CONF-02 | unit | `mix test test/lattice_stripe/config_test.exs` | Wave 0 | ⬜ pending |
-| 01-02-05 | 02 | 1 | -- | unit | `mix test test/lattice_stripe/error_test.exs` | Wave 0 | ⬜ pending |
-| 01-03-01 | 03 | 2 | TRNS-02, TRNS-05 | unit | `mix test test/lattice_stripe/transport/finch_test.exs` | Wave 0 | ⬜ pending |
-| 01-03-02 | 03 | 2 | TRNS-03, CONF-03, CONF-04, CONF-05 | unit (Mox) | `mix test test/lattice_stripe/client_test.exs` | Wave 0 | ⬜ pending |
+| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | Test File | Status |
+|---------|------|------|-------------|-----------|-------------------|-----------|--------|
+| 01-01-01 | 01 | 1 | -- | setup | `mix compile --warnings-as-errors` | -- (no test file) | pending |
+| 01-01-02 | 01 | 1 | -- | setup | `mix test && mix format --check-formatted` | test/test_helper.exs | pending |
+| 01-02-01 | 02 | 2 | JSON-01, JSON-02 | unit | `mix test test/lattice_stripe/json_test.exs` | test/lattice_stripe/json_test.exs | pending |
+| 01-02-02 | 02 | 2 | TRNS-04 | unit | `mix test test/lattice_stripe/form_encoder_test.exs` | test/lattice_stripe/form_encoder_test.exs | pending |
+| 01-03-01 | 03 | 2 | TRNS-01, TRNS-03 | unit | `mix test test/lattice_stripe/transport_test.exs test/lattice_stripe/request_test.exs` | test/lattice_stripe/transport_test.exs, test/lattice_stripe/request_test.exs | pending |
+| 01-03-02 | 03 | 2 | TRNS-03 | unit | `mix test test/lattice_stripe/error_test.exs` | test/lattice_stripe/error_test.exs | pending |
+| 01-04-01 | 04 | 3 | CONF-01, CONF-02 | unit | `mix test test/lattice_stripe/config_test.exs` | test/lattice_stripe/config_test.exs | pending |
+| 01-04-02 | 04 | 3 | TRNS-02, TRNS-05 | unit | `mix test test/lattice_stripe/transport/finch_test.exs` | test/lattice_stripe/transport/finch_test.exs | pending |
+| 01-05-01 | 05 | 4 | CONF-03, CONF-04, CONF-05, TRNS-05 | compile | `mix compile --warnings-as-errors` | -- (compile check) | pending |
+| 01-05-02 | 05 | 4 | CONF-03, CONF-04, CONF-05, TRNS-05 | unit (Mox) | `mix test test/lattice_stripe/client_test.exs` | test/lattice_stripe/client_test.exs | pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: pending / green / red / flaky*
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] `mix new lattice_stripe --module LatticeStripe` — project scaffolding
-- [ ] `mix.exs` — add all Phase 1 dependencies (Finch, Jason, :telemetry, NimbleOptions, Mox, ExDoc, Credo)
-- [ ] `test/test_helper.exs` — Mox.defmock setup for MockTransport and MockJson
-- [ ] `.formatter.exs` — configure formatter
-- [ ] `.credo.exs` — configure Credo
+- [ ] `mix new lattice_stripe --module LatticeStripe` -- project scaffolding
+- [ ] `mix.exs` -- add all Phase 1 dependencies (Finch, Jason, :telemetry, NimbleOptions, Mox, ExDoc, Credo)
+- [ ] `test/test_helper.exs` -- Mox.defmock setup for MockTransport and MockJson
+- [ ] `.formatter.exs` -- configure formatter
+- [ ] `.credo.exs` -- configure Credo
 
 ---
 
