@@ -9,9 +9,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Transport
 
-- [ ] **TRNS-01**: Library provides a Transport behaviour with a single `request/1` callback for HTTP abstraction
+- [x] **TRNS-01**: Library provides a Transport behaviour with a single `request/1` callback for HTTP abstraction
 - [ ] **TRNS-02**: Library ships a default Finch adapter implementing the Transport behaviour
-- [ ] **TRNS-03**: User can swap HTTP client by implementing the Transport behaviour
+- [x] **TRNS-03**: User can swap HTTP client by implementing the Transport behaviour
 - [ ] **TRNS-04**: Transport handles form-encoded request bodies (Stripe v1 API format)
 - [ ] **TRNS-05**: Transport supports configurable timeouts per-request and per-client
 
@@ -214,9 +214,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TRNS-01 | Phase 1 | Pending |
+| TRNS-01 | Phase 1 | Complete |
 | TRNS-02 | Phase 1 | Pending |
-| TRNS-03 | Phase 1 | Pending |
+| TRNS-03 | Phase 1 | Complete |
 | TRNS-04 | Phase 1 | Pending |
 | TRNS-05 | Phase 1 | Pending |
 | CONF-01 | Phase 1 | Pending |
