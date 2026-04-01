@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 01-transport-client-configuration-01-03-PLAN.md
-last_updated: "2026-04-01T04:50:02.503Z"
+stopped_at: Completed 01-transport-client-configuration-01-04-PLAN.md
+last_updated: "2026-04-01T05:04:19.314Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 11
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
+  completed_plans: 4
   percent: 0
 ---
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01 P01 | 3min | 2 tasks | 8 files |
 | Phase 01-transport-client-configuration P03 | 2 | 2 tasks | 6 files |
+| Phase 01-transport-client-configuration P04 | 119 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,8 @@ Recent decisions affecting current work:
 - [Phase 01]: Stub Transport/Json behaviours created in scaffolding plan so Mox.defmock compiles; Plans 02/03 expand them
 - [Phase 01-transport-client-configuration]: Transport behaviour uses single request/1 callback with plain map for narrowest possible contract
 - [Phase 01-transport-client-configuration]: Error.from_response/3 falls back to :api_error for unknown types and non-standard response bodies
+- [Phase 01-transport-client-configuration]: NimbleOptions.new! schema compiled once at module load time for efficient runtime validation
+- [Phase 01-transport-client-configuration]: Finch transport unit tests avoid real pool; integration via stripe-mock in Phase 9
 
 ### Pending Todos
 
@@ -79,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T04:50:02.499Z
-Stopped at: Completed 01-transport-client-configuration-01-03-PLAN.md
+Last session: 2026-04-01T05:04:19.311Z
+Stopped at: Completed 01-transport-client-configuration-01-04-PLAN.md
 Resume file: None

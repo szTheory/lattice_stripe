@@ -10,15 +10,15 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Transport
 
 - [x] **TRNS-01**: Library provides a Transport behaviour with a single `request/1` callback for HTTP abstraction
-- [ ] **TRNS-02**: Library ships a default Finch adapter implementing the Transport behaviour
+- [x] **TRNS-02**: Library ships a default Finch adapter implementing the Transport behaviour
 - [x] **TRNS-03**: User can swap HTTP client by implementing the Transport behaviour
 - [ ] **TRNS-04**: Transport handles form-encoded request bodies (Stripe v1 API format)
-- [ ] **TRNS-05**: Transport supports configurable timeouts per-request and per-client
+- [x] **TRNS-05**: Transport supports configurable timeouts per-request and per-client
 
 ### Client Configuration
 
-- [ ] **CONF-01**: User can create a client struct with API key, base URL, timeouts, retry policy, API version, and telemetry toggle
-- [ ] **CONF-02**: Client configuration is validated at creation time with clear error messages (NimbleOptions)
+- [x] **CONF-01**: User can create a client struct with API key, base URL, timeouts, retry policy, API version, and telemetry toggle
+- [x] **CONF-02**: Client configuration is validated at creation time with clear error messages (NimbleOptions)
 - [ ] **CONF-03**: User can override options per-request (idempotency_key, stripe_account, api_key, stripe_version, expand, timeout)
 - [ ] **CONF-04**: Client struct is a plain struct — no GenServer, no global state
 - [ ] **CONF-05**: Multiple independent clients can coexist in the same VM
@@ -215,12 +215,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | TRNS-01 | Phase 1 | Complete |
-| TRNS-02 | Phase 1 | Pending |
+| TRNS-02 | Phase 1 | Complete |
 | TRNS-03 | Phase 1 | Complete |
 | TRNS-04 | Phase 1 | Pending |
-| TRNS-05 | Phase 1 | Pending |
-| CONF-01 | Phase 1 | Pending |
-| CONF-02 | Phase 1 | Pending |
+| TRNS-05 | Phase 1 | Complete |
+| CONF-01 | Phase 1 | Complete |
+| CONF-02 | Phase 1 | Complete |
 | CONF-03 | Phase 1 | Pending |
 | CONF-04 | Phase 1 | Pending |
 | CONF-05 | Phase 1 | Pending |
