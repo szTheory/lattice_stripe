@@ -214,111 +214,111 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TRNS-01 | TBD | Pending |
-| TRNS-02 | TBD | Pending |
-| TRNS-03 | TBD | Pending |
-| TRNS-04 | TBD | Pending |
-| TRNS-05 | TBD | Pending |
-| CONF-01 | TBD | Pending |
-| CONF-02 | TBD | Pending |
-| CONF-03 | TBD | Pending |
-| CONF-04 | TBD | Pending |
-| CONF-05 | TBD | Pending |
-| ERRR-01 | TBD | Pending |
-| ERRR-02 | TBD | Pending |
-| ERRR-03 | TBD | Pending |
-| ERRR-04 | TBD | Pending |
-| ERRR-05 | TBD | Pending |
-| ERRR-06 | TBD | Pending |
-| RTRY-01 | TBD | Pending |
-| RTRY-02 | TBD | Pending |
-| RTRY-03 | TBD | Pending |
-| RTRY-04 | TBD | Pending |
-| RTRY-05 | TBD | Pending |
-| RTRY-06 | TBD | Pending |
-| PAGE-01 | TBD | Pending |
-| PAGE-02 | TBD | Pending |
-| PAGE-03 | TBD | Pending |
-| PAGE-04 | TBD | Pending |
-| PAGE-05 | TBD | Pending |
-| PAGE-06 | TBD | Pending |
-| EXPD-01 | TBD | Pending |
-| EXPD-02 | TBD | Pending |
-| EXPD-03 | TBD | Pending |
-| EXPD-04 | TBD | Pending |
-| EXPD-05 | TBD | Pending |
-| VERS-01 | TBD | Pending |
-| VERS-02 | TBD | Pending |
-| VERS-03 | TBD | Pending |
-| TLMT-01 | TBD | Pending |
-| TLMT-02 | TBD | Pending |
-| TLMT-03 | TBD | Pending |
-| JSON-01 | TBD | Pending |
-| JSON-02 | TBD | Pending |
-| PINT-01 | TBD | Pending |
-| PINT-02 | TBD | Pending |
-| PINT-03 | TBD | Pending |
-| PINT-04 | TBD | Pending |
-| PINT-05 | TBD | Pending |
-| PINT-06 | TBD | Pending |
-| PINT-07 | TBD | Pending |
-| SINT-01 | TBD | Pending |
-| SINT-02 | TBD | Pending |
-| SINT-03 | TBD | Pending |
-| SINT-04 | TBD | Pending |
-| SINT-05 | TBD | Pending |
-| SINT-06 | TBD | Pending |
-| PMTH-01 | TBD | Pending |
-| PMTH-02 | TBD | Pending |
-| PMTH-03 | TBD | Pending |
-| PMTH-04 | TBD | Pending |
-| PMTH-05 | TBD | Pending |
-| PMTH-06 | TBD | Pending |
-| CUST-01 | TBD | Pending |
-| CUST-02 | TBD | Pending |
-| CUST-03 | TBD | Pending |
-| CUST-04 | TBD | Pending |
-| CUST-05 | TBD | Pending |
-| CUST-06 | TBD | Pending |
-| RFND-01 | TBD | Pending |
-| RFND-02 | TBD | Pending |
-| RFND-03 | TBD | Pending |
-| RFND-04 | TBD | Pending |
-| CHKT-01 | TBD | Pending |
-| CHKT-02 | TBD | Pending |
-| CHKT-03 | TBD | Pending |
-| CHKT-04 | TBD | Pending |
-| CHKT-05 | TBD | Pending |
-| CHKT-06 | TBD | Pending |
-| CHKT-07 | TBD | Pending |
-| WHBK-01 | TBD | Pending |
-| WHBK-02 | TBD | Pending |
-| WHBK-03 | TBD | Pending |
-| WHBK-04 | TBD | Pending |
-| WHBK-05 | TBD | Pending |
-| DOCS-01 | TBD | Pending |
-| DOCS-02 | TBD | Pending |
-| DOCS-03 | TBD | Pending |
-| DOCS-04 | TBD | Pending |
-| DOCS-05 | TBD | Pending |
-| DOCS-06 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| TEST-04 | TBD | Pending |
-| TEST-05 | TBD | Pending |
-| TEST-06 | TBD | Pending |
-| CICD-01 | TBD | Pending |
-| CICD-02 | TBD | Pending |
-| CICD-03 | TBD | Pending |
-| CICD-04 | TBD | Pending |
-| CICD-05 | TBD | Pending |
+| TRNS-01 | Phase 1 | Pending |
+| TRNS-02 | Phase 1 | Pending |
+| TRNS-03 | Phase 1 | Pending |
+| TRNS-04 | Phase 1 | Pending |
+| TRNS-05 | Phase 1 | Pending |
+| CONF-01 | Phase 1 | Pending |
+| CONF-02 | Phase 1 | Pending |
+| CONF-03 | Phase 1 | Pending |
+| CONF-04 | Phase 1 | Pending |
+| CONF-05 | Phase 1 | Pending |
+| JSON-01 | Phase 1 | Pending |
+| JSON-02 | Phase 1 | Pending |
+| ERRR-01 | Phase 2 | Pending |
+| ERRR-02 | Phase 2 | Pending |
+| ERRR-03 | Phase 2 | Pending |
+| ERRR-04 | Phase 2 | Pending |
+| ERRR-05 | Phase 2 | Pending |
+| ERRR-06 | Phase 2 | Pending |
+| RTRY-01 | Phase 2 | Pending |
+| RTRY-02 | Phase 2 | Pending |
+| RTRY-03 | Phase 2 | Pending |
+| RTRY-04 | Phase 2 | Pending |
+| RTRY-05 | Phase 2 | Pending |
+| RTRY-06 | Phase 2 | Pending |
+| PAGE-01 | Phase 3 | Pending |
+| PAGE-02 | Phase 3 | Pending |
+| PAGE-03 | Phase 3 | Pending |
+| PAGE-04 | Phase 3 | Pending |
+| PAGE-05 | Phase 3 | Pending |
+| PAGE-06 | Phase 3 | Pending |
+| EXPD-01 | Phase 3 | Pending |
+| EXPD-02 | Phase 3 | Pending |
+| EXPD-03 | Phase 3 | Pending |
+| EXPD-04 | Phase 3 | Pending |
+| EXPD-05 | Phase 3 | Pending |
+| VERS-01 | Phase 3 | Pending |
+| VERS-02 | Phase 3 | Pending |
+| VERS-03 | Phase 3 | Pending |
+| CUST-01 | Phase 4 | Pending |
+| CUST-02 | Phase 4 | Pending |
+| CUST-03 | Phase 4 | Pending |
+| CUST-04 | Phase 4 | Pending |
+| CUST-05 | Phase 4 | Pending |
+| CUST-06 | Phase 4 | Pending |
+| PINT-01 | Phase 4 | Pending |
+| PINT-02 | Phase 4 | Pending |
+| PINT-03 | Phase 4 | Pending |
+| PINT-04 | Phase 4 | Pending |
+| PINT-05 | Phase 4 | Pending |
+| PINT-06 | Phase 4 | Pending |
+| PINT-07 | Phase 4 | Pending |
+| SINT-01 | Phase 5 | Pending |
+| SINT-02 | Phase 5 | Pending |
+| SINT-03 | Phase 5 | Pending |
+| SINT-04 | Phase 5 | Pending |
+| SINT-05 | Phase 5 | Pending |
+| SINT-06 | Phase 5 | Pending |
+| PMTH-01 | Phase 5 | Pending |
+| PMTH-02 | Phase 5 | Pending |
+| PMTH-03 | Phase 5 | Pending |
+| PMTH-04 | Phase 5 | Pending |
+| PMTH-05 | Phase 5 | Pending |
+| PMTH-06 | Phase 5 | Pending |
+| RFND-01 | Phase 6 | Pending |
+| RFND-02 | Phase 6 | Pending |
+| RFND-03 | Phase 6 | Pending |
+| RFND-04 | Phase 6 | Pending |
+| CHKT-01 | Phase 6 | Pending |
+| CHKT-02 | Phase 6 | Pending |
+| CHKT-03 | Phase 6 | Pending |
+| CHKT-04 | Phase 6 | Pending |
+| CHKT-05 | Phase 6 | Pending |
+| CHKT-06 | Phase 6 | Pending |
+| CHKT-07 | Phase 6 | Pending |
+| WHBK-01 | Phase 7 | Pending |
+| WHBK-02 | Phase 7 | Pending |
+| WHBK-03 | Phase 7 | Pending |
+| WHBK-04 | Phase 7 | Pending |
+| WHBK-05 | Phase 7 | Pending |
+| TLMT-01 | Phase 8 | Pending |
+| TLMT-02 | Phase 8 | Pending |
+| TLMT-03 | Phase 8 | Pending |
+| TEST-01 | Phase 9 | Pending |
+| TEST-02 | Phase 9 | Pending |
+| TEST-03 | Phase 9 | Pending |
+| TEST-04 | Phase 9 | Pending |
+| TEST-05 | Phase 9 | Pending |
+| TEST-06 | Phase 9 | Pending |
+| DOCS-01 | Phase 10 | Pending |
+| DOCS-02 | Phase 10 | Pending |
+| DOCS-03 | Phase 10 | Pending |
+| DOCS-04 | Phase 10 | Pending |
+| DOCS-05 | Phase 10 | Pending |
+| DOCS-06 | Phase 10 | Pending |
+| CICD-01 | Phase 11 | Pending |
+| CICD-02 | Phase 11 | Pending |
+| CICD-03 | Phase 11 | Pending |
+| CICD-04 | Phase 11 | Pending |
+| CICD-05 | Phase 11 | Pending |
 
 **Coverage:**
-- v1 requirements: 82 total
-- Mapped to phases: 0
-- Unmapped: 82 ⚠️
+- v1 requirements: 99 total
+- Mapped to phases: 99
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-31*
-*Last updated: 2026-03-31 after initial definition*
+*Last updated: 2026-03-31 after roadmap creation*
