@@ -12,7 +12,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **TRNS-01**: Library provides a Transport behaviour with a single `request/1` callback for HTTP abstraction
 - [ ] **TRNS-02**: Library ships a default Finch adapter implementing the Transport behaviour
 - [ ] **TRNS-03**: User can swap HTTP client by implementing the Transport behaviour
-- [ ] **TRNS-04**: Transport handles form-encoded request bodies (Stripe v1 API format)
+- [x] **TRNS-04**: Transport handles form-encoded request bodies (Stripe v1 API format)
 - [ ] **TRNS-05**: Transport supports configurable timeouts per-request and per-client
 
 ### Client Configuration
@@ -72,8 +72,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### JSON Codec
 
-- [ ] **JSON-01**: Library uses Jason as default JSON encoder/decoder
-- [ ] **JSON-02**: JSON codec is pluggable via a behaviour for users with different JSON libraries
+- [x] **JSON-01**: Library uses Jason as default JSON encoder/decoder
+- [x] **JSON-02**: JSON codec is pluggable via a behaviour for users with different JSON libraries
 
 ### Payments — PaymentIntents
 
@@ -217,15 +217,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRNS-01 | Phase 1 | Pending |
 | TRNS-02 | Phase 1 | Pending |
 | TRNS-03 | Phase 1 | Pending |
-| TRNS-04 | Phase 1 | Pending |
+| TRNS-04 | Phase 1 | Complete |
 | TRNS-05 | Phase 1 | Pending |
 | CONF-01 | Phase 1 | Pending |
 | CONF-02 | Phase 1 | Pending |
 | CONF-03 | Phase 1 | Pending |
 | CONF-04 | Phase 1 | Pending |
 | CONF-05 | Phase 1 | Pending |
-| JSON-01 | Phase 1 | Pending |
-| JSON-02 | Phase 1 | Pending |
+| JSON-01 | Phase 1 | Complete |
+| JSON-02 | Phase 1 | Complete |
 | ERRR-01 | Phase 2 | Pending |
 | ERRR-02 | Phase 2 | Pending |
 | ERRR-03 | Phase 2 | Pending |

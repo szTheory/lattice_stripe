@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-04-01T04:36:23.142Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-04-01T04:48:33.565Z"
 last_activity: 2026-04-01
 progress:
   total_phases: 11
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01 P01 | 3min | 2 tasks | 8 files |
+| Phase 01-transport-client-configuration P02 | 8 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - Transport behaviour with Finch default: library doesn't force HTTP client choice
 - Client struct is plain struct, no GenServer, no global state
 - [Phase 01]: Stub Transport/Json behaviours created in scaffolding plan so Mox.defmock compiles; Plans 02/03 expand them
+- [Phase 01-transport-client-configuration]: Preserve literal brackets in form-encoded keys for Stripe v1 API compatibility
+- [Phase 01-transport-client-configuration]: Sort form-encoded pairs alphabetically for deterministic output
+- [Phase 01-transport-client-configuration]: Nil values omitted, empty string preserved in form encoding (Stripe conventions)
 
 ### Pending Todos
 
@@ -76,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T04:36:23.140Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-04-01T04:48:33.563Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
