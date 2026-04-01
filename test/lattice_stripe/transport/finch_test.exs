@@ -10,7 +10,7 @@ defmodule LatticeStripe.Transport.FinchTest do
     end
 
     test "exports request/1" do
-      assert function_exported?(FinchTransport, :request, 1)
+      assert {:request, 1} in FinchTransport.__info__(:functions)
     end
   end
 
