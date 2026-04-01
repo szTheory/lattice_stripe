@@ -19,9 +19,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **CONF-01**: User can create a client struct with API key, base URL, timeouts, retry policy, API version, and telemetry toggle
 - [x] **CONF-02**: Client configuration is validated at creation time with clear error messages (NimbleOptions)
-- [ ] **CONF-03**: User can override options per-request (idempotency_key, stripe_account, api_key, stripe_version, expand, timeout)
-- [ ] **CONF-04**: Client struct is a plain struct — no GenServer, no global state
-- [ ] **CONF-05**: Multiple independent clients can coexist in the same VM
+- [x] **CONF-03**: User can override options per-request (idempotency_key, stripe_account, api_key, stripe_version, expand, timeout)
+- [x] **CONF-04**: Client struct is a plain struct — no GenServer, no global state
+- [x] **CONF-05**: Multiple independent clients can coexist in the same VM
 
 ### Error Handling
 
@@ -221,9 +221,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRNS-05 | Phase 1 | Complete |
 | CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 1 | Complete |
-| CONF-03 | Phase 1 | Pending |
-| CONF-04 | Phase 1 | Pending |
-| CONF-05 | Phase 1 | Pending |
+| CONF-03 | Phase 1 | Complete |
+| CONF-04 | Phase 1 | Complete |
+| CONF-05 | Phase 1 | Complete |
 | JSON-01 | Phase 1 | Pending |
 | JSON-02 | Phase 1 | Pending |
 | ERRR-01 | Phase 2 | Pending |

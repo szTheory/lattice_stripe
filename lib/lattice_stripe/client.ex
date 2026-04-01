@@ -157,7 +157,14 @@ defmodule LatticeStripe.Client do
 
     {url, body} = build_url_and_body(client.base_url, req.method, req.path, params)
 
-    headers = build_headers(req.method, effective_api_key, effective_api_version, effective_stripe_account, idempotency_key)
+    headers =
+      build_headers(
+        req.method,
+        effective_api_key,
+        effective_api_version,
+        effective_stripe_account,
+        idempotency_key
+      )
 
     transport_opts = [finch: client.finch, timeout: effective_timeout]
 
