@@ -3,7 +3,7 @@ defmodule LatticeStripe.PaymentIntentTest do
 
   import Mox
 
-  alias LatticeStripe.{Client, Error, List, PaymentIntent, Request, Response}
+  alias LatticeStripe.{Client, Error, List, PaymentIntent, Response}
 
   setup :verify_on_exit!
 

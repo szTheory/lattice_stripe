@@ -3,7 +3,7 @@ defmodule LatticeStripe.ListTest do
 
   import Mox
 
-  alias LatticeStripe.{Client, List, Request, Response}
+  alias LatticeStripe.{Client, List, Request}
 
   setup :verify_on_exit!
 
