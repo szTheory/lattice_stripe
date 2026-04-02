@@ -96,12 +96,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Payments — PaymentMethods
 
-- [ ] **PMTH-01**: User can create a PaymentMethod
-- [ ] **PMTH-02**: User can retrieve a PaymentMethod by ID
-- [ ] **PMTH-03**: User can update a PaymentMethod
-- [ ] **PMTH-04**: User can list PaymentMethods for a customer
-- [ ] **PMTH-05**: User can attach a PaymentMethod to a customer
-- [ ] **PMTH-06**: User can detach a PaymentMethod from a customer
+- [x] **PMTH-01**: User can create a PaymentMethod
+- [x] **PMTH-02**: User can retrieve a PaymentMethod by ID
+- [x] **PMTH-03**: User can update a PaymentMethod
+- [x] **PMTH-04**: User can list PaymentMethods for a customer
+- [x] **PMTH-05**: User can attach a PaymentMethod to a customer
+- [x] **PMTH-06**: User can detach a PaymentMethod from a customer
 
 ### Payments — Customers
 
@@ -271,12 +271,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SINT-04 | Phase 5 | Complete |
 | SINT-05 | Phase 5 | Complete |
 | SINT-06 | Phase 5 | Complete |
-| PMTH-01 | Phase 5 | Pending |
-| PMTH-02 | Phase 5 | Pending |
-| PMTH-03 | Phase 5 | Pending |
-| PMTH-04 | Phase 5 | Pending |
-| PMTH-05 | Phase 5 | Pending |
-| PMTH-06 | Phase 5 | Pending |
+| PMTH-01 | Phase 5 | Complete |
+| PMTH-02 | Phase 5 | Complete |
+| PMTH-03 | Phase 5 | Complete |
+| PMTH-04 | Phase 5 | Complete |
+| PMTH-05 | Phase 5 | Complete |
+| PMTH-06 | Phase 5 | Complete |
 | RFND-01 | Phase 6 | Pending |
 | RFND-02 | Phase 6 | Pending |
 | RFND-03 | Phase 6 | Pending |
