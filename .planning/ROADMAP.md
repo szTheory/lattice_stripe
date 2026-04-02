@@ -72,11 +72,11 @@ Plans:
   3. Search endpoints support page-based pagination with next_page, and documentation clearly states eventual consistency caveats
   4. Developer can pass expand option to expand nested objects into typed structs, including nested expansion paths
   5. Library pins to a specific Stripe API version per release, overridable per-client and per-request
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [x] 03-01-PLAN.md — Response struct, List struct, api_version/0, Config update, User-Agent enhancement
-- [ ] 03-02-PLAN.md — Client.request/2 Response wrapping, list detection, existing test updates
+- [x] 03-02-PLAN.md — Client.request/2 Response wrapping, list detection, existing test updates
 - [ ] 03-03-PLAN.md — List auto-pagination streaming (stream!/2, stream/2)
 
 ### Phase 4: Customers & PaymentIntents
@@ -207,7 +207,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 |-------|----------------|--------|-----------|
 | 1. Transport & Client Configuration | 5/5 | Complete   | 2026-04-01 |
 | 2. Error Handling & Retry | 0/3 | Planned | - |
-| 3. Pagination & Response | 1/3 | In Progress|  |
+| 3. Pagination & Response | 2/3 | In Progress|  |
 | 4. Customers & PaymentIntents | 0/0 | Not started | - |
 | 5. SetupIntents & PaymentMethods | 0/0 | Not started | - |
 | 6. Refunds & Checkout | 0/0 | Not started | - |

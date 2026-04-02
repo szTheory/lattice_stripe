@@ -44,7 +44,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Pagination
 
 - [x] **PAGE-01**: List endpoints return a struct with `data`, `has_more`, and pagination cursors
-- [ ] **PAGE-02**: User can paginate manually with `starting_after` and `ending_before` parameters
+- [x] **PAGE-02**: User can paginate manually with `starting_after` and `ending_before` parameters
 - [ ] **PAGE-03**: Library provides auto-pagination via `Stream.resource/3` that lazily fetches all pages
 - [ ] **PAGE-04**: Auto-pagination streams are composable with Elixir's Stream and Enum modules
 - [x] **PAGE-05**: Search endpoints support page-based pagination with `page` and `next_page` parameters
@@ -52,7 +52,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Expand & Response
 
-- [ ] **EXPD-01**: User can pass `expand` option to expand nested objects on any request
+- [x] **EXPD-01**: User can pass `expand` option to expand nested objects on any request
 - [ ] **EXPD-02**: Expanded objects are deserialized into typed structs, unexpanded remain as string IDs
 - [ ] **EXPD-03**: Nested expansion is supported (e.g., `expand: ["data.customer"]`)
 - [x] **EXPD-04**: Response structs expose raw response metadata: request_id, HTTP status, headers
@@ -239,12 +239,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RTRY-05 | Phase 2 | Complete |
 | RTRY-06 | Phase 2 | Complete |
 | PAGE-01 | Phase 3 | Complete |
-| PAGE-02 | Phase 3 | Pending |
+| PAGE-02 | Phase 3 | Complete |
 | PAGE-03 | Phase 3 | Pending |
 | PAGE-04 | Phase 3 | Pending |
 | PAGE-05 | Phase 3 | Complete |
 | PAGE-06 | Phase 3 | Complete |
-| EXPD-01 | Phase 3 | Pending |
+| EXPD-01 | Phase 3 | Complete |
 | EXPD-02 | Phase 3 | Pending |
 | EXPD-03 | Phase 3 | Pending |
 | EXPD-04 | Phase 3 | Complete |
