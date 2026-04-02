@@ -103,10 +103,10 @@ Plans:
   2. Developer can create, retrieve, update, and list PaymentMethods for a customer
   3. Developer can attach a PaymentMethod to a customer and detach it
   4. All operations follow the same ergonomic pattern established by Customers and PaymentIntents
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 05-01-PLAN.md — Extract Resource helpers, refactor Customer/PI, add PI search, build SetupIntent + tests
+- [x] 05-01-PLAN.md — Extract Resource helpers, refactor Customer/PI, add PI search, build SetupIntent + tests
 - [ ] 05-02-PLAN.md — PaymentMethod struct, CRUD, attach/detach, validated list, stream + tests
 
 ### Phase 6: Refunds & Checkout
@@ -209,7 +209,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 2. Error Handling & Retry | 0/3 | Planned | - |
 | 3. Pagination & Response | 2/3 | In Progress|  |
 | 4. Customers & PaymentIntents | 0/2 | Planned | - |
-| 5. SetupIntents & PaymentMethods | 0/2 | Planned | - |
+| 5. SetupIntents & PaymentMethods | 1/2 | In Progress|  |
 | 6. Refunds & Checkout | 0/0 | Not started | - |
 | 7. Webhooks | 0/0 | Not started | - |
 | 8. Telemetry & Observability | 0/0 | Not started | - |

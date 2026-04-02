@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 context gathered
-last_updated: "2026-04-02T20:44:54.527Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-04-02T21:29:18.425Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 11
   completed_phases: 4
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 15
+  completed_plans: 14
   percent: 100
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 04 — customers-paymentintents
+**Current focus:** Phase 05 — setupintents-paymentmethods
 
 ## Current Position
 
-Phase: 5
-Plan: Not started
+Phase: 05 (setupintents-paymentmethods) — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
 Last activity: 2026-04-02
 
@@ -63,6 +63,7 @@ Progress: [████████████████████] 11/11 p
 | Phase 03-pagination-response P02 | 4 | 2 tasks | 2 files |
 | Phase 03-pagination-response P03 | 3 | 1 tasks | 2 files |
 | Phase 04-customers-paymentintents P02 | 15 | 1 tasks | 2 files |
+| Phase 05-setupintents-paymentmethods P01 | 7 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Recent decisions affecting current work:
 - [Phase 03-pagination-response]: Stream.resource/3 start_fun makes initial fetch synchronously — stream is truly lazy, no fetch until evaluation
 - [Phase 04-customers-paymentintents]: PaymentIntent Inspect uses Inspect.Algebra concat/to_doc (not Inspect.Any.inspect with fake struct) to exclude client_secret field name entirely from output
 - [Phase 04-customers-paymentintents]: Action verbs confirm/capture/cancel follow same unwrap_singular pattern as CRUD with optional params defaulting to empty map
+- [Phase 05-setupintents-paymentmethods]: LatticeStripe.Resource module extracts shared unwrap_singular/2, unwrap_list/2, unwrap_bang!/1 helpers — all resource modules use this instead of private defp copies
+- [Phase 05-setupintents-paymentmethods]: elixirc_paths(:test) compiles test/support/ as real modules — importable via import LatticeStripe.TestHelpers in test files
+- [Phase 05-setupintents-paymentmethods]: SetupIntent.latest_attempt kept as raw value (string or map) — Stripe API returns either, no forced typing applied
 
 ### Pending Todos
 
@@ -106,6 +110,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T20:44:54.523Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-setupintents-paymentmethods/05-CONTEXT.md
+Last session: 2026-04-02T21:29:18.422Z
+Stopped at: Completed 05-01-PLAN.md
+Resume file: None

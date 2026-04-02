@@ -87,12 +87,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Payments — SetupIntents
 
-- [ ] **SINT-01**: User can create a SetupIntent for saving payment methods
-- [ ] **SINT-02**: User can retrieve a SetupIntent by ID
-- [ ] **SINT-03**: User can update a SetupIntent
-- [ ] **SINT-04**: User can confirm a SetupIntent
-- [ ] **SINT-05**: User can cancel a SetupIntent
-- [ ] **SINT-06**: User can list SetupIntents with filters and pagination
+- [x] **SINT-01**: User can create a SetupIntent for saving payment methods
+- [x] **SINT-02**: User can retrieve a SetupIntent by ID
+- [x] **SINT-03**: User can update a SetupIntent
+- [x] **SINT-04**: User can confirm a SetupIntent
+- [x] **SINT-05**: User can cancel a SetupIntent
+- [x] **SINT-06**: User can list SetupIntents with filters and pagination
 
 ### Payments — PaymentMethods
 
@@ -265,12 +265,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PINT-05 | Phase 4 | Complete |
 | PINT-06 | Phase 4 | Complete |
 | PINT-07 | Phase 4 | Complete |
-| SINT-01 | Phase 5 | Pending |
-| SINT-02 | Phase 5 | Pending |
-| SINT-03 | Phase 5 | Pending |
-| SINT-04 | Phase 5 | Pending |
-| SINT-05 | Phase 5 | Pending |
-| SINT-06 | Phase 5 | Pending |
+| SINT-01 | Phase 5 | Complete |
+| SINT-02 | Phase 5 | Complete |
+| SINT-03 | Phase 5 | Complete |
+| SINT-04 | Phase 5 | Complete |
+| SINT-05 | Phase 5 | Complete |
+| SINT-06 | Phase 5 | Complete |
 | PMTH-01 | Phase 5 | Pending |
 | PMTH-02 | Phase 5 | Pending |
 | PMTH-03 | Phase 5 | Pending |
