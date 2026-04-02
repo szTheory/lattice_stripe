@@ -245,6 +245,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         assert req.method == :post
         assert String.ends_with?(req.url, "/v1/payment_intents/pi_test123/cancel")
         assert req.body =~ "cancellation_reason=abandoned"
+
         ok_response(
           payment_intent_json(%{
             "status" => "canceled",
