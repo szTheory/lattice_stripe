@@ -19,6 +19,12 @@ defmodule LatticeStripe.ClientTest do
     Client.new!(Keyword.merge(defaults, overrides))
   end
 
+  # Helper: client with zero-delay retry for fast tests.
+  defp retry_client(overrides \\ []) do
+    defaults = [max_retries: 2, retry_strategy: LatticeStripe.MockRetryStrategy]
+    test_client(Keyword.merge(defaults, overrides))
+  end
+
   # Helper to build a standard 200 success response.
   defp ok_response(body \\ %{"id" => "obj_123", "object" => "charge"}) do
     {:ok,
@@ -30,7 +36,7 @@ defmodule LatticeStripe.ClientTest do
   end
 
   # Helper to build an error response.
-  defp error_response(status, type, message) do
+  defp error_response(status, type, message, extra_headers \\ []) do
     body = %{
       "error" => %{
         "type" => type,
@@ -42,8 +48,18 @@ defmodule LatticeStripe.ClientTest do
     {:ok,
      %{
        status: status,
-       headers: [{"request-id", "req_err_456"}],
+       headers: [{"request-id", "req_err_456"}] ++ extra_headers,
        body: Jason.encode!(body)
+     }}
+  end
+
+  # Helper to build a non-JSON response.
+  defp non_json_response(status, body) do
+    {:ok,
+     %{
+       status: status,
+       headers: [{"request-id", "req_html_789"}],
+       body: body
      }}
   end
 
@@ -55,6 +71,11 @@ defmodule LatticeStripe.ClientTest do
   # Basic POST request struct.
   defp post_request(path \\ "/v1/charges", params \\ %{}, opts \\ []) do
     %Request{method: :post, path: path, params: params, opts: opts}
+  end
+
+  # Basic DELETE request struct.
+  defp delete_request(path \\ "/v1/customers/cus_123", opts \\ []) do
+    %Request{method: :delete, path: path, params: %{}, opts: opts}
   end
 
   describe "new!/1 and new/1" do
@@ -254,7 +275,7 @@ defmodule LatticeStripe.ClientTest do
 
     # Test 15: request/2 on 401 returns {:error, %Error{type: :authentication_error}}
     test "401 response returns authentication_error" do
-      client = test_client()
+      client = test_client(max_retries: 0)
 
       expect(LatticeStripe.MockTransport, :request, fn _req_map ->
         error_response(401, "authentication_error", "No such API key")
@@ -266,7 +287,7 @@ defmodule LatticeStripe.ClientTest do
 
     # Test 16: request/2 on 400 returns {:error, %Error{type: :invalid_request_error}}
     test "400 response returns invalid_request_error" do
-      client = test_client()
+      client = test_client(max_retries: 0)
 
       expect(LatticeStripe.MockTransport, :request, fn _req_map ->
         error_response(400, "invalid_request_error", "Missing required param: source")
@@ -278,7 +299,7 @@ defmodule LatticeStripe.ClientTest do
 
     # Test 17: request/2 on 429 returns {:error, %Error{type: :rate_limit_error}}
     test "429 response returns rate_limit_error" do
-      client = test_client()
+      client = test_client(max_retries: 0)
 
       expect(LatticeStripe.MockTransport, :request, fn _req_map ->
         error_response(429, "rate_limit_error", "Too many requests")
@@ -290,7 +311,7 @@ defmodule LatticeStripe.ClientTest do
 
     # Test 18: request/2 on transport error returns {:error, %Error{type: :connection_error}}
     test "transport error returns connection_error" do
-      client = test_client()
+      client = test_client(max_retries: 0)
 
       expect(LatticeStripe.MockTransport, :request, fn _req_map ->
         {:error, :timeout}
@@ -354,8 +375,8 @@ defmodule LatticeStripe.ClientTest do
       assert {:ok, _} = Client.request(client, req)
     end
 
-    # Test 23: Per-request idempotency_key adds Idempotency-Key header
-    test "per-request idempotency_key adds Idempotency-Key header" do
+    # Test 23: Per-request idempotency_key adds Idempotency-Key header (user key takes precedence)
+    test "per-request idempotency_key overrides auto-generated key" do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn req_map ->
@@ -388,7 +409,7 @@ defmodule LatticeStripe.ClientTest do
 
     # Test 25: request_id extracted from response headers and included in error structs
     test "request_id from response header is included in error struct" do
-      client = test_client()
+      client = test_client(max_retries: 0)
 
       expect(LatticeStripe.MockTransport, :request, fn _req_map ->
         {:ok,
@@ -491,6 +512,485 @@ defmodule LatticeStripe.ClientTest do
 
       req = %Request{method: :get, path: "/v1/customers", params: %{}, opts: []}
       assert {:ok, %{"object" => "list"}} = Client.request(client, req)
+    end
+  end
+
+  describe "request/2 retry loop" do
+    # Test 29: Client retries on 500 response up to max_retries times
+    test "retries on 500 up to max_retries times" do
+      # max_retries: 2 means 3 total attempts (initial + 2 retries)
+      client = retry_client(max_retries: 2)
+
+      # Strategy returns {:retry, 0} for first 2 attempts, :stop on 3rd (exhausted)
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      # Transport called 3 times total: initial + 2 retries
+      expect(LatticeStripe.MockTransport, :request, 3, fn _req_map ->
+        error_response(500, "api_error", "Internal server error")
+      end)
+
+      assert {:error, %Error{type: :api_error, status: 500}} =
+               Client.request(client, get_request())
+    end
+
+    # Test 30: Client stops retrying when strategy returns :stop
+    test "stops retrying when strategy returns :stop" do
+      client = retry_client()
+
+      # Strategy immediately says :stop
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        :stop
+      end)
+
+      # Transport called only once (400 is not retriable for default strategy)
+      expect(LatticeStripe.MockTransport, :request, 1, fn _req_map ->
+        error_response(400, "invalid_request_error", "Bad param")
+      end)
+
+      assert {:error, %Error{type: :invalid_request_error, status: 400}} =
+               Client.request(client, post_request())
+    end
+
+    # Test 31: Client returns final error after exhausting retries
+    test "returns final error after exhausting retries" do
+      client = retry_client(max_retries: 1)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      # 2 total attempts (initial + 1 retry)
+      expect(LatticeStripe.MockTransport, :request, 2, fn _req_map ->
+        error_response(503, "api_error", "Service unavailable")
+      end)
+
+      assert {:error, %Error{status: 503}} = Client.request(client, get_request())
+    end
+
+    # Test 32: Per-request max_retries: 0 disables retries (single attempt)
+    test "max_retries: 0 disables retries" do
+      client = retry_client(max_retries: 0)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      # Only 1 attempt even though strategy says retry
+      expect(LatticeStripe.MockTransport, :request, 1, fn _req_map ->
+        error_response(500, "api_error", "Internal server error")
+      end)
+
+      assert {:error, %Error{status: 500}} = Client.request(client, get_request())
+    end
+
+    # Test 33: Per-request max_retries override
+    test "per-request max_retries: 5 overrides client default" do
+      # Client has default max_retries: 2, but request overrides to 1
+      client = retry_client(max_retries: 2)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      # Only 2 attempts (initial + 1 retry with max_retries: 1 override)
+      expect(LatticeStripe.MockTransport, :request, 2, fn _req_map ->
+        error_response(500, "api_error", "Internal server error")
+      end)
+
+      req = get_request("/v1/customers", max_retries: 1)
+      assert {:error, %Error{status: 500}} = Client.request(client, req)
+    end
+
+    # Test 34: Successful request after retries returns {:ok, result}
+    test "succeeds after initial failures" do
+      client = retry_client(max_retries: 2)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      # First 2 attempts fail, 3rd succeeds
+      expect(LatticeStripe.MockTransport, :request, 2, fn _req_map ->
+        error_response(500, "api_error", "Server error")
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        ok_response(%{"id" => "cus_success"})
+      end)
+
+      assert {:ok, %{"id" => "cus_success"}} = Client.request(client, get_request())
+    end
+  end
+
+  describe "request/2 idempotency keys" do
+    # Test 35: POST request gets auto-generated idempotency-key header
+    test "POST request gets auto-generated idempotency-key header" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        idk_header = Enum.find(req_map.headers, fn {k, _} -> k == "idempotency-key" end)
+        assert idk_header != nil
+        {_, key} = idk_header
+        # Matches idk_ltc_ prefix + UUID v4 format
+        assert Regex.match?(
+                 ~r/^idk_ltc_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+                 key
+               )
+
+        ok_response()
+      end)
+
+      assert {:ok, _} = Client.request(client, post_request())
+    end
+
+    # Test 36: GET request does NOT get auto-generated idempotency-key header
+    test "GET request does NOT get auto-generated idempotency-key header" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        refute Enum.any?(req_map.headers, fn {k, _} -> k == "idempotency-key" end)
+        ok_response()
+      end)
+
+      assert {:ok, _} = Client.request(client, get_request())
+    end
+
+    # Test 37: DELETE request does NOT get auto-generated idempotency-key header
+    test "DELETE request does NOT get auto-generated idempotency-key header" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        refute Enum.any?(req_map.headers, fn {k, _} -> k == "idempotency-key" end)
+        ok_response()
+      end)
+
+      assert {:ok, _} = Client.request(client, delete_request())
+    end
+
+    # Test 38: User-provided idempotency_key in opts takes precedence
+    test "user-provided idempotency_key takes precedence over auto-generated" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        # Should have exactly the user-provided key, not an auto-generated one
+        idk_header = Enum.find(req_map.headers, fn {k, _} -> k == "idempotency-key" end)
+        assert idk_header != nil
+        {_, key} = idk_header
+        assert key == "my-custom-key-xyz"
+        ok_response()
+      end)
+
+      req = post_request("/v1/charges", %{}, idempotency_key: "my-custom-key-xyz")
+      assert {:ok, _} = Client.request(client, req)
+    end
+
+    # Test 39: Same idempotency key sent on all retry attempts
+    test "same idempotency key reused across all retry attempts" do
+      client = retry_client(max_retries: 2)
+      seen_keys = Agent.start_link(fn -> [] end) |> elem(1)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, 3, fn req_map ->
+        idk_header = Enum.find(req_map.headers, fn {k, _} -> k == "idempotency-key" end)
+        assert idk_header != nil
+        {_, key} = idk_header
+        Agent.update(seen_keys, fn keys -> [key | keys] end)
+        error_response(500, "api_error", "Server error")
+      end)
+
+      assert {:error, _} = Client.request(client, post_request())
+
+      keys = Agent.get(seen_keys, & &1)
+      Agent.stop(seen_keys)
+
+      # All 3 attempts used the same key
+      assert length(keys) == 3
+      assert Enum.uniq(keys) |> length() == 1
+    end
+  end
+
+  describe "request/2 non-JSON responses" do
+    # Test 40: HTML response body returns structured api_error with raw_body
+    test "HTML response returns api_error with raw_body containing _raw key" do
+      client = test_client(max_retries: 0)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        non_json_response(503, "<html><body>We're down for maintenance</body></html>")
+      end)
+
+      assert {:error, %Error{type: :api_error, raw_body: %{"_raw" => raw}}} =
+               Client.request(client, get_request())
+
+      assert is_binary(raw)
+      assert String.contains?(raw, "maintenance")
+    end
+
+    # Test 41: Empty response body returns structured api_error
+    test "empty response body returns api_error with descriptive message" do
+      client = test_client(max_retries: 0)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        non_json_response(500, "")
+      end)
+
+      assert {:error, %Error{type: :api_error, message: message}} =
+               Client.request(client, get_request())
+
+      assert is_binary(message)
+    end
+
+    # Test 42: Non-JSON 503 response flows through retry loop normally
+    test "non-JSON 503 response flows through retry loop" do
+      client = retry_client(max_retries: 1)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      # 2 total attempts (initial + 1 retry)
+      expect(LatticeStripe.MockTransport, :request, 2, fn _req_map ->
+        non_json_response(503, "<html>maintenance</html>")
+      end)
+
+      assert {:error, %Error{type: :api_error, status: 503}} =
+               Client.request(client, get_request())
+    end
+
+    # Test 43: Non-JSON body is truncated at 500 bytes in raw_body
+    test "long non-JSON body is truncated in raw_body" do
+      client = test_client(max_retries: 0)
+      long_body = String.duplicate("x", 1000)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        non_json_response(502, long_body)
+      end)
+
+      assert {:error, %Error{type: :api_error, raw_body: %{"_raw" => raw}}} =
+               Client.request(client, get_request())
+
+      # Should be truncated (500 chars + "...")
+      assert byte_size(raw) <= 510
+    end
+  end
+
+  describe "request!/2 bang variant" do
+    # Test 44: request!/2 raises LatticeStripe.Error on failure
+    test "raises LatticeStripe.Error on failure" do
+      client = test_client(max_retries: 0)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        error_response(401, "authentication_error", "Invalid API key")
+      end)
+
+      assert_raise LatticeStripe.Error, fn ->
+        Client.request!(client, get_request())
+      end
+    end
+
+    # Test 45: request!/2 returns decoded map on success
+    test "returns decoded map on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        ok_response(%{"id" => "cus_bang_123"})
+      end)
+
+      result = Client.request!(client, get_request())
+      assert result == %{"id" => "cus_bang_123"}
+    end
+
+    # Test 46: request!/2 retries before raising
+    test "retries before raising on final failure" do
+      client = retry_client(max_retries: 2)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      # All 3 attempts fail
+      expect(LatticeStripe.MockTransport, :request, 3, fn _req_map ->
+        error_response(500, "api_error", "Server error")
+      end)
+
+      assert_raise LatticeStripe.Error, fn ->
+        Client.request!(client, get_request())
+      end
+    end
+
+    # Test 47: request!/2 raises with correct error type
+    test "raised error has correct type and status" do
+      client = test_client(max_retries: 0)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        error_response(402, "card_error", "Card declined")
+      end)
+
+      error =
+        assert_raise LatticeStripe.Error, fn ->
+          Client.request!(client, post_request())
+        end
+
+      assert error.type == :card_error
+      assert error.status == 402
+    end
+  end
+
+  describe "request/2 retry telemetry" do
+    # Test 48: Per-retry event emitted with attempt and delay_ms measurements
+    test "emits per-retry telemetry events with attempt and delay_ms" do
+      client =
+        test_client(
+          telemetry_enabled: true,
+          retry_strategy: LatticeStripe.MockRetryStrategy,
+          max_retries: 1
+        )
+
+      test_pid = self()
+      handler_id = "test-retry-telemetry-#{:erlang.unique_integer([:positive])}"
+
+      :telemetry.attach(
+        handler_id,
+        [:lattice_stripe, :request, :retry],
+        fn _event, measurements, metadata, _config ->
+          send(test_pid, {:retry_event, measurements, metadata})
+        end,
+        nil
+      )
+
+      on_exit(fn -> :telemetry.detach(handler_id) end)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, 2, fn _req_map ->
+        error_response(500, "api_error", "Server error")
+      end)
+
+      Client.request(client, get_request())
+
+      assert_receive {:retry_event, measurements, metadata}
+      assert Map.has_key?(measurements, :attempt)
+      assert Map.has_key?(measurements, :delay_ms)
+      assert Map.has_key?(metadata, :method)
+      assert Map.has_key?(metadata, :path)
+    end
+
+    # Test 49: Stop event metadata includes attempts and retries
+    test "stop event metadata includes attempts and retries counts" do
+      client =
+        test_client(
+          telemetry_enabled: true,
+          retry_strategy: LatticeStripe.MockRetryStrategy,
+          max_retries: 1
+        )
+
+      test_pid = self()
+      handler_id = "test-stop-metadata-#{:erlang.unique_integer([:positive])}"
+
+      :telemetry.attach(
+        handler_id,
+        [:lattice_stripe, :request, :stop],
+        fn _event, _measurements, metadata, _config ->
+          send(test_pid, {:stop_event, metadata})
+        end,
+        nil
+      )
+
+      on_exit(fn -> :telemetry.detach(handler_id) end)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      # Both attempts fail
+      expect(LatticeStripe.MockTransport, :request, 2, fn _req_map ->
+        error_response(500, "api_error", "Server error")
+      end)
+
+      Client.request(client, get_request())
+
+      assert_receive {:stop_event, metadata}
+      assert metadata.attempts == 2
+      assert metadata.retries == 1
+    end
+
+    # Test 50: Successful request after retries has correct attempts in stop metadata
+    test "successful request after retries has correct attempts count" do
+      client =
+        test_client(
+          telemetry_enabled: true,
+          retry_strategy: LatticeStripe.MockRetryStrategy,
+          max_retries: 2
+        )
+
+      test_pid = self()
+      handler_id = "test-success-retry-#{:erlang.unique_integer([:positive])}"
+
+      :telemetry.attach(
+        handler_id,
+        [:lattice_stripe, :request, :stop],
+        fn _event, _measurements, metadata, _config ->
+          send(test_pid, {:stop_event, metadata})
+        end,
+        nil
+      )
+
+      on_exit(fn -> :telemetry.detach(handler_id) end)
+
+      stub(LatticeStripe.MockRetryStrategy, :retry?, fn _attempt, _ctx ->
+        {:retry, 0}
+      end)
+
+      # First fails, second succeeds
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        error_response(500, "api_error", "Server error")
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        ok_response()
+      end)
+
+      assert {:ok, _} = Client.request(client, get_request())
+
+      assert_receive {:stop_event, metadata}
+      assert metadata.attempts == 2
+      assert metadata.retries == 1
+      assert metadata.status == :ok
+    end
+  end
+
+  describe "request/2 Stripe-Should-Retry" do
+    # Test 51: Stripe-Should-Retry: true on 400 causes retry
+    test "Stripe-Should-Retry: true on 400 causes retry" do
+      client = test_client(max_retries: 1)
+      # Use default retry strategy which respects Stripe-Should-Retry header
+
+      # Transport called twice: initial + 1 retry
+      expect(LatticeStripe.MockTransport, :request, 2, fn _req_map ->
+        error_response(400, "invalid_request_error", "Bad request", [
+          {"stripe-should-retry", "true"}
+        ])
+      end)
+
+      assert {:error, %Error{status: 400}} = Client.request(client, get_request())
+    end
+
+    # Test 52: Stripe-Should-Retry: false on 500 prevents retry
+    test "Stripe-Should-Retry: false on 500 prevents retry" do
+      client = test_client(max_retries: 2)
+      # Only 1 attempt — header says don't retry
+
+      expect(LatticeStripe.MockTransport, :request, 1, fn _req_map ->
+        error_response(500, "api_error", "Server error", [{"stripe-should-retry", "false"}])
+      end)
+
+      assert {:error, %Error{status: 500}} = Client.request(client, get_request())
     end
   end
 end

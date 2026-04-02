@@ -32,7 +32,7 @@ defmodule LatticeStripe.RetryStrategy do
         }
 
   @callback retry?(attempt :: pos_integer(), context()) ::
-                {:retry, delay_ms :: non_neg_integer()} | :stop
+              {:retry, delay_ms :: non_neg_integer()} | :stop
 end
 
 defmodule LatticeStripe.RetryStrategy.Default do

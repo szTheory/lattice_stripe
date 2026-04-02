@@ -4,3 +4,5 @@ ExUnit.start()
 Mox.defmock(LatticeStripe.MockTransport, for: LatticeStripe.Transport)
 # JSON codec mock for testing codec swapping
 Mox.defmock(LatticeStripe.MockJson, for: LatticeStripe.Json)
+# RetryStrategy mock for testing retry loop without real delays
+Mox.defmock(LatticeStripe.MockRetryStrategy, for: LatticeStripe.RetryStrategy)

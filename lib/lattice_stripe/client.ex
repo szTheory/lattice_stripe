@@ -124,14 +124,19 @@ defmodule LatticeStripe.Client do
   end
 
   @doc """
-  Dispatches a `Request` through the client's configured transport.
+  Dispatches a `Request` through the client's configured transport with automatic retries.
 
   Builds the full request with all required headers, encodes params, calls
   the transport, decodes the response JSON, and returns either `{:ok, map}`
   on success or `{:error, %Error{}}` on failure.
 
-  Wraps the transport call in a `:telemetry.span/3` for observability (unless
-  `telemetry_enabled: false` on the client).
+  POST requests automatically get an `idk_ltc_`-prefixed UUID v4 idempotency key
+  to make retries safe. The same key is reused across all retry attempts.
+  User-provided `:idempotency_key` in `opts` takes precedence over auto-generation.
+
+  Wraps the transport call(s) in a `:telemetry.span/3` for observability (unless
+  `telemetry_enabled: false` on the client). Per-retry events are emitted as
+  `[:lattice_stripe, :request, :retry]`.
 
   ## Parameters
 
@@ -148,12 +153,13 @@ defmodule LatticeStripe.Client do
     effective_api_key = Keyword.get(req.opts, :api_key, client.api_key)
     effective_api_version = Keyword.get(req.opts, :stripe_version, client.api_version)
     effective_timeout = Keyword.get(req.opts, :timeout, client.timeout)
-
-    effective_stripe_account =
-      Keyword.get(req.opts, :stripe_account, client.stripe_account)
-
-    idempotency_key = Keyword.get(req.opts, :idempotency_key)
+    effective_stripe_account = Keyword.get(req.opts, :stripe_account, client.stripe_account)
+    effective_max_retries = Keyword.get(req.opts, :max_retries, client.max_retries)
     expand = Keyword.get(req.opts, :expand, [])
+
+    # Resolve idempotency key ONCE before retry loop so all retry attempts share the same key (D-21).
+    # Auto-generate for POST requests; user-provided key takes precedence (D-18, D-19).
+    idempotency_key = resolve_idempotency_key(req.method, req.opts)
 
     params = merge_expand(req.params, expand)
 
@@ -183,12 +189,188 @@ defmodule LatticeStripe.Client do
         [:lattice_stripe, :request],
         %{method: req.method, path: req.path},
         fn ->
-          result = do_request(client, transport_request)
-          {result, telemetry_stop_metadata(result)}
+          {result, attempts} =
+            do_request_with_retries(
+              client,
+              transport_request,
+              req.method,
+              idempotency_key,
+              effective_max_retries
+            )
+
+          {result, telemetry_stop_metadata(result, idempotency_key, attempts)}
         end
       )
     else
-      do_request(client, transport_request)
+      {result, _attempts} =
+        do_request_with_retries(
+          client,
+          transport_request,
+          req.method,
+          idempotency_key,
+          effective_max_retries
+        )
+
+      result
+    end
+  end
+
+  @doc """
+  Like `request/2`, but raises `LatticeStripe.Error` on failure.
+
+  Retries are attempted first. Only raises after all retries are exhausted.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `request` - A `%LatticeStripe.Request{}` struct
+
+  ## Returns
+
+  - Decoded JSON map on success
+  - Raises `LatticeStripe.Error` on failure (after retries exhausted)
+  """
+  @spec request!(t(), Request.t()) :: map()
+  def request!(%__MODULE__{} = client, %Request{} = req) do
+    case request(client, req) do
+      {:ok, result} -> result
+      {:error, %Error{} = error} -> raise error
+    end
+  end
+
+  # Resolve the idempotency key for a request.
+  # User-provided key takes precedence. Auto-generates for POST only (D-18, D-19).
+  defp resolve_idempotency_key(method, opts) do
+    user_key = Keyword.get(opts, :idempotency_key)
+
+    cond do
+      user_key != nil -> user_key
+      method == :post -> generate_idempotency_key()
+      true -> nil
+    end
+  end
+
+  # Generate a UUID v4 with the idk_ltc_ prefix (D-19, D-20).
+  # Uses :crypto.strong_rand_bytes/1 — same approach as Ecto.UUID.
+  defp generate_idempotency_key do
+    "idk_ltc_" <> uuid4()
+  end
+
+  defp uuid4 do
+    <<a::48, _::4, b::12, _::2, c::62>> = :crypto.strong_rand_bytes(16)
+
+    <<a::48, 4::4, b::12, 2::2, c::62>>
+    |> encode_uuid()
+  end
+
+  defp encode_uuid(<<a::32, b::16, c::16, d::16, e::48>>) do
+    [
+      Base.encode16(<<a::32>>, case: :lower),
+      "-",
+      Base.encode16(<<b::16>>, case: :lower),
+      "-",
+      Base.encode16(<<c::16>>, case: :lower),
+      "-",
+      Base.encode16(<<d::16>>, case: :lower),
+      "-",
+      Base.encode16(<<e::48>>, case: :lower)
+    ]
+    |> IO.iodata_to_binary()
+  end
+
+  # Entry point for retry loop — starts with attempt 1, total_attempts 1.
+  # Returns {result, total_attempts} so telemetry can record attempt count.
+  defp do_request_with_retries(client, transport_request, method, idempotency_key, max_retries) do
+    do_request_with_retries(
+      client,
+      transport_request,
+      method,
+      idempotency_key,
+      max_retries,
+      _attempt = 1,
+      _total_attempts = 1
+    )
+  end
+
+  defp do_request_with_retries(
+         client,
+         transport_request,
+         method,
+         idempotency_key,
+         max_retries,
+         attempt,
+         total_attempts
+       ) do
+    case do_request(client, transport_request) do
+      {:ok, _} = success ->
+        {success, total_attempts}
+
+      {:error, %Error{} = error, resp_headers} = _failure ->
+        retry_state = %{
+          method: method,
+          idempotency_key: idempotency_key,
+          max_retries: max_retries,
+          attempt: attempt,
+          total_attempts: total_attempts
+        }
+
+        maybe_retry(client, transport_request, retry_state, error, resp_headers)
+    end
+  end
+
+  # Handle retry decision after a failed request attempt.
+  # retry_state bundles {method, idempotency_key, max_retries, attempt, total_attempts}
+  # to keep arity within Credo limits.
+  defp maybe_retry(client, transport_request, retry_state, error, resp_headers) do
+    %{attempt: attempt, total_attempts: total_attempts} = retry_state
+
+    if attempt <= retry_state.max_retries do
+      # Parse Stripe-Should-Retry from response headers before building context (D-09).
+      stripe_should_retry = parse_stripe_should_retry(resp_headers)
+
+      context = %{
+        error: error,
+        status: error.status,
+        headers: resp_headers,
+        stripe_should_retry: stripe_should_retry,
+        method: retry_state.method,
+        idempotency_key: retry_state.idempotency_key
+      }
+
+      apply_retry_decision(client, transport_request, retry_state, error, context)
+    else
+      {{:error, error}, total_attempts}
+    end
+  end
+
+  # Apply the retry strategy decision: sleep and recurse, or stop.
+  defp apply_retry_decision(client, transport_request, retry_state, error, context) do
+    %{
+      method: method,
+      idempotency_key: idk,
+      max_retries: max,
+      attempt: attempt,
+      total_attempts: total
+    } = retry_state
+
+    case client.retry_strategy.retry?(attempt, context) do
+      {:retry, delay_ms} ->
+        emit_retry_telemetry(client, method, transport_request.url, error, attempt, delay_ms)
+        # D-15: Process.sleep for retry delays; BEAM handles thousands of sleeping processes
+        Process.sleep(delay_ms)
+
+        do_request_with_retries(
+          client,
+          transport_request,
+          method,
+          idk,
+          max,
+          attempt + 1,
+          total + 1
+        )
+
+      :stop ->
+        {{:error, error}, total}
     end
   end
 
@@ -260,26 +442,69 @@ defmodule LatticeStripe.Client do
   end
 
   # Execute the transport request and decode the response.
+  # Returns {:ok, decoded} | {:error, error, resp_headers} — the 3-tuple variant
+  # keeps response headers available internally for the retry loop to inspect
+  # (e.g., Stripe-Should-Retry, Retry-After) without leaking them to the public API.
   defp do_request(client, transport_request) do
     case client.transport.request(transport_request) do
       {:ok, %{status: status, headers: resp_headers, body: body}} ->
-        request_id = extract_request_id(resp_headers)
-        decoded = client.json_codec.decode!(body)
-
-        if status in 200..299 do
-          {:ok, decoded}
-        else
-          {:error, Error.from_response(status, decoded, request_id)}
-        end
+        decode_response(client, status, resp_headers, body)
 
       {:error, reason} ->
         {:error,
          %Error{
            type: :connection_error,
            message: inspect(reason)
-         }}
+         }, []}
     end
   end
+
+  # Decode the HTTP response body and build the appropriate result tuple.
+  defp decode_response(client, status, resp_headers, body) do
+    request_id = extract_request_id(resp_headers)
+
+    case client.json_codec.decode(body) do
+      {:ok, decoded} ->
+        build_decoded_response(status, decoded, request_id, resp_headers)
+
+      {:error, _decode_error} ->
+        # Non-JSON response (D-27): HTML maintenance page, empty body, etc.
+        # Produce a structured error rather than crashing.
+        build_non_json_error(status, body, request_id, resp_headers)
+    end
+  end
+
+  # Build response for successfully decoded JSON.
+  defp build_decoded_response(status, decoded, request_id, resp_headers) do
+    if status in 200..299 do
+      {:ok, decoded}
+    else
+      {:error, Error.from_response(status, decoded, request_id), resp_headers}
+    end
+  end
+
+  # Build a structured error for non-JSON responses (D-27).
+  defp build_non_json_error(status, body, request_id, resp_headers) do
+    truncated = truncate_body(body, 500)
+
+    error = %Error{
+      type: :api_error,
+      code: nil,
+      message: "Non-JSON response from Stripe API (HTTP #{status})",
+      status: status,
+      request_id: request_id,
+      raw_body: %{"_raw" => truncated}
+    }
+
+    {:error, error, resp_headers}
+  end
+
+  # Truncate body to max bytes, appending "..." if truncated.
+  # Used for non-JSON responses so raw_body doesn't balloon memory.
+  defp truncate_body(nil, _max), do: ""
+  defp truncate_body("", _max), do: ""
+  defp truncate_body(body, max) when byte_size(body) <= max, do: body
+  defp truncate_body(body, max), do: binary_part(body, 0, max) <> "..."
 
   # Extract the request-id header value (case-insensitive).
   defp extract_request_id(headers) do
@@ -289,14 +514,70 @@ defmodule LatticeStripe.Client do
     end)
   end
 
-  # Build stop metadata for telemetry span based on result.
-  defp telemetry_stop_metadata({:ok, _decoded}), do: %{status: :ok}
+  # Parse the Stripe-Should-Retry header into a boolean or nil (D-09).
+  # Stripe sends "true" or "false" as strings.
+  defp parse_stripe_should_retry(headers) do
+    value =
+      Enum.find_value(headers, fn {k, v} ->
+        if String.downcase(k) == "stripe-should-retry", do: v
+      end)
 
-  defp telemetry_stop_metadata({:error, %Error{type: :connection_error}}) do
-    %{status: :error, error_type: :connection_error}
+    case value do
+      "true" -> true
+      "false" -> false
+      _ -> nil
+    end
   end
 
-  defp telemetry_stop_metadata({:error, %Error{status: status, type: type}}) do
-    %{status: :error, http_status: status, error_type: type}
+  # Emit the per-retry telemetry event (D-24).
+  # [:lattice_stripe, :request, :retry] with measurements {attempt, delay_ms}
+  # and metadata {method, path, error_type, status}.
+  defp emit_retry_telemetry(client, method, url, error, attempt, delay_ms) do
+    if client.telemetry_enabled do
+      :telemetry.execute(
+        [:lattice_stripe, :request, :retry],
+        %{attempt: attempt, delay_ms: delay_ms},
+        %{method: method, path: extract_path(url), error_type: error.type, status: error.status}
+      )
+    end
+  end
+
+  # Extract path portion from a URL for telemetry metadata.
+  defp extract_path(url) do
+    case URI.parse(url) do
+      %URI{path: path} when is_binary(path) -> path
+      _ -> url
+    end
+  end
+
+  # Build stop metadata for telemetry span based on result and attempt count (D-24).
+  defp telemetry_stop_metadata({:ok, _decoded}, _idempotency_key, attempts) do
+    %{status: :ok, attempts: attempts, retries: attempts - 1}
+  end
+
+  defp telemetry_stop_metadata(
+         {:error, %Error{type: :connection_error}},
+         idempotency_key,
+         attempts
+       ) do
+    %{
+      status: :error,
+      error_type: :connection_error,
+      idempotency_key: idempotency_key,
+      attempts: attempts,
+      retries: attempts - 1
+    }
+  end
+
+  defp telemetry_stop_metadata({:error, %Error{} = error}, idempotency_key, attempts) do
+    %{
+      status: :error,
+      http_status: error.status,
+      error_type: error.type,
+      request_id: error.request_id,
+      idempotency_key: idempotency_key,
+      attempts: attempts,
+      retries: attempts - 1
+    }
   end
 end
