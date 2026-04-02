@@ -13,7 +13,13 @@ defmodule LatticeStripe.ResponseTest do
     end
 
     test "can be constructed with values" do
-      resp = %Response{data: %{"id" => "cus_123"}, status: 200, request_id: "req_abc", headers: [{"content-type", "application/json"}]}
+      resp = %Response{
+        data: %{"id" => "cus_123"},
+        status: 200,
+        request_id: "req_abc",
+        headers: [{"content-type", "application/json"}]
+      }
+
       assert resp.data == %{"id" => "cus_123"}
       assert resp.status == 200
       assert resp.request_id == "req_abc"
@@ -144,6 +150,7 @@ defmodule LatticeStripe.ResponseTest do
         status: 200,
         request_id: "req_abc"
       }
+
       inspected = inspect(resp)
       assert inspected =~ "cus_123"
       assert inspected =~ "customer"
@@ -156,6 +163,7 @@ defmodule LatticeStripe.ResponseTest do
         status: 200,
         request_id: "req_abc"
       }
+
       inspected = inspect(resp)
       assert inspected =~ "200"
       assert inspected =~ "req_abc"
@@ -171,8 +179,12 @@ defmodule LatticeStripe.ResponseTest do
     test "hides individual header values, shows count" do
       resp = %Response{
         data: %{"id" => "cus_123"},
-        headers: [{"authorization", "Bearer sk_test_secret"}, {"content-type", "application/json"}]
+        headers: [
+          {"authorization", "Bearer sk_test_secret"},
+          {"content-type", "application/json"}
+        ]
       }
+
       inspected = inspect(resp)
       refute inspected =~ "sk_test_secret"
       assert inspected =~ "2 headers"

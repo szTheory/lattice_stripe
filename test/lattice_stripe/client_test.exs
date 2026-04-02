@@ -189,7 +189,7 @@ defmodule LatticeStripe.ClientTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn req_map ->
-        assert {"stripe-version", "2025-12-18.acacia"} in req_map.headers
+        assert {"stripe-version", LatticeStripe.api_version()} in req_map.headers
         ok_response()
       end)
 

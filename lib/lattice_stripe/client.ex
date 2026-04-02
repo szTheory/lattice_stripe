@@ -54,7 +54,7 @@ defmodule LatticeStripe.Client do
     :finch,
     :stripe_account,
     base_url: "https://api.stripe.com",
-    api_version: "2025-12-18.acacia",
+    api_version: "2026-03-25.dahlia",
     transport: LatticeStripe.Transport.Finch,
     json_codec: LatticeStripe.Json.Jason,
     retry_strategy: LatticeStripe.RetryStrategy.Default,
@@ -379,7 +379,9 @@ defmodule LatticeStripe.Client do
     base_headers = [
       {"authorization", "Bearer #{api_key}"},
       {"stripe-version", api_version},
-      {"user-agent", "LatticeStripe/#{@version} elixir/#{System.version()}"},
+      {"user-agent",
+       "LatticeStripe/#{@version} elixir/#{System.version()} otp/#{System.otp_release()}"},
+      {"x-stripe-client-user-agent", client_user_agent_json()},
       {"accept", "application/json"}
     ]
 
@@ -387,6 +389,17 @@ defmodule LatticeStripe.Client do
     headers = maybe_add_stripe_account(headers, stripe_account)
     headers = maybe_add_idempotency_key(headers, idempotency_key)
     headers
+  end
+
+  defp client_user_agent_json do
+    %{
+      "bindings_version" => @version,
+      "lang" => "elixir",
+      "lang_version" => System.version(),
+      "publisher" => "lattice_stripe",
+      "otp_version" => System.otp_release()
+    }
+    |> Jason.encode!()
   end
 
   defp maybe_add_content_type(headers, method) when method in [:post, :put, :patch] do

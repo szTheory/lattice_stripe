@@ -97,6 +97,11 @@ defmodule LatticeStripe.ConfigTest do
       assert is_binary(result[:api_version])
       assert String.length(result[:api_version]) > 0
     end
+
+    test "api_version default matches LatticeStripe.api_version/0" do
+      schema_default = Config.schema().schema[:api_version][:default]
+      assert schema_default == LatticeStripe.api_version()
+    end
   end
 
   describe "validate/1" do

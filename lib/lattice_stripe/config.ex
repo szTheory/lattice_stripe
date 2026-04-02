@@ -41,7 +41,7 @@ defmodule LatticeStripe.Config do
             ],
             api_version: [
               type: :string,
-              default: "2025-12-18.acacia",
+              default: "2026-03-25.dahlia",
               doc: "Stripe API version to pin requests to."
             ],
             transport: [
