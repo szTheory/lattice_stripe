@@ -471,17 +471,25 @@ defmodule LatticeStripe.Customer do
 end
 
 defimpl Inspect, for: LatticeStripe.Customer do
+  import Inspect.Algebra
+
   def inspect(customer, opts) do
     # Show only non-PII structural fields. Hide: email, name, phone,
     # description, address, shipping — all contain personally-identifiable data.
-    safe = %{
-      __struct__: LatticeStripe.Customer,
+    fields = [
       id: customer.id,
       object: customer.object,
       livemode: customer.livemode,
       deleted: customer.deleted
-    }
+    ]
 
-    Inspect.Any.inspect(safe, opts)
+    pairs =
+      fields
+      |> Enum.map(fn {k, v} ->
+        concat([Atom.to_string(k), ": ", to_doc(v, opts)])
+      end)
+      |> Enum.intersperse(", ")
+
+    concat(["#LatticeStripe.Customer<" | pairs] ++ [">"])
   end
 end

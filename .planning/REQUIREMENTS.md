@@ -105,12 +105,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Payments — Customers
 
-- [ ] **CUST-01**: User can create a Customer with email, name, metadata
-- [ ] **CUST-02**: User can retrieve a Customer by ID
-- [ ] **CUST-03**: User can update a Customer
-- [ ] **CUST-04**: User can delete a Customer
-- [ ] **CUST-05**: User can list Customers with filters and pagination
-- [ ] **CUST-06**: User can search Customers (search API with page-based pagination)
+- [x] **CUST-01**: User can create a Customer with email, name, metadata
+- [x] **CUST-02**: User can retrieve a Customer by ID
+- [x] **CUST-03**: User can update a Customer
+- [x] **CUST-04**: User can delete a Customer
+- [x] **CUST-05**: User can list Customers with filters and pagination
+- [x] **CUST-06**: User can search Customers (search API with page-based pagination)
 
 ### Payments — Refunds
 
@@ -252,12 +252,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VERS-01 | Phase 3 | Complete |
 | VERS-02 | Phase 3 | Complete |
 | VERS-03 | Phase 3 | Complete |
-| CUST-01 | Phase 4 | Pending |
-| CUST-02 | Phase 4 | Pending |
-| CUST-03 | Phase 4 | Pending |
-| CUST-04 | Phase 4 | Pending |
-| CUST-05 | Phase 4 | Pending |
-| CUST-06 | Phase 4 | Pending |
+| CUST-01 | Phase 4 | Complete |
+| CUST-02 | Phase 4 | Complete |
+| CUST-03 | Phase 4 | Complete |
+| CUST-04 | Phase 4 | Complete |
+| CUST-05 | Phase 4 | Complete |
+| CUST-06 | Phase 4 | Complete |
 | PINT-01 | Phase 4 | Complete |
 | PINT-02 | Phase 4 | Complete |
 | PINT-03 | Phase 4 | Complete |
