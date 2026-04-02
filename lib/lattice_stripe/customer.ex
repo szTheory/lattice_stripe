@@ -40,7 +40,7 @@ defmodule LatticeStripe.Customer do
   `livemode`, and `deleted` are shown in inspect output.
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Response}
+  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
 
   # Known top-level fields from the Stripe Customer object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -148,7 +148,7 @@ defmodule LatticeStripe.Customer do
   def create(%Client{} = client, params \\ %{}, opts \\ []) do
     %Request{method: :post, path: "/v1/customers", params: params, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -171,7 +171,7 @@ defmodule LatticeStripe.Customer do
   def retrieve(%Client{} = client, id, opts \\ []) when is_binary(id) do
     %Request{method: :get, path: "/v1/customers/#{id}", params: %{}, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -195,7 +195,7 @@ defmodule LatticeStripe.Customer do
   def update(%Client{} = client, id, params, opts \\ []) when is_binary(id) do
     %Request{method: :post, path: "/v1/customers/#{id}", params: params, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -218,7 +218,7 @@ defmodule LatticeStripe.Customer do
   def delete(%Client{} = client, id, opts \\ []) when is_binary(id) do
     %Request{method: :delete, path: "/v1/customers/#{id}", params: %{}, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -247,7 +247,7 @@ defmodule LatticeStripe.Customer do
   def list(%Client{} = client, params \\ %{}, opts \\ []) do
     %Request{method: :get, path: "/v1/customers", params: params, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_list()
+    |> Resource.unwrap_list(&from_map/1)
   end
 
   @doc """
@@ -281,7 +281,7 @@ defmodule LatticeStripe.Customer do
       opts: opts
     }
     |> then(&Client.request(client, &1))
-    |> unwrap_list()
+    |> Resource.unwrap_list(&from_map/1)
   end
 
   @doc """
@@ -350,7 +350,7 @@ defmodule LatticeStripe.Customer do
   """
   @spec create!(Client.t(), map(), keyword()) :: t()
   def create!(%Client{} = client, params \\ %{}, opts \\ []) do
-    create(client, params, opts) |> unwrap_bang!()
+    create(client, params, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -358,7 +358,7 @@ defmodule LatticeStripe.Customer do
   """
   @spec retrieve!(Client.t(), String.t(), keyword()) :: t()
   def retrieve!(%Client{} = client, id, opts \\ []) when is_binary(id) do
-    retrieve(client, id, opts) |> unwrap_bang!()
+    retrieve(client, id, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -366,7 +366,7 @@ defmodule LatticeStripe.Customer do
   """
   @spec update!(Client.t(), String.t(), map(), keyword()) :: t()
   def update!(%Client{} = client, id, params, opts \\ []) when is_binary(id) do
-    update(client, id, params, opts) |> unwrap_bang!()
+    update(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -374,7 +374,7 @@ defmodule LatticeStripe.Customer do
   """
   @spec delete!(Client.t(), String.t(), keyword()) :: t()
   def delete!(%Client{} = client, id, opts \\ []) when is_binary(id) do
-    delete(client, id, opts) |> unwrap_bang!()
+    delete(client, id, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -382,7 +382,7 @@ defmodule LatticeStripe.Customer do
   """
   @spec list!(Client.t(), map(), keyword()) :: Response.t()
   def list!(%Client{} = client, params \\ %{}, opts \\ []) do
-    list(client, params, opts) |> unwrap_bang!()
+    list(client, params, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -390,7 +390,7 @@ defmodule LatticeStripe.Customer do
   """
   @spec search!(Client.t(), String.t(), keyword()) :: Response.t()
   def search!(%Client{} = client, query, opts \\ []) when is_binary(query) do
-    search(client, query, opts) |> unwrap_bang!()
+    search(client, query, opts) |> Resource.unwrap_bang!()
   end
 
   # ---------------------------------------------------------------------------
@@ -446,28 +446,6 @@ defmodule LatticeStripe.Customer do
     }
   end
 
-  # ---------------------------------------------------------------------------
-  # Private helpers
-  # ---------------------------------------------------------------------------
-
-  # Unwrap a singular resource response: converts raw map to typed struct.
-  defp unwrap_singular({:ok, %Response{data: data}}) do
-    {:ok, from_map(data)}
-  end
-
-  defp unwrap_singular({:error, %Error{}} = error), do: error
-
-  # Unwrap a list response: converts each raw map in list.data to typed struct.
-  defp unwrap_list({:ok, %Response{data: %List{} = list} = resp}) do
-    typed_items = Enum.map(list.data, &from_map/1)
-    {:ok, %{resp | data: %{list | data: typed_items}}}
-  end
-
-  defp unwrap_list({:error, %Error{}} = error), do: error
-
-  # Unwrap bang: extract value or raise error.
-  defp unwrap_bang!({:ok, result}), do: result
-  defp unwrap_bang!({:error, %Error{} = error}), do: raise(error)
 end
 
 defimpl Inspect, for: LatticeStripe.Customer do

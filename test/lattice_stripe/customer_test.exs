@@ -2,24 +2,15 @@ defmodule LatticeStripe.CustomerTest do
   use ExUnit.Case, async: true
 
   import Mox
+  import LatticeStripe.TestHelpers
 
-  alias LatticeStripe.{Client, Customer, Error, List, Response}
+  alias LatticeStripe.{Customer, Error, List, Response}
 
   setup :verify_on_exit!
 
   # ---------------------------------------------------------------------------
   # Test helpers
   # ---------------------------------------------------------------------------
-
-  defp test_client do
-    Client.new!(
-      api_key: "sk_test_123",
-      finch: :test_finch,
-      transport: LatticeStripe.MockTransport,
-      telemetry_enabled: false,
-      max_retries: 0
-    )
-  end
 
   defp customer_json(overrides \\ %{}) do
     Map.merge(
@@ -35,39 +26,6 @@ defmodule LatticeStripe.CustomerTest do
       },
       overrides
     )
-  end
-
-  defp ok_response(body) do
-    {:ok,
-     %{
-       status: 200,
-       headers: [{"request-id", "req_test"}],
-       body: Jason.encode!(body)
-     }}
-  end
-
-  defp error_response do
-    {:ok,
-     %{
-       status: 404,
-       headers: [{"request-id", "req_err"}],
-       body:
-         Jason.encode!(%{
-           "error" => %{
-             "type" => "invalid_request_error",
-             "message" => "not found"
-           }
-         })
-     }}
-  end
-
-  defp list_json(items) do
-    %{
-      "object" => "list",
-      "data" => items,
-      "has_more" => false,
-      "url" => "/v1/customers"
-    }
   end
 
   # ---------------------------------------------------------------------------
@@ -178,7 +136,7 @@ defmodule LatticeStripe.CustomerTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert String.ends_with?(req.url, "/v1/customers")
-        ok_response(list_json([customer_json()]))
+        ok_response(list_json([customer_json()], "/v1/customers"))
       end)
 
       assert {:ok, %Response{data: %List{data: [%Customer{id: "cus_test123"}]}}} =
@@ -259,7 +217,7 @@ defmodule LatticeStripe.CustomerTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(list_json([customer_json()]))
+        ok_response(list_json([customer_json()], "/v1/customers"))
       end)
 
       assert %Response{data: %List{data: [%Customer{}]}} = Customer.list!(client)

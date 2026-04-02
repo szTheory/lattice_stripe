@@ -2,24 +2,15 @@ defmodule LatticeStripe.PaymentIntentTest do
   use ExUnit.Case, async: true
 
   import Mox
+  import LatticeStripe.TestHelpers
 
-  alias LatticeStripe.{Client, Error, List, PaymentIntent, Response}
+  alias LatticeStripe.{Error, List, PaymentIntent, Response}
 
   setup :verify_on_exit!
 
   # ---------------------------------------------------------------------------
   # Test helpers
   # ---------------------------------------------------------------------------
-
-  defp test_client do
-    Client.new!(
-      api_key: "sk_test_123",
-      finch: :test_finch,
-      transport: LatticeStripe.MockTransport,
-      telemetry_enabled: false,
-      max_retries: 0
-    )
-  end
 
   defp payment_intent_json(overrides \\ %{}) do
     Map.merge(
@@ -36,39 +27,6 @@ defmodule LatticeStripe.PaymentIntentTest do
       },
       overrides
     )
-  end
-
-  defp ok_response(body) do
-    {:ok,
-     %{
-       status: 200,
-       headers: [{"request-id", "req_test"}],
-       body: Jason.encode!(body)
-     }}
-  end
-
-  defp error_response do
-    {:ok,
-     %{
-       status: 400,
-       headers: [{"request-id", "req_err"}],
-       body:
-         Jason.encode!(%{
-           "error" => %{
-             "type" => "invalid_request_error",
-             "message" => "amount is required"
-           }
-         })
-     }}
-  end
-
-  defp list_json(items) do
-    %{
-      "object" => "list",
-      "data" => items,
-      "has_more" => false,
-      "url" => "/v1/payment_intents"
-    }
   end
 
   # ---------------------------------------------------------------------------
@@ -272,7 +230,7 @@ defmodule LatticeStripe.PaymentIntentTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert String.ends_with?(req.url, "/v1/payment_intents")
-        ok_response(list_json([payment_intent_json()]))
+        ok_response(list_json([payment_intent_json()], "/v1/payment_intents"))
       end)
 
       assert {:ok, %Response{data: %List{data: [%PaymentIntent{id: "pi_test123"}]}}} =
@@ -328,7 +286,7 @@ defmodule LatticeStripe.PaymentIntentTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(list_json([payment_intent_json()]))
+        ok_response(list_json([payment_intent_json()], "/v1/payment_intents"))
       end)
 
       assert %Response{data: %List{data: [%PaymentIntent{}]}} = PaymentIntent.list!(client)
@@ -383,6 +341,79 @@ defmodule LatticeStripe.PaymentIntentTest do
     test "preserves status field" do
       pi = PaymentIntent.from_map(payment_intent_json(%{"status" => "succeeded"}))
       assert pi.status == "succeeded"
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # search/3
+  # ---------------------------------------------------------------------------
+
+  describe "search/3" do
+    test "sends GET /v1/payment_intents/search with query param and returns typed items" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert req.url =~ "/v1/payment_intents/search"
+        assert req.url =~ "query="
+
+        ok_response(%{
+          "object" => "search_result",
+          "data" => [payment_intent_json()],
+          "has_more" => false,
+          "url" => "/v1/payment_intents/search"
+        })
+      end)
+
+      assert {:ok, %Response{data: %List{data: [%PaymentIntent{id: "pi_test123"}]}}} =
+               PaymentIntent.search(client, "status:'succeeded'")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # search!/3
+  # ---------------------------------------------------------------------------
+
+  describe "search!/3" do
+    test "returns %Response{} directly on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(%{
+          "object" => "search_result",
+          "data" => [payment_intent_json()],
+          "has_more" => false,
+          "url" => "/v1/payment_intents/search"
+        })
+      end)
+
+      assert %Response{data: %List{data: [%PaymentIntent{}]}} =
+               PaymentIntent.search!(client, "status:'succeeded'")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # search_stream!/3
+  # ---------------------------------------------------------------------------
+
+  describe "search_stream!/3" do
+    test "streams %PaymentIntent{} structs from search results" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.url =~ "/v1/payment_intents/search"
+
+        ok_response(%{
+          "object" => "search_result",
+          "data" => [payment_intent_json()],
+          "has_more" => false,
+          "url" => "/v1/payment_intents/search"
+        })
+      end)
+
+      results = PaymentIntent.search_stream!(client, "status:'succeeded'") |> Enum.to_list()
+
+      assert [%PaymentIntent{id: "pi_test123"}] = results
     end
   end
 

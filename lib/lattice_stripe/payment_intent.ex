@@ -53,7 +53,7 @@ defmodule LatticeStripe.PaymentIntent do
   Note: PaymentIntents cannot be deleted. There is no `delete/3` function.
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Response}
+  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
 
   # Known top-level fields from the Stripe PaymentIntent object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -196,7 +196,7 @@ defmodule LatticeStripe.PaymentIntent do
   def create(%Client{} = client, params \\ %{}, opts \\ []) do
     %Request{method: :post, path: "/v1/payment_intents", params: params, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -219,7 +219,7 @@ defmodule LatticeStripe.PaymentIntent do
   def retrieve(%Client{} = client, id, opts \\ []) when is_binary(id) do
     %Request{method: :get, path: "/v1/payment_intents/#{id}", params: %{}, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -244,7 +244,7 @@ defmodule LatticeStripe.PaymentIntent do
   def update(%Client{} = client, id, params, opts \\ []) when is_binary(id) do
     %Request{method: :post, path: "/v1/payment_intents/#{id}", params: params, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -276,7 +276,7 @@ defmodule LatticeStripe.PaymentIntent do
   def confirm(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
     %Request{method: :post, path: "/v1/payment_intents/#{id}/confirm", params: params, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -305,7 +305,7 @@ defmodule LatticeStripe.PaymentIntent do
   def capture(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
     %Request{method: :post, path: "/v1/payment_intents/#{id}/capture", params: params, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -338,7 +338,7 @@ defmodule LatticeStripe.PaymentIntent do
   def cancel(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
     %Request{method: :post, path: "/v1/payment_intents/#{id}/cancel", params: params, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_singular()
+    |> Resource.unwrap_singular(&from_map/1)
   end
 
   @doc """
@@ -367,7 +367,7 @@ defmodule LatticeStripe.PaymentIntent do
   def list(%Client{} = client, params \\ %{}, opts \\ []) do
     %Request{method: :get, path: "/v1/payment_intents", params: params, opts: opts}
     |> then(&Client.request(client, &1))
-    |> unwrap_list()
+    |> Resource.unwrap_list(&from_map/1)
   end
 
   @doc """
@@ -408,7 +408,7 @@ defmodule LatticeStripe.PaymentIntent do
   """
   @spec create!(Client.t(), map(), keyword()) :: t()
   def create!(%Client{} = client, params \\ %{}, opts \\ []) do
-    create(client, params, opts) |> unwrap_bang!()
+    create(client, params, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -416,7 +416,7 @@ defmodule LatticeStripe.PaymentIntent do
   """
   @spec retrieve!(Client.t(), String.t(), keyword()) :: t()
   def retrieve!(%Client{} = client, id, opts \\ []) when is_binary(id) do
-    retrieve(client, id, opts) |> unwrap_bang!()
+    retrieve(client, id, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -424,7 +424,7 @@ defmodule LatticeStripe.PaymentIntent do
   """
   @spec update!(Client.t(), String.t(), map(), keyword()) :: t()
   def update!(%Client{} = client, id, params, opts \\ []) when is_binary(id) do
-    update(client, id, params, opts) |> unwrap_bang!()
+    update(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -432,7 +432,7 @@ defmodule LatticeStripe.PaymentIntent do
   """
   @spec confirm!(Client.t(), String.t(), map(), keyword()) :: t()
   def confirm!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
-    confirm(client, id, params, opts) |> unwrap_bang!()
+    confirm(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -440,7 +440,7 @@ defmodule LatticeStripe.PaymentIntent do
   """
   @spec capture!(Client.t(), String.t(), map(), keyword()) :: t()
   def capture!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
-    capture(client, id, params, opts) |> unwrap_bang!()
+    capture(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -448,7 +448,7 @@ defmodule LatticeStripe.PaymentIntent do
   """
   @spec cancel!(Client.t(), String.t(), map(), keyword()) :: t()
   def cancel!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
-    cancel(client, id, params, opts) |> unwrap_bang!()
+    cancel(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
   @doc """
@@ -456,7 +456,77 @@ defmodule LatticeStripe.PaymentIntent do
   """
   @spec list!(Client.t(), map(), keyword()) :: Response.t()
   def list!(%Client{} = client, params \\ %{}, opts \\ []) do
-    list(client, params, opts) |> unwrap_bang!()
+    list(client, params, opts) |> Resource.unwrap_bang!()
+  end
+
+  @doc """
+  Searches PaymentIntents using Stripe's search query language.
+
+  Sends `GET /v1/payment_intents/search` with the query string and returns typed results.
+  Note: search results have eventual consistency — newly created PaymentIntents may not
+  appear immediately.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `query` - Stripe search query string (e.g., `"status:'succeeded' AND currency:'usd'"`)
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Response{data: %List{data: [%PaymentIntent{}, ...]}}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+
+  ## Example
+
+      {:ok, resp} = LatticeStripe.PaymentIntent.search(client, "status:'succeeded'")
+  """
+  @spec search(Client.t(), String.t(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
+  def search(%Client{} = client, query, opts \\ []) when is_binary(query) do
+    %Request{
+      method: :get,
+      path: "/v1/payment_intents/search",
+      params: %{"query" => query},
+      opts: opts
+    }
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_list(&from_map/1)
+  end
+
+  @doc """
+  Like `search/3` but raises `LatticeStripe.Error` on failure.
+  """
+  @spec search!(Client.t(), String.t(), keyword()) :: Response.t()
+  def search!(%Client{} = client, query, opts \\ []) when is_binary(query) do
+    search(client, query, opts) |> Resource.unwrap_bang!()
+  end
+
+  @doc """
+  Returns a lazy stream of all PaymentIntents matching the search query (auto-pagination).
+
+  Emits individual `%PaymentIntent{}` structs, fetching additional search pages as needed.
+  Raises `LatticeStripe.Error` if any page fetch fails.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `query` - Stripe search query string
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  An `Enumerable.t()` of `%PaymentIntent{}` structs.
+  """
+  @spec search_stream!(Client.t(), String.t(), keyword()) :: Enumerable.t()
+  def search_stream!(%Client{} = client, query, opts \\ []) when is_binary(query) do
+    req = %Request{
+      method: :get,
+      path: "/v1/payment_intents/search",
+      params: %{"query" => query},
+      opts: opts
+    }
+
+    List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
   # ---------------------------------------------------------------------------
@@ -527,28 +597,6 @@ defmodule LatticeStripe.PaymentIntent do
     }
   end
 
-  # ---------------------------------------------------------------------------
-  # Private helpers
-  # ---------------------------------------------------------------------------
-
-  # Unwrap a singular resource response: converts raw map to typed struct.
-  defp unwrap_singular({:ok, %Response{data: data}}) do
-    {:ok, from_map(data)}
-  end
-
-  defp unwrap_singular({:error, %Error{}} = error), do: error
-
-  # Unwrap a list response: converts each raw map in list.data to typed struct.
-  defp unwrap_list({:ok, %Response{data: %List{} = list} = resp}) do
-    typed_items = Enum.map(list.data, &from_map/1)
-    {:ok, %{resp | data: %{list | data: typed_items}}}
-  end
-
-  defp unwrap_list({:error, %Error{}} = error), do: error
-
-  # Unwrap bang: extract value or raise error.
-  defp unwrap_bang!({:ok, result}), do: result
-  defp unwrap_bang!({:error, %Error{} = error}), do: raise(error)
 end
 
 defimpl Inspect, for: LatticeStripe.PaymentIntent do
