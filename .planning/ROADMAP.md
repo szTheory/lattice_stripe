@@ -58,8 +58,8 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Error struct enrichment, idempotency_error type, String.Chars, Json non-bang callbacks
-- [ ] 02-02-PLAN.md — RetryStrategy behaviour + Default implementation, Config schema updates
+- [x] 02-01-PLAN.md — Error struct enrichment, idempotency_error type, String.Chars, Json non-bang callbacks
+- [x] 02-02-PLAN.md — RetryStrategy behaviour + Default implementation, Config schema updates
 - [ ] 02-03-PLAN.md — Client retry loop, auto-idempotency keys, bang variant, non-JSON handling
 
 ### Phase 3: Pagination & Response

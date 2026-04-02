@@ -27,10 +27,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **ERRR-01**: All public API functions return `{:ok, result} | {:error, reason}`
 - [ ] **ERRR-02**: Bang variants (e.g., `create!/2`) are provided that raise on error
-- [ ] **ERRR-03**: Errors are structured, pattern-matchable structs with type, code, message, param, request_id
-- [ ] **ERRR-04**: Distinct error types exist for: card errors, invalid request, authentication, rate limit, API errors, idempotency conflicts
-- [ ] **ERRR-05**: Error structs include HTTP status, full error body, and actionable context for debugging
-- [ ] **ERRR-06**: Idempotency conflicts (409) surface as a distinct error type with original request_id
+- [x] **ERRR-03**: Errors are structured, pattern-matchable structs with type, code, message, param, request_id
+- [x] **ERRR-04**: Distinct error types exist for: card errors, invalid request, authentication, rate limit, API errors, idempotency conflicts
+- [x] **ERRR-05**: Error structs include HTTP status, full error body, and actionable context for debugging
+- [x] **ERRR-06**: Idempotency conflicts (409) surface as a distinct error type with original request_id
 
 ### Retry & Idempotency
 
@@ -228,10 +228,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | JSON-02 | Phase 1 | Complete |
 | ERRR-01 | Phase 2 | Pending |
 | ERRR-02 | Phase 2 | Pending |
-| ERRR-03 | Phase 2 | Pending |
-| ERRR-04 | Phase 2 | Pending |
-| ERRR-05 | Phase 2 | Pending |
-| ERRR-06 | Phase 2 | Pending |
+| ERRR-03 | Phase 2 | Complete |
+| ERRR-04 | Phase 2 | Complete |
+| ERRR-05 | Phase 2 | Complete |
+| ERRR-06 | Phase 2 | Complete |
 | RTRY-01 | Phase 2 | Pending |
 | RTRY-02 | Phase 2 | Pending |
 | RTRY-03 | Phase 2 | Pending |
