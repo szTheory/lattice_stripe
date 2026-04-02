@@ -55,11 +55,12 @@ Plans:
   3. Failed requests are automatically retried with exponential backoff, respecting the Stripe-Should-Retry header, and the same idempotency key is reused across retries
   4. Developer can provide a custom idempotency key, configure max retries, or plug in a custom RetryStrategy behaviour
   5. Error structs carry HTTP status, request_id, full error body, and actionable debugging context
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Error struct enrichment, idempotency_error type, String.Chars, Json non-bang callbacks
+- [ ] 02-02-PLAN.md — RetryStrategy behaviour + Default implementation, Config schema updates
+- [ ] 02-03-PLAN.md — Client retry loop, auto-idempotency keys, bang variant, non-JSON handling
 
 ### Phase 3: Pagination & Response
 **Goal**: Developers can paginate through lists, auto-paginate with Streams, expand nested objects, and pin API versions
@@ -204,7 +205,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Transport & Client Configuration | 5/5 | Complete   | 2026-04-01 |
-| 2. Error Handling & Retry | 0/0 | Not started | - |
+| 2. Error Handling & Retry | 0/3 | Planned | - |
 | 3. Pagination & Response | 0/0 | Not started | - |
 | 4. Customers & PaymentIntents | 0/0 | Not started | - |
 | 5. SetupIntents & PaymentMethods | 0/0 | Not started | - |
