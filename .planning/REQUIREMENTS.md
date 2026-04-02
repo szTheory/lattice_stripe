@@ -25,8 +25,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Error Handling
 
-- [ ] **ERRR-01**: All public API functions return `{:ok, result} | {:error, reason}`
-- [ ] **ERRR-02**: Bang variants (e.g., `create!/2`) are provided that raise on error
+- [x] **ERRR-01**: All public API functions return `{:ok, result} | {:error, reason}`
+- [x] **ERRR-02**: Bang variants (e.g., `create!/2`) are provided that raise on error
 - [x] **ERRR-03**: Errors are structured, pattern-matchable structs with type, code, message, param, request_id
 - [x] **ERRR-04**: Distinct error types exist for: card errors, invalid request, authentication, rate limit, API errors, idempotency conflicts
 - [x] **ERRR-05**: Error structs include HTTP status, full error body, and actionable context for debugging
@@ -36,8 +36,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **RTRY-01**: Library automatically retries failed requests with exponential backoff and jitter
 - [x] **RTRY-02**: Retry logic respects the Stripe-Should-Retry response header
-- [ ] **RTRY-03**: Library auto-generates idempotency keys for mutating requests and reuses the same key on retry
-- [ ] **RTRY-04**: User can provide a custom idempotency key per-request
+- [x] **RTRY-03**: Library auto-generates idempotency keys for mutating requests and reuses the same key on retry
+- [x] **RTRY-04**: User can provide a custom idempotency key per-request
 - [x] **RTRY-05**: Retry strategy is pluggable via a RetryStrategy behaviour (custom backoff, circuit breaking)
 - [x] **RTRY-06**: Max retries are configurable per-client and per-request
 
@@ -226,16 +226,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONF-05 | Phase 1 | Complete |
 | JSON-01 | Phase 1 | Complete |
 | JSON-02 | Phase 1 | Complete |
-| ERRR-01 | Phase 2 | Pending |
-| ERRR-02 | Phase 2 | Pending |
+| ERRR-01 | Phase 2 | Complete |
+| ERRR-02 | Phase 2 | Complete |
 | ERRR-03 | Phase 2 | Complete |
 | ERRR-04 | Phase 2 | Complete |
 | ERRR-05 | Phase 2 | Complete |
 | ERRR-06 | Phase 2 | Complete |
 | RTRY-01 | Phase 2 | Complete |
 | RTRY-02 | Phase 2 | Complete |
-| RTRY-03 | Phase 2 | Pending |
-| RTRY-04 | Phase 2 | Pending |
+| RTRY-03 | Phase 2 | Complete |
+| RTRY-04 | Phase 2 | Complete |
 | RTRY-05 | Phase 2 | Complete |
 | RTRY-06 | Phase 2 | Complete |
 | PAGE-01 | Phase 3 | Pending |
