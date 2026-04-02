@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-04-02T21:29:18.425Z"
+status: verifying
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-04-02T21:34:41.321Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 11
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
-  completed_plans: 14
+  completed_plans: 15
   percent: 100
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-02)
 
 Phase: 05 (setupintents-paymentmethods) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-02
 
 Progress: [████████████████████] 11/11 plans (100%)
@@ -64,6 +64,7 @@ Progress: [████████████████████] 11/11 p
 | Phase 03-pagination-response P03 | 3 | 1 tasks | 2 files |
 | Phase 04-customers-paymentintents P02 | 15 | 1 tasks | 2 files |
 | Phase 05-setupintents-paymentmethods P01 | 7 | 2 tasks | 10 files |
+| Phase 05-setupintents-paymentmethods P02 | 5 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,9 @@ Recent decisions affecting current work:
 - [Phase 05-setupintents-paymentmethods]: LatticeStripe.Resource module extracts shared unwrap_singular/2, unwrap_list/2, unwrap_bang!/1 helpers — all resource modules use this instead of private defp copies
 - [Phase 05-setupintents-paymentmethods]: elixirc_paths(:test) compiles test/support/ as real modules — importable via import LatticeStripe.TestHelpers in test files
 - [Phase 05-setupintents-paymentmethods]: SetupIntent.latest_attempt kept as raw value (string or map) — Stripe API returns either, no forced typing applied
+- [Phase 05-setupintents-paymentmethods]: PaymentMethod list/stream require_param! called before Request construction — validation is pre-network, ArgumentError tests need no mock setup
+- [Phase 05-setupintents-paymentmethods]: PaymentMethod stream!/3 params has no default value — customer required, making API constraint explicit
+- [Phase 05-setupintents-paymentmethods]: PaymentMethod 53-field struct intentional — all type-specific nested objects (card, us_bank_account, sepa_debit, etc.) as nil-able fields per Stripe API shape
 
 ### Pending Todos
 
@@ -110,6 +114,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T21:29:18.422Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-04-02T21:34:41.318Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None

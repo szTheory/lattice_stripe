@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Error Handling & Retry** - Structured errors, automatic retries, and idempotency
 - [ ] **Phase 3: Pagination & Response** - List pagination, auto-pagination streams, expand support, API versioning
 - [ ] **Phase 4: Customers & PaymentIntents** - First two resource modules to validate the foundation pattern
-- [ ] **Phase 5: SetupIntents & PaymentMethods** - Intent-based and method management resources
+- [x] **Phase 5: SetupIntents & PaymentMethods** - Intent-based and method management resources (completed 2026-04-02)
 - [ ] **Phase 6: Refunds & Checkout** - Refund operations and Checkout Sessions
 - [ ] **Phase 7: Webhooks** - Signature verification, event parsing, and Phoenix Plug
 - [ ] **Phase 8: Telemetry & Observability** - Request lifecycle events wired through the stack
@@ -103,11 +103,11 @@ Plans:
   2. Developer can create, retrieve, update, and list PaymentMethods for a customer
   3. Developer can attach a PaymentMethod to a customer and detach it
   4. All operations follow the same ergonomic pattern established by Customers and PaymentIntents
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 05-01-PLAN.md — Extract Resource helpers, refactor Customer/PI, add PI search, build SetupIntent + tests
-- [ ] 05-02-PLAN.md — PaymentMethod struct, CRUD, attach/detach, validated list, stream + tests
+- [x] 05-02-PLAN.md — PaymentMethod struct, CRUD, attach/detach, validated list, stream + tests
 
 ### Phase 6: Refunds & Checkout
 **Goal**: Developers can issue refunds and create Checkout Sessions in all modes
@@ -209,7 +209,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 2. Error Handling & Retry | 0/3 | Planned | - |
 | 3. Pagination & Response | 2/3 | In Progress|  |
 | 4. Customers & PaymentIntents | 0/2 | Planned | - |
-| 5. SetupIntents & PaymentMethods | 1/2 | In Progress|  |
+| 5. SetupIntents & PaymentMethods | 2/2 | Complete   | 2026-04-02 |
 | 6. Refunds & Checkout | 0/0 | Not started | - |
 | 7. Webhooks | 0/0 | Not started | - |
 | 8. Telemetry & Observability | 0/0 | Not started | - |
