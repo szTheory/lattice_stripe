@@ -13,4 +13,14 @@ defmodule LatticeStripe.Json.Jason do
 
   @impl true
   def decode!(data), do: Jason.decode!(data)
+
+  @impl true
+  def encode(data) do
+    Jason.encode(data)
+  end
+
+  @impl true
+  def decode(data) do
+    Jason.decode(data)
+  end
 end

@@ -27,7 +27,18 @@ defmodule LatticeStripe.Error do
   - `raw_body` - Full decoded error body map — escape hatch for fields not yet in the struct, or `nil`
   """
 
-  defexception [:type, :code, :message, :status, :request_id, :param, :decline_code, :charge, :doc_url, :raw_body]
+  defexception [
+    :type,
+    :code,
+    :message,
+    :status,
+    :request_id,
+    :param,
+    :decline_code,
+    :charge,
+    :doc_url,
+    :raw_body
+  ]
 
   @type error_type ::
           :card_error
