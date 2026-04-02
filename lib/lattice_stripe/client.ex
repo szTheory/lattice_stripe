@@ -57,8 +57,9 @@ defmodule LatticeStripe.Client do
     api_version: "2025-12-18.acacia",
     transport: LatticeStripe.Transport.Finch,
     json_codec: LatticeStripe.Json.Jason,
+    retry_strategy: LatticeStripe.RetryStrategy.Default,
     timeout: 30_000,
-    max_retries: 0,
+    max_retries: 2,
     telemetry_enabled: true
   ]
 
@@ -70,6 +71,7 @@ defmodule LatticeStripe.Client do
           api_version: String.t(),
           transport: module(),
           json_codec: module(),
+          retry_strategy: module(),
           timeout: pos_integer(),
           max_retries: non_neg_integer(),
           telemetry_enabled: boolean()

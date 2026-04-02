@@ -54,6 +54,12 @@ defmodule LatticeStripe.Config do
               default: LatticeStripe.Json.Jason,
               doc: "JSON codec module implementing LatticeStripe.Json behaviour."
             ],
+            retry_strategy: [
+              type: :atom,
+              default: LatticeStripe.RetryStrategy.Default,
+              doc:
+                "Module implementing LatticeStripe.RetryStrategy behaviour for retry decisions."
+            ],
             finch: [
               type: :atom,
               required: true,
@@ -67,9 +73,9 @@ defmodule LatticeStripe.Config do
             ],
             max_retries: [
               type: :non_neg_integer,
-              default: 0,
+              default: 2,
               doc:
-                "Maximum number of retries. Phase 2 wires retry logic; Phase 1 stores the config."
+                "Maximum number of retries for failed requests. 0 disables retries. Default 2 means up to 3 total attempts."
             ],
             stripe_account: [
               type: {:or, [:string, nil]},

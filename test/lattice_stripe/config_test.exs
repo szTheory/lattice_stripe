@@ -29,14 +29,42 @@ defmodule LatticeStripe.ConfigTest do
       end
     end
 
-    test "defaults applied: base_url, timeout, transport, json_codec, max_retries, telemetry_enabled" do
+    test "defaults applied: base_url, timeout, transport, json_codec, max_retries, retry_strategy, telemetry_enabled" do
       result = Config.validate!(api_key: "sk_test_123", finch: MyFinch)
       assert result[:base_url] == "https://api.stripe.com"
       assert result[:timeout] == 30_000
       assert result[:transport] == LatticeStripe.Transport.Finch
       assert result[:json_codec] == LatticeStripe.Json.Jason
-      assert result[:max_retries] == 0
+      assert result[:max_retries] == 2
+      assert result[:retry_strategy] == LatticeStripe.RetryStrategy.Default
       assert result[:telemetry_enabled] == true
+    end
+
+    test "retry_strategy defaults to LatticeStripe.RetryStrategy.Default" do
+      result = Config.validate!(api_key: "sk_test_123", finch: MyFinch)
+      assert result[:retry_strategy] == LatticeStripe.RetryStrategy.Default
+    end
+
+    test "retry_strategy accepts custom module atom" do
+      result =
+        Config.validate!(
+          api_key: "sk_test_123",
+          finch: MyFinch,
+          retry_strategy: MyApp.CustomRetryStrategy
+        )
+
+      assert result[:retry_strategy] == MyApp.CustomRetryStrategy
+    end
+
+    test "retry_strategy rejects non-atom value" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate!(api_key: "sk_test_123", finch: MyFinch, retry_strategy: "not_an_atom")
+      end
+    end
+
+    test "max_retries defaults to 2" do
+      result = Config.validate!(api_key: "sk_test_123", finch: MyFinch)
+      assert result[:max_retries] == 2
     end
 
     test "custom values override defaults" do
