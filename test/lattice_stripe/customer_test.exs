@@ -206,8 +206,9 @@ defmodule LatticeStripe.CustomerTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
-        assert String.ends_with?(req.url, "/v1/customers/search")
+        assert req.url =~ "/v1/customers/search"
         assert req.url =~ "query="
+
         ok_response(%{
           "object" => "search_result",
           "data" => [customer_json()],
