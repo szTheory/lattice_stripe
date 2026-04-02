@@ -45,8 +45,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PAGE-01**: List endpoints return a struct with `data`, `has_more`, and pagination cursors
 - [x] **PAGE-02**: User can paginate manually with `starting_after` and `ending_before` parameters
-- [ ] **PAGE-03**: Library provides auto-pagination via `Stream.resource/3` that lazily fetches all pages
-- [ ] **PAGE-04**: Auto-pagination streams are composable with Elixir's Stream and Enum modules
+- [x] **PAGE-03**: Library provides auto-pagination via `Stream.resource/3` that lazily fetches all pages
+- [x] **PAGE-04**: Auto-pagination streams are composable with Elixir's Stream and Enum modules
 - [x] **PAGE-05**: Search endpoints support page-based pagination with `page` and `next_page` parameters
 - [x] **PAGE-06**: Search pagination documents eventual consistency caveats clearly
 
@@ -240,8 +240,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RTRY-06 | Phase 2 | Complete |
 | PAGE-01 | Phase 3 | Complete |
 | PAGE-02 | Phase 3 | Complete |
-| PAGE-03 | Phase 3 | Pending |
-| PAGE-04 | Phase 3 | Pending |
+| PAGE-03 | Phase 3 | Complete |
+| PAGE-04 | Phase 3 | Complete |
 | PAGE-05 | Phase 3 | Complete |
 | PAGE-06 | Phase 3 | Complete |
 | EXPD-01 | Phase 3 | Complete |
