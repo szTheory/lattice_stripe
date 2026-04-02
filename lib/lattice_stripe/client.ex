@@ -44,7 +44,7 @@ defmodule LatticeStripe.Client do
       }
   """
 
-  alias LatticeStripe.{Config, Error, FormEncoder, Request}
+  alias LatticeStripe.{Config, Error, FormEncoder, List, Request, Response}
 
   @version Mix.Project.config()[:version]
 
@@ -145,10 +145,11 @@ defmodule LatticeStripe.Client do
 
   ## Returns
 
-  - `{:ok, decoded_body}` - Decoded JSON map from a 2xx response
+  - `{:ok, %LatticeStripe.Response{}}` - Response struct wrapping decoded data with metadata.
+    `data` is a `%LatticeStripe.List{}` for list/search endpoints, or a plain map for singular resources.
   - `{:error, %LatticeStripe.Error{}}` - Structured error from 4xx/5xx or transport failure
   """
-  @spec request(t(), Request.t()) :: {:ok, map()} | {:error, Error.t()}
+  @spec request(t(), Request.t()) :: {:ok, Response.t()} | {:error, Error.t()}
   def request(%__MODULE__{} = client, %Request{} = req) do
     effective_api_key = Keyword.get(req.opts, :api_key, client.api_key)
     effective_api_version = Keyword.get(req.opts, :stripe_version, client.api_version)
@@ -181,7 +182,9 @@ defmodule LatticeStripe.Client do
       url: url,
       headers: headers,
       body: body,
-      opts: transport_opts
+      opts: transport_opts,
+      _params: params,
+      _req_opts: req.opts
     }
 
     if client.telemetry_enabled do
@@ -227,10 +230,10 @@ defmodule LatticeStripe.Client do
 
   ## Returns
 
-  - Decoded JSON map on success
+  - `%LatticeStripe.Response{}` on success (raises `LatticeStripe.Error` on failure)
   - Raises `LatticeStripe.Error` on failure (after retries exhausted)
   """
-  @spec request!(t(), Request.t()) :: map()
+  @spec request!(t(), Request.t()) :: Response.t()
   def request!(%__MODULE__{} = client, %Request{} = req) do
     case request(client, req) do
       {:ok, result} -> result
@@ -455,13 +458,16 @@ defmodule LatticeStripe.Client do
   end
 
   # Execute the transport request and decode the response.
-  # Returns {:ok, decoded} | {:error, error, resp_headers} — the 3-tuple variant
+  # Returns {:ok, %Response{}} | {:error, error, resp_headers} — the 3-tuple variant
   # keeps response headers available internally for the retry loop to inspect
   # (e.g., Stripe-Should-Retry, Retry-After) without leaking them to the public API.
   defp do_request(client, transport_request) do
+    params = Map.get(transport_request, :_params, %{})
+    req_opts = Map.get(transport_request, :_req_opts, [])
+
     case client.transport.request(transport_request) do
       {:ok, %{status: status, headers: resp_headers, body: body}} ->
-        decode_response(client, status, resp_headers, body)
+        decode_response(client, status, resp_headers, body, params, req_opts)
 
       {:error, reason} ->
         {:error,
@@ -473,12 +479,12 @@ defmodule LatticeStripe.Client do
   end
 
   # Decode the HTTP response body and build the appropriate result tuple.
-  defp decode_response(client, status, resp_headers, body) do
+  defp decode_response(client, status, resp_headers, body, params, req_opts) do
     request_id = extract_request_id(resp_headers)
 
     case client.json_codec.decode(body) do
       {:ok, decoded} ->
-        build_decoded_response(status, decoded, request_id, resp_headers)
+        build_decoded_response(status, decoded, request_id, resp_headers, params, req_opts)
 
       {:error, _decode_error} ->
         # Non-JSON response (D-27): HTML maintenance page, empty body, etc.
@@ -488,9 +494,19 @@ defmodule LatticeStripe.Client do
   end
 
   # Build response for successfully decoded JSON.
-  defp build_decoded_response(status, decoded, request_id, resp_headers) do
+  # Detects list/search_result objects and wraps them in %List{} with params/opts threading.
+  defp build_decoded_response(status, decoded, request_id, resp_headers, params, req_opts) do
     if status in 200..299 do
-      {:ok, decoded}
+      data =
+        case decoded["object"] do
+          type when type in ["list", "search_result"] ->
+            List.from_json(decoded, params, req_opts)
+
+          _ ->
+            decoded
+        end
+
+      {:ok, %Response{data: data, status: status, headers: resp_headers, request_id: request_id}}
     else
       {:error, Error.from_response(status, decoded, request_id), resp_headers}
     end
@@ -564,8 +580,8 @@ defmodule LatticeStripe.Client do
   end
 
   # Build stop metadata for telemetry span based on result and attempt count (D-24).
-  defp telemetry_stop_metadata({:ok, _decoded}, _idempotency_key, attempts) do
-    %{status: :ok, attempts: attempts, retries: attempts - 1}
+  defp telemetry_stop_metadata({:ok, %Response{} = resp}, _idempotency_key, attempts) do
+    %{status: :ok, http_status: resp.status, request_id: resp.request_id, attempts: attempts, retries: attempts - 1}
   end
 
   defp telemetry_stop_metadata(
