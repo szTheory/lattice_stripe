@@ -12,17 +12,22 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] HTTP transport via pluggable `Transport` behaviour with default Finch adapter — *Validated in Phase 1: Transport & Client Configuration*
+- [x] Explicit client configuration (API key, base URL, timeouts, retries, API version, telemetry) — *Validated in Phase 1: Transport & Client Configuration*
+- [x] Per-request option overrides (idempotency_key, stripe_account, api_key, stripe_version, expand, timeout) — *Validated in Phase 1: Transport & Client Configuration*
+- [x] Structured error model with pattern-matchable error types (auth, card, validation, rate limit, server) — *Validated in Phase 2: Error Handling & Retry*
+- [x] Automatic retries with exponential backoff, respecting Stripe-Should-Retry header — *Validated in Phase 2: Error Handling & Retry*
+- [x] Idempotency key generation and replay handling — *Validated in Phase 2: Error Handling & Retry*
 
 ### Active
 
 **Foundation (Tier 0)**
-- [ ] HTTP transport via pluggable `Transport` behaviour with default Finch adapter
-- [ ] Explicit client configuration (API key, base URL, timeouts, retries, API version, telemetry)
-- [ ] Per-request option overrides (idempotency_key, stripe_account, api_key, stripe_version, expand, timeout)
-- [ ] Structured error model with pattern-matchable error types (auth, card, validation, rate limit, server)
-- [ ] Automatic retries with exponential backoff, respecting Stripe-Should-Retry header
-- [ ] Idempotency key generation and replay handling
+- [ ] ~~HTTP transport via pluggable `Transport` behaviour with default Finch adapter~~ *(moved to Validated)*
+- [ ] ~~Explicit client configuration~~ *(moved to Validated)*
+- [ ] ~~Per-request option overrides~~ *(moved to Validated)*
+- [ ] ~~Structured error model with pattern-matchable error types~~ *(moved to Validated)*
+- [ ] ~~Automatic retries with exponential backoff~~ *(moved to Validated)*
+- [ ] ~~Idempotency key generation and replay handling~~ *(moved to Validated)*
 - [ ] Cursor-based list pagination with auto-pagination via Elixir Streams
 - [ ] Search pagination support (page-based, eventual consistency caveats documented)
 - [ ] Expand support for nested object expansion
@@ -141,4 +146,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-31 after initialization*
+*Last updated: 2026-04-02 after Phase 2 completion*
