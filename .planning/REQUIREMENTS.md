@@ -43,26 +43,26 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Pagination
 
-- [ ] **PAGE-01**: List endpoints return a struct with `data`, `has_more`, and pagination cursors
+- [x] **PAGE-01**: List endpoints return a struct with `data`, `has_more`, and pagination cursors
 - [ ] **PAGE-02**: User can paginate manually with `starting_after` and `ending_before` parameters
 - [ ] **PAGE-03**: Library provides auto-pagination via `Stream.resource/3` that lazily fetches all pages
 - [ ] **PAGE-04**: Auto-pagination streams are composable with Elixir's Stream and Enum modules
-- [ ] **PAGE-05**: Search endpoints support page-based pagination with `page` and `next_page` parameters
-- [ ] **PAGE-06**: Search pagination documents eventual consistency caveats clearly
+- [x] **PAGE-05**: Search endpoints support page-based pagination with `page` and `next_page` parameters
+- [x] **PAGE-06**: Search pagination documents eventual consistency caveats clearly
 
 ### Expand & Response
 
 - [ ] **EXPD-01**: User can pass `expand` option to expand nested objects on any request
 - [ ] **EXPD-02**: Expanded objects are deserialized into typed structs, unexpanded remain as string IDs
 - [ ] **EXPD-03**: Nested expansion is supported (e.g., `expand: ["data.customer"]`)
-- [ ] **EXPD-04**: Response structs expose raw response metadata: request_id, HTTP status, headers
+- [x] **EXPD-04**: Response structs expose raw response metadata: request_id, HTTP status, headers
 - [ ] **EXPD-05**: Pattern-matchable domain types use atoms for status fields (e.g., `:succeeded`, `:requires_action`)
 
 ### API Versioning
 
-- [ ] **VERS-01**: Library pins to a specific Stripe API version per release
-- [ ] **VERS-02**: User can override API version per-client
-- [ ] **VERS-03**: User can override API version per-request
+- [x] **VERS-01**: Library pins to a specific Stripe API version per release
+- [x] **VERS-02**: User can override API version per-client
+- [x] **VERS-03**: User can override API version per-request
 
 ### Telemetry
 
@@ -238,20 +238,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RTRY-04 | Phase 2 | Complete |
 | RTRY-05 | Phase 2 | Complete |
 | RTRY-06 | Phase 2 | Complete |
-| PAGE-01 | Phase 3 | Pending |
+| PAGE-01 | Phase 3 | Complete |
 | PAGE-02 | Phase 3 | Pending |
 | PAGE-03 | Phase 3 | Pending |
 | PAGE-04 | Phase 3 | Pending |
-| PAGE-05 | Phase 3 | Pending |
-| PAGE-06 | Phase 3 | Pending |
+| PAGE-05 | Phase 3 | Complete |
+| PAGE-06 | Phase 3 | Complete |
 | EXPD-01 | Phase 3 | Pending |
 | EXPD-02 | Phase 3 | Pending |
 | EXPD-03 | Phase 3 | Pending |
-| EXPD-04 | Phase 3 | Pending |
+| EXPD-04 | Phase 3 | Complete |
 | EXPD-05 | Phase 3 | Pending |
-| VERS-01 | Phase 3 | Pending |
-| VERS-02 | Phase 3 | Pending |
-| VERS-03 | Phase 3 | Pending |
+| VERS-01 | Phase 3 | Complete |
+| VERS-02 | Phase 3 | Complete |
+| VERS-03 | Phase 3 | Complete |
 | CUST-01 | Phase 4 | Pending |
 | CUST-02 | Phase 4 | Pending |
 | CUST-03 | Phase 4 | Pending |
