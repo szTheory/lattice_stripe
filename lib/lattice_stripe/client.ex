@@ -581,7 +581,13 @@ defmodule LatticeStripe.Client do
 
   # Build stop metadata for telemetry span based on result and attempt count (D-24).
   defp telemetry_stop_metadata({:ok, %Response{} = resp}, _idempotency_key, attempts) do
-    %{status: :ok, http_status: resp.status, request_id: resp.request_id, attempts: attempts, retries: attempts - 1}
+    %{
+      status: :ok,
+      http_status: resp.status,
+      request_id: resp.request_id,
+      attempts: attempts,
+      retries: attempts - 1
+    }
   end
 
   defp telemetry_stop_metadata(

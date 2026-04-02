@@ -3,7 +3,7 @@ defmodule LatticeStripe.ClientTest do
 
   import Mox
 
-  alias LatticeStripe.{Client, Error, Request}
+  alias LatticeStripe.{Client, Error, Request, Response}
 
   setup :verify_on_exit!
 
@@ -261,15 +261,15 @@ defmodule LatticeStripe.ClientTest do
   end
 
   describe "request/2 response handling" do
-    # Test 14: request/2 on 200 returns {:ok, decoded_json_map}
-    test "200 response returns {:ok, decoded_map}" do
+    # Test 14: request/2 on 200 returns {:ok, %Response{data: decoded_map}}
+    test "200 response returns {:ok, %Response{data: decoded_map}}" do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req_map ->
         ok_response(%{"id" => "cus_123", "object" => "customer"})
       end)
 
-      assert {:ok, %{"id" => "cus_123", "object" => "customer"}} =
+      assert {:ok, %Response{data: %{"id" => "cus_123", "object" => "customer"}}} =
                Client.request(client, get_request())
     end
 
@@ -511,7 +511,9 @@ defmodule LatticeStripe.ClientTest do
       end)
 
       req = %Request{method: :get, path: "/v1/customers", params: %{}, opts: []}
-      assert {:ok, %{"object" => "list"}} = Client.request(client, req)
+
+      assert {:ok, %Response{data: %LatticeStripe.List{object: "list"}}} =
+               Client.request(client, req)
     end
   end
 
@@ -620,7 +622,8 @@ defmodule LatticeStripe.ClientTest do
         ok_response(%{"id" => "cus_success"})
       end)
 
-      assert {:ok, %{"id" => "cus_success"}} = Client.request(client, get_request())
+      assert {:ok, %Response{data: %{"id" => "cus_success"}}} =
+               Client.request(client, get_request())
     end
   end
 
@@ -792,8 +795,8 @@ defmodule LatticeStripe.ClientTest do
       end
     end
 
-    # Test 45: request!/2 returns decoded map on success
-    test "returns decoded map on success" do
+    # Test 45: request!/2 returns %Response{} on success
+    test "returns %Response{} on success" do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req_map ->
@@ -801,7 +804,7 @@ defmodule LatticeStripe.ClientTest do
       end)
 
       result = Client.request!(client, get_request())
-      assert result == %{"id" => "cus_bang_123"}
+      assert %Response{data: %{"id" => "cus_bang_123"}} = result
     end
 
     # Test 46: request!/2 retries before raising
@@ -991,6 +994,147 @@ defmodule LatticeStripe.ClientTest do
       end)
 
       assert {:error, %Error{status: 500}} = Client.request(client, get_request())
+    end
+  end
+
+  describe "response wrapping" do
+    # Test 53: Singular resource response is wrapped in %Response{} with metadata
+    test "singular resource wrapped in %Response{} with status and request_id" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        {:ok,
+         %{
+           status: 200,
+           headers: [{"request-id", "req_test_123"}],
+           body: Jason.encode!(%{"id" => "cus_123", "object" => "customer"})
+         }}
+      end)
+
+      assert {:ok, %Response{data: %{"id" => "cus_123"}, status: 200, request_id: "req_test_123"}} =
+               Client.request(client, get_request())
+    end
+
+    # Test 54: List response auto-detected and wrapped in %LatticeStripe.List{}
+    test "list object auto-detected and data wrapped in %List{}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        {:ok,
+         %{
+           status: 200,
+           headers: [{"request-id", "req_list_123"}],
+           body:
+             Jason.encode!(%{
+               "object" => "list",
+               "data" => [%{"id" => "cus_1"}],
+               "has_more" => true,
+               "url" => "/v1/customers"
+             })
+         }}
+      end)
+
+      assert {:ok,
+              %Response{
+                data: %LatticeStripe.List{
+                  object: "list",
+                  data: [%{"id" => "cus_1"}],
+                  has_more: true
+                }
+              }} =
+               Client.request(client, get_request("/v1/customers"))
+    end
+
+    # Test 55: Search result auto-detected and wrapped in %LatticeStripe.List{}
+    test "search_result object auto-detected and wrapped in %List{}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        {:ok,
+         %{
+           status: 200,
+           headers: [{"request-id", "req_search_456"}],
+           body:
+             Jason.encode!(%{
+               "object" => "search_result",
+               "data" => [%{"id" => "cus_2"}],
+               "has_more" => false,
+               "next_page" => "page_token_abc"
+             })
+         }}
+      end)
+
+      assert {:ok,
+              %Response{
+                data: %LatticeStripe.List{object: "search_result", next_page: "page_token_abc"}
+              }} =
+               Client.request(client, get_request("/v1/customers/search"))
+    end
+
+    # Test 56: List response carries _params from the request
+    test "_params and _opts are threaded into %List{} from the original request" do
+      client = test_client()
+
+      req = %Request{
+        method: :get,
+        path: "/v1/customers",
+        params: %{"limit" => 10},
+        opts: [stripe_account: "acct_123"]
+      }
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        {:ok,
+         %{
+           status: 200,
+           headers: [{"request-id", "req_params_789"}],
+           body:
+             Jason.encode!(%{
+               "object" => "list",
+               "data" => [],
+               "has_more" => false,
+               "url" => "/v1/customers"
+             })
+         }}
+      end)
+
+      assert {:ok, %Response{data: list}} = Client.request(client, req)
+      assert %LatticeStripe.List{} = list
+      assert list._params == %{"limit" => 10}
+      assert list._opts == [stripe_account: "acct_123"]
+    end
+
+    # Test 57: Response headers are accessible on the Response struct
+    test "response headers accessible on %Response{} struct" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        {:ok,
+         %{
+           status: 200,
+           headers: [{"request-id", "req_hdr_111"}, {"content-type", "application/json"}],
+           body: Jason.encode!(%{"id" => "cus_hdr"})
+         }}
+      end)
+
+      assert {:ok, resp} = Client.request(client, get_request())
+      assert resp.headers != []
+      assert {"request-id", "req_hdr_111"} in resp.headers
+    end
+
+    # Test 58: bang variant returns %Response{} on success
+    test "request!/2 returns %Response{} struct on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        {:ok,
+         %{
+           status: 200,
+           headers: [{"request-id", "req_bang_999"}],
+           body: Jason.encode!(%{"id" => "cus_bang"})
+         }}
+      end)
+
+      assert %Response{data: %{"id" => "cus_bang"}} = Client.request!(client, get_request())
     end
   end
 end
