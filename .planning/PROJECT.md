@@ -18,6 +18,8 @@ Elixir developers can integrate Stripe payments into their applications with con
 - [x] Structured error model with pattern-matchable error types (auth, card, validation, rate limit, server) — *Validated in Phase 2: Error Handling & Retry*
 - [x] Automatic retries with exponential backoff, respecting Stripe-Should-Retry header — *Validated in Phase 2: Error Handling & Retry*
 - [x] Idempotency key generation and replay handling — *Validated in Phase 2: Error Handling & Retry*
+- [x] SetupIntents — create, retrieve, update, confirm, cancel, list — *Validated in Phase 5: SetupIntents & PaymentMethods*
+- [x] PaymentMethods — create, retrieve, update, list, attach, detach — *Validated in Phase 5: SetupIntents & PaymentMethods*
 
 ### Active
 
@@ -146,4 +148,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 4 completion*
+*Last updated: 2026-04-02 after Phase 5 completion*
