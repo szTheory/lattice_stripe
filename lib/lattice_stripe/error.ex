@@ -15,14 +15,19 @@ defmodule LatticeStripe.Error do
 
   ## Fields
 
-  - `type` - Error category atom: `:card_error | :invalid_request_error | :authentication_error | :rate_limit_error | :api_error | :connection_error`
+  - `type` - Error category atom: `:card_error | :invalid_request_error | :authentication_error | :rate_limit_error | :api_error | :idempotency_error | :connection_error`
   - `code` - Stripe error code string (e.g., `"card_declined"`, `"missing_param"`) or `nil`
   - `message` - Human-readable error message
   - `status` - HTTP status integer, or `nil` for connection errors (no HTTP response received)
   - `request_id` - Stripe request ID from `Request-Id` response header, or `nil`
+  - `param` - Parameter name that caused the error (e.g., `"card[number]"`), or `nil`
+  - `decline_code` - Decline code for card errors (e.g., `"insufficient_funds"`), or `nil`
+  - `charge` - Stripe charge ID associated with the error, or `nil`
+  - `doc_url` - URL to Stripe documentation for this error, or `nil`
+  - `raw_body` - Full decoded error body map — escape hatch for fields not yet in the struct, or `nil`
   """
 
-  defexception [:type, :code, :message, :status, :request_id]
+  defexception [:type, :code, :message, :status, :request_id, :param, :decline_code, :charge, :doc_url, :raw_body]
 
   @type error_type ::
           :card_error
@@ -30,6 +35,7 @@ defmodule LatticeStripe.Error do
           | :authentication_error
           | :rate_limit_error
           | :api_error
+          | :idempotency_error
           | :connection_error
 
   @type t :: %__MODULE__{
@@ -37,12 +43,22 @@ defmodule LatticeStripe.Error do
           code: String.t() | nil,
           message: String.t() | nil,
           status: pos_integer() | nil,
-          request_id: String.t() | nil
+          request_id: String.t() | nil,
+          param: String.t() | nil,
+          decline_code: String.t() | nil,
+          charge: String.t() | nil,
+          doc_url: String.t() | nil,
+          raw_body: map() | nil
         }
 
   @impl true
-  def message(%__MODULE__{type: type, message: msg}) do
-    "(#{type}) #{msg}"
+  def message(%__MODULE__{} = error) do
+    parts = ["(#{error.type})"]
+    parts = if error.status, do: parts ++ ["#{error.status}"], else: parts
+    parts = if error.code, do: parts ++ [error.code], else: parts
+    parts = if error.message, do: parts ++ [error.message], else: parts
+    parts = if error.request_id, do: parts ++ ["(request: #{error.request_id})"], else: parts
+    Enum.join(parts, " ")
   end
 
   @doc """
@@ -64,8 +80,13 @@ defmodule LatticeStripe.Error do
           type: parse_type(type_str),
           code: Map.get(error_map, "code"),
           message: Map.get(error_map, "message"),
+          param: Map.get(error_map, "param"),
+          decline_code: Map.get(error_map, "decline_code"),
+          charge: Map.get(error_map, "charge"),
+          doc_url: Map.get(error_map, "doc_url"),
           status: status,
-          request_id: request_id
+          request_id: request_id,
+          raw_body: decoded_body
         }
 
       _ ->
@@ -74,7 +95,8 @@ defmodule LatticeStripe.Error do
           code: nil,
           message: "An unexpected error occurred",
           status: status,
-          request_id: request_id
+          request_id: request_id,
+          raw_body: decoded_body
         }
     end
   end
@@ -85,5 +107,12 @@ defmodule LatticeStripe.Error do
   defp parse_type("authentication_error"), do: :authentication_error
   defp parse_type("rate_limit_error"), do: :rate_limit_error
   defp parse_type("api_error"), do: :api_error
+  defp parse_type("idempotency_error"), do: :idempotency_error
   defp parse_type(_), do: :api_error
+end
+
+defimpl String.Chars, for: LatticeStripe.Error do
+  def to_string(error) do
+    Exception.message(error)
+  end
 end
