@@ -91,8 +91,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Customer struct, CRUD, list, search, stream, bang variants + tests
-- [ ] 04-02-PLAN.md — PaymentIntent struct, CRUD, confirm/capture/cancel, list, stream + tests
+- [x] 04-01-PLAN.md — Customer struct, CRUD, list, search, stream, bang variants + tests
+- [x] 04-02-PLAN.md — PaymentIntent struct, CRUD, confirm/capture/cancel, list, stream + tests
 
 ### Phase 5: SetupIntents & PaymentMethods
 **Goal**: Developers can save payment methods for future use via SetupIntents and manage PaymentMethod lifecycle

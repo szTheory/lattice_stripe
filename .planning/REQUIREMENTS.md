@@ -77,13 +77,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Payments — PaymentIntents
 
-- [ ] **PINT-01**: User can create a PaymentIntent with amount, currency, and payment method options
-- [ ] **PINT-02**: User can retrieve a PaymentIntent by ID
-- [ ] **PINT-03**: User can update a PaymentIntent
-- [ ] **PINT-04**: User can confirm a PaymentIntent
-- [ ] **PINT-05**: User can capture a PaymentIntent (manual capture flow)
-- [ ] **PINT-06**: User can cancel a PaymentIntent
-- [ ] **PINT-07**: User can list PaymentIntents with filters and pagination
+- [x] **PINT-01**: User can create a PaymentIntent with amount, currency, and payment method options
+- [x] **PINT-02**: User can retrieve a PaymentIntent by ID
+- [x] **PINT-03**: User can update a PaymentIntent
+- [x] **PINT-04**: User can confirm a PaymentIntent
+- [x] **PINT-05**: User can capture a PaymentIntent (manual capture flow)
+- [x] **PINT-06**: User can cancel a PaymentIntent
+- [x] **PINT-07**: User can list PaymentIntents with filters and pagination
 
 ### Payments — SetupIntents
 
@@ -258,13 +258,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CUST-04 | Phase 4 | Pending |
 | CUST-05 | Phase 4 | Pending |
 | CUST-06 | Phase 4 | Pending |
-| PINT-01 | Phase 4 | Pending |
-| PINT-02 | Phase 4 | Pending |
-| PINT-03 | Phase 4 | Pending |
-| PINT-04 | Phase 4 | Pending |
-| PINT-05 | Phase 4 | Pending |
-| PINT-06 | Phase 4 | Pending |
-| PINT-07 | Phase 4 | Pending |
+| PINT-01 | Phase 4 | Complete |
+| PINT-02 | Phase 4 | Complete |
+| PINT-03 | Phase 4 | Complete |
+| PINT-04 | Phase 4 | Complete |
+| PINT-05 | Phase 4 | Complete |
+| PINT-06 | Phase 4 | Complete |
+| PINT-07 | Phase 4 | Complete |
 | SINT-01 | Phase 5 | Pending |
 | SINT-02 | Phase 5 | Pending |
 | SINT-03 | Phase 5 | Pending |
