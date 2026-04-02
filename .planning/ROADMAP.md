@@ -88,11 +88,11 @@ Plans:
   2. Developer can search Customers using the Search API with page-based pagination
   3. Developer can create, retrieve, update, confirm, capture, cancel, and list PaymentIntents
   4. All Customer and PaymentIntent operations work with expand, idempotency keys, per-request overrides, and auto-pagination
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — Customer struct, CRUD, list, search, stream, bang variants + tests
+- [ ] 04-02-PLAN.md — PaymentIntent struct, CRUD, confirm/capture/cancel, list, stream + tests
 
 ### Phase 5: SetupIntents & PaymentMethods
 **Goal**: Developers can save payment methods for future use via SetupIntents and manage PaymentMethod lifecycle
@@ -208,7 +208,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 1. Transport & Client Configuration | 5/5 | Complete   | 2026-04-01 |
 | 2. Error Handling & Retry | 0/3 | Planned | - |
 | 3. Pagination & Response | 2/3 | In Progress|  |
-| 4. Customers & PaymentIntents | 0/0 | Not started | - |
+| 4. Customers & PaymentIntents | 0/2 | Planned | - |
 | 5. SetupIntents & PaymentMethods | 0/0 | Not started | - |
 | 6. Refunds & Checkout | 0/0 | Not started | - |
 | 7. Webhooks | 0/0 | Not started | - |
