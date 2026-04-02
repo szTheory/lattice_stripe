@@ -34,12 +34,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Retry & Idempotency
 
-- [ ] **RTRY-01**: Library automatically retries failed requests with exponential backoff and jitter
-- [ ] **RTRY-02**: Retry logic respects the Stripe-Should-Retry response header
+- [x] **RTRY-01**: Library automatically retries failed requests with exponential backoff and jitter
+- [x] **RTRY-02**: Retry logic respects the Stripe-Should-Retry response header
 - [ ] **RTRY-03**: Library auto-generates idempotency keys for mutating requests and reuses the same key on retry
 - [ ] **RTRY-04**: User can provide a custom idempotency key per-request
-- [ ] **RTRY-05**: Retry strategy is pluggable via a RetryStrategy behaviour (custom backoff, circuit breaking)
-- [ ] **RTRY-06**: Max retries are configurable per-client and per-request
+- [x] **RTRY-05**: Retry strategy is pluggable via a RetryStrategy behaviour (custom backoff, circuit breaking)
+- [x] **RTRY-06**: Max retries are configurable per-client and per-request
 
 ### Pagination
 
@@ -232,12 +232,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ERRR-04 | Phase 2 | Complete |
 | ERRR-05 | Phase 2 | Complete |
 | ERRR-06 | Phase 2 | Complete |
-| RTRY-01 | Phase 2 | Pending |
-| RTRY-02 | Phase 2 | Pending |
+| RTRY-01 | Phase 2 | Complete |
+| RTRY-02 | Phase 2 | Complete |
 | RTRY-03 | Phase 2 | Pending |
 | RTRY-04 | Phase 2 | Pending |
-| RTRY-05 | Phase 2 | Pending |
-| RTRY-06 | Phase 2 | Pending |
+| RTRY-05 | Phase 2 | Complete |
+| RTRY-06 | Phase 2 | Complete |
 | PAGE-01 | Phase 3 | Pending |
 | PAGE-02 | Phase 3 | Pending |
 | PAGE-03 | Phase 3 | Pending |

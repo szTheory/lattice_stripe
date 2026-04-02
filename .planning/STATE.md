@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-error-handling-retry-01-PLAN.md
-last_updated: "2026-04-02T15:47:41.695Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-04-02T15:47:51.747Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 11
@@ -77,6 +77,9 @@ Recent decisions affecting current work:
 - [Phase 01-transport-client-configuration]: Client.request/2 completes Phase 1: telemetry_enabled flag on client, @version module attribute for User-Agent, per-request opts override client defaults via Keyword.get
 - [Phase 02-error-handling-retry]: Error struct enriched additively with :param, :decline_code, :charge, :doc_url, :raw_body fields; :idempotency_error type added for 409 conflicts; String.Chars protocol delegates to Exception.message/1
 - [Phase 02-error-handling-retry]: Json behaviour has 4 callbacks (encode!/decode! bang + encode/decode non-bang); non-bang variants return {:ok, result} | {:error, exception} for graceful non-JSON response handling
+- [Phase 02-error-handling-retry]: RetryStrategy.Default.retry?/2 reads stripe_should_retry from pre-parsed context map (boolean), not raw headers — caller parses headers before building context
+- [Phase 02-error-handling-retry]: max_retries default changed from 0 to 2 matching Stripe SDK convention (3 total attempts)
+- [Phase 02-error-handling-retry]: 409 Idempotency conflicts non-retriable: retrying same key with different params hits same conflict
 
 ### Pending Todos
 
@@ -88,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T15:47:29.136Z
-Stopped at: Completed 02-error-handling-retry-01-PLAN.md
+Last session: 2026-04-02T15:47:51.745Z
+Stopped at: Completed 02-02-PLAN.md
 Resume file: None
