@@ -1,0 +1,19 @@
+# LatticeStripe Cheatsheet
+
+## Setup
+{: .col-2}
+
+### Add dependency
+
+```elixir
+{:lattice_stripe, "~> 0.1"}
+```
+
+### Create client
+
+```elixir
+client = LatticeStripe.Client.new!(
+  api_key: "sk_test_...",
+  finch: MyApp.Finch
+)
+```

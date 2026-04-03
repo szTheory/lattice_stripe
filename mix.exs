@@ -16,8 +16,68 @@ defmodule LatticeStripe.MixProject do
       description: "A production-grade, idiomatic Elixir SDK for the Stripe API",
       source_url: @source_url,
       docs: [
-        main: "LatticeStripe",
-        extras: ["README.md"]
+        main: "getting-started",
+        source_url: @source_url,
+        source_ref: "v#{@version}",
+        # logo: "assets/logo.png",  # Add when logo asset is created
+        extras: [
+          "guides/getting-started.md",
+          "guides/client-configuration.md",
+          "guides/payments.md",
+          "guides/checkout.md",
+          "guides/webhooks.md",
+          "guides/error-handling.md",
+          "guides/testing.md",
+          "guides/telemetry.md",
+          "guides/extending-lattice-stripe.md",
+          "guides/cheatsheet.cheatmd",
+          "CHANGELOG.md"
+        ],
+        groups_for_extras: [
+          Guides: Path.wildcard("guides/*.{md,cheatmd}"),
+          Changelog: ["CHANGELOG.md"]
+        ],
+        groups_for_modules: [
+          Core: [
+            LatticeStripe,
+            LatticeStripe.Client,
+            LatticeStripe.Config,
+            LatticeStripe.Error,
+            LatticeStripe.Response,
+            LatticeStripe.List
+          ],
+          Payments: [
+            LatticeStripe.PaymentIntent,
+            LatticeStripe.Customer,
+            LatticeStripe.PaymentMethod,
+            LatticeStripe.SetupIntent,
+            LatticeStripe.Refund
+          ],
+          Checkout: [
+            LatticeStripe.Checkout.Session,
+            LatticeStripe.Checkout.LineItem
+          ],
+          Webhooks: [
+            LatticeStripe.Webhook,
+            LatticeStripe.Webhook.Plug,
+            LatticeStripe.Event
+          ],
+          "Telemetry & Testing": [
+            LatticeStripe.Telemetry,
+            LatticeStripe.Testing
+          ],
+          Internals: [
+            LatticeStripe.Transport,
+            LatticeStripe.Transport.Finch,
+            LatticeStripe.Json,
+            LatticeStripe.Json.Jason,
+            LatticeStripe.RetryStrategy,
+            LatticeStripe.RetryStrategy.Default,
+            LatticeStripe.FormEncoder,
+            LatticeStripe.Request,
+            LatticeStripe.Resource
+          ]
+        ]
       ],
       package: package(),
       aliases: aliases()
