@@ -141,8 +141,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **DOCS-01**: Every public module has @moduledoc with purpose and usage examples
 - [ ] **DOCS-02**: Every public function has @doc with arguments, return types, examples, and error cases
-- [ ] **DOCS-03**: ExDoc generates grouped, navigable documentation published to HexDocs
-- [ ] **DOCS-04**: README provides <60 second quickstart from install to first API call
+- [x] **DOCS-03**: ExDoc generates grouped, navigable documentation published to HexDocs
+- [x] **DOCS-04**: README provides <60 second quickstart from install to first API call
 - [ ] **DOCS-05**: Guides cover: Getting Started, Client Configuration, Payments, Checkout, Webhooks, Error Handling, Testing, Telemetry
 - [ ] **DOCS-06**: Non-obvious code has short, readable comments with example input/output data shapes
 
@@ -304,8 +304,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-06 | Phase 9 | Complete |
 | DOCS-01 | Phase 10 | Pending |
 | DOCS-02 | Phase 10 | Pending |
-| DOCS-03 | Phase 10 | Pending |
-| DOCS-04 | Phase 10 | Pending |
+| DOCS-03 | Phase 10 | Complete |
+| DOCS-04 | Phase 10 | Complete |
 | DOCS-05 | Phase 10 | Pending |
 | DOCS-06 | Phase 10 | Pending |
 | CICD-01 | Phase 11 | Pending |
