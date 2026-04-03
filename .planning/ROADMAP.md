@@ -165,8 +165,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md — Integration test infrastructure (test_helper.exs, test_integration_client) + 6 resource integration test files via stripe-mock
+- [ ] 09-02-PLAN.md — LatticeStripe.Testing public module + mix ci alias + Credo strict mode
 
 ### Phase 10: Documentation & Guides
 **Goal**: Every public API is documented and developers can go from install to first API call in under 60 seconds
@@ -214,6 +214,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 6. Refunds & Checkout | 2/2 | Complete   | 2026-04-03 |
 | 7. Webhooks | 2/2 | Complete   | 2026-04-03 |
 | 8. Telemetry & Observability | 2/2 | Complete   | 2026-04-03 |
-| 9. Testing Infrastructure | 0/0 | Not started | - |
+| 9. Testing Infrastructure | 0/2 | Planned | - |
 | 10. Documentation & Guides | 0/0 | Not started | - |
 | 11. CI/CD & Release | 0/0 | Not started | - |
