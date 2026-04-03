@@ -558,6 +558,200 @@ defmodule LatticeStripe.TelemetryTest do
   end
 
   # ---------------------------------------------------------------------------
+  # 9a. Metadata field exhaustiveness
+  # ---------------------------------------------------------------------------
+
+  describe "start event metadata exhaustiveness" do
+    test "start event has :telemetry_span_context injected by :telemetry.span/3" do
+      # :telemetry.span/3 auto-injects telemetry_span_context reference for correlating
+      # start/stop/exception events — this should always be present
+      attach_handler([[:lattice_stripe, :request, :start]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response() end)
+      Client.request(client, get_request("/v1/customers"))
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :start], _measurements, metadata}
+      assert Map.has_key?(metadata, :telemetry_span_context)
+      assert is_reference(metadata.telemetry_span_context)
+    end
+
+    test "start event has all six documented metadata fields" do
+      attach_handler([[:lattice_stripe, :request, :start]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response() end)
+      Client.request(client, post_request("/v1/customers"))
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :start], _measurements, metadata}
+
+      assert Map.has_key?(metadata, :method)
+      assert Map.has_key?(metadata, :path)
+      assert Map.has_key?(metadata, :resource)
+      assert Map.has_key?(metadata, :operation)
+      assert Map.has_key?(metadata, :api_version)
+      assert Map.has_key?(metadata, :stripe_account)
+    end
+
+    test "start event :stripe_account is nil when client has no stripe_account configured" do
+      attach_handler([[:lattice_stripe, :request, :start]])
+      client = test_client()  # no stripe_account option => nil
+
+      expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response() end)
+      Client.request(client, get_request())
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :start], _measurements, metadata}
+      assert metadata.stripe_account == nil
+    end
+  end
+
+  describe "stop event metadata exhaustiveness - success" do
+    test "stop event success: :error_type and :idempotency_key are absent on success" do
+      # On success the stop metadata does NOT include :error_type or :idempotency_key
+      attach_handler([[:lattice_stripe, :request, :stop]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response() end)
+      Client.request(client, get_request())
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :stop], _measurements, metadata}
+      refute Map.has_key?(metadata, :error_type)
+      refute Map.has_key?(metadata, :idempotency_key)
+    end
+
+    test "stop event has :telemetry_span_context that matches start event context" do
+      attach_handler([
+        [:lattice_stripe, :request, :start],
+        [:lattice_stripe, :request, :stop]
+      ])
+
+      client = test_client()
+      expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response() end)
+      Client.request(client, get_request())
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :start], _, start_meta}
+      assert_receive {:telemetry, [:lattice_stripe, :request, :stop], _, stop_meta}
+
+      # Both events share the same telemetry_span_context reference for correlation
+      assert start_meta.telemetry_span_context == stop_meta.telemetry_span_context
+    end
+
+    test "stop event success: measurements include :duration and :monotonic_time" do
+      attach_handler([[:lattice_stripe, :request, :stop]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response() end)
+      Client.request(client, get_request())
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :stop], measurements, _metadata}
+      assert Map.has_key?(measurements, :duration)
+      assert Map.has_key?(measurements, :monotonic_time)
+      assert is_integer(measurements.duration)
+      assert measurements.duration >= 0
+    end
+
+    test "start event measurements include :system_time and :monotonic_time" do
+      attach_handler([[:lattice_stripe, :request, :start]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response() end)
+      Client.request(client, get_request())
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :start], measurements, _metadata}
+      assert Map.has_key?(measurements, :system_time)
+      assert Map.has_key?(measurements, :monotonic_time)
+      assert is_integer(measurements.system_time)
+      assert is_integer(measurements.monotonic_time)
+    end
+  end
+
+  describe "stop event metadata exhaustiveness - error" do
+    test "stop event API error: has :error_type, :http_status, :request_id, :idempotency_key (on POST)" do
+      attach_handler([[:lattice_stripe, :request, :stop]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response(402, "card_error", "Card declined")
+      end)
+
+      Client.request(client, post_request("/v1/payment_intents"))
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :stop], _measurements, metadata}
+      assert metadata.status == :error
+      assert Map.has_key?(metadata, :error_type)
+      assert Map.has_key?(metadata, :http_status)
+      assert Map.has_key?(metadata, :request_id)
+      assert Map.has_key?(metadata, :idempotency_key)
+    end
+
+    test "stop event connection error: has :error_type but NOT :http_status or :request_id" do
+      attach_handler([[:lattice_stripe, :request, :stop]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        {:error, :econnrefused}
+      end)
+
+      Client.request(client, get_request())
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :stop], _measurements, metadata}
+      assert metadata.status == :error
+      assert metadata.error_type == :connection_error
+      refute Map.has_key?(metadata, :http_status)
+      refute Map.has_key?(metadata, :request_id)
+    end
+  end
+
+  describe "exception event metadata exhaustiveness" do
+    test "exception event has all documented metadata fields" do
+      attach_handler([[:lattice_stripe, :request, :exception]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        raise RuntimeError, "transport failure"
+      end)
+
+      assert_raise RuntimeError, fn ->
+        Client.request(client, post_request("/v1/customers"))
+      end
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :exception], _measurements, metadata}
+
+      # Start metadata fields
+      assert Map.has_key?(metadata, :method)
+      assert Map.has_key?(metadata, :path)
+      assert Map.has_key?(metadata, :resource)
+      assert Map.has_key?(metadata, :operation)
+      assert Map.has_key?(metadata, :api_version)
+      assert Map.has_key?(metadata, :stripe_account)
+
+      # Exception-specific fields
+      assert Map.has_key?(metadata, :kind)
+      assert Map.has_key?(metadata, :reason)
+      assert Map.has_key?(metadata, :stacktrace)
+      assert Map.has_key?(metadata, :telemetry_span_context)
+    end
+
+    test "exception event measurements include :duration and :monotonic_time" do
+      attach_handler([[:lattice_stripe, :request, :exception]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        raise "boom"
+      end)
+
+      assert_raise RuntimeError, fn ->
+        Client.request(client, get_request())
+      end
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :exception], measurements, _metadata}
+      assert Map.has_key?(measurements, :duration)
+      assert Map.has_key?(measurements, :monotonic_time)
+      assert is_integer(measurements.duration)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # 9. Default logger
   # ---------------------------------------------------------------------------
 
