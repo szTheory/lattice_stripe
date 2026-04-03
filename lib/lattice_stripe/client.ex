@@ -187,35 +187,15 @@ defmodule LatticeStripe.Client do
       _req_opts: req.opts
     }
 
-    if client.telemetry_enabled do
-      :telemetry.span(
-        [:lattice_stripe, :request],
-        %{method: req.method, path: req.path},
-        fn ->
-          {result, attempts} =
-            do_request_with_retries(
-              client,
-              transport_request,
-              req.method,
-              idempotency_key,
-              effective_max_retries
-            )
-
-          {result, telemetry_stop_metadata(result, idempotency_key, attempts)}
-        end
+    LatticeStripe.Telemetry.request_span(client, req, idempotency_key, fn ->
+      do_request_with_retries(
+        client,
+        transport_request,
+        req.method,
+        idempotency_key,
+        effective_max_retries
       )
-    else
-      {result, _attempts} =
-        do_request_with_retries(
-          client,
-          transport_request,
-          req.method,
-          idempotency_key,
-          effective_max_retries
-        )
-
-      result
-    end
+    end)
   end
 
   @doc """
@@ -358,7 +338,7 @@ defmodule LatticeStripe.Client do
 
     case client.retry_strategy.retry?(attempt, context) do
       {:retry, delay_ms} ->
-        emit_retry_telemetry(client, method, transport_request.url, error, attempt, delay_ms)
+        LatticeStripe.Telemetry.emit_retry(client, method, transport_request.url, error, attempt, delay_ms)
         # D-15: Process.sleep for retry delays; BEAM handles thousands of sleeping processes
         Process.sleep(delay_ms)
 
@@ -558,61 +538,4 @@ defmodule LatticeStripe.Client do
     end
   end
 
-  # Emit the per-retry telemetry event (D-24).
-  # [:lattice_stripe, :request, :retry] with measurements {attempt, delay_ms}
-  # and metadata {method, path, error_type, status}.
-  defp emit_retry_telemetry(client, method, url, error, attempt, delay_ms) do
-    if client.telemetry_enabled do
-      :telemetry.execute(
-        [:lattice_stripe, :request, :retry],
-        %{attempt: attempt, delay_ms: delay_ms},
-        %{method: method, path: extract_path(url), error_type: error.type, status: error.status}
-      )
-    end
-  end
-
-  # Extract path portion from a URL for telemetry metadata.
-  defp extract_path(url) do
-    case URI.parse(url) do
-      %URI{path: path} when is_binary(path) -> path
-      _ -> url
-    end
-  end
-
-  # Build stop metadata for telemetry span based on result and attempt count (D-24).
-  defp telemetry_stop_metadata({:ok, %Response{} = resp}, _idempotency_key, attempts) do
-    %{
-      status: :ok,
-      http_status: resp.status,
-      request_id: resp.request_id,
-      attempts: attempts,
-      retries: attempts - 1
-    }
-  end
-
-  defp telemetry_stop_metadata(
-         {:error, %Error{type: :connection_error}},
-         idempotency_key,
-         attempts
-       ) do
-    %{
-      status: :error,
-      error_type: :connection_error,
-      idempotency_key: idempotency_key,
-      attempts: attempts,
-      retries: attempts - 1
-    }
-  end
-
-  defp telemetry_stop_metadata({:error, %Error{} = error}, idempotency_key, attempts) do
-    %{
-      status: :error,
-      http_status: error.status,
-      error_type: error.type,
-      request_id: error.request_id,
-      idempotency_key: idempotency_key,
-      attempts: attempts,
-      retries: attempts - 1
-    }
-  end
 end
