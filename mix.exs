@@ -36,6 +36,8 @@ defmodule LatticeStripe.MixProject do
       {:jason, "~> 1.4"},
       {:telemetry, "~> 1.0"},
       {:nimble_options, "~> 1.0"},
+      {:plug_crypto, "~> 2.0"},
+      {:plug, "~> 1.16", optional: true},
 
       # Dev/test dependencies
       {:mox, "~> 1.2", only: :test},
