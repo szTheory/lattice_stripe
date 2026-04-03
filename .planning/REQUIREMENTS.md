@@ -121,13 +121,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Checkout
 
-- [ ] **CHKT-01**: User can create a Checkout Session in payment mode
-- [ ] **CHKT-02**: User can create a Checkout Session in subscription mode
-- [ ] **CHKT-03**: User can create a Checkout Session in setup mode
-- [ ] **CHKT-04**: User can configure line items, customer prefill, and success/cancel URLs
-- [ ] **CHKT-05**: User can retrieve a Checkout Session by ID
-- [ ] **CHKT-06**: User can list Checkout Sessions with filters and pagination
-- [ ] **CHKT-07**: User can expire an incomplete Checkout Session
+- [x] **CHKT-01**: User can create a Checkout Session in payment mode
+- [x] **CHKT-02**: User can create a Checkout Session in subscription mode
+- [x] **CHKT-03**: User can create a Checkout Session in setup mode
+- [x] **CHKT-04**: User can configure line items, customer prefill, and success/cancel URLs
+- [x] **CHKT-05**: User can retrieve a Checkout Session by ID
+- [x] **CHKT-06**: User can list Checkout Sessions with filters and pagination
+- [x] **CHKT-07**: User can expire an incomplete Checkout Session
 
 ### Webhooks
 
@@ -281,13 +281,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RFND-02 | Phase 6 | Complete |
 | RFND-03 | Phase 6 | Complete |
 | RFND-04 | Phase 6 | Complete |
-| CHKT-01 | Phase 6 | Pending |
-| CHKT-02 | Phase 6 | Pending |
-| CHKT-03 | Phase 6 | Pending |
-| CHKT-04 | Phase 6 | Pending |
-| CHKT-05 | Phase 6 | Pending |
-| CHKT-06 | Phase 6 | Pending |
-| CHKT-07 | Phase 6 | Pending |
+| CHKT-01 | Phase 6 | Complete |
+| CHKT-02 | Phase 6 | Complete |
+| CHKT-03 | Phase 6 | Complete |
+| CHKT-04 | Phase 6 | Complete |
+| CHKT-05 | Phase 6 | Complete |
+| CHKT-06 | Phase 6 | Complete |
+| CHKT-07 | Phase 6 | Complete |
 | WHBK-01 | Phase 7 | Pending |
 | WHBK-02 | Phase 7 | Pending |
 | WHBK-03 | Phase 7 | Pending |
