@@ -135,8 +135,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md — Event struct + Webhook verification module (HMAC-SHA256, construct_event, verify_signature, generate_test_signature) + Handler behaviour + SignatureVerificationError
+- [ ] 07-02-PLAN.md — Webhook.Plug (NimbleOptions, path matching, handler dispatch, MFA secrets) + CacheBodyReader + Plug integration tests
 
 ### Phase 8: Telemetry & Observability
 **Goal**: Developers can observe and monitor all Stripe API interactions via standard Telemetry events
@@ -211,7 +211,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 4. Customers & PaymentIntents | 0/2 | Planned | - |
 | 5. SetupIntents & PaymentMethods | 2/2 | Complete   | 2026-04-02 |
 | 6. Refunds & Checkout | 2/2 | Complete   | 2026-04-03 |
-| 7. Webhooks | 0/0 | Not started | - |
+| 7. Webhooks | 0/2 | Planned | - |
 | 8. Telemetry & Observability | 0/0 | Not started | - |
 | 9. Testing Infrastructure | 0/0 | Not started | - |
 | 10. Documentation & Guides | 0/0 | Not started | - |
