@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: SetupIntents & PaymentMethods** - Intent-based and method management resources (completed 2026-04-02)
 - [x] **Phase 6: Refunds & Checkout** - Refund operations and Checkout Sessions (completed 2026-04-03)
 - [x] **Phase 7: Webhooks** - Signature verification, event parsing, and Phoenix Plug (completed 2026-04-03)
-- [ ] **Phase 8: Telemetry & Observability** - Request lifecycle events wired through the stack
+- [x] **Phase 8: Telemetry & Observability** - Request lifecycle events wired through the stack (completed 2026-04-03)
 - [ ] **Phase 9: Testing Infrastructure** - Integration tests, unit tests, Mox contracts, test helpers
 - [ ] **Phase 10: Documentation & Guides** - ExDoc, moduledocs, guides, README quickstart
 - [ ] **Phase 11: CI/CD & Release** - GitHub Actions, Release Please, Hex publishing, Dependabot
@@ -146,11 +146,11 @@ Plans:
   1. Library emits [:lattice_stripe, :request, :start] before each HTTP request with method, path, and metadata
   2. Library emits [:lattice_stripe, :request, :stop] after each request with duration, status, and request_id
   3. Library emits [:lattice_stripe, :request, :exception] on request failure with error details
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 08-01-PLAN.md — Centralized Telemetry module (event catalog, request_span, emit_retry, path parsing) + Client refactor
-- [ ] 08-02-PLAN.md — Webhook telemetry span + default logger + comprehensive metadata contract tests (~25-30 tests)
+- [x] 08-02-PLAN.md — Webhook telemetry span + default logger + comprehensive metadata contract tests (~25-30 tests)
 
 ### Phase 9: Testing Infrastructure
 **Goal**: The library has comprehensive test coverage and provides test helpers for downstream users
@@ -213,7 +213,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 5. SetupIntents & PaymentMethods | 2/2 | Complete   | 2026-04-02 |
 | 6. Refunds & Checkout | 2/2 | Complete   | 2026-04-03 |
 | 7. Webhooks | 2/2 | Complete   | 2026-04-03 |
-| 8. Telemetry & Observability | 1/2 | In Progress|  |
+| 8. Telemetry & Observability | 2/2 | Complete   | 2026-04-03 |
 | 9. Testing Infrastructure | 0/0 | Not started | - |
 | 10. Documentation & Guides | 0/0 | Not started | - |
 | 11. CI/CD & Release | 0/0 | Not started | - |
