@@ -114,10 +114,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Payments — Refunds
 
-- [ ] **RFND-01**: User can create a Refund (full or partial) for a PaymentIntent
-- [ ] **RFND-02**: User can retrieve a Refund by ID
-- [ ] **RFND-03**: User can update a Refund
-- [ ] **RFND-04**: User can list Refunds with filters and pagination
+- [x] **RFND-01**: User can create a Refund (full or partial) for a PaymentIntent
+- [x] **RFND-02**: User can retrieve a Refund by ID
+- [x] **RFND-03**: User can update a Refund
+- [x] **RFND-04**: User can list Refunds with filters and pagination
 
 ### Checkout
 
@@ -277,10 +277,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PMTH-04 | Phase 5 | Complete |
 | PMTH-05 | Phase 5 | Complete |
 | PMTH-06 | Phase 5 | Complete |
-| RFND-01 | Phase 6 | Pending |
-| RFND-02 | Phase 6 | Pending |
-| RFND-03 | Phase 6 | Pending |
-| RFND-04 | Phase 6 | Pending |
+| RFND-01 | Phase 6 | Complete |
+| RFND-02 | Phase 6 | Complete |
+| RFND-03 | Phase 6 | Complete |
+| RFND-04 | Phase 6 | Complete |
 | CHKT-01 | Phase 6 | Pending |
 | CHKT-02 | Phase 6 | Pending |
 | CHKT-03 | Phase 6 | Pending |

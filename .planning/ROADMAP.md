@@ -117,10 +117,10 @@ Plans:
   1. Developer can create full or partial refunds for a PaymentIntent, and retrieve, update, and list refunds
   2. Developer can create a Checkout Session in payment, subscription, or setup mode with line items, customer prefill, and success/cancel URLs
   3. Developer can retrieve, list, and expire Checkout Sessions
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 06-01-PLAN.md — Fixture extraction (Customer, PI, SI, PM) + Refund resource (create, retrieve, update, cancel, list, stream + tests)
+- [x] 06-01-PLAN.md — Fixture extraction (Customer, PI, SI, PM) + Refund resource (create, retrieve, update, cancel, list, stream + tests)
 - [ ] 06-02-PLAN.md — Checkout.Session (create 3 modes, retrieve, list, expire, search, stream) + LineItem struct + list_line_items + stream_line_items + tests
 
 ### Phase 7: Webhooks
@@ -210,7 +210,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 3. Pagination & Response | 2/3 | In Progress|  |
 | 4. Customers & PaymentIntents | 0/2 | Planned | - |
 | 5. SetupIntents & PaymentMethods | 2/2 | Complete   | 2026-04-02 |
-| 6. Refunds & Checkout | 0/2 | Planned | - |
+| 6. Refunds & Checkout | 1/2 | In Progress|  |
 | 7. Webhooks | 0/0 | Not started | - |
 | 8. Telemetry & Observability | 0/0 | Not started | - |
 | 9. Testing Infrastructure | 0/0 | Not started | - |
