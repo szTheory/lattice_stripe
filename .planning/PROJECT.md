@@ -22,6 +22,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 - [x] PaymentMethods — create, retrieve, update, list, attach, detach — *Validated in Phase 5: SetupIntents & PaymentMethods*
 - [x] Refunds — create, retrieve, update, cancel, list — *Validated in Phase 6: Refunds & Checkout*
 - [x] Checkout Sessions — create (payment/subscription/setup modes), retrieve, list, expire, search — *Validated in Phase 6: Refunds & Checkout*
+- [x] Telemetry events for request lifecycle — *Validated in Phase 8: Telemetry & Observability*
 
 ### Active
 
@@ -150,4 +151,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 7 completion — Webhook signature verification, Event struct, Phoenix Plug with CacheBodyReader*
+*Last updated: 2026-04-03 after Phase 8 completion — Telemetry & Observability with centralized Telemetry module, webhook span, default logger, 30 metadata contract tests*
