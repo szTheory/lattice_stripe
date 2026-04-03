@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Phase 8 context gathered
-last_updated: "2026-04-03T15:48:12.368Z"
+status: executing
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-03T16:17:29.619Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 11
   completed_phases: 7
-  total_plans: 19
-  completed_plans: 19
+  total_plans: 21
+  completed_plans: 20
   percent: 100
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-02)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 07 — webhooks
+**Current focus:** Phase 08 — telemetry-observability
 
 ## Current Position
 
-Phase: 8
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 08 (telemetry-observability) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-04-03
 
 Progress: [████████████████████] 11/11 plans (100%)
@@ -69,6 +69,7 @@ Progress: [████████████████████] 11/11 p
 | Phase 06-refunds-checkout P02 | 12 | 1 tasks | 5 files |
 | Phase 07-webhooks P01 | 15 | 2 tasks | 8 files |
 | Phase 07-webhooks P02 | 3 | 2 tasks | 3 files |
+| Phase 08-telemetry-observability P01 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,8 @@ Recent decisions affecting current work:
 - [Phase 07-webhooks]: Webhook uses Jason.decode! directly (not json_codec behaviour) for SDK metadata path
 - [Phase 07-webhooks]: Webhook.Plug uses four call/2 clauses ordered by specificity: POST+path match, POST+no-path, non-POST+path match, fallthrough — pattern matching is the dispatch mechanism
 - [Phase 07-webhooks]: CacheBodyReader handles :more tuple for chunked bodies, stashing partial body in conn.private[:raw_body] consistent with Plug.Conn.read_body semantics
+- [Phase 08-telemetry-observability]: LatticeStripe.Telemetry module centralized as single source of truth for all telemetry event schemas — Client delegates via request_span/4 and emit_retry/5 (D-09, D-10)
+- [Phase 08-telemetry-observability]: parse_resource_and_operation/2 derives resource and operation from URL path at telemetry layer — zero changes to resource modules (D-05)
 
 ### Pending Todos
 
@@ -135,6 +138,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T15:48:12.364Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-telemetry-observability/08-CONTEXT.md
+Last session: 2026-04-03T16:17:29.617Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: None

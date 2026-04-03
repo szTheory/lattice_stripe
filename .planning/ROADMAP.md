@@ -146,10 +146,10 @@ Plans:
   1. Library emits [:lattice_stripe, :request, :start] before each HTTP request with method, path, and metadata
   2. Library emits [:lattice_stripe, :request, :stop] after each request with duration, status, and request_id
   3. Library emits [:lattice_stripe, :request, :exception] on request failure with error details
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 08-01-PLAN.md — Centralized Telemetry module (event catalog, request_span, emit_retry, path parsing) + Client refactor
+- [x] 08-01-PLAN.md — Centralized Telemetry module (event catalog, request_span, emit_retry, path parsing) + Client refactor
 - [ ] 08-02-PLAN.md — Webhook telemetry span + default logger + comprehensive metadata contract tests (~25-30 tests)
 
 ### Phase 9: Testing Infrastructure
@@ -213,7 +213,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 5. SetupIntents & PaymentMethods | 2/2 | Complete   | 2026-04-02 |
 | 6. Refunds & Checkout | 2/2 | Complete   | 2026-04-03 |
 | 7. Webhooks | 2/2 | Complete   | 2026-04-03 |
-| 8. Telemetry & Observability | 0/2 | Planned | - |
+| 8. Telemetry & Observability | 1/2 | In Progress|  |
 | 9. Testing Infrastructure | 0/0 | Not started | - |
 | 10. Documentation & Guides | 0/0 | Not started | - |
 | 11. CI/CD & Release | 0/0 | Not started | - |

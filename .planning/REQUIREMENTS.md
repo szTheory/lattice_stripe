@@ -66,9 +66,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Telemetry
 
-- [ ] **TLMT-01**: Library emits `[:lattice_stripe, :request, :start]` event before each HTTP request
-- [ ] **TLMT-02**: Library emits `[:lattice_stripe, :request, :stop]` event after each HTTP request with duration, method, path, status, request_id
-- [ ] **TLMT-03**: Library emits `[:lattice_stripe, :request, :exception]` event on request failure
+- [x] **TLMT-01**: Library emits `[:lattice_stripe, :request, :start]` event before each HTTP request
+- [x] **TLMT-02**: Library emits `[:lattice_stripe, :request, :stop]` event after each HTTP request with duration, method, path, status, request_id
+- [x] **TLMT-03**: Library emits `[:lattice_stripe, :request, :exception]` event on request failure
 
 ### JSON Codec
 
@@ -131,11 +131,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Webhooks
 
-- [ ] **WHBK-01**: User can verify webhook signature against raw request body with timing-safe comparison
-- [ ] **WHBK-02**: User can parse verified webhook payload into a typed Event struct
-- [ ] **WHBK-03**: User can configure signature tolerance window (default 300 seconds)
-- [ ] **WHBK-04**: Library provides a Phoenix Plug that handles raw body extraction and signature verification
-- [ ] **WHBK-05**: Webhook Plug documents and solves the Plug.Parsers raw body consumption problem
+- [x] **WHBK-01**: User can verify webhook signature against raw request body with timing-safe comparison
+- [x] **WHBK-02**: User can parse verified webhook payload into a typed Event struct
+- [x] **WHBK-03**: User can configure signature tolerance window (default 300 seconds)
+- [x] **WHBK-04**: Library provides a Phoenix Plug that handles raw body extraction and signature verification
+- [x] **WHBK-05**: Webhook Plug documents and solves the Plug.Parsers raw body consumption problem
 
 ### Documentation
 
@@ -288,14 +288,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHKT-05 | Phase 6 | Complete |
 | CHKT-06 | Phase 6 | Complete |
 | CHKT-07 | Phase 6 | Complete |
-| WHBK-01 | Phase 7 | Pending |
-| WHBK-02 | Phase 7 | Pending |
-| WHBK-03 | Phase 7 | Pending |
-| WHBK-04 | Phase 7 | Pending |
-| WHBK-05 | Phase 7 | Pending |
-| TLMT-01 | Phase 8 | Pending |
-| TLMT-02 | Phase 8 | Pending |
-| TLMT-03 | Phase 8 | Pending |
+| WHBK-01 | Phase 7 | Complete |
+| WHBK-02 | Phase 7 | Complete |
+| WHBK-03 | Phase 7 | Complete |
+| WHBK-04 | Phase 7 | Complete |
+| WHBK-05 | Phase 7 | Complete |
+| TLMT-01 | Phase 8 | Complete |
+| TLMT-02 | Phase 8 | Complete |
+| TLMT-03 | Phase 8 | Complete |
 | TEST-01 | Phase 9 | Pending |
 | TEST-02 | Phase 9 | Pending |
 | TEST-03 | Phase 9 | Pending |
