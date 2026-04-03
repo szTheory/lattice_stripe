@@ -57,6 +57,11 @@ defmodule LatticeStripe.PaymentMethod do
   The `Inspect` implementation hides all sensitive billing and card details.
   Only `id`, `object`, and `type` are shown. When `type` is `"card"`, the
   `card_brand` and `card_last4` are also shown (safe to log).
+
+  ## Stripe API Reference
+
+  See the [Stripe PaymentMethod API](https://docs.stripe.com/api/payment_methods) for the full
+  object reference and available parameters.
   """
 
   alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
@@ -133,6 +138,11 @@ defmodule LatticeStripe.PaymentMethod do
     extra: %{}
   ]
 
+  @typedoc """
+  A Stripe PaymentMethod object.
+
+  See the [Stripe PaymentMethod API](https://docs.stripe.com/api/payment_methods/object) for field definitions.
+  """
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t(),

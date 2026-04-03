@@ -51,6 +51,11 @@ defmodule LatticeStripe.PaymentIntent do
   shown in inspect output.
 
   Note: PaymentIntents cannot be deleted. There is no `delete/3` function.
+
+  ## Stripe API Reference
+
+  See the [Stripe PaymentIntent API](https://docs.stripe.com/api/payment_intents) for the full
+  object reference and available parameters.
   """
 
   alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
@@ -118,6 +123,11 @@ defmodule LatticeStripe.PaymentIntent do
     extra: %{}
   ]
 
+  @typedoc """
+  A Stripe PaymentIntent object.
+
+  See the [Stripe PaymentIntent API](https://docs.stripe.com/api/payment_intents/object) for field definitions.
+  """
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t(),
@@ -192,6 +202,14 @@ defmodule LatticeStripe.PaymentIntent do
         "amount" => 2000,
         "currency" => "usd"
       })
+
+      # Error handling
+      case LatticeStripe.PaymentIntent.create(client, %{"amount" => 2000, "currency" => "usd"}) do
+        {:ok, pi} -> pi.id
+        {:error, %LatticeStripe.Error{type: :card_error} = err} -> handle_card_error(err)
+        {:error, %LatticeStripe.Error{type: :invalid_request_error} = err} -> handle_error(err)
+        {:error, %LatticeStripe.Error{}} = err -> handle_error(err)
+      end
   """
   @spec create(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def create(%Client{} = client, params \\ %{}, opts \\ []) do

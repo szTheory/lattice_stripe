@@ -38,6 +38,11 @@ defmodule LatticeStripe.Customer do
   The `Inspect` implementation hides personally-identifiable information
   (email, name, phone, description, address, shipping). Only `id`, `object`,
   `livemode`, and `deleted` are shown in inspect output.
+
+  ## Stripe API Reference
+
+  See the [Stripe Customer API](https://docs.stripe.com/api/customers) for the full
+  object reference and available parameters.
   """
 
   alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
@@ -85,6 +90,11 @@ defmodule LatticeStripe.Customer do
     extra: %{}
   ]
 
+  @typedoc """
+  A Stripe Customer object.
+
+  See the [Stripe Customer API](https://docs.stripe.com/api/customers/object) for field definitions.
+  """
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t(),
@@ -143,6 +153,13 @@ defmodule LatticeStripe.Customer do
         "email" => "user@example.com",
         "name" => "Jane Doe"
       })
+
+      # Error handling
+      case LatticeStripe.Customer.create(client, %{"email" => "user@example.com"}) do
+        {:ok, customer} -> customer.id
+        {:error, %LatticeStripe.Error{type: :invalid_request_error} = err} -> handle_error(err)
+        {:error, %LatticeStripe.Error{}} = err -> handle_error(err)
+      end
   """
   @spec create(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def create(%Client{} = client, params \\ %{}, opts \\ []) do

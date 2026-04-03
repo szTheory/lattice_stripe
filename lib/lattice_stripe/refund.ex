@@ -56,7 +56,8 @@ defmodule LatticeStripe.Refund do
 
   ## Stripe API Reference
 
-  https://stripe.com/docs/api/refunds
+  See the [Stripe Refund API](https://docs.stripe.com/api/refunds) for the full
+  object reference and available parameters.
   """
 
   alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
@@ -94,6 +95,11 @@ defmodule LatticeStripe.Refund do
     extra: %{}
   ]
 
+  @typedoc """
+  A Stripe Refund object.
+
+  See the [Stripe Refund API](https://docs.stripe.com/api/refunds/object) for field definitions.
+  """
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t(),

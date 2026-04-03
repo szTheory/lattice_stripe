@@ -54,6 +54,11 @@ defmodule LatticeStripe.SetupIntent do
   inspect output.
 
   Note: SetupIntents cannot be deleted. There is no `delete/3` function.
+
+  ## Stripe API Reference
+
+  See the [Stripe SetupIntent API](https://docs.stripe.com/api/setup_intents) for the full
+  object reference and available parameters.
   """
 
   alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
@@ -101,6 +106,11 @@ defmodule LatticeStripe.SetupIntent do
     extra: %{}
   ]
 
+  @typedoc """
+  A Stripe SetupIntent object.
+
+  See the [Stripe SetupIntent API](https://docs.stripe.com/api/setup_intents/object) for field definitions.
+  """
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t(),

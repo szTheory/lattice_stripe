@@ -64,7 +64,8 @@ defmodule LatticeStripe.Checkout.Session do
 
   ## Stripe API Reference
 
-  https://stripe.com/docs/api/checkout/sessions
+  See the [Stripe Checkout Session API](https://docs.stripe.com/api/checkout/sessions) for
+  the full object reference and available parameters.
   """
 
   alias LatticeStripe.Checkout.LineItem
@@ -148,6 +149,11 @@ defmodule LatticeStripe.Checkout.Session do
     extra: %{}
   ]
 
+  @typedoc """
+  A Stripe Checkout Session object.
+
+  See the [Stripe Checkout Session API](https://docs.stripe.com/api/checkout/sessions/object) for field definitions.
+  """
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t(),

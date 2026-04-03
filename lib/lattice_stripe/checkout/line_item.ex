@@ -36,6 +36,15 @@ defmodule LatticeStripe.Checkout.LineItem do
     extra: %{}
   ]
 
+  @typedoc """
+  A line item within a Stripe Checkout Session.
+
+  Line items are accessed through `Checkout.Session.list_line_items/4` or
+  `Checkout.Session.stream_line_items!/4`. They cannot be fetched independently.
+
+  See [Stripe Checkout Sessions line items](https://docs.stripe.com/api/checkout/sessions/line_items)
+  for field definitions.
+  """
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t(),
