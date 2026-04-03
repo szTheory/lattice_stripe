@@ -165,7 +165,7 @@ Plans:
 **Plans:** 2/3 plans executed
 
 Plans:
-- [ ] 09-01-PLAN.md — Integration test infrastructure (test_helper.exs, test_integration_client) + 6 resource integration test files via stripe-mock
+- [x] 09-01-PLAN.md — Integration test infrastructure (test_helper.exs, test_integration_client) + 6 resource integration test files via stripe-mock
 - [x] 09-02-PLAN.md — LatticeStripe.Testing public module + mix ci alias + Credo strict mode
 - [x] 09-03-PLAN.md — Unit test gap audit (form encoding edge cases, error normalization, pagination cursors, telemetry metadata) + Transport contract completeness
 

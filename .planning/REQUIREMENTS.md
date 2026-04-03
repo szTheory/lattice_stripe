@@ -148,7 +148,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Testing
 
-- [ ] **TEST-01**: Integration tests validate real HTTP request/response cycles via stripe-mock
+- [x] **TEST-01**: Integration tests validate real HTTP request/response cycles via stripe-mock
 - [x] **TEST-02**: Unit tests cover pure logic: request building, response decoding, error normalization, pagination
 - [x] **TEST-03**: Mox-based tests validate Transport behaviour contract adherence
 - [x] **TEST-04**: Test helpers available for constructing mock webhook events
@@ -296,7 +296,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TLMT-01 | Phase 8 | Complete |
 | TLMT-02 | Phase 8 | Complete |
 | TLMT-03 | Phase 8 | Complete |
-| TEST-01 | Phase 9 | Pending |
+| TEST-01 | Phase 9 | Complete |
 | TEST-02 | Phase 9 | Complete |
 | TEST-03 | Phase 9 | Complete |
 | TEST-04 | Phase 9 | Complete |

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-04-03T17:13:22.256Z"
+status: verifying
+stopped_at: Completed 09-testing-infrastructure-01-PLAN.md
+last_updated: "2026-04-03T17:14:51.865Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 11
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 24
-  completed_plans: 23
+  completed_plans: 24
   percent: 100
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 
 Phase: 09 (testing-infrastructure) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-03
 
 Progress: [████████████████████] 11/11 plans (100%)
@@ -73,6 +73,7 @@ Progress: [████████████████████] 11/11 p
 | Phase 08-telemetry-observability P02 | 22 | 2 tasks | 3 files |
 | Phase 09-testing-infrastructure P03 | 15 | 2 tasks | 5 files |
 | Phase 09-testing-infrastructure P02 | 9 | 2 tasks | 31 files |
+| Phase 09-testing-infrastructure P01 | 12 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -131,6 +132,8 @@ Recent decisions affecting current work:
 - [Phase 09-testing-infrastructure]: Transport.behaviour_info(:callbacks) exact match assertion chosen over membership check — strict contract, fails loudly on API expansion
 - [Phase 09-testing-infrastructure]: LatticeStripe.Testing builds raw map then calls Event.from_map to avoid struct JSON encoding issues in generate_webhook_payload
 - [Phase 09-testing-infrastructure]: mix ci uses preferred_envs [ci: :test] and ex_doc in [:dev, :test] to ensure all 5 quality gates run in the correct MIX_ENV
+- [Phase 09-testing-infrastructure]: ExUnit 1.19 does not support {:skip, reason} from setup_all — use raise with descriptive docker command for integration test infrastructure guard
+- [Phase 09-testing-infrastructure]: LatticeStripe.IntegrationFinch as Finch pool name in integration tests separates from app-level pools; test_integration_client/0 points at stripe-mock localhost:12111
 
 ### Pending Todos
 
@@ -148,6 +151,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T17:13:22.253Z
-Stopped at: Completed 09-02-PLAN.md
+Last session: 2026-04-03T17:14:51.862Z
+Stopped at: Completed 09-testing-infrastructure-01-PLAN.md
 Resume file: None
