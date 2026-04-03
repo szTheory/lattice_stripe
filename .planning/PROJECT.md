@@ -20,6 +20,8 @@ Elixir developers can integrate Stripe payments into their applications with con
 - [x] Idempotency key generation and replay handling — *Validated in Phase 2: Error Handling & Retry*
 - [x] SetupIntents — create, retrieve, update, confirm, cancel, list — *Validated in Phase 5: SetupIntents & PaymentMethods*
 - [x] PaymentMethods — create, retrieve, update, list, attach, detach — *Validated in Phase 5: SetupIntents & PaymentMethods*
+- [x] Refunds — create, retrieve, update, cancel, list — *Validated in Phase 6: Refunds & Checkout*
+- [x] Checkout Sessions — create (payment/subscription/setup modes), retrieve, list, expire, search — *Validated in Phase 6: Refunds & Checkout*
 
 ### Active
 
@@ -148,4 +150,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 5 completion*
+*Last updated: 2026-04-03 after Phase 6 completion*
