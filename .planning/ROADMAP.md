@@ -149,7 +149,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 08-01: TBD
+- [ ] 08-01-PLAN.md — Centralized Telemetry module (event catalog, request_span, emit_retry, path parsing) + Client refactor
+- [ ] 08-02-PLAN.md — Webhook telemetry span + default logger + comprehensive metadata contract tests (~25-30 tests)
 
 ### Phase 9: Testing Infrastructure
 **Goal**: The library has comprehensive test coverage and provides test helpers for downstream users
@@ -212,7 +213,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 5. SetupIntents & PaymentMethods | 2/2 | Complete   | 2026-04-02 |
 | 6. Refunds & Checkout | 2/2 | Complete   | 2026-04-03 |
 | 7. Webhooks | 2/2 | Complete   | 2026-04-03 |
-| 8. Telemetry & Observability | 0/0 | Not started | - |
+| 8. Telemetry & Observability | 0/2 | Planned | - |
 | 9. Testing Infrastructure | 0/0 | Not started | - |
 | 10. Documentation & Guides | 0/0 | Not started | - |
 | 11. CI/CD & Release | 0/0 | Not started | - |
