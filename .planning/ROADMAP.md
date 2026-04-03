@@ -179,12 +179,12 @@ Plans:
   3. README provides a quickstart that takes a developer from mix dependency to first Stripe API call in under 60 seconds
   4. Guides cover: Getting Started, Client Configuration, Payments, Checkout, Webhooks, Error Handling, Testing, and Telemetry
   5. Non-obvious code has short readable comments with example input/output data shapes
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [x] 10-01-PLAN.md — ExDoc configuration, README rewrite, CHANGELOG, cheatsheet, guide stubs
 - [x] 10-02-PLAN.md — @moduledoc/@doc/@typedoc audit across all modules + inline code comments
-- [ ] 10-03-PLAN.md — Guides: Getting Started, Client Configuration, Payments, Checkout, Webhooks
+- [x] 10-03-PLAN.md — Guides: Getting Started, Client Configuration, Payments, Checkout, Webhooks
 - [ ] 10-04-PLAN.md — Guides: Error Handling, Testing, Telemetry, Extending LatticeStripe
 
 ### Phase 11: CI/CD & Release
@@ -218,5 +218,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 7. Webhooks | 2/2 | Complete   | 2026-04-03 |
 | 8. Telemetry & Observability | 2/2 | Complete   | 2026-04-03 |
 | 9. Testing Infrastructure | 2/3 | In Progress|  |
-| 10. Documentation & Guides | 2/4 | In Progress|  |
+| 10. Documentation & Guides | 3/4 | In Progress|  |
 | 11. CI/CD & Release | 0/0 | Not started | - |
