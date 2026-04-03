@@ -6,14 +6,230 @@
 ### Add dependency
 
 ```elixir
-{:lattice_stripe, "~> 0.1"}
+# mix.exs
+def deps do
+  [
+    {:lattice_stripe, "~> 0.1"}
+  ]
+end
 ```
 
 ### Create client
 
 ```elixir
+# In your supervision tree (application.ex):
+children = [
+  {Finch, name: MyApp.Finch}
+]
+
+# Create a client:
 client = LatticeStripe.Client.new!(
   api_key: "sk_test_...",
   finch: MyApp.Finch
+)
+```
+
+## Payments
+{: .col-2}
+
+### Create customer
+
+```elixir
+{:ok, customer} = LatticeStripe.Customer.create(client, %{
+  "email" => "jenny@example.com",
+  "name" => "Jenny Rosen"
+})
+
+# Access fields:
+customer.id       # "cus_..."
+customer.email    # "jenny@example.com"
+```
+
+### Create PaymentIntent
+
+```elixir
+{:ok, payment_intent} = LatticeStripe.PaymentIntent.create(client, %{
+  "amount" => 2000,
+  "currency" => "usd",
+  "payment_method" => "pm_card_visa",
+  "confirm" => true,
+  "automatic_payment_methods" => %{
+    "enabled" => true,
+    "allow_redirects" => "never"
+  }
+})
+```
+
+## Checkout
+{: .col-2}
+
+### Create session
+
+```elixir
+{:ok, session} = LatticeStripe.Checkout.Session.create(client, %{
+  "mode" => "payment",
+  "success_url" => "https://example.com/success",
+  "cancel_url" => "https://example.com/cancel",
+  "line_items" => [
+    %{"price" => "price_xxx", "quantity" => 1}
+  ]
+})
+
+# Redirect user to:
+session.url
+```
+
+### Expire session
+
+```elixir
+{:ok, session} = LatticeStripe.Checkout.Session.expire(
+  client,
+  "cs_test_..."
+)
+```
+
+## Webhooks
+{: .col-2}
+
+### Verify event
+
+```elixir
+raw_body = conn.assigns[:raw_body]
+sig_header = Plug.Conn.get_req_header(conn, "stripe-signature")
+              |> List.first()
+
+case LatticeStripe.Webhook.construct_event(
+  raw_body,
+  sig_header,
+  "whsec_test_..."
+) do
+  {:ok, event} -> handle_event(event)
+  {:error, reason} -> {:error, reason}
+end
+```
+
+### Plug setup (Phoenix router)
+
+```elixir
+# In your router.ex, mount the webhook plug:
+plug LatticeStripe.Webhook.Plug,
+  path: "/webhooks/stripe",
+  secret: Application.fetch_env!(:my_app, :stripe_webhook_secret),
+  handler: MyApp.StripeWebhookHandler
+
+# Implement the handler:
+defmodule MyApp.StripeWebhookHandler do
+  @behaviour LatticeStripe.Webhook.Handler
+
+  @impl true
+  def handle_event(%LatticeStripe.Event{type: "payment_intent.succeeded"} = event) do
+    # handle payment success
+    :ok
+  end
+
+  def handle_event(_event), do: :ok
+end
+```
+
+## Error Handling
+{: .col-2}
+
+### Pattern match on errors
+
+```elixir
+alias LatticeStripe.Error
+
+case LatticeStripe.PaymentIntent.create(client, params) do
+  {:ok, payment_intent} ->
+    {:ok, payment_intent}
+
+  {:error, %Error{type: :card_error, message: msg}} ->
+    {:error, "Card declined: #{msg}"}
+
+  {:error, %Error{type: :rate_limit_error}} ->
+    {:error, "Rate limited — retry later"}
+
+  {:error, %Error{type: :auth_error}} ->
+    {:error, "Invalid API key"}
+
+  {:error, %Error{} = err} ->
+    {:error, "Stripe error: #{err.message}"}
+end
+```
+
+### Bang variants
+
+```elixir
+# Raises LatticeStripe.Error on failure:
+customer = LatticeStripe.Customer.create!(client, %{
+  "email" => "jenny@example.com"
+})
+
+payment_intent = LatticeStripe.PaymentIntent.retrieve!(
+  client,
+  "pi_..."
+)
+```
+
+## Pagination
+{: .col-2}
+
+### List with limit
+
+```elixir
+{:ok, result} = LatticeStripe.Customer.list(client, %{
+  "limit" => 10
+})
+
+result.data     # list of customers
+result.has_more # true if more pages available
+```
+
+### Auto-paginate with Stream
+
+```elixir
+# Stream all customers, fetching pages lazily:
+client
+|> LatticeStripe.Customer.stream!(%{"limit" => 100})
+|> Enum.take(50)
+
+# Process all matching customers:
+client
+|> LatticeStripe.Customer.stream!(%{"email" => "jenny@example.com"})
+|> Enum.each(&process_customer/1)
+```
+
+## Telemetry
+{: .col-2}
+
+### Attach default logger
+
+```elixir
+# In your application.ex start/2, after supervision tree:
+LatticeStripe.Telemetry.attach_default_logger()
+
+# With log level:
+LatticeStripe.Telemetry.attach_default_logger(level: :debug)
+```
+
+### Telemetry events
+
+```elixir
+# Events emitted by LatticeStripe:
+[:lattice_stripe, :request, :start]
+[:lattice_stripe, :request, :stop]
+[:lattice_stripe, :request, :exception]
+[:lattice_stripe, :webhook, :verify, :start]
+[:lattice_stripe, :webhook, :verify, :stop]
+[:lattice_stripe, :webhook, :verify, :exception]
+
+# Attach a custom handler:
+:telemetry.attach(
+  "my-handler",
+  [:lattice_stripe, :request, :stop],
+  fn _event, measurements, metadata, _config ->
+    Logger.info("Stripe #{metadata.method} #{metadata.path} #{measurements.duration}ns")
+  end,
+  nil
 )
 ```
