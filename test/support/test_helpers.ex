@@ -15,6 +15,19 @@ defmodule LatticeStripe.TestHelpers do
     Client.new!(Keyword.merge(defaults, overrides))
   end
 
+  def test_integration_client(overrides \\ []) do
+    defaults = [
+      api_key: "sk_test_123",
+      base_url: "http://localhost:12111",
+      finch: LatticeStripe.IntegrationFinch,
+      transport: LatticeStripe.Transport.Finch,
+      telemetry_enabled: false,
+      max_retries: 0
+    ]
+
+    Client.new!(Keyword.merge(defaults, overrides))
+  end
+
   def ok_response(body) do
     {:ok,
      %{
