@@ -13,6 +13,13 @@ defmodule LatticeStripe.Request do
   - `opts` - Per-request overrides: `[stripe_account: "acct_...", timeout: 5_000, idempotency_key: "...", api_key: "sk_...", stripe_version: "...", expand: ["data.customer"]]`
   """
 
+  @type t :: %__MODULE__{
+          method: :get | :post | :delete,
+          path: String.t(),
+          params: map(),
+          opts: keyword()
+        }
+
   defstruct [
     :method,
     :path,

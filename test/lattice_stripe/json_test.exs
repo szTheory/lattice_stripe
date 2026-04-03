@@ -1,7 +1,9 @@
 defmodule LatticeStripe.JsonTest do
   use ExUnit.Case, async: true
 
+  alias LatticeStripe.Json
   alias LatticeStripe.Json.Jason, as: JasonAdapter
+  alias LatticeStripe.MockJson
 
   describe "LatticeStripe.Json.Jason.encode!/1" do
     test "encodes a map to valid JSON string" do
@@ -80,54 +82,54 @@ defmodule LatticeStripe.JsonTest do
   describe "LatticeStripe.Json behaviour" do
     test "Jason adapter implements all callbacks defined by the behaviour" do
       # Verify the module exports the behaviour callbacks
-      behaviours = LatticeStripe.Json.Jason.module_info(:attributes)[:behaviour] || []
-      assert LatticeStripe.Json in behaviours
+      behaviours = JasonAdapter.module_info(:attributes)[:behaviour] || []
+      assert Json in behaviours
     end
 
     test "a custom module implementing @behaviour LatticeStripe.Json can be used via Mox (encode!)" do
       # The mock was defined in test_helper.exs
       # Verify the mock implements the behaviour interface
-      Mox.expect(LatticeStripe.MockJson, :encode!, fn data ->
+      Mox.expect(MockJson, :encode!, fn data ->
         Jason.encode!(data)
       end)
 
-      result = LatticeStripe.MockJson.encode!(%{id: "cus_123"})
+      result = MockJson.encode!(%{id: "cus_123"})
       assert result =~ "cus_123"
 
-      Mox.verify!(LatticeStripe.MockJson)
+      Mox.verify!(MockJson)
     end
 
     test "behaviour callbacks are satisfied by MockJson (decode!)" do
-      Mox.expect(LatticeStripe.MockJson, :decode!, fn data ->
+      Mox.expect(MockJson, :decode!, fn data ->
         Jason.decode!(data)
       end)
 
-      result = LatticeStripe.MockJson.decode!(~s({"id":"cus_123"}))
+      result = MockJson.decode!(~s({"id":"cus_123"}))
       assert result == %{"id" => "cus_123"}
 
-      Mox.verify!(LatticeStripe.MockJson)
+      Mox.verify!(MockJson)
     end
 
     test "MockJson can define decode/1 expectations (non-bang behaviour contract)" do
-      Mox.expect(LatticeStripe.MockJson, :decode, fn data ->
+      Mox.expect(MockJson, :decode, fn data ->
         Jason.decode(data)
       end)
 
       assert {:ok, %{"id" => "cus_123"}} =
-               LatticeStripe.MockJson.decode(~s({"id":"cus_123"}))
+               MockJson.decode(~s({"id":"cus_123"}))
 
-      Mox.verify!(LatticeStripe.MockJson)
+      Mox.verify!(MockJson)
     end
 
     test "MockJson can define encode/1 expectations (non-bang behaviour contract)" do
-      Mox.expect(LatticeStripe.MockJson, :encode, fn data ->
+      Mox.expect(MockJson, :encode, fn data ->
         Jason.encode(data)
       end)
 
-      assert {:ok, json} = LatticeStripe.MockJson.encode(%{id: "cus_123"})
+      assert {:ok, json} = MockJson.encode(%{id: "cus_123"})
       assert json =~ "cus_123"
 
-      Mox.verify!(LatticeStripe.MockJson)
+      Mox.verify!(MockJson)
     end
   end
 end

@@ -53,7 +53,8 @@ defmodule LatticeStripe.CustomerTest do
         ok_response(customer_json())
       end)
 
-      assert {:ok, %Customer{id: "cus_test1234567890"}} = Customer.retrieve(client, "cus_test1234567890")
+      assert {:ok, %Customer{id: "cus_test1234567890"}} =
+               Customer.retrieve(client, "cus_test1234567890")
     end
 
     test "returns {:error, %Error{}} when customer not found" do

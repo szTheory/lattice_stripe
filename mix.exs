@@ -19,7 +19,8 @@ defmodule LatticeStripe.MixProject do
         main: "LatticeStripe",
         extras: ["README.md"]
       ],
-      package: package()
+      package: package(),
+      aliases: aliases()
     ]
   end
 
@@ -27,6 +28,10 @@ defmodule LatticeStripe.MixProject do
     [
       extra_applications: [:logger]
     ]
+  end
+
+  def cli do
+    [preferred_envs: [ci: :test]]
   end
 
   defp deps do
@@ -41,7 +46,7 @@ defmodule LatticeStripe.MixProject do
 
       # Dev/test dependencies
       {:mox, "~> 1.2", only: :test},
-      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
@@ -55,4 +60,16 @@ defmodule LatticeStripe.MixProject do
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp aliases do
+    [
+      ci: [
+        "format --check-formatted",
+        "compile --warnings-as-errors",
+        "credo --strict",
+        "test",
+        "docs --warnings-as-errors"
+      ]
+    ]
+  end
 end

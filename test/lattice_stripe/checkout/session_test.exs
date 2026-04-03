@@ -6,8 +6,8 @@ defmodule LatticeStripe.Checkout.SessionTest do
   import LatticeStripe.Test.Fixtures.Checkout.Session
   import LatticeStripe.Test.Fixtures.Checkout.LineItem
 
-  alias LatticeStripe.{Error, List, Response}
   alias LatticeStripe.Checkout.{LineItem, Session}
+  alias LatticeStripe.{Error, List, Response}
 
   setup :verify_on_exit!
 
@@ -61,7 +61,12 @@ defmodule LatticeStripe.Checkout.SessionTest do
         ok_response(checkout_session_setup_json())
       end)
 
-      assert {:ok, %Session{mode: "setup", setup_intent: "seti_test123", payment_status: "no_payment_required"}} =
+      assert {:ok,
+              %Session{
+                mode: "setup",
+                setup_intent: "seti_test123",
+                payment_status: "no_payment_required"
+              }} =
                Session.create(client, %{
                  "mode" => "setup",
                  "success_url" => "https://example.com/success"
@@ -310,7 +315,10 @@ defmodule LatticeStripe.Checkout.SessionTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert String.ends_with?(req.url, "/v1/checkout/sessions/cs_test1234567890abc/line_items")
-        ok_response(list_json([line_item_json()], "/v1/checkout/sessions/cs_test1234567890abc/line_items"))
+
+        ok_response(
+          list_json([line_item_json()], "/v1/checkout/sessions/cs_test1234567890abc/line_items")
+        )
       end)
 
       assert {:ok,
@@ -340,7 +348,10 @@ defmodule LatticeStripe.Checkout.SessionTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.url =~ "/v1/checkout/sessions/cs_test1234567890abc/line_items"
-        ok_response(list_json([line_item_json()], "/v1/checkout/sessions/cs_test1234567890abc/line_items"))
+
+        ok_response(
+          list_json([line_item_json()], "/v1/checkout/sessions/cs_test1234567890abc/line_items")
+        )
       end)
 
       results = Session.stream_line_items!(client, "cs_test1234567890abc") |> Enum.to_list()
@@ -452,7 +463,9 @@ defmodule LatticeStripe.Checkout.SessionTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(list_json([line_item_json()], "/v1/checkout/sessions/cs_test1234567890abc/line_items"))
+        ok_response(
+          list_json([line_item_json()], "/v1/checkout/sessions/cs_test1234567890abc/line_items")
+        )
       end)
 
       assert %Response{data: %List{data: [%LineItem{}]}} =
@@ -525,7 +538,9 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
 
     test "inspect output does NOT contain client_secret" do
-      session = Session.from_map(checkout_session_payment_json(%{"client_secret" => "cs_secret_123"}))
+      session =
+        Session.from_map(checkout_session_payment_json(%{"client_secret" => "cs_secret_123"}))
+
       inspected = inspect(session)
 
       refute inspected =~ "cs_secret_123"
@@ -534,9 +549,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
 
     test "inspect output does NOT contain customer_email (PII)" do
       session =
-        Session.from_map(
-          checkout_session_payment_json(%{"customer_email" => "user@example.com"})
-        )
+        Session.from_map(checkout_session_payment_json(%{"customer_email" => "user@example.com"}))
 
       inspected = inspect(session)
 

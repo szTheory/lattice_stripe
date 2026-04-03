@@ -97,7 +97,8 @@ defmodule LatticeStripe.PaymentMethodTest do
         ok_response(payment_method_json(%{"metadata" => %{"order_id" => "ord_123"}}))
       end)
 
-      assert {:ok, %PaymentMethod{id: "pm_test1234567890abc", metadata: %{"order_id" => "ord_123"}}} =
+      assert {:ok,
+              %PaymentMethod{id: "pm_test1234567890abc", metadata: %{"order_id" => "ord_123"}}} =
                PaymentMethod.update(client, "pm_test1234567890abc", %{
                  "metadata" => %{"order_id" => "ord_123"}
                })
@@ -131,7 +132,9 @@ defmodule LatticeStripe.PaymentMethodTest do
       end)
 
       assert %PaymentMethod{id: "pm_test1234567890abc"} =
-               PaymentMethod.attach!(client, "pm_test1234567890abc", %{"customer" => "cus_test456"})
+               PaymentMethod.attach!(client, "pm_test1234567890abc", %{
+                 "customer" => "cus_test456"
+               })
     end
   end
 

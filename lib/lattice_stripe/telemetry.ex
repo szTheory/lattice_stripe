@@ -595,10 +595,18 @@ defmodule LatticeStripe.Telemetry do
   # Handles irregular plurals specific to Stripe's API naming conventions.
   defp singularize(plural) do
     case plural do
-      "payment_intents" -> "payment_intent"
-      "setup_intents" -> "setup_intent"
-      "payment_methods" -> "payment_method"
-      "checkout" -> "checkout"
+      "payment_intents" ->
+        "payment_intent"
+
+      "setup_intents" ->
+        "setup_intent"
+
+      "payment_methods" ->
+        "payment_method"
+
+      "checkout" ->
+        "checkout"
+
       # Strip trailing "s" for regular English plurals:
       # customers -> customer, sessions -> session, refunds -> refund, etc.
       other ->

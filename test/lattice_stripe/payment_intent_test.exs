@@ -84,7 +84,8 @@ defmodule LatticeStripe.PaymentIntentTest do
         ok_response(payment_intent_json(%{"metadata" => %{"order_id" => "ord_123"}}))
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", metadata: %{"order_id" => "ord_123"}}} =
+      assert {:ok,
+              %PaymentIntent{id: "pi_test1234567890abc", metadata: %{"order_id" => "ord_123"}}} =
                PaymentIntent.update(client, "pi_test1234567890abc", %{
                  "metadata" => %{"order_id" => "ord_123"}
                })
@@ -154,7 +155,9 @@ defmodule LatticeStripe.PaymentIntentTest do
       end)
 
       assert {:ok, %PaymentIntent{status: "succeeded", amount_received: 1500}} =
-               PaymentIntent.capture(client, "pi_test1234567890abc", %{"amount_to_capture" => 1500})
+               PaymentIntent.capture(client, "pi_test1234567890abc", %{
+                 "amount_to_capture" => 1500
+               })
     end
   end
 

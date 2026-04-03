@@ -338,7 +338,15 @@ defmodule LatticeStripe.Client do
 
     case client.retry_strategy.retry?(attempt, context) do
       {:retry, delay_ms} ->
-        LatticeStripe.Telemetry.emit_retry(client, method, transport_request.url, error, attempt, delay_ms)
+        LatticeStripe.Telemetry.emit_retry(
+          client,
+          method,
+          transport_request.url,
+          error,
+          attempt,
+          delay_ms
+        )
+
         # D-15: Process.sleep for retry delays; BEAM handles thousands of sleeping processes
         Process.sleep(delay_ms)
 
@@ -537,5 +545,4 @@ defmodule LatticeStripe.Client do
       _ -> nil
     end
   end
-
 end

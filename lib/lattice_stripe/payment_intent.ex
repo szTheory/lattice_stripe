@@ -71,6 +71,7 @@ defmodule LatticeStripe.PaymentIntent do
     transfer_data transfer_group
   ]
 
+  # credo:disable-for-next-line Credo.Check.Warning.StructFieldAmount
   defstruct [
     :id,
     :amount,
@@ -596,7 +597,6 @@ defmodule LatticeStripe.PaymentIntent do
       extra: Map.drop(map, @known_fields)
     }
   end
-
 end
 
 defimpl Inspect, for: LatticeStripe.PaymentIntent do

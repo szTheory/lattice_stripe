@@ -40,10 +40,9 @@ defmodule LatticeStripe.FormEncoder do
     params
     |> flatten(nil)
     |> Enum.sort_by(fn {key, _val} -> key end)
-    |> Enum.map(fn {key, val} ->
+    |> Enum.map_join("&", fn {key, val} ->
       encode_key(key) <> "=" <> URI.encode_www_form(val)
     end)
-    |> Enum.join("&")
   end
 
   # Flatten a map or keyword list recursively into a list of {key_string, value_string} pairs.
@@ -98,12 +97,11 @@ defmodule LatticeStripe.FormEncoder do
   defp encode_key(key) do
     key
     |> String.split(~r/(\[|\])/, include_captures: true)
-    |> Enum.map(fn
+    |> Enum.map_join(fn
       "[" -> "["
       "]" -> "]"
       segment -> URI.encode_www_form(segment)
     end)
-    |> Enum.join()
   end
 
   # Build the encoded key for a child given the parent prefix.

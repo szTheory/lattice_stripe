@@ -58,21 +58,23 @@ defmodule LatticeStripe.RetryStrategy.Default do
   def retry?(attempt, context) do
     # stripe_should_retry is pre-parsed from the Stripe-Should-Retry response header.
     # It takes precedence over all other signals per D-09.
-    stripe_should_retry = Map.get(context, :stripe_should_retry)
+    case Map.get(context, :stripe_should_retry) do
+      true -> {:retry, backoff_delay(attempt)}
+      false -> :stop
+      nil -> retry_by_status(attempt, context)
+    end
+  end
 
+  # Determines retry behavior based on HTTP status and error type.
+  # Called only when stripe_should_retry header is absent (nil).
+  defp retry_by_status(attempt, context) do
     cond do
-      stripe_should_retry == true ->
-        {:retry, backoff_delay(attempt)}
-
-      stripe_should_retry == false ->
-        :stop
-
       # 409 idempotency conflict is never retriable (D-12)
       context.status == 409 ->
         :stop
 
       # Connection errors (nil status with connection_error type) are retriable (D-11)
-      is_nil(context.status) and is_connection_error?(context.error) ->
+      is_nil(context.status) and connection_error?(context.error) ->
         {:retry, backoff_delay(attempt)}
 
       # nil status without connection_error: not retriable
@@ -81,8 +83,7 @@ defmodule LatticeStripe.RetryStrategy.Default do
 
       # 429: respect Retry-After header if present, otherwise backoff
       context.status == 429 ->
-        delay = retry_after_delay(context.headers) || backoff_delay(attempt)
-        {:retry, delay}
+        {:retry, retry_after_delay(context.headers) || backoff_delay(attempt)}
 
       # 500+: exponential backoff
       context.status >= 500 ->
@@ -131,6 +132,6 @@ defmodule LatticeStripe.RetryStrategy.Default do
   end
 
   # Check if an error struct represents a connection-level failure.
-  defp is_connection_error?(%LatticeStripe.Error{type: :connection_error}), do: true
-  defp is_connection_error?(_), do: false
+  defp connection_error?(%LatticeStripe.Error{type: :connection_error}), do: true
+  defp connection_error?(_), do: false
 end

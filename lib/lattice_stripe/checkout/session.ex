@@ -67,8 +67,8 @@ defmodule LatticeStripe.Checkout.Session do
   https://stripe.com/docs/api/checkout/sessions
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
   alias LatticeStripe.Checkout.LineItem
+  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
 
   # Known top-level fields from the Stripe Checkout Session object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -87,6 +87,7 @@ defmodule LatticeStripe.Checkout.Session do
     total_details ui_mode url
   ]
 
+  # credo:disable-for-next-line Credo.Check.Warning.StructFieldAmount
   defstruct [
     :id,
     :adaptive_pricing,

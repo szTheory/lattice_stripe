@@ -530,7 +530,9 @@ defmodule LatticeStripe.TelemetryTest do
       # Use a current timestamp but a bad signature so we get :no_matching_signature
       # (not :timestamp_expired)
       ts = System.system_time(:second)
-      bad_sig_header = "t=#{ts},v1=deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+
+      bad_sig_header =
+        "t=#{ts},v1=deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
 
       assert {:error, :no_matching_signature} =
                Webhook.construct_event(payload, bad_sig_header, @secret)
@@ -595,7 +597,8 @@ defmodule LatticeStripe.TelemetryTest do
 
     test "start event :stripe_account is nil when client has no stripe_account configured" do
       attach_handler([[:lattice_stripe, :request, :start]])
-      client = test_client()  # no stripe_account option => nil
+      # no stripe_account option => nil
+      client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response() end)
       Client.request(client, get_request())
@@ -715,7 +718,8 @@ defmodule LatticeStripe.TelemetryTest do
         Client.request(client, post_request("/v1/customers"))
       end
 
-      assert_receive {:telemetry, [:lattice_stripe, :request, :exception], _measurements, metadata}
+      assert_receive {:telemetry, [:lattice_stripe, :request, :exception], _measurements,
+                      metadata}
 
       # Start metadata fields
       assert Map.has_key?(metadata, :method)
@@ -744,7 +748,9 @@ defmodule LatticeStripe.TelemetryTest do
         Client.request(client, get_request())
       end
 
-      assert_receive {:telemetry, [:lattice_stripe, :request, :exception], measurements, _metadata}
+      assert_receive {:telemetry, [:lattice_stripe, :request, :exception], measurements,
+                      _metadata}
+
       assert Map.has_key?(measurements, :duration)
       assert Map.has_key?(measurements, :monotonic_time)
       assert is_integer(measurements.duration)

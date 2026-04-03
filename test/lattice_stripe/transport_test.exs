@@ -89,7 +89,15 @@ defmodule LatticeStripe.TransportTest do
       LatticeStripe.MockTransport
       |> expect(:request, fn _req -> {:error, :timeout} end)
 
-      result = LatticeStripe.MockTransport.request(%{method: :get, url: "u", headers: [], body: nil, opts: []})
+      result =
+        LatticeStripe.MockTransport.request(%{
+          method: :get,
+          url: "u",
+          headers: [],
+          body: nil,
+          opts: []
+        })
+
       assert result == {:error, :timeout}
     end
 
@@ -97,7 +105,15 @@ defmodule LatticeStripe.TransportTest do
       LatticeStripe.MockTransport
       |> expect(:request, fn _req -> {:error, :closed} end)
 
-      result = LatticeStripe.MockTransport.request(%{method: :get, url: "u", headers: [], body: nil, opts: []})
+      result =
+        LatticeStripe.MockTransport.request(%{
+          method: :get,
+          url: "u",
+          headers: [],
+          body: nil,
+          opts: []
+        })
+
       assert result == {:error, :closed}
     end
 
@@ -105,7 +121,15 @@ defmodule LatticeStripe.TransportTest do
       LatticeStripe.MockTransport
       |> expect(:request, fn _req -> {:error, %RuntimeError{message: "boom"}} end)
 
-      result = LatticeStripe.MockTransport.request(%{method: :get, url: "u", headers: [], body: nil, opts: []})
+      result =
+        LatticeStripe.MockTransport.request(%{
+          method: :get,
+          url: "u",
+          headers: [],
+          body: nil,
+          opts: []
+        })
+
       assert {:error, %RuntimeError{message: "boom"}} = result
     end
 
@@ -113,7 +137,15 @@ defmodule LatticeStripe.TransportTest do
       LatticeStripe.MockTransport
       |> expect(:request, fn _req -> {:error, {:transport_error, "DNS resolution failed"}} end)
 
-      result = LatticeStripe.MockTransport.request(%{method: :get, url: "u", headers: [], body: nil, opts: []})
+      result =
+        LatticeStripe.MockTransport.request(%{
+          method: :get,
+          url: "u",
+          headers: [],
+          body: nil,
+          opts: []
+        })
+
       assert {:error, {:transport_error, "DNS resolution failed"}} = result
     end
 

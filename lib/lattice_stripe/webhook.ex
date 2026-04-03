@@ -151,14 +151,7 @@ defmodule LatticeStripe.Webhook do
       secrets = normalize_secrets(secret)
       computed = Enum.map(secrets, &compute_signature(payload, timestamp_str, &1))
 
-      matched =
-        Enum.any?(computed, fn computed_sig ->
-          Enum.any?(signatures, fn received_sig ->
-            Plug.Crypto.secure_compare(computed_sig, received_sig)
-          end)
-        end)
-
-      if matched do
+      if signatures_match?(computed, signatures) do
         {:ok, timestamp}
       else
         {:error, :no_matching_signature}
@@ -290,6 +283,14 @@ defmodule LatticeStripe.Webhook do
   # Input: ["s1", "s2"]   -> ["s1", "s2"]
   defp normalize_secrets(secret) when is_binary(secret), do: [secret]
   defp normalize_secrets(secrets) when is_list(secrets), do: secrets
+
+  # Checks whether any computed signature matches any received signature.
+  # Timing-safe comparison via Plug.Crypto.secure_compare/2.
+  defp signatures_match?(computed, signatures) do
+    Enum.any?(computed, fn computed_sig ->
+      Enum.any?(signatures, &Plug.Crypto.secure_compare(computed_sig, &1))
+    end)
+  end
 
   # Computes the HMAC-SHA256 signature for the given payload and timestamp.
   #

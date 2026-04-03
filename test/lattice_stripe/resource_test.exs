@@ -29,7 +29,8 @@ defmodule LatticeStripe.ResourceTest do
     test "passes through {:error, %Error{}} unchanged" do
       error = %Error{type: :invalid_request_error, message: "bad request"}
 
-      assert {:error, ^error} = Resource.unwrap_singular({:error, error}, fn _ -> :never_called end)
+      assert {:error, ^error} =
+               Resource.unwrap_singular({:error, error}, fn _ -> :never_called end)
     end
   end
 

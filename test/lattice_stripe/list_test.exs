@@ -722,15 +722,15 @@ defmodule LatticeStripe.ListTest do
       # An integer value still matches the pattern — verify the actual behavior.
       json = %{
         "object" => "list",
-        "data" => [%{"id" => 12345}],
+        "data" => [%{"id" => 12_345}],
         "has_more" => false
       }
 
       list = List.from_json(json)
 
-      # Integer 12345 matches %{"id" => id} — _first_id and _last_id are 12345 (integer)
-      assert list._first_id == 12345
-      assert list._last_id == 12345
+      # Integer 12_345 matches %{"id" => id} — _first_id and _last_id are 12_345 (integer)
+      assert list._first_id == 12_345
+      assert list._last_id == 12_345
     end
 
     test "mixed items: some have id, last item has no id => _first_id is first id, _last_id is nil" do

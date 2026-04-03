@@ -1,10 +1,10 @@
 defmodule LatticeStripe.Webhook.PlugTest do
   use ExUnit.Case, async: true
 
+  alias LatticeStripe.Test.Fixtures.Event, as: EventFixture
   alias LatticeStripe.Webhook
   alias LatticeStripe.Webhook.CacheBodyReader
   alias LatticeStripe.Webhook.Plug, as: WebhookPlug
-  alias LatticeStripe.Test.Fixtures.Event, as: EventFixture
 
   @secret "whsec_plug_test_secret"
   @payload Jason.encode!(EventFixture.event_map())

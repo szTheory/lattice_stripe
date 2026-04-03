@@ -108,7 +108,8 @@ defmodule LatticeStripe.SetupIntentTest do
         ok_response(setup_intent_json(%{"metadata" => %{"order_id" => "ord_123"}}))
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", metadata: %{"order_id" => "ord_123"}}} =
+      assert {:ok,
+              %SetupIntent{id: "seti_test1234567890abc", metadata: %{"order_id" => "ord_123"}}} =
                SetupIntent.update(client, "seti_test1234567890abc", %{
                  "metadata" => %{"order_id" => "ord_123"}
                })
@@ -200,12 +201,19 @@ defmodule LatticeStripe.SetupIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test1234567890abc/verify_microdeposits")
+
+        assert String.ends_with?(
+                 req.url,
+                 "/v1/setup_intents/seti_test1234567890abc/verify_microdeposits"
+               )
+
         ok_response(setup_intent_json(%{"status" => "succeeded"}))
       end)
 
       assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: "succeeded"}} =
-               SetupIntent.verify_microdeposits(client, "seti_test1234567890abc", %{"amounts" => [32, 45]})
+               SetupIntent.verify_microdeposits(client, "seti_test1234567890abc", %{
+                 "amounts" => [32, 45]
+               })
     end
   end
 

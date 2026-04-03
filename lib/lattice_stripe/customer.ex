@@ -445,7 +445,6 @@ defmodule LatticeStripe.Customer do
       extra: Map.drop(map, @known_fields)
     }
   end
-
 end
 
 defimpl Inspect, for: LatticeStripe.Customer do

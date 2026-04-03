@@ -76,6 +76,7 @@ defmodule LatticeStripe.PaymentMethod do
     mobilepay multibanco customer_balance interac_present
   ]
 
+  # credo:disable-for-next-line Credo.Check.Warning.StructFieldAmount
   defstruct [
     :id,
     :type,
