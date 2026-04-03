@@ -16,13 +16,12 @@ defmodule LatticeStripe.Checkout.SessionIntegrationTest do
         :ok
 
       {:error, _} ->
-        {:skip, "stripe-mock not running on localhost:12111"}
+        raise "stripe-mock not running on localhost:12111 — start with: docker run -p 12111-12112:12111-12112 stripe/stripe-mock:latest"
     end
   end
 
   setup do
-    client = test_integration_client()
-    {:ok, client: client}
+    {:ok, client: test_integration_client()}
   end
 
   defp session_params do
