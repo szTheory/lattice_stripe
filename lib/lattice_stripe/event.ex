@@ -29,6 +29,12 @@ defmodule LatticeStripe.Event do
   The `Inspect` implementation hides `data`, `request`, `account`, and `extra` fields
   to keep inspect output concise. Only `id`, `type`, `object`, `created`, and `livemode`
   are shown.
+
+  ## Stripe API Reference
+
+  See the [Stripe Events API](https://docs.stripe.com/api/events) for the full object
+  reference, and the [event types catalog](https://docs.stripe.com/api/events/types)
+  for all available event type strings.
   """
 
   alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
@@ -57,6 +63,27 @@ defmodule LatticeStripe.Event do
     extra: %{}
   ]
 
+  @typedoc """
+  A Stripe Event object.
+
+  Events represent actions in your Stripe account. Delivered as webhook payloads
+  or retrieved via the Events API. The `data.object` map contains the full Stripe
+  object snapshot at the time of the event — its shape varies by `type`.
+
+  See the [Stripe Events API](https://docs.stripe.com/api/events/object) for field definitions
+  and the [event catalog](https://docs.stripe.com/api/events/types) for all event types.
+
+  - `id` - Event ID (e.g., `"evt_1NxGkW2eZvKYlo2CvN93zMW1"`)
+  - `type` - Event type string (e.g., `"payment_intent.succeeded"`, `"customer.created"`)
+  - `data` - Raw map with `"object"` key containing the Stripe object snapshot
+  - `created` - Unix timestamp when the event was created
+  - `livemode` - `true` for live mode, `false` for test mode
+  - `api_version` - Stripe API version the event was rendered with
+  - `pending_webhooks` - Number of webhook endpoints yet to receive this event
+  - `request` - Original request that triggered the event (raw map), or `nil`
+  - `account` - Connected account ID for Connect events, or `nil`
+  - `extra` - Any unknown fields from the Stripe response
+  """
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t(),

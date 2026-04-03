@@ -40,6 +40,19 @@ defmodule LatticeStripe.Error do
     :raw_body
   ]
 
+  @typedoc """
+  Stripe error type atom.
+
+  See the [Stripe error types documentation](https://docs.stripe.com/api/errors) for details.
+
+  - `:card_error` — The card was declined or has an issue (e.g., `"card_declined"`, `"expired_card"`)
+  - `:invalid_request_error` — Invalid parameters in the request (e.g., missing required field)
+  - `:authentication_error` — Invalid or missing API key
+  - `:rate_limit_error` — Too many requests in too short a time
+  - `:api_error` — Stripe server error or unexpected response
+  - `:idempotency_error` — The same idempotency key was reused with different parameters
+  - `:connection_error` — Network-level failure, no HTTP response received
+  """
   @type error_type ::
           :card_error
           | :invalid_request_error
@@ -49,6 +62,25 @@ defmodule LatticeStripe.Error do
           | :idempotency_error
           | :connection_error
 
+  @typedoc """
+  A structured Stripe API error.
+
+  All errors from `LatticeStripe.Client.request/2` are wrapped in this struct.
+  Pattern match on `type` to handle specific error categories.
+
+  See the [Stripe error object](https://docs.stripe.com/api/errors) for field definitions.
+
+  - `type` - Error category atom (always present)
+  - `code` - Stripe error code string (e.g., `"card_declined"`, `"missing_param"`), or `nil`
+  - `message` - Human-readable error description
+  - `status` - HTTP status integer, or `nil` for `:connection_error`
+  - `request_id` - Stripe `Request-Id` header value for support, or `nil`
+  - `param` - Parameter name that caused the error (e.g., `"card[number]"`), or `nil`
+  - `decline_code` - Card decline reason (e.g., `"insufficient_funds"`), or `nil`
+  - `charge` - Stripe charge ID associated with the error, or `nil`
+  - `doc_url` - Stripe documentation URL for this specific error, or `nil`
+  - `raw_body` - Full decoded error body — escape hatch for fields not in the struct, or `nil`
+  """
   @type t :: %__MODULE__{
           type: error_type(),
           code: String.t() | nil,

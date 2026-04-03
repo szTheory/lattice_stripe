@@ -46,6 +46,11 @@ defmodule LatticeStripe.Webhook do
   webhook secret rotation — the new and old secret both work until rotation completes.
 
       Webhook.verify_signature(payload, header, [old_secret, new_secret])
+
+  ## Stripe API Reference
+
+  See the [Stripe Webhooks documentation](https://docs.stripe.com/webhooks) for the full
+  webhook reference, event catalog, and delivery guarantees.
   """
 
   alias LatticeStripe.Event

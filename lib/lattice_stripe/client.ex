@@ -63,6 +63,24 @@ defmodule LatticeStripe.Client do
     telemetry_enabled: true
   ]
 
+  @typedoc """
+  A configured LatticeStripe client.
+
+  Created via `new!/1` or `new/1`. Pass this struct to every API call.
+  It is a plain struct with no process state — safe to share across processes.
+
+  - `api_key` - Stripe secret key (`sk_test_...` or `sk_live_...`)
+  - `finch` - Name of the Finch pool started in your supervision tree
+  - `stripe_account` - Connected account ID for Stripe Connect platforms, or `nil`
+  - `base_url` - Stripe API base URL (default: `"https://api.stripe.com"`)
+  - `api_version` - Stripe API version header (default: `"2026-03-25.dahlia"`)
+  - `transport` - Transport module implementing `LatticeStripe.Transport`
+  - `json_codec` - JSON codec module implementing `LatticeStripe.Json`
+  - `retry_strategy` - Retry strategy module implementing `LatticeStripe.RetryStrategy`
+  - `timeout` - Default request timeout in milliseconds (default: `30_000`)
+  - `max_retries` - Max retry attempts after initial failure (default: `2`)
+  - `telemetry_enabled` - Whether to emit telemetry events (default: `true`)
+  """
   @type t :: %__MODULE__{
           api_key: String.t(),
           finch: atom(),

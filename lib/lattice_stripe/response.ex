@@ -28,6 +28,18 @@ defmodule LatticeStripe.Response do
 
   defstruct [:data, :status, :request_id, headers: []]
 
+  @typedoc """
+  A successful Stripe API response with metadata.
+
+  Returned by `LatticeStripe.Client.request/2` on success. The `data` field holds
+  the decoded response body — either a plain map (singular resource) or a
+  `%LatticeStripe.List{}` (list/search endpoints).
+
+  - `data` - Decoded response body: a plain map or `%LatticeStripe.List{}`
+  - `status` - HTTP status integer (e.g., `200`, `201`)
+  - `headers` - List of `{name, value}` string tuples from the response
+  - `request_id` - Stripe `Request-Id` header value (useful for support requests)
+  """
   @type t :: %__MODULE__{
           data: map() | LatticeStripe.List.t() | nil,
           status: non_neg_integer() | nil,

@@ -63,6 +63,24 @@ defmodule LatticeStripe.List do
     _opts: []
   ]
 
+  @typedoc """
+  A paginated Stripe list response.
+
+  Returned by `LatticeStripe.Client.request/2` for list and search endpoints.
+  Access items with `list.data`; check `list.has_more` to determine if more pages exist.
+
+  Use `stream!/2` or `stream/2` to lazily consume all pages instead of manually paginating.
+
+  - `data` - Items on the current page (list of decoded maps or typed structs)
+  - `has_more` - Whether more pages are available
+  - `url` - The URL for this list (used for cursor-based next-page construction)
+  - `total_count` - Total item count (only set on some endpoints)
+  - `next_page` - Page token for search pagination (set when `object` is `"search_result"`)
+  - `object` - Either `"list"` or `"search_result"`
+  - `extra` - Any unknown fields from the Stripe response
+  - `_params` / `_opts` - Stored for internal pagination; not for direct use
+  - `_first_id` / `_last_id` - Stored cursor IDs; not for direct use
+  """
   @type t :: %__MODULE__{
           data: [map()],
           has_more: boolean(),

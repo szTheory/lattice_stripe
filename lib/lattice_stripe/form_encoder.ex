@@ -35,6 +35,8 @@ defmodule LatticeStripe.FormEncoder do
   - Atom keys and values are converted via `to_string/1`
   - Output is sorted alphabetically for deterministic results
   """
+  # Example: %{"card" => %{"number" => "4242..."}} => "card[number]=4242..."
+  # Example: %{"items" => [%{"price" => "price_123"}]} => "items[0][price]=price_123"
   @spec encode(map() | keyword()) :: binary()
   def encode(params) when is_map(params) or is_list(params) do
     params
