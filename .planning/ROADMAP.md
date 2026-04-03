@@ -117,11 +117,11 @@ Plans:
   1. Developer can create full or partial refunds for a PaymentIntent, and retrieve, update, and list refunds
   2. Developer can create a Checkout Session in payment, subscription, or setup mode with line items, customer prefill, and success/cancel URLs
   3. Developer can retrieve, list, and expire Checkout Sessions
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — Fixture extraction (Customer, PI, SI, PM) + Refund resource (create, retrieve, update, cancel, list, stream + tests)
+- [ ] 06-02-PLAN.md — Checkout.Session (create 3 modes, retrieve, list, expire, search, stream) + LineItem struct + list_line_items + stream_line_items + tests
 
 ### Phase 7: Webhooks
 **Goal**: Developers can securely receive and verify Stripe webhook events in their Phoenix application
@@ -132,7 +132,7 @@ Plans:
   2. Developer can parse a verified webhook payload into a typed Event struct
   3. Developer can configure the signature tolerance window (default 300s)
   4. Library provides a Phoenix Plug that handles raw body extraction and signature verification, with clear documentation of the Plug.Parsers raw body consumption problem and its solution
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 07-01: TBD
@@ -146,7 +146,7 @@ Plans:
   1. Library emits [:lattice_stripe, :request, :start] before each HTTP request with method, path, and metadata
   2. Library emits [:lattice_stripe, :request, :stop] after each request with duration, status, and request_id
   3. Library emits [:lattice_stripe, :request, :exception] on request failure with error details
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 08-01: TBD
@@ -161,7 +161,7 @@ Plans:
   3. Mox-based tests verify Transport behaviour contract adherence
   4. LatticeStripe.Testing module provides helpers for constructing mock webhook events
   5. Test suite passes formatter, compiler warnings, Credo, tests, and ExDoc build checks
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 09-01: TBD
@@ -177,7 +177,7 @@ Plans:
   3. README provides a quickstart that takes a developer from mix dependency to first Stripe API call in under 60 seconds
   4. Guides cover: Getting Started, Client Configuration, Payments, Checkout, Webhooks, Error Handling, Testing, and Telemetry
   5. Non-obvious code has short readable comments with example input/output data shapes
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 10-01: TBD
@@ -192,7 +192,7 @@ Plans:
   2. CI tests across the Elixir/OTP matrix: 1.15/OTP 26, 1.17/OTP 27, 1.19/OTP 28 with stripe-mock via Docker
   3. Release Please automates version bumps via Conventional Commits and Hex publishing triggers on release
   4. Dependabot keeps Mix dependencies and GitHub Actions updated automatically
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 11-01: TBD
@@ -210,7 +210,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 3. Pagination & Response | 2/3 | In Progress|  |
 | 4. Customers & PaymentIntents | 0/2 | Planned | - |
 | 5. SetupIntents & PaymentMethods | 2/2 | Complete   | 2026-04-02 |
-| 6. Refunds & Checkout | 0/0 | Not started | - |
+| 6. Refunds & Checkout | 0/2 | Planned | - |
 | 7. Webhooks | 0/0 | Not started | - |
 | 8. Telemetry & Observability | 0/0 | Not started | - |
 | 9. Testing Infrastructure | 0/0 | Not started | - |
