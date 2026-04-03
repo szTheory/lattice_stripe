@@ -319,48 +319,66 @@ defmodule LatticeStripe.Telemetry do
   end
 
   @doc """
-  Attaches a default logger handler for all LatticeStripe telemetry events.
+  Attaches a default structured logger for all LatticeStripe request events.
 
-  Logs one line per request to `Logger` with method, path, status, duration,
-  attempt count, and request ID. Useful during development or for lightweight
-  production visibility without a full metrics pipeline.
+  Safe to call multiple times -- detaches any existing handler with the same ID first.
 
   ## Options
-
-  - `:level` - Log level (default: `:info`). Any `Logger` level atom: `:debug`,
-    `:info`, `:warning`, `:error`.
+    * `:level` -- log level (default: `:info`)
 
   ## Example
 
-      # In your application start/2:
-      LatticeStripe.Telemetry.attach_default_logger()
+      LatticeStripe.Telemetry.attach_default_logger(level: :info)
 
-      # Or with a custom log level:
-      LatticeStripe.Telemetry.attach_default_logger(level: :debug)
-
-  ## Output Format
+  Logs one line per completed request:
 
       [info] POST /v1/customers => 200 in 145ms (1 attempt, req_abc123)
-      [warn] GET /v1/payment_intents/pi_123 => :error in 301ms (3 attempts, connection_error)
+      [warning] GET /v1/customers/cus_xxx => 404 in 12ms (1 attempt, req_yyy)
   """
-  @spec attach_default_logger(keyword()) :: :ok | {:error, :already_exists}
-  def attach_default_logger(_opts \\ []) do
-    # Stub — full implementation in Plan 02.
-    # Will attach a handler identified by @default_logger_id listening to
-    # @request_event and @webhook_verify_event spans.
-    _ = @default_logger_id
-    _ = @webhook_verify_event
+  @spec attach_default_logger(keyword()) :: :ok
+  def attach_default_logger(opts \\ []) do
+    level = Keyword.get(opts, :level, :info)
+    :telemetry.detach(@default_logger_id)
+
+    :telemetry.attach(
+      @default_logger_id,
+      [:lattice_stripe, :request, :stop],
+      &__MODULE__.handle_default_log/4,
+      %{level: level}
+    )
+
     :ok
   end
 
-  # Wraps webhook verification in a telemetry span. Stub — full implementation in Plan 02.
+  @doc false
+  def handle_default_log(_event, measurements, metadata, %{level: level}) do
+    duration_ms = System.convert_time_unit(measurements.duration, :native, :millisecond)
+    method = metadata.method |> to_string() |> String.upcase()
+    status_part = if metadata[:http_status], do: "=> #{metadata.http_status} ", else: ""
+    req_id = Map.get(metadata, :request_id, "no-req-id")
+    attempts = Map.get(metadata, :attempts, 1)
+    attempt_word = if attempts == 1, do: "attempt", else: "attempts"
+
+    message =
+      "#{method} #{metadata.path} #{status_part}in #{duration_ms}ms (#{attempts} #{attempt_word}, #{req_id})"
+
+    Logger.log(level, message)
+  end
+
+  # Wraps webhook verification in a telemetry span.
   # Uses @webhook_verify_event [:lattice_stripe, :webhook, :verify] event prefix.
   # @doc false — implementation detail; event catalog documented in @moduledoc.
   @doc false
   @spec webhook_verify_span(keyword(), (-> term())) :: term()
-  def webhook_verify_span(_opts \\ [], fun) do
-    # Stub — full implementation in Plan 02
-    fun.()
+  def webhook_verify_span(opts \\ [], fun) do
+    path = Keyword.get(opts, :path)
+    start_meta = %{path: path}
+
+    :telemetry.span(@webhook_verify_event, start_meta, fn ->
+      result = fun.()
+      stop_meta = build_webhook_stop_metadata(result, path)
+      {result, stop_meta}
+    end)
   end
 
   # ---------------------------------------------------------------------------
@@ -563,6 +581,15 @@ defmodule LatticeStripe.Telemetry do
   defp derive_crud_operation(:post), do: "update"
   defp derive_crud_operation(:delete), do: "delete"
   defp derive_crud_operation(method), do: to_string(method)
+
+  # Build stop metadata for webhook verification span.
+  defp build_webhook_stop_metadata({:ok, _event}, path) do
+    %{path: path, result: :ok, error_reason: nil}
+  end
+
+  defp build_webhook_stop_metadata({:error, reason}, path) do
+    %{path: path, result: :error, error_reason: reason}
+  end
 
   # Singularize a Stripe resource plural name to its canonical singular form.
   # Handles irregular plurals specific to Stripe's API naming conventions.

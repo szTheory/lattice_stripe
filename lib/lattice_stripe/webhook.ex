@@ -86,18 +86,20 @@ defmodule LatticeStripe.Webhook do
   @spec construct_event(String.t(), String.t() | nil, secret(), keyword()) ::
           {:ok, Event.t()} | {:error, verify_error()}
   def construct_event(payload, sig_header, secret, opts \\ []) when is_binary(payload) do
-    case verify_signature(payload, sig_header, secret, opts) do
-      {:ok, _timestamp} ->
-        event =
-          payload
-          |> Jason.decode!()
-          |> Event.from_map()
+    LatticeStripe.Telemetry.webhook_verify_span([], fn ->
+      case verify_signature(payload, sig_header, secret, opts) do
+        {:ok, _timestamp} ->
+          event =
+            payload
+            |> Jason.decode!()
+            |> Event.from_map()
 
-        {:ok, event}
+          {:ok, event}
 
-      {:error, _reason} = error ->
-        error
-    end
+        {:error, _reason} = error ->
+          error
+      end
+    end)
   end
 
   @doc """
