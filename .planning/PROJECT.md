@@ -24,6 +24,8 @@ Elixir developers can integrate Stripe payments into their applications with con
 - [x] Checkout Sessions — create (payment/subscription/setup modes), retrieve, list, expire, search — *Validated in Phase 6: Refunds & Checkout*
 - [x] Telemetry events for request lifecycle — *Validated in Phase 8: Telemetry & Observability*
 - [x] Comprehensive specs: integration tests (primary), unit tests for pure logic — *Validated in Phase 9: Testing Infrastructure*
+- [x] ExDoc documentation with guides, examples, and grouped modules — *Validated in Phase 10: Documentation & Guides*
+- [x] README with <60 second quickstart — *Validated in Phase 10: Documentation & Guides*
 
 ### Active
 
@@ -152,4 +154,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 after Phase 9 completion — Testing Infrastructure with integration tests, LatticeStripe.Testing module, mix ci alias, 590 total tests*
+*Last updated: 2026-04-03 after Phase 10 completion — Documentation & Guides with ExDoc config, 9 guides, full module docs, cheatsheet, README quickstart*
