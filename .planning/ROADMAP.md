@@ -162,11 +162,11 @@ Plans:
   3. Mox-based tests verify Transport behaviour contract adherence
   4. LatticeStripe.Testing module provides helpers for constructing mock webhook events
   5. Test suite passes formatter, compiler warnings, Credo, tests, and ExDoc build checks
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] 09-01-PLAN.md — Integration test infrastructure (test_helper.exs, test_integration_client) + 6 resource integration test files via stripe-mock
-- [ ] 09-02-PLAN.md — LatticeStripe.Testing public module + mix ci alias + Credo strict mode
+- [x] 09-02-PLAN.md — LatticeStripe.Testing public module + mix ci alias + Credo strict mode
 - [x] 09-03-PLAN.md — Unit test gap audit (form encoding edge cases, error normalization, pagination cursors, telemetry metadata) + Transport contract completeness
 
 ### Phase 10: Documentation & Guides
@@ -215,6 +215,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 6. Refunds & Checkout | 2/2 | Complete   | 2026-04-03 |
 | 7. Webhooks | 2/2 | Complete   | 2026-04-03 |
 | 8. Telemetry & Observability | 2/2 | Complete   | 2026-04-03 |
-| 9. Testing Infrastructure | 1/3 | In Progress|  |
+| 9. Testing Infrastructure | 2/3 | In Progress|  |
 | 10. Documentation & Guides | 0/0 | Not started | - |
 | 11. CI/CD & Release | 0/0 | Not started | - |

@@ -151,8 +151,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **TEST-01**: Integration tests validate real HTTP request/response cycles via stripe-mock
 - [x] **TEST-02**: Unit tests cover pure logic: request building, response decoding, error normalization, pagination
 - [x] **TEST-03**: Mox-based tests validate Transport behaviour contract adherence
-- [ ] **TEST-04**: Test helpers available for constructing mock webhook events
-- [ ] **TEST-05**: CI runs formatter, compiler warnings, Credo, tests, ExDoc build
+- [x] **TEST-04**: Test helpers available for constructing mock webhook events
+- [x] **TEST-05**: CI runs formatter, compiler warnings, Credo, tests, ExDoc build
 - [x] **TEST-06**: CI tests across Elixir 1.15/OTP 26, 1.17/OTP 27, 1.19/OTP 28
 
 ### CI/CD
@@ -299,8 +299,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-01 | Phase 9 | Pending |
 | TEST-02 | Phase 9 | Complete |
 | TEST-03 | Phase 9 | Complete |
-| TEST-04 | Phase 9 | Pending |
-| TEST-05 | Phase 9 | Pending |
+| TEST-04 | Phase 9 | Complete |
+| TEST-05 | Phase 9 | Complete |
 | TEST-06 | Phase 9 | Complete |
 | DOCS-01 | Phase 10 | Pending |
 | DOCS-02 | Phase 10 | Pending |
