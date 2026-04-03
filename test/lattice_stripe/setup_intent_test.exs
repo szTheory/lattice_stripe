@@ -3,30 +3,11 @@ defmodule LatticeStripe.SetupIntentTest do
 
   import Mox
   import LatticeStripe.TestHelpers
+  import LatticeStripe.Test.Fixtures.SetupIntent
 
   alias LatticeStripe.{Error, List, Response, SetupIntent}
 
   setup :verify_on_exit!
-
-  # ---------------------------------------------------------------------------
-  # Test helpers
-  # ---------------------------------------------------------------------------
-
-  defp setup_intent_json(overrides \\ %{}) do
-    Map.merge(
-      %{
-        "id" => "seti_test123",
-        "object" => "setup_intent",
-        "status" => "requires_payment_method",
-        "usage" => "off_session",
-        "client_secret" => "seti_test123_secret_abc",
-        "livemode" => false,
-        "created" => 1_700_000_000,
-        "metadata" => %{}
-      },
-      overrides
-    )
-  end
 
   # ---------------------------------------------------------------------------
   # create/3
@@ -42,7 +23,7 @@ defmodule LatticeStripe.SetupIntentTest do
         ok_response(setup_intent_json())
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test123"}} = SetupIntent.create(client, %{})
+      assert {:ok, %SetupIntent{id: "seti_test1234567890abc"}} = SetupIntent.create(client, %{})
     end
 
     test "returns {:error, %Error{}} on error response" do
@@ -68,7 +49,7 @@ defmodule LatticeStripe.SetupIntentTest do
         ok_response(setup_intent_json())
       end)
 
-      assert %SetupIntent{id: "seti_test123"} = SetupIntent.create!(client, %{})
+      assert %SetupIntent{id: "seti_test1234567890abc"} = SetupIntent.create!(client, %{})
     end
 
     test "raises %Error{} on error response" do
@@ -94,12 +75,12 @@ defmodule LatticeStripe.SetupIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
-        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test123")
+        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test1234567890abc")
         ok_response(setup_intent_json())
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test123"}} =
-               SetupIntent.retrieve(client, "seti_test123")
+      assert {:ok, %SetupIntent{id: "seti_test1234567890abc"}} =
+               SetupIntent.retrieve(client, "seti_test1234567890abc")
     end
 
     test "returns {:error, %Error{}} when not found" do
@@ -123,12 +104,12 @@ defmodule LatticeStripe.SetupIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test123")
+        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test1234567890abc")
         ok_response(setup_intent_json(%{"metadata" => %{"order_id" => "ord_123"}}))
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test123", metadata: %{"order_id" => "ord_123"}}} =
-               SetupIntent.update(client, "seti_test123", %{
+      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", metadata: %{"order_id" => "ord_123"}}} =
+               SetupIntent.update(client, "seti_test1234567890abc", %{
                  "metadata" => %{"order_id" => "ord_123"}
                })
     end
@@ -144,12 +125,12 @@ defmodule LatticeStripe.SetupIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test123/confirm")
+        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test1234567890abc/confirm")
         ok_response(setup_intent_json(%{"status" => "succeeded"}))
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test123", status: "succeeded"}} =
-               SetupIntent.confirm(client, "seti_test123", %{
+      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: "succeeded"}} =
+               SetupIntent.confirm(client, "seti_test1234567890abc", %{
                  "payment_method" => "pm_card_visa"
                })
     end
@@ -159,12 +140,12 @@ defmodule LatticeStripe.SetupIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test123/confirm")
+        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test1234567890abc/confirm")
         ok_response(setup_intent_json(%{"status" => "succeeded"}))
       end)
 
       assert {:ok, %SetupIntent{status: "succeeded"}} =
-               SetupIntent.confirm(client, "seti_test123")
+               SetupIntent.confirm(client, "seti_test1234567890abc")
     end
   end
 
@@ -178,12 +159,12 @@ defmodule LatticeStripe.SetupIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test123/cancel")
+        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test1234567890abc/cancel")
         ok_response(setup_intent_json(%{"status" => "canceled"}))
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test123", status: "canceled"}} =
-               SetupIntent.cancel(client, "seti_test123")
+      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: "canceled"}} =
+               SetupIntent.cancel(client, "seti_test1234567890abc")
     end
 
     test "sends cancel with cancellation_reason param" do
@@ -191,7 +172,7 @@ defmodule LatticeStripe.SetupIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test123/cancel")
+        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test1234567890abc/cancel")
         assert req.body =~ "cancellation_reason=abandoned"
 
         ok_response(
@@ -203,7 +184,7 @@ defmodule LatticeStripe.SetupIntentTest do
       end)
 
       assert {:ok, %SetupIntent{status: "canceled", cancellation_reason: "abandoned"}} =
-               SetupIntent.cancel(client, "seti_test123", %{
+               SetupIntent.cancel(client, "seti_test1234567890abc", %{
                  "cancellation_reason" => "abandoned"
                })
     end
@@ -219,12 +200,12 @@ defmodule LatticeStripe.SetupIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test123/verify_microdeposits")
+        assert String.ends_with?(req.url, "/v1/setup_intents/seti_test1234567890abc/verify_microdeposits")
         ok_response(setup_intent_json(%{"status" => "succeeded"}))
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test123", status: "succeeded"}} =
-               SetupIntent.verify_microdeposits(client, "seti_test123", %{"amounts" => [32, 45]})
+      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: "succeeded"}} =
+               SetupIntent.verify_microdeposits(client, "seti_test1234567890abc", %{"amounts" => [32, 45]})
     end
   end
 
@@ -242,7 +223,7 @@ defmodule LatticeStripe.SetupIntentTest do
         ok_response(list_json([setup_intent_json()], "/v1/setup_intents"))
       end)
 
-      assert {:ok, %Response{data: %List{data: [%SetupIntent{id: "seti_test123"}]}}} =
+      assert {:ok, %Response{data: %List{data: [%SetupIntent{id: "seti_test1234567890abc"}]}}} =
                SetupIntent.list(client)
     end
 
@@ -290,7 +271,7 @@ defmodule LatticeStripe.SetupIntentTest do
 
       results = SetupIntent.stream!(client) |> Enum.to_list()
 
-      assert [%SetupIntent{id: "seti_test123"}] = results
+      assert [%SetupIntent{id: "seti_test1234567890abc"}] = results
     end
   end
 
@@ -309,10 +290,10 @@ defmodule LatticeStripe.SetupIntentTest do
 
       si = SetupIntent.from_map(map)
 
-      assert si.id == "seti_test123"
+      assert si.id == "seti_test1234567890abc"
       assert si.status == "requires_payment_method"
       assert si.usage == "off_session"
-      assert si.client_secret == "seti_test123_secret_abc"
+      assert si.client_secret == "seti_test1234567890abc_secret_abc"
       assert si.livemode == false
       assert si.customer == "cus_abc"
       assert si.payment_method_types == ["card"]
@@ -374,7 +355,7 @@ defmodule LatticeStripe.SetupIntentTest do
     test "inspect output contains id and status" do
       si = SetupIntent.from_map(setup_intent_json())
       inspected = inspect(si)
-      assert inspected =~ "seti_test123"
+      assert inspected =~ "seti_test1234567890abc"
       assert inspected =~ "requires_payment_method"
     end
 
@@ -387,7 +368,7 @@ defmodule LatticeStripe.SetupIntentTest do
     test "inspect output does NOT contain client_secret value" do
       si = SetupIntent.from_map(setup_intent_json())
       inspected = inspect(si)
-      refute inspected =~ "seti_test123_secret_abc"
+      refute inspected =~ "seti_test1234567890abc_secret_abc"
     end
 
     test "inspect output does NOT contain client_secret key" do

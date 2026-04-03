@@ -3,31 +3,11 @@ defmodule LatticeStripe.PaymentIntentTest do
 
   import Mox
   import LatticeStripe.TestHelpers
+  import LatticeStripe.Test.Fixtures.PaymentIntent
 
   alias LatticeStripe.{Error, List, PaymentIntent, Response}
 
   setup :verify_on_exit!
-
-  # ---------------------------------------------------------------------------
-  # Test helpers
-  # ---------------------------------------------------------------------------
-
-  defp payment_intent_json(overrides \\ %{}) do
-    Map.merge(
-      %{
-        "id" => "pi_test123",
-        "object" => "payment_intent",
-        "amount" => 2000,
-        "currency" => "usd",
-        "status" => "requires_payment_method",
-        "client_secret" => "pi_test123_secret_abc",
-        "livemode" => false,
-        "created" => 1_700_000_000,
-        "metadata" => %{}
-      },
-      overrides
-    )
-  end
 
   # ---------------------------------------------------------------------------
   # create/3
@@ -45,7 +25,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         ok_response(payment_intent_json())
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test123", amount: 2000, currency: "usd"}} =
+      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", amount: 2000, currency: "usd"}} =
                PaymentIntent.create(client, %{"amount" => 2000, "currency" => "usd"})
     end
 
@@ -70,12 +50,12 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
-        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test123")
+        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test1234567890abc")
         ok_response(payment_intent_json())
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test123"}} =
-               PaymentIntent.retrieve(client, "pi_test123")
+      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc"}} =
+               PaymentIntent.retrieve(client, "pi_test1234567890abc")
     end
 
     test "returns {:error, %Error{}} when not found" do
@@ -99,13 +79,13 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test123")
+        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test1234567890abc")
         assert req.body =~ "metadata"
         ok_response(payment_intent_json(%{"metadata" => %{"order_id" => "ord_123"}}))
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test123", metadata: %{"order_id" => "ord_123"}}} =
-               PaymentIntent.update(client, "pi_test123", %{
+      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", metadata: %{"order_id" => "ord_123"}}} =
+               PaymentIntent.update(client, "pi_test1234567890abc", %{
                  "metadata" => %{"order_id" => "ord_123"}
                })
     end
@@ -121,12 +101,12 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test123/confirm")
+        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test1234567890abc/confirm")
         ok_response(payment_intent_json(%{"status" => "requires_capture"}))
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test123", status: "requires_capture"}} =
-               PaymentIntent.confirm(client, "pi_test123", %{
+      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", status: "requires_capture"}} =
+               PaymentIntent.confirm(client, "pi_test1234567890abc", %{
                  "payment_method" => "pm_card_visa"
                })
     end
@@ -136,12 +116,12 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test123/confirm")
+        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test1234567890abc/confirm")
         ok_response(payment_intent_json(%{"status" => "succeeded"}))
       end)
 
       assert {:ok, %PaymentIntent{status: "succeeded"}} =
-               PaymentIntent.confirm(client, "pi_test123")
+               PaymentIntent.confirm(client, "pi_test1234567890abc")
     end
   end
 
@@ -155,12 +135,12 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test123/capture")
+        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test1234567890abc/capture")
         ok_response(payment_intent_json(%{"status" => "succeeded"}))
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test123", status: "succeeded"}} =
-               PaymentIntent.capture(client, "pi_test123")
+      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", status: "succeeded"}} =
+               PaymentIntent.capture(client, "pi_test1234567890abc")
     end
 
     test "sends capture with amount_to_capture param" do
@@ -168,13 +148,13 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test123/capture")
+        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test1234567890abc/capture")
         assert req.body =~ "amount_to_capture=1500"
         ok_response(payment_intent_json(%{"status" => "succeeded", "amount_received" => 1500}))
       end)
 
       assert {:ok, %PaymentIntent{status: "succeeded", amount_received: 1500}} =
-               PaymentIntent.capture(client, "pi_test123", %{"amount_to_capture" => 1500})
+               PaymentIntent.capture(client, "pi_test1234567890abc", %{"amount_to_capture" => 1500})
     end
   end
 
@@ -188,12 +168,12 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test123/cancel")
+        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test1234567890abc/cancel")
         ok_response(payment_intent_json(%{"status" => "canceled"}))
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test123", status: "canceled"}} =
-               PaymentIntent.cancel(client, "pi_test123")
+      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", status: "canceled"}} =
+               PaymentIntent.cancel(client, "pi_test1234567890abc")
     end
 
     test "sends cancel with cancellation_reason param" do
@@ -201,7 +181,7 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test123/cancel")
+        assert String.ends_with?(req.url, "/v1/payment_intents/pi_test1234567890abc/cancel")
         assert req.body =~ "cancellation_reason=abandoned"
 
         ok_response(
@@ -213,7 +193,7 @@ defmodule LatticeStripe.PaymentIntentTest do
       end)
 
       assert {:ok, %PaymentIntent{status: "canceled", cancellation_reason: "abandoned"}} =
-               PaymentIntent.cancel(client, "pi_test123", %{
+               PaymentIntent.cancel(client, "pi_test1234567890abc", %{
                  "cancellation_reason" => "abandoned"
                })
     end
@@ -233,7 +213,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         ok_response(list_json([payment_intent_json()], "/v1/payment_intents"))
       end)
 
-      assert {:ok, %Response{data: %List{data: [%PaymentIntent{id: "pi_test123"}]}}} =
+      assert {:ok, %Response{data: %List{data: [%PaymentIntent{id: "pi_test1234567890abc"}]}}} =
                PaymentIntent.list(client)
     end
 
@@ -260,7 +240,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         ok_response(payment_intent_json())
       end)
 
-      assert %PaymentIntent{id: "pi_test123"} =
+      assert %PaymentIntent{id: "pi_test1234567890abc"} =
                PaymentIntent.create!(client, %{"amount" => 2000, "currency" => "usd"})
     end
 
@@ -307,11 +287,11 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       pi = PaymentIntent.from_map(map)
 
-      assert pi.id == "pi_test123"
+      assert pi.id == "pi_test1234567890abc"
       assert pi.amount == 2000
       assert pi.currency == "usd"
       assert pi.status == "requires_payment_method"
-      assert pi.client_secret == "pi_test123_secret_abc"
+      assert pi.client_secret == "pi_test1234567890abc_secret_abc"
       assert pi.capture_method == "manual"
       assert pi.confirmation_method == "automatic"
     end
@@ -365,7 +345,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         })
       end)
 
-      assert {:ok, %Response{data: %List{data: [%PaymentIntent{id: "pi_test123"}]}}} =
+      assert {:ok, %Response{data: %List{data: [%PaymentIntent{id: "pi_test1234567890abc"}]}}} =
                PaymentIntent.search(client, "status:'succeeded'")
     end
   end
@@ -413,7 +393,7 @@ defmodule LatticeStripe.PaymentIntentTest do
 
       results = PaymentIntent.search_stream!(client, "status:'succeeded'") |> Enum.to_list()
 
-      assert [%PaymentIntent{id: "pi_test123"}] = results
+      assert [%PaymentIntent{id: "pi_test1234567890abc"}] = results
     end
   end
 
@@ -425,7 +405,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     test "inspect output contains id and amount" do
       pi = PaymentIntent.from_map(payment_intent_json())
       inspected = inspect(pi)
-      assert inspected =~ "pi_test123"
+      assert inspected =~ "pi_test1234567890abc"
       assert inspected =~ "2000"
     end
 
@@ -439,7 +419,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     test "inspect output does NOT contain client_secret" do
       pi = PaymentIntent.from_map(payment_intent_json())
       inspected = inspect(pi)
-      refute inspected =~ "pi_test123_secret_abc"
+      refute inspected =~ "pi_test1234567890abc_secret_abc"
       refute inspected =~ "client_secret"
     end
   end

@@ -3,40 +3,11 @@ defmodule LatticeStripe.PaymentMethodTest do
 
   import Mox
   import LatticeStripe.TestHelpers
+  import LatticeStripe.Test.Fixtures.PaymentMethod
 
   alias LatticeStripe.{Error, List, PaymentMethod, Response}
 
   setup :verify_on_exit!
-
-  # ---------------------------------------------------------------------------
-  # Test helpers
-  # ---------------------------------------------------------------------------
-
-  defp payment_method_json(overrides \\ %{}) do
-    Map.merge(
-      %{
-        "id" => "pm_test123",
-        "object" => "payment_method",
-        "type" => "card",
-        "customer" => "cus_test456",
-        "livemode" => false,
-        "created" => 1_700_000_000,
-        "metadata" => %{},
-        "card" => %{
-          "brand" => "visa",
-          "last4" => "4242",
-          "exp_month" => 12,
-          "exp_year" => 2030,
-          "fingerprint" => "abc123"
-        },
-        "billing_details" => %{
-          "email" => "test@example.com",
-          "name" => "Test User"
-        }
-      },
-      overrides
-    )
-  end
 
   # ---------------------------------------------------------------------------
   # create/3
@@ -52,7 +23,7 @@ defmodule LatticeStripe.PaymentMethodTest do
         ok_response(payment_method_json())
       end)
 
-      assert {:ok, %PaymentMethod{id: "pm_test123", type: "card"}} =
+      assert {:ok, %PaymentMethod{id: "pm_test1234567890abc", type: "card"}} =
                PaymentMethod.create(client, %{"type" => "card"})
     end
 
@@ -79,7 +50,7 @@ defmodule LatticeStripe.PaymentMethodTest do
         ok_response(payment_method_json())
       end)
 
-      assert %PaymentMethod{id: "pm_test123"} = PaymentMethod.create!(client, %{})
+      assert %PaymentMethod{id: "pm_test1234567890abc"} = PaymentMethod.create!(client, %{})
     end
   end
 
@@ -93,12 +64,12 @@ defmodule LatticeStripe.PaymentMethodTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
-        assert String.ends_with?(req.url, "/v1/payment_methods/pm_test123")
+        assert String.ends_with?(req.url, "/v1/payment_methods/pm_test1234567890abc")
         ok_response(payment_method_json())
       end)
 
-      assert {:ok, %PaymentMethod{id: "pm_test123"}} =
-               PaymentMethod.retrieve(client, "pm_test123")
+      assert {:ok, %PaymentMethod{id: "pm_test1234567890abc"}} =
+               PaymentMethod.retrieve(client, "pm_test1234567890abc")
     end
 
     test "returns {:error, %Error{}} when not found" do
@@ -122,12 +93,12 @@ defmodule LatticeStripe.PaymentMethodTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_methods/pm_test123")
+        assert String.ends_with?(req.url, "/v1/payment_methods/pm_test1234567890abc")
         ok_response(payment_method_json(%{"metadata" => %{"order_id" => "ord_123"}}))
       end)
 
-      assert {:ok, %PaymentMethod{id: "pm_test123", metadata: %{"order_id" => "ord_123"}}} =
-               PaymentMethod.update(client, "pm_test123", %{
+      assert {:ok, %PaymentMethod{id: "pm_test1234567890abc", metadata: %{"order_id" => "ord_123"}}} =
+               PaymentMethod.update(client, "pm_test1234567890abc", %{
                  "metadata" => %{"order_id" => "ord_123"}
                })
     end
@@ -143,13 +114,13 @@ defmodule LatticeStripe.PaymentMethodTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_methods/pm_test123/attach")
+        assert String.ends_with?(req.url, "/v1/payment_methods/pm_test1234567890abc/attach")
         assert req.body =~ "customer=cus_test456"
         ok_response(payment_method_json(%{"customer" => "cus_test456"}))
       end)
 
       assert {:ok, %PaymentMethod{customer: "cus_test456"}} =
-               PaymentMethod.attach(client, "pm_test123", %{"customer" => "cus_test456"})
+               PaymentMethod.attach(client, "pm_test1234567890abc", %{"customer" => "cus_test456"})
     end
 
     test "returns {:ok, %PaymentMethod{}} on success (bang via attach!/4)" do
@@ -159,8 +130,8 @@ defmodule LatticeStripe.PaymentMethodTest do
         ok_response(payment_method_json())
       end)
 
-      assert %PaymentMethod{id: "pm_test123"} =
-               PaymentMethod.attach!(client, "pm_test123", %{"customer" => "cus_test456"})
+      assert %PaymentMethod{id: "pm_test1234567890abc"} =
+               PaymentMethod.attach!(client, "pm_test1234567890abc", %{"customer" => "cus_test456"})
     end
   end
 
@@ -174,12 +145,12 @@ defmodule LatticeStripe.PaymentMethodTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/payment_methods/pm_test123/detach")
+        assert String.ends_with?(req.url, "/v1/payment_methods/pm_test1234567890abc/detach")
         ok_response(payment_method_json(%{"customer" => nil}))
       end)
 
       assert {:ok, %PaymentMethod{customer: nil}} =
-               PaymentMethod.detach(client, "pm_test123")
+               PaymentMethod.detach(client, "pm_test1234567890abc")
     end
 
     test "returns %PaymentMethod{} directly via detach!/4" do
@@ -189,7 +160,7 @@ defmodule LatticeStripe.PaymentMethodTest do
         ok_response(payment_method_json(%{"customer" => nil}))
       end)
 
-      assert %PaymentMethod{customer: nil} = PaymentMethod.detach!(client, "pm_test123")
+      assert %PaymentMethod{customer: nil} = PaymentMethod.detach!(client, "pm_test1234567890abc")
     end
   end
 
@@ -207,7 +178,7 @@ defmodule LatticeStripe.PaymentMethodTest do
         ok_response(list_json([payment_method_json()], "/v1/payment_methods"))
       end)
 
-      assert {:ok, %Response{data: %List{data: [%PaymentMethod{id: "pm_test123"}]}}} =
+      assert {:ok, %Response{data: %List{data: [%PaymentMethod{id: "pm_test1234567890abc"}]}}} =
                PaymentMethod.list(client, %{"customer" => "cus_test456"})
     end
 
@@ -271,7 +242,7 @@ defmodule LatticeStripe.PaymentMethodTest do
 
       results = PaymentMethod.stream!(client, %{"customer" => "cus_test456"}) |> Enum.to_list()
 
-      assert [%PaymentMethod{id: "pm_test123"}] = results
+      assert [%PaymentMethod{id: "pm_test1234567890abc"}] = results
     end
 
     test "raises ArgumentError when customer param is missing" do
@@ -292,7 +263,7 @@ defmodule LatticeStripe.PaymentMethodTest do
       map = payment_method_json()
       pm = PaymentMethod.from_map(map)
 
-      assert pm.id == "pm_test123"
+      assert pm.id == "pm_test1234567890abc"
       assert pm.object == "payment_method"
       assert pm.type == "card"
       assert pm.customer == "cus_test456"
@@ -382,7 +353,7 @@ defmodule LatticeStripe.PaymentMethodTest do
       pm = PaymentMethod.from_map(payment_method_json())
       inspected = inspect(pm)
 
-      assert inspected =~ "pm_test123"
+      assert inspected =~ "pm_test1234567890abc"
       assert inspected =~ ~s|type: "card"|
       assert inspected =~ ~s|card_brand: "visa"|
       assert inspected =~ ~s|card_last4: "4242"|
@@ -396,7 +367,7 @@ defmodule LatticeStripe.PaymentMethodTest do
       pm = PaymentMethod.from_map(payment_method_json(%{"type" => "sepa_debit", "card" => nil}))
       inspected = inspect(pm)
 
-      assert inspected =~ "pm_test123"
+      assert inspected =~ "pm_test1234567890abc"
       assert inspected =~ ~s|type: "sepa_debit"|
       refute inspected =~ "card_brand"
       refute inspected =~ "card_last4"

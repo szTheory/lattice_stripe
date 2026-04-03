@@ -3,30 +3,11 @@ defmodule LatticeStripe.CustomerTest do
 
   import Mox
   import LatticeStripe.TestHelpers
+  import LatticeStripe.Test.Fixtures.Customer
 
   alias LatticeStripe.{Customer, Error, List, Response}
 
   setup :verify_on_exit!
-
-  # ---------------------------------------------------------------------------
-  # Test helpers
-  # ---------------------------------------------------------------------------
-
-  defp customer_json(overrides \\ %{}) do
-    Map.merge(
-      %{
-        "id" => "cus_test123",
-        "object" => "customer",
-        "email" => "test@example.com",
-        "name" => "Test User",
-        "livemode" => false,
-        "created" => 1_700_000_000,
-        "metadata" => %{},
-        "deleted" => false
-      },
-      overrides
-    )
-  end
 
   # ---------------------------------------------------------------------------
   # create/3
@@ -43,7 +24,7 @@ defmodule LatticeStripe.CustomerTest do
         ok_response(customer_json())
       end)
 
-      assert {:ok, %Customer{id: "cus_test123", email: "test@example.com"}} =
+      assert {:ok, %Customer{id: "cus_test1234567890", email: "test@example.com"}} =
                Customer.create(client, %{"email" => "test@example.com"})
     end
 
@@ -68,11 +49,11 @@ defmodule LatticeStripe.CustomerTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
-        assert String.ends_with?(req.url, "/v1/customers/cus_test123")
+        assert String.ends_with?(req.url, "/v1/customers/cus_test1234567890")
         ok_response(customer_json())
       end)
 
-      assert {:ok, %Customer{id: "cus_test123"}} = Customer.retrieve(client, "cus_test123")
+      assert {:ok, %Customer{id: "cus_test1234567890"}} = Customer.retrieve(client, "cus_test1234567890")
     end
 
     test "returns {:error, %Error{}} when customer not found" do
@@ -96,13 +77,13 @@ defmodule LatticeStripe.CustomerTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/customers/cus_test123")
+        assert String.ends_with?(req.url, "/v1/customers/cus_test1234567890")
         assert req.body =~ "name=New+Name"
         ok_response(customer_json(%{"name" => "New Name"}))
       end)
 
-      assert {:ok, %Customer{id: "cus_test123", name: "New Name"}} =
-               Customer.update(client, "cus_test123", %{"name" => "New Name"})
+      assert {:ok, %Customer{id: "cus_test1234567890", name: "New Name"}} =
+               Customer.update(client, "cus_test1234567890", %{"name" => "New Name"})
     end
   end
 
@@ -116,12 +97,12 @@ defmodule LatticeStripe.CustomerTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :delete
-        assert String.ends_with?(req.url, "/v1/customers/cus_test123")
-        ok_response(%{"id" => "cus_test123", "object" => "customer", "deleted" => true})
+        assert String.ends_with?(req.url, "/v1/customers/cus_test1234567890")
+        ok_response(%{"id" => "cus_test1234567890", "object" => "customer", "deleted" => true})
       end)
 
-      assert {:ok, %Customer{id: "cus_test123", deleted: true}} =
-               Customer.delete(client, "cus_test123")
+      assert {:ok, %Customer{id: "cus_test1234567890", deleted: true}} =
+               Customer.delete(client, "cus_test1234567890")
     end
   end
 
@@ -139,7 +120,7 @@ defmodule LatticeStripe.CustomerTest do
         ok_response(list_json([customer_json()], "/v1/customers"))
       end)
 
-      assert {:ok, %Response{data: %List{data: [%Customer{id: "cus_test123"}]}}} =
+      assert {:ok, %Response{data: %List{data: [%Customer{id: "cus_test1234567890"}]}}} =
                Customer.list(client)
     end
 
@@ -175,7 +156,7 @@ defmodule LatticeStripe.CustomerTest do
         })
       end)
 
-      assert {:ok, %Response{data: %List{data: [%Customer{id: "cus_test123"}]}}} =
+      assert {:ok, %Response{data: %List{data: [%Customer{id: "cus_test1234567890"}]}}} =
                Customer.search(client, "email:'test@example.com'")
     end
   end
@@ -192,7 +173,7 @@ defmodule LatticeStripe.CustomerTest do
         ok_response(customer_json())
       end)
 
-      assert %Customer{id: "cus_test123"} = Customer.create!(client, %{})
+      assert %Customer{id: "cus_test1234567890"} = Customer.create!(client, %{})
     end
 
     test "raises %Error{} on error response" do
@@ -233,7 +214,7 @@ defmodule LatticeStripe.CustomerTest do
       map = customer_json(%{"phone" => "+1-555-1234", "description" => "VIP customer"})
       customer = Customer.from_map(map)
 
-      assert customer.id == "cus_test123"
+      assert customer.id == "cus_test1234567890"
       assert customer.email == "test@example.com"
       assert customer.name == "Test User"
       assert customer.phone == "+1-555-1234"
@@ -272,7 +253,7 @@ defmodule LatticeStripe.CustomerTest do
     test "inspect output contains id and object" do
       customer = Customer.from_map(customer_json())
       inspected = inspect(customer)
-      assert inspected =~ "cus_test123"
+      assert inspected =~ "cus_test1234567890"
       assert inspected =~ "customer"
     end
 
