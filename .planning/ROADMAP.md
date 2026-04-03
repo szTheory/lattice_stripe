@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: Customers & PaymentIntents** - First two resource modules to validate the foundation pattern
 - [x] **Phase 5: SetupIntents & PaymentMethods** - Intent-based and method management resources (completed 2026-04-02)
 - [x] **Phase 6: Refunds & Checkout** - Refund operations and Checkout Sessions (completed 2026-04-03)
-- [ ] **Phase 7: Webhooks** - Signature verification, event parsing, and Phoenix Plug
+- [x] **Phase 7: Webhooks** - Signature verification, event parsing, and Phoenix Plug (completed 2026-04-03)
 - [ ] **Phase 8: Telemetry & Observability** - Request lifecycle events wired through the stack
 - [ ] **Phase 9: Testing Infrastructure** - Integration tests, unit tests, Mox contracts, test helpers
 - [ ] **Phase 10: Documentation & Guides** - ExDoc, moduledocs, guides, README quickstart
@@ -132,11 +132,11 @@ Plans:
   2. Developer can parse a verified webhook payload into a typed Event struct
   3. Developer can configure the signature tolerance window (default 300s)
   4. Library provides a Phoenix Plug that handles raw body extraction and signature verification, with clear documentation of the Plug.Parsers raw body consumption problem and its solution
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 07-01-PLAN.md — Event struct + Webhook verification module (HMAC-SHA256, construct_event, verify_signature, generate_test_signature) + Handler behaviour + SignatureVerificationError
-- [ ] 07-02-PLAN.md — Webhook.Plug (NimbleOptions, path matching, handler dispatch, MFA secrets) + CacheBodyReader + Plug integration tests
+- [x] 07-02-PLAN.md — Webhook.Plug (NimbleOptions, path matching, handler dispatch, MFA secrets) + CacheBodyReader + Plug integration tests
 
 ### Phase 8: Telemetry & Observability
 **Goal**: Developers can observe and monitor all Stripe API interactions via standard Telemetry events
@@ -211,7 +211,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 4. Customers & PaymentIntents | 0/2 | Planned | - |
 | 5. SetupIntents & PaymentMethods | 2/2 | Complete   | 2026-04-02 |
 | 6. Refunds & Checkout | 2/2 | Complete   | 2026-04-03 |
-| 7. Webhooks | 1/2 | In Progress|  |
+| 7. Webhooks | 2/2 | Complete   | 2026-04-03 |
 | 8. Telemetry & Observability | 0/0 | Not started | - |
 | 9. Testing Infrastructure | 0/0 | Not started | - |
 | 10. Documentation & Guides | 0/0 | Not started | - |
