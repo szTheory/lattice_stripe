@@ -127,7 +127,8 @@ if Code.ensure_loaded?(Plug) do
               handler: [
                 type: {:or, [:atom, nil]},
                 default: nil,
-                doc: "Module implementing LatticeStripe.Webhook.Handler. Dispatches to handle_event/1."
+                doc:
+                  "Module implementing LatticeStripe.Webhook.Handler. Dispatches to handle_event/1."
               ],
               at: [
                 type: {:or, [:string, nil]},
@@ -172,7 +173,10 @@ if Code.ensure_loaded?(Plug) do
     @impl Plug
 
     # POST + at: path set + path matches → handle
-    def call(%Plug.Conn{method: "POST", path_info: path_info} = conn, %{path_info: path_info} = opts)
+    def call(
+          %Plug.Conn{method: "POST", path_info: path_info} = conn,
+          %{path_info: path_info} = opts
+        )
         when path_info != nil do
       handle_webhook(conn, opts)
     end
