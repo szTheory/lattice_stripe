@@ -315,4 +315,82 @@ defmodule LatticeStripe.ErrorTest do
       assert error.raw_body == body
     end
   end
+
+  describe "Error.from_response/3 unusual shapes" do
+    test "missing 'error' key entirely: falls back to :api_error with fallback message" do
+      # When the "error" key is missing, the catch-all clause fires
+      body = %{"message" => "plain text error"}
+      error = Error.from_response(500, body, "req_missing")
+
+      assert error.type == :api_error
+      assert error.status == 500
+      assert error.message == "An unexpected error occurred"
+    end
+
+    test "empty error map: falls back to :api_error (no 'type' key to match)" do
+      # %{"error" => %{}} does not match %{"error" => %{"type" => type_str}}
+      body = %{"error" => %{}}
+      error = Error.from_response(400, body, "req_empty_error")
+
+      assert error.type == :api_error
+      assert error.status == 400
+    end
+
+    test "null/nil message: message field is nil in the produced struct" do
+      body = %{"error" => %{"type" => "api_error", "message" => nil}}
+      error = Error.from_response(500, body, "req_nil_msg")
+
+      assert error.type == :api_error
+      assert error.message == nil
+    end
+
+    test "extra unknown fields in error: does not crash, known fields still parsed" do
+      body = %{
+        "error" => %{
+          "type" => "card_error",
+          "message" => "Declined",
+          "unknown_field" => "value",
+          "nested" => %{"deep" => true}
+        }
+      }
+
+      error = Error.from_response(402, body, "req_extra_fields")
+
+      assert error.type == :card_error
+      assert error.message == "Declined"
+      assert error.status == 402
+      # unknown fields don't surface as named struct fields but they don't crash either
+    end
+
+    test "type is nil: falls back to :api_error because nil doesn't match known type strings" do
+      # %{"error" => %{"type" => nil}} matches the pattern but parse_type(nil) hits the catch-all
+      body = %{"error" => %{"type" => nil, "message" => "Error"}}
+      error = Error.from_response(500, body, "req_nil_type")
+
+      assert error.type == :api_error
+    end
+
+    test "very long message string: stored without truncation" do
+      long_message = String.duplicate("x", 1_200)
+      body = %{"error" => %{"type" => "api_error", "message" => long_message}}
+      error = Error.from_response(500, body, "req_long")
+
+      assert byte_size(error.message) == 1_200
+      assert error.message == long_message
+    end
+
+    test "status 0 (edge case): still produces an Error struct" do
+      body = %{"error" => %{"type" => "api_error", "message" => "Status zero"}}
+      error = Error.from_response(0, body, "req_zero_status")
+
+      assert %Error{type: :api_error, status: 0} = error
+    end
+
+    test "status 999 (non-standard): still produces an Error struct" do
+      body = %{"error" => %{"type" => "api_error", "message" => "Unknown status"}}
+      error = Error.from_response(999, body, "req_999_status")
+
+      assert %Error{type: :api_error, status: 999} = error
+    end
+  end
 end

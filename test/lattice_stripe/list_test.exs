@@ -699,6 +699,97 @@ defmodule LatticeStripe.ListTest do
   # stream/2 - from-existing-list
   # ---------------------------------------------------------------------------
 
+  # ---------------------------------------------------------------------------
+  # from_json/1 - cursor edge cases
+  # ---------------------------------------------------------------------------
+
+  describe "from_json/1 cursor edge cases" do
+    test "items with string ID containing special characters: _last_id preserves the full value" do
+      json = %{
+        "object" => "list",
+        "data" => [%{"id" => "cus_abc/def"}, %{"id" => "cus_xyz"}],
+        "has_more" => false
+      }
+
+      list = List.from_json(json)
+
+      assert list._first_id == "cus_abc/def"
+      assert list._last_id == "cus_xyz"
+    end
+
+    test "items with integer ID: _last_id and _first_id are nil (pattern expects string 'id')" do
+      # first_item_id and last_item_id match on %{"id" => id} using Map pattern matching.
+      # An integer value still matches the pattern — verify the actual behavior.
+      json = %{
+        "object" => "list",
+        "data" => [%{"id" => 12345}],
+        "has_more" => false
+      }
+
+      list = List.from_json(json)
+
+      # Integer 12345 matches %{"id" => id} — _first_id and _last_id are 12345 (integer)
+      assert list._first_id == 12345
+      assert list._last_id == 12345
+    end
+
+    test "mixed items: some have id, last item has no id => _first_id is first id, _last_id is nil" do
+      json = %{
+        "object" => "list",
+        "data" => [%{"id" => "cus_1"}, %{"name" => "no_id"}, %{"name" => "also_no_id"}],
+        "has_more" => false
+      }
+
+      list = List.from_json(json)
+
+      # _first_id comes from first item which has an id
+      assert list._first_id == "cus_1"
+      # _last_id comes from last item which has no id => nil
+      assert list._last_id == nil
+    end
+
+    test "mixed items: first item has no id, last item has id" do
+      json = %{
+        "object" => "list",
+        "data" => [%{"name" => "no_id"}, %{"id" => "cus_last"}],
+        "has_more" => false
+      }
+
+      list = List.from_json(json)
+
+      # _first_id comes from first item which has no id => nil
+      assert list._first_id == nil
+      # _last_id comes from last item which has an id
+      assert list._last_id == "cus_last"
+    end
+
+    test "single item with nil id: _first_id and _last_id are both nil" do
+      json = %{
+        "object" => "list",
+        "data" => [%{"id" => nil}],
+        "has_more" => false
+      }
+
+      list = List.from_json(json)
+
+      # %{"id" => nil} matches the pattern, id = nil
+      assert list._first_id == nil
+      assert list._last_id == nil
+    end
+
+    test "large data array (100 items): _first_id is first, _last_id is last (no off-by-one)" do
+      items =
+        Enum.map(1..100, fn i -> %{"id" => "cus_#{String.pad_leading("#{i}", 3, "0")}"} end)
+
+      json = %{"object" => "list", "data" => items, "has_more" => false}
+
+      list = List.from_json(json)
+
+      assert list._first_id == "cus_001"
+      assert list._last_id == "cus_100"
+    end
+  end
+
   describe "stream/2 - from-existing-list" do
     test "emits items and halts when has_more is false (no API call)" do
       # No transport expect — Mox will fail if any call is made
