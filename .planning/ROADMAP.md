@@ -21,7 +21,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 7: Webhooks** - Signature verification, event parsing, and Phoenix Plug (completed 2026-04-03)
 - [x] **Phase 8: Telemetry & Observability** - Request lifecycle events wired through the stack (completed 2026-04-03)
 - [ ] **Phase 9: Testing Infrastructure** - Integration tests, unit tests, Mox contracts, test helpers
-- [ ] **Phase 10: Documentation & Guides** - ExDoc, moduledocs, guides, README quickstart
+- [x] **Phase 10: Documentation & Guides** - ExDoc, moduledocs, guides, README quickstart (completed 2026-04-03)
 - [ ] **Phase 11: CI/CD & Release** - GitHub Actions, Release Please, Hex publishing, Dependabot
 
 ## Phase Details
@@ -179,13 +179,13 @@ Plans:
   3. README provides a quickstart that takes a developer from mix dependency to first Stripe API call in under 60 seconds
   4. Guides cover: Getting Started, Client Configuration, Payments, Checkout, Webhooks, Error Handling, Testing, and Telemetry
   5. Non-obvious code has short readable comments with example input/output data shapes
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 10-01-PLAN.md — ExDoc configuration, README rewrite, CHANGELOG, cheatsheet, guide stubs
 - [x] 10-02-PLAN.md — @moduledoc/@doc/@typedoc audit across all modules + inline code comments
 - [x] 10-03-PLAN.md — Guides: Getting Started, Client Configuration, Payments, Checkout, Webhooks
-- [ ] 10-04-PLAN.md — Guides: Error Handling, Testing, Telemetry, Extending LatticeStripe
+- [x] 10-04-PLAN.md — Guides: Error Handling, Testing, Telemetry, Extending LatticeStripe
 
 ### Phase 11: CI/CD & Release
 **Goal**: The library has automated CI, versioning, and publishing so releases are one-click
@@ -218,5 +218,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 7. Webhooks | 2/2 | Complete   | 2026-04-03 |
 | 8. Telemetry & Observability | 2/2 | Complete   | 2026-04-03 |
 | 9. Testing Infrastructure | 2/3 | In Progress|  |
-| 10. Documentation & Guides | 3/4 | In Progress|  |
+| 10. Documentation & Guides | 4/4 | Complete   | 2026-04-03 |
 | 11. CI/CD & Release | 0/0 | Not started | - |
