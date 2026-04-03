@@ -96,7 +96,7 @@ No specific requirements — open to standard approaches
 <deferred>
 ## Deferred Ideas
 
-None — discussion stayed within phase scope
+- **TEST-06 (CI matrix across Elixir versions):** TEST-06 requires running tests across Elixir 1.15/OTP 26, 1.17/OTP 27, 1.19/OTP 28. This is Phase 11 scope — it requires GitHub Actions matrix configuration, not local test infrastructure. Phase 9 ensures all quality gates pass locally via `mix ci`; Phase 11 wires `mix ci` into a CI matrix. TEST-06 is claimed by Plan 09-03 for traceability but the actual matrix execution is deferred to Phase 11.
 
 </deferred>
 
