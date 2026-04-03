@@ -1,8 +1,6 @@
 defmodule LatticeStripe.WebhookTest do
   use ExUnit.Case, async: true
 
-  import LatticeStripe.Test.Fixtures.Event, only: [event_map: 0]
-
   alias LatticeStripe.{Event, Webhook}
   alias LatticeStripe.Webhook.SignatureVerificationError
 
@@ -88,6 +86,7 @@ defmodule LatticeStripe.WebhookTest do
   describe "verify_signature/3 — :no_matching_signature" do
     test "returns {:error, :no_matching_signature} when secret is wrong" do
       header = valid_header()
+
       assert {:error, :no_matching_signature} =
                Webhook.verify_signature(@payload, header, "wrong_secret")
     end
@@ -95,6 +94,7 @@ defmodule LatticeStripe.WebhookTest do
     test "returns {:error, :no_matching_signature} when payload was tampered" do
       header = valid_header()
       tampered = @payload <> "extra"
+
       assert {:error, :no_matching_signature} =
                Webhook.verify_signature(tampered, header, @secret)
     end
@@ -121,6 +121,7 @@ defmodule LatticeStripe.WebhookTest do
     test "tolerance: 0 fails on any non-zero-age timestamp" do
       old_ts = System.system_time(:second) - 1
       header = Webhook.generate_test_signature(@payload, @secret, timestamp: old_ts)
+
       assert {:error, :timestamp_expired} =
                Webhook.verify_signature(@payload, header, @secret, tolerance: 0)
     end
@@ -133,18 +134,21 @@ defmodule LatticeStripe.WebhookTest do
   describe "verify_signature/3 — multi-secret" do
     test "returns {:ok, ts} when second secret in list matches" do
       header = valid_header()
+
       assert {:ok, _ts} =
                Webhook.verify_signature(@payload, header, ["wrong_secret", @secret])
     end
 
     test "returns {:ok, ts} when first secret in list matches" do
       header = valid_header()
+
       assert {:ok, _ts} =
                Webhook.verify_signature(@payload, header, [@secret, "other_secret"])
     end
 
     test "returns {:error, :no_matching_signature} when all secrets are wrong" do
       header = valid_header()
+
       assert {:error, :no_matching_signature} =
                Webhook.verify_signature(@payload, header, ["wrong1", "wrong2"])
     end
@@ -205,6 +209,7 @@ defmodule LatticeStripe.WebhookTest do
   describe "construct_event/3" do
     test "returns {:ok, %Event{}} with valid signature" do
       header = valid_header()
+
       assert {:ok, %Event{type: "payment_intent.succeeded"}} =
                Webhook.construct_event(@payload, header, @secret)
     end
@@ -218,6 +223,7 @@ defmodule LatticeStripe.WebhookTest do
 
     test "returns {:error, :no_matching_signature} with invalid signature" do
       header = valid_header()
+
       assert {:error, :no_matching_signature} =
                Webhook.construct_event(@payload, header, "wrong_secret")
     end

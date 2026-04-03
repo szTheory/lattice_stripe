@@ -25,7 +25,8 @@ defmodule LatticeStripe.Webhook.SignatureVerificationError do
 
   defexception [:message, :reason]
 
-  @type verify_error :: :missing_header | :invalid_header | :no_matching_signature | :timestamp_expired
+  @type verify_error ::
+          :missing_header | :invalid_header | :no_matching_signature | :timestamp_expired
 
   @type t :: %__MODULE__{
           message: String.t(),
@@ -42,6 +43,10 @@ defmodule LatticeStripe.Webhook.SignatureVerificationError do
 
   defp default_message(:missing_header), do: "No Stripe-Signature header found"
   defp default_message(:invalid_header), do: "Stripe-Signature header is malformed"
-  defp default_message(:no_matching_signature), do: "Signature verification failed — no secret matched"
-  defp default_message(:timestamp_expired), do: "Webhook timestamp is too old (replay attack protection)"
+
+  defp default_message(:no_matching_signature),
+    do: "Signature verification failed — no secret matched"
+
+  defp default_message(:timestamp_expired),
+    do: "Webhook timestamp is too old (replay attack protection)"
 end
