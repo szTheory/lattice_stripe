@@ -70,7 +70,7 @@ Create a client with your Stripe API key and your Finch pool name:
 
 ```elixir
 client = LatticeStripe.Client.new!(
-  api_key: "sk_test_4eC39HqLyjWDarjtT1zdp7dc",
+  api_key: "sk_test_YOUR_STRIPE_TEST_KEY",
   finch: MyApp.Finch
 )
 ```
