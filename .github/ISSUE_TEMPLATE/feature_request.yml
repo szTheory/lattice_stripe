@@ -1,0 +1,38 @@
+name: Feature Request
+description: Suggest a new feature for LatticeStripe
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please describe what you'd like.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: "What problem does this feature solve? Is it related to a frustration?"
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: "Describe the solution you'd like."
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: "Any alternative solutions or features you've considered."
+    validations:
+      required: false
+  - type: input
+    id: stripe-api
+    attributes:
+      label: Related Stripe API
+      description: "If this relates to a specific Stripe API resource or endpoint."
+      placeholder: "e.g., Subscriptions, Invoices, /v1/billing_portal/sessions"
+    validations:
+      required: false
