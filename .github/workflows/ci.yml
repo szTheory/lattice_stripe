@@ -1,0 +1,161 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - ".planning/**"
+      - "guides/**"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - ".planning/**"
+      - "guides/**"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  MIX_ENV: test
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-mix-
+
+      - name: Cache _build
+        uses: actions/cache@v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-build-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Check formatting
+        run: mix format --check-formatted
+
+      - name: Compile with warnings-as-errors
+        run: mix compile --warnings-as-errors
+
+      - name: Run Credo
+        run: mix credo --strict
+
+      - name: Build docs
+        run: mix docs
+
+      - name: Build Hex package
+        run: mix hex.build
+
+      - name: Audit dependencies
+        run: mix deps.audit
+
+  test:
+    name: "Test (Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - elixir: '1.15'
+            otp: '26'
+          - elixir: '1.17'
+            otp: '27'
+          - elixir: '1.19'
+            otp: '28'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-
+
+      - name: Cache _build
+        uses: actions/cache@v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-build-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Run tests
+        run: mix test
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      stripe-mock:
+        image: stripe/stripe-mock:latest
+        ports:
+          - '12111:12111'
+          - '12112:12112'
+    env:
+      STRIPE_MOCK_HOST: localhost
+      STRIPE_MOCK_PORT: '12111'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-mix-
+
+      - name: Cache _build
+        uses: actions/cache@v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-build-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Run integration tests
+        run: mix test --include integration
