@@ -107,14 +107,22 @@ defmodule LatticeStripe.MixProject do
       # Dev/test dependencies
       {:mox, "~> 1.2", only: :test},
       {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
     ]
   end
 
   defp package do
     [
+      name: "lattice_stripe",
+      description: "A production-grade, idiomatic Elixir SDK for the Stripe API",
       licenses: ["MIT"],
-      links: %{"GitHub" => @source_url}
+      links: %{
+        "GitHub" => @source_url,
+        "Changelog" => "#{@source_url}/blob/main/CHANGELOG.md",
+        "HexDocs" => "https://hexdocs.pm/lattice_stripe"
+      },
+      files: ["lib", "mix.exs", "README.md", "CHANGELOG.md", "LICENSE"]
     ]
   end
 
