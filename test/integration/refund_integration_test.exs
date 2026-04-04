@@ -71,6 +71,8 @@ defmodule LatticeStripe.RefundIntegrationTest do
     assert %LatticeStripe.List{} = resp.data
   end
 
+  # stripe-mock returns a stub for any ID — invalid ID errors can only be tested against real Stripe
+  @tag :skip
   test "retrieve/3 with invalid id returns error", %{client: client} do
     {:error, error} = Refund.retrieve(client, "nonexistent_id_999")
 
