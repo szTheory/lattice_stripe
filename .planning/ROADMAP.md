@@ -22,7 +22,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: Telemetry & Observability** - Request lifecycle events wired through the stack (completed 2026-04-03)
 - [ ] **Phase 9: Testing Infrastructure** - Integration tests, unit tests, Mox contracts, test helpers
 - [x] **Phase 10: Documentation & Guides** - ExDoc, moduledocs, guides, README quickstart (completed 2026-04-03)
-- [ ] **Phase 11: CI/CD & Release** - GitHub Actions, Release Please, Hex publishing, Dependabot
+- [x] **Phase 11: CI/CD & Release** - GitHub Actions, Release Please, Hex publishing, Dependabot (completed 2026-04-04)
 
 ## Phase Details
 
@@ -196,10 +196,10 @@ Plans:
   2. CI tests across the Elixir/OTP matrix: 1.15/OTP 26, 1.17/OTP 27, 1.19/OTP 28 with stripe-mock via Docker
   3. Release Please automates version bumps via Conventional Commits and Hex publishing triggers on release
   4. Dependabot keeps Mix dependencies and GitHub Actions updated automatically
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 11-01-PLAN.md — CI workflow (lint, test matrix, integration) + mix.exs package metadata + LICENSE
+- [x] 11-01-PLAN.md — CI workflow (lint, test matrix, integration) + mix.exs package metadata + LICENSE
 - [x] 11-02-PLAN.md — Release Please workflow + manifest config + Dependabot + auto-merge
 - [x] 11-03-PLAN.md — Community files (CONTRIBUTING, SECURITY, issue/PR templates) + repo settings checkpoint
 
@@ -220,4 +220,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 8. Telemetry & Observability | 2/2 | Complete   | 2026-04-03 |
 | 9. Testing Infrastructure | 2/3 | In Progress|  |
 | 10. Documentation & Guides | 4/4 | Complete    | 2026-04-03 |
-| 11. CI/CD & Release | 2/3 | In Progress|  |
+| 11. CI/CD & Release | 3/3 | Complete   | 2026-04-04 |

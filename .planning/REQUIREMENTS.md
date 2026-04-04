@@ -157,11 +157,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### CI/CD
 
-- [ ] **CICD-01**: GitHub Actions CI runs on PR and push to main (format, compile, credo, test, docs)
-- [ ] **CICD-02**: Release Please automates versioning via Conventional Commits
-- [ ] **CICD-03**: Hex publishing triggers automatically on release
-- [ ] **CICD-04**: Dependabot keeps Mix dependencies and GitHub Actions updated
-- [ ] **CICD-05**: stripe-mock runs in CI via Docker for integration tests
+- [x] **CICD-01**: GitHub Actions CI runs on PR and push to main (format, compile, credo, test, docs)
+- [x] **CICD-02**: Release Please automates versioning via Conventional Commits
+- [x] **CICD-03**: Hex publishing triggers automatically on release
+- [x] **CICD-04**: Dependabot keeps Mix dependencies and GitHub Actions updated
+- [x] **CICD-05**: stripe-mock runs in CI via Docker for integration tests
 
 ## v2 Requirements
 
@@ -308,11 +308,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOCS-04 | Phase 10 | Complete |
 | DOCS-05 | Phase 10 | Complete |
 | DOCS-06 | Phase 10 | Complete |
-| CICD-01 | Phase 11 | Pending |
-| CICD-02 | Phase 11 | Pending |
-| CICD-03 | Phase 11 | Pending |
-| CICD-04 | Phase 11 | Pending |
-| CICD-05 | Phase 11 | Pending |
+| CICD-01 | Phase 11 | Complete |
+| CICD-02 | Phase 11 | Complete |
+| CICD-03 | Phase 11 | Complete |
+| CICD-04 | Phase 11 | Complete |
+| CICD-05 | Phase 11 | Complete |
 
 **Coverage:**
 - v1 requirements: 99 total
