@@ -26,6 +26,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 - [x] Comprehensive specs: integration tests (primary), unit tests for pure logic — *Validated in Phase 9: Testing Infrastructure*
 - [x] ExDoc documentation with guides, examples, and grouped modules — *Validated in Phase 10: Documentation & Guides*
 - [x] README with <60 second quickstart — *Validated in Phase 10: Documentation & Guides*
+- [x] CI/CD pipeline: GitHub Actions, Release Please, Hex publishing — *Validated in Phase 11: CI/CD & Release*
 
 ### Active
 
@@ -63,7 +64,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 **Developer Experience**
 - [ ] ExDoc documentation with guides, examples, and grouped modules
 - [ ] Comprehensive specs: integration tests (primary), unit tests for pure logic
-- [ ] CI/CD pipeline: GitHub Actions, Release Please, Hex publishing
+- [ ] ~~CI/CD pipeline: GitHub Actions, Release Please, Hex publishing~~ *(moved to Validated)*
 - [ ] README with <60 second quickstart
 
 ### Out of Scope
