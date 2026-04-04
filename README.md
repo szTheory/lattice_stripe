@@ -16,14 +16,14 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:lattice_stripe, "~> 0.1"}
+    {:lattice_stripe, "~> 0.2"}
   ]
 end
 ```
 
 ## Quick Start
 
-Add Finch to your supervision tree in `application.ex`:
+LatticeStripe uses [Finch](https://github.com/sneako/finch) for HTTP requests. Add it to your supervision tree in `application.ex`:
 
 ```elixir
 children = [
