@@ -6,7 +6,7 @@ Thank you for your interest in contributing to LatticeStripe!
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/lattice-stripe/lattice_stripe.git
+   git clone https://github.com/szTheory/lattice_stripe.git
    cd lattice_stripe
    ```
 

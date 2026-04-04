@@ -1,7 +1,7 @@
 # LatticeStripe
 
 [![Hex.pm](https://img.shields.io/hexpm/v/lattice_stripe.svg)](https://hex.pm/packages/lattice_stripe)
-[![CI](https://github.com/lattice-stripe/lattice_stripe/actions/workflows/ci.yml/badge.svg)](https://github.com/lattice-stripe/lattice_stripe/actions/workflows/ci.yml)
+[![CI](https://github.com/szTheory/lattice_stripe/actions/workflows/ci.yml/badge.svg)](https://github.com/szTheory/lattice_stripe/actions/workflows/ci.yml)
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
