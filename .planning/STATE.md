@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 11-03-PLAN.md
-last_updated: "2026-04-04T00:23:59.513Z"
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-04-04T00:24:10.836Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 11
@@ -80,6 +80,7 @@ Progress: [████████████████████] 11/11 p
 | Phase 10-documentation-guides P04 | 5 | 2 tasks | 4 files |
 | Phase 11-ci-cd-release P02 | 5 | 2 tasks | 5 files |
 | Phase 11-ci-cd-release P03 | 3 | 2 tasks | 5 files |
+| Phase 11-ci-cd-release P01 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -150,6 +151,8 @@ Recent decisions affecting current work:
 - [Phase 11-ci-cd-release]: Dependabot auto-merge via GitHub Actions workflow (not native) — enables required CI status-check gate before merge
 - [Phase 11-ci-cd-release]: Docs-only PR bypass caveat documented in CONTRIBUTING.md — CI skips doc-only paths so maintainer bypass may be needed for docs PRs
 - [Phase 11-ci-cd-release]: security@latticestripe.dev as private vulnerability reporting channel with 48h ack, 7-day assessment, 30-day patch SLA
+- [Phase 11-ci-cd-release]: Three CI jobs run in parallel (no needs:) per D-01 — lint, test matrix, integration each independent
+- [Phase 11-ci-cd-release]: Cache keys include Elixir/OTP version strings to prevent cross-version _build cache poisoning (RESEARCH.md Pitfall 2)
 
 ### Pending Todos
 
@@ -167,6 +170,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T00:23:49.966Z
-Stopped at: Completed 11-03-PLAN.md
+Last session: 2026-04-04T00:24:10.833Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None
