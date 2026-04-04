@@ -196,11 +196,12 @@ Plans:
   2. CI tests across the Elixir/OTP matrix: 1.15/OTP 26, 1.17/OTP 27, 1.19/OTP 28 with stripe-mock via Docker
   3. Release Please automates version bumps via Conventional Commits and Hex publishing triggers on release
   4. Dependabot keeps Mix dependencies and GitHub Actions updated automatically
-**Plans:** 2 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
+- [ ] 11-01-PLAN.md — CI workflow (lint, test matrix, integration) + mix.exs package metadata + LICENSE
+- [ ] 11-02-PLAN.md — Release Please workflow + manifest config + Dependabot + auto-merge
+- [ ] 11-03-PLAN.md — Community files (CONTRIBUTING, SECURITY, issue/PR templates) + repo settings checkpoint
 
 ## Progress
 
@@ -219,4 +220,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 a
 | 8. Telemetry & Observability | 2/2 | Complete   | 2026-04-03 |
 | 9. Testing Infrastructure | 2/3 | In Progress|  |
 | 10. Documentation & Guides | 4/4 | Complete    | 2026-04-03 |
-| 11. CI/CD & Release | 0/0 | Not started | - |
+| 11. CI/CD & Release | 0/3 | Not started | - |
