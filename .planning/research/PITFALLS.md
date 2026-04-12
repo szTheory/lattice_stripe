@@ -1,349 +1,414 @@
-# Domain Pitfalls
+# Research: Pitfalls — Billing + Connect in lattice_stripe v2.0
 
-**Domain:** Elixir Stripe SDK / API Client Library
-**Researched:** 2026-03-31
+**Mode:** Ecosystem (pitfall-focused)
+**Confidence:** HIGH for Stripe API behaviors; MEDIUM for "what other SDKs get wrong" (based on public issue tracker patterns)
+**Target phases:** 12–19 (v2.0 Billing & Connect)
+**Researched:** 2026-04-12
 
-## Critical Pitfalls
+## Severity Legend
 
-Mistakes that cause rewrites, security vulnerabilities, or major user frustration.
-
-### Pitfall 1: Webhook Raw Body Consumed by Phoenix Plug.Parsers
-
-**What goes wrong:** Phoenix's `Plug.Parsers` automatically parses the request body into JSON, consuming the raw bytes. Stripe's webhook signature verification requires the exact original bytes. Once parsed, the raw body is gone and HMAC verification fails silently or produces cryptic errors. This is the single most complained-about issue in the Elixir Stripe ecosystem -- multiple ElixirForum threads describe it as the worst DX experience in the Elixir ecosystem. Developers either skip verification entirely (security hole) or copy-paste `Plug.Parsers` source code into their app to hack in raw body capture.
-
-**Why it happens:** Stripe signs the raw HTTP body bytes with HMAC-SHA256. Any transformation (JSON parsing, whitespace normalization, key reordering) invalidates the signature. Phoenix's default plug pipeline parses bodies before user code sees them.
-
-**Consequences:** Webhook verification fails in production. Developers disable verification (security vulnerability). Support burden from confused users dominates library issue trackers.
-
-**Prevention:**
-- Provide a dedicated `LatticeStripe.WebhookPlug` that captures the raw body before `Plug.Parsers` runs, using `Plug.Conn.read_body/2` and storing it in `conn.assigns` or `conn.private`
-- Document the plug ordering requirement prominently: webhook plug MUST be placed before `Plug.Parsers` in the endpoint pipeline, or use a separate pipeline for the webhook route
-- Provide a Phoenix router example showing the correct pipeline configuration
-- Include a "troubleshooting webhook verification" guide in ExDoc
-
-**Detection:** Users reporting "webhook signature verification failed" errors when using the library with Phoenix. Integration tests that parse JSON before verification will catch this early.
-
-**Phase:** Foundation (Tier 0) -- webhook infrastructure must solve this from day one.
-
-**Confidence:** HIGH -- documented extensively in ElixirForum, GitHub issues on stripity_stripe (#855), and the master research document.
+- **CRITICAL** — Silent data corruption, charges to wrong accounts, or broken callers. Must fix in SDK.
+- **HIGH** — Surprising behavior that causes on-call incidents. SDK should guard or validate.
+- **MEDIUM** — Documentation-only footgun; caller problem, but docs must be loud.
 
 ---
 
-### Pitfall 2: Global Application Config Instead of Per-Request Client Configuration
+## CRITICAL Pitfalls
 
-**What goes wrong:** The library stores API keys and configuration in `Application.get_env/3` (global process dictionary), making it impossible to use multiple Stripe accounts simultaneously. This breaks multi-tenant SaaS apps, Stripe Connect workflows (which need per-request `Stripe-Account` headers), and async test suites.
+### C1. `proration_behavior` default silently varies across endpoints and API versions
 
-**Why it happens:** `Application.get_env` is the path of least resistance in Elixir. Early library versions (stripity_stripe v2) used it exclusively. But Elixir's application environment is global mutable state -- changing it in one process affects all others.
+**What goes wrong:** `Subscription.update(client, sub_id, %{"items" => [...]})` expecting no proration, gets a prorated invoice. Stripe's defaults differ:
+- `POST /v1/subscriptions` (create): no proration applies
+- `POST /v1/subscriptions/:id` (update): defaults to `create_prorations`
+- `POST /v1/subscription_items/:id`: defaults to `create_prorations`
+- `POST /v1/subscription_schedules/:id`: phase-dependent, defaults to `create_prorations` on phase transition
 
-**Consequences:**
-- Multi-tenant apps cannot use different API keys per tenant
-- Stripe Connect (`stripe_account` header) requires per-request overrides that fight the global config
-- Tests must use `async: false` because config changes in one test leak into concurrent tests
-- Race conditions in production when multiple requests modify shared config
+Silent inheritance is a time-bomb when callers bump `api_version`.
 
-**Prevention:**
-- Follow the modern StripeClient pattern (all official SDKs converged on this in 2024+): explicit client structs passed to every function call
-- Accept `api_key`, `stripe_account`, `api_version`, `idempotency_key` as per-request options on every API call
-- Use `Application.get_env` only as fallback defaults, never as the primary config mechanism
-- Design the client struct to be created once and passed through -- `LatticeStripe.client(api_key: "sk_...")` returns a reusable struct
-- This enables `async: true` in all user tests
+**Why:** Stripe applies defaults server-side when a param is omitted. Pass-through SDKs inherit whatever Stripe does today.
 
-**Detection:** Users filing issues about "how to use different API keys per request" or "Connect account header not working." Test suite requiring `async: false`.
+**Prevention (SDK-level):**
+1. In `Subscription.update/3`, `Subscription.cancel/3`, `SubscriptionSchedule.update/3`, `SubscriptionItem.update/3`, `Invoice.upcoming/2`: validate `proration_behavior` presence when mutation-class. If absent AND `client.require_explicit_proration == true`, return `{:error, %Error{type: :proration_required, ...}}`.
+2. Ship `LatticeStripe.Billing.ProrationBehavior.validate!/1` accepting string values `"create_prorations" | "always_invoice" | "none"` (strings, matching v1's wire format). Reject atoms with a clear message pointing to the string form.
+3. Default `require_explicit_proration: false` for back-compat. Heavily document in Subscriptions guide; recommend `true` for new apps.
+4. Never set a proration default inside the SDK — let Stripe's server apply its default when caller opts out (forward-compat).
 
-**Phase:** Foundation (Tier 0) -- client configuration architecture must be correct from the start; retrofitting is a breaking change.
+**Phase:** 15 (Subscriptions, primary). 14 (Invoice.upcoming). 16 (Schedules).
 
-**Confidence:** HIGH -- official Stripe SDKs all moved to instance-based clients. ElixirForum threads and the Elixir Application docs explicitly warn against global config in libraries.
-
----
-
-### Pitfall 3: Timing-Vulnerable Webhook Signature Comparison
-
-**What goes wrong:** Using `==` or `===` to compare HMAC signatures allows timing attacks. An attacker can determine the correct signature byte-by-byte by measuring response times.
-
-**Why it happens:** String equality operators in most languages short-circuit on the first differing byte. This is a subtle security issue that looks correct in code review.
-
-**Consequences:** Webhook endpoint becomes vulnerable to signature forgery via timing side-channel. Attackers can forge webhook events to trigger actions in the application (refunds, subscription changes, etc.).
-
-**Prevention:**
-- Use Erlang's `:crypto.hash_equals/2` (available since OTP 25) or implement constant-time comparison via XOR-and-reduce pattern
-- Never use `==`, `===`, or pattern matching for signature comparison
-- Add explicit code comments explaining why constant-time comparison is required
-- Test that the verification module uses the correct comparison function
-
-**Detection:** Security audit or code review catching `==` in signature verification path. No runtime detection possible (that is the nature of timing attacks).
-
-**Phase:** Foundation (Tier 0) -- webhook signature verification is a security-critical path.
-
-**Confidence:** HIGH -- well-documented cryptographic best practice. Stripe's own documentation and all official SDKs use constant-time comparison.
+**How to test:**
+- Unit: Mox-based — `Subscription.update/3` returns `{:error, :proration_required}` when flag on + param missing.
+- Unit: `ProrationBehavior.validate!/1` accepts the three strings, rejects atoms + unknown strings.
+- Integration (stripe-mock): omitting and passing `proration_behavior` both succeed HTTP-wise but SDK path only encodes when present.
+- Integration (stripe-mock + TestClock): create sub, advance past period boundary, update with `proration_behavior=none`, assert no proration line items.
 
 ---
 
-### Pitfall 4: Structs That Break on Stripe API Changes
+### C2. Subscription `incomplete` → `incomplete_expired` 23-hour hard cancel window
 
-**What goes wrong:** Defining Elixir structs with `defstruct` for every Stripe resource field creates a rigid schema. When Stripe adds new fields (monthly), the library either drops them silently or requires a library update for every Stripe API change. When Stripe removes or renames fields, user code pattern-matching on struct fields breaks.
+**What goes wrong:** Sub created, first PaymentIntent requires SCA or fails, Sub goes `incomplete`. If customer doesn't complete auth within **23 hours**, Stripe auto-transitions to `incomplete_expired` — permanently dead, no retry, no rescue. Callers treating `incomplete` as "will self-heal" end up with dead subs.
 
-**Why it happens:** Elixir structs have a fixed set of keys defined at compile time. Stripe's API evolves constantly (the OpenAPI spec has 2,196+ releases). The temptation to provide "type-safe" structs conflicts with the reality of a rapidly changing upstream API.
-
-**Consequences:**
-- New Stripe fields silently dropped until library updates
-- Users stuck on old library versions miss important response data
-- Adding struct fields is technically a non-breaking change but removing them is breaking
-- Pattern matching on struct module name (`%LatticeStripe.Customer{}`) couples user code to internal types
+**Why:** Stripe's SCA compliance model needs a firm deadline. 23 hours is a hard Stripe-side timer, not configurable.
 
 **Prevention:**
-- Use structs with an `__extra__` or `metadata` catch-all map field that captures unknown keys from the API response
-- Or use a hybrid approach: typed structs for well-known fields + pass-through map for the rest
-- Store the raw decoded map alongside parsed fields (the Pay gem's `object` column pattern)
-- Provide `Access` behaviour implementation so users can do `customer[:unknown_field]`
-- Document that structs represent the library's known fields, not the complete Stripe response
-- Consider making struct fields liberal (allow nil for most fields) since Stripe responses vary by expand options and API version
+1. `Subscription` `@moduledoc` documents the state machine explicitly, with a Mermaid or ASCII diagram showing `incomplete —23h→ incomplete_expired` as a one-way edge.
+2. `Subscription.status_is_terminal?/1` helper returns `true` for `"incomplete_expired" | "canceled" | "unpaid"`. Use in webhook handlers to short-circuit rescue logic.
+3. `LatticeStripe.EventType` documents that `incomplete → incomplete_expired` fires as `customer.subscription.updated`, not `.deleted` — a common surprise.
+4. Subscriptions guide: "Don't rely on `incomplete` self-healing. Use `payment_behavior: default_incomplete` + frontend confirmation, or `payment_behavior: error_if_incomplete` to fail fast server-side."
 
-**Detection:** Users reporting "missing field X in response" issues. Stripe changelog showing new fields not reflected in library structs.
+**Phase:** 15 (Subscriptions).
 
-**Phase:** Foundation (Tier 0) -- response type design is architectural and cannot be easily changed later.
-
-**Confidence:** HIGH -- stripity_stripe's GitHub issues (#878, #879, #568) are dominated by missing/incorrect struct fields. This is the primary maintenance burden of any Stripe library.
+**How to test:**
+- Integration (stripe-mock + TestClock): create sub with failing test card, advance 24h, assert `incomplete_expired`. Note: stripe-mock may not simulate this transition; backstop with real test-mode CI.
+- Unit: `status_is_terminal?/1` truth table.
 
 ---
 
-### Pitfall 5: Incorrect Retry Logic That Causes Double Charges
+### C3. Connect `Stripe-Account` header scoping — platform vs connected account
 
-**What goes wrong:** Retrying non-idempotent requests (or retrying with a new idempotency key) after ambiguous failures (timeouts, 500s) can cause duplicate charges, double subscription creations, or other duplicate side effects.
+**What goes wrong:** `Customer.create(client, %{"email" => "x@y.com"})` without `stripe_account` creates the Customer **on the platform**, not the connected account. Later `Subscription.create(client_with_account, %{"customer" => "cus_xxx"})` returns `resource_missing: No such customer` because the Customer is in the wrong namespace.
 
-**Why it happens:** Network timeouts and 500 errors are ambiguous -- the request may have succeeded server-side before the client received the response. Retrying with a different idempotency key creates a new operation. Retrying without an idempotency key on POST endpoints also creates a new operation.
+Inverse: accidentally including `Stripe-Account` on a `PaymentMethod.attach` for a platform-level customer attaches nothing, or — worse in direct-charge mode — moves the attach to the wrong context silently.
 
-**Consequences:** Customers charged twice. Duplicate subscriptions created. Duplicate refunds issued. Financial and trust damage that is difficult to recover from.
+**Security implication:** Cross-tenant leak possible if a platform caches customers by email on the platform and reads them from connected-account context.
+
+**Why:** `Stripe-Account` is a **context switch**. Every resource lookup/mutation is scoped to that account. No implicit "try both" — different namespaces entirely.
 
 **Prevention:**
-- Auto-generate idempotency keys for all POST requests (Stripe recommends this)
-- On retry, always reuse the same idempotency key (this is the entire point of idempotency)
-- Respect the `Stripe-Should-Retry` response header -- Stripe explicitly tells you when retrying is safe
-- Do NOT retry 400-level errors (except 409 Conflict and 429 Rate Limit)
-- DO retry 500+ errors and network errors, but with the same idempotency key
-- Implement exponential backoff with jitter to avoid thundering herd
-- Document that idempotency keys expire after 24 hours
-- Raise/warn if user provides an idempotency key AND the library would auto-generate one (avoid confusion)
-- Handle the idempotency error case where parameters differ from the original request
+1. Keep v1's existing per-request `stripe_account` option.
+2. Add telemetry metadata: `stripe_account: "acct_xxx" | nil` on the request span. Grep-able in logs.
+3. Connect guide: ship a "Context matrix" table — which resources **must** be scoped (PaymentIntent direct charges, Customer for Express/Custom onboarding), **must not** be scoped (`Account.create` for new connected account, `AccountLink.create`).
+4. `LatticeStripe.Connect` namespace doc module with top-level warning: *"The `stripe_account` option switches execution context. A client without it talks to the platform; with it, to the connected account. These are different data universes."*
+5. Ship `LatticeStripe.Client.with_account(client, "acct_xxx")` returning a new Client struct with the header baked in. Makes per-context paths explicit and greppable.
 
-**Detection:** Users reporting duplicate charges or subscriptions. Stripe dashboard showing duplicate objects with different IDs but same parameters.
+**Phase:** 17 (Connect Accounts/Links).
 
-**Phase:** Foundation (Tier 0) -- retry and idempotency logic is core HTTP infrastructure.
-
-**Confidence:** HIGH -- Stripe's official blog post on idempotency design, official SDK implementations, and API documentation all detail these requirements.
+**How to test:**
+- Integration (stripe-mock): `Customer.create` without vs with `stripe_account`, assert headers differ, params identical.
+- Unit: `with_account/2` returns new struct with `stripe_account` set; immutability check.
+- Doc-test: Connect guide code samples compile and run against stripe-mock.
 
 ---
 
-## Moderate Pitfalls
+### C4. Invoice finalization race — ~1h auto-finalize after creation
 
-### Pitfall 6: Finch Pool Lifecycle Mismanagement
+**What goes wrong:** Caller does `Invoice.create(...)` intending to add line items via a follow-up call. After ~1 hour, Stripe **auto-finalizes the draft**. Now `Invoice.update` returns `invoice_not_editable` and CI fails mysteriously.
 
-**What goes wrong:** The library either (a) forces users to start a Finch pool in their supervision tree with a specific name the library expects, creating tight coupling, or (b) starts its own Finch pool via an OTP application, creating an unnecessary process that conflicts with users' existing Finch instances. Libraries should not start processes users do not expect.
-
-**Why it happens:** Finch requires a named process started in a supervision tree. The question of "who owns the Finch pool" is a design decision with no obvious right answer for a library.
+**Why:** Stripe auto-advances draft invoices via an async worker. `auto_advance` default differs by creation path — `true` for subscription-generated, `false` for manual.
 
 **Prevention:**
-- Accept a Finch pool name as a client configuration option (e.g., `LatticeStripe.client(finch: MyApp.Finch)`)
-- Provide sensible defaults: if no Finch name given, check if a well-known default exists or start a supervised pool lazily
-- Use the Transport behaviour so users can swap out Finch entirely
-- Document clearly: "LatticeStripe does not start its own HTTP connection pool. You must include Finch in your supervision tree."
-- Provide a copy-paste supervision tree example in the README
+1. In `Invoice.create/2`: if caller omits `auto_advance`, emit telemetry event `[:lattice_stripe, :invoice, :auto_advance_unset]` (silent in prod, catchable in dev logger). Do NOT change Stripe's default.
+2. Invoice guide documents the canonical order:
+   ```
+   create(%{"customer" => id, "auto_advance" => false, ...})
+     → add_invoice_items
+     → finalize
+     → pay
+   ```
+3. Ship `Invoice.finalize/2`, `pay/2+3` as first-class verbs.
+4. Error catalog: `invoice_not_editable` → likely means auto-finalized.
 
-**Detection:** Users reporting "Finch pool not started" errors or "I already have Finch, how do I reuse it?"
+**Phase:** 14 (Invoices).
 
-**Phase:** Foundation (Tier 0) -- transport layer architecture.
-
-**Confidence:** MEDIUM -- this is an Elixir ecosystem convention issue. The Dashbit blog post on Req-based SDKs sidesteps it by using Req (which manages its own pools), but for a Finch-based library this is a real design decision.
+**How to test:**
+- Integration (stripe-mock + TestClock): create with `auto_advance=false`, advance 2h, assert still `draft`, update succeeds.
+- Integration: create with `auto_advance=true`, advance clock, assert status transitions and subsequent `update/3` returns typed error.
+- Unit: telemetry warning fires when `auto_advance` absent.
 
 ---
 
-### Pitfall 7: Auto-Pagination Streams That Exhaust Rate Limits or Memory
+### C5. `SubscriptionSchedule` owns its Subscription — direct mutations conflict
 
-**What goes wrong:** Elixir Streams are lazy, which is great for pagination. But without guardrails, `Stream.map(pages, &process/1) |> Enum.to_list()` will eagerly fetch ALL pages, potentially hitting Stripe's rate limit (100 requests/second per API key) or loading millions of objects into memory.
+**What goes wrong:** Caller creates a SubscriptionSchedule (quarterly upgrade path), 3 months later calls `Subscription.update(sub_id, %{"items" => [new_plan]})` directly. Schedule's next phase transition wipes those changes, or fails with `subscription_schedule_not_released` — customer stuck.
 
-**Why it happens:** Developers unfamiliar with Stripe's data volumes treat auto-pagination like iterating a small list. Stripe accounts can have millions of customers, charges, or events.
-
-**Consequences:** Rate limit errors (429) cascading through the stream. OOM crashes from materializing large lists. Long-running requests that time out.
+**Why:** SubscriptionSchedule is the source of truth for the sub's plan trajectory. Stripe treats the Subscription as a rendered view of the Schedule's current phase.
 
 **Prevention:**
-- Document that `Stream` functions are lazy but `Enum` functions materialize everything
-- Provide a `max_pages` or `max_items` option on auto-pagination to prevent runaway fetches
-- Log or emit telemetry events at page boundaries so users can monitor progress
-- Consider built-in rate limiting (respect `Retry-After` headers on 429 responses)
-- Provide both `stream_` variants (lazy) and `list_` variants (single page) so the API makes the distinction clear
-- Document examples showing `Stream.take/2` for bounded iteration
+1. `Subscription.update/3` `@doc`: **loud warning** that if `sub.schedule` is not nil, you likely want `SubscriptionSchedule.update/3`.
+2. `SubscriptionSchedule.release/2`: document as the "convert scheduled sub back to free-standing" mechanism.
+3. `Subscription` struct surfaces `:schedule` as a typed field so callers can pattern-match `%Subscription{schedule: nil}`.
+4. **Discussion item** for Phase 16: should `Subscription.update/3` return `{:error, :schedule_owned}` when `sub.schedule` is non-nil? Opinionated, prevents a valid use case (one-off override within phase). Default to docs-only for v0.3.0.
 
-**Detection:** Users reporting 429 errors when paginating. High memory usage when listing large collections.
+**Phase:** 16 (Subscription Schedules). Cross-file doc update in 15.
 
-**Phase:** Foundation (Tier 0) -- pagination is core infrastructure.
-
-**Confidence:** MEDIUM -- documented in stripe-node issue #575 and general Stripe pagination docs. The Elixir Stream integration is novel territory without direct precedent.
+**How to test:**
+- Integration (stripe-mock): create sub via schedule, attempt direct update, assert `:schedule` populated.
+- Unit: struct decoder lifts `schedule` from raw JSON into typed field.
 
 ---
 
-### Pitfall 8: API Version Mismatch Between Library Structs and Actual Responses
+## HIGH Pitfalls
 
-**What goes wrong:** The library pins to a specific Stripe API version but allows per-request version overrides. When a user overrides the version, the response shape may differ from what the library's structs/decoders expect, causing decoding failures or silently dropped data.
+### H1. `cancel_at_period_end: true` keeps status `"active"` — not `"canceled"`
 
-**Why it happens:** Stripe's API version affects response shapes (field names, nesting, presence of fields). The library's decoders are written against one version but users can send any version.
+**What goes wrong:** Tests assert `sub.status == "canceled"` after `Subscription.update(sub, %{"cancel_at_period_end" => true})`. Status still `"active"`. Only transitions to `canceled` when period ends. CI passes locally, fails in production because clock time differs.
 
-**Consequences:** Decoding crashes on unexpected response shapes. Silent data loss when fields are renamed between versions. Confusing error messages that don't mention version mismatch as the cause.
+**Why:** `cancel_at_period_end` is a scheduling flag, not a state transition. Sets `sub.cancel_at = period_end` and `cancel_at_period_end = true`, but keeps serving until Stripe's billing worker runs at period boundary.
 
 **Prevention:**
-- Pin a default API version per library release (document it prominently)
-- When users override the version, log a warning that response shapes may differ from library expectations
-- Make decoders tolerant of unknown/missing fields (do not crash on unexpected keys)
-- Test against at least two API versions in CI
-- Document which Stripe API version the library is built against in the module docs and README
-- Consider the Java SDK bug (v27.x.y) as a cautionary tale: version pinning bugs can cascade
+1. `Subscription.cancel/2+3` `@doc` distinguishes two modes prominently:
+   - `cancel/2` (immediate): status → `canceled` synchronously.
+   - `cancel/3` with `cancel_at_period_end: true`: flag set, status stays `active`, cancellation deferred.
+2. `Subscription.cancellation_pending?/1` returns `true` when `cancel_at_period_end == true`. Useful in UI ("your plan ends on X").
+3. Document webhook sequence: `customer.subscription.updated` fires when flag set; `customer.subscription.deleted` fires when period ends and cancel executes.
 
-**Detection:** Users reporting decoding errors after setting a custom API version. Stripe deprecation notices for the pinned version.
+**Phase:** 15 (Subscriptions).
 
-**Phase:** Foundation (Tier 0) -- response decoding architecture.
-
-**Confidence:** HIGH -- documented in Stripe's versioning docs and the Java/dotnet SDK version pinning bug.
+**How to test:**
+- Integration (stripe-mock + TestClock): set flag, assert unchanged; advance past period_end, assert `canceled`.
+- Unit: `cancellation_pending?/1` truth table.
 
 ---
 
-### Pitfall 9: Expand Parameter Handling That Degrades Performance
+### H2. Webhook event ordering — `invoice.paid` can arrive before `invoice.finalized`
 
-**What goes wrong:** The library makes it too easy to expand deeply nested objects on list endpoints, causing Stripe to return massive payloads that are slow to generate and slow to decode. Users copy-paste expand examples without understanding the performance implications.
+**What goes wrong:** Handler assumes `finalized` precedes `paid`. Stripe's distributed queue has at-least-once semantics with best-effort ordering. Retries reorder. Handler that creates local record on `finalized` and marks paid on `paid` hits foreign-key race and 500s.
 
-**Why it happens:** Stripe supports up to 4 levels of expansion nesting. On list endpoints with 100 items, each expansion multiplies the response size. A `list customers` with `expand: ["data.subscriptions.data.default_payment_method"]` on 100 customers generates an enormous response.
+**Why:** Stripe webhook delivery is at-least-once with best-effort ordering. Cross-event-type ordering never guaranteed.
 
 **Prevention:**
-- Document performance implications of expand on list endpoints prominently
-- Consider warning or raising when expand depth exceeds 2 on list endpoints
-- Provide examples showing the right way: fetch the list, then expand on individual retrieve calls
-- Validate expand paths at request build time (catch typos before the API call)
+1. Fundamentally caller's problem — SDK can't fix ordering. Educate.
+2. Webhooks guide: "Handling out-of-order events" section:
+   - Order by event `created` timestamp, not arrival.
+   - Make handlers idempotent: upsert by Stripe ID, not insert.
+   - When dependent event arrives before prerequisite, fetch current state via `retrieve/2` instead of relying on event payload.
+3. Ship `LatticeStripe.Event.created_at/1` returning `DateTime` from unix timestamp. Tiny ergonomic that makes "order by created" obvious.
+4. Document which events can arrive out of order (invoice lifecycle, subscription updates) vs tightly ordered (payment_intent within a single intent).
 
-**Detection:** Users reporting slow API calls or timeouts on list endpoints with expansions.
+**Phase:** 19 (cross-cutting, Webhooks guide update). Optional helper in Phase 15.
 
-**Phase:** Foundation (Tier 0) -- expand is part of request building.
-
-**Confidence:** MEDIUM -- Stripe's own docs warn about this. Less of a library design pitfall and more of a documentation/DX pitfall.
+**How to test:**
+- Unit: `Event.created_at/1` returns DateTime from integer.
+- Doc-test: guide's idempotent handler example compiles.
 
 ---
 
-### Pitfall 10: Testing Strategy That Creates Brittle or Meaningless Tests
+### H3. Search eventual consistency — just-created resources don't show up
 
-**What goes wrong:** The library either (a) encourages mocking at the wrong level (mocking HTTP responses with hardcoded JSON, creating tests that pass but don't verify real behavior), or (b) requires a live Stripe test-mode key for all tests (slow, flaky, requires network, leaks test data into Stripe dashboard).
+**What goes wrong:** `Customer.create` → immediate `Customer.search(query: "email:'x@y.com'")` returns empty. Stripe search is async-indexed; resources take ~1s (sometimes longer) to appear.
 
-**Why it happens:** Stripe's `stripe-mock` is stateless and limited. VCR/cassette recording captures exact responses but breaks when the API changes. Mocking at the HTTP level is easy but tests nothing meaningful. There is no perfect testing strategy.
+**Why:** Stripe search is backed by an Elasticsearch-style eventually-consistent store.
 
 **Prevention:**
-- Use the Transport behaviour as the test seam: provide a `LatticeStripe.Transport.Mock` or document how to use Mox with the Transport behaviour
-- Test at the right level: unit test request building and response decoding with known fixtures; integration test against stripe-mock or Stripe test mode for API correctness
-- Provide test helpers that make it easy to build fixture data (e.g., `LatticeStripe.Testing.customer_fixture()`)
-- Document the recommended testing strategy: Mox the transport for unit tests, stripe-mock for integration, Stripe test mode for smoke tests
-- Make the test helper module opt-in (`use LatticeStripe.Testing` or a separate hex package)
+1. Every `search/2` `@doc` (Customer, Invoice, PaymentIntent, Charge, Price, Product, Subscription) includes: *"Search is eventually consistent. Resources created within the last ~1 second may not yet appear. For immediate reads, use `retrieve/2` with a known ID or `list/2` with filters."*
+2. Do **not** bake retry-loops into `search/2` — hides semantics and wastes quota. stripe-ruby and stripe-node both document the delay without retrying.
+3. `LatticeStripe.Search` module doc explains the search pagination shape (`page` / `next_page`, not `starting_after`).
 
-**Detection:** Users asking "how do I test my Stripe integration?" on forums. Users with 100% passing tests that break in production.
+**Phase:** 19 (cross-cutting — Search.stream! + docs). Per-resource doc updates in 12, 14, 15.
 
-**Phase:** Developer Experience -- but the Transport behaviour enabling this must be in Foundation.
-
-**Confidence:** MEDIUM -- PaperTiger's existence validates this is a real pain point. The testing strategy is well-understood in principle but poorly executed in practice across the ecosystem.
+**How to test:**
+- Integration: skip. stripe-mock doesn't simulate indexing delay reliably.
+- Doc-test: callout text exists in every relevant `@moduledoc`.
 
 ---
 
-## Minor Pitfalls
+### H4. `BillingTestClock` fixture isolation + async advancement + cleanup
 
-### Pitfall 11: Inconsistent Error Shapes Across Endpoints
+**What goes wrong:**
+- (a) Developer creates Customer + Sub **outside** any clock, then creates a clock and tries to test advancement — nothing happens because fixtures aren't attached. **All resources under test must be created with `test_clock: "clock_xxx"` at creation time.**
+- (b) Tests leak clocks between runs. Stripe allows ~100 test clocks per account; CI eventually hits the limit.
+- (c) `clock.advance/3` is **async** — returns with `status: "advancing"`. Tests asserting on sub state before advancement completes see stale status.
+- (d) stripe-mock clock simulation is incomplete (see M3).
 
-**What goes wrong:** Different API calls return errors in different shapes (card errors have `decline_code`, validation errors have `param`, rate limit errors have `Retry-After` header). The library normalizes some but not all, leaving users to handle raw maps for edge cases.
+**Why:** Clocks are Stripe's deterministic-time sandbox. Strict isolation prevents cross-contamination. Advancement is async because Stripe has to re-run the billing worker pipeline.
 
 **Prevention:**
-- Define a clear error type hierarchy: `LatticeStripe.Error.CardError`, `.InvalidRequestError`, `.AuthenticationError`, `.RateLimitError`, `.APIError`, `.ConnectionError`
-- Each error type carries all relevant fields for that category
-- Pattern matching on error types should be the primary error handling mechanism
-- Include `request_id` on every error for support debugging
+1. `BillingTestClock.advance/3` returns the clock with `status: "advancing"`. Ship `advance_and_wait/3` (or `await_ready/2`) polling `retrieve/2` until `status == "ready"` with configurable timeout. Matches stripe-node's `clock.advance + clock.retrieve` pattern.
+2. Billing guide: **always** pass `test_clock` param when creating fixtures under a clock.
+3. Add Mix task `mix lattice_stripe.test_clock.cleanup` (or ExUnit helper in `test/support/`) listing + deleting clocks tagged with test marker metadata. Run in CI `after` hook.
+4. Document the 100-clock limit; recommend tagging via `metadata: %{"lattice_stripe_test" => "true"}` for cleanup.
 
-**Phase:** Foundation (Tier 0).
+**Phase:** 13 (TestClocks — pulled forward for exactly this reason).
 
-**Confidence:** HIGH -- Stripe's error hierarchy is well-documented and all official SDKs implement it.
+**How to test:**
+- Integration (stripe-mock): create clock, create sub with `test_clock`, advance, poll, assert transitions.
+- Unit: `advance_and_wait/3` timeout path returns `{:error, :timeout}`.
+- ExUnit support helper compiles in a sample test.
 
 ---
 
-### Pitfall 12: Not Preserving Request ID for Debugging
+### H5. Meter events eventual consistency (Tier 4, deferred — but design now)
 
-**What goes wrong:** When users contact Stripe support, the first thing support asks for is the `Request-Id` header. If the library discards response headers, users cannot provide this, making debugging production issues extremely difficult.
+**What goes wrong:** Usage-based system does `MeterEvent.create(...)`, queries `MeterEventSummary.list(...)`, expects the new event. Stripe's meter aggregation is async; events land in summaries after a delay of up to several minutes.
 
-**Prevention:**
-- Include `request_id` on every successful response and error response
-- Make it accessible without digging into raw HTTP headers
-- Log it via Telemetry events so it appears in structured logs automatically
-- Consider a "raw response" mode that returns full headers alongside the parsed body
+**Why:** Stripe's meter system is designed for high-volume telemetry (API gateways billing per-request). Synchronous aggregation wouldn't scale.
 
-**Phase:** Foundation (Tier 0).
+**Prevention (forward-looking for v0.5.x):**
+1. Don't design `MeterEvent.create/2` to return an enriched struct implying aggregation. Return raw response — `%MeterEvent{status: "pending", ...}` ack shape.
+2. `@moduledoc` opens with: *"Meter events are processed asynchronously. Expect a delay of up to several minutes before events appear in `MeterEventSummary.list/3`. Do not use meters for synchronous UI flows."*
+3. Foundational choice now (v0.3.0): `LatticeStripe.Resource` helper's `create` return shape should remain flexible as "ack-only" vs "full resource" without breaking changes. Already flexible in v1 (returns raw `Response`) — just note Meters shouldn't sugar it.
 
-**Confidence:** HIGH -- every official Stripe SDK surfaces request_id prominently.
-
----
-
-### Pitfall 13: Blocking the Caller During Pagination
-
-**What goes wrong:** Synchronous pagination (fetch page, process, fetch next page) blocks the calling process. In a Phoenix request handler, this means the connection is held open for the entire pagination duration.
-
-**Prevention:**
-- Use Elixir Streams (lazy evaluation) so callers can process items incrementally
-- Document that long-running pagination should be done in a background Task or GenServer, not in a Phoenix controller
-- Consider providing a `LatticeStripe.Task` helper for background processing patterns
-
-**Phase:** Foundation (Tier 0) for Stream-based pagination. Developer Experience for helpers.
-
-**Confidence:** LOW -- this is more of a usage pattern issue than a library design flaw. Most users will not paginate millions of records.
+**Phase:** Design note for Phase 19; actual implementation in future v0.5.x.
 
 ---
 
-### Pitfall 14: Hex Package Name Collision or Confusion
+### H6. `BillingPortal.Session` URL expiry (Tier 3, deferred — but note)
 
-**What goes wrong:** Publishing a Stripe-related package on Hex with a name that is too generic, conflicts with existing packages, or is confusable with the incumbent (`stripity_stripe`). Users install the wrong package.
+**What goes wrong:** Caller creates portal session, stores URL in DB, uses it a day later — URL is dead. Portal session URLs expire quickly (~5 min to first click, then ~1h valid). **Not reusable across customers or long-lived.**
 
-**Prevention:**
-- `lattice_stripe` is already chosen and verified unique on Hex -- this pitfall is mitigated
-- Use `LatticeStripe` module prefix consistently (not `Stripe` which would conflict)
-- Document the distinction from `stripity_stripe` in the README for users searching
+**Why:** Portal session URLs embed short-lived signed tokens for security.
 
-**Phase:** Pre-development (already resolved).
+**Prevention (for v0.4.x):**
+1. `BillingPortal.Session.create/2` returns `%Session{url: url, expires_at: datetime | nil}` populated from Stripe's response or computed as `created + 1h`.
+2. `@moduledoc`: *"Portal session URLs are single-use and short-lived. Generate a fresh session on every portal entry; do not cache URLs."*
 
-**Confidence:** HIGH -- the `lattice-stripe-oss-lib-name.md` research document addresses this.
+**Phase:** Future (v0.4.x). Note only in v0.3.0 research.
 
 ---
 
-## Phase-Specific Warnings
+### H7. Connect Account deletion and live-mode immutability
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Foundation: HTTP Transport | Finch pool ownership confusion (Pitfall 6) | Transport behaviour + documented supervision tree |
-| Foundation: Client Config | Global config anti-pattern (Pitfall 2) | Per-request client struct from day one |
-| Foundation: Error Handling | Inconsistent error shapes (Pitfall 11) | Comprehensive error type hierarchy |
-| Foundation: Retry Logic | Double charges from bad retries (Pitfall 5) | Auto-idempotency + Stripe-Should-Retry |
-| Foundation: Response Types | Rigid structs breaking on API changes (Pitfall 4) | Tolerant decoders with extra field capture |
-| Foundation: Pagination | Rate limit exhaustion (Pitfall 7) | Stream-based with guardrails and telemetry |
-| Foundation: API Versioning | Version mismatch decoding failures (Pitfall 8) | Tolerant decoders + version warning |
-| Webhooks | Raw body consumption (Pitfall 1) | Dedicated Plug with raw body capture |
-| Webhooks | Timing attack on signature (Pitfall 3) | Constant-time HMAC comparison |
-| Testing/DX | Brittle or meaningless tests (Pitfall 10) | Transport behaviour as test seam + fixtures |
-| All phases | Request ID not preserved (Pitfall 12) | Surface request_id on every response/error |
+**What goes wrong:** `Account.delete(client, "acct_xxx")` on a live-mode Standard connected account returns 400/401. Only Custom/Express (and all test-mode) are deletable. Standard accounts are also largely immutable post-onboarding — `Account.update` with business fields returns `account_invalid`.
 
-## Sources
+**Why:** Standard connected accounts are owned by the account holder (not the platform). Platform's relationship is oauth-authorized; deletion is via deauthorization, not resource delete. Live accounts have regulatory retention obligations.
 
-- [ElixirForum: Is Stripity Stripe maintained?](https://elixirforum.com/t/is-stripity-stripe-maintained/73673)
-- [Dashbit Blog: SDKs with Req: Stripe](https://dashbit.co/blog/sdks-with-req-stripe)
-- [Stripe: Designing robust APIs with idempotency](https://stripe.com/blog/idempotency)
-- [Stripe: Idempotent requests API docs](https://docs.stripe.com/api/idempotent_requests)
-- [Stripe: Webhook signature verification](https://docs.stripe.com/webhooks/signature)
-- [Stripe: API versioning](https://docs.stripe.com/api/versioning)
-- [Stripe: Expanding responses](https://docs.stripe.com/api/expanding_objects)
-- [Stripe: Automated testing](https://docs.stripe.com/automated-testing)
-- [Stripe: Pagination](https://docs.stripe.com/api/pagination)
-- [stripe-node: Auto-pagination rate limiting issue #575](https://github.com/stripe/stripe-node/issues/575)
-- [stripe-node: Webhook signature verification issue #341](https://github.com/stripe/stripe-node/issues/341)
-- [stripity-stripe: GitHub issues](https://github.com/beam-community/stripity-stripe/issues)
-- [Elixir: Application behaviour docs (global config warning)](https://hexdocs.pm/elixir/Application.html)
-- [Elixir: Design-related anti-patterns](https://hexdocs.pm/elixir/design-anti-patterns.html)
-- [Michal Muskala: Configuring Elixir Libraries](https://michal.muskala.eu/post/configuring-elixir-libraries/)
-- [Felt: Tips for improving Elixir configuration](https://felt.com/blog/elixir-configuration)
-- [stripe-mock: GitHub (statelessness limitations)](https://github.com/stripe/stripe-mock)
-- [Stripe: SDK versioning and support policy](https://docs.stripe.com/sdks/versioning)
-- [Hacker News: Stripe Elixir support frustration](https://news.ycombinator.com/item?id=24436079)
-- Master research document: `/prompts/The definitive Stripe library gap in Elixir - a master research document.md`
+**Prevention:**
+1. `Account.delete/2` `@doc` prominent callout: *"Only test-mode accounts and Custom/Express live accounts can be deleted. Deleting a Standard live account is not supported — use oauth deauthorization via the platform dashboard. Returns `{:error, %Error{type: :invalid_request, code: \"account_cannot_be_deleted\"}}` on such accounts."*
+2. `Account.update/3` `@doc`: Standard accounts accept only a narrow subset of fields post-onboarding; link to Stripe's "Updating accounts" doc.
+3. Connect guide: "Which Account type?" decision matrix.
+
+**Phase:** 17 (Connect Accounts).
+
+**How to test:**
+- Integration (stripe-mock): create test account, delete, assert 200. Note: stripe-mock likely permits deletion always; negative path is doc-test only.
+- Unit: error normalization maps `account_cannot_be_deleted` to typed Error.
+
+---
+
+### H8. Params serialization — nested arrays and `expand` with indices
+
+**What goes wrong:** v1's `FormEncoder` handles most cases. Billing introduces nasty shapes:
+- `items[0][price]=price_xxx&items[0][quantity]=2` — array of maps (v1 handles)
+- `discounts[0][coupon]=X&discounts[1][promotion_code]=Y` — Billing-specific multi-discount
+- `expand[]=data.customer&expand[]=data.subscription.default_payment_method` — nested dot paths (v1 handles)
+- `add_invoice_items[0][price_data][currency]=usd&add_invoice_items[0][price_data][product]=prod_xxx` — **triple-nested**: array of maps containing maps containing scalars. `Subscription.update` with `add_invoice_items` is notoriously ugly
+- `automatic_tax[enabled]=true` — boolean-nested in top-level map. Booleans must serialize as `"true"`/`"false"` strings. v1 should handle; audit
+
+**Why:** Stripe's form encoding is idiosyncratic. Array-of-maps uses `[index]`, nested maps use `[key]`, booleans are stringified.
+
+**Prevention:**
+1. Phase 12 (Products/Prices) and Phase 15 (Subscriptions) each include an integration test battery hitting stripe-mock with the complex shapes. stripe-mock validates form encoding against OpenAPI.
+2. Explicit unit tests for `FormEncoder`:
+   - `items[n][price_data][recurring][interval]` (4 levels deep)
+   - `discounts` array with mixed coupon/promotion_code keys
+   - `metadata` with keys containing dots
+   - `expand` with 3-level dot paths
+3. Price + Subscription guides document the exact map shapes with working examples for `price_data` inline creation.
+
+**Phase:** 12 (Products/Prices), 15 (Subscriptions).
+
+**How to test:**
+- Unit: `FormEncoder.encode/1` round-trips the battery.
+- Integration (stripe-mock): create Subscription with inline `price_data` in items, assert 200.
+
+---
+
+## MEDIUM Pitfalls (Docs-Only)
+
+### M1. Event type drift across API versions
+
+**What goes wrong:** Stripe adds new webhook event types with each API version bump. Hand-maintained `LatticeStripe.EventType` goes stale; caller pattern matches silently miss new events.
+
+**Prevention:**
+1. Phase 19 adds Mix task `mix lattice_stripe.gen.event_types` fetching Stripe's OpenAPI spec (cached, not build-time default), diffing against the module, emitting CI warning on drift. Do NOT regenerate automatically — humans should review additions.
+2. CI job (separate workflow, weekly cron): run drift check, open an issue on drift. Low-maintenance tripwire.
+3. Pin catalog to API version in `Client`'s default (`2026-03-25.dahlia`). Doc: *"Catalog accurate as of Stripe API version X. If you pin newer, run `mix lattice_stripe.events.drift`."*
+
+**Phase:** 19 (Cross-cutting EventType catalog).
+
+---
+
+### M2. "Strict mode" opinionated flags — community reception
+
+**What goes wrong:** `require_explicit_proration` is a strict-mode toggle. Research from Ruby/Node ecosystems:
+- **stripe-ruby / stripe-node / stripe-python**: no strict modes. Pure pass-through; opinions belong at caller's level.
+- **stripity_stripe** (stale Elixir lib): also pass-through.
+- **Rails `pay` gem**: opinions at its own level, not SDK's. Community likes this split: "SDK = dumb wire, high-level lib = opinions."
+- **Laravel Cashier**: opinionated, but Cashier IS the wrapper, not the SDK.
+
+Adding `require_explicit_proration` is a departure from Ruby/Node/Python norms. **Aligned with Elixir community's bias for explicitness** (Ecto's `required_fields`, NimbleOptions). Risk: stripe-ruby migrators surprised.
+
+**Mitigation:** Opt-in, defaults to `false`, heavily documented, framed as "strict mode" not "default mode."
+
+**Recommendation:** Ship it. Default off. Document as first-class feature in Subscriptions guide. Mention in release notes as opt-in.
+
+**Phase:** 15 (implement flag), 19 (document in guide).
+
+---
+
+### M3. stripe-mock coverage gaps
+
+**What goes wrong:** stripe-mock is generated from OpenAPI. Validates **shape**, not **semantics**. Known gaps for v0.3.0:
+
+- **TestClocks:** stripe-mock accepts create/advance but **does not simulate time-advance effects** on subscriptions, invoices, or meter events. Advancing doesn't cause renewal/invoice generation. Integration tests for lifecycle depending on clock effects **must** run against real Stripe test mode.
+- **Webhook event firing:** stripe-mock doesn't fire webhooks. Webhook signature verification is v1 functionality (tested in isolation); integration flow testing needs a different approach.
+- **Search:** deterministic stubs, not a real index. Eventual-consistency delay not simulated.
+- **Connect:** accepts `Stripe-Account` header but doesn't enforce cross-account isolation. Tests can verify header is **sent**, not enforced.
+- **Billing Portal:** stub URLs, not real.
+- **SubscriptionSchedule phase transitions:** shape returned, transitions not executed on clock advance.
+
+**Prevention — two-tier integration testing strategy**, documented in CONTRIBUTING:
+- **Unit/stripe-mock tier** (always runs in CI): verifies request shape, response parsing, error normalization, header presence. Fast, hermetic.
+- **Real test-mode tier** (gated behind `STRIPE_TEST_SECRET_KEY` env var, opt-in, tag `:real_stripe`): verifies end-to-end semantics — clock effects, webhook delivery, search indexing. Runs nightly or on release candidates.
+
+Each test file with semantic assertions stripe-mock can't satisfy uses `@tag :real_stripe` and skips unless env var set.
+
+Phases needing real-Stripe coverage: 13 (clocks), 14 (invoice auto-advance), 15 (subscription lifecycle), 16 (schedule phase transitions).
+
+**Phase:** 13 (first impact). Phase 19 (strategy documentation).
+
+**Open question:** stripe-mock clock simulation status may have improved since knowledge cutoff. Spike at start of Phase 13 to confirm.
+
+---
+
+### M4. Release Please with multi-phase milestone — conventional commit scopes
+
+**What goes wrong:** Milestone spans 8 phases with multiple commits. Inconsistent scopes (`feat(billing)`, `feat(subscription)`, `feat:`) produce incoherent CHANGELOG.
+
+**Prevention:**
+1. CONTRIBUTING documents scope conventions for v0.3.0 phases up front:
+   - `feat(billing):` for Tier 1 resources (Phases 12–16)
+   - `feat(connect):` for Tier 2 (Phases 17–18)
+   - `feat(sdk):` for cross-cutting (Phase 19)
+2. Release Please v4 handles scopes — each `feat(...)` becomes a CHANGELOG section, any `feat:` bumps minor.
+3. `BREAKING CHANGE:` footer bumps major. v0.3.0 is pre-1.0 so minor bumps for breaking changes is fine per SemVer, but document clearly. Avoid footer misuse.
+4. Optional v0.3.0-rc1 pre-release after Phase 16 requires Release Please manifest mode with `prerelease: true`. Confirm v1 config supports this. Easier path: manual git tag `v0.3.0-rc1` outside Release Please (no Hex auto-publish, but downstream consumers can pin git ref).
+
+**Phase:** 19 (release process doc). Decision point: Phase 16 transition (rc1 mechanism).
+
+---
+
+## Phase-Specific Warning Map
+
+| Phase | Title | Critical | High | Medium |
+|-------|-------|----------|------|--------|
+| 12 | Products/Prices/Coupons/PromoCodes | — | H8 (params) | M3 |
+| 13 | TestClocks | — | H4 (isolation/async/cleanup) | M3 |
+| 14 | Invoices + upcoming | C1, C4 | H8 | M3 |
+| 15 | Subscriptions | C1, C2 | H1, H8 | M2 |
+| 16 | Subscription Schedules | C1, C5 | H1 | M4 (rc1 decision) |
+| 17 | Connect Accounts/Links | C3 | H7 | — |
+| 18 | Connect Transfers/Payouts/Balance | C3 | — | — |
+| 19 | Cross-cutting | — | H2, H3, H5, H6 | M1, M3, M4 |
+
+---
+
+## Confidence Assessment
+
+| Area | Level | Reason |
+|------|-------|--------|
+| Stripe API behaviors (C1–C5, H1, H4, H7, H8) | HIGH | Documented in Stripe API reference; well-known community post-mortems. |
+| Webhook ordering / search consistency (H2, H3) | HIGH | Stripe documents these explicitly. |
+| stripe-mock gap analysis (M3) | MEDIUM | Based on stripe-mock README and issue tracker patterns; exact gap set may have improved. Spike in Phase 13 to confirm clock simulation status before committing to two-tier strategy. |
+| Community reception of strict-mode flags (M2) | MEDIUM | Pattern-inference from Ruby/Node ecosystems. Opt-in + default-off de-risks. |
+| Release Please v4 multi-scope behavior (M4) | HIGH | v1.0 shipped successfully with Release Please v4; known-good foundation. |
+| Meter/Portal forward-compat notes (H5, H6) | MEDIUM | Based on Stripe API docs for deferred modules; architectural impact low. |
+
+---
+
+## Gaps / Recommended Follow-ups
+
+1. **stripe-mock clock simulation status** — spike at start of Phase 13 to confirm which assertions work against stripe-mock vs must defer to real test-mode.
+2. **`require_explicit_proration` default** — ship opt-in for v0.3.0, revisit for v1.0 whether to flip default to `true`. Track via GitHub issue.
+3. **`with_account/2` helper** (C3 prevention) — low-risk ergonomic. Decide in Phase 17 planning whether to ship or defer.
+4. **`Account.update/3` Standard-account field allowlist** — Stripe doesn't expose machine-readable list. Not worth manual curation in v0.3.0; document behavior instead.
+5. **Event type drift Mix task** — tripwire design in Phase 19. Decide whether to fetch OpenAPI at build time or commit a snapshot JSON.
