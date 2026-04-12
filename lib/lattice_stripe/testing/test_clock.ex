@@ -305,11 +305,11 @@ defmodule LatticeStripe.Testing.TestClock do
             client
 
           mod when is_atom(mod) ->
-            apply(mod, :stripe_client, [])
+            mod.stripe_client()
         end
 
       mod when is_atom(mod) ->
-        apply(mod, :stripe_client, [])
+        mod.stripe_client()
     end
   end
 
@@ -325,7 +325,7 @@ defmodule LatticeStripe.Testing.TestClock do
       spec = test_mod.__lattice_test_clock_client__()
 
       if is_atom(spec) and function_exported?(spec, :stripe_client, 0) do
-        apply(spec, :stripe_client, [])
+        spec.stripe_client()
       else
         spec
       end

@@ -21,10 +21,10 @@ defmodule LatticeStripe.Integration.PriceTest do
       if Code.ensure_loaded?(LatticeStripe.Product) and
            function_exported?(LatticeStripe.Product, :create, 2) do
         {:ok, p} =
-          apply(LatticeStripe.Product, :create, [
+          LatticeStripe.Product.create(
             client,
             %{"name" => "Integration Price Product", "type" => "service"}
-          ])
+          )
 
         p
       else

@@ -159,7 +159,7 @@ defmodule LatticeStripe.Testing.TestClockTest do
       :code.load_binary(full_name, ~c"nofile", binary)
 
       assert function_exported?(full_name, :__lattice_test_clock_client__, 0)
-      assert apply(full_name, :__lattice_test_clock_client__, []) == SomeTestModule
+      assert full_name.__lattice_test_clock_client__() == SomeTestModule
     end
   end
 

@@ -762,7 +762,7 @@ defmodule LatticeStripe.TelemetryTest do
   # ---------------------------------------------------------------------------
 
   describe "invoice auto_advance_scheduled event" do
-    alias LatticeStripe.{Invoice, Error}
+    alias LatticeStripe.{Error, Invoice}
 
     defp invoice_json_for_telemetry(overrides \\ %{}) do
       Map.merge(

@@ -55,6 +55,8 @@ defmodule Mix.Tasks.LatticeStripe.TestClock.Cleanup do
 
   @shortdoc "Clean up leaked test clocks (age-based, safe by default)"
 
+  alias LatticeStripe.TestHelpers.TestClock, as: TestClockHelper
+
   @impl Mix.Task
   def run(args) do
     {opts, _, _} =
@@ -92,7 +94,7 @@ defmodule Mix.Tasks.LatticeStripe.TestClock.Cleanup do
         if(name_prefix, do: [name_prefix: name_prefix], else: [])
 
     {:ok, candidates} =
-      LatticeStripe.TestHelpers.TestClock.cleanup_tagged(client, cleanup_opts)
+      TestClockHelper.cleanup_tagged(client, cleanup_opts)
 
     Mix.shell().info(
       "Found #{length(candidates)} candidate clock(s) older than #{format_duration(older_than_ms)}."
@@ -122,7 +124,7 @@ defmodule Mix.Tasks.LatticeStripe.TestClock.Cleanup do
             if(name_prefix, do: [name_prefix: name_prefix], else: [])
 
         {:ok, %{deleted: d, failed: f}} =
-          LatticeStripe.TestHelpers.TestClock.cleanup_tagged(client, delete_opts)
+          TestClockHelper.cleanup_tagged(client, delete_opts)
 
         Mix.shell().info("Deleted #{d} clock(s); #{f} failure(s).")
     end
@@ -139,7 +141,7 @@ defmodule Mix.Tasks.LatticeStripe.TestClock.Cleanup do
           String.to_existing_atom("Elixir." <> spec)
       end
 
-    apply(mod, :stripe_client, [])
+    mod.stripe_client()
   rescue
     e in [ArgumentError, UndefinedFunctionError] ->
       Mix.raise(

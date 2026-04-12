@@ -43,6 +43,7 @@ defmodule LatticeStripe.Coupon do
   """
 
   alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.Coupon.AppliesTo
 
   @known_fields ~w[
     id object amount_off applies_to created currency currency_options deleted
@@ -172,7 +173,7 @@ defmodule LatticeStripe.Coupon do
   end
 
   defp decode_applies_to(nil), do: nil
-  defp decode_applies_to(%{} = m), do: LatticeStripe.Coupon.AppliesTo.from_map(m)
+  defp decode_applies_to(%{} = m), do: AppliesTo.from_map(m)
 
   # D-03 whitelist atomization
   defp atomize_duration("forever"), do: :forever

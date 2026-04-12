@@ -69,7 +69,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
     # Items list should decode with id preserved (stripity_stripe regression guard).
     %{"data" => items} = sub.items
     assert is_list(items)
-    assert length(items) >= 1
+    assert items != []
     [first | _] = items
     assert %SubscriptionItem{} = first
     refute is_nil(first.id)

@@ -122,7 +122,7 @@ defmodule LatticeStripe.PromotionCode do
     |> Resource.unwrap_singular(&from_map/1)
   end
 
-  @doc "Updates a PromotionCode. POST /v1/promotion_codes/:id. Use `%{\"active\" => \"false\"}` to deactivate."
+  @doc ~s(Updates a PromotionCode. POST /v1/promotion_codes/:id. Use `%{"active" => "false"}` to deactivate.)
   @spec update(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def update(%Client{} = client, id, params, opts \\ []) when is_binary(id) do
     %Request{method: :post, path: "/v1/promotion_codes/#{id}", params: params, opts: opts}

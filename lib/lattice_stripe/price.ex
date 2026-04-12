@@ -42,6 +42,7 @@ defmodule LatticeStripe.Price do
   """
 
   alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.Price.{Recurring, Tier}
 
   @known_fields ~w[
     id object active billing_scheme created currency currency_options
@@ -291,12 +292,12 @@ defmodule LatticeStripe.Price do
   end
 
   defp decode_recurring(nil), do: nil
-  defp decode_recurring(%{} = m), do: LatticeStripe.Price.Recurring.from_map(m)
+  defp decode_recurring(%{} = m), do: Recurring.from_map(m)
 
   defp decode_tiers(nil), do: nil
 
   defp decode_tiers(list) when is_list(list),
-    do: Enum.map(list, &LatticeStripe.Price.Tier.from_map/1)
+    do: Enum.map(list, &Tier.from_map/1)
 
   # D-03 atomization helpers — whitelist only; unknown values pass through as strings.
   defp atomize_type("one_time"), do: :one_time
