@@ -49,6 +49,11 @@ defmodule LatticeStripe.ProductTest do
   end
 
   describe "function surface (D-05 absence)" do
+    setup do
+      Code.ensure_loaded!(Product)
+      :ok
+    end
+
     test "create/2,3 exported" do
       assert function_exported?(Product, :create, 2)
       assert function_exported?(Product, :create, 3)

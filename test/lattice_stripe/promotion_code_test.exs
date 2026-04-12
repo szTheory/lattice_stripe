@@ -41,6 +41,11 @@ defmodule LatticeStripe.PromotionCodeTest do
   end
 
   describe "function surface (D-04 D-05 absences)" do
+    setup do
+      Code.ensure_loaded!(PromotionCode)
+      :ok
+    end
+
     test "CRUD-minus-delete-and-search exported" do
       assert function_exported?(PromotionCode, :create, 2)
       assert function_exported?(PromotionCode, :retrieve, 2)

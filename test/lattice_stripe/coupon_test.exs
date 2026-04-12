@@ -52,6 +52,11 @@ defmodule LatticeStripe.CouponTest do
   end
 
   describe "function surface (D-05 forbidden ops absence)" do
+    setup do
+      Code.ensure_loaded!(Coupon)
+      :ok
+    end
+
     test "create / retrieve / delete / list / stream! exported" do
       assert function_exported?(Coupon, :create, 2)
       assert function_exported?(Coupon, :retrieve, 2)

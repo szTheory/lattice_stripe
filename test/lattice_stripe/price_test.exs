@@ -100,6 +100,11 @@ defmodule LatticeStripe.PriceTest do
   end
 
   describe "function surface (D-05 forbidden ops absence)" do
+    setup do
+      Code.ensure_loaded!(Price)
+      :ok
+    end
+
     test "CRUD functions exported" do
       assert function_exported?(Price, :create, 2)
       assert function_exported?(Price, :retrieve, 2)

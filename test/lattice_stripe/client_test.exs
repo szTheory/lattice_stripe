@@ -482,7 +482,9 @@ defmodule LatticeStripe.ClientTest do
         handler_id,
         [[:lattice_stripe, :request, :start], [:lattice_stripe, :request, :stop]],
         fn event, _measurements, metadata, _config ->
-          send(test_pid, {:telemetry_event, event, metadata})
+          if metadata[:path] == "/v1/customers/cus_123" do
+            send(test_pid, {:telemetry_event, event, metadata})
+          end
         end,
         nil
       )
@@ -495,8 +497,8 @@ defmodule LatticeStripe.ClientTest do
 
       Client.request(client, get_request())
 
-      refute_receive {:telemetry_event, [:lattice_stripe, :request, :start], _}
-      refute_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _}
+      refute_receive {:telemetry_event, [:lattice_stripe, :request, :start], _}, 100
+      refute_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _}, 100
     end
   end
 
