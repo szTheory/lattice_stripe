@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0-billing
-milestone_name: Billing (Subscriptions, Invoices, Schedules)
-status: shipped_pending_merge
-stopped_at: Phase 15 shipped as PR #4 (Billing track 14+15); awaiting merge. Next up Phase 16 subscription-schedules.
-last_updated: "2026-04-12T19:00:00.000Z"
+milestone: v1.0
+milestone_name: milestone
+status: "Awaiting PR #4 merge (Billing track: Phase 14 + Phase 15) → then `/gsd-plan-phase 16`"
+stopped_at: Phase 16 context gathered (5 decisions locked D1-D5)
+last_updated: "2026-04-12T21:28:54.152Z"
 last_activity: 2026-04-12
 progress:
-  total_phases: 17
-  completed_phases: 14
-  total_plans: 44
-  completed_plans: 44
-  percent: 82
+  total_phases: 11
+  completed_phases: 11
+  total_plans: 31
+  completed_plans: 31
+  percent: 100
 ---
 
 # Project State
@@ -35,6 +35,7 @@ Progress: [████████████████░░░░] 14/17 p
 **Open PR:** [#4 Billing track: Phase 14 (Invoices) + Phase 15 (Subscriptions + SubscriptionItems)](https://github.com/szTheory/lattice_stripe/pull/4) — 137 commits, 975 unit tests + 11 Phase 15 integration tests green, code review HIGH+MEDIUM auto-fixed.
 
 **Phase 15 shipped delivers:**
+
 - `LatticeStripe.Subscription` — CRUD + search + streams + bang variants + lifecycle verbs (`cancel/3..4`, `resume/3`, `pause_collection/5` with atom guard)
 - `LatticeStripe.SubscriptionItem` — flat namespace, full CRUD, `subscription` param required on list/stream
 - 3 new nested typed structs: `Subscription.{PauseCollection, CancellationDetails, TrialSettings}`
@@ -198,6 +199,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12
-Stopped at: Phase 15 shipped as PR #4 (Billing track 14+15). D1 restore landed. Code review complete (4 findings auto-fixed). Verification 6/6 passed. 975 unit tests + 11 integration tests green. Awaiting PR merge.
+Last session: 2026-04-12T21:28:54.145Z
+Stopped at: Phase 16 context gathered (5 decisions locked D1-D5)
 Resume path: After PR #4 merges, `git fetch && git checkout main && git pull`, then `/gsd-plan-phase 16` (subscription-schedules).
