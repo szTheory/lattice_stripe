@@ -62,8 +62,11 @@ defmodule LatticeStripe.SubscriptionSchedule do
   `proration_behavior` at either the top level of `params` or inside any
   element of `params["phases"][]`. Stripe does not accept
   `proration_behavior` at `phases[].items[]`, so the guard does not walk
-  that deep. (Wiring is added in Plan 16-02 — this plan ships the resource
-  shape unguarded.)
+  that deep.
+
+  Wired into `update/4` only — `create/3`, `cancel/4`, and `release/4`
+  bypass this guard because Stripe does not accept `proration_behavior` on
+  those endpoints.
 
   ## Telemetry
 
@@ -77,7 +80,7 @@ defmodule LatticeStripe.SubscriptionSchedule do
   See the [Stripe Subscription Schedules API](https://docs.stripe.com/api/subscription_schedules).
   """
 
-  alias LatticeStripe.{Client, Error, Request, Resource, Response}
+  alias LatticeStripe.{Billing, Client, Error, Request, Resource, Response}
   alias LatticeStripe.SubscriptionSchedule.{CurrentPhase, Phase}
 
   @known_fields ~w[
@@ -193,18 +196,25 @@ defmodule LatticeStripe.SubscriptionSchedule do
 
   > #### Proration guard {: .info}
   >
-  > Plan 16-02 wires `LatticeStripe.Billing.Guards.check_proration_required/2`
-  > into this function. Until then, `update/4` does not enforce
-  > `require_explicit_proration: true` on this resource.
+  > When the client has `require_explicit_proration: true`, this function
+  > runs `LatticeStripe.Billing.Guards.check_proration_required/2` BEFORE
+  > dispatching the request. Params must carry `"proration_behavior"` at
+  > the top level OR at `phases[].proration_behavior` (but NOT
+  > `phases[].items[]` — Stripe does not accept it there).
   """
   @spec update(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def update(%Client{} = client, id, params \\ %{}, opts \\ [])
       when is_binary(id) and is_map(params) and is_list(opts) do
-    # NOTE: Plan 16-02 Task 3 adds Billing.Guards.check_proration_required/2 here.
-    # Keep this call path narrow so that wiring is a single-line diff.
-    %Request{method: :post, path: "/v1/subscription_schedules/#{id}", params: params, opts: opts}
-    |> then(&Client.request(client, &1))
-    |> Resource.unwrap_singular(&from_map/1)
+    with :ok <- Billing.Guards.check_proration_required(client, params) do
+      %Request{
+        method: :post,
+        path: "/v1/subscription_schedules/#{id}",
+        params: params,
+        opts: opts
+      }
+      |> then(&Client.request(client, &1))
+      |> Resource.unwrap_singular(&from_map/1)
+    end
   end
 
   @doc "Like `update/4` but raises on failure."

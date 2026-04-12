@@ -276,7 +276,9 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
       end)
 
       assert {:ok, %SubscriptionSchedule{}} =
-               SubscriptionSchedule.update(client, "sub_sched_1", %{"proration_behavior" => "none"})
+               SubscriptionSchedule.update(client, "sub_sched_1", %{
+                 "proration_behavior" => "none"
+               })
     end
 
     test "permissive client (default) reaches Transport without proration_behavior" do
