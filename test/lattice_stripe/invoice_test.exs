@@ -843,5 +843,4 @@ defmodule LatticeStripe.InvoiceTest do
       assert inspected =~ "extra:"
     end
   end
-
 end

@@ -121,7 +121,11 @@ defmodule LatticeStripe.ConfigTest do
 
     test "require_explicit_proration rejects non-boolean" do
       assert_raise NimbleOptions.ValidationError, fn ->
-        Config.validate!(api_key: "sk_test_123", finch: MyFinch, require_explicit_proration: "yes")
+        Config.validate!(
+          api_key: "sk_test_123",
+          finch: MyFinch,
+          require_explicit_proration: "yes"
+        )
       end
     end
   end

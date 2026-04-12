@@ -1058,7 +1058,8 @@ defmodule LatticeStripe.Invoice do
   defp parse_lines(nil), do: nil
 
   defp parse_lines(%{"object" => "list"} = lines_map) do
-    List.from_json(lines_map) |> Map.update!(:data, fn items ->
+    List.from_json(lines_map)
+    |> Map.update!(:data, fn items ->
       Enum.map(items, &LineItem.from_map/1)
     end)
   end
