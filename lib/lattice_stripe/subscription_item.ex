@@ -12,7 +12,7 @@ defmodule LatticeStripe.SubscriptionItem do
 
   ## Listing requires a subscription
 
-  `list/3` and `stream!/2` require the `"subscription"` param — unfiltered
+  `list/3` and `stream!/3` require the `"subscription"` param — unfiltered
   SubscriptionItem listing is an antipattern and produces confusing results
   (it returns items across all subscriptions, which is rarely what you want).
   Passing `%{}` raises `ArgumentError` immediately.
@@ -212,7 +212,7 @@ defmodule LatticeStripe.SubscriptionItem do
     Resource.require_param!(
       params,
       "subscription",
-      ~s|SubscriptionItem.stream!/2 requires a "subscription" key in params.|
+      ~s|SubscriptionItem.stream!/3 requires a "subscription" key in params.|
     )
 
     req = %Request{method: :get, path: "/v1/subscription_items", params: params, opts: opts}
