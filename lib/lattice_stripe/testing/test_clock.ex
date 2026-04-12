@@ -196,9 +196,15 @@ defmodule LatticeStripe.Testing.TestClock do
   no calendar shift helper. Use `[to: DateTime]` with hand-computed month
   math if needed.
 
+  ## Options
+
+  - `:client` -- per-call client override (`%LatticeStripe.Client{}`).
+    When omitted, falls back to the process-bound client from the `use` macro.
+
   ## Example
 
       advance(clock, days: 30)
+      advance(clock, days: 30, client: my_client)
   """
   def advance(clock, unit_opts) when is_list(unit_opts) do
     client = resolve_client!(unit_opts)
