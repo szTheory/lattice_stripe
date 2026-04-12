@@ -50,15 +50,12 @@ defmodule LatticeStripe.Discount do
 
   @typedoc """
   A Stripe Discount.
-
-  `:coupon` is typed as `term()` until `LatticeStripe.Coupon` lands (Plan 12-06),
-  at which point the typespec tightens to `LatticeStripe.Coupon.t() | String.t() | nil`.
   """
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t(),
           checkout_session: String.t() | nil,
-          coupon: term() | nil,
+          coupon: LatticeStripe.Coupon.t() | String.t() | nil,
           customer: String.t() | nil,
           end: integer() | nil,
           invoice: String.t() | nil,
@@ -76,8 +73,8 @@ defmodule LatticeStripe.Discount do
 
   - `nil` — no embedded coupon
   - a string — unexpanded coupon ID, kept as-is
-  - a map — expanded coupon object; kept as a raw map until `LatticeStripe.Coupon`
-    lands in Plan 12-06, which replaces this branch to call `Coupon.from_map/1`.
+  - a map — expanded coupon object; decoded to `%LatticeStripe.Coupon{}` via
+    `LatticeStripe.Coupon.from_map/1`.
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
@@ -85,7 +82,7 @@ defmodule LatticeStripe.Discount do
       id: map["id"],
       object: map["object"] || "discount",
       checkout_session: map["checkout_session"],
-      coupon: map["coupon"],
+      coupon: decode_coupon(map["coupon"]),
       customer: map["customer"],
       end: map["end"],
       invoice: map["invoice"],
@@ -96,4 +93,8 @@ defmodule LatticeStripe.Discount do
       extra: Map.drop(map, @known_fields)
     }
   end
+
+  defp decode_coupon(nil), do: nil
+  defp decode_coupon(id) when is_binary(id), do: id
+  defp decode_coupon(%{} = coupon_map), do: LatticeStripe.Coupon.from_map(coupon_map)
 end
