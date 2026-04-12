@@ -398,12 +398,6 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
       refute function_exported?(LatticeStripe.TestHelpers.TestClock, :search, 3)
     end
 
-    test "advance/4 and advance_and_wait/4 are NOT exported yet (Plan 04)" do
-      # These land in Plan 13-04; this plan ships CRUD only.
-      refute function_exported?(LatticeStripe.TestHelpers.TestClock, :advance, 4)
-      refute function_exported?(LatticeStripe.TestHelpers.TestClock, :advance_and_wait, 4)
-    end
-
     test "CRUD functions are exported" do
       assert function_exported?(TestClock, :create, 2)
       assert function_exported?(TestClock, :retrieve, 2)
@@ -414,6 +408,85 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
       assert function_exported?(TestClock, :retrieve!, 2)
       assert function_exported?(TestClock, :list!, 1)
       assert function_exported?(TestClock, :delete!, 2)
+    end
+
+    test "advance/4 and advance_and_wait/4 ARE exported" do
+      assert function_exported?(TestClock, :advance, 4)
+      assert function_exported?(TestClock, :advance!, 4)
+      assert function_exported?(TestClock, :advance_and_wait, 4)
+      assert function_exported?(TestClock, :advance_and_wait!, 4)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # advance/4 (Plan 13-04)
+  # ---------------------------------------------------------------------------
+
+  describe "advance/4" do
+    test "POSTs /v1/test_helpers/test_clocks/:id/advance with frozen_time param" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/test_helpers/test_clocks/clock_abc/advance")
+        assert req.body =~ "frozen_time=1713086400"
+        ok_response(test_clock_json(%{"id" => "clock_abc", "status" => "advancing"}))
+      end)
+
+      assert {:ok, %TestClock{id: "clock_abc", status: :advancing}} =
+               TestClock.advance(client, "clock_abc", 1_713_086_400)
+    end
+
+    test "returns {:error, %Error{}} on HTTP failure" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert {:error, %Error{type: :invalid_request_error}} =
+               TestClock.advance(client, "clock_abc", 1_713_086_400)
+    end
+
+    test "guards against non-binary id" do
+      client = test_client()
+
+      assert_raise FunctionClauseError, fn ->
+        TestClock.advance(client, :not_binary, 1_713_086_400)
+      end
+    end
+
+    test "guards against non-integer frozen_time" do
+      client = test_client()
+
+      assert_raise FunctionClauseError, fn ->
+        TestClock.advance(client, "clock_abc", "not_int")
+      end
+    end
+  end
+
+  describe "advance!/4" do
+    test "returns %TestClock{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(test_clock_json(%{"id" => "clock_abc", "status" => "advancing"}))
+      end)
+
+      assert %TestClock{id: "clock_abc", status: :advancing} =
+               TestClock.advance!(client, "clock_abc", 1_713_086_400)
+    end
+
+    test "raises %Error{} on error response" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise Error, fn ->
+        TestClock.advance!(client, "clock_abc", 1_713_086_400)
+      end
     end
   end
 end
