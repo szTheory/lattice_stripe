@@ -24,3 +24,6 @@ lattice_stripe-*.tar
 
 # ElixirLS
 .elixir_ls/
+
+# direnv (real_stripe test env — see CONTRIBUTING.md)
+.envrc

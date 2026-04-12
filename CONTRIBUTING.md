@@ -40,6 +40,63 @@ Then run integration tests:
 mix test --include integration
 ```
 
+## Running `:real_stripe` tests
+
+A small set of tests under `test/real_stripe/` exercises live Stripe test
+mode (not `stripe-mock`). They are tagged `:real_stripe` and EXCLUDED by
+default — `mix test` never runs them unless you opt in with
+`--include real_stripe`.
+
+### Prerequisites
+
+1. A Stripe **test-mode** secret key. Get one from
+   https://dashboard.stripe.com/test/apikeys. **Never use a live key** — the
+   `LatticeStripe.Testing.RealStripeCase` case template refuses keys that
+   start with `sk_live_` as a non-negotiable safety guard.
+2. The environment variable `STRIPE_TEST_SECRET_KEY` must be set to that key.
+
+### Recommended: `direnv` + `.envrc`
+
+The repo does not commit any `.envrc` file (`.envrc` is in `.gitignore`).
+Create one locally:
+
+```bash
+# .envrc (in the repo root — gitignored)
+export STRIPE_TEST_SECRET_KEY=sk_test_yourkeyhere
+```
+
+Then `direnv allow` once. From then on, `cd`-ing into the repo exports the
+key automatically. Install direnv via `brew install direnv` (macOS) or
+your distro's package manager, and hook it into your shell per
+https://direnv.net/docs/hook.html.
+
+### Running the suite
+
+```bash
+# Run ONLY the real_stripe tests (requires STRIPE_TEST_SECRET_KEY):
+mix test --include real_stripe --only real_stripe
+
+# Run everything: unit + stripe-mock integration + real Stripe:
+mix test --include integration --include real_stripe
+```
+
+### CI
+
+GitHub Actions stores `STRIPE_TEST_SECRET_KEY` as a repository secret. The
+`:real_stripe` job reads it from the job env. If the secret is missing in a
+CI run (e.g. rotated by accident), the tests **flunk loudly** rather than
+skipping — use `LatticeStripe.Testing.RealStripeCase`'s `setup_all` gate as
+the canonical example for phases 14+.
+
+### Safety
+
+- Keys starting with `sk_live_` cause an immediate `flunk/1` — NON-NEGOTIABLE.
+- Non-CI runs with no key → skipped with a friendly message.
+- CI runs with no key → flunk (secret rotation must be noticed).
+- All real_stripe tests run with `async: false` and a 120s per-test timeout.
+- Resources created during tests are cleaned up by `on_exit` (ExUnit Owner
+  pattern) and backstopped by `mix lattice_stripe.test_clock.cleanup`.
+
 ## Commit Convention
 
 This project uses [Conventional Commits](https://www.conventionalcommits.org/). All commit messages must follow this format:
