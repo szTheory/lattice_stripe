@@ -31,7 +31,6 @@ defmodule LatticeStripe.ProductIntegrationTest do
       {:ok, created} =
         Product.create(client, %{
           "name" => "Integration Test Product",
-          "type" => "service",
           "metadata" => %{"test" => "true"}
         })
 
@@ -54,7 +53,7 @@ defmodule LatticeStripe.ProductIntegrationTest do
 
     test "archive-via-update (D-05 delete workaround)", %{client: client} do
       {:ok, product} =
-        Product.create(client, %{"name" => "Archive Me", "type" => "good"})
+        Product.create(client, %{"name" => "Archive Me"})
 
       # "Delete" is expressed as update(active: false) per moduledoc guidance —
       # Stripe's Products API has no delete endpoint.

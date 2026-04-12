@@ -3,16 +3,25 @@ defmodule LatticeStripe.Integration.PriceTest do
 
   @moduletag :integration
 
-  alias LatticeStripe.{Client, Price}
+  import LatticeStripe.TestHelpers
+
+  alias LatticeStripe.Price
   alias LatticeStripe.Price.Recurring
 
+  setup_all do
+    case :gen_tcp.connect(~c"localhost", 12_111, [], 1000) do
+      {:ok, socket} ->
+        :gen_tcp.close(socket)
+        start_supervised!({Finch, name: LatticeStripe.IntegrationFinch})
+        :ok
+
+      {:error, _} ->
+        raise "stripe-mock not running on localhost:12111 — start with: docker run -p 12111-12112:12111-12112 stripe/stripe-mock:latest"
+    end
+  end
+
   setup do
-    client =
-      Client.new!(
-        api_key: "sk_test_123",
-        base_url: "http://localhost:12111",
-        finch: LatticeStripe.Finch
-      )
+    client = test_integration_client()
 
     # Product module ships in Plan 12-04 (parallel wave). When available,
     # create a real Product; otherwise fall back to a hardcoded stripe-mock
@@ -23,7 +32,7 @@ defmodule LatticeStripe.Integration.PriceTest do
         {:ok, p} =
           LatticeStripe.Product.create(
             client,
-            %{"name" => "Integration Price Product", "type" => "service"}
+            %{"name" => "Integration Price Product"}
           )
 
         p
@@ -124,7 +133,7 @@ defmodule LatticeStripe.Integration.PriceTest do
       # for the Phase 12 Price flow (unit_amount_decimal uses the same path).
       encoded = LatticeStripe.FormEncoder.encode(%{"percent_off" => 12.5})
       assert encoded == "percent_off=12.5"
-      refute encoded =~ "e"
+      refute encoded =~ ~r/\d+\.?\d*e[+-]?\d+/i
     end
 
     test "search/3 returns typed list", %{client: client} do

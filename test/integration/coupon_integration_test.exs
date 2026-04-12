@@ -3,17 +3,24 @@ defmodule LatticeStripe.Integration.CouponTest do
 
   @moduletag :integration
 
-  alias LatticeStripe.{Client, Coupon}
+  import LatticeStripe.TestHelpers
+
+  alias LatticeStripe.Coupon
+
+  setup_all do
+    case :gen_tcp.connect(~c"localhost", 12_111, [], 1000) do
+      {:ok, socket} ->
+        :gen_tcp.close(socket)
+        start_supervised!({Finch, name: LatticeStripe.IntegrationFinch})
+        :ok
+
+      {:error, _} ->
+        raise "stripe-mock not running on localhost:12111 — start with: docker run -p 12111-12112:12111-12112 stripe/stripe-mock:latest"
+    end
+  end
 
   setup do
-    client =
-      Client.new!(
-        api_key: "sk_test_123",
-        base_url: "http://localhost:12111",
-        finch: LatticeStripe.Finch
-      )
-
-    {:ok, client: client}
+    {:ok, client: test_integration_client()}
   end
 
   describe "Coupon CRUD round-trip" do
