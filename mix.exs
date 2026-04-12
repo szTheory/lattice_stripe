@@ -107,7 +107,7 @@ defmodule LatticeStripe.MixProject do
   defp deps do
     [
       # Runtime dependencies
-      {:finch, "~> 0.19"},
+      {:finch, "~> 0.21"},
       {:jason, "~> 1.4"},
       {:telemetry, "~> 1.0"},
       {:nimble_options, "~> 1.0"},
