@@ -407,6 +407,232 @@ defmodule LatticeStripe.InvoiceTest do
   end
 
   # ---------------------------------------------------------------------------
+  # finalize/4
+  # ---------------------------------------------------------------------------
+
+  describe "finalize/4" do
+    test "sends POST /v1/invoices/:id/finalize and returns {:ok, %Invoice{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/in_test1234567890/finalize")
+        ok_response(invoice_json(%{"status" => "open"}))
+      end)
+
+      assert {:ok, %Invoice{status: :open}} =
+               Invoice.finalize(client, "in_test1234567890")
+    end
+
+    test "accepts optional params" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/in_test1234567890/finalize")
+        assert req.body =~ "auto_advance=false"
+        ok_response(invoice_json(%{"status" => "open"}))
+      end)
+
+      assert {:ok, %Invoice{}} =
+               Invoice.finalize(client, "in_test1234567890", %{"auto_advance" => false})
+    end
+  end
+
+  describe "finalize!/4" do
+    test "returns %Invoice{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(invoice_json(%{"status" => "open"}))
+      end)
+
+      assert %Invoice{status: :open} = Invoice.finalize!(client, "in_test1234567890")
+    end
+
+    test "raises %Error{} on failure" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise Error, fn ->
+        Invoice.finalize!(client, "in_test1234567890")
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # void/4
+  # ---------------------------------------------------------------------------
+
+  describe "void/4" do
+    test "sends POST /v1/invoices/:id/void and returns {:ok, %Invoice{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/in_test1234567890/void")
+        ok_response(invoice_json(%{"status" => "void"}))
+      end)
+
+      assert {:ok, %Invoice{status: :void}} =
+               Invoice.void(client, "in_test1234567890")
+    end
+  end
+
+  describe "void!/4" do
+    test "returns %Invoice{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(invoice_json(%{"status" => "void"}))
+      end)
+
+      assert %Invoice{status: :void} = Invoice.void!(client, "in_test1234567890")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # pay/4
+  # ---------------------------------------------------------------------------
+
+  describe "pay/4" do
+    test "sends POST /v1/invoices/:id/pay and returns {:ok, %Invoice{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/in_test1234567890/pay")
+        ok_response(invoice_json(%{"status" => "paid"}))
+      end)
+
+      assert {:ok, %Invoice{status: :paid}} =
+               Invoice.pay(client, "in_test1234567890")
+    end
+
+    test "accepts paid_out_of_band param" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/in_test1234567890/pay")
+        assert req.body =~ "paid_out_of_band=true"
+        ok_response(invoice_json(%{"status" => "paid"}))
+      end)
+
+      assert {:ok, %Invoice{}} =
+               Invoice.pay(client, "in_test1234567890", %{"paid_out_of_band" => true})
+    end
+  end
+
+  describe "pay!/4" do
+    test "returns %Invoice{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(invoice_json(%{"status" => "paid"}))
+      end)
+
+      assert %Invoice{status: :paid} = Invoice.pay!(client, "in_test1234567890")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # send_invoice/4
+  # ---------------------------------------------------------------------------
+
+  describe "send_invoice/4" do
+    test "sends POST /v1/invoices/:id/send and returns {:ok, %Invoice{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/in_test1234567890/send")
+        ok_response(invoice_json(%{"status" => "open"}))
+      end)
+
+      assert {:ok, %Invoice{status: :open}} =
+               Invoice.send_invoice(client, "in_test1234567890")
+    end
+  end
+
+  describe "send_invoice!/4" do
+    test "returns %Invoice{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(invoice_json(%{"status" => "open"}))
+      end)
+
+      assert %Invoice{} = Invoice.send_invoice!(client, "in_test1234567890")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # mark_uncollectible/4
+  # ---------------------------------------------------------------------------
+
+  describe "mark_uncollectible/4" do
+    test "sends POST /v1/invoices/:id/mark_uncollectible and returns {:ok, %Invoice{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/in_test1234567890/mark_uncollectible")
+        ok_response(invoice_json(%{"status" => "uncollectible"}))
+      end)
+
+      assert {:ok, %Invoice{status: :uncollectible}} =
+               Invoice.mark_uncollectible(client, "in_test1234567890")
+    end
+  end
+
+  describe "mark_uncollectible!/4" do
+    test "returns %Invoice{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(invoice_json(%{"status" => "uncollectible"}))
+      end)
+
+      assert %Invoice{status: :uncollectible} =
+               Invoice.mark_uncollectible!(client, "in_test1234567890")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # search/3
+  # ---------------------------------------------------------------------------
+
+  describe "search/3" do
+    test "sends GET /v1/invoices/search with query param" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert req.url =~ "/v1/invoices/search"
+        assert req.url =~ "query="
+        ok_response(list_json([invoice_json()], "/v1/invoices/search"))
+      end)
+
+      assert {:ok, %Response{data: %List{data: [%Invoice{}]}}} =
+               Invoice.search(client, %{"query" => "status:'open'"})
+    end
+
+    test "returns {:error, %Error{}} on failure" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert {:error, %Error{}} = Invoice.search(client, %{"query" => "status:'open'"})
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Inspect
   # ---------------------------------------------------------------------------
 

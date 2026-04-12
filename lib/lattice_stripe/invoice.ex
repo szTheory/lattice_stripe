@@ -411,6 +411,231 @@ defmodule LatticeStripe.Invoice do
   end
 
   # ---------------------------------------------------------------------------
+  # Public API: Action verbs
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Finalizes a draft invoice, transitioning it to `open` status.
+
+  After finalization, no more items can be added and the invoice becomes payable.
+  Only callable on draft invoices.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `id` - The invoice ID string (e.g., `"in_123"`)
+  - `params` - Optional params (e.g., `%{"auto_advance" => false}`)
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Invoice{status: :open}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec finalize(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def finalize(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
+    %Request{method: :post, path: "/v1/invoices/#{id}/finalize", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Like `finalize/4` but raises `LatticeStripe.Error` on failure."
+  @spec finalize!(Client.t(), String.t(), map(), keyword()) :: t()
+  def finalize!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id),
+    do: client |> finalize(id, params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Voids an open invoice. Only callable on open invoices.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `id` - The invoice ID string
+  - `params` - Optional params
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Invoice{status: :void}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec void(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def void(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
+    %Request{method: :post, path: "/v1/invoices/#{id}/void", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Like `void/4` but raises `LatticeStripe.Error` on failure."
+  @spec void!(Client.t(), String.t(), map(), keyword()) :: t()
+  def void!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id),
+    do: client |> void(id, params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Pays an open invoice.
+
+  Accepts optional `"paid_out_of_band"`, `"payment_method"`, and `"source"` params.
+  Only callable on open invoices.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `id` - The invoice ID string
+  - `params` - Optional params (e.g., `%{"paid_out_of_band" => true}`)
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Invoice{status: :paid}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec pay(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def pay(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
+    %Request{method: :post, path: "/v1/invoices/#{id}/pay", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Like `pay/4` but raises `LatticeStripe.Error` on failure."
+  @spec pay!(Client.t(), String.t(), map(), keyword()) :: t()
+  def pay!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id),
+    do: client |> pay(id, params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Sends an invoice to the customer via email.
+
+  Only applicable when `collection_method: :send_invoice`. Named `send_invoice`
+  to avoid conflict with `Kernel.send/2`.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `id` - The invoice ID string
+  - `params` - Optional params
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Invoice{}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec send_invoice(Client.t(), String.t(), map(), keyword()) ::
+          {:ok, t()} | {:error, Error.t()}
+  def send_invoice(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
+    %Request{method: :post, path: "/v1/invoices/#{id}/send", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Like `send_invoice/4` but raises `LatticeStripe.Error` on failure."
+  @spec send_invoice!(Client.t(), String.t(), map(), keyword()) :: t()
+  def send_invoice!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id),
+    do: client |> send_invoice(id, params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Marks an open invoice as uncollectible. Only callable on open invoices.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `id` - The invoice ID string
+  - `params` - Optional params
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Invoice{status: :uncollectible}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec mark_uncollectible(Client.t(), String.t(), map(), keyword()) ::
+          {:ok, t()} | {:error, Error.t()}
+  def mark_uncollectible(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
+    %Request{
+      method: :post,
+      path: "/v1/invoices/#{id}/mark_uncollectible",
+      params: params,
+      opts: opts
+    }
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Like `mark_uncollectible/4` but raises `LatticeStripe.Error` on failure."
+  @spec mark_uncollectible!(Client.t(), String.t(), map(), keyword()) :: t()
+  def mark_uncollectible!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id),
+    do: client |> mark_uncollectible(id, params, opts) |> Resource.unwrap_bang!()
+
+  # ---------------------------------------------------------------------------
+  # Public API: Search
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Searches for invoices matching a query.
+
+  ## Searchable Fields
+
+  `created`, `currency`, `customer`, `last_finalization_error_code`,
+  `last_finalization_error_type`, `metadata`, `number`, `receipt_number`,
+  `status`, `subscription`, `total`
+
+  ## Example
+
+      Invoice.search(client, %{"query" => "status:'open' AND customer:'cus_xxx'"})
+
+  > #### Eventual Consistency {: .warning}
+  >
+  > Search results may not reflect changes made within the last ~1 second.
+  > Resources that were recently created, updated, or deleted may not appear
+  > in search results immediately. If you need real-time results for a specific
+  > resource, use `retrieve/3` instead.
+
+  Upcoming invoices (previews) are not searchable because they are not yet persisted objects.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `params` - Map with at least `"query"` key (Stripe search query string)
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Response{data: %List{data: [%Invoice{}, ...]}}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec search(Client.t(), map(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
+  def search(%Client{} = client, params \\ %{}, opts \\ []) do
+    %Request{method: :get, path: "/v1/invoices/search", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_list(&from_map/1)
+  end
+
+  @doc """
+  Returns a lazy stream of all invoices matching a search query (auto-pagination).
+
+  Emits individual `%Invoice{}` structs. Raises `LatticeStripe.Error` if any
+  page fetch fails.
+
+  > #### Eventual Consistency {: .warning}
+  >
+  > Search results may not reflect changes made within the last ~1 second.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `params` - Map with at least `"query"` key
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  An `Enumerable.t()` of `%Invoice{}` structs.
+  """
+  @spec search_stream!(Client.t(), map(), keyword()) :: Enumerable.t()
+  def search_stream!(%Client{} = client, params \\ %{}, opts \\ []) do
+    req = %Request{method: :get, path: "/v1/invoices/search", params: params, opts: opts}
+    List.stream!(client, req) |> Stream.map(&from_map/1)
+  end
+
+  # ---------------------------------------------------------------------------
   # Public API: Bang variants
   # ---------------------------------------------------------------------------
 
