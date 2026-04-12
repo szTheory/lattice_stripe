@@ -164,4 +164,32 @@ defmodule LatticeStripe.FormEncoderTest do
       assert result == "adjustment=-500"
     end
   end
+
+  describe "encode/1 — float handling (D-09f)" do
+    test "small float: does not emit scientific notation" do
+      assert FormEncoder.encode(%{"x" => 0.00001}) == "x=0.00001"
+    end
+
+    test "very small float: stays compact decimal" do
+      result = FormEncoder.encode(%{"x" => 1.0e-20})
+      refute result =~ "e-"
+      refute result =~ "E-"
+    end
+
+    test "normal float: 12.5 encodes as 12.5" do
+      assert FormEncoder.encode(%{"x" => 12.5}) == "x=12.5"
+    end
+
+    test "zero float: 0.0 encodes as 0.0" do
+      assert FormEncoder.encode(%{"x" => 0.0}) == "x=0.0"
+    end
+
+    test "negative float: -1.5 encodes as -1.5" do
+      assert FormEncoder.encode(%{"x" => -1.5}) == "x=-1.5"
+    end
+
+    test "percent_off fractional (Coupon case)" do
+      assert FormEncoder.encode(%{"percent_off" => 12.5}) == "percent_off=12.5"
+    end
+  end
 end
