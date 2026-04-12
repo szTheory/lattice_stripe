@@ -13,7 +13,7 @@ Promoted from v1's deferred "v2 Requirements" list and expanded with new items s
 - [ ] **BILL-01**: Developer can manage Products — create, retrieve, update, list, stream, search
 - [ ] **BILL-02**: Developer can manage Prices — create, retrieve, update, list, stream, search (no delete; Stripe API constraint)
 - [ ] **BILL-06**: Developer can manage Coupons — create, retrieve, delete, list, stream (no update; Stripe API constraint)
-- [ ] **BILL-06b**: Developer can manage Promotion Codes — create, retrieve, update, list, stream (search conditional on Phase 12 verification)
+- [ ] **BILL-06b**: Developer can manage Promotion Codes — create, retrieve, update, list, stream. Search is NOT supported: verified against Stripe OpenAPI spec (`spec3.sdk.json`) during Phase 12 discussion — the `/v1/promotion_codes/search` endpoint does not exist (only 7 resources have search: charges, customers, invoices, payment_intents, prices, products, subscriptions). Discovery path is `list/2` with filters (`code`, `coupon`, `customer`, `active`) per https://docs.stripe.com/api/promotion_codes/list.
 
 ### Billing — Testing Infrastructure
 
