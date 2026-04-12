@@ -218,6 +218,172 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
   end
 
   # ---------------------------------------------------------------------------
+  # cancel/4
+  # ---------------------------------------------------------------------------
+
+  describe "cancel/4" do
+    test "uses POST to /cancel sub-path (NOT DELETE)" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/subscription_schedules/sub_sched_1/cancel")
+        ok_response(Fixtures.basic(%{"status" => "canceled"}))
+      end)
+
+      assert {:ok, %SubscriptionSchedule{status: "canceled"}} =
+               SubscriptionSchedule.cancel(client, "sub_sched_1")
+    end
+
+    test "passes invoice_now and prorate params through" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        # form-encoded body should contain both keys
+        assert req.body =~ "invoice_now=true"
+        assert req.body =~ "prorate=false"
+        ok_response(Fixtures.basic(%{"status" => "canceled"}))
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.cancel(client, "sub_sched_1", %{
+                 "invoice_now" => true,
+                 "prorate" => false
+               })
+    end
+
+    test "forwards opts[:idempotency_key]" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert Enum.any?(req.headers, fn {k, v} ->
+                 String.downcase(k) == "idempotency-key" and v == "ik-cancel-1"
+               end)
+
+        ok_response(Fixtures.basic(%{"status" => "canceled"}))
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.cancel(
+                 client,
+                 "sub_sched_1",
+                 %{},
+                 idempotency_key: "ik-cancel-1"
+               )
+    end
+
+    test "does NOT invoke Billing.Guards even with strict client" do
+      # Strict client + phases[] params missing proration_behavior — cancel must
+      # still reach Transport. Proves D4: guard is NOT wired into cancel/4.
+      client = test_client(require_explicit_proration: true)
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/subscription_schedules/sub_sched_1/cancel")
+        ok_response(Fixtures.basic(%{"status" => "canceled"}))
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.cancel(client, "sub_sched_1", %{
+                 "phases" => [%{"items" => [%{"price" => "price_1"}]}]
+               })
+    end
+
+    test "cancel!/4 raises on error" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise LatticeStripe.Error, fn ->
+        SubscriptionSchedule.cancel!(client, "sub_sched_1")
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # release/4
+  # ---------------------------------------------------------------------------
+
+  describe "release/4" do
+    test "uses POST to /release sub-path" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/subscription_schedules/sub_sched_1/release")
+        ok_response(Fixtures.basic(%{"status" => "released"}))
+      end)
+
+      assert {:ok, %SubscriptionSchedule{status: "released"}} =
+               SubscriptionSchedule.release(client, "sub_sched_1")
+    end
+
+    test "passes preserve_cancel_date param through" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.body =~ "preserve_cancel_date=true"
+        ok_response(Fixtures.basic(%{"status" => "released"}))
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.release(client, "sub_sched_1", %{
+                 "preserve_cancel_date" => true
+               })
+    end
+
+    test "forwards opts[:idempotency_key]" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert Enum.any?(req.headers, fn {k, v} ->
+                 String.downcase(k) == "idempotency-key" and v == "ik-release-1"
+               end)
+
+        ok_response(Fixtures.basic(%{"status" => "released"}))
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.release(
+                 client,
+                 "sub_sched_1",
+                 %{},
+                 idempotency_key: "ik-release-1"
+               )
+    end
+
+    test "does NOT invoke Billing.Guards even with strict client" do
+      client = test_client(require_explicit_proration: true)
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/subscription_schedules/sub_sched_1/release")
+        ok_response(Fixtures.basic(%{"status" => "released"}))
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.release(client, "sub_sched_1", %{
+                 "phases" => [%{"items" => [%{"price" => "price_1"}]}]
+               })
+    end
+
+    test "release!/4 raises on error" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise LatticeStripe.Error, fn ->
+        SubscriptionSchedule.release!(client, "sub_sched_1")
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # list/3 + stream!/3
   # ---------------------------------------------------------------------------
 
