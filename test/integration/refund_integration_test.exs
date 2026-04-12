@@ -1,7 +1,7 @@
 defmodule LatticeStripe.RefundIntegrationTest do
   use ExUnit.Case, async: false
 
-  import LatticeStripe.TestHelpers
+  import LatticeStripe.TestSupport
 
   @moduletag :integration
 

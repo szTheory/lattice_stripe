@@ -1,4 +1,4 @@
-defmodule LatticeStripe.TestHelpers do
+defmodule LatticeStripe.TestSupport do
   @moduledoc false
 
   alias LatticeStripe.Client

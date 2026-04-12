@@ -2,7 +2,7 @@ defmodule LatticeStripe.CustomerTest do
   use ExUnit.Case, async: true
 
   import Mox
-  import LatticeStripe.TestHelpers
+  import LatticeStripe.TestSupport
   import LatticeStripe.Test.Fixtures.Customer
 
   alias LatticeStripe.{Customer, Error, List, Response}

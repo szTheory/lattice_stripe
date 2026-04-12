@@ -2,7 +2,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
   use ExUnit.Case, async: true
 
   import Mox
-  import LatticeStripe.TestHelpers
+  import LatticeStripe.TestSupport
   import LatticeStripe.Test.Fixtures.Checkout.Session
   import LatticeStripe.Test.Fixtures.Checkout.LineItem
 

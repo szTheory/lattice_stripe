@@ -2,7 +2,7 @@ defmodule LatticeStripe.PaymentMethodTest do
   use ExUnit.Case, async: true
 
   import Mox
-  import LatticeStripe.TestHelpers
+  import LatticeStripe.TestSupport
   import LatticeStripe.Test.Fixtures.PaymentMethod
 
   alias LatticeStripe.{Error, List, PaymentMethod, Response}
