@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: "Awaiting PR #4 merge (Billing track: Phase 14 + Phase 15) → then `/gsd-plan-phase 16`"
-stopped_at: Phase 16 context gathered (5 decisions locked D1-D5)
-last_updated: "2026-04-12T22:43:48.482Z"
+status: "Billing track complete (PR #4 merged as 21e63fe). Next: Connect track — `/gsd-discuss-phase 17`"
+stopped_at: Phase 16 complete — Billing track shipped (Phases 14+15+16 in PR #4)
+last_updated: "2026-04-12T23:00:00.000Z"
 last_activity: 2026-04-12
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 31
-  completed_plans: 31
-  percent: 100
+  total_phases: 17
+  completed_phases: 14
+  total_plans: 44
+  completed_plans: 44
+  percent: 82
 ---
 
 # Project State
@@ -21,18 +21,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 16 — subscription-schedules (next in Billing track, after PR #4 merges)
+**Current focus:** Phase 17 — Connect Accounts & Account Links (first phase of Connect track; Billing track shipped)
 
 ## Current Position
 
-Phase: 16
-Plan: Not started
-Status: Awaiting PR #4 merge (Billing track: Phase 14 + Phase 15) → then `/gsd-plan-phase 16`
+Phase: 17
+Plan: Not started — needs scope definition (`/gsd-discuss-phase 17`)
+Status: Billing track complete (PR #4 merged as 21e63fe). Next: flesh out Phase 17 Connect scope.
 Last activity: 2026-04-12
 
 Progress: [████████████████░░░░] 14/17 phases (82%) · 44/44 planned plans complete
 
-**Open PR:** [#4 Billing track: Phase 14 (Invoices) + Phase 15 (Subscriptions + SubscriptionItems)](https://github.com/szTheory/lattice_stripe/pull/4) — 137 commits, 975 unit tests + 11 Phase 15 integration tests green, code review HIGH+MEDIUM auto-fixed.
+**PR #4 merged:** [Billing track: Phases 14 (Invoices) + 15 (Subscriptions) + 16 (Subscription Schedules)](https://github.com/szTheory/lattice_stripe/pull/4) — merged as commit 21e63fe.
 
 **Phase 15 shipped delivers:**
 
@@ -45,7 +45,7 @@ Progress: [████████████████░░░░] 14/17 p
 
 **D1 restore (part of PR #4):** Recovered Phase 12/13 billing catalog (`Product`, `Price`, `Coupon`, `PromotionCode`) and `TestClock` time-travel testing from commit `39b98c9^` (20 files, `TestSupport → TestHelpers` rename fixup).
 
-**Milestone framing:** v1.0 (Phases 1–11) was released as 0.2.0. v2.0-billing covers Phases 14 (done), 15 (done), 16 (next — Subscription Schedules). Connect (17/18) and cross-cutting polish (19) are deferred to a later milestone — not in the Billing track critical path for the downstream Cashier/Pay analogue library. ROADMAP.md still documents only 1–11; refresh is overdue but separate from phase work.
+**Milestone framing:** v1.0 (Phases 1–11) released as 0.2.0. v2.0-billing complete — Phases 14 (Invoices), 15 (Subscriptions + SubscriptionItems), 16 (Subscription Schedules) all shipped in merged PR #4. Next milestone is Connect: Phase 17 (Accounts + AccountLinks), Phase 18 (money movement — Transfers/Payouts/Balance), Phase 19 (cross-cutting polish + release). ROADMAP.md still documents only 1–11; refresh is overdue.
 
 ## Performance Metrics
 
@@ -200,6 +200,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T21:28:54.145Z
-Stopped at: Phase 16 context gathered (5 decisions locked D1-D5)
-Resume path: After PR #4 merges, `git fetch && git checkout main && git pull`, then `/gsd-plan-phase 16` (subscription-schedules).
+Last session: 2026-04-12T23:00:00.000Z
+Stopped at: Billing track complete (PR #4 merged). Beginning Connect track — Phase 17 scope definition.
+Resume path: `/gsd-discuss-phase 17` to flesh out Connect Accounts + AccountLinks scope, then plan/execute.
