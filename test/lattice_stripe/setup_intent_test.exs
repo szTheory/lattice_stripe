@@ -2,7 +2,7 @@ defmodule LatticeStripe.SetupIntentTest do
   use ExUnit.Case, async: true
 
   import Mox
-  import LatticeStripe.TestSupport
+  import LatticeStripe.TestHelpers
   import LatticeStripe.Test.Fixtures.SetupIntent
 
   alias LatticeStripe.{Error, List, Response, SetupIntent}

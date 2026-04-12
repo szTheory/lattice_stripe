@@ -2,7 +2,7 @@ defmodule LatticeStripe.CustomerTest do
   use ExUnit.Case, async: true
 
   import Mox
-  import LatticeStripe.TestSupport
+  import LatticeStripe.TestHelpers
   import LatticeStripe.Test.Fixtures.Customer
 
   alias LatticeStripe.{Customer, Error, List, Response}
@@ -275,38 +275,6 @@ defmodule LatticeStripe.CustomerTest do
       inspected = inspect(customer)
       assert inspected =~ "livemode"
       assert inspected =~ "deleted"
-    end
-  end
-
-  describe "from_map/1 — D-02 discount backfill" do
-    alias LatticeStripe.Discount
-
-    test "decodes embedded discount as %Discount{}, not raw map" do
-      customer =
-        Customer.from_map(%{
-          "id" => "cus_1",
-          "object" => "customer",
-          "discount" => %{
-            "id" => "di_1",
-            "object" => "discount",
-            "customer" => "cus_1",
-            "start" => 1_700_000_000
-          }
-        })
-
-      assert %Discount{} = customer.discount
-      assert customer.discount.id == "di_1"
-      assert customer.discount.start == 1_700_000_000
-    end
-
-    test "nil discount stays nil" do
-      customer = Customer.from_map(%{"id" => "cus_1", "discount" => nil})
-      assert customer.discount == nil
-    end
-
-    test "missing discount key produces nil" do
-      customer = Customer.from_map(%{"id" => "cus_1"})
-      assert customer.discount == nil
     end
   end
 end

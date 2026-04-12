@@ -82,12 +82,6 @@ defmodule LatticeStripe.Config do
               default: nil,
               doc: "Default Stripe-Account header for Connect platforms."
             ],
-            idempotency_key_prefix: [
-              type: {:or, [:string, nil]},
-              default: nil,
-              doc:
-                "Optional string prefix for auto-generated idempotency keys. When set, auto-generated keys are formatted as `<prefix><uuid4>` instead of the default `idk_ltc_<uuid4>`. User-supplied `opts[:idempotency_key]` always wins over auto-generation. Primarily intended for `:real_stripe` test suites that need per-test-run uniqueness."
-            ],
             telemetry_enabled: [
               type: :boolean,
               default: true,

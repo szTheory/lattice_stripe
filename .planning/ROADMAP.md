@@ -1,178 +1,223 @@
 # Roadmap: LatticeStripe
 
-## Milestones
+## Overview
 
-- ✅ **v1.0 Foundation & Payments** — Phases 1–11 (shipped 2026-04-04 as Hex `lattice_stripe` v0.2.0) — see [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
-- 📋 **v2.0 Billing & Connect** — Phases 12–19 (planned, targets Hex `lattice_stripe` v0.3.0)
+LatticeStripe delivers a production-grade Elixir Stripe SDK by building from the inside out: a solid foundation layer (transport, config, errors, retry), then resource modules in dependency order (Customers first to validate the pattern, PaymentIntents for lifecycle complexity), then the remaining payment resources, Checkout, independent Webhooks, and finally developer experience layers (telemetry, testing infrastructure, documentation, CI/CD). Every phase delivers a verifiable capability that subsequent phases build on.
 
 ## Phases
 
-<details>
-<summary>✅ v1.0 Foundation & Payments (Phases 1–11) — SHIPPED 2026-04-04</summary>
+**Phase Numbering:**
+- Integer phases (1, 2, 3): Planned milestone work
+- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [x] Phase 1: Transport & Client Configuration (5/5 plans) — 2026-04-01
-- [x] Phase 2: Error Handling & Retry (3/3 plans) — 2026-04-01
-- [x] Phase 3: Pagination & Response (3/3 plans) — 2026-04-02
-- [x] Phase 4: Customers & PaymentIntents (2/2 plans) — 2026-04-02
-- [x] Phase 5: SetupIntents & PaymentMethods (2/2 plans) — 2026-04-02
-- [x] Phase 6: Refunds & Checkout (2/2 plans) — 2026-04-03
-- [x] Phase 7: Webhooks (2/2 plans) — 2026-04-03
-- [x] Phase 8: Telemetry & Observability (2/2 plans) — 2026-04-03
-- [x] Phase 9: Testing Infrastructure (3/3 plans) — 2026-04-03
-- [x] Phase 10: Documentation & Guides (4/4 plans) — 2026-04-03
-- [x] Phase 11: CI/CD & Release (3/3 plans) — 2026-04-04
+Decimal phases appear between their surrounding integers in numeric order.
 
-Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
-
-</details>
-
-### 📋 v2.0 Billing & Connect (Phases 12–19)
-
-v2.0 is a pure resource-surface milestone on top of the v1 foundation — zero new runtime dependencies, zero behaviour additions, zero modifications to HTTP/retry/pagination primitives. Build order is strictly topological: Billing catalog → test clocks (pulled forward) → invoices → subscriptions (with proration discipline) → schedules → Connect accounts → Connect money → cross-cutting polish. Optional v0.3.0-rc1 cut at the Phase 16 boundary; v0.3.0 final after Phase 19.
-
-- [x] **Phase 12: Billing Catalog** — Products, Prices, Coupons, PromotionCodes (+ FormEncoder battery for triple-nested shapes) (completed 2026-04-12)
-- [x] **Phase 13: Billing Test Clocks** — TestClock resource, `advance_and_wait/3`, `Testing.TestClock` helper, cleanup Mix task, first `:real_stripe` tier tests (completed 2026-04-12)
-- [ ] **Phase 14: Invoices & Invoice Line Items** — Full Invoice CRUD + action verbs (finalize/void/pay/send/mark_uncollectible) + `upcoming/2` preview + auto-advance race mitigation
-- [ ] **Phase 15: Subscriptions & Subscription Items** — Full subscription lifecycle + `ProrationBehavior` validator + `require_explicit_proration` client flag + state machine docs
-- [ ] **Phase 16: Subscription Schedules** — Schedule CRUD + release vs cancel semantics + schedule-owned subscription warnings + v0.3.0-rc1 cut decision
-- [ ] **Phase 17: Connect Accounts & Links** — Account/AccountLink/LoginLink + `Client.with_account/2` + `LatticeStripe.Connect` namespace + Context Matrix
-- [ ] **Phase 18: Connect Money Movement** — Transfers (+ reversals), Payouts, Balance singleton, BalanceTransactions
-- [ ] **Phase 19: Cross-cutting Polish & v0.3.0 Release** — EventType catalog + OpenAPI drift test, Search facade, Billing/Connect guides, milestone smoke test, Hex v0.3.0 release
+- [x] **Phase 1: Transport & Client Configuration** - HTTP abstraction layer, client struct, and JSON codec (completed 2026-04-01)
+- [ ] **Phase 2: Error Handling & Retry** - Structured errors, automatic retries, and idempotency
+- [ ] **Phase 3: Pagination & Response** - List pagination, auto-pagination streams, expand support, API versioning
+- [ ] **Phase 4: Customers & PaymentIntents** - First two resource modules to validate the foundation pattern
+- [x] **Phase 5: SetupIntents & PaymentMethods** - Intent-based and method management resources (completed 2026-04-02)
+- [x] **Phase 6: Refunds & Checkout** - Refund operations and Checkout Sessions (completed 2026-04-03)
+- [x] **Phase 7: Webhooks** - Signature verification, event parsing, and Phoenix Plug (completed 2026-04-03)
+- [x] **Phase 8: Telemetry & Observability** - Request lifecycle events wired through the stack (completed 2026-04-03)
+- [ ] **Phase 9: Testing Infrastructure** - Integration tests, unit tests, Mox contracts, test helpers
+- [x] **Phase 10: Documentation & Guides** - ExDoc, moduledocs, guides, README quickstart (completed 2026-04-03)
+- [x] **Phase 11: CI/CD & Release** - GitHub Actions, Release Please, Hex publishing, Dependabot (completed 2026-04-04)
 
 ## Phase Details
 
-### Phase 12: Billing Catalog
-**Goal**: Developers can manage the Stripe billing catalog — Products, Prices, Coupons, and PromotionCodes — as idiomatic Elixir resources
-**Depends on**: v1.0 (Phase 11)
-**Requirements**: BILL-01, BILL-02, BILL-06, BILL-06b
+### Phase 1: Transport & Client Configuration
+**Goal**: Developers can create a configured client and make raw HTTP requests to Stripe's API
+**Depends on**: Nothing (first phase)
+**Requirements**: TRNS-01, TRNS-02, TRNS-03, TRNS-04, TRNS-05, CONF-01, CONF-02, CONF-03, CONF-04, CONF-05, JSON-01, JSON-02
 **Success Criteria** (what must be TRUE):
-  1. Developer can create, retrieve, update, list, stream, and search Products and Prices using the same v1 resource template (no `Price.delete/2`, no `Coupon.update/3` — Stripe API constraints are surfaced as missing functions, not runtime errors)
-  2. Developer can create, retrieve, delete, list, and stream Coupons, and manage PromotionCodes (including update) — with PromotionCode `search/2` shipped only if verified against the live Stripe API during this phase
-  3. Developer can pass triple-nested inline shapes (e.g. `items[0][price_data][recurring][interval]`) through the form encoder and the request round-trips against stripe-mock cleanly — regression-guarded by an explicit `FormEncoder` unit battery
-  4. Every `search/2` `@doc` in this phase carries an eventual-consistency callout, matching H3 guidance
-**Plans**: 7 plans
+  1. Developer can create a LatticeStripe client with API key and custom options, and the client validates configuration at creation time
+  2. Developer can make a raw authenticated HTTP request to Stripe via the default Finch transport and receive a response
+  3. Developer can swap the HTTP transport by implementing the Transport behaviour without modifying library code
+  4. Multiple independent clients with different API keys can coexist in the same BEAM VM
+  5. Request bodies are correctly form-encoded for Stripe's v1 API format
+**Plans:** 5/5 plans complete
 
 Plans:
-- [x] 12-01-PLAN.md — Wave 0 test infrastructure (stream_data dep + test stubs for all Phase 12 resources)
-- [x] 12-02-PLAN.md — FormEncoder D-09f float fix + D-09a..e regression battery + StreamData property layer
-- [x] 12-03-PLAN.md — LatticeStripe.Discount module (D-08) + Customer.discount backfill (D-02)
-- [x] 12-04-PLAN.md — LatticeStripe.Product (BILL-01) with D-03 atomization + D-10 search callout
-- [x] 12-05-PLAN.md — LatticeStripe.Price + Price.Recurring + Price.Tier typed nesteds (BILL-02) — no delete (D-05)
-- [x] 12-06-PLAN.md — LatticeStripe.Coupon + Coupon.AppliesTo (BILL-06) — no update, no search (D-05) + tightened Discount coupon dispatch
-- [x] 12-07-PLAN.md — LatticeStripe.PromotionCode (BILL-06b) — no search, no delete; list-filter discovery path (D-06)
+- [x] 01-01-PLAN.md — Project scaffolding, dependencies, test infrastructure
+- [x] 01-02-PLAN.md — JSON codec behaviour + Jason adapter + form encoder
+- [x] 01-03-PLAN.md — Transport behaviour + Error struct + Request struct
+- [x] 01-04-PLAN.md — NimbleOptions config validation + Finch adapter
+- [x] 01-05-PLAN.md — Client module with telemetry + comprehensive tests
 
-### Phase 13: Billing Test Clocks
-**Goal**: Developers can deterministically time-travel billing fixtures in tests, unblocking subscription/invoice lifecycle coverage in later phases
-**Depends on**: Phase 12
-**Requirements**: BILL-08, BILL-08b, BILL-08c, TEST-09, TEST-10
+### Phase 2: Error Handling & Retry
+**Goal**: All API calls return structured, pattern-matchable results with automatic retry safety
+**Depends on**: Phase 1
+**Requirements**: ERRR-01, ERRR-02, ERRR-03, ERRR-04, ERRR-05, ERRR-06, RTRY-01, RTRY-02, RTRY-03, RTRY-04, RTRY-05, RTRY-06
 **Success Criteria** (what must be TRUE):
-  1. Developer can create, retrieve, list, stream, delete, and advance Billing Test Clocks as a first-class SDK resource
-  2. Developer can call `BillingTestClock.advance_and_wait/3` with a configurable timeout and receive either the ready clock or `{:error, :timeout}` — no more silent reads of `status: "advancing"` stale state
-  3. Developer can `use LatticeStripe.Testing.TestClock` in their own test suite to coordinate test clock + customer + subscription fixtures with automatic cleanup, and can run `mix lattice_stripe.test_clock.cleanup` (or the equivalent ExUnit helper) to purge tagged clocks and stay under the 100-clock-per-account Stripe limit
-  4. The first `@tag :real_stripe` integration test in the repo exercises a clock advancement end-to-end against real Stripe test mode, gated by `STRIPE_TEST_SECRET_KEY`, documenting the two-tier strategy pattern the rest of the milestone will follow
-**Plans**: TBD
-
-### Phase 14: Invoices & Invoice Line Items
-**Goal**: Developers can manage the full invoice lifecycle — draft creation, line items, action verbs, and proration preview — without tripping Stripe's auto-finalization race
-**Depends on**: Phase 13
-**Requirements**: BILL-04, BILL-04b, BILL-04c, BILL-10
-**Success Criteria** (what must be TRUE):
-  1. Developer can create, retrieve, update, list, stream, and search Invoices, and drive the action verbs `finalize/2`, `pay/2+3`, `void/2`, `mark_uncollectible/2`, and `send/2` as first-class functions rather than magic `update` params
-  2. Developer can call `Invoice.upcoming/2` and get back a typed Invoice struct with `id: nil`, suitable for previewing proration impact before confirming a subscription change
-  3. Developer can list Invoice Line Items for an invoice and also read them off an `Invoice` struct's typed `:lines` field — no raw map access required
-  4. When `auto_advance` is omitted on `Invoice.create/2`, a telemetry event fires warning of the ~1h auto-finalization window, and the Invoice guide documents the canonical `create → add_invoice_items → finalize → pay` order (C4 mitigation)
-  5. Developer who calls `Invoice.upcoming/2` or any other mutation path while `require_explicit_proration: true` is set gets a typed `{:error, %Error{type: :proration_required}}` instead of Stripe's endpoint-dependent default (C1 mitigation, forward-wired from Phase 15)
-**Plans**: 5 plans
+  1. Every public API function returns {:ok, result} | {:error, reason} with bang variants that raise
+  2. Developer can pattern match on distinct error types (card, auth, rate limit, validation, server, idempotency conflict) to handle each case differently
+  3. Failed requests are automatically retried with exponential backoff, respecting the Stripe-Should-Retry header, and the same idempotency key is reused across retries
+  4. Developer can provide a custom idempotency key, configure max retries, or plug in a custom RetryStrategy behaviour
+  5. Error structs carry HTTP status, request_id, full error body, and actionable debugging context
+**Plans:** 3 plans
 
 Plans:
-- [ ] 14-01-PLAN.md — Foundation: typed nested structs (StatusTransitions, AutomaticTax, LineItem, Period) + Billing.Guards + Client require_explicit_proration
-- [ ] 14-02-PLAN.md — Invoice struct + CRUD + InvoiceItem struct + CRUD with atomization and nested parsing
-- [ ] 14-03-PLAN.md — Invoice action verbs (finalize/void/pay/send_invoice/mark_uncollectible) + search + upcoming/create_preview + list_line_items
-- [ ] 14-04-PLAN.md — Auto-advance telemetry in Invoice.create + stripe-mock integration tests for Invoice and InvoiceItem
-- [ ] 14-05-PLAN.md — guides/invoices.md comprehensive workflow guide + mix.exs ExDoc config
+- [x] 02-01-PLAN.md — Error struct enrichment, idempotency_error type, String.Chars, Json non-bang callbacks
+- [x] 02-02-PLAN.md — RetryStrategy behaviour + Default implementation, Config schema updates
+- [x] 02-03-PLAN.md — Client retry loop, auto-idempotency keys, bang variant, non-JSON handling
 
-### Phase 15: Subscriptions & Subscription Items
-**Goal**: Developers can manage the full subscription lifecycle with proration discipline and a documented state machine — the semantics-heavy center of the milestone
-**Depends on**: Phase 14
-**Requirements**: BILL-03, BILL-03b, BILL-03c, BILL-03d, BILL-03e, BILL-03f, UTIL-03, UTIL-04
+### Phase 3: Pagination & Response
+**Goal**: Developers can paginate through lists, auto-paginate with Streams, expand nested objects, and pin API versions
+**Depends on**: Phase 2
+**Requirements**: PAGE-01, PAGE-02, PAGE-03, PAGE-04, PAGE-05, PAGE-06, EXPD-01, EXPD-02, EXPD-03, EXPD-04, EXPD-05, VERS-01, VERS-02, VERS-03
 **Success Criteria** (what must be TRUE):
-  1. Developer can create, retrieve, update, list, stream, and search Subscriptions, and can cancel in two distinct modes — immediate (`cancel/2`) and scheduled (`cancel/3` with `cancel_at_period_end: true`) — with `Subscription.cancellation_pending?/1` returning `true` for the scheduled-but-still-active case (H1 mitigation)
-  2. Developer can pause and resume Subscriptions via dedicated `pause/3` and `resume/3` action verbs mapping to Stripe's dedicated endpoint, with the `@doc` clearly distinguishing these from the `pause_collection` update param
-  3. Developer can manage Subscription Items (create/retrieve/update/delete/list) as a nested child resource following the `Checkout.LineItem` precedent
-  4. Developer can opt into strict proration mode via `require_explicit_proration: true` on the Client struct and receive a clear `{:error, %Error{type: :proration_required}}` when calling any Subscription/SubscriptionItem/Invoice mutation that omits `proration_behavior`; in the default (off) mode, the param passes through transparently for parity with stripe-ruby/node/python (C1 primary mitigation)
-  5. `LatticeStripe.Billing.ProrationBehavior.validate!/1` accepts exactly `"create_prorations"`, `"always_invoice"`, `"none"` as strings and rejects atoms or unknown values with an `ArgumentError` that points at the string form
-  6. The `Subscription` `@moduledoc` documents the complete lifecycle state machine — including the `incomplete → incomplete_expired` 23-hour one-way edge, the webhook event sequence, and the fact that the transition fires as `customer.subscription.updated` not `.deleted` — and `Subscription.status_is_terminal?/1` returns `true` for `incomplete_expired`, `canceled`, and `unpaid` (C2 + H1 mitigation)
-**Plans**: TBD
+  1. List endpoints return a struct with data, has_more, and cursors; developer can paginate manually with starting_after/ending_before
+  2. Developer can auto-paginate any list endpoint using Elixir Streams that lazily fetch pages and compose with Stream/Enum
+  3. Search endpoints support page-based pagination with next_page, and documentation clearly states eventual consistency caveats
+  4. Developer can pass expand option to expand nested objects into typed structs, including nested expansion paths
+  5. Library pins to a specific Stripe API version per release, overridable per-client and per-request
+**Plans:** 2/3 plans executed
 
-### Phase 16: Subscription Schedules
-**Goal**: Developers can manage planned upgrade/downgrade trajectories via SubscriptionSchedule, with clear ownership boundaries between schedule and subscription
-**Depends on**: Phase 15
-**Requirements**: BILL-09, BILL-09b, BILL-09c, REL-03
-**Success Criteria** (what must be TRUE):
-  1. Developer can create, retrieve, update, cancel, release, list, and stream Subscription Schedules, with `release/2` and `cancel/2` documented as the two distinct escape hatches
-  2. Developer can pattern-match `%Subscription{schedule: nil}` vs schedule-owned subscriptions because `:schedule` is surfaced as a typed field on the `Subscription` struct
-  3. `Subscription.update/3`'s `@doc` carries a loud warning that mutating a schedule-owned subscription conflicts with phase transitions, and recommends `SubscriptionSchedule.release/2` as the escape hatch (C5 mitigation)
-  4. A v0.3.0-rc1 release mechanism is chosen (manual git tag vs Release Please prerelease manifest) and documented in CONTRIBUTING, and either the rc1 tag is cut or a conscious decision is logged to defer to v0.3.0 final (M4 mitigation)
-**Plans**: TBD
+Plans:
+- [x] 03-01-PLAN.md — Response struct, List struct, api_version/0, Config update, User-Agent enhancement
+- [x] 03-02-PLAN.md — Client.request/2 Response wrapping, list detection, existing test updates
+- [x] 03-03-PLAN.md — List auto-pagination streaming (stream!/2, stream/2)
 
-### Phase 17: Connect Accounts & Links
-**Goal**: Developers can onboard and manage Stripe Connect accounts with the platform/connected-account context switch made explicit and greppable
-**Depends on**: Phase 16
-**Requirements**: CNCT-01, CNCT-01b, CNCT-01c, CNCT-06, CNCT-07
+### Phase 4: Customers & PaymentIntents
+**Goal**: Developers can manage Customers and PaymentIntents end-to-end, validating the resource module pattern
+**Depends on**: Phase 3
+**Requirements**: CUST-01, CUST-02, CUST-03, CUST-04, CUST-05, CUST-06, PINT-01, PINT-02, PINT-03, PINT-04, PINT-05, PINT-06, PINT-07
 **Success Criteria** (what must be TRUE):
-  1. Developer can create, retrieve, update, (where Stripe permits) delete, list, and stream connected Accounts, with `@doc` callouts documenting the Standard/Express/Custom deletion and update constraints (H7 mitigation — Standard live accounts are not deletable; point at oauth deauthorization)
-  2. Developer can create AccountLinks for onboarding/update flows and LoginLinks for Express dashboard access — write-only resources with the sensitive `url` field hidden from `Inspect` output
-  3. Developer can call `LatticeStripe.Client.with_account(client, "acct_xxx")` to get a new Client struct with the `Stripe-Account` header baked in, making per-tenant code paths explicit and greppable across a codebase (C3 mitigation)
-  4. The `LatticeStripe.Connect` namespace module ships with a top-level warning explaining that `stripe_account` is a context switch (platform vs connected account are different data universes), and the Connect guide includes a Context Matrix table documenting which resources must/must-not carry the header
-  5. Telemetry metadata on every request span exposes `stripe_account: "acct_xxx" | nil` for log-based cross-tenant auditing
-**Plans**: TBD
-**UI hint**: yes
+  1. Developer can create, retrieve, update, delete, and list Customers with filters and pagination
+  2. Developer can search Customers using the Search API with page-based pagination
+  3. Developer can create, retrieve, update, confirm, capture, cancel, and list PaymentIntents
+  4. All Customer and PaymentIntent operations work with expand, idempotency keys, per-request overrides, and auto-pagination
+**Plans:** 2 plans
 
-### Phase 18: Connect Money Movement
-**Goal**: Developers can move money across the Connect graph — Transfers, Payouts, Balance, BalanceTransactions — with the Transfer-vs-Payout distinction made impossible to confuse
-**Depends on**: Phase 17
-**Requirements**: CNCT-02, CNCT-02b, CNCT-05, CNCT-05b, CNCT-04
-**Success Criteria** (what must be TRUE):
-  1. Developer can create, retrieve, list, and stream Transfers, and can reverse a Transfer via a dedicated `Transfer.reverse/3` verb mapping to the nested reversal endpoint
-  2. Developer can create, retrieve, update, cancel, reverse, list, and stream Payouts, with `@moduledoc` loudly distinguishing Transfer (platform → connected account) from Payout (Stripe → bank)
-  3. Developer can retrieve the Balance singleton (`Balance.retrieve/1` — no ID) scoped to any Connect context via the Client's `stripe_account` header, and can retrieve and list/stream BalanceTransactions as a read-only resource
-  4. The Connect guide documents both destination-charge (existing v1 `PaymentIntent` with `transfer_data` / `on_behalf_of`) and separate-charge-and-transfer patterns with working code examples using `Client.with_account/2`
-**Plans**: TBD
+Plans:
+- [x] 04-01-PLAN.md — Customer struct, CRUD, list, search, stream, bang variants + tests
+- [x] 04-02-PLAN.md — PaymentIntent struct, CRUD, confirm/capture/cancel, list, stream + tests
 
-### Phase 19: Cross-cutting Polish & v0.3.0 Release
-**Goal**: The milestone ships as Hex `lattice_stripe` v0.3.0 — exhaustive EventType catalog, Search facade, Billing + Connect guides, end-to-end smoke test, and release automation discipline
-**Depends on**: Phase 18
-**Requirements**: UTIL-01, UTIL-01b, UTIL-01c, UTIL-02, UTIL-05, UTIL-06, TEST-07, TEST-08, DOCS-05, DOCS-06, DOCS-07, DOCS-08, DOCS-09, DOCS-10, DOCS-11, REL-01, REL-02, REL-04
+### Phase 5: SetupIntents & PaymentMethods
+**Goal**: Developers can save payment methods for future use via SetupIntents and manage PaymentMethod lifecycle
+**Depends on**: Phase 4
+**Requirements**: SINT-01, SINT-02, SINT-03, SINT-04, SINT-05, SINT-06, PMTH-01, PMTH-02, PMTH-03, PMTH-04, PMTH-05, PMTH-06
 **Success Criteria** (what must be TRUE):
-  1. Developer can reference every Stripe webhook event type for API version `2026-03-25.dahlia` via `LatticeStripe.EventType` — each event as both a `@attribute` and a `foo/0` function, grouped by `billing_events/0`, `payment_events/0`, `connect_events/0`, `subscription_events/0`, `invoice_events/0`, and `all/0`, with string values matching wire format (M1 mitigation)
-  2. A weekly GitHub Actions workflow runs `mix lattice_stripe.gen.event_types` against the vendored `test/fixtures/stripe_openapi_events.json`, and an ExUnit test tagged `:openapi_sync` fails CI and opens an issue when the Stripe OpenAPI spec drifts from `LatticeStripe.EventType.all/0`
-  3. Developer can read `LatticeStripe.Search` module docs explaining the search pagination shape (`page`/`next_page` vs list's `starting_after`/`ending_before`) and every searchable resource's `search/2` `@doc` links to it and carries an eventual-consistency callout (H3 + UTIL-02 + UTIL-06 mitigation — `LatticeStripe.Search` is a thin facade, not a new engine module)
-  4. Developer can call `LatticeStripe.Event.created_at/1` to get a `DateTime` from an event's unix `created` timestamp, and the Webhooks guide "Handling out-of-order events" section uses it in an idempotent-upsert example (H2 mitigation)
-  5. Developer can follow the Billing guide from install to first Subscription (with explicit `proration_behavior`) and the Connect guide from install to first destination charge, with every new v2 resource covered by a worked example; Subscription and Invoice lifecycle reference pages document state machines and auto-advance races respectively
-  6. The testing guide documents the two-tier `@tag :real_stripe` integration strategy, a milestone smoke test exercises end-to-end `Product → Price → Customer → Subscription → Invoice → pay` against stripe-mock, and CONTRIBUTING documents Conventional Commit scopes (`feat(billing):`, `feat(connect):`, `feat(sdk):`) for Release Please v4
-  7. `lattice_stripe` v0.3.0 is published to Hex via Release Please after this phase merges to `main`, with README version badge and Billing/Connect sections updated
-**Plans**: TBD
+  1. Developer can create, retrieve, update, confirm, cancel, and list SetupIntents
+  2. Developer can create, retrieve, update, and list PaymentMethods for a customer
+  3. Developer can attach a PaymentMethod to a customer and detach it
+  4. All operations follow the same ergonomic pattern established by Customers and PaymentIntents
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 05-01-PLAN.md — Extract Resource helpers, refactor Customer/PI, add PI search, build SetupIntent + tests
+- [x] 05-02-PLAN.md — PaymentMethod struct, CRUD, attach/detach, validated list, stream + tests
+
+### Phase 6: Refunds & Checkout
+**Goal**: Developers can issue refunds and create Checkout Sessions in all modes
+**Depends on**: Phase 4
+**Requirements**: RFND-01, RFND-02, RFND-03, RFND-04, CHKT-01, CHKT-02, CHKT-03, CHKT-04, CHKT-05, CHKT-06, CHKT-07
+**Success Criteria** (what must be TRUE):
+  1. Developer can create full or partial refunds for a PaymentIntent, and retrieve, update, and list refunds
+  2. Developer can create a Checkout Session in payment, subscription, or setup mode with line items, customer prefill, and success/cancel URLs
+  3. Developer can retrieve, list, and expire Checkout Sessions
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 06-01-PLAN.md — Fixture extraction (Customer, PI, SI, PM) + Refund resource (create, retrieve, update, cancel, list, stream + tests)
+- [x] 06-02-PLAN.md — Checkout.Session (create 3 modes, retrieve, list, expire, search, stream) + LineItem struct + list_line_items + stream_line_items + tests
+
+### Phase 7: Webhooks
+**Goal**: Developers can securely receive and verify Stripe webhook events in their Phoenix application
+**Depends on**: Phase 1
+**Requirements**: WHBK-01, WHBK-02, WHBK-03, WHBK-04, WHBK-05
+**Success Criteria** (what must be TRUE):
+  1. Developer can verify a webhook signature against the raw request body using timing-safe comparison
+  2. Developer can parse a verified webhook payload into a typed Event struct
+  3. Developer can configure the signature tolerance window (default 300s)
+  4. Library provides a Phoenix Plug that handles raw body extraction and signature verification, with clear documentation of the Plug.Parsers raw body consumption problem and its solution
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 07-01-PLAN.md — Event struct + Webhook verification module (HMAC-SHA256, construct_event, verify_signature, generate_test_signature) + Handler behaviour + SignatureVerificationError
+- [x] 07-02-PLAN.md — Webhook.Plug (NimbleOptions, path matching, handler dispatch, MFA secrets) + CacheBodyReader + Plug integration tests
+
+### Phase 8: Telemetry & Observability
+**Goal**: Developers can observe and monitor all Stripe API interactions via standard Telemetry events
+**Depends on**: Phase 2
+**Requirements**: TLMT-01, TLMT-02, TLMT-03
+**Success Criteria** (what must be TRUE):
+  1. Library emits [:lattice_stripe, :request, :start] before each HTTP request with method, path, and metadata
+  2. Library emits [:lattice_stripe, :request, :stop] after each request with duration, status, and request_id
+  3. Library emits [:lattice_stripe, :request, :exception] on request failure with error details
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 08-01-PLAN.md — Centralized Telemetry module (event catalog, request_span, emit_retry, path parsing) + Client refactor
+- [x] 08-02-PLAN.md — Webhook telemetry span + default logger + comprehensive metadata contract tests (~25-30 tests)
+
+### Phase 9: Testing Infrastructure
+**Goal**: The library has comprehensive test coverage and provides test helpers for downstream users
+**Depends on**: Phase 6, Phase 7
+**Requirements**: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, TEST-06
+**Success Criteria** (what must be TRUE):
+  1. Integration tests validate real HTTP request/response cycles via stripe-mock for all resource modules
+  2. Unit tests cover pure logic: request building, response decoding, error normalization, pagination cursor management
+  3. Mox-based tests verify Transport behaviour contract adherence
+  4. LatticeStripe.Testing module provides helpers for constructing mock webhook events
+  5. Test suite passes formatter, compiler warnings, Credo, tests, and ExDoc build checks
+**Plans:** 2/3 plans executed
+
+Plans:
+- [x] 09-01-PLAN.md — Integration test infrastructure (test_helper.exs, test_integration_client) + 6 resource integration test files via stripe-mock
+- [x] 09-02-PLAN.md — LatticeStripe.Testing public module + mix ci alias + Credo strict mode
+- [x] 09-03-PLAN.md — Unit test gap audit (form encoding edge cases, error normalization, pagination cursors, telemetry metadata) + Transport contract completeness
+
+### Phase 10: Documentation & Guides
+**Goal**: Every public API is documented and developers can go from install to first API call in under 60 seconds
+**Depends on**: Phase 6, Phase 7, Phase 8
+**Requirements**: DOCS-01, DOCS-02, DOCS-03, DOCS-04, DOCS-05, DOCS-06
+**Success Criteria** (what must be TRUE):
+  1. Every public module has @moduledoc with purpose and usage examples; every public function has @doc with arguments, return types, examples, and error cases
+  2. ExDoc generates grouped, navigable documentation that can be published to HexDocs
+  3. README provides a quickstart that takes a developer from mix dependency to first Stripe API call in under 60 seconds
+  4. Guides cover: Getting Started, Client Configuration, Payments, Checkout, Webhooks, Error Handling, Testing, and Telemetry
+  5. Non-obvious code has short readable comments with example input/output data shapes
+**Plans:** 4/4 plans complete
+
+Plans:
+- [x] 10-01-PLAN.md — ExDoc configuration, README rewrite, CHANGELOG, cheatsheet, guide stubs
+- [x] 10-02-PLAN.md — @moduledoc/@doc/@typedoc audit across all modules + inline code comments
+- [x] 10-03-PLAN.md — Guides: Getting Started, Client Configuration, Payments, Checkout, Webhooks
+- [x] 10-04-PLAN.md — Guides: Error Handling, Testing, Telemetry, Extending LatticeStripe
+
+### Phase 11: CI/CD & Release
+**Goal**: The library has automated CI, versioning, and publishing so releases are one-click
+**Depends on**: Phase 9
+**Requirements**: CICD-01, CICD-02, CICD-03, CICD-04, CICD-05
+**Success Criteria** (what must be TRUE):
+  1. GitHub Actions CI runs format, compile warnings, Credo, tests, and doc build on every PR and push to main
+  2. CI tests across the Elixir/OTP matrix: 1.15/OTP 26, 1.17/OTP 27, 1.19/OTP 28 with stripe-mock via Docker
+  3. Release Please automates version bumps via Conventional Commits and Hex publishing triggers on release
+  4. Dependabot keeps Mix dependencies and GitHub Actions updated automatically
+**Plans:** 3/3 plans complete
+
+Plans:
+- [x] 11-01-PLAN.md — CI workflow (lint, test matrix, integration) + mix.exs package metadata + LICENSE
+- [x] 11-02-PLAN.md — Release Please workflow + manifest config + Dependabot + auto-merge
+- [x] 11-03-PLAN.md — Community files (CONTRIBUTING, SECURITY, issue/PR templates) + repo settings checkpoint
 
 ## Progress
 
-| Phase                                     | Milestone | Plans Complete | Status      | Completed  |
-|-------------------------------------------|-----------|----------------|-------------|------------|
-| 1. Transport & Client Config              | v1.0      | 5/5            | Complete    | 2026-04-01 |
-| 2. Error Handling & Retry                 | v1.0      | 3/3            | Complete    | 2026-04-01 |
-| 3. Pagination & Response                  | v1.0      | 3/3            | Complete    | 2026-04-02 |
-| 4. Customers & PaymentIntents             | v1.0      | 2/2            | Complete    | 2026-04-02 |
-| 5. SetupIntents & PaymentMethods          | v1.0      | 2/2            | Complete    | 2026-04-02 |
-| 6. Refunds & Checkout                     | v1.0      | 2/2            | Complete    | 2026-04-03 |
-| 7. Webhooks                               | v1.0      | 2/2            | Complete    | 2026-04-03 |
-| 8. Telemetry & Observability              | v1.0      | 2/2            | Complete    | 2026-04-03 |
-| 9. Testing Infrastructure                 | v1.0      | 3/3            | Complete    | 2026-04-03 |
-| 10. Documentation & Guides                | v1.0      | 4/4            | Complete    | 2026-04-03 |
-| 11. CI/CD & Release                       | v1.0      | 3/3            | Complete    | 2026-04-04 |
-| 12. Billing Catalog                       | v2.0      | 7/7 | Complete   | 2026-04-12 |
-| 13. Billing Test Clocks                   | v2.0      | 8/7 | Complete    | 2026-04-12 |
-| 14. Invoices & Invoice Line Items         | v2.0      | 0/5            | Planned     | -          |
-| 15. Subscriptions & Subscription Items    | v2.0      | 0/0            | Not started | -          |
-| 16. Subscription Schedules                | v2.0      | 0/0            | Not started | -          |
-| 17. Connect Accounts & Links              | v2.0      | 0/0            | Not started | -          |
-| 18. Connect Money Movement                | v2.0      | 0/0            | Not started | -          |
-| 19. Cross-cutting Polish & v0.3.0 Release | v2.0      | 0/0            | Not started | -          |
+**Execution Order:**
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 after 1) -> 8 -> 9 -> 10 -> 11
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Transport & Client Configuration | 5/5 | Complete   | 2026-04-01 |
+| 2. Error Handling & Retry | 0/3 | Planned | - |
+| 3. Pagination & Response | 2/3 | In Progress|  |
+| 4. Customers & PaymentIntents | 0/2 | Planned | - |
+| 5. SetupIntents & PaymentMethods | 2/2 | Complete   | 2026-04-02 |
+| 6. Refunds & Checkout | 2/2 | Complete   | 2026-04-03 |
+| 7. Webhooks | 2/2 | Complete   | 2026-04-03 |
+| 8. Telemetry & Observability | 2/2 | Complete   | 2026-04-03 |
+| 9. Testing Infrastructure | 2/3 | In Progress|  |
+| 10. Documentation & Guides | 4/4 | Complete    | 2026-04-03 |
+| 11. CI/CD & Release | 3/3 | Complete    | 2026-04-04 |

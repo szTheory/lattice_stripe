@@ -64,9 +64,7 @@ defmodule LatticeStripe.MixProject do
           ],
           "Telemetry & Testing": [
             LatticeStripe.Telemetry,
-            LatticeStripe.Testing,
-            LatticeStripe.Testing.TestClock,
-            LatticeStripe.TestHelpers.TestClock
+            LatticeStripe.Testing
           ],
           Internals: [
             LatticeStripe.Transport,
@@ -108,7 +106,6 @@ defmodule LatticeStripe.MixProject do
 
       # Dev/test dependencies
       {:mox, "~> 1.2", only: :test},
-      {:stream_data, "~> 1.1", only: :test},
       {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}

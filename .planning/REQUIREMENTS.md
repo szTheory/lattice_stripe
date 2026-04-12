@@ -1,201 +1,324 @@
-# Requirements: LatticeStripe v2.0 Billing & Connect
+# Requirements: LatticeStripe
 
-**Milestone:** v2.0 Billing & Connect
-**Target Hex release:** `lattice_stripe` v0.3.0 (with optional v0.3.0-rc1 cut at Phase 16)
-**Philosophy:** SDK-first. Every requirement serves the Elixir Stripe SDK mission (completeness, consistency, DX, correctness). Downstream consumers (notably Accrue) are canaries, not design drivers.
+**Defined:** 2026-03-31
+**Core Value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
 
-## v2.0 Requirements
+## v1 Requirements
 
-Promoted from v1's deferred "v2 Requirements" list and expanded with new items surfaced during the v2.0 planning + research cycle.
+Requirements for initial release. Each maps to roadmap phases.
 
-### Billing — Catalog
+### Transport
 
-- [x] **BILL-01**: Developer can manage Products — create, retrieve, update, list, stream, search
-- [x] **BILL-02**: Developer can manage Prices — create, retrieve, update, list, stream, search (no delete; Stripe API constraint)
-- [x] **BILL-06**: Developer can manage Coupons — create, retrieve, delete, list, stream (no update; Stripe API constraint)
-- [x] **BILL-06b**: Developer can manage Promotion Codes — create, retrieve, update, list, stream. Search is NOT supported: verified against Stripe OpenAPI spec (`spec3.sdk.json`) during Phase 12 discussion — the `/v1/promotion_codes/search` endpoint does not exist (only 7 resources have search: charges, customers, invoices, payment_intents, prices, products, subscriptions). Discovery path is `list/2` with filters (`code`, `coupon`, `customer`, `active`) per https://docs.stripe.com/api/promotion_codes/list.
+- [x] **TRNS-01**: Library provides a Transport behaviour with a single `request/1` callback for HTTP abstraction
+- [x] **TRNS-02**: Library ships a default Finch adapter implementing the Transport behaviour
+- [x] **TRNS-03**: User can swap HTTP client by implementing the Transport behaviour
+- [x] **TRNS-04**: Transport handles form-encoded request bodies (Stripe v1 API format)
+- [x] **TRNS-05**: Transport supports configurable timeouts per-request and per-client
 
-### Billing — Testing Infrastructure
+### Client Configuration
 
-- [x] **BILL-08**: Developer can manage Billing Test Clocks — create, retrieve, list, stream, delete, advance
-- [x] **BILL-08b**: Developer can await asynchronous clock advancement via an SDK helper (`advance_and_wait/3` or equivalent) with configurable timeout, returning `{:error, :timeout}` on failure
-- [x] **BILL-08c**: Developer can use a high-level test helper module (`LatticeStripe.Testing.TestClock`) to coordinate test clock + subscription lifecycle fixtures in their own test suite
+- [x] **CONF-01**: User can create a client struct with API key, base URL, timeouts, retry policy, API version, and telemetry toggle
+- [x] **CONF-02**: Client configuration is validated at creation time with clear error messages (NimbleOptions)
+- [x] **CONF-03**: User can override options per-request (idempotency_key, stripe_account, api_key, stripe_version, expand, timeout)
+- [x] **CONF-04**: Client struct is a plain struct — no GenServer, no global state
+- [x] **CONF-05**: Multiple independent clients can coexist in the same VM
 
-### Billing — Invoices
+### Error Handling
 
-- [ ] **BILL-04**: Developer can manage Invoices — create, retrieve, update, list, stream, search
-- [ ] **BILL-04b**: Developer can finalize, void, mark as uncollectible, pay, and send Invoices via dedicated action verbs
-- [ ] **BILL-04c**: Developer can preview upcoming Invoice charges via `upcoming/2` returning an Invoice-shaped struct with `id: nil` (proration preview before confirming a plan change)
-- [ ] **BILL-10**: Developer can list Invoice Line Items for an invoice (read-only child resource, also surfaced as `Invoice.lines` typed field)
+- [x] **ERRR-01**: All public API functions return `{:ok, result} | {:error, reason}`
+- [x] **ERRR-02**: Bang variants (e.g., `create!/2`) are provided that raise on error
+- [x] **ERRR-03**: Errors are structured, pattern-matchable structs with type, code, message, param, request_id
+- [x] **ERRR-04**: Distinct error types exist for: card errors, invalid request, authentication, rate limit, API errors, idempotency conflicts
+- [x] **ERRR-05**: Error structs include HTTP status, full error body, and actionable context for debugging
+- [x] **ERRR-06**: Idempotency conflicts (409) surface as a distinct error type with original request_id
 
-### Billing — Subscriptions
+### Retry & Idempotency
 
-- [ ] **BILL-03**: Developer can manage Subscriptions — create, retrieve, update, list, stream, search
-- [ ] **BILL-03b**: Developer can cancel Subscriptions in two modes: immediate (`cancel/2`) and scheduled at period end (`cancel/3` with `cancel_at_period_end: true`)
-- [ ] **BILL-03c**: Developer can pause and resume Subscriptions via dedicated action verbs (`pause/3`, `resume/3`) mapping to Stripe's dedicated endpoint
-- [ ] **BILL-03d**: Developer can manage Subscription Items — create, retrieve, update, delete, list (search not supported by Stripe)
-- [ ] **BILL-03e**: Subscription `@moduledoc` documents the complete lifecycle state machine — `incomplete → incomplete_expired` (23h one-way edge), `active → past_due → unpaid → canceled`, `cancel_at_period_end = true` keeping status `active` until period end, and webhook event sequence
-- [ ] **BILL-03f**: Developer can query Subscription lifecycle helpers — `status_is_terminal?/1`, `cancellation_pending?/1`
-- [ ] **UTIL-03**: `LatticeStripe.Billing.ProrationBehavior.validate!/1` validates `proration_behavior` values (`"create_prorations"`, `"always_invoice"`, `"none"`) with clear ArgumentError messages
-- [ ] **UTIL-04**: Client struct gains additive `require_explicit_proration: boolean` field (default `false`). When `true`, calls to Subscription/Schedule/Invoice mutation functions that omit `proration_behavior` return `{:error, %Error{type: :proration_required}}`. When `false` (default), the param passes through to Stripe transparently, matching stripe-ruby/node/python SDK parity. Documented as opt-in strict mode, not surprising default.
+- [x] **RTRY-01**: Library automatically retries failed requests with exponential backoff and jitter
+- [x] **RTRY-02**: Retry logic respects the Stripe-Should-Retry response header
+- [x] **RTRY-03**: Library auto-generates idempotency keys for mutating requests and reuses the same key on retry
+- [x] **RTRY-04**: User can provide a custom idempotency key per-request
+- [x] **RTRY-05**: Retry strategy is pluggable via a RetryStrategy behaviour (custom backoff, circuit breaking)
+- [x] **RTRY-06**: Max retries are configurable per-client and per-request
 
-### Billing — Schedules
+### Pagination
 
-- [ ] **BILL-09**: Developer can manage Subscription Schedules — create, retrieve, update, cancel, release, list, stream
-- [ ] **BILL-09b**: Subscription struct surfaces `:schedule` as a typed field so callers can pattern-match `%Subscription{schedule: nil}` vs managed subscriptions
-- [ ] **BILL-09c**: `Subscription.update/3` `@doc` warns prominently that mutations to a schedule-owned subscription will conflict with the schedule's phase transitions; recommends `SubscriptionSchedule.release/2` as the escape hatch
+- [x] **PAGE-01**: List endpoints return a struct with `data`, `has_more`, and pagination cursors
+- [x] **PAGE-02**: User can paginate manually with `starting_after` and `ending_before` parameters
+- [x] **PAGE-03**: Library provides auto-pagination via `Stream.resource/3` that lazily fetches all pages
+- [x] **PAGE-04**: Auto-pagination streams are composable with Elixir's Stream and Enum modules
+- [x] **PAGE-05**: Search endpoints support page-based pagination with `page` and `next_page` parameters
+- [x] **PAGE-06**: Search pagination documents eventual consistency caveats clearly
 
-### Connect — Accounts & Links
+### Expand & Response
 
-- [ ] **CNCT-01**: Developer can manage connected Accounts — create, retrieve, update, delete (where Stripe permits), list, stream, with clear documentation of Standard/Express/Custom type constraints
-- [ ] **CNCT-01b**: Developer can create AccountLinks for onboarding and update flows
-- [ ] **CNCT-01c**: Developer can create LoginLinks for Express dashboard access
-- [ ] **CNCT-06**: Developer can construct a Connect-scoped client via `LatticeStripe.Client.with_account/2` returning a new Client struct with the `Stripe-Account` header baked in, making per-tenant code paths explicit and greppable
-- [ ] **CNCT-07**: `LatticeStripe.Connect` namespace module ships with a top-level warning documenting that `stripe_account` is a context switch (platform vs connected account are different data universes), with a Context Matrix table documenting which resources must/must-not carry the header
+- [x] **EXPD-01**: User can pass `expand` option to expand nested objects on any request
+- [ ] **EXPD-02**: Expanded objects are deserialized into typed structs, unexpanded remain as string IDs
+- [ ] **EXPD-03**: Nested expansion is supported (e.g., `expand: ["data.customer"]`)
+- [x] **EXPD-04**: Response structs expose raw response metadata: request_id, HTTP status, headers
+- [ ] **EXPD-05**: Pattern-matchable domain types use atoms for status fields (e.g., `:succeeded`, `:requires_action`)
 
-### Connect — Money Movement
+### API Versioning
 
-- [ ] **CNCT-02**: Developer can create and retrieve Transfers, reverse them, update metadata, and list/stream
-- [ ] **CNCT-02b**: Developer can create, retrieve, update, cancel, reverse Payouts and list/stream
-- [ ] **CNCT-05**: Developer can retrieve Balance (singleton — no ID, scoped to Connect context via `stripe_account` header)
-- [ ] **CNCT-05b**: Developer can retrieve and list/stream Balance Transactions
-- [ ] **CNCT-04**: Connect guide documents destination charges (via existing v1 `PaymentIntent` with `transfer_data` / `on_behalf_of`) and separate charges + transfers patterns with working code examples
+- [x] **VERS-01**: Library pins to a specific Stripe API version per release
+- [x] **VERS-02**: User can override API version per-client
+- [x] **VERS-03**: User can override API version per-request
 
-### Cross-cutting SDK utilities
+### Telemetry
 
-- [ ] **UTIL-01**: `LatticeStripe.EventType` exhaustive catalog of Stripe webhook event types for API version `2026-03-25.dahlia`, organized into groups (`billing_events/0`, `payment_events/0`, `connect_events/0`, `subscription_events/0`, `invoice_events/0`, `all/0`). Each event exposed as a `@attribute` and a matching `foo/0` function. Constants are strings (matching wire format), not atoms.
-- [ ] **UTIL-01b**: Mix task `mix lattice_stripe.gen.event_types` fetches Stripe's OpenAPI spec (cached to `test/fixtures/stripe_openapi_events.json`) and emits a diff against the EventType module; weekly GitHub Actions workflow runs the diff check and opens an issue on drift
-- [ ] **UTIL-01c**: ExUnit test tagged `:openapi_sync` diffs the vendored fixture against `LatticeStripe.EventType.all/0` to catch drift in CI
-- [ ] **UTIL-02**: `LatticeStripe.Search` module ships as a thin documentation facade — every `search/2` `@doc` links to it, and the module explains the search pagination shape (`page`/`next_page` vs list's `starting_after`/`ending_before`). Search auto-pagination already works transparently via `List.stream!/2`; no new engine module.
-- [ ] **UTIL-05**: `LatticeStripe.Event.created_at/1` helper returns a `DateTime` from the event's `created` unix timestamp, making "order by created time" ergonomic for out-of-order webhook handlers
-- [ ] **UTIL-06**: Every `search/2` function's `@doc` includes an eventual-consistency callout warning that resources created within ~1 second may not yet appear in search results
+- [x] **TLMT-01**: Library emits `[:lattice_stripe, :request, :start]` event before each HTTP request
+- [x] **TLMT-02**: Library emits `[:lattice_stripe, :request, :stop]` event after each HTTP request with duration, method, path, status, request_id
+- [x] **TLMT-03**: Library emits `[:lattice_stripe, :request, :exception]` event on request failure
 
-### Testing & CI
+### JSON Codec
 
-- [ ] **TEST-07**: Integration test tier split — stripe-mock tier (fast, always runs) plus a new real-Stripe-test-mode tier tagged `:real_stripe` and gated by `STRIPE_TEST_SECRET_KEY` env var, running nightly in CI for stateful scenarios stripe-mock cannot simulate (subscription lifecycle, invoice auto-advance, test clock effects, schedule phase transitions)
-- [ ] **TEST-08**: Integration test suite for every new resource passes against stripe-mock via the existing Docker infrastructure
-- [x] **TEST-09**: `test/support/billing_case.ex` ExUnit CaseTemplate coordinates test clock + customer + subscription fixtures with automatic clock cleanup (internal-only, not shipped in hex docs)
-- [x] **TEST-10**: `mix lattice_stripe.test_clock.cleanup` Mix task (or equivalent ExUnit helper) lists and deletes test clocks tagged with a test marker metadata key, preventing the 100-clock Stripe account limit from breaking CI
+- [x] **JSON-01**: Library uses Jason as default JSON encoder/decoder
+- [x] **JSON-02**: JSON codec is pluggable via a behaviour for users with different JSON libraries
+
+### Payments — PaymentIntents
+
+- [x] **PINT-01**: User can create a PaymentIntent with amount, currency, and payment method options
+- [x] **PINT-02**: User can retrieve a PaymentIntent by ID
+- [x] **PINT-03**: User can update a PaymentIntent
+- [x] **PINT-04**: User can confirm a PaymentIntent
+- [x] **PINT-05**: User can capture a PaymentIntent (manual capture flow)
+- [x] **PINT-06**: User can cancel a PaymentIntent
+- [x] **PINT-07**: User can list PaymentIntents with filters and pagination
+
+### Payments — SetupIntents
+
+- [x] **SINT-01**: User can create a SetupIntent for saving payment methods
+- [x] **SINT-02**: User can retrieve a SetupIntent by ID
+- [x] **SINT-03**: User can update a SetupIntent
+- [x] **SINT-04**: User can confirm a SetupIntent
+- [x] **SINT-05**: User can cancel a SetupIntent
+- [x] **SINT-06**: User can list SetupIntents with filters and pagination
+
+### Payments — PaymentMethods
+
+- [x] **PMTH-01**: User can create a PaymentMethod
+- [x] **PMTH-02**: User can retrieve a PaymentMethod by ID
+- [x] **PMTH-03**: User can update a PaymentMethod
+- [x] **PMTH-04**: User can list PaymentMethods for a customer
+- [x] **PMTH-05**: User can attach a PaymentMethod to a customer
+- [x] **PMTH-06**: User can detach a PaymentMethod from a customer
+
+### Payments — Customers
+
+- [x] **CUST-01**: User can create a Customer with email, name, metadata
+- [x] **CUST-02**: User can retrieve a Customer by ID
+- [x] **CUST-03**: User can update a Customer
+- [x] **CUST-04**: User can delete a Customer
+- [x] **CUST-05**: User can list Customers with filters and pagination
+- [x] **CUST-06**: User can search Customers (search API with page-based pagination)
+
+### Payments — Refunds
+
+- [x] **RFND-01**: User can create a Refund (full or partial) for a PaymentIntent
+- [x] **RFND-02**: User can retrieve a Refund by ID
+- [x] **RFND-03**: User can update a Refund
+- [x] **RFND-04**: User can list Refunds with filters and pagination
+
+### Checkout
+
+- [x] **CHKT-01**: User can create a Checkout Session in payment mode
+- [x] **CHKT-02**: User can create a Checkout Session in subscription mode
+- [x] **CHKT-03**: User can create a Checkout Session in setup mode
+- [x] **CHKT-04**: User can configure line items, customer prefill, and success/cancel URLs
+- [x] **CHKT-05**: User can retrieve a Checkout Session by ID
+- [x] **CHKT-06**: User can list Checkout Sessions with filters and pagination
+- [x] **CHKT-07**: User can expire an incomplete Checkout Session
+
+### Webhooks
+
+- [x] **WHBK-01**: User can verify webhook signature against raw request body with timing-safe comparison
+- [x] **WHBK-02**: User can parse verified webhook payload into a typed Event struct
+- [x] **WHBK-03**: User can configure signature tolerance window (default 300 seconds)
+- [x] **WHBK-04**: Library provides a Phoenix Plug that handles raw body extraction and signature verification
+- [x] **WHBK-05**: Webhook Plug documents and solves the Plug.Parsers raw body consumption problem
 
 ### Documentation
 
-- [ ] **DOCS-05**: Billing guide (`guides/billing.md`) — install to first Subscription with explicit `proration_behavior`, explains the Stripe Billing data model for Elixir developers new to Stripe, covers every new resource with working code examples
-- [ ] **DOCS-06**: Connect guide (`guides/connect.md`) — account type decision matrix (Standard/Express/Custom), Context Matrix for `stripe_account` header scoping, destination charges vs separate charges patterns, worked example using `Client.with_account/2`
-- [ ] **DOCS-07**: Subscription lifecycle reference documentation — state machine diagram, every state transition documented, `incomplete_expired` 23-hour window called out, `cancel_at_period_end` behavior, `pause/resume` vs `pause_collection` param distinction
-- [ ] **DOCS-08**: Invoice lifecycle reference documentation — draft/open/paid/uncollectible/void states, auto-advance behavior and the ~1h race window, canonical order of operations for manual invoicing
-- [ ] **DOCS-09**: Testing guide updated with two-tier strategy, TestClock usage patterns, and `:real_stripe` tag convention
-- [ ] **DOCS-10**: Webhooks guide updated with "Handling out-of-order events" section using `Event.created_at/1` helper and idempotent-upsert pattern
-- [ ] **DOCS-11**: README "Billing" and "Connect" sections with short worked examples; updated version badge for v0.3.0
+- [x] **DOCS-01**: Every public module has @moduledoc with purpose and usage examples
+- [x] **DOCS-02**: Every public function has @doc with arguments, return types, examples, and error cases
+- [x] **DOCS-03**: ExDoc generates grouped, navigable documentation published to HexDocs
+- [x] **DOCS-04**: README provides <60 second quickstart from install to first API call
+- [x] **DOCS-05**: Guides cover: Getting Started, Client Configuration, Payments, Checkout, Webhooks, Error Handling, Testing, Telemetry
+- [x] **DOCS-06**: Non-obvious code has short, readable comments with example input/output data shapes
 
-### Release
+### Testing
 
-- [ ] **REL-01**: Conventional commit scope discipline documented in CONTRIBUTING — `feat(billing):`, `feat(connect):`, `feat(sdk):` conventions for Release Please v4
-- [ ] **REL-02**: Milestone smoke test in Phase 19 exercises end-to-end Product → Price → Customer → Subscription (with explicit `proration_behavior`) → Invoice → pay against stripe-mock, proving the whole milestone composes into a working billing flow
-- [ ] **REL-03**: Optional v0.3.0-rc1 pre-release mechanism decided at Phase 16 transition (manual tag vs Release Please prerelease manifest)
-- [ ] **REL-04**: v0.3.0 final published to Hex via Release Please after Phase 19 merges to main
+- [x] **TEST-01**: Integration tests validate real HTTP request/response cycles via stripe-mock
+- [x] **TEST-02**: Unit tests cover pure logic: request building, response decoding, error normalization, pagination
+- [x] **TEST-03**: Mox-based tests validate Transport behaviour contract adherence
+- [x] **TEST-04**: Test helpers available for constructing mock webhook events
+- [x] **TEST-05**: CI runs formatter, compiler warnings, Credo, tests, ExDoc build
+- [x] **TEST-06**: CI tests across Elixir 1.15/OTP 26, 1.17/OTP 27, 1.19/OTP 28
 
-## Traceability
+### CI/CD
 
-Every v2.0 requirement is mapped to exactly one phase. 53 of 53 mapped.
+- [x] **CICD-01**: GitHub Actions CI runs on PR and push to main (format, compile, credo, test, docs)
+- [x] **CICD-02**: Release Please automates versioning via Conventional Commits
+- [x] **CICD-03**: Hex publishing triggers automatically on release
+- [x] **CICD-04**: Dependabot keeps Mix dependencies and GitHub Actions updated
+- [x] **CICD-05**: stripe-mock runs in CI via Docker for integration tests
 
-| Requirement | Phase    | Status  |
-|-------------|----------|---------|
-| BILL-01     | Phase 12 | Complete |
-| BILL-02     | Phase 12 | Complete |
-| BILL-06     | Phase 12 | Complete |
-| BILL-06b    | Phase 12 | Complete |
-| BILL-08     | Phase 13 | Complete |
-| BILL-08b    | Phase 13 | Complete |
-| BILL-08c    | Phase 13 | Complete |
-| TEST-09     | Phase 13 | Complete |
-| TEST-10     | Phase 13 | Complete |
-| BILL-04     | Phase 14 | Pending |
-| BILL-04b    | Phase 14 | Pending |
-| BILL-04c    | Phase 14 | Pending |
-| BILL-10     | Phase 14 | Pending |
-| BILL-03     | Phase 15 | Pending |
-| BILL-03b    | Phase 15 | Pending |
-| BILL-03c    | Phase 15 | Pending |
-| BILL-03d    | Phase 15 | Pending |
-| BILL-03e    | Phase 15 | Pending |
-| BILL-03f    | Phase 15 | Pending |
-| UTIL-03     | Phase 15 | Pending |
-| UTIL-04     | Phase 15 | Pending |
-| BILL-09     | Phase 16 | Pending |
-| BILL-09b    | Phase 16 | Pending |
-| BILL-09c    | Phase 16 | Pending |
-| REL-03      | Phase 16 | Pending |
-| CNCT-01     | Phase 17 | Pending |
-| CNCT-01b    | Phase 17 | Pending |
-| CNCT-01c    | Phase 17 | Pending |
-| CNCT-06     | Phase 17 | Pending |
-| CNCT-07     | Phase 17 | Pending |
-| CNCT-02     | Phase 18 | Pending |
-| CNCT-02b    | Phase 18 | Pending |
-| CNCT-05     | Phase 18 | Pending |
-| CNCT-05b    | Phase 18 | Pending |
-| CNCT-04     | Phase 18 | Pending |
-| UTIL-01     | Phase 19 | Pending |
-| UTIL-01b    | Phase 19 | Pending |
-| UTIL-01c    | Phase 19 | Pending |
-| UTIL-02     | Phase 19 | Pending |
-| UTIL-05     | Phase 19 | Pending |
-| UTIL-06     | Phase 19 | Pending |
-| TEST-07     | Phase 19 | Pending |
-| TEST-08     | Phase 19 | Pending |
-| DOCS-05     | Phase 19 | Pending |
-| DOCS-06     | Phase 19 | Pending |
-| DOCS-07     | Phase 19 | Pending |
-| DOCS-08     | Phase 19 | Pending |
-| DOCS-09     | Phase 19 | Pending |
-| DOCS-10     | Phase 19 | Pending |
-| DOCS-11     | Phase 19 | Pending |
-| REL-01      | Phase 19 | Pending |
-| REL-02      | Phase 19 | Pending |
-| REL-04      | Phase 19 | Pending |
+## v2 Requirements
 
-## Future Requirements (Deferred Beyond v2.0)
+Deferred to future release. Tracked but not in current roadmap.
 
-### v0.4.x — Tier 3 High-Value
+### Billing
 
-- **BILL-05**: BillingPortal Sessions and Configuration
-- **BILL-12**: CreditNote with `preview/2` and `void/2`
-- **BILL-13**: TaxRate
-- **BILL-14**: TaxId (customer-scoped)
-- **BILL-15**: CustomerBalanceTransaction (customer-scoped)
+- **BILL-01**: Products — create, retrieve, update, delete, list
+- **BILL-02**: Prices — create, retrieve, update, list
+- **BILL-03**: Subscriptions — create, retrieve, update, cancel, pause, resume, list, search
+- **BILL-04**: Invoices — create, retrieve, update, finalize, pay, send, void, list, search
+- **BILL-05**: Customer Portal Sessions — create with deep-linked flows
+- **BILL-06**: Coupons and Promotion Codes
+- **BILL-07**: Meters and Meter Events (usage-based billing)
+- **BILL-08**: Billing Test Clocks for subscription testing
 
-### v0.5.x — Tier 4 Usage-Based Billing
+### Connect
 
-- **BILL-07**: Billing.Meter, Billing.MeterEvent, Billing.MeterEventAdjustment, Billing.MeterEventSummary
+- **CNCT-01**: Account lifecycle (retrieve, update, onboarding)
+- **CNCT-02**: Transfers and Payouts
+- **CNCT-03**: Destination charges vs separate charge/transfer patterns
+- **CNCT-04**: Platform fee handling and reconciliation
+- **CNCT-05**: Balance and Balance Transactions
 
-### v0.6.x — Tier 5 B2B Sales
+### Advanced
 
-- **BILL-16**: Quote lifecycle (create, retrieve, update, finalize, accept, cancel, list, line item listing)
-
-### Carried Forward from v1 Known Gaps
-
-- **EXPD-02**: Expanded objects deserialized into typed structs, unexpanded remain as string IDs
-- **EXPD-03**: Nested expansion support (e.g., `expand: ["data.customer"]`)
-- **EXPD-05**: Pattern-matchable domain types use atoms for status fields (e.g., `:succeeded`)
-
-These can be promoted to a future milestone when typed-struct deserialization becomes a blocker.
-
-### Always Deferred (Out of Scope)
-
-- **CNCT-03**: Destination charges vs separate charge/transfer patterns as SDK primitives (documented in Connect guide instead — these are usage patterns, not new resources)
 - **ADVN-01**: v2 API namespace support and thin events
-- **ADVN-02**: Code generation from Stripe OpenAPI spec
+- **ADVN-02**: Code generation from Stripe OpenAPI spec for breadth coverage
 - **ADVN-03**: Tax, Identity, Treasury, Issuing, Terminal resource coverage
 
-## Out of Scope (Explicit Exclusions)
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Mandatory `proration_behavior` enforcement in default mode | Stripe's own SDKs (ruby/node/python) pass through to Stripe defaults; forcing a required keyword would surprise developers migrating from stripe-ruby. Strict mode ships as opt-in via `require_explicit_proration: true` client flag. |
-| Higher-level billing abstractions (Pay gem style) | Accrue is the separate project being built for this. `lattice_stripe` is the SDK; opinionated wrappers live one layer up. |
-| Global module-level configuration | v1 design decision — breaks multi-tenancy, test isolation, concurrent usage. Client struct remains passed explicitly. |
-| Ecto dependency | v1 design decision — API client should not force Ecto on users. |
-| Dialyzer/Dialyxir | v1 design decision — typespecs for documentation only. |
-| Typed struct deserialization for expanded objects | Deferred to own milestone (EXPD-02/03/05). Requires careful type design; not additive to v2 scope. |
-| Webhook event ordering guarantees at SDK level | Fundamentally impossible — at-least-once Stripe delivery semantics mean the SDK cannot guarantee ordering. We document the pattern (idempotent upsert by ID, order by `created`) and ship the `Event.created_at/1` helper instead. |
-| Auto-retry on search eventual consistency | Hides the semantic from callers and wastes quota. stripe-ruby and stripe-node both document the delay without retrying; we match. |
+| Dialyzer/Dialyxir | Feels janky; typespecs for documentation only, specs + pattern matching for safety |
+| Higher-level billing abstractions (Pay gem style) | Separate project with different dependencies and change cadence |
+| Global module-level configuration | Breaks multi-tenancy, test isolation, and concurrent usage |
+| Ecto dependency | API client should not force Ecto on users |
+| Phoenix dependency (except webhook Plug) | Core library must work outside Phoenix |
+| Legacy Charges/Tokens/Sources as primary API | Stripe recommends PaymentIntents; legacy sends wrong signal |
+| Mobile/frontend SDK | Backend only; Stripe.js handles the frontend |
+| Automatic webhook event routing/dispatch | Belongs in higher-level layer, not API client |
+| ExVCR/cassette-based testing | Brittle, hard to maintain; stripe-mock + Mox preferred |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| TRNS-01 | Phase 1 | Complete |
+| TRNS-02 | Phase 1 | Complete |
+| TRNS-03 | Phase 1 | Complete |
+| TRNS-04 | Phase 1 | Complete |
+| TRNS-05 | Phase 1 | Complete |
+| CONF-01 | Phase 1 | Complete |
+| CONF-02 | Phase 1 | Complete |
+| CONF-03 | Phase 1 | Complete |
+| CONF-04 | Phase 1 | Complete |
+| CONF-05 | Phase 1 | Complete |
+| JSON-01 | Phase 1 | Complete |
+| JSON-02 | Phase 1 | Complete |
+| ERRR-01 | Phase 2 | Complete |
+| ERRR-02 | Phase 2 | Complete |
+| ERRR-03 | Phase 2 | Complete |
+| ERRR-04 | Phase 2 | Complete |
+| ERRR-05 | Phase 2 | Complete |
+| ERRR-06 | Phase 2 | Complete |
+| RTRY-01 | Phase 2 | Complete |
+| RTRY-02 | Phase 2 | Complete |
+| RTRY-03 | Phase 2 | Complete |
+| RTRY-04 | Phase 2 | Complete |
+| RTRY-05 | Phase 2 | Complete |
+| RTRY-06 | Phase 2 | Complete |
+| PAGE-01 | Phase 3 | Complete |
+| PAGE-02 | Phase 3 | Complete |
+| PAGE-03 | Phase 3 | Complete |
+| PAGE-04 | Phase 3 | Complete |
+| PAGE-05 | Phase 3 | Complete |
+| PAGE-06 | Phase 3 | Complete |
+| EXPD-01 | Phase 3 | Complete |
+| EXPD-02 | Phase 3 | Pending |
+| EXPD-03 | Phase 3 | Pending |
+| EXPD-04 | Phase 3 | Complete |
+| EXPD-05 | Phase 3 | Pending |
+| VERS-01 | Phase 3 | Complete |
+| VERS-02 | Phase 3 | Complete |
+| VERS-03 | Phase 3 | Complete |
+| CUST-01 | Phase 4 | Complete |
+| CUST-02 | Phase 4 | Complete |
+| CUST-03 | Phase 4 | Complete |
+| CUST-04 | Phase 4 | Complete |
+| CUST-05 | Phase 4 | Complete |
+| CUST-06 | Phase 4 | Complete |
+| PINT-01 | Phase 4 | Complete |
+| PINT-02 | Phase 4 | Complete |
+| PINT-03 | Phase 4 | Complete |
+| PINT-04 | Phase 4 | Complete |
+| PINT-05 | Phase 4 | Complete |
+| PINT-06 | Phase 4 | Complete |
+| PINT-07 | Phase 4 | Complete |
+| SINT-01 | Phase 5 | Complete |
+| SINT-02 | Phase 5 | Complete |
+| SINT-03 | Phase 5 | Complete |
+| SINT-04 | Phase 5 | Complete |
+| SINT-05 | Phase 5 | Complete |
+| SINT-06 | Phase 5 | Complete |
+| PMTH-01 | Phase 5 | Complete |
+| PMTH-02 | Phase 5 | Complete |
+| PMTH-03 | Phase 5 | Complete |
+| PMTH-04 | Phase 5 | Complete |
+| PMTH-05 | Phase 5 | Complete |
+| PMTH-06 | Phase 5 | Complete |
+| RFND-01 | Phase 6 | Complete |
+| RFND-02 | Phase 6 | Complete |
+| RFND-03 | Phase 6 | Complete |
+| RFND-04 | Phase 6 | Complete |
+| CHKT-01 | Phase 6 | Complete |
+| CHKT-02 | Phase 6 | Complete |
+| CHKT-03 | Phase 6 | Complete |
+| CHKT-04 | Phase 6 | Complete |
+| CHKT-05 | Phase 6 | Complete |
+| CHKT-06 | Phase 6 | Complete |
+| CHKT-07 | Phase 6 | Complete |
+| WHBK-01 | Phase 7 | Complete |
+| WHBK-02 | Phase 7 | Complete |
+| WHBK-03 | Phase 7 | Complete |
+| WHBK-04 | Phase 7 | Complete |
+| WHBK-05 | Phase 7 | Complete |
+| TLMT-01 | Phase 8 | Complete |
+| TLMT-02 | Phase 8 | Complete |
+| TLMT-03 | Phase 8 | Complete |
+| TEST-01 | Phase 9 | Complete |
+| TEST-02 | Phase 9 | Complete |
+| TEST-03 | Phase 9 | Complete |
+| TEST-04 | Phase 9 | Complete |
+| TEST-05 | Phase 9 | Complete |
+| TEST-06 | Phase 9 | Complete |
+| DOCS-01 | Phase 10 | Complete |
+| DOCS-02 | Phase 10 | Complete |
+| DOCS-03 | Phase 10 | Complete |
+| DOCS-04 | Phase 10 | Complete |
+| DOCS-05 | Phase 10 | Complete |
+| DOCS-06 | Phase 10 | Complete |
+| CICD-01 | Phase 11 | Complete |
+| CICD-02 | Phase 11 | Complete |
+| CICD-03 | Phase 11 | Complete |
+| CICD-04 | Phase 11 | Complete |
+| CICD-05 | Phase 11 | Complete |
+
+**Coverage:**
+- v1 requirements: 99 total
+- Mapped to phases: 99
+- Unmapped: 0
+
+---
+*Requirements defined: 2026-03-31*
+*Last updated: 2026-03-31 after roadmap creation*

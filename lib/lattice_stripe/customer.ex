@@ -45,7 +45,7 @@ defmodule LatticeStripe.Customer do
   object reference and available parameters.
   """
 
-  alias LatticeStripe.{Client, Discount, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
 
   # Known top-level fields from the Stripe Customer object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -108,7 +108,7 @@ defmodule LatticeStripe.Customer do
           default_source: String.t() | nil,
           delinquent: boolean() | nil,
           description: String.t() | nil,
-          discount: Discount.t() | nil,
+          discount: map() | nil,
           email: String.t() | nil,
           individual_name: String.t() | nil,
           invoice_credit_balance: map() | nil,
@@ -443,7 +443,7 @@ defmodule LatticeStripe.Customer do
       default_source: map["default_source"],
       delinquent: map["delinquent"],
       description: map["description"],
-      discount: decode_discount(map["discount"]),
+      discount: map["discount"],
       email: map["email"],
       individual_name: map["individual_name"],
       invoice_credit_balance: map["invoice_credit_balance"],
@@ -462,9 +462,6 @@ defmodule LatticeStripe.Customer do
       extra: Map.drop(map, @known_fields)
     }
   end
-
-  defp decode_discount(nil), do: nil
-  defp decode_discount(%{} = discount_map), do: Discount.from_map(discount_map)
 end
 
 defimpl Inspect, for: LatticeStripe.Customer do

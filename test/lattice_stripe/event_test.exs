@@ -2,7 +2,7 @@ defmodule LatticeStripe.EventTest do
   use ExUnit.Case, async: true
 
   import Mox
-  import LatticeStripe.TestSupport
+  import LatticeStripe.TestHelpers
   import LatticeStripe.Test.Fixtures.Event, only: [event_map: 0, event_map: 1]
 
   alias LatticeStripe.{Error, Event, List, Response}

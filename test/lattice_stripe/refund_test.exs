@@ -2,7 +2,7 @@ defmodule LatticeStripe.RefundTest do
   use ExUnit.Case, async: true
 
   import Mox
-  import LatticeStripe.TestSupport
+  import LatticeStripe.TestHelpers
   import LatticeStripe.Test.Fixtures.Refund
 
   alias LatticeStripe.{Error, List, Refund, Response}

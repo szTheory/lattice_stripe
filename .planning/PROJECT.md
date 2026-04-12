@@ -8,80 +8,74 @@ A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe aims 
 
 Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
 
-## Current Milestone: v2.0 Billing & Connect
-
-**Goal:** Close `lattice_stripe`'s Billing and Connect coverage gap so it's a complete Elixir Stripe SDK — the full Billing tier (Products, Prices, Subscriptions, Invoices, Schedules, Coupons, PromotionCodes, Test Clocks) and Stripe Connect (Accounts, Links, Transfers, Payouts, Balances) ship together, alongside cross-cutting SDK ergonomics (EventType catalog, Search pagination helper, proration discipline).
-
-**Target features:**
-- Products, Prices, Coupons, PromotionCodes (Phase 12)
-- Billing Test Clocks (Phase 13, pulled forward to enable subscription lifecycle testing)
-- Invoices + Invoice Line Items with `upcoming/2` proration preview (Phase 14)
-- Subscriptions with pause/resume/cancel, validated `proration_behavior` enum, `require_explicit_proration` config flag, documented status lifecycle traps (Phase 15)
-- Subscription Schedules for planned upgrades/downgrades (Phase 16)
-- Stripe Connect — Accounts, AccountLinks, LoginLinks (Phase 17)
-- Stripe Connect — Transfers, Payouts, Balance, BalanceTransactions (Phase 18)
-- Cross-cutting: `LatticeStripe.EventType` catalog, `LatticeStripe.Search.stream!/3`, `LatticeStripe.Billing.ProrationBehavior` validator, Billing + Connect guides, milestone smoke test (Phase 19)
-
-**Release target:** Hex `lattice_stripe` v0.3.0 after Phase 19. Optional v0.3.0-rc1 pre-release after Phase 16 to unblock downstream consumers (notably Accrue, a higher-level Elixir billing library that depends on `lattice_stripe` as a canary consumer — see plan at `~/.claude/plans/steady-sleeping-blum.md`).
-
-**Design philosophy for this milestone:** `lattice_stripe` remains *the* Elixir Stripe SDK — decisions prioritize (1) consistency with v1 patterns, (2) completeness/coherence as an SDK, (3) great DX for any caller, (4) correctness around Stripe footguns, (5) downstream unblock only as a release-sequencing concern. Resources are added because Stripe's data model has them, not because one consumer asked. See `~/.claude/plans/steady-sleeping-blum.md` "Design Philosophy" section for the full framing.
-
 ## Requirements
 
 ### Validated
 
-**Foundation**
-- ✓ HTTP transport via pluggable `Transport` behaviour with default Finch adapter — v1.0 (Phase 1)
-- ✓ Explicit client configuration (API key, base URL, timeouts, retries, API version, telemetry) — v1.0 (Phase 1)
-- ✓ Per-request option overrides (idempotency_key, stripe_account, api_key, stripe_version, expand, timeout) — v1.0 (Phase 1)
-- ✓ Structured error model with pattern-matchable error types (auth, card, validation, rate limit, server, idempotency_error) — v1.0 (Phase 2)
-- ✓ Automatic retries with exponential backoff, respecting `Stripe-Should-Retry` header — v1.0 (Phase 2)
-- ✓ Idempotency key generation and replay handling (auto `idk_ltc_<uuid4>`, user-overridable, retry-safe) — v1.0 (Phase 2)
-- ✓ Cursor-based list pagination with auto-pagination via Elixir Streams — v1.0 (Phase 3)
-- ✓ Raw response access (request ID, status, headers via `Response` struct) — v1.0 (Phase 3)
-- ✓ API version pinning per library release with per-client and per-request override — v1.0 (Phase 3)
-- ✓ Telemetry events for request lifecycle — v1.0 (Phase 8)
-
-**Payments tier**
-- ✓ Customers — create, retrieve, update, delete, list, search — v1.0 (Phase 4)
-- ✓ PaymentIntents — create, retrieve, update, confirm, capture, cancel, list — v1.0 (Phase 4)
-- ✓ SetupIntents — create, retrieve, update, confirm, cancel, verify_microdeposits, list — v1.0 (Phase 5)
-- ✓ PaymentMethods — create, retrieve, update, list, attach, detach — v1.0 (Phase 5)
-- ✓ Refunds — create, retrieve, update, cancel, list — v1.0 (Phase 6)
-- ✓ Checkout Sessions — create (payment/subscription/setup modes), retrieve, list, expire, search, line items — v1.0 (Phase 6)
-
-**Webhooks**
-- ✓ Webhook signature verification with raw body capture, multi-secret rotation, configurable tolerance window — v1.0 (Phase 7)
-- ✓ Event parsing for snapshot events (v1 style) — v1.0 (Phase 7)
-- ✓ Phoenix Plug for webhook endpoint with raw body handling (`CacheBodyReader`) — v1.0 (Phase 7)
-
-**Developer Experience**
-- ✓ Comprehensive specs: integration tests (primary) via stripe-mock, unit tests via Mox — v1.0 (Phase 9)
-- ✓ ExDoc documentation with guides, examples, and grouped modules — v1.0 (Phase 10)
-- ✓ README with <60 second quickstart — v1.0 (Phase 10)
-- ✓ CI/CD pipeline: GitHub Actions, Release Please, Hex publishing, Dependabot — v1.0 (Phase 11)
+- [x] HTTP transport via pluggable `Transport` behaviour with default Finch adapter — *Validated in Phase 1: Transport & Client Configuration*
+- [x] Explicit client configuration (API key, base URL, timeouts, retries, API version, telemetry) — *Validated in Phase 1: Transport & Client Configuration*
+- [x] Per-request option overrides (idempotency_key, stripe_account, api_key, stripe_version, expand, timeout) — *Validated in Phase 1: Transport & Client Configuration*
+- [x] Structured error model with pattern-matchable error types (auth, card, validation, rate limit, server) — *Validated in Phase 2: Error Handling & Retry*
+- [x] Automatic retries with exponential backoff, respecting Stripe-Should-Retry header — *Validated in Phase 2: Error Handling & Retry*
+- [x] Idempotency key generation and replay handling — *Validated in Phase 2: Error Handling & Retry*
+- [x] SetupIntents — create, retrieve, update, confirm, cancel, list — *Validated in Phase 5: SetupIntents & PaymentMethods*
+- [x] PaymentMethods — create, retrieve, update, list, attach, detach — *Validated in Phase 5: SetupIntents & PaymentMethods*
+- [x] Refunds — create, retrieve, update, cancel, list — *Validated in Phase 6: Refunds & Checkout*
+- [x] Checkout Sessions — create (payment/subscription/setup modes), retrieve, list, expire, search — *Validated in Phase 6: Refunds & Checkout*
+- [x] Telemetry events for request lifecycle — *Validated in Phase 8: Telemetry & Observability*
+- [x] Comprehensive specs: integration tests (primary), unit tests for pure logic — *Validated in Phase 9: Testing Infrastructure*
+- [x] ExDoc documentation with guides, examples, and grouped modules — *Validated in Phase 10: Documentation & Guides*
+- [x] README with <60 second quickstart — *Validated in Phase 10: Documentation & Guides*
+- [x] CI/CD pipeline: GitHub Actions, Release Please, Hex publishing — *Validated in Phase 11: CI/CD & Release*
 
 ### Active
 
-Defined for v2.0 via `/gsd-new-milestone`. See `.planning/REQUIREMENTS.md` (generated by the milestone workflow).
+**Foundation (Tier 0)**
+- [ ] ~~HTTP transport via pluggable `Transport` behaviour with default Finch adapter~~ *(moved to Validated)*
+- [ ] ~~Explicit client configuration~~ *(moved to Validated)*
+- [ ] ~~Per-request option overrides~~ *(moved to Validated)*
+- [ ] ~~Structured error model with pattern-matchable error types~~ *(moved to Validated)*
+- [ ] ~~Automatic retries with exponential backoff~~ *(moved to Validated)*
+- [ ] ~~Idempotency key generation and replay handling~~ *(moved to Validated)*
+- [ ] Cursor-based list pagination with auto-pagination via Elixir Streams
+- [ ] Search pagination support (page-based, eventual consistency caveats documented)
+- [ ] Expand support for nested object expansion
+- [ ] Raw response access (request ID, status, headers)
+- [ ] Telemetry events for request lifecycle
+- [ ] API version pinning per library release with per-client and per-request override
 
-### Known Gaps (from v1.0)
+**Payments (Tier 1)**
+- [ ] PaymentIntents — create, retrieve, update, confirm, capture, cancel, list
+- [ ] SetupIntents — create, retrieve, update, confirm, cancel, list
+- [ ] PaymentMethods — create, retrieve, update, list, attach, detach
+- [ ] Customers — create, retrieve, update, delete, list, search
+- [ ] Refunds — create, retrieve, update, list
 
-Deferred during v1 execution, deliberately shipped without implementation. Expand support exists at the request-option level (raw paths passed through to Stripe), but typed deserialization was deferred:
+**Checkout (Tier 2)**
+- [ ] Checkout Sessions — create, retrieve, list, expire
+- [ ] Payment, subscription, and setup modes
+- [ ] Line items, customer prefill, success/cancel URLs
 
-- `EXPD-02` — Expanded objects are deserialized into typed structs, unexpanded remain as string IDs
-- `EXPD-03` — Nested expansion (e.g., `expand: ["data.customer"]`)
-- `EXPD-05` — Atom-based status fields on domain types (e.g., `:succeeded`, `:requires_action`)
+**Webhooks**
+- [ ] Webhook signature verification (raw body, tolerance window)
+- [ ] Event parsing for snapshot events (v1 style)
+- [ ] Phoenix Plug for webhook endpoint with raw body handling
 
-Promote to a future milestone when typed-struct deserialization becomes a blocker.
+**Developer Experience**
+- [ ] ExDoc documentation with guides, examples, and grouped modules
+- [ ] Comprehensive specs: integration tests (primary), unit tests for pure logic
+- [ ] ~~CI/CD pipeline: GitHub Actions, Release Please, Hex publishing~~ *(moved to Validated)*
+- [ ] README with <60 second quickstart
 
 ### Out of Scope
 
 - Dialyzer/Dialyxir — feels janky, relying on specs + pattern matching instead
-- Code generation from OpenAPI spec — v1 is fully handwritten; generation is a future consideration (ADVN-02, deferred)
-- Specialist families (Tax, Identity, Treasury, Issuing, Terminal) — ADVN-03, deferred beyond v2.0
-- Higher-level payment abstractions (like Ruby's `pay` gem) — separate future project (in fact being built as Accrue, which depends on `lattice_stripe`)
-- Thin event support (v2 API namespace) — v1 snapshot events first; v2 in future milestone (ADVN-01)
+- Code generation from OpenAPI spec — v1 is fully handwritten; generation is a future consideration
+- Billing (subscriptions, invoices, products, prices) — future milestone
+- Connect (platform accounts, transfers, payouts) — future milestone
+- Specialist families (Tax, Identity, Treasury, Issuing, Terminal) — future milestone
+- Higher-level payment abstractions (like Ruby's `pay` gem) — separate future project
+- Thin event support (v2 style) — v1 snapshot events first; v2 in future milestone
 - Mobile/frontend SDK — backend only
 
 ## Context
@@ -132,20 +126,16 @@ Promote to a future milestone when typed-struct deserialization becomes a blocke
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Skip Dialyzer | Feels janky; specs + pattern matching provide better value | ✓ Good — v1 shipped clean with pattern-matchable error types, no Dialyzer friction |
-| Handwritten v1, no codegen | First principles; polish and ergonomics over breadth for initial release | ✓ Good — v1 resource modules are consistent and ergonomic; codegen remains future consideration (ADVN-02) |
-| Finch as default transport | Modern Elixir HTTP standard; mint-based, performant | ✓ Good — Finch performs well, no transport issues in v1 |
-| Transport behaviour | Library shouldn't force HTTP client choice on users | ✓ Good — behaviour proved useful for Mox-based unit tests with `async: true` |
-| LatticeStripe namespace | Unique on Hex, branded, no conflict with existing packages | ✓ Good — `lattice_stripe` published to Hex without conflict |
-| Foundation-first architecture | HTTP/errors/pagination/webhooks must be solid before resource coverage | ✓ Good — Phases 12–19 (v2) reuse v1 foundation unchanged; zero behaviour additions planned |
-| Integration specs primary | Test real behavior at boundaries; mocks hide bugs | ✓ Good — stripe-mock caught several param-shape bugs that Mox unit tests missed |
-| v1 scope: Foundation + Payments + Checkout + Webhooks | Ship a useful, polished core; Billing/Connect in future milestones | ✓ Good — v1 shipped as v0.2.0; v2 now adds Billing + Connect |
-| MIT license | Maximum adoption, standard for Elixir ecosystem | ✓ Good |
-| Elixir 1.15+ / OTP 26+ | ~2 year coverage, good balance of features and reach | ✓ Good — CI matrix runs 1.15/1.17/1.19 × 26/27/28 cleanly |
-| v2 proration_behavior as optional-but-validated | SDK parity with Stripe's own libs; opinionated strictness available via `require_explicit_proration` client flag | — Pending v2 execution |
-| v2 split Connect into 2 phases (17 Accounts/Links, 18 Transfers/Payouts/Balance) | Matches Stripe's data model; phase 17 proves `stripe_account` header plumbing before transfer semantics layer on top | — Pending v2 execution |
-| v2 TestClocks pulled forward to Phase 13 | Enables time-travel integration tests for Phases 14–16 (Invoices, Subscriptions, Schedules) | — Pending v2 execution |
-| v2 LatticeStripe.EventType catalog is exhaustive (not Accrue-scoped) | SDK serves all consumers, not one; auto-verify against OpenAPI spec during Phase 19 | — Pending v2 execution |
+| Skip Dialyzer | Feels janky; specs + pattern matching provide better value | -- Pending |
+| Handwritten v1, no codegen | First principles; polish and ergonomics over breadth for initial release | -- Pending |
+| Finch as default transport | Modern Elixir HTTP standard; mint-based, performant | -- Pending |
+| Transport behaviour | Library shouldn't force HTTP client choice on users | -- Pending |
+| LatticeStripe namespace | Unique on Hex, branded, no conflict with existing packages | -- Pending |
+| Foundation-first architecture | HTTP/errors/pagination/webhooks must be solid before resource coverage | -- Pending |
+| Integration specs primary | Test real behavior at boundaries; mocks hide bugs | -- Pending |
+| v1 scope: Foundation + Payments + Checkout + Webhooks | Ship a useful, polished core; Billing/Connect in future milestones | -- Pending |
+| MIT license | Maximum adoption, standard for Elixir ecosystem | -- Pending |
+| Elixir 1.15+ / OTP 26+ | ~2 year coverage, good balance of features and reach | -- Pending |
 
 ## Evolution
 
@@ -165,4 +155,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-12 after v1.0 milestone completion — v1.0 Foundation & Payments archived as Hex `lattice_stripe` v0.2.0. v2.0 Billing & Connect milestone initialized.*
+*Last updated: 2026-04-03 after Phase 10 completion — Documentation & Guides with ExDoc config, 9 guides, full module docs, cheatsheet, README quickstart*

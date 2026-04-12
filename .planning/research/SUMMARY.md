@@ -1,161 +1,206 @@
-# Research Summary — v2.0 Billing & Connect
+# Project Research Summary
 
-**Milestone:** lattice_stripe v2.0 (Hex target: `lattice_stripe` v0.3.0)
-**Synthesized:** 2026-04-12
-**Inputs:** STACK.md, FEATURES.md, ARCHITECTURE.md, PITFALLS.md
-**Overall confidence:** HIGH — the four research tracks converge cleanly with no contradictions.
+**Project:** LatticeStripe (Elixir Stripe SDK)
+**Domain:** Elixir API client library / open-source Hex package
+**Researched:** 2026-03-31
+**Confidence:** HIGH
 
 ## Executive Summary
 
-v2.0 is a **pure resource-surface milestone**. The four research tracks agree: the v1 foundation (Client, Transport, Request, Response, Error, RetryStrategy, List, Resource, Webhook, Telemetry) is complete and load-bearing for every Billing and Connect resource the milestone needs. **Zero new runtime dependencies, zero new behaviours, zero modifications to HTTP/retry/pagination primitives.** Every new resource is a ~300–600 line module that copy-pastes the v1 `PaymentIntent` / `Checkout.Session` template against a new path.
+LatticeStripe is an Elixir Stripe SDK built to fill a genuine gap in the ecosystem: the incumbent library (`stripity_stripe`) targets a six-year-old Stripe API version, lacks automatic retry, has no auto-pagination Streams, and has a widely-reported webhook raw-body bug. The research is unambiguous about how to build this well: a pure-functional layered architecture, explicit client structs (no global config), behaviour-based extension points for transport and retry, and deep polish on a curated set of resources rather than shallow breadth. The stack is settled — Finch for HTTP, Jason for JSON, Telemetry for observability, Plug/Plug.Crypto for webhooks, Mox for testing — all well-established dependencies with minimal footprint.
 
-The single most important decision is that **v2 ships a `require_explicit_proration` strict-mode flag** (default `false`) backed by a `LatticeStripe.Billing.ProrationBehavior` validator. This is a deliberate departure from Ruby/Node/Python SDK norms in favor of Elixir's explicitness bias — and it defuses the #1 Billing footgun (silent inheritance of Stripe's endpoint-dependent `proration_behavior` defaults, which vary across `create`/`update`/`cancel`/`schedule` paths).
+The recommended build order flows strictly from dependencies: foundation (config, request encoding, error types, transport, retry, pagination) must precede all resource modules, and the foundation layer's design decisions — client struct shape, error hierarchy, response decoder tolerance, idempotency handling — are architectural and cannot be easily changed later. Resources then build in a pattern-establishing sequence: Customers first (simplest), PaymentIntents second (most complex lifecycle), then SetupIntents, PaymentMethods, Refunds, and Checkout Sessions. Webhooks are largely independent and can be parallelized.
 
-The milestone splits across **eight phases (12–19)** in strictly topological order — catalog → test clocks → invoices → subscriptions → schedules → Connect accounts → Connect money → cross-cutting polish — with a clean v0.3.0-rc1 release boundary at Phase 16. Testing introduces a **two-tier integration gate**: stripe-mock (fast, always runs) plus a new real-Stripe-test-mode job (`@tag :real_stripe`, gated by `STRIPE_TEST_SECRET_KEY`, runs nightly) for stateful scenarios stripe-mock cannot simulate.
+The top risks are all in the foundation layer: using `==` for HMAC signature comparison (timing attack), using `Application.get_env` as primary config (breaks multi-tenancy and test isolation), retrying with new idempotency keys after ambiguous failures (double charges), and defining rigid structs without a catch-all for unknown Stripe fields (breaks on every Stripe API change). These are fully preventable with known mitigations and must be correct from day one — retrofitting is a breaking change or a security vulnerability.
 
-## Stack Decisions (no new deps)
+## Key Findings
 
-| Area | v0.3.0 decision | Change from v0.2.0? |
-|------|-----------------|---------------------|
-| HTTP (Finch), JSON (Jason), Telemetry, NimbleOptions, Plug.Crypto, Plug | unchanged | No |
-| Mox, ExDoc, Credo, MixAudit | unchanged | No |
-| Stripe API pin (`2026-03-25.dahlia`) | unchanged — Dahlia breaks are client-side; Billing is additive | No |
-| stripe-mock Docker integration | unchanged | No |
-| **Real-Stripe test-mode tier** | NEW CI job, `@tag :real_stripe`, secret-gated | **New CI job only — zero Hex deps** |
-| **EventType drift check** | vendored `test/fixtures/stripe_openapi_events.json` + mix refresh task + tagged diff test | **Test code only** |
+### Recommended Stack
 
-`mix.exs` diff for v0.3.0 is **only** the `@version` bump.
+The stack is lean by design. Finch is the right default HTTP transport for an SDK because it gives low-level control over connection pooling, timeouts, and request lifecycle without the high-level behaviors (retry, redirect, decompression) that Req adds on top — behaviors that would conflict with Stripe-specific semantics. The Transport behaviour abstracts Finch behind a one-function callback, so users can substitute any HTTP client. Jason is uncontested for JSON. NimbleOptions is worth the dependency for config validation and auto-generated docs. The CI matrix should cover Elixir 1.15/OTP 26, 1.17/OTP 27, and 1.19/OTP 28.
 
-## Feature Inventory
+**Core technologies:**
+- **Finch ~> 0.21**: default HTTP transport — Mint-based, connection pooling, correct level of control for an SDK
+- **Jason ~> 1.4**: JSON codec — undisputed Elixir standard; wrap behind a JSON behaviour for future swap
+- **:telemetry ~> 1.0**: observability — ecosystem standard, lets users plug in any monitoring stack
+- **Plug ~> 1.16 + Plug.Crypto ~> 2.0**: webhook handling — Plug for the endpoint, Plug.Crypto for timing-safe HMAC comparison
+- **NimbleOptions ~> 1.0**: config validation — 200 lines, battle-tested, auto-generates option docs
+- **Mox ~> 1.2** (test): behaviour-based mocking — enforces Transport/RetryStrategy contracts, `async: true` safe
+- **stripe-mock** (CI infrastructure): official Docker image, validates against Stripe's actual OpenAPI spec
 
-### Tier 1 — Must ship together for v0.3.0
+**Do not use:** Req (high-level HTTP conflicts with SDK retry/error semantics), HTTPoison/Hackney (legacy, memory issues), Dialyzer (explicitly excluded), global `Application.get_env` as primary config, GenServer for client state, ExVCR/cassettes.
 
-- **Phase 12:** Product, Price, Coupon, PromotionCode
-- **Phase 13:** Billing.TestClock (pulled forward)
-- **Phase 14:** Invoice + Invoice.LineItem + `upcoming/2` (returns Invoice with `id: nil`)
-- **Phase 15:** Subscription + Subscription.Item + pause/resume/cancel + `ProrationBehavior` validator + `require_explicit_proration` flag
-- **Phase 16:** SubscriptionSchedule (release vs cancel)
-- **Phase 17:** Account, AccountLink, LoginLink (write-only)
-- **Phase 18:** Transfer (+ reversals), Payout, Balance (singleton), BalanceTransaction
-- **Phase 19:** `LatticeStripe.EventType` exhaustive catalog + OpenAPI drift test + `LatticeStripe.Search` **thin facade** + Billing guide + Connect guide + milestone smoke test
+### Expected Features
 
-### Tier 2 — Stretch goal for v0.3.0
+Research identified a clear critical path. The foundation layer is a single cohesive unit — all components must be built together before any resource module is usable. Within the feature set, auto-pagination via Streams and comprehensive webhook support are the top community pain points that represent the clearest differentiation opportunity.
 
-- BillingPortal.Session + BillingPortal.Configuration (Phase 19 if budget remains)
+**Must have (table stakes):**
+- HTTP transport with pluggable adapter — baseline for any API client
+- Client configuration struct with per-request overrides — multi-tenancy and Connect support
+- Structured, pattern-matchable error hierarchy — Elixir's pattern matching must work on errors
+- Automatic retries with exponential backoff respecting `Stripe-Should-Retry` — all modern SDKs do this
+- Idempotency key auto-generation and replay on retry — safety against double charges
+- `{:ok, result} | {:error, reason}` returns with bang variants — non-negotiable Elixir convention
+- Cursor-based pagination (manual) and auto-pagination via `Stream.resource/3` — auto-pagination is a top community request
+- Webhook signature verification with Phoenix Plug and correct raw body handling — #1 Elixir community pain point
+- Full Tier 1 resource coverage: Customers, PaymentIntents, SetupIntents, PaymentMethods, Refunds, Checkout Sessions
 
-### Deferred to v0.4.x+
+**Should have (competitive differentiators):**
+- Telemetry events for request lifecycle — no existing Elixir Stripe lib does this well
+- Search pagination support (page/next_page model, distinct from cursor pagination) — stripity_stripe lacks entirely
+- Expand support as first-class concept with union types for id-vs-expanded-object
+- Pattern-matchable domain types with atom-based status/type fields (`:succeeded`, `:requires_action`)
+- Pluggable RetryStrategy behaviour for custom backoff/circuit breaking
+- Test helpers: fixture factories, mock webhook event construction
+- Stripe-Account header as first-class on every request (Connect support)
+- Detailed error context: request_id, HTTP status, full error body on every error struct
+- Up-to-date API version (2026-03-25.dahlia vs. stripity_stripe's 2019-12-03)
 
-- CreditNote, TaxRate, TaxId, CustomerBalanceTransaction, Billing Meter family, Quote
+**Defer (v2+):**
+- Billing resources (subscriptions, invoices, products, prices) — large surface, separate milestone
+- Connect resources (accounts, transfers, payouts) — different user persona
+- v2 API support (thin events, evolving semantics) — still changing
+- Code generation from OpenAPI — consider after handwritten library proves architecture
+- Higher-level billing layer with Ecto — separate package
+- Tax, Identity, Treasury, Issuing, Terminal — specialist domains
 
-### Explicitly NOT in v2.0
+### Architecture Approach
 
-- Typed struct deserialization for expanded objects (EXPD-02/03/05) — own milestone
-- Code generation (ADVN-02), v2 thin events namespace (ADVN-01), specialist families (ADVN-03)
+LatticeStripe follows a layered pure-functional-core architecture: Public API (resource modules) -> Client (orchestration) -> Transport (I/O boundary) -> Codec/Middleware (Request, Response, Error, Pagination, Retry) -> Cross-cutting concerns (Telemetry, Webhook). All layers below Transport are pure functions. The Client is a plain struct passed as the first argument to every API call — never a GenServer, never global state. The Transport and RetryStrategy are behaviours for extension and testability. Resource modules are hand-written, flat (not URL-path-mirrored), one module per Stripe resource.
 
-### Search Capability Matrix
+**Major components:**
+1. **LatticeStripe.Client** — config struct + request lifecycle orchestration; holds api_key, base_url, transport, json_codec, retry settings, api_version
+2. **LatticeStripe.Transport (behaviour) + Transport.Finch** — HTTP I/O boundary; decouples SDK from HTTP client; test seam via Mox
+3. **LatticeStripe.Request / Response / Error** — pure data structs; Request is built by resource modules, Response decodes JSON, Error carries full Stripe error hierarchy
+4. **LatticeStripe.Pagination** — cursor + search pagination; `Stream.resource/3` for lazy auto-pagination
+5. **LatticeStripe.Retry** — pure retry decision logic; reads `Stripe-Should-Retry` header, exponential backoff with jitter
+6. **LatticeStripe.Telemetry** — emits `[:lattice_stripe, :request, :start|:stop|:exception]` events
+7. **LatticeStripe.Webhook + Webhook.Plug** — HMAC-SHA256 signature verification (constant-time); Phoenix Plug that captures raw body before Plug.Parsers
+8. **Resource modules** (Customer, PaymentIntent, etc.) — pure builders; construct Request structs, expose public API functions
 
-- **Ship `search/2`:** Product, Price, Invoice, Subscription (all ride existing `List.stream!/2` search branch)
-- **Do NOT expose:** Coupon, SubscriptionSchedule, Account, Transfer, Payout, BalanceTransaction, InvoiceLineItem
-- **VERIFY IN PHASE 12 (LOW confidence):** PromotionCode — Stripe's published list excludes it but gap doc implies otherwise. Do not ship `PromotionCode.search/2` until confirmed.
+### Critical Pitfalls
 
-## Architecture Decisions
+1. **Webhook raw body consumed by Plug.Parsers** — provide `LatticeStripe.WebhookPlug` that must be placed before `Plug.Parsers` in the Phoenix endpoint; document prominently with copy-paste Phoenix router example
+2. **Timing attack on HMAC signature comparison** — use `:crypto.hash_equals/2` (OTP 25+) or XOR-reduce; never use `==`; add code comments explaining why
+3. **Retry with new idempotency key causing double charges** — auto-generate idempotency keys for all POST requests; always reuse the same key on retry; respect `Stripe-Should-Retry`; never retry 400s except 409/429
+4. **Rigid structs that break on Stripe API changes** — use tolerant decoders with an `__extra__` catch-all map for unknown keys; make all fields nil-able; implement Access behaviour
+5. **Global Application config as primary interface** — client struct is the only primary config path; `Application.get_env` is fallback only; this enables `async: true` in all user tests
 
-### v1 foundation is frozen
+## Implications for Roadmap
 
-`Client`, `Transport`, `Request`, `Response`, `Error`, `RetryStrategy`, `Json`, `FormEncoder`, `List` (including search pagination at `list.ex:245–275`), `Resource`, `Webhook`, `Telemetry` — all untouched. `Client.stripe_account` header plumbing (`client.ex:175, 422–424`) is already end-to-end; Connect gets it free.
+Based on research, the dependency graph is clear and the build order has no ambiguity. Everything flows from the foundation layer.
 
-### One additive `Client` field
+### Phase 1: Foundation Core
 
-`client.ex:52–64` gains `require_explicit_proration: false` (default off). Only v1 `Client` struct change.
+**Rationale:** The entire library depends on this layer. Config, Request, Error, Response, Transport, Client, Retry, Pagination are tightly coupled — they must be built together. Design decisions here (client struct shape, error hierarchy, decoder tolerance, idempotency key handling) are architectural and cannot be retrofitted without breaking changes. This phase produces no user-visible Stripe API calls but is the hardest phase to change later.
+**Delivers:** A working HTTP client layer that can make authenticated Stripe API calls, handle errors, retry safely, and paginate lazily — but with no resource modules yet
+**Addresses:** Transport, client config, error model, retries, idempotency, list pagination, auto-pagination (FEATURES.md Tier 0)
+**Avoids:** Global config anti-pattern (Pitfall 2), double-charge retry bug (Pitfall 5), rigid struct breakage (Pitfall 4), Finch pool ownership confusion (Pitfall 6), rate-limit-exhausting pagination (Pitfall 7)
+**Research flag:** Standard patterns — well-documented in ExAws, Req, Finch, official Elixir library guidelines. No additional research needed.
 
-### New modules (all follow v1 template)
+### Phase 2: First Resource Modules (Pattern Validation)
 
-| Module | Shape / notes |
-|--------|---------------|
-| All Billing + Connect resources | Standard v1 template, 300–600 LOC each |
-| `Invoice.LineItem` / `Subscription.Item` | Nested child following `Checkout.LineItem` precedent |
-| `LatticeStripe.BillingTestClock` | Plain resource module, ships in `lib/` |
-| `LatticeStripe.Testing.TestClock` | High-level helper, **ships in `lib/`** (precedent: `LatticeStripe.Testing`) |
-| `LatticeStripe.EventType` | Plain constants module (`@attr + def` + category lists). Rejected: behaviour, macro, atoms |
-| `LatticeStripe.Billing.ProrationBehavior` | Standalone validator (`values/0`, `valid?/1`, `validate!/1`). **Ships in Phase 15**, not deferred to 19 |
-| `LatticeStripe.Search` | **Thin facade — docs only**, points at `List.stream!/2`. Plan's "add `Search.stream!/3`" was outdated |
-| `LatticeStripe.Client.with_account/2` | Ergonomic helper for Connect scoping. Decide in Phase 17 |
-| `test/support/billing_case.ex` | Internal CaseTemplate, not shipped |
+**Rationale:** Customers is the simplest complete resource and validates the entire foundation stack end-to-end. PaymentIntents is the most important resource and validates complex multi-step state machine operations. Together they prove the pattern before it is replicated to 4+ additional resources.
+**Delivers:** Full Customers CRUD + search; full PaymentIntents lifecycle (create, retrieve, update, confirm, capture, cancel, list); auto-pagination on both
+**Addresses:** Customers, PaymentIntents, List struct, SearchResult struct (FEATURES.md Tier 1 Payments)
+**Implements:** Resource module pattern, bang variants, expand support wired in
+**Research flag:** Standard patterns — Stripe API docs are comprehensive. stripe-mock validates implementation.
 
-### Build order: **Order A (plan's proposed) — CONFIRMED**
+### Phase 3: Webhooks
 
-Strictly topological, single-executor friendly, clean rc1 boundary at Phase 16. Orders B (Connect-first) and C (interleaved) rejected per ARCHITECTURE §9.
+**Rationale:** Webhook infrastructure is independent from resource modules (pure crypto + Plug, no HTTP client needed). Can be parallelized with Phase 2. Solving the raw body problem and timing-safe comparison is the #1 Elixir community pain point and the clearest immediate differentiator. Must be correct from day one — webhook security is not refactorable.
+**Delivers:** `Webhook.construct_event/3`, `Webhook.Plug`, Event struct, tolerance window configuration, documentation of Phoenix pipeline ordering, troubleshooting guide
+**Addresses:** Webhook signature verification, Phoenix Plug (FEATURES.md Tier 0 + Webhook Handling)
+**Avoids:** Raw body consumption (Pitfall 1), timing attack (Pitfall 3)
+**Research flag:** Standard patterns — Stripe webhook docs are detailed. Plug raw body handling is well-understood. No additional research needed.
 
-## Critical Pitfalls — Phase Assignments
+### Phase 4: Remaining Tier 1 Resources
 
-**5 Critical, 8 High, 4 Medium.**
+**Rationale:** Pattern is established from Phase 2. Remaining resources follow the same structure with no new architectural decisions. SetupIntents, PaymentMethods, Refunds, and Checkout Sessions complete the payment story that developers evaluate when choosing a library.
+**Delivers:** SetupIntents lifecycle, PaymentMethods CRUD + attach/detach, Refunds, Checkout Sessions (create/retrieve/list/expire)
+**Addresses:** Tier 2 Checkout, full Tier 1 Payments completion (FEATURES.md)
+**Research flag:** Standard patterns — same resource module pattern established in Phase 2.
 
-| ID | Pitfall | Primary phase | Mitigation |
-|----|---------|---------------|------------|
-| **C1** | `proration_behavior` default silently varies across create/update/cancel/schedule | **15** (also 14, 16) | `ProrationBehavior.validate!/1` + `require_explicit_proration` flag; never set SDK default |
-| **C2** | Subscription `incomplete → incomplete_expired` is a **23-hour one-way edge** | **15** | State-machine `@moduledoc`; `status_is_terminal?/1`; document that it fires as `.updated` not `.deleted` |
-| **C3** | Connect `Stripe-Account` is a context switch — cross-tenant leak risk | **17** | Telemetry metadata, Context matrix in Connect guide, `Client.with_account/2`, `LatticeStripe.Connect` warning module |
-| **C4** | Invoice auto-finalization race (~1h after create if `auto_advance` omitted) | **14** | Document canonical order; telemetry warning when `auto_advance` unset; first-class `finalize/2`, `pay/2+3` |
-| **C5** | SubscriptionSchedule **owns** its Subscription — direct mutations conflict | **16** (cross-link 15) | `Subscription.update/3` `@doc` warning when `sub.schedule` non-nil; surface `:schedule` typed field |
+### Phase 5: Developer Experience Polish
 
-### HIGH pitfalls
+**Rationale:** The library is functionally complete after Phase 4 but rough around the edges. This phase elevates it to production-quality open source: guides, telemetry, test helpers, expand support finalization, and SearchResult struct. These items are independent of each other and can be developed in parallel.
+**Delivers:** ExDoc guides (quickstart, webhook troubleshooting, error handling, testing strategy), telemetry events wired throughout, `LatticeStripe.Testing` helpers (fixture factories, mock webhook events), search pagination, expand support documentation
+**Addresses:** Telemetry, test helpers, documentation, search pagination differentiators (FEATURES.md differentiators)
+**Avoids:** Brittle test anti-pattern (Pitfall 10), missing request_id (Pitfall 12)
+**Research flag:** Telemetry and test helper patterns are well-documented. ExDoc guides require no research. No additional research phase needed.
 
-- **H1** `cancel_at_period_end` leaves status `"active"` — **15**
-- **H2** Webhook out-of-order delivery — **19** (Webhooks guide + `Event.created_at/1` helper)
-- **H3** Search eventual consistency (~1s) — **12/14/15** per-resource docs + **19**
-- **H4** TestClock fixture isolation + async advance + 100-clock limit — **13** (`advance_and_wait/3`, `mix lattice_stripe.test_clock.cleanup`)
-- **H5** Meter events eventual consistency — **19 design note only** (v0.5.x)
-- **H6** BillingPortal URL expiry — design note only (Tier 3)
-- **H7** Standard Connect account immutability — **17**
-- **H8** Form encoding for triple-nested shapes + multi-discount — **12 + 15** (FormEncoder test battery)
+### Phase Ordering Rationale
 
-### MEDIUM (docs-only)
+- **Foundation must be phase 1**: every subsequent phase depends on Client, Transport, Error, Pagination, and Retry; these modules reference each other and cannot be incrementally extracted
+- **First resources validate before replication**: building Customer + PaymentIntent before the other 4 resources prevents replicating architectural mistakes across the whole codebase
+- **Webhooks are parallelizable**: they share no code with resource modules; the only dependency is Plug and the crypto primitives, which have no connection to the HTTP client layer
+- **DX polish is last**: telemetry can be wired in alongside any phase, but guides and test helpers are more useful once the API surface is stable
+- **All pitfalls in the critical path are in Phase 1**: the five critical pitfalls (timing attack, global config, double charge, rigid structs, raw body) all manifest in Foundation or Webhooks — solving them early eliminates the hardest retrofits
 
-- **M1** EventType catalog drift — **19** (vendored fixture + mix task + weekly CI)
-- **M2** Strict-mode flag departure from Ruby/Node norms — mitigated by opt-in default
-- **M3** stripe-mock coverage gaps — **13** spike + **19** CONTRIBUTING strategy
-- **M4** Conventional Commit scope discipline + rc1 mechanics — **19** + Phase 16 decision
+### Research Flags
 
-## Phase-by-Phase Recommendations
+Phases with standard patterns (no additional research phase needed):
+- **Phase 1 (Foundation):** Finch, Jason, NimbleOptions, Transport behaviour patterns are extensively documented in official Elixir library guidelines, ExAws, Req, Finch source. Stripe retry/idempotency semantics are fully documented.
+- **Phase 2 (First Resources):** Stripe Customers and PaymentIntents APIs are the most documented resources. stripe-mock validates correctness.
+- **Phase 3 (Webhooks):** Plug raw body capture pattern is established. Stripe webhook signature spec is complete.
+- **Phase 4 (Remaining Resources):** Pattern established. Stripe API docs sufficient.
+- **Phase 5 (DX Polish):** Telemetry event naming patterns follow Elixir ecosystem conventions (Phoenix/Ecto). No novel territory.
 
-**Phase 12 — Billing Catalog:** 4 standalone resources. No `Coupon.update/3`, no `Price.delete/2`. Verify PromotionCode search. Build FormEncoder unit test battery (H8) now. Research flag: **LOW**.
-
-**Phase 13 — TestClocks (pulled forward):** `BillingTestClock` resource + `Testing.TestClock` helper + internal `billing_case.ex`. Ship `advance_and_wait/3` polling + cleanup task (H4). **Spike stripe-mock clock simulation** at phase start (M3). First real-API tier test. Research flag: **MEDIUM**.
-
-**Phase 14 — Invoices + `upcoming/2`:** Invoice + Invoice.LineItem + finalize/pay/void/mark_uncollectible/send. Address **C4** (telemetry warning + canonical order docs) and **C1** for upcoming. `upcoming/2` explicitly returns Invoice with `id: nil`. Distinguish `void/2` vs `mark_uncollectible/2`. Real-API tier for auto-advance race. Research flag: **MEDIUM**.
-
-**Phase 15 — Subscriptions + ProrationBehavior ships here:** Most semantics-heavy phase. Address **C1** (primary) + **C2** (23h window) + H1 + H8. Ship `ProrationBehavior.validate!/1` + `require_explicit_proration` + Config schema update. Exhaustive state machine `@moduledoc`. Both pause mechanisms documented (`pause_collection` param vs `pause/3` action; LatticeStripe `pause/3` → dedicated action). `status_is_terminal?/1`, `cancellation_pending?/1`. Real-API tier critical for C2 and proration math. Research flag: **HIGH**.
-
-**Phase 16 — Subscription Schedules (+ v0.3.0-rc1 cut):** Address **C5**. Document release vs cancel. `Subscription.update/3` `@doc` warning when `sub.schedule` non-nil. Phase 16 end = **v0.3.0-rc1 tag decision point** (M4). Real-API tier for phase transitions. Research flag: **MEDIUM**.
-
-**Phase 17 — Connect Accounts + Links:** Address **C3** + H7. Ship `Client.with_account/2` here. Connect guide with Context Matrix + three account-type decision matrix + destination vs separate charges. Heavy-PII Inspect on Account; hide `url` on AccountLink/LoginLink. Research flag: **LOW**.
-
-**Phase 18 — Connect Money Movement:** Transfer (+ `Transfer.reverse/3` ergonomic), Payout, Balance singleton `retrieve/1`, BalanceTransaction read-only. Loud Transfer-vs-Payout distinction docs. Destination-charge + separate-charges patterns in guide. Research flag: **LOW**.
-
-**Phase 19 — Cross-cutting Polish:** `LatticeStripe.EventType` exhaustive catalog + OpenAPI drift test + `LatticeStripe.Search` **facade** + Billing/Connect guides + milestone smoke test + release process docs. H2 (Webhooks ordering), H3 (search consistency per-resource callouts), M1/M3/M4 polish. H5/H6 design notes only. BillingPortal as stretch goal. Research flag: **MEDIUM**.
-
-## Open Questions for Phase Discussions
-
-1. **PromotionCode `search/2`** — verify in Phase 12 before exposing (LOW confidence)
-2. **stripe-mock test clock fidelity** — spike at start of Phase 13
-3. **`Client.with_account/2`** — ship in Phase 17 or defer (low risk either way)
-4. **`require_explicit_proration` default for v1.0** — revisit at v1.0 boundary
-5. **v0.3.0-rc1 mechanics** — manual git tag vs Release Please prerelease manifest (Phase 16 decision)
-6. **EventType catalog storage** — vendored fixture vs fetch-at-test (vendored recommended)
-7. **`Subscription.update/3` schedule-owned hard error** — docs-only for v0.3.0; revisit at v1.0
+No phases require a `research-phase` step. The combined research documents are comprehensive and the domain is well-understood.
 
 ## Confidence Assessment
 
-| Area | Level | Notes |
-|------|-------|-------|
-| Stack (no new deps) | **HIGH** | Every resource reduces to v1 primitives |
-| Feature scope + dependency order | **HIGH** | Matches gap doc + PROJECT.md |
-| Architecture fit (v1 template scales) | **HIGH** | File+line refs back every claim |
-| Pitfall coverage (Stripe API) | **HIGH** | Stripe docs + community post-mortems |
-| stripe-mock coverage assumptions | **MEDIUM** | Phase 13 spike de-risks; real-API tier backs up the rest |
-| PromotionCode search capability | **LOW** | Conflicting signals; verify Phase 12 |
-| EventType drift automation shape | **MEDIUM** | Novel for this repo (~150 LOC test code) |
-| Strict-mode flag community reception | **MEDIUM** | Opt-in default de-risks |
-| Release Please rc1 mechanics | **MEDIUM** | v0.2.0 shipped clean; prerelease config needs verification |
+| Area | Confidence | Notes |
+|------|------------|-------|
+| Stack | HIGH | All dependencies verified on Hex.pm with current version numbers. Version constraints verified against official Elixir compatibility table. Rationale cross-checked against official Elixir library guidelines. |
+| Features | HIGH | Based on multiple deep-research documents including Stripe API surface mapping, community pain point analysis, competitive analysis of all known Elixir Stripe libraries, and official Stripe SDK documentation. |
+| Architecture | HIGH | Patterns sourced from ExAws, Finch, Req source code and documentation. Official Elixir anti-patterns docs explicitly cover the pitfalls being avoided. Prior art is strong. |
+| Pitfalls | HIGH | All critical pitfalls are documented in GitHub issues, ElixirForum threads, official security documentation, and official Stripe SDK source code. Not speculative. |
 
-**Overall:** HIGH. Well-scoped additive milestone, complete v1 foundation, three LOW/MEDIUM points to resolve during phase planning, no contradictions between research tracks.
+**Overall confidence:** HIGH
+
+### Gaps to Address
+
+- **Finch pool supervision tree example**: the exact recommended supervision tree for users who want to use their existing Finch instance vs. let LatticeStripe manage its own needs to be finalized during Phase 1 implementation. Both patterns are known; the question is which to make default.
+- **Struct tolerance strategy (catch-all vs. Access behaviour)**: research recommends an `__extra__` catch-all field but the exact implementation (field name, Access implementation, how it interacts with struct pattern matching) needs to be decided during Phase 1 Response module design.
+- **Expand union types**: the research identifies expand support as a differentiator but describes it as "High" complexity. The exact Elixir type representation for "field is either a string ID or an expanded struct" needs a concrete decision (tagged tuples vs. sum types via a behaviour vs. raw maps) before resource modules are written.
+- **stripe-mock limitations for testing**: stripe-mock is stateless and cannot test all state-machine transitions. The testing guide will need to document which scenarios require Stripe test mode vs. stripe-mock. This is a documentation gap, not an implementation gap.
+
+## Sources
+
+### Primary (HIGH confidence)
+- [Finch on Hex.pm](https://hex.pm/packages/finch) — v0.21.0, pool configuration
+- [Jason on Hex.pm](https://hex.pm/packages/jason) — v1.4.4
+- [Telemetry on Hex.pm](https://hex.pm/packages/telemetry) — v1.4.1
+- [Plug on Hex.pm](https://hex.pm/packages/plug) — v1.19.1
+- [Plug.Crypto docs](https://hexdocs.pm/plug_crypto/) — v2.1.1, HMAC verification
+- [NimbleOptions on Hex.pm](https://hex.pm/packages/nimble_options) — v1.1.1
+- [Mox on GitHub](https://github.com/dashbitco/mox) — v1.2.0
+- [Elixir Compatibility Table](https://hexdocs.pm/elixir/compatibility-and-deprecations.html) — version matrix
+- [Elixir Official Library Guidelines](https://hexdocs.pm/elixir/library-guidelines.html) — avoid global config, prefer explicit APIs
+- [Elixir Design Anti-Patterns](https://hexdocs.pm/elixir/design-anti-patterns.html) — overloaded return types, GenServer abuse
+- [Stripe Idempotent Requests](https://docs.stripe.com/api/idempotent_requests) — retry semantics
+- [Stripe Webhook Signature Verification](https://docs.stripe.com/webhooks/signature) — HMAC spec
+- [Stripe API Versioning](https://docs.stripe.com/api/versioning) — version pinning
+- [stripe-mock on GitHub](https://github.com/stripe/stripe-mock) — OpenAPI-backed test server
+- [ExAws GitHub](https://github.com/ex-aws/ex_aws) — behaviour-based SDK architecture reference
+- [Req GitHub](https://github.com/wojtekmach/req) — request-as-data pattern reference
+
+### Secondary (MEDIUM confidence)
+- [Dashbit Blog: SDKs with Req: Stripe](https://dashbit.co/blog/sdks-with-req-stripe) — SDK architecture guidance, Finch vs. Req rationale
+- [Application Layering Pattern](https://aaronrenner.io/2019/09/18/application-layering-a-pattern-for-extensible-elixir-application-design.html) — layered architecture pattern
+- [stripity-stripe GitHub issues](https://github.com/beam-community/stripity-stripe/issues) — documented community pain points
+- [stripe-node auto-pagination issue #575](https://github.com/stripe/stripe-node/issues/575) — rate limit risk in auto-pagination
+- [ElixirForum: Is Stripity Stripe maintained?](https://elixirforum.com/t/is-stripity-stripe-maintained/73673) — community sentiment
+- [Stripe: Designing robust APIs with idempotency](https://stripe.com/blog/idempotency) — retry safety
+
+### Tertiary (project-internal research documents)
+- `/prompts/The definitive Stripe library gap in Elixir - a master research document.md` — comprehensive ecosystem gap analysis
+- `/prompts/stripe-lib-priority-user-flows-deep-research.md` — Tier priority analysis
+- `/prompts/stripe-sdk-api-surface-area-deep-research.md` — complete API surface mapping
+- `/prompts/elixir-best-practices-deep-research.md` — Elixir patterns reference
+- `/prompts/elixir-opensource-libs-best-practices-deep-research.md` — open source library conventions
+
+---
+*Research completed: 2026-03-31*
+*Ready for roadmap: yes*
