@@ -133,20 +133,6 @@ defmodule LatticeStripe.Testing.TestClock do
 
       @doc false
       def __lattice_test_clock_client__, do: @__lattice_test_clock_client__
-
-      setup do
-        client_spec = @__lattice_test_clock_client__
-
-        client =
-          if is_atom(client_spec) and function_exported?(client_spec, :stripe_client, 0) do
-            apply(client_spec, :stripe_client, [])
-          else
-            client_spec
-          end
-
-        Process.put(:__lattice_stripe_bound_client__, client)
-        :ok
-      end
     end
   end
 
@@ -313,12 +299,7 @@ defmodule LatticeStripe.Testing.TestClock do
       nil ->
         case Process.get(:__lattice_stripe_bound_client__) do
           nil ->
-            raise TestClockError,
-              message:
-                "No LatticeStripe client is bound. Either " <>
-                  "`use LatticeStripe.Testing.TestClock, client: MyApp.StripeClient` " <>
-                  "in your CaseTemplate, or pass `client:` per call.",
-              type: :no_client_bound
+            resolve_from_caller!()
 
           %LatticeStripe.Client{} = client ->
             client
@@ -329,6 +310,32 @@ defmodule LatticeStripe.Testing.TestClock do
 
       mod when is_atom(mod) ->
         apply(mod, :stripe_client, [])
+    end
+  end
+
+  defp resolve_from_caller! do
+    test_mod =
+      case Process.get(:__ex_unit__) do
+        %{module: mod} when is_atom(mod) -> mod
+        _ -> nil
+      end
+
+    if is_atom(test_mod) and test_mod != nil and
+         function_exported?(test_mod, :__lattice_test_clock_client__, 0) do
+      spec = test_mod.__lattice_test_clock_client__()
+
+      if is_atom(spec) and function_exported?(spec, :stripe_client, 0) do
+        apply(spec, :stripe_client, [])
+      else
+        spec
+      end
+    else
+      raise TestClockError,
+        message:
+          "No LatticeStripe client is bound. Either " <>
+            "`use LatticeStripe.Testing.TestClock, client: MyApp.StripeClient` " <>
+            "in your CaseTemplate, or pass `client:` per call.",
+        type: :no_client_bound
     end
   end
 
