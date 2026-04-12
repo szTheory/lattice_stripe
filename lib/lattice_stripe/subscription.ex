@@ -404,7 +404,20 @@ defmodule LatticeStripe.Subscription do
   @doc """
   Returns a lazy stream of all Subscriptions matching a search query.
 
-  Requires `"query"` in params. Raises on fetch failure.
+  Requires `"query"` in params. Emits individual `%Subscription{}` structs via
+  auto-pagination; raises `LatticeStripe.Error` if any page fetch fails
+  mid-stream.
+
+  The `!` suffix here does not pair with a tuple-returning `search_stream/3`
+  counterpart — there is none. Elixir Streams are inherently eager across
+  pages and cannot return `{:ok, _} | {:error, _}` for mid-stream failures,
+  so the only sensible behavior is to raise. This matches the convention used
+  by `LatticeStripe.Invoice.search_stream!/3` and
+  `LatticeStripe.Checkout.Session.search_stream!/3`.
+
+  > #### Eventual Consistency {: .warning}
+  >
+  > Search results may not reflect changes made within the last ~1 second.
   """
   @spec search_stream!(Client.t(), map(), keyword()) :: Enumerable.t()
   def search_stream!(%Client{} = client, params, opts \\ []) do
