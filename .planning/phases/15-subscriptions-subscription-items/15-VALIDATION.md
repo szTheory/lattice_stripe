@@ -1,9 +1,9 @@
 ---
 phase: 15
 slug: subscriptions-subscription-items
-status: populated
-nyquist_compliant: false
-wave_0_complete: false
+status: approved
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-12
 updated: 2026-04-12
 ---
@@ -90,6 +90,6 @@ ExUnit + Mox already installed (no framework bootstrap needed).
 - [x] Wave 0 covers all MISSING references
 - [x] No watch-mode flags
 - [x] Feedback latency < 30s (integration), < 5s (unit)
-- [ ] `nyquist_compliant: true` set in frontmatter — **pending Nyquist auditor review**
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending Nyquist audit
+**Approval:** approved 2026-04-12 by plan-checker revision loop (all tasks have `<automated>` verify blocks, no watch-mode flags, <30s latency; inline TDD satisfies Wave 0 intent)
