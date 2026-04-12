@@ -88,8 +88,14 @@ defmodule LatticeStripe.FormEncoder do
     flatten(value, key)
   end
 
+  defp flatten_value(value, key) when is_float(value) do
+    # Avoid scientific notation on small floats (e.g. 0.00001 → "1.0e-5"),
+    # which Stripe's unit_amount_decimal / percent_off parsers reject.
+    [{key, :erlang.float_to_binary(value, [:compact, {:decimals, 12}])}]
+  end
+
   defp flatten_value(value, key) do
-    # Scalar: boolean, integer, float, atom, binary
+    # Scalar: boolean, integer, atom, binary (non-float)
     [{key, to_string(value)}]
   end
 
