@@ -1,5 +1,5 @@
 ExUnit.start()
-ExUnit.configure(exclude: [:integration])
+ExUnit.configure(exclude: [:integration, :real_stripe])
 
 # Transport mock for testing Client.request/2 without real HTTP
 Mox.defmock(LatticeStripe.MockTransport, for: LatticeStripe.Transport)
