@@ -776,7 +776,7 @@ defmodule LatticeStripe.Invoice do
           {:ok, Response.t()} | {:error, Error.t()}
   def create_preview_lines(%Client{} = client, params \\ %{}, opts \\ []) do
     %Request{
-      method: :post,
+      method: :get,
       path: "/v1/invoices/create_preview/lines",
       params: params,
       opts: opts

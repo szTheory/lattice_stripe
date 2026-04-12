@@ -764,12 +764,12 @@ defmodule LatticeStripe.InvoiceTest do
   # ---------------------------------------------------------------------------
 
   describe "create_preview_lines/3" do
-    test "sends POST /v1/invoices/create_preview/lines and returns {:ok, %Response{}}" do
+    test "sends GET /v1/invoices/create_preview/lines and returns {:ok, %Response{}}" do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
-        assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/invoices/create_preview/lines")
+        assert req.method == :get
+        assert req.url =~ "/v1/invoices/create_preview/lines"
         ok_response(list_json([], "/v1/invoices/create_preview/lines"))
       end)
 
