@@ -152,12 +152,15 @@ defmodule LatticeStripe.SubscriptionSchedule.Phase do
 
   defp decode_items(nil), do: nil
   defp decode_items(items) when is_list(items), do: Enum.map(items, &PhaseItem.from_map/1)
-  defp decode_items(other), do: other
+  # Defensive coerce: Stripe only sends list | nil, but coerce malformed shapes to
+  # nil to keep the struct type-honest (`items: [PhaseItem.t()] | nil`).
+  defp decode_items(_other), do: nil
 
   defp decode_add_invoice_items(nil), do: nil
 
   defp decode_add_invoice_items(items) when is_list(items),
     do: Enum.map(items, &AddInvoiceItem.from_map/1)
 
-  defp decode_add_invoice_items(other), do: other
+  # Defensive coerce: same rationale as decode_items/1.
+  defp decode_add_invoice_items(_other), do: nil
 end

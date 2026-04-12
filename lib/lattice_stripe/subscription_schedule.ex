@@ -409,7 +409,10 @@ defmodule LatticeStripe.SubscriptionSchedule do
 
   defp decode_phases(nil), do: nil
   defp decode_phases(phases) when is_list(phases), do: Enum.map(phases, &Phase.from_map/1)
-  defp decode_phases(other), do: other
+  # Defensive coerce: Stripe only sends list | nil for `phases`, but if a malformed
+  # payload arrives (map, string, etc.) coerce to nil to keep the struct type-honest
+  # (`phases: [Phase.t()] | nil`) rather than silently retaining an off-type value.
+  defp decode_phases(_other), do: nil
 end
 
 defimpl Inspect, for: LatticeStripe.SubscriptionSchedule do
