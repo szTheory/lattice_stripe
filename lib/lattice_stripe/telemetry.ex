@@ -629,7 +629,7 @@ defmodule LatticeStripe.Telemetry do
   # Stripe IDs are prefixed with known object type codes (cus_, pi_, seti_, etc.)
   # or are alphanumeric strings longer than 10 characters that aren't known action words.
   defp id_segment?(segment) do
-    known_prefixes = ~w[cus_ pi_ seti_ pm_ re_ cs_ evt_ ch_ in_ sub_ prod_ price_]
+    known_prefixes = ~w[cus_ pi_ seti_ pm_ re_ cs_ evt_ ch_ in_ sub_ prod_ price_ ii_ il_]
 
     Enum.any?(known_prefixes, &String.starts_with?(segment, &1)) or
       (String.length(segment) > 10 and segment =~ ~r/^[a-zA-Z0-9_]+$/ and
