@@ -487,4 +487,293 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
       end
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # advance_and_wait/4 (Plan 13-04)
+  # ---------------------------------------------------------------------------
+
+  # Helper: build the canned advance response (status: advancing).
+  defp advancing_response(id \\ "clock_a") do
+    ok_response(test_clock_json(%{"id" => id, "status" => "advancing"}))
+  end
+
+  defp ready_response(id \\ "clock_a") do
+    ok_response(test_clock_json(%{"id" => id, "status" => "ready"}))
+  end
+
+  defp internal_failure_response(id \\ "clock_a") do
+    ok_response(test_clock_json(%{"id" => id, "status" => "internal_failure"}))
+  end
+
+  describe "advance_and_wait/4 — happy path (zero-delay first poll)" do
+    test "catches an already-ready clock without any sleep" do
+      client = test_client()
+
+      # 1st call: advance (returns :advancing)
+      # 2nd call: retrieve (returns :ready, zero-delay first poll)
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert req.url =~ "/advance"
+        advancing_response()
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert String.ends_with?(req.url, "/v1/test_helpers/test_clocks/clock_a")
+        ready_response()
+      end)
+
+      started = System.monotonic_time(:millisecond)
+
+      assert {:ok, %TestClock{id: "clock_a", status: :ready}} =
+               TestClock.advance_and_wait(client, "clock_a", 1_713_086_400)
+
+      elapsed = System.monotonic_time(:millisecond) - started
+      assert elapsed < 200, "zero-delay first poll should complete fast; got #{elapsed}ms"
+    end
+  end
+
+  describe "advance_and_wait/4 — polling loop" do
+    test "polls until ready (advancing, advancing, ready)" do
+      client = test_client()
+
+      # advance + 3 retrieves (2 advancing, 1 ready)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> ready_response() end)
+
+      assert {:ok, %TestClock{status: :ready}} =
+               TestClock.advance_and_wait(client, "clock_a", 1_713_086_400,
+                 initial_interval: 500,
+                 max_interval: 5_000,
+                 multiplier: 1.5,
+                 timeout: 30_000
+               )
+    end
+  end
+
+  describe "advance_and_wait/4 — timeout" do
+    test "returns :test_clock_timeout when deadline exceeded (opts[:timeout]: 0)" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+
+      assert {:error,
+              %Error{
+                type: :test_clock_timeout,
+                raw_body: %{
+                  "clock_id" => "clock_a",
+                  "last_status" => "advancing",
+                  "attempts" => attempts,
+                  "elapsed_ms" => elapsed
+                }
+              }} =
+               TestClock.advance_and_wait(client, "clock_a", 1_713_086_400, timeout: 0)
+
+      assert attempts >= 1
+      assert is_integer(elapsed) and elapsed >= 0
+    end
+  end
+
+  describe "advance_and_wait/4 — internal_failure" do
+    test "returns :test_clock_failed on first :internal_failure (no retry)" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> internal_failure_response() end)
+
+      assert {:error,
+              %Error{
+                type: :test_clock_failed,
+                raw_body: %{
+                  "clock_id" => "clock_a",
+                  "last_status" => "internal_failure",
+                  "attempts" => 1
+                }
+              }} =
+               TestClock.advance_and_wait(client, "clock_a", 1_713_086_400)
+    end
+  end
+
+  describe "advance_and_wait/4 — HTTP failure propagates" do
+    test "returns the underlying retrieve error unchanged" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+
+      expect(LatticeStripe.MockTransport, :request, fn _ ->
+        {:ok,
+         %{
+           status: 429,
+           headers: [{"request-id", "req_rl"}],
+           body:
+             Jason.encode!(%{
+               "error" => %{"type" => "rate_limit_error", "message" => "slow down"}
+             })
+         }}
+      end)
+
+      assert {:error, %Error{type: :rate_limit_error}} =
+               TestClock.advance_and_wait(client, "clock_a", 1_713_086_400)
+    end
+
+    test "returns :test_clock_failed NOT :test_clock_timeout if advance itself fails" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> error_response() end)
+
+      assert {:error, %Error{type: :invalid_request_error}} =
+               TestClock.advance_and_wait(client, "clock_a", 1_713_086_400)
+    end
+  end
+
+  describe "advance_and_wait!/4" do
+    test "returns %TestClock{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> ready_response() end)
+
+      assert %TestClock{status: :ready} =
+               TestClock.advance_and_wait!(client, "clock_a", 1_713_086_400)
+    end
+
+    test "raises on timeout" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+
+      assert_raise Error, ~r/test_clock_timeout|did not reach/, fn ->
+        TestClock.advance_and_wait!(client, "clock_a", 1_713_086_400, timeout: 0)
+      end
+    end
+
+    test "raises on internal_failure" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> internal_failure_response() end)
+
+      assert_raise Error, ~r/internal_failure/, fn ->
+        TestClock.advance_and_wait!(client, "clock_a", 1_713_086_400)
+      end
+    end
+  end
+
+  describe "advance_and_wait/4 — telemetry" do
+    test "emits :start and :stop events via :telemetry.span/3 on success" do
+      client = test_client(telemetry_enabled: true)
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> ready_response() end)
+
+      handler_id = "advance-and-wait-ok-#{System.unique_integer()}"
+      ref = make_ref()
+      test_pid = self()
+
+      :telemetry.attach_many(
+        handler_id,
+        [
+          [:lattice_stripe, :test_clock, :advance_and_wait, :start],
+          [:lattice_stripe, :test_clock, :advance_and_wait, :stop]
+        ],
+        fn name, measurements, metadata, _ ->
+          send(test_pid, {ref, name, measurements, metadata})
+        end,
+        nil
+      )
+
+      assert {:ok, _} =
+               TestClock.advance_and_wait(client, "clock_a", 1_713_086_400)
+
+      assert_receive {^ref, [:lattice_stripe, :test_clock, :advance_and_wait, :start], _m1,
+                      start_meta},
+                     500
+
+      assert start_meta.clock_id == "clock_a"
+      assert start_meta.timeout == 60_000
+
+      assert_receive {^ref, [:lattice_stripe, :test_clock, :advance_and_wait, :stop],
+                      stop_measurements, stop_meta},
+                     500
+
+      assert stop_meta.clock_id == "clock_a"
+      assert stop_meta.outcome == :ok
+      assert stop_meta.status == :ready
+      assert is_integer(stop_measurements.duration)
+
+      :telemetry.detach(handler_id)
+    end
+
+    test "emits :stop with outcome: :error on timeout" do
+      client = test_client(telemetry_enabled: true)
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+
+      handler_id = "advance-and-wait-err-#{System.unique_integer()}"
+      ref = make_ref()
+      test_pid = self()
+
+      :telemetry.attach(
+        handler_id,
+        [:lattice_stripe, :test_clock, :advance_and_wait, :stop],
+        fn name, measurements, metadata, _ ->
+          send(test_pid, {ref, name, measurements, metadata})
+        end,
+        nil
+      )
+
+      assert {:error, %Error{type: :test_clock_timeout}} =
+               TestClock.advance_and_wait(client, "clock_a", 1_713_086_400, timeout: 0)
+
+      assert_receive {^ref, [:lattice_stripe, :test_clock, :advance_and_wait, :stop], _, stop_meta},
+                     500
+
+      assert stop_meta.outcome == :ok or stop_meta.outcome == :error
+      # The span wraps :ok return of the function; inside we return the error tuple,
+      # so outcome should be :error per our build_stop_meta.
+      assert stop_meta.outcome == :error
+      assert stop_meta.error_type == :test_clock_timeout
+
+      :telemetry.detach(handler_id)
+    end
+
+    test "does NOT emit events when client.telemetry_enabled is false" do
+      client = test_client(telemetry_enabled: false)
+
+      expect(LatticeStripe.MockTransport, :request, fn _ -> advancing_response() end)
+      expect(LatticeStripe.MockTransport, :request, fn _ -> ready_response() end)
+
+      handler_id = "advance-and-wait-off-#{System.unique_integer()}"
+      ref = make_ref()
+      test_pid = self()
+
+      :telemetry.attach(
+        handler_id,
+        [:lattice_stripe, :test_clock, :advance_and_wait, :start],
+        fn name, measurements, metadata, _ ->
+          send(test_pid, {ref, name, measurements, metadata})
+        end,
+        nil
+      )
+
+      assert {:ok, _} =
+               TestClock.advance_and_wait(client, "clock_a", 1_713_086_400)
+
+      refute_receive {^ref, _, _, _}, 100
+
+      :telemetry.detach(handler_id)
+    end
+  end
+
+  describe "advance_and_wait/4 — export check" do
+    test "advance_and_wait/4 and advance_and_wait!/4 ARE exported" do
+      assert function_exported?(TestClock, :advance_and_wait, 4)
+      assert function_exported?(TestClock, :advance_and_wait!, 4)
+    end
+  end
 end
