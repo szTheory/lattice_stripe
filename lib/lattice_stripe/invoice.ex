@@ -54,7 +54,7 @@ defmodule LatticeStripe.Invoice do
   object reference and available parameters.
   """
 
-  alias LatticeStripe.{Billing, Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Billing, Client, Error, List, Request, Resource, Response, Telemetry}
   alias LatticeStripe.Invoice.{AutomaticTax, LineItem, StatusTransitions}
 
   # Known top-level fields from the Stripe Invoice object.
@@ -286,9 +286,19 @@ defmodule LatticeStripe.Invoice do
   """
   @spec create(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def create(%Client{} = client, params \\ %{}, opts \\ []) do
-    %Request{method: :post, path: "/v1/invoices", params: params, opts: opts}
-    |> then(&Client.request(client, &1))
-    |> Resource.unwrap_singular(&from_map/1)
+    result =
+      %Request{method: :post, path: "/v1/invoices", params: params, opts: opts}
+      |> then(&Client.request(client, &1))
+      |> Resource.unwrap_singular(&from_map/1)
+
+    case result do
+      {:ok, %__MODULE__{auto_advance: true} = invoice} ->
+        Telemetry.emit_auto_advance_scheduled(client, invoice)
+        result
+
+      _ ->
+        result
+    end
   end
 
   @doc """
