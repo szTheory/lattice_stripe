@@ -25,6 +25,7 @@ defmodule LatticeStripe.MixProject do
           "guides/client-configuration.md",
           "guides/payments.md",
           "guides/checkout.md",
+          "guides/invoices.md",
           "guides/webhooks.md",
           "guides/error-handling.md",
           "guides/testing.md",
@@ -56,6 +57,15 @@ defmodule LatticeStripe.MixProject do
           Checkout: [
             LatticeStripe.Checkout.Session,
             LatticeStripe.Checkout.LineItem
+          ],
+          Billing: [
+            LatticeStripe.Invoice,
+            LatticeStripe.Invoice.LineItem,
+            LatticeStripe.Invoice.StatusTransitions,
+            LatticeStripe.Invoice.AutomaticTax,
+            LatticeStripe.InvoiceItem,
+            LatticeStripe.InvoiceItem.Period,
+            LatticeStripe.Billing.Guards
           ],
           Webhooks: [
             LatticeStripe.Webhook,
