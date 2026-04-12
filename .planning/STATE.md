@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Billing & Connect
 status: verifying
-stopped_at: Completed 13-07-PLAN.md
-last_updated: "2026-04-12T12:19:20.403Z"
+stopped_at: Phase 14 context gathered
+last_updated: "2026-04-12T15:05:44.504Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 7
@@ -113,7 +113,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T04:16:45.106Z
-Stopped at: Completed 13-07-PLAN.md
-Resume file: None
+Last session: 2026-04-12T15:05:44.494Z
+Stopped at: Phase 14 context gathered
+Resume file: .planning/phases/14-invoices-invoice-line-items/14-CONTEXT.md
 Next action: `/gsd-plan-phase 12`
