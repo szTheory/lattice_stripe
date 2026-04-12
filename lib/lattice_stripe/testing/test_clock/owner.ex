@@ -38,20 +38,24 @@ defmodule LatticeStripe.Testing.TestClock.Owner do
   """
   @spec cleanup(pid(), Client.t()) :: :ok
   def cleanup(owner, %Client{} = client) when is_pid(owner) do
-    if Process.alive?(owner) do
-      ids = registered(owner)
+    try do
+      if Process.alive?(owner) do
+        ids = registered(owner)
 
-      for id <- ids do
-        try do
-          Backend.delete(client, id)
-        rescue
-          _ -> :ok
-        catch
-          _, _ -> :ok
+        for id <- ids do
+          try do
+            Backend.delete(client, id)
+          rescue
+            _ -> :ok
+          catch
+            _, _ -> :ok
+          end
         end
-      end
 
-      if Process.alive?(owner), do: GenServer.stop(owner)
+        if Process.alive?(owner), do: GenServer.stop(owner)
+      end
+    catch
+      :exit, _ -> :ok
     end
 
     :ok
