@@ -441,6 +441,113 @@ defmodule LatticeStripe.SubscriptionTest do
 
       assert_raise Error, fn -> Subscription.create!(client, %{}) end
     end
+
+    test "pause_collection! returns %Subscription{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Fixtures.paused())
+      end)
+
+      assert %Subscription{pause_collection: %PauseCollection{behavior: "keep_as_draft"}} =
+               Subscription.pause_collection!(client, "sub_test1234567890", :keep_as_draft)
+    end
+
+    test "pause_collection! raises on error" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise Error, fn ->
+        Subscription.pause_collection!(client, "sub_test1234567890", :keep_as_draft)
+      end
+    end
+
+    test "resume! returns %Subscription{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Fixtures.basic())
+      end)
+
+      assert %Subscription{} = Subscription.resume!(client, "sub_test1234567890")
+    end
+
+    test "resume! raises on error" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise Error, fn -> Subscription.resume!(client, "sub_test1234567890") end
+    end
+
+    test "list! returns %Response{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(list_json([Fixtures.basic()], "/v1/subscriptions"))
+      end)
+
+      assert %Response{data: %List{data: [%Subscription{}]}} = Subscription.list!(client)
+    end
+
+    test "list! raises on error" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise Error, fn -> Subscription.list!(client) end
+    end
+
+    test "stream! raises mid-stream when page fetch fails" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise Error, fn ->
+        Subscription.stream!(client) |> Enum.take(5)
+      end
+    end
+
+    test "stream! yields decoded %Subscription{} structs on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(list_json([Fixtures.basic()], "/v1/subscriptions"))
+      end)
+
+      assert [%Subscription{id: "sub_test1234567890"}] =
+               Subscription.stream!(client) |> Enum.take(5)
+    end
+
+    test "cancel! returns %Subscription{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Fixtures.canceled())
+      end)
+
+      assert %Subscription{status: "canceled"} =
+               Subscription.cancel!(client, "sub_test1234567890")
+    end
+
+    test "cancel! raises on error" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise Error, fn -> Subscription.cancel!(client, "sub_test1234567890") end
+    end
   end
 
   # ---------------------------------------------------------------------------
