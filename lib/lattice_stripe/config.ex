@@ -86,6 +86,12 @@ defmodule LatticeStripe.Config do
               type: :boolean,
               default: true,
               doc: "Whether to emit telemetry events for requests."
+            ],
+            require_explicit_proration: [
+              type: :boolean,
+              default: false,
+              doc:
+                "When true, proration-sensitive operations (Invoice.upcoming/3, Invoice.create_preview/3, Subscription mutations) require an explicit proration_behavior parameter. When false (default), the parameter passes through to Stripe's default, matching stripe-ruby/node/python SDK behavior."
             ]
           )
 

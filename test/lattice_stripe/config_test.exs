@@ -102,6 +102,28 @@ defmodule LatticeStripe.ConfigTest do
       schema_default = Config.schema().schema[:api_version][:default]
       assert schema_default == LatticeStripe.api_version()
     end
+
+    test "require_explicit_proration defaults to false" do
+      result = Config.validate!(api_key: "sk_test_123", finch: MyFinch)
+      assert result[:require_explicit_proration] == false
+    end
+
+    test "require_explicit_proration accepts true" do
+      result =
+        Config.validate!(
+          api_key: "sk_test_123",
+          finch: MyFinch,
+          require_explicit_proration: true
+        )
+
+      assert result[:require_explicit_proration] == true
+    end
+
+    test "require_explicit_proration rejects non-boolean" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate!(api_key: "sk_test_123", finch: MyFinch, require_explicit_proration: "yes")
+      end
+    end
   end
 
   describe "validate/1" do

@@ -169,6 +169,22 @@ defmodule LatticeStripe.ClientTest do
       assert {:ok, _} = Client.request(client_a, get_request())
       assert {:ok, _} = Client.request(client_b, get_request())
     end
+
+    test "require_explicit_proration defaults to false" do
+      client = Client.new!(api_key: "sk_test_123", finch: MyApp.Finch)
+      assert client.require_explicit_proration == false
+    end
+
+    test "require_explicit_proration can be set to true" do
+      client =
+        Client.new!(
+          api_key: "sk_test_123",
+          finch: MyApp.Finch,
+          require_explicit_proration: true
+        )
+
+      assert client.require_explicit_proration == true
+    end
   end
 
   describe "request/2 headers" do

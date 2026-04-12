@@ -60,7 +60,8 @@ defmodule LatticeStripe.Client do
     retry_strategy: LatticeStripe.RetryStrategy.Default,
     timeout: 30_000,
     max_retries: 2,
-    telemetry_enabled: true
+    telemetry_enabled: true,
+    require_explicit_proration: false
   ]
 
   @typedoc """
@@ -80,6 +81,7 @@ defmodule LatticeStripe.Client do
   - `timeout` - Default request timeout in milliseconds (default: `30_000`)
   - `max_retries` - Max retry attempts after initial failure (default: `2`)
   - `telemetry_enabled` - Whether to emit telemetry events (default: `true`)
+  - `require_explicit_proration` - When `true`, proration-sensitive operations require explicit `proration_behavior` param (default: `false`)
   """
   @type t :: %__MODULE__{
           api_key: String.t(),
@@ -92,7 +94,8 @@ defmodule LatticeStripe.Client do
           retry_strategy: module(),
           timeout: pos_integer(),
           max_retries: non_neg_integer(),
-          telemetry_enabled: boolean()
+          telemetry_enabled: boolean(),
+          require_explicit_proration: boolean()
         }
 
   @doc """
