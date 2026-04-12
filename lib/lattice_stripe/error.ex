@@ -52,6 +52,13 @@ defmodule LatticeStripe.Error do
   - `:api_error` — Stripe server error or unexpected response
   - `:idempotency_error` — The same idempotency key was reused with different parameters
   - `:connection_error` — Network-level failure, no HTTP response received
+  - `:test_clock_timeout` — **Locally constructed.** `TestHelpers.TestClock.advance_and_wait/3`
+    polled past its deadline without the clock reaching `:ready`. Context
+    (`clock_id`, `last_status`, `attempts`, `elapsed_ms`) is stashed in
+    `:raw_body` as a free-form map. Never parsed from a Stripe response.
+  - `:test_clock_failed` — **Locally constructed.** A polled test clock entered
+    `:internal_failure` state. Terminal (no retry). Context stashed in
+    `:raw_body` as a free-form map. Never parsed from a Stripe response.
   """
   @type error_type ::
           :card_error
@@ -61,6 +68,8 @@ defmodule LatticeStripe.Error do
           | :api_error
           | :idempotency_error
           | :connection_error
+          | :test_clock_timeout
+          | :test_clock_failed
 
   @typedoc """
   A structured Stripe API error.
