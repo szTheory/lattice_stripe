@@ -96,7 +96,63 @@ Promoted from v1's deferred "v2 Requirements" list and expanded with new items s
 
 ## Traceability
 
-Empty until roadmap creation. Populated by gsd-roadmapper.
+Every v2.0 requirement is mapped to exactly one phase. 53 of 53 mapped.
+
+| Requirement | Phase    | Status  |
+|-------------|----------|---------|
+| BILL-01     | Phase 12 | Pending |
+| BILL-02     | Phase 12 | Pending |
+| BILL-06     | Phase 12 | Pending |
+| BILL-06b    | Phase 12 | Pending |
+| BILL-08     | Phase 13 | Pending |
+| BILL-08b    | Phase 13 | Pending |
+| BILL-08c    | Phase 13 | Pending |
+| TEST-09     | Phase 13 | Pending |
+| TEST-10     | Phase 13 | Pending |
+| BILL-04     | Phase 14 | Pending |
+| BILL-04b    | Phase 14 | Pending |
+| BILL-04c    | Phase 14 | Pending |
+| BILL-10     | Phase 14 | Pending |
+| BILL-03     | Phase 15 | Pending |
+| BILL-03b    | Phase 15 | Pending |
+| BILL-03c    | Phase 15 | Pending |
+| BILL-03d    | Phase 15 | Pending |
+| BILL-03e    | Phase 15 | Pending |
+| BILL-03f    | Phase 15 | Pending |
+| UTIL-03     | Phase 15 | Pending |
+| UTIL-04     | Phase 15 | Pending |
+| BILL-09     | Phase 16 | Pending |
+| BILL-09b    | Phase 16 | Pending |
+| BILL-09c    | Phase 16 | Pending |
+| REL-03      | Phase 16 | Pending |
+| CNCT-01     | Phase 17 | Pending |
+| CNCT-01b    | Phase 17 | Pending |
+| CNCT-01c    | Phase 17 | Pending |
+| CNCT-06     | Phase 17 | Pending |
+| CNCT-07     | Phase 17 | Pending |
+| CNCT-02     | Phase 18 | Pending |
+| CNCT-02b    | Phase 18 | Pending |
+| CNCT-05     | Phase 18 | Pending |
+| CNCT-05b    | Phase 18 | Pending |
+| CNCT-04     | Phase 18 | Pending |
+| UTIL-01     | Phase 19 | Pending |
+| UTIL-01b    | Phase 19 | Pending |
+| UTIL-01c    | Phase 19 | Pending |
+| UTIL-02     | Phase 19 | Pending |
+| UTIL-05     | Phase 19 | Pending |
+| UTIL-06     | Phase 19 | Pending |
+| TEST-07     | Phase 19 | Pending |
+| TEST-08     | Phase 19 | Pending |
+| DOCS-05     | Phase 19 | Pending |
+| DOCS-06     | Phase 19 | Pending |
+| DOCS-07     | Phase 19 | Pending |
+| DOCS-08     | Phase 19 | Pending |
+| DOCS-09     | Phase 19 | Pending |
+| DOCS-10     | Phase 19 | Pending |
+| DOCS-11     | Phase 19 | Pending |
+| REL-01      | Phase 19 | Pending |
+| REL-02      | Phase 19 | Pending |
+| REL-04      | Phase 19 | Pending |
 
 ## Future Requirements (Deferred Beyond v2.0)
 
