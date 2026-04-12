@@ -51,6 +51,24 @@ defmodule LatticeStripe.Billing.GuardsTest do
       assert error.message =~ "require_explicit_proration"
     end
 
+    test "returns :ok when proration_behavior is nested in subscription_details" do
+      client = test_client(require_explicit_proration: true)
+
+      params = %{
+        "subscription_details" => %{"proration_behavior" => "create_prorations"}
+      }
+
+      assert Guards.check_proration_required(client, params) == :ok
+    end
+
+    test "returns error when subscription_details exists but has no proration_behavior" do
+      client = test_client(require_explicit_proration: true)
+      params = %{"subscription_details" => %{"items" => []}}
+
+      assert {:error, %Error{type: :proration_required}} =
+               Guards.check_proration_required(client, params)
+    end
+
     test "error message includes valid values guidance" do
       client = test_client(require_explicit_proration: true)
       {:error, error} = Guards.check_proration_required(client, %{"other_param" => "value"})
