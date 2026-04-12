@@ -53,11 +53,20 @@ defmodule LatticeStripe.TestHelpers.TestClock do
 
   ## Typical usage
 
-      {:ok, clock} = LatticeStripe.TestHelpers.TestClock.create(client, %{frozen_time: System.system_time(:second)})
-      {:ok, clock} = LatticeStripe.TestHelpers.TestClock.retrieve(client, clock.id)
-      {:ok, _}     = LatticeStripe.TestHelpers.TestClock.delete(client, clock.id)
+      frozen_time = System.system_time(:second)
 
-  The `advance/4` and `advance_and_wait/4` functions land in Plan 13-04.
+      {:ok, clock} = LatticeStripe.TestHelpers.TestClock.create(client, %{frozen_time: frozen_time})
+
+      {:ok, ready} =
+        LatticeStripe.TestHelpers.TestClock.advance_and_wait(
+          client,
+          clock.id,
+          frozen_time + 86_400 * 30
+        )
+
+      assert ready.status == :ready
+
+      {:ok, _} = LatticeStripe.TestHelpers.TestClock.delete(client, clock.id)
 
   For a high-level ExUnit experience (automatic cleanup, setup callbacks,
   customer linkage), use `LatticeStripe.Testing.TestClock` instead.
@@ -254,7 +263,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
   Lists and optionally deletes test clocks older than a threshold.
 
   This is the shared deletion core used by both
-  `LatticeStripe.Testing.TestClock.Owner.cleanup/2` (per-test) and
+  the `Owner` GenServer's cleanup callback (per-test) and
   `mix lattice_stripe.test_clock.cleanup` (backstop). See those callers
   for the user-facing entry points.
 

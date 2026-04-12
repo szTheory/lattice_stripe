@@ -64,7 +64,9 @@ defmodule LatticeStripe.MixProject do
           ],
           "Telemetry & Testing": [
             LatticeStripe.Telemetry,
-            LatticeStripe.Testing
+            LatticeStripe.Testing,
+            LatticeStripe.Testing.TestClock,
+            LatticeStripe.TestHelpers.TestClock
           ],
           Internals: [
             LatticeStripe.Transport,
