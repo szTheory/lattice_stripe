@@ -243,6 +243,116 @@ defmodule LatticeStripe.SubscriptionSchedule do
   end
 
   # ---------------------------------------------------------------------------
+  # Public API: Action verbs (cancel/release)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Cancels a Subscription Schedule.
+
+  Terminates the schedule AND the underlying Subscription. Both entities move
+  to `canceled` status. This is irreversible.
+
+  ## Wire shape
+
+  Dispatches `POST /v1/subscription_schedules/:id/cancel` — unlike
+  `LatticeStripe.Subscription.cancel/4` which uses DELETE. Do not mix them up.
+
+  ## Params
+
+  - `"invoice_now"` (boolean) — whether to generate a final invoice
+    immediately for any prorations
+  - `"prorate"` (boolean) — whether to prorate the cancellation
+
+  Note: the `prorate` param here is unrelated to `proration_behavior`. It
+  controls whether a proration invoice is generated on cancel, not which
+  proration strategy applies to a future item change. LatticeStripe does NOT
+  run `check_proration_required/2` on this call.
+
+  ## Contrast with `release/4`
+
+  - `cancel/4` terminates both schedule and subscription.
+  - `release/4` detaches the schedule; the subscription stays active.
+
+  ## Examples
+
+      iex> LatticeStripe.SubscriptionSchedule.cancel(client, "sub_sched_123", %{"invoice_now" => true})
+      {:ok, %LatticeStripe.SubscriptionSchedule{status: "canceled"}}
+  """
+  @spec cancel(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def cancel(%Client{} = client, id, params \\ %{}, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    %Request{
+      method: :post,
+      path: "/v1/subscription_schedules/#{id}/cancel",
+      params: params,
+      opts: opts
+    }
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Like `cancel/4` but raises on failure."
+  @spec cancel!(Client.t(), String.t(), map(), keyword()) :: t()
+  def cancel!(%Client{} = client, id, params \\ %{}, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts),
+      do: client |> cancel(id, params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Releases a Subscription Schedule.
+
+  Detaches the schedule from its Subscription. The Subscription remains
+  active and billable but is no longer governed by phases — subsequent
+  configuration changes must go through `LatticeStripe.Subscription.update/4`
+  directly.
+
+  **This is irreversible.** Once a schedule is released, there is no API to
+  re-attach it. If you need to regain phase-based control, you must create a
+  new schedule from the now-detached subscription (if policy allows).
+
+  ## Contrast with `cancel/4`
+
+  - `release/4` detaches the schedule; the subscription continues billing
+    but is no longer phase-governed.
+  - `cancel/4` terminates BOTH the schedule AND the underlying subscription.
+
+  Use `release/4` when you want to graduate a subscription off a phased plan
+  into a flat ongoing subscription. Use `cancel/4` when you want to end
+  billing entirely.
+
+  ## Wire shape
+
+  Dispatches `POST /v1/subscription_schedules/:id/release`.
+
+  ## Params
+
+  - `"preserve_cancel_date"` (boolean) — if the underlying subscription had
+    a scheduled cancellation date, whether to preserve it on release
+
+  ## Examples
+
+      iex> LatticeStripe.SubscriptionSchedule.release(client, "sub_sched_123")
+      {:ok, %LatticeStripe.SubscriptionSchedule{status: "released"}}
+  """
+  @spec release(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def release(%Client{} = client, id, params \\ %{}, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts) do
+    %Request{
+      method: :post,
+      path: "/v1/subscription_schedules/#{id}/release",
+      params: params,
+      opts: opts
+    }
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Like `release/4` but raises on failure."
+  @spec release!(Client.t(), String.t(), map(), keyword()) :: t()
+  def release!(%Client{} = client, id, params \\ %{}, opts \\ [])
+      when is_binary(id) and is_map(params) and is_list(opts),
+      do: client |> release(id, params, opts) |> Resource.unwrap_bang!()
+
+  # ---------------------------------------------------------------------------
   # Public: from_map/1
   # ---------------------------------------------------------------------------
 
