@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-04-12T16:28:10.707Z"
+status: ready_to_plan
+stopped_at: Phase 14 code review fixes landed (WR-02/03/04); Phase 15 draft at ~/.claude/plans/lazy-shimmying-ladybug.md
+last_updated: "2026-04-12T00:00:00.000Z"
 last_activity: 2026-04-12
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 31
-  completed_plans: 31
-  percent: 100
+  total_phases: 17
+  completed_phases: 12
+  total_plans: 36
+  completed_plans: 36
+  percent: 70
 ---
 
 # Project State
@@ -21,16 +21,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 11 — ci-cd-release
+**Current focus:** Phase 15 — subscriptions-subscription-items (Billing track)
 
 ## Current Position
 
-Phase: 14
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 15
+Plan: Not started (draft at ~/.claude/plans/lazy-shimmying-ladybug.md — 5 decisions D1–D5, 4 sequenced tasks)
+Status: Ready to plan — Phase 14 complete (5/5 summaries, REVIEW-FIX landed; VERIFICATION.md stale re: WR-01 fixed in 0628bbd)
 Last activity: 2026-04-12
 
-Progress: [████████████████████] 11/11 plans (100%)
+Progress: [██████████████░░░░░░] 12/17 phases (70%) · 36/36 planned plans complete
+
+**Milestone scope note:** Phases 1–11 shipped as v1.0. Phases 12–13 were deleted in commit 39b98c9 (Product/Price/Coupon/TestClock — recoverable from `git show 39b98c9^:<path>`). Phases 14–19 form the post-v1.0 Billing track; ROADMAP.md currently only documents 1–11 and should be refreshed separately.
 
 ## Performance Metrics
 
@@ -170,6 +172,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T00:24:10.833Z
-Stopped at: Completed 11-01-PLAN.md
-Resume file: None
+Last session: 2026-04-12
+Stopped at: Session resumed — STATE.md drift repaired; awaiting user direction on Phase 15 kickoff
+Resume file: ~/.claude/plans/lazy-shimmying-ladybug.md (Phase 15 draft plan)
