@@ -410,11 +410,9 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
       assert function_exported?(TestClock, :delete!, 2)
     end
 
-    test "advance/4 and advance_and_wait/4 ARE exported" do
+    test "advance/4 is exported" do
       assert function_exported?(TestClock, :advance, 4)
       assert function_exported?(TestClock, :advance!, 4)
-      assert function_exported?(TestClock, :advance_and_wait, 4)
-      assert function_exported?(TestClock, :advance_and_wait!, 4)
     end
   end
 

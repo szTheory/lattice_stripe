@@ -243,5 +243,56 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     do: delete(c, id, o) |> Resource.unwrap_bang!()
 
   # NOTE: NO update/3,4 and NO search/2,3 — Stripe Test Clock API absence.
-  # NO advance/4 or advance_and_wait/4 yet — lands in Plan 13-04.
+
+  # ---------------------------------------------------------------------------
+  # advance/4 (Plan 13-04)
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Advances a Test Clock to a new `frozen_time`.
+
+  Sends `POST /v1/test_helpers/test_clocks/:id/advance`. The returned
+  clock will typically have `status: :advancing` — the server processes
+  the advancement asynchronously. Use `advance_and_wait/4` (or the bang
+  variant) if you need to block until the clock reaches `:ready`.
+
+  Stripe enforces a maximum advancement of roughly two billing intervals
+  of the shortest attached subscription. Advancing further in a single
+  call returns a 400 error; advance in chunks instead.
+
+  ## Parameters
+
+  - `client` — A `%LatticeStripe.Client{}` struct
+  - `id` — Test Clock id (`"clock_..."`)
+  - `frozen_time` — Unix timestamp (integer) to advance TO
+  - `opts` — Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %TestClock{status: :advancing}}` (usually) on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec advance(Client.t(), String.t(), integer(), keyword()) ::
+          {:ok, t()} | {:error, Error.t()}
+  def advance(%Client{} = client, id, frozen_time, opts \\ [])
+      when is_binary(id) and is_integer(frozen_time) do
+    %Request{
+      method: :post,
+      path: "#{@path}/#{id}/advance",
+      params: %{"frozen_time" => frozen_time},
+      opts: opts
+    }
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc """
+  Bang variant of `advance/4`. Returns `%TestClock{}` on success, raises
+  `LatticeStripe.Error` on failure.
+  """
+  @spec advance!(Client.t(), String.t(), integer(), keyword()) :: t() | no_return()
+  def advance!(%Client{} = client, id, frozen_time, opts \\ [])
+      when is_binary(id) and is_integer(frozen_time) do
+    advance(client, id, frozen_time, opts) |> Resource.unwrap_bang!()
+  end
 end
