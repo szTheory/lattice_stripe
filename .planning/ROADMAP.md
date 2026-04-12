@@ -55,7 +55,7 @@ v2.0 is a pure resource-surface milestone on top of the v1 foundation — zero n
 Plans:
 - [x] 12-01-PLAN.md — Wave 0 test infrastructure (stream_data dep + test stubs for all Phase 12 resources)
 - [x] 12-02-PLAN.md — FormEncoder D-09f float fix + D-09a..e regression battery + StreamData property layer
-- [ ] 12-03-PLAN.md — LatticeStripe.Discount module (D-08) + Customer.discount backfill (D-02)
+- [x] 12-03-PLAN.md — LatticeStripe.Discount module (D-08) + Customer.discount backfill (D-02)
 - [ ] 12-04-PLAN.md — LatticeStripe.Product (BILL-01) with D-03 atomization + D-10 search callout
 - [ ] 12-05-PLAN.md — LatticeStripe.Price + Price.Recurring + Price.Tier typed nesteds (BILL-02) — no delete (D-05)
 - [ ] 12-06-PLAN.md — LatticeStripe.Coupon + Coupon.AppliesTo (BILL-06) — no update, no search (D-05) + tightened Discount coupon dispatch
@@ -161,7 +161,7 @@ Plans:
 | 9. Testing Infrastructure                 | v1.0      | 3/3            | Complete    | 2026-04-03 |
 | 10. Documentation & Guides                | v1.0      | 4/4            | Complete    | 2026-04-03 |
 | 11. CI/CD & Release                       | v1.0      | 3/3            | Complete    | 2026-04-04 |
-| 12. Billing Catalog                       | v2.0      | 2/7 | In Progress|  |
+| 12. Billing Catalog                       | v2.0      | 3/7 | In Progress|  |
 | 13. Billing Test Clocks                   | v2.0      | 0/0            | Not started | -          |
 | 14. Invoices & Invoice Line Items         | v2.0      | 0/0            | Not started | -          |
 | 15. Subscriptions & Subscription Items    | v2.0      | 0/0            | Not started | -          |
