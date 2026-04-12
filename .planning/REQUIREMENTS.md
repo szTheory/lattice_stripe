@@ -171,7 +171,7 @@ Deferred to future release. Tracked but not in current roadmap.
 
 - **BILL-01**: Products — create, retrieve, update, delete, list
 - **BILL-02**: Prices — create, retrieve, update, list
-- **BILL-03**: Subscriptions — create, retrieve, update, cancel, pause, resume, list, search
+- **BILL-03**: Subscriptions — create, retrieve, update, cancel, pause, resume, list, search + Subscription Schedule lifecycle (create, retrieve, update, cancel, release, list)
 - **BILL-04**: Invoices — create, retrieve, update, finalize, pay, send, void, list, search
 - **BILL-05**: Customer Portal Sessions — create with deep-linked flows
 - **BILL-06**: Coupons and Promotion Codes

@@ -710,15 +710,20 @@ Framework is already installed — ExUnit + Mox are on every wave of the project
 
 **No new ASVS categories become relevant for this phase** — Phase 16 is a pure data-plane extension of Phases 14/15. Same trust boundaries, same mitigations, same test patterns.
 
-## Open Questions for Planner
+## Open Questions for Planner (RESOLVED)
 
-All D1–D5 decisions are locked. The planner's only real degrees of freedom are listed in 16-CONTEXT.md §Claude's Discretion and repeated here:
+All D1–D5 decisions are locked. The planner's only real degrees of freedom are listed in 16-CONTEXT.md §Claude's Discretion and repeated here, each with its resolution:
 
 1. **Exact `@moduledoc` wording for `Phase` struct's dual usage** — the nil-trailing-fields asymmetry. Proposed text is in the §@known_fields Proposals section above; planner may refine.
+   **RESOLVED:** 16-01-PLAN.md Task 1 embeds the full `@moduledoc` verbatim in the Phase code template (see §action block for `lib/lattice_stripe/subscription_schedule/phase.ex`). Deferred further refinement to executor per 16-CONTEXT §Claude's Discretion.
 2. **Whether Plan 16-01 splits at 4 nested structs + struct + CRUD = 3 tasks, or splits Task 1 into Task 1a (2 structs) + Task 1b (2 structs).** Phase 15 kept 3 nested structs as a single Task 1 in 15-01 — recommend mirroring: one task, 4 nested structs + tests in a batch.
+   **RESOLVED:** 16-01-PLAN.md uses 2 tasks total — Task 1 batches all 4 nested structs + tests; Task 2 builds the top-level resource + CRUD + fixture. Mirrors Phase 15 15-01 rhythm.
 3. **`guides/subscriptions.md` section placement** — where inside the existing guide to add `## Subscription Schedules`. Proposed: immediately after `## Proration`, before `## SubscriptionItem operations`, so schedule docs benefit from the proration context already established.
+   **RESOLVED:** 16-03-PLAN.md owns guide updates; placement deferred to executor per 16-CONTEXT §Claude's Discretion (proposed ordering noted in 16-03 Task read_first context).
 4. **Whether `SubscriptionSchedule.update/4` accepts atom-keyed `phases:` or requires string-keyed `"phases"`.** Follow existing resource convention: accept both (atom keys normalize through `FormEncoder.encode/1` which calls `to_string/1` on keys), but document string-keyed as canonical in examples.
+   **RESOLVED:** 16-01-PLAN.md Task 2 inherits the pass-through pattern from `lib/lattice_stripe/subscription.ex` (via read_first + interfaces block). Both atom- and string-keyed params normalize through `FormEncoder.encode/1` — no special-casing in `update/4`. String-keyed is canonical in `@moduledoc` examples.
 5. **One genuine open call for the planner:** Phase 16 `SubscriptionSchedule` struct has 19 top-level fields. Phase 15's `Subscription` had 46 and used a `# credo:disable-for-next-line Credo.Check.Warning.StructFieldAmount` comment above `defstruct`. Phase 16's count is below the Credo default threshold (~32), so no disable comment should be needed — planner should verify via first compile.
+   **RESOLVED:** 16-01-PLAN.md Task 2 action block explicitly states "Field count is 19 (below Credo's ~32 default threshold — no `credo:disable-for-next-line` needed per 16-RESEARCH.md §Open Questions item 5)." If `mix credo --strict` flags this at execution time, executor adds the disable comment inline — not a planner concern.
 
 No LOW-confidence findings. No research blockers. No gaps requiring additional investigation before planning begins.
 
