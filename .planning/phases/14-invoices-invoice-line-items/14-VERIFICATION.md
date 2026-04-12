@@ -1,17 +1,26 @@
 ---
 phase: 14-invoices-invoice-line-items
 verified: 2026-04-12T17:00:00Z
-status: human_needed
-score: 7/8 must-haves verified
+resolved: 2026-04-12T18:00:00Z
+status: passed
+score: 8/8 must-haves verified
 overrides_applied: 0
 gaps: []
-human_verification:
-  - test: "Verify create_preview/3 with proration_behavior nested inside subscription_details is not incorrectly rejected by the guard when require_explicit_proration: true"
-    expected: "Invoice.create_preview(client_with_flag, %{\"subscription_details\" => %{\"proration_behavior\" => \"create_prorations\"}}) returns {:ok, %Invoice{}} not {:error, %Error{type: :proration_required}}"
-    why_human: "Guard bug (WR-01 from code review) confirmed in code — guard only checks top-level params key, not nested subscription_details. Requires manual test or stripe-mock call to confirm real-world impact."
-  - test: "Verify create_preview_lines/3 HTTP method (POST vs GET)"
-    expected: "create_preview_lines/3 uses the correct HTTP verb — Stripe docs show GET for preview lines endpoints, but the implementation uses POST"
-    why_human: "IN-01 from code review flags this as a possible semantic error. Cannot confirm without checking live Stripe OpenAPI spec or stripe-mock response."
+superseded_by: .planning/phases/14-invoices-invoice-line-items/14-UAT.md
+resolution_notes: |
+  Both originally-flagged human_verification items are now resolved:
+
+  1. Proration guard nested subscription_details (WR-01) — fixed in commit 0628bbd.
+     has_proration_behavior?/1 in billing/guards.ex:37-41 now checks both the top-level
+     "proration_behavior" key and params["subscription_details"]["proration_behavior"].
+
+  2. create_preview_lines/3 HTTP verb (IN-01) — fixed in commit 4709ad8.
+     Verified directly against stripe-mock: POST /v1/invoices/create_preview/lines
+     returns 404 "Unrecognized request URL"; GET is accepted. Method switched to :get
+     in invoice.ex:779; unit test updated accordingly.
+
+  All 4 code-review warnings (WR-01..04) landed in commits 0628bbd, 97bae75, c464feb,
+  4a084e7. Full UAT signed off by user in 14-UAT.md (12/12 passed).
 ---
 
 # Phase 14: Invoices and Invoice Line Items Verification Report
