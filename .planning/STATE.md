@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Billing & Connect
 status: executing
-stopped_at: Completed 13-02-PLAN.md
-last_updated: "2026-04-12T03:34:58.110Z"
+stopped_at: Completed 13-03-PLAN.md
+last_updated: "2026-04-12T03:41:12.627Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 14
-  completed_plans: 10
-  percent: 71
+  completed_plans: 11
+  percent: 79
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 ## Current Position
 
 Phase: 13 (billing-test-clocks) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-04-12
 Last activity: 2026-04-12
@@ -60,6 +60,7 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 1/8 pha
 | Phase 12 P07 | 15m | 2 tasks | 3 files |
 | Phase 13 P01 | 12min | 5 tasks | 19 files |
 | Phase 13 P02 | 9min | 2 tasks | 2 files |
+| Phase 13 P03 | 8min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ Recent decisions affecting current work:
 - [Phase 13]: Phase 13-01: test_clock error context stashed in existing Error :raw_body field (no :details schema change)
 - [Phase 13]: Phase 13-02: A-13g probe — Stripe does NOT support metadata on test clocks (verified OpenAPI + stripe-mock). Plan 13-05 cleanup strategy must fall back from marker to Owner-only + age-based Mix task.
 - [Phase 13]: Phase 13-02: TestHelpers.TestClock struct intentionally omits :metadata field, reflecting Stripe's actual API surface.
+- [Phase 13]: Phase 13-03: TestClock CRUD modeled on Coupon template (no update, no search — closest surface match)
+- [Phase 13]: Phase 13-03: Integration test asserts request+response shape only; polling deferred to Plan 13-04 Mox + Plan 13-06 :real_stripe (Pitfall 4)
 
 ### Pending Todos
 
@@ -99,7 +102,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T03:34:58.108Z
-Stopped at: Completed 13-02-PLAN.md
+Last session: 2026-04-12T03:41:12.625Z
+Stopped at: Completed 13-03-PLAN.md
 Resume file: None
 Next action: `/gsd-plan-phase 12`
