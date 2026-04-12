@@ -10,10 +10,10 @@ Promoted from v1's deferred "v2 Requirements" list and expanded with new items s
 
 ### Billing — Catalog
 
-- [ ] **BILL-01**: Developer can manage Products — create, retrieve, update, list, stream, search
-- [ ] **BILL-02**: Developer can manage Prices — create, retrieve, update, list, stream, search (no delete; Stripe API constraint)
-- [ ] **BILL-06**: Developer can manage Coupons — create, retrieve, delete, list, stream (no update; Stripe API constraint)
-- [ ] **BILL-06b**: Developer can manage Promotion Codes — create, retrieve, update, list, stream. Search is NOT supported: verified against Stripe OpenAPI spec (`spec3.sdk.json`) during Phase 12 discussion — the `/v1/promotion_codes/search` endpoint does not exist (only 7 resources have search: charges, customers, invoices, payment_intents, prices, products, subscriptions). Discovery path is `list/2` with filters (`code`, `coupon`, `customer`, `active`) per https://docs.stripe.com/api/promotion_codes/list.
+- [x] **BILL-01**: Developer can manage Products — create, retrieve, update, list, stream, search
+- [x] **BILL-02**: Developer can manage Prices — create, retrieve, update, list, stream, search (no delete; Stripe API constraint)
+- [x] **BILL-06**: Developer can manage Coupons — create, retrieve, delete, list, stream (no update; Stripe API constraint)
+- [x] **BILL-06b**: Developer can manage Promotion Codes — create, retrieve, update, list, stream. Search is NOT supported: verified against Stripe OpenAPI spec (`spec3.sdk.json`) during Phase 12 discussion — the `/v1/promotion_codes/search` endpoint does not exist (only 7 resources have search: charges, customers, invoices, payment_intents, prices, products, subscriptions). Discovery path is `list/2` with filters (`code`, `coupon`, `customer`, `active`) per https://docs.stripe.com/api/promotion_codes/list.
 
 ### Billing — Testing Infrastructure
 
@@ -100,10 +100,10 @@ Every v2.0 requirement is mapped to exactly one phase. 53 of 53 mapped.
 
 | Requirement | Phase    | Status  |
 |-------------|----------|---------|
-| BILL-01     | Phase 12 | Pending |
-| BILL-02     | Phase 12 | Pending |
-| BILL-06     | Phase 12 | Pending |
-| BILL-06b    | Phase 12 | Pending |
+| BILL-01     | Phase 12 | Complete |
+| BILL-02     | Phase 12 | Complete |
+| BILL-06     | Phase 12 | Complete |
+| BILL-06b    | Phase 12 | Complete |
 | BILL-08     | Phase 13 | Pending |
 | BILL-08b    | Phase 13 | Pending |
 | BILL-08c    | Phase 13 | Pending |

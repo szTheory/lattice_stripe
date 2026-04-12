@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Billing & Connect
 status: executing
-stopped_at: Completed 12-01-PLAN.md (Wave 0)
-last_updated: "2026-04-12T01:48:54.626Z"
+stopped_at: Completed 12-02-PLAN.md
+last_updated: "2026-04-12T01:53:41.367Z"
 last_activity: 2026-04-12 -- Phase 12 planning complete
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 7
-  completed_plans: 1
-  percent: 14
+  completed_plans: 2
+  percent: 29
 ---
 
 # Project State
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0/8 pha
 
 *Updated after each plan completion*
 | Phase 12 P01 | 97 | 1 tasks | 11 files |
+| Phase 12 P02 | 8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,7 @@ Recent decisions affecting current work:
 - v0.3.0-rc1 cut decision deferred to Phase 16 transition (REL-03 / M4)
 - Zero new runtime dependencies, zero behaviour additions, zero modifications to v1 HTTP/retry/pagination primitives
 - Two-tier integration test strategy: stripe-mock (always) + `:real_stripe` (nightly, gated by `STRIPE_TEST_SECRET_KEY`) — first `:real_stripe` test ships in Phase 13
+- [Phase 12]: D-09f: use :erlang.float_to_binary with [:compact, {:decimals, 12}] to avoid scientific notation on Stripe decimal fields
 
 ### Pending Todos
 
@@ -88,7 +90,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T01:48:54.623Z
-Stopped at: Completed 12-01-PLAN.md (Wave 0)
+Last session: 2026-04-12T01:53:41.364Z
+Stopped at: Completed 12-02-PLAN.md
 Resume file: None
 Next action: `/gsd-plan-phase 12`
