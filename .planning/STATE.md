@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Billing & Connect
 status: executing
-stopped_at: Completed 12-07-PLAN.md
-last_updated: "2026-04-12T02:17:25.649Z"
-last_activity: 2026-04-12 -- Phase 12 planning complete
+stopped_at: Completed 13-01-PLAN.md
+last_updated: "2026-04-12T03:30:01.284Z"
+last_activity: 2026-04-12
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_plans: 14
+  completed_plans: 9
+  percent: 64
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** v2.0 Billing & Connect — roadmap complete, Phase 12 (Billing Catalog) ready for planning
+**Current focus:** Phase 13 — billing-test-clocks
 
 ## Current Position
 
-Phase: 12 — Billing Catalog (complete, verified)
-Plan: —
-Status: Phase 12 complete — verification PASS
-Last activity: 2026-04-12 -- Phase 12 executed, 7/7 plans, verifier PASS
+Phase: 13 (billing-test-clocks) — EXECUTING
+Plan: 2 of 7
+Status: Ready to execute
+Last activity: 2026-04-12
 Last activity: 2026-04-12
 
 Progress: [██░░░░░░░░░░░░░░░░░░] 1/8 phases (13%) in v2.0 milestone
@@ -58,6 +58,7 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 1/8 pha
 | Phase 12 P02 | 8min | 2 tasks | 2 files |
 | Phase 12 P03 | 142 | 2 tasks | 3 files |
 | Phase 12 P07 | 15m | 2 tasks | 3 files |
+| Phase 13 P01 | 12min | 5 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,8 @@ Recent decisions affecting current work:
 - Two-tier integration test strategy: stripe-mock (always) + `:real_stripe` (nightly, gated by `STRIPE_TEST_SECRET_KEY`) — first `:real_stripe` test ships in Phase 13
 - [Phase 12]: D-09f: use :erlang.float_to_binary with [:compact, {:decimals, 12}] to avoid scientific notation on Stripe decimal fields
 - [Phase 12]: 12-07: PromotionCode ships with 5-op surface (no search, no delete) — absence is the interface; three-identifier moduledoc table distinguishes Coupon.id / PromotionCode.id / PromotionCode.code
+- [Phase 13]: Phase 13-01: rename test-only TestHelpers to TestSupport to free the public namespace for TestHelpers.TestClock submodule
+- [Phase 13]: Phase 13-01: test_clock error context stashed in existing Error :raw_body field (no :details schema change)
 
 ### Pending Todos
 
@@ -93,7 +96,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T02:17:25.647Z
-Stopped at: Completed 12-07-PLAN.md
+Last session: 2026-04-12T03:30:01.281Z
+Stopped at: Completed 13-01-PLAN.md
 Resume file: None
 Next action: `/gsd-plan-phase 12`

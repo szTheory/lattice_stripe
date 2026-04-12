@@ -17,9 +17,9 @@ Promoted from v1's deferred "v2 Requirements" list and expanded with new items s
 
 ### Billing — Testing Infrastructure
 
-- [ ] **BILL-08**: Developer can manage Billing Test Clocks — create, retrieve, list, stream, delete, advance
-- [ ] **BILL-08b**: Developer can await asynchronous clock advancement via an SDK helper (`advance_and_wait/3` or equivalent) with configurable timeout, returning `{:error, :timeout}` on failure
-- [ ] **BILL-08c**: Developer can use a high-level test helper module (`LatticeStripe.Testing.TestClock`) to coordinate test clock + subscription lifecycle fixtures in their own test suite
+- [x] **BILL-08**: Developer can manage Billing Test Clocks — create, retrieve, list, stream, delete, advance
+- [x] **BILL-08b**: Developer can await asynchronous clock advancement via an SDK helper (`advance_and_wait/3` or equivalent) with configurable timeout, returning `{:error, :timeout}` on failure
+- [x] **BILL-08c**: Developer can use a high-level test helper module (`LatticeStripe.Testing.TestClock`) to coordinate test clock + subscription lifecycle fixtures in their own test suite
 
 ### Billing — Invoices
 
@@ -74,8 +74,8 @@ Promoted from v1's deferred "v2 Requirements" list and expanded with new items s
 
 - [ ] **TEST-07**: Integration test tier split — stripe-mock tier (fast, always runs) plus a new real-Stripe-test-mode tier tagged `:real_stripe` and gated by `STRIPE_TEST_SECRET_KEY` env var, running nightly in CI for stateful scenarios stripe-mock cannot simulate (subscription lifecycle, invoice auto-advance, test clock effects, schedule phase transitions)
 - [ ] **TEST-08**: Integration test suite for every new resource passes against stripe-mock via the existing Docker infrastructure
-- [ ] **TEST-09**: `test/support/billing_case.ex` ExUnit CaseTemplate coordinates test clock + customer + subscription fixtures with automatic clock cleanup (internal-only, not shipped in hex docs)
-- [ ] **TEST-10**: `mix lattice_stripe.test_clock.cleanup` Mix task (or equivalent ExUnit helper) lists and deletes test clocks tagged with a test marker metadata key, preventing the 100-clock Stripe account limit from breaking CI
+- [x] **TEST-09**: `test/support/billing_case.ex` ExUnit CaseTemplate coordinates test clock + customer + subscription fixtures with automatic clock cleanup (internal-only, not shipped in hex docs)
+- [x] **TEST-10**: `mix lattice_stripe.test_clock.cleanup` Mix task (or equivalent ExUnit helper) lists and deletes test clocks tagged with a test marker metadata key, preventing the 100-clock Stripe account limit from breaking CI
 
 ### Documentation
 
@@ -104,11 +104,11 @@ Every v2.0 requirement is mapped to exactly one phase. 53 of 53 mapped.
 | BILL-02     | Phase 12 | Complete |
 | BILL-06     | Phase 12 | Complete |
 | BILL-06b    | Phase 12 | Complete |
-| BILL-08     | Phase 13 | Pending |
-| BILL-08b    | Phase 13 | Pending |
-| BILL-08c    | Phase 13 | Pending |
-| TEST-09     | Phase 13 | Pending |
-| TEST-10     | Phase 13 | Pending |
+| BILL-08     | Phase 13 | Complete |
+| BILL-08b    | Phase 13 | Complete |
+| BILL-08c    | Phase 13 | Complete |
+| TEST-09     | Phase 13 | Complete |
+| TEST-10     | Phase 13 | Complete |
 | BILL-04     | Phase 14 | Pending |
 | BILL-04b    | Phase 14 | Pending |
 | BILL-04c    | Phase 14 | Pending |
