@@ -143,11 +143,17 @@ defmodule LatticeStripe.Test.Fixtures.SubscriptionSchedule do
   end
 
   @doc "Wraps `count` schedule fixtures into a Stripe list response."
-  def list_response(count) when is_integer(count) and count >= 0 do
-    items =
-      for i <- 1..max(count, 1)//1, count > 0 do
-        basic(%{"id" => "sub_sched_test#{i}"})
-      end
+  def list_response(0) do
+    %{
+      "object" => "list",
+      "data" => [],
+      "has_more" => false,
+      "url" => "/v1/subscription_schedules"
+    }
+  end
+
+  def list_response(count) when is_integer(count) and count > 0 do
+    items = Enum.map(1..count, fn i -> basic(%{"id" => "sub_sched_test#{i}"}) end)
 
     %{
       "object" => "list",
