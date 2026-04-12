@@ -730,7 +730,8 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
       assert {:error, %Error{type: :test_clock_timeout}} =
                TestClock.advance_and_wait(client, "clock_a", 1_713_086_400, timeout: 0)
 
-      assert_receive {^ref, [:lattice_stripe, :test_clock, :advance_and_wait, :stop], _, stop_meta},
+      assert_receive {^ref, [:lattice_stripe, :test_clock, :advance_and_wait, :stop], _,
+                      stop_meta},
                      500
 
       assert stop_meta.outcome == :ok or stop_meta.outcome == :error

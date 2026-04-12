@@ -4,6 +4,59 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added (Phase 13: Billing Test Clocks)
+
+- `LatticeStripe.TestHelpers.TestClock` — full SDK resource for Stripe's
+  `/v1/test_helpers/test_clocks` API: `create/2`, `retrieve/3`, `list/3`,
+  `stream!/3`, `delete/3`, `advance/4`, and the differentiating
+  `advance_and_wait/4` and `advance_and_wait!/4` helpers that poll until
+  `:ready` with exponential backoff + full jitter (500ms floor), monotonic
+  deadline, and a configurable 60-second default timeout. `advance_and_wait`
+  is not shipped by any other Stripe SDK.
+- `LatticeStripe.Testing.TestClock` — user-facing ExUnit helper library
+  with a compile-time `use`-macro for client binding (Oban.Testing-style),
+  automatic per-test cleanup via a lightweight `Owner` GenServer
+  (Ecto.Sandbox-style `start_owner!` + `on_exit`), `test_clock/1`,
+  `advance/2` (supports `:seconds`, `:minutes`, `:hours`, `:days`, `:to`
+  on Elixir 1.15+), `freeze/1`, `create_customer/3` (auto-injects
+  `test_clock:` to close the silent-correctness footgun), and
+  `with_test_clock/1` setup callback.
+- `LatticeStripe.Error` extended with `:test_clock_timeout` and
+  `:test_clock_failed` types for `advance_and_wait` failure modes. Clock
+  context (`clock_id`, `last_status`, `attempts`, `elapsed_ms`) stored in
+  the existing `:raw_body` field — no schema change.
+- `LatticeStripe.Client` extended with `:idempotency_key_prefix` option
+  for per-environment idempotency key namespacing (backward-compatible,
+  default `nil` preserves the existing `idk_ltc_` prefix).
+- `mix lattice_stripe.test_clock.cleanup` — Mix task backstop for
+  SIGKILL / CI timeout scenarios that bypass `on_exit`. Safe-by-default
+  (`--dry-run true`, `--yes false`); destructive delete requires both
+  `--yes` and `--no-dry-run`. Supports `--older-than` (e.g. `1h`,
+  `24h`), `--client` (module name), stripe-mock detection.
+- `LatticeStripe.Testing.RealStripeCase` — internal CaseTemplate
+  (`test/support/real_stripe_case.ex`, not shipped in Hex) establishing
+  the `:real_stripe` test tier used by phases 14-19. Gates on
+  `STRIPE_TEST_SECRET_KEY`, refuses `sk_live_*` keys as a non-negotiable
+  safety guard, 120-second per-test timeout, `async: false` implicit.
+- First `@moduletag :real_stripe` test in the repo:
+  `test/real_stripe/test_clock_real_stripe_test.exs` — full TestClock
+  round-trip (create, advance 30 days, assert ready, delete) against
+  live Stripe test mode.
+- `.planning/CONVENTIONS.md` — codifies the flat-core / nested-subproduct
+  namespace rule (Phase 17 Connect and future sub-product families will
+  follow it).
+- `CONTRIBUTING.md` — new section documenting the `direnv` + `.envrc`
+  workflow for `STRIPE_TEST_SECRET_KEY`.
+
+### Changed
+
+- `test/support/test_helpers.ex` (internal test-only) renamed to
+  `test/support/test_support.ex`; module name `LatticeStripe.TestHelpers`
+  to `LatticeStripe.TestSupport` to free the `TestHelpers` namespace for
+  the public `LatticeStripe.TestHelpers.TestClock` submodule.
+
 ## [0.2.0](https://github.com/szTheory/lattice_stripe/compare/v0.1.0...v0.2.0) (2026-04-04)
 
 
@@ -67,15 +120,3 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 * skip invalid-id integration tests — stripe-mock returns stubs for any ID ([e986f1b](https://github.com/szTheory/lattice_stripe/commit/e986f1bb67c9bf51602d108ab7d6af23a5323844))
 * update GitHub org from lattice-stripe to szTheory ([ad46956](https://github.com/szTheory/lattice_stripe/commit/ad469565578f4791ba29c6bb46544750bee7018e))
 
-## [Unreleased]
-
-### Added
-
-- Initial release of LatticeStripe
-- Core: Client configuration, transport behaviour, JSON codec, form encoding
-- Resources: Customer, PaymentIntent, SetupIntent, PaymentMethod, Refund, Checkout.Session
-- Webhook signature verification with Phoenix Plug integration
-- Auto-pagination via Elixir Streams
-- Automatic retry with exponential backoff and idempotency keys
-- Telemetry events for request lifecycle monitoring
-- Test helpers for webhook event construction

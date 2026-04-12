@@ -55,6 +55,7 @@ defmodule LatticeStripe.Testing.TestClockTest do
       expect(LatticeStripe.MockTransport, :request, 2, fn req ->
         assert req.method == :delete
         assert req.url =~ ~r|/v1/test_helpers/test_clocks/clock_[ab]|
+
         ok_response(%{
           "id" => "clock_a",
           "object" => "test_helpers.test_clock",

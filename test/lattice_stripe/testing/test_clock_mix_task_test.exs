@@ -53,8 +53,12 @@ defmodule LatticeStripe.Testing.TestClockMixTaskTest do
     test "filters by name_prefix when provided" do
       client = test_client()
       now = System.system_time(:second)
-      matched = clock_json(%{"id" => "clock_a", "created" => now - 7200, "name" => "lattice_stripe_test"})
-      unmatched = clock_json(%{"id" => "clock_b", "created" => now - 7200, "name" => "other_clock"})
+
+      matched =
+        clock_json(%{"id" => "clock_a", "created" => now - 7200, "name" => "lattice_stripe_test"})
+
+      unmatched =
+        clock_json(%{"id" => "clock_b", "created" => now - 7200, "name" => "other_clock"})
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
         ok_response(list_json([matched, unmatched], "/v1/test_helpers/test_clocks"))
@@ -85,7 +89,12 @@ defmodule LatticeStripe.Testing.TestClockMixTaskTest do
       # Delete calls: first succeeds, second fails
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :delete
-        ok_response(%{"id" => "clock_d1", "object" => "test_helpers.test_clock", "deleted" => true})
+
+        ok_response(%{
+          "id" => "clock_d1",
+          "object" => "test_helpers.test_clock",
+          "deleted" => true
+        })
       end)
 
       expect(LatticeStripe.MockTransport, :request, fn req ->

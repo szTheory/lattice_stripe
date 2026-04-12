@@ -260,19 +260,28 @@ defmodule LatticeStripe.Testing.TestClock do
                 "Use `advance(clock, to: DateTime.add(clock_dt, N, :day))` or similar."
 
       true ->
-        delta =
-          cond do
-            n = Keyword.get(unit_opts, :seconds) -> n
-            n = Keyword.get(unit_opts, :minutes) -> n * 60
-            n = Keyword.get(unit_opts, :hours) -> n * 3_600
-            n = Keyword.get(unit_opts, :days) -> n * 86_400
-            true ->
-              raise ArgumentError,
-                    "advance/2 unit_opts must contain one of :seconds, :minutes, :hours, :days, :to " <>
-                      "-- got #{inspect(unit_opts)}"
-          end
+        (clock.frozen_time || System.system_time(:second)) + delta_seconds!(unit_opts)
+    end
+  end
 
-        (clock.frozen_time || System.system_time(:second)) + delta
+  defp delta_seconds!(unit_opts) do
+    cond do
+      n = Keyword.get(unit_opts, :seconds) ->
+        n
+
+      n = Keyword.get(unit_opts, :minutes) ->
+        n * 60
+
+      n = Keyword.get(unit_opts, :hours) ->
+        n * 3_600
+
+      n = Keyword.get(unit_opts, :days) ->
+        n * 86_400
+
+      true ->
+        raise ArgumentError,
+              "advance/2 unit_opts must contain one of :seconds, :minutes, :hours, :days, :to " <>
+                "-- got #{inspect(unit_opts)}"
     end
   end
 

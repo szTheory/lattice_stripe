@@ -337,8 +337,7 @@ defmodule LatticeStripe.Price.Recurring do
   ]
 
   @type t :: %__MODULE__{
-          aggregate_usage:
-            :sum | :last_during_period | :last_ever | :max | String.t() | nil,
+          aggregate_usage: :sum | :last_during_period | :last_ever | :max | String.t() | nil,
           interval: :day | :week | :month | :year | String.t() | nil,
           interval_count: integer() | nil,
           meter: String.t() | nil,

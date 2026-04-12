@@ -103,7 +103,7 @@ defmodule Mix.Tasks.LatticeStripe.TestClock.Cleanup do
     end
 
     cond do
-      length(candidates) == 0 ->
+      candidates == [] ->
         Mix.shell().info("Nothing to clean up.")
 
       dry_run ->
