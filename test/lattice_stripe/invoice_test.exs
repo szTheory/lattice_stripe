@@ -633,6 +633,194 @@ defmodule LatticeStripe.InvoiceTest do
   end
 
   # ---------------------------------------------------------------------------
+  # upcoming/3
+  # ---------------------------------------------------------------------------
+
+  describe "upcoming/3" do
+    test "sends GET /v1/invoices/upcoming and returns {:ok, %Invoice{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert req.url =~ "/v1/invoices/upcoming"
+        ok_response(invoice_json(%{"id" => nil, "status" => "draft"}))
+      end)
+
+      assert {:ok, %Invoice{id: nil}} =
+               Invoice.upcoming(client, %{"customer" => "cus_test123"})
+    end
+
+    test "returns proration error when require_explicit_proration is true and proration_behavior missing" do
+      client = test_client(require_explicit_proration: true)
+
+      assert {:error, %Error{type: :proration_required}} =
+               Invoice.upcoming(client, %{"customer" => "cus_test123"})
+    end
+
+    test "succeeds when require_explicit_proration is true and proration_behavior is present" do
+      client = test_client(require_explicit_proration: true)
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert req.url =~ "/v1/invoices/upcoming"
+        ok_response(invoice_json(%{"id" => nil}))
+      end)
+
+      assert {:ok, %Invoice{}} =
+               Invoice.upcoming(client, %{
+                 "customer" => "cus_test123",
+                 "proration_behavior" => "none"
+               })
+    end
+  end
+
+  describe "upcoming!/3" do
+    test "returns %Invoice{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(invoice_json(%{"id" => nil}))
+      end)
+
+      assert %Invoice{} = Invoice.upcoming!(client, %{"customer" => "cus_test123"})
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # create_preview/3
+  # ---------------------------------------------------------------------------
+
+  describe "create_preview/3" do
+    test "sends POST /v1/invoices/create_preview and returns {:ok, %Invoice{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/create_preview")
+        ok_response(invoice_json(%{"id" => nil}))
+      end)
+
+      assert {:ok, %Invoice{id: nil}} =
+               Invoice.create_preview(client, %{"customer" => "cus_test123"})
+    end
+
+    test "returns proration error when require_explicit_proration is true and proration_behavior missing" do
+      client = test_client(require_explicit_proration: true)
+
+      assert {:error, %Error{type: :proration_required}} =
+               Invoice.create_preview(client, %{"customer" => "cus_test123"})
+    end
+
+    test "succeeds when require_explicit_proration is true and proration_behavior is present" do
+      client = test_client(require_explicit_proration: true)
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/create_preview")
+        ok_response(invoice_json(%{"id" => nil}))
+      end)
+
+      assert {:ok, %Invoice{}} =
+               Invoice.create_preview(client, %{
+                 "customer" => "cus_test123",
+                 "proration_behavior" => "create_prorations"
+               })
+    end
+  end
+
+  describe "create_preview!/3" do
+    test "returns %Invoice{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(invoice_json(%{"id" => nil}))
+      end)
+
+      assert %Invoice{} = Invoice.create_preview!(client, %{"customer" => "cus_test123"})
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # upcoming_lines/3
+  # ---------------------------------------------------------------------------
+
+  describe "upcoming_lines/3" do
+    test "sends GET /v1/invoices/upcoming/lines and returns {:ok, %Response{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert req.url =~ "/v1/invoices/upcoming/lines"
+        ok_response(list_json([], "/v1/invoices/upcoming/lines"))
+      end)
+
+      assert {:ok, %Response{data: %List{}}} =
+               Invoice.upcoming_lines(client, %{"customer" => "cus_test123"})
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # create_preview_lines/3
+  # ---------------------------------------------------------------------------
+
+  describe "create_preview_lines/3" do
+    test "sends POST /v1/invoices/create_preview/lines and returns {:ok, %Response{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/invoices/create_preview/lines")
+        ok_response(list_json([], "/v1/invoices/create_preview/lines"))
+      end)
+
+      assert {:ok, %Response{data: %List{}}} =
+               Invoice.create_preview_lines(client, %{"customer" => "cus_test123"})
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # list_line_items/4
+  # ---------------------------------------------------------------------------
+
+  describe "list_line_items/4" do
+    test "sends GET /v1/invoices/:id/lines and returns {:ok, %Response{}}" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert String.ends_with?(req.url, "/v1/invoices/in_test1234567890/lines")
+        ok_response(list_json([], "/v1/invoices/in_test1234567890/lines"))
+      end)
+
+      assert {:ok, %Response{data: %List{}}} =
+               Invoice.list_line_items(client, "in_test1234567890")
+    end
+
+    test "includes invoice_id in path" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.url =~ "/v1/invoices/in_other_id/lines"
+        ok_response(list_json([], "/v1/invoices/in_other_id/lines"))
+      end)
+
+      assert {:ok, %Response{}} = Invoice.list_line_items(client, "in_other_id")
+    end
+  end
+
+  describe "list_line_items!/4" do
+    test "returns %Response{} on success" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(list_json([], "/v1/invoices/in_test1234567890/lines"))
+      end)
+
+      assert %Response{} = Invoice.list_line_items!(client, "in_test1234567890")
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Inspect
   # ---------------------------------------------------------------------------
 

@@ -54,7 +54,7 @@ defmodule LatticeStripe.Invoice do
   object reference and available parameters.
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Billing, Client, Error, List, Request, Resource, Response}
   alias LatticeStripe.Invoice.{AutomaticTax, LineItem, StatusTransitions}
 
   # Known top-level fields from the Stripe Invoice object.
@@ -633,6 +633,224 @@ defmodule LatticeStripe.Invoice do
   def search_stream!(%Client{} = client, params \\ %{}, opts \\ []) do
     req = %Request{method: :get, path: "/v1/invoices/search", params: params, opts: opts}
     List.stream!(client, req) |> Stream.map(&from_map/1)
+  end
+
+  # ---------------------------------------------------------------------------
+  # Public API: Preview endpoints
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Retrieves an upcoming invoice preview.
+
+  Returns a `%Invoice{id: nil}` representing what the next invoice will look like.
+  Useful for previewing proration impact before confirming a subscription change.
+
+  ## Parameters
+
+  Pass params as a map with keys like `"customer"`, `"subscription"`,
+  `"subscription_items"`, `"subscription_proration_behavior"`, etc.
+
+  ## Example
+
+      Invoice.upcoming(client, %{
+        "customer" => "cus_xxx",
+        "subscription" => "sub_xxx",
+        "subscription_items" => [%{"id" => "si_xxx", "price" => "price_new"}],
+        "subscription_proration_behavior" => "create_prorations"
+      })
+
+  > #### Deprecation Notice {: .info}
+  >
+  > Stripe is deprecating this endpoint in favor of `create_preview/3`.
+  > Use `create_preview/3` for new integrations.
+
+  ## Proration Guard
+
+  If `client.require_explicit_proration` is `true`, `"proration_behavior"` must
+  be present in params or `{:error, %Error{type: :proration_required}}` is returned.
+  """
+  @spec upcoming(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def upcoming(%Client{} = client, params \\ %{}, opts \\ []) do
+    with :ok <- Billing.Guards.check_proration_required(client, params) do
+      %Request{method: :get, path: "/v1/invoices/upcoming", params: params, opts: opts}
+      |> then(&Client.request(client, &1))
+      |> Resource.unwrap_singular(&from_map/1)
+    end
+  end
+
+  @doc "Like `upcoming/3` but raises `LatticeStripe.Error` on failure."
+  @spec upcoming!(Client.t(), map(), keyword()) :: t()
+  def upcoming!(%Client{} = client, params \\ %{}, opts \\ []),
+    do: client |> upcoming(params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Creates an invoice preview.
+
+  Replacement for the legacy `upcoming/3` endpoint. Returns `%Invoice{id: nil}`.
+
+  ## Parameters
+
+  Pass params as a map with keys like `"customer"`, `"subscription"`,
+  `"subscription_items"`, `"subscription_proration_behavior"`, etc.
+
+  ## Example
+
+      Invoice.create_preview(client, %{
+        "customer" => "cus_xxx",
+        "subscription_details" => %{
+          "items" => [%{"id" => "si_xxx", "price" => "price_new"}],
+          "proration_behavior" => "create_prorations"
+        }
+      })
+
+  ## Proration Guard
+
+  If `client.require_explicit_proration` is `true`, `"proration_behavior"` must
+  be present in params or `{:error, %Error{type: :proration_required}}` is returned.
+  """
+  @spec create_preview(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def create_preview(%Client{} = client, params \\ %{}, opts \\ []) do
+    with :ok <- Billing.Guards.check_proration_required(client, params) do
+      %Request{method: :post, path: "/v1/invoices/create_preview", params: params, opts: opts}
+      |> then(&Client.request(client, &1))
+      |> Resource.unwrap_singular(&from_map/1)
+    end
+  end
+
+  @doc "Like `create_preview/3` but raises `LatticeStripe.Error` on failure."
+  @spec create_preview!(Client.t(), map(), keyword()) :: t()
+  def create_preview!(%Client{} = client, params \\ %{}, opts \\ []),
+    do: client |> create_preview(params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Retrieves line items for an upcoming invoice preview.
+
+  Returns paginated `%Invoice.LineItem{}` structs for the upcoming invoice.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `params` - Map with `"customer"` and optional subscription params
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Response{data: %List{data: [%Invoice.LineItem{}, ...]}}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec upcoming_lines(Client.t(), map(), keyword()) ::
+          {:ok, Response.t()} | {:error, Error.t()}
+  def upcoming_lines(%Client{} = client, params \\ %{}, opts \\ []) do
+    %Request{method: :get, path: "/v1/invoices/upcoming/lines", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_list(&LineItem.from_map/1)
+  end
+
+  @doc """
+  Retrieves line items for a create_preview invoice.
+
+  Returns paginated `%Invoice.LineItem{}` structs for the preview invoice.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `params` - Map with `"customer"` and optional subscription params
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Response{data: %List{data: [%Invoice.LineItem{}, ...]}}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec create_preview_lines(Client.t(), map(), keyword()) ::
+          {:ok, Response.t()} | {:error, Error.t()}
+  def create_preview_lines(%Client{} = client, params \\ %{}, opts \\ []) do
+    %Request{
+      method: :post,
+      path: "/v1/invoices/create_preview/lines",
+      params: params,
+      opts: opts
+    }
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_list(&LineItem.from_map/1)
+  end
+
+  # ---------------------------------------------------------------------------
+  # Public API: Line item access
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Lists line items for a specific invoice.
+
+  Returns paginated line items rendered on the invoice. For draft invoices,
+  these reflect the current InvoiceItems. For finalized invoices, these are
+  locked.
+
+  ## Example
+
+      {:ok, response} = Invoice.list_line_items(client, "in_xxx")
+      line_items = response.data.data  # [%Invoice.LineItem{}, ...]
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `invoice_id` - The invoice ID string
+  - `params` - Optional pagination params
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Response{data: %List{data: [%Invoice.LineItem{}, ...]}}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec list_line_items(Client.t(), String.t(), map(), keyword()) ::
+          {:ok, Response.t()} | {:error, Error.t()}
+  def list_line_items(%Client{} = client, invoice_id, params \\ %{}, opts \\ [])
+      when is_binary(invoice_id) do
+    %Request{
+      method: :get,
+      path: "/v1/invoices/#{invoice_id}/lines",
+      params: params,
+      opts: opts
+    }
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_list(&LineItem.from_map/1)
+  end
+
+  @doc "Like `list_line_items/4` but raises `LatticeStripe.Error` on failure."
+  @spec list_line_items!(Client.t(), String.t(), map(), keyword()) :: Response.t()
+  def list_line_items!(%Client{} = client, invoice_id, params \\ %{}, opts \\ [])
+      when is_binary(invoice_id),
+      do: client |> list_line_items(invoice_id, params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Returns a lazy stream of all line items for a specific invoice (auto-pagination).
+
+  Emits individual `%Invoice.LineItem{}` structs, fetching additional pages as needed.
+  Raises `LatticeStripe.Error` if any page fetch fails.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `invoice_id` - The invoice ID string
+  - `params` - Optional pagination params
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  An `Enumerable.t()` of `%Invoice.LineItem{}` structs.
+  """
+  @spec stream_line_items!(Client.t(), String.t(), map(), keyword()) :: Enumerable.t()
+  def stream_line_items!(%Client{} = client, invoice_id, params \\ %{}, opts \\ [])
+      when is_binary(invoice_id) do
+    req = %Request{
+      method: :get,
+      path: "/v1/invoices/#{invoice_id}/lines",
+      params: params,
+      opts: opts
+    }
+
+    List.stream!(client, req) |> Stream.map(&LineItem.from_map/1)
   end
 
   # ---------------------------------------------------------------------------
