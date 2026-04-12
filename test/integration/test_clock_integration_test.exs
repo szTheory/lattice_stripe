@@ -29,8 +29,8 @@ defmodule LatticeStripe.Integration.TestClockTest do
   describe "TestClock CRUD round-trip against stripe-mock" do
     # NOTE: DO NOT assert polling/advance semantics here.
     # stripe-mock returns a static fixture for /advance, so the polling loop
-    # is never exercised. advance/4 + advance_and_wait/4 polling is covered
-    # by Mox unit tests in Plan 13-04 and the :real_stripe test in Plan 13-06.
+    # is never exercised. Polling (advance + polling helper) is covered by
+    # Mox unit tests in Plan 13-04 and the :real_stripe test in Plan 13-06.
 
     test "create → retrieve → list → delete", %{client: client} do
       frozen = System.system_time(:second)
