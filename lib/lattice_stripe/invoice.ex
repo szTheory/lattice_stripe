@@ -1063,7 +1063,7 @@ defmodule LatticeStripe.Invoice do
     end)
   end
 
-  defp parse_lines(_), do: nil
+  defp parse_lines(other), do: other
 end
 
 defimpl Inspect, for: LatticeStripe.Invoice do
