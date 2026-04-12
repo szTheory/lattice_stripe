@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Billing & Connect
 status: executing
-stopped_at: Completed 13-05-PLAN.md
-last_updated: "2026-04-12T04:03:56.607Z"
+stopped_at: Completed 13-06-PLAN.md
+last_updated: "2026-04-12T04:09:30.050Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 7
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 14
-  completed_plans: 13
-  percent: 93
+  completed_plans: 14
+  percent: 100
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 ## Current Position
 
 Phase: 13 (billing-test-clocks) — EXECUTING
-Plan: 6 of 7
+Plan: 7 of 7
 Status: Ready to execute
 Last activity: 2026-04-12
 Last activity: 2026-04-12
@@ -63,6 +63,7 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 1/8 pha
 | Phase 13 P03 | 8min | 2 tasks | 4 files |
 | Phase 13 P04 | 14min | 2 tasks | 2 files |
 | Phase 13 P05 | 18min | 3 tasks | 7 files |
+| Phase 13 P06 | 5min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,7 @@ Recent decisions affecting current work:
 - [Phase 13]: Phase 13-04: advance_and_wait errors use string-keyed raw_body (clock_id, last_status, attempts, elapsed_ms) for consistency with Error.from_response
 - [Phase 13]: Phase 13-05: A-13g metadata fallback — cleanup uses age-based filtering + name_prefix instead of metadata marker (Stripe doesn't support metadata on test clocks)
 - [Phase 13]: Phase 13-05: Mix task requires both --no-dry-run and --yes for destructive delete (threat T-13-15)
+- [Phase 13]: Phase 13-06: RealStripeCase uses start_supervised Finch pool (LatticeStripe.RealStripeFinch) matching integration test convention
 
 ### Pending Todos
 
@@ -108,7 +110,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T04:03:56.604Z
-Stopped at: Completed 13-05-PLAN.md
+Last session: 2026-04-12T04:09:30.048Z
+Stopped at: Completed 13-06-PLAN.md
 Resume file: None
 Next action: `/gsd-plan-phase 12`

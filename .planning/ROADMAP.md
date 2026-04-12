@@ -31,7 +31,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 v2.0 is a pure resource-surface milestone on top of the v1 foundation — zero new runtime dependencies, zero behaviour additions, zero modifications to HTTP/retry/pagination primitives. Build order is strictly topological: Billing catalog → test clocks (pulled forward) → invoices → subscriptions (with proration discipline) → schedules → Connect accounts → Connect money → cross-cutting polish. Optional v0.3.0-rc1 cut at the Phase 16 boundary; v0.3.0 final after Phase 19.
 
 - [x] **Phase 12: Billing Catalog** — Products, Prices, Coupons, PromotionCodes (+ FormEncoder battery for triple-nested shapes) (completed 2026-04-12)
-- [ ] **Phase 13: Billing Test Clocks** — TestClock resource, `advance_and_wait/3`, `Testing.TestClock` helper, cleanup Mix task, first `:real_stripe` tier tests
+- [x] **Phase 13: Billing Test Clocks** — TestClock resource, `advance_and_wait/3`, `Testing.TestClock` helper, cleanup Mix task, first `:real_stripe` tier tests (completed 2026-04-12)
 - [ ] **Phase 14: Invoices & Invoice Line Items** — Full Invoice CRUD + action verbs (finalize/void/pay/send/mark_uncollectible) + `upcoming/2` preview + auto-advance race mitigation
 - [ ] **Phase 15: Subscriptions & Subscription Items** — Full subscription lifecycle + `ProrationBehavior` validator + `require_explicit_proration` client flag + state machine docs
 - [ ] **Phase 16: Subscription Schedules** — Schedule CRUD + release vs cancel semantics + schedule-owned subscription warnings + v0.3.0-rc1 cut decision
@@ -162,7 +162,7 @@ Plans:
 | 10. Documentation & Guides                | v1.0      | 4/4            | Complete    | 2026-04-03 |
 | 11. CI/CD & Release                       | v1.0      | 3/3            | Complete    | 2026-04-04 |
 | 12. Billing Catalog                       | v2.0      | 7/7 | Complete   | 2026-04-12 |
-| 13. Billing Test Clocks                   | v2.0      | 6/7 | In Progress|  |
+| 13. Billing Test Clocks                   | v2.0      | 7/7 | Complete   | 2026-04-12 |
 | 14. Invoices & Invoice Line Items         | v2.0      | 0/0            | Not started | -          |
 | 15. Subscriptions & Subscription Items    | v2.0      | 0/0            | Not started | -          |
 | 16. Subscription Schedules                | v2.0      | 0/0            | Not started | -          |
