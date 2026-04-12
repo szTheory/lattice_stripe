@@ -133,6 +133,25 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
 
       assert %SubscriptionSchedule{} = SubscriptionSchedule.create!(client, %{})
     end
+
+    test "create/3 does NOT invoke Billing.Guards even with strict client" do
+      # Strict client + no proration_behavior + create succeeds (Transport IS called).
+      # This proves the guard is NOT wired into create/3 per D4 — Stripe does not
+      # accept proration_behavior on POST /v1/subscription_schedules.
+      client = test_client(require_explicit_proration: true)
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/subscription_schedules")
+        ok_response(Fixtures.basic())
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.create(client, %{
+                 "customer" => "cus_test123",
+                 "phases" => [%{"items" => [%{"price" => "price_1"}]}]
+               })
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -214,6 +233,63 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
 
       assert %SubscriptionSchedule{} =
                SubscriptionSchedule.update!(client, "sub_sched_test1234567890", %{})
+    end
+  end
+
+  describe "update/4 proration guard" do
+    test "strict client + phases[] without proration_behavior returns error without hitting Transport" do
+      client = test_client(require_explicit_proration: true)
+      params = %{"phases" => [%{"items" => [%{"price" => "price_1", "quantity" => 1}]}]}
+
+      # Mox: zero expectations registered → any call to MockTransport flunks via verify_on_exit!
+      assert {:error, %Error{type: :proration_required}} =
+               SubscriptionSchedule.update(client, "sub_sched_1", params, [])
+    end
+
+    test "strict client + phases[].proration_behavior present reaches Transport" do
+      client = test_client(require_explicit_proration: true)
+
+      params = %{
+        "phases" => [
+          %{
+            "items" => [%{"price" => "price_1"}],
+            "proration_behavior" => "create_prorations"
+          }
+        ]
+      }
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/subscription_schedules/sub_sched_1")
+        ok_response(Fixtures.basic())
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.update(client, "sub_sched_1", params, [])
+    end
+
+    test "strict client + top-level proration_behavior present reaches Transport" do
+      client = test_client(require_explicit_proration: true)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Fixtures.basic())
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.update(client, "sub_sched_1", %{"proration_behavior" => "none"})
+    end
+
+    test "permissive client (default) reaches Transport without proration_behavior" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Fixtures.basic())
+      end)
+
+      assert {:ok, %SubscriptionSchedule{}} =
+               SubscriptionSchedule.update(client, "sub_sched_1", %{
+                 "metadata" => %{"k" => "v"}
+               })
     end
   end
 
