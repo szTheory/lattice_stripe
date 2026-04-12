@@ -53,6 +53,7 @@ defmodule LatticeStripe.Client do
     :api_key,
     :finch,
     :stripe_account,
+    :idempotency_key_prefix,
     base_url: "https://api.stripe.com",
     api_version: "2026-03-25.dahlia",
     transport: LatticeStripe.Transport.Finch,
@@ -72,6 +73,7 @@ defmodule LatticeStripe.Client do
   - `api_key` - Stripe secret key (`sk_test_...` or `sk_live_...`)
   - `finch` - Name of the Finch pool started in your supervision tree
   - `stripe_account` - Connected account ID for Stripe Connect platforms, or `nil`
+  - `idempotency_key_prefix` - Optional string prefix for auto-generated idempotency keys, or `nil`
   - `base_url` - Stripe API base URL (default: `"https://api.stripe.com"`)
   - `api_version` - Stripe API version header (default: `"2026-03-25.dahlia"`)
   - `transport` - Transport module implementing `LatticeStripe.Transport`
@@ -85,6 +87,7 @@ defmodule LatticeStripe.Client do
           api_key: String.t(),
           finch: atom(),
           stripe_account: String.t() | nil,
+          idempotency_key_prefix: String.t() | nil,
           base_url: String.t(),
           api_version: String.t(),
           transport: module(),
@@ -178,7 +181,7 @@ defmodule LatticeStripe.Client do
 
     # Resolve idempotency key ONCE before retry loop so all retry attempts share the same key (D-21).
     # Auto-generate for POST requests; user-provided key takes precedence (D-18, D-19).
-    idempotency_key = resolve_idempotency_key(req.method, req.opts)
+    idempotency_key = resolve_idempotency_key(client, req.method, req.opts)
 
     params = merge_expand(req.params, expand)
 
@@ -241,21 +244,23 @@ defmodule LatticeStripe.Client do
 
   # Resolve the idempotency key for a request.
   # User-provided key takes precedence. Auto-generates for POST only (D-18, D-19).
-  defp resolve_idempotency_key(method, opts) do
+  # Client's `idempotency_key_prefix` (A-13client) replaces the default
+  # `idk_ltc_` prefix when set — useful for :real_stripe tests that need
+  # per-test-run uniqueness on replay.
+  defp resolve_idempotency_key(%__MODULE__{} = client, method, opts) do
     user_key = Keyword.get(opts, :idempotency_key)
 
     cond do
       user_key != nil -> user_key
-      method == :post -> generate_idempotency_key()
+      method == :post -> generate_idempotency_key(client.idempotency_key_prefix)
       true -> nil
     end
   end
 
-  # Generate a UUID v4 with the idk_ltc_ prefix (D-19, D-20).
+  # Generate a UUID v4 with the configured prefix (D-19, D-20, A-13client).
   # Uses :crypto.strong_rand_bytes/1 — same approach as Ecto.UUID.
-  defp generate_idempotency_key do
-    "idk_ltc_" <> uuid4()
-  end
+  defp generate_idempotency_key(nil), do: "idk_ltc_" <> uuid4()
+  defp generate_idempotency_key(prefix) when is_binary(prefix), do: prefix <> uuid4()
 
   defp uuid4 do
     <<a::48, _::4, b::12, _::2, c::62>> = :crypto.strong_rand_bytes(16)
