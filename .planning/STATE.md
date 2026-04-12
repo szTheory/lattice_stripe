@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Billing & Connect
 status: executing
-stopped_at: Completed 12-03-PLAN.md
-last_updated: "2026-04-12T01:58:28.194Z"
+stopped_at: Completed 12-07-PLAN.md
+last_updated: "2026-04-12T02:17:25.649Z"
 last_activity: 2026-04-12 -- Phase 12 planning complete
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 7
-  completed_plans: 3
-  percent: 43
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0/8 pha
 | Phase 12 P01 | 97 | 1 tasks | 11 files |
 | Phase 12 P02 | 8min | 2 tasks | 2 files |
 | Phase 12 P03 | 142 | 2 tasks | 3 files |
+| Phase 12 P07 | 15m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,7 @@ Recent decisions affecting current work:
 - Zero new runtime dependencies, zero behaviour additions, zero modifications to v1 HTTP/retry/pagination primitives
 - Two-tier integration test strategy: stripe-mock (always) + `:real_stripe` (nightly, gated by `STRIPE_TEST_SECRET_KEY`) — first `:real_stripe` test ships in Phase 13
 - [Phase 12]: D-09f: use :erlang.float_to_binary with [:compact, {:decimals, 12}] to avoid scientific notation on Stripe decimal fields
+- [Phase 12]: 12-07: PromotionCode ships with 5-op surface (no search, no delete) — absence is the interface; three-identifier moduledoc table distinguishes Coupon.id / PromotionCode.id / PromotionCode.code
 
 ### Pending Todos
 
@@ -91,7 +93,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T01:58:24.812Z
-Stopped at: Completed 12-03-PLAN.md
+Last session: 2026-04-12T02:17:25.647Z
+Stopped at: Completed 12-07-PLAN.md
 Resume file: None
 Next action: `/gsd-plan-phase 12`
