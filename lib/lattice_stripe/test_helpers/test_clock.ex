@@ -53,15 +53,27 @@ defmodule LatticeStripe.TestHelpers.TestClock do
 
   ## Typical usage
 
-  This module's functions land in subsequent plans (CRUD in Plan 13-03,
-  advance/advance_and_wait in Plan 13-04). After those plans ship:
-
       {:ok, clock} = LatticeStripe.TestHelpers.TestClock.create(client, %{frozen_time: System.system_time(:second)})
-      {:ok, ready} = LatticeStripe.TestHelpers.TestClock.advance_and_wait(client, clock.id, System.system_time(:second) + 86400 * 30)
+      {:ok, clock} = LatticeStripe.TestHelpers.TestClock.retrieve(client, clock.id)
+      {:ok, _}     = LatticeStripe.TestHelpers.TestClock.delete(client, clock.id)
+
+  The `advance/4` and `advance_and_wait/4` functions land in Plan 13-04.
 
   For a high-level ExUnit experience (automatic cleanup, setup callbacks,
   customer linkage), use `LatticeStripe.Testing.TestClock` instead.
+
+  ## Operations not supported by the Stripe API
+
+  - **update** — Stripe Test Clocks are immutable after creation. To
+    advance their time, use `advance/4` (lands in Plan 13-04). To change
+    metadata or name, delete and re-create.
+  - **search** — Stripe's Test Clock API does not expose a `/search`
+    endpoint. Use `list/3` with client-side filtering if needed.
   """
+
+  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+
+  @path "/v1/test_helpers/test_clocks"
 
   # Known top-level fields from the Stripe test_helpers.test_clock object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -140,4 +152,96 @@ defmodule LatticeStripe.TestHelpers.TestClock do
   defp atomize_status(nil), do: nil
   defp atomize_status(other) when is_binary(other), do: other
   defp atomize_status(other), do: other
+
+  # ---------------------------------------------------------------------------
+  # CRUD
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Creates a new Stripe Test Clock.
+
+  Sends `POST /v1/test_helpers/test_clocks` with the given params and returns
+  the new clock as a typed `t()`.
+
+  ## Parameters
+
+  - `client` — A `%LatticeStripe.Client{}` struct.
+  - `params` — Map of Stripe API params. Required: `:frozen_time` (integer unix
+    timestamp). Optional: `:name` (string). Note: `:metadata` is NOT accepted
+    by the Stripe Test Clock API (see "Metadata support" above).
+  - `opts` — Per-request overrides (e.g., `:idempotency_key`).
+
+  ## Example
+
+      {:ok, clock} = LatticeStripe.TestHelpers.TestClock.create(client, %{
+        frozen_time: System.system_time(:second),
+        name: "renewal-test"
+      })
+  """
+  @spec create(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def create(%Client{} = client, params \\ %{}, opts \\ []) do
+    %Request{method: :post, path: @path, params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Retrieves a Test Clock by id. GET /v1/test_helpers/test_clocks/:id."
+  @spec retrieve(Client.t(), String.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def retrieve(%Client{} = client, id, opts \\ []) when is_binary(id) do
+    %Request{method: :get, path: "#{@path}/#{id}", params: %{}, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Lists Test Clocks with optional filters. GET /v1/test_helpers/test_clocks."
+  @spec list(Client.t(), map(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
+  def list(%Client{} = client, params \\ %{}, opts \\ []) do
+    %Request{method: :get, path: @path, params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_list(&from_map/1)
+  end
+
+  @doc """
+  Streams Test Clocks lazily via cursor pagination.
+
+  Returns a `Stream` that yields `%TestClock{}` items. Matches the
+  Phase 12 resource pattern (`LatticeStripe.List.stream!/2` + `Stream.map`).
+  """
+  @spec stream!(Client.t(), map(), keyword()) :: Enumerable.t()
+  def stream!(%Client{} = client, params \\ %{}, opts \\ []) do
+    req = %Request{method: :get, path: @path, params: params, opts: opts}
+    List.stream!(client, req) |> Stream.map(&from_map/1)
+  end
+
+  @doc """
+  Deletes a Test Clock by id. DELETE /v1/test_helpers/test_clocks/:id.
+
+  **This cascades**: every Customer attached to the clock is deleted, every
+  Subscription canceled. See module docs.
+  """
+  @spec delete(Client.t(), String.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def delete(%Client{} = client, id, opts \\ []) when is_binary(id) do
+    %Request{method: :delete, path: "#{@path}/#{id}", params: %{}, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  # ---------------------------------------------------------------------------
+  # Bang variants
+  # ---------------------------------------------------------------------------
+
+  def create!(%Client{} = c, p \\ %{}, o \\ []),
+    do: create(c, p, o) |> Resource.unwrap_bang!()
+
+  def retrieve!(%Client{} = c, id, o \\ []) when is_binary(id),
+    do: retrieve(c, id, o) |> Resource.unwrap_bang!()
+
+  def list!(%Client{} = c, p \\ %{}, o \\ []),
+    do: list(c, p, o) |> Resource.unwrap_bang!()
+
+  def delete!(%Client{} = c, id, o \\ []) when is_binary(id),
+    do: delete(c, id, o) |> Resource.unwrap_bang!()
+
+  # NOTE: NO update/3,4 and NO search/2,3 — Stripe Test Clock API absence.
+  # NO advance/4 or advance_and_wait/4 yet — lands in Plan 13-04.
 end
