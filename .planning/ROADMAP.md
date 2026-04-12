@@ -82,7 +82,14 @@ Plans:
   3. Developer can list Invoice Line Items for an invoice and also read them off an `Invoice` struct's typed `:lines` field — no raw map access required
   4. When `auto_advance` is omitted on `Invoice.create/2`, a telemetry event fires warning of the ~1h auto-finalization window, and the Invoice guide documents the canonical `create → add_invoice_items → finalize → pay` order (C4 mitigation)
   5. Developer who calls `Invoice.upcoming/2` or any other mutation path while `require_explicit_proration: true` is set gets a typed `{:error, %Error{type: :proration_required}}` instead of Stripe's endpoint-dependent default (C1 mitigation, forward-wired from Phase 15)
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Foundation: typed nested structs (StatusTransitions, AutomaticTax, LineItem, Period) + Billing.Guards + Client require_explicit_proration
+- [ ] 14-02-PLAN.md — Invoice struct + CRUD + InvoiceItem struct + CRUD with atomization and nested parsing
+- [ ] 14-03-PLAN.md — Invoice action verbs (finalize/void/pay/send_invoice/mark_uncollectible) + search + upcoming/create_preview + list_line_items
+- [ ] 14-04-PLAN.md — Auto-advance telemetry in Invoice.create + stripe-mock integration tests for Invoice and InvoiceItem
+- [ ] 14-05-PLAN.md — guides/invoices.md comprehensive workflow guide + mix.exs ExDoc config
 
 ### Phase 15: Subscriptions & Subscription Items
 **Goal**: Developers can manage the full subscription lifecycle with proration discipline and a documented state machine — the semantics-heavy center of the milestone
@@ -163,7 +170,7 @@ Plans:
 | 11. CI/CD & Release                       | v1.0      | 3/3            | Complete    | 2026-04-04 |
 | 12. Billing Catalog                       | v2.0      | 7/7 | Complete   | 2026-04-12 |
 | 13. Billing Test Clocks                   | v2.0      | 8/7 | Complete    | 2026-04-12 |
-| 14. Invoices & Invoice Line Items         | v2.0      | 0/0            | Not started | -          |
+| 14. Invoices & Invoice Line Items         | v2.0      | 0/5            | Planned     | -          |
 | 15. Subscriptions & Subscription Items    | v2.0      | 0/0            | Not started | -          |
 | 16. Subscription Schedules                | v2.0      | 0/0            | Not started | -          |
 | 17. Connect Accounts & Links              | v2.0      | 0/0            | Not started | -          |
