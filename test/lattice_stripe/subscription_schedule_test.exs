@@ -34,7 +34,8 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
     test "decodes current_phase as %CurrentPhase{}" do
       sched = SubscriptionSchedule.from_map(Fixtures.basic())
 
-      assert %CurrentPhase{start_date: 1_700_000_000, end_date: 1_702_678_400} = sched.current_phase
+      assert %CurrentPhase{start_date: 1_700_000_000, end_date: 1_702_678_400} =
+               sched.current_phase
     end
 
     test "decodes default_settings as %Phase{} with nil timeline fields" do
@@ -310,12 +311,16 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
       assert inspected =~ "has_subscription?: false"
     end
 
-    test "shows extra only when non-empty" do
+    test "shows top-level extra only when non-empty" do
+      # The nested current_phase's default-derived Inspect emits its own
+      # `extra: %{}` even when empty. Only the top-level Inspect should
+      # suppress an empty :extra. Anchor on "phase_count: N>" (with no
+      # trailing extra) vs "phase_count: N, extra:".
       sched_no_extra = SubscriptionSchedule.from_map(Fixtures.basic())
-      refute inspect(sched_no_extra) =~ "extra:"
+      refute inspect(sched_no_extra) =~ ~r/phase_count: \d+, extra:/
 
       sched_extra = SubscriptionSchedule.from_map(Fixtures.basic(%{"future_field" => "hello"}))
-      assert inspect(sched_extra) =~ "extra:"
+      assert inspect(sched_extra) =~ ~r/phase_count: \d+, extra:/
     end
   end
 end
