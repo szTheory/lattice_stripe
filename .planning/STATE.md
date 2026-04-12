@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Billing & Connect
 status: executing
-stopped_at: Completed 13-03-PLAN.md
-last_updated: "2026-04-12T03:41:12.627Z"
+stopped_at: Completed 13-04-PLAN.md
+last_updated: "2026-04-12T03:48:03.014Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 14
-  completed_plans: 11
-  percent: 79
+  completed_plans: 12
+  percent: 86
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 ## Current Position
 
 Phase: 13 (billing-test-clocks) — EXECUTING
-Plan: 4 of 7
+Plan: 5 of 7
 Status: Ready to execute
 Last activity: 2026-04-12
 Last activity: 2026-04-12
@@ -61,6 +61,7 @@ Progress: [██░░░░░░░░░░░░░░░░░░] 1/8 pha
 | Phase 13 P01 | 12min | 5 tasks | 19 files |
 | Phase 13 P02 | 9min | 2 tasks | 2 files |
 | Phase 13 P03 | 8min | 2 tasks | 4 files |
+| Phase 13 P04 | 14min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Recent decisions affecting current work:
 - [Phase 13]: Phase 13-02: TestHelpers.TestClock struct intentionally omits :metadata field, reflecting Stripe's actual API surface.
 - [Phase 13]: Phase 13-03: TestClock CRUD modeled on Coupon template (no update, no search — closest surface match)
 - [Phase 13]: Phase 13-03: Integration test asserts request+response shape only; polling deferred to Plan 13-04 Mox + Plan 13-06 :real_stripe (Pitfall 4)
+- [Phase 13]: Phase 13-04: backoff state bundled into a map to keep poll_until_ready under Credo max arity, preserving readable recursive call site
+- [Phase 13]: Phase 13-04: advance_and_wait errors use string-keyed raw_body (clock_id, last_status, attempts, elapsed_ms) for consistency with Error.from_response
 
 ### Pending Todos
 
@@ -102,7 +105,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T03:41:12.625Z
-Stopped at: Completed 13-03-PLAN.md
+Last session: 2026-04-12T03:48:03.011Z
+Stopped at: Completed 13-04-PLAN.md
 Resume file: None
 Next action: `/gsd-plan-phase 12`
