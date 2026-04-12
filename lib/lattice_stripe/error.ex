@@ -52,6 +52,10 @@ defmodule LatticeStripe.Error do
   - `:api_error` — Stripe server error or unexpected response
   - `:idempotency_error` — The same idempotency key was reused with different parameters
   - `:connection_error` — Network-level failure, no HTTP response received
+  - `:test_clock_timeout` — A test clock advance timed out waiting for the clock to reach the target time
+  - `:test_clock_failed` — A test clock advance completed but the clock reported a failed status
+  - `:proration_required` — Returned by `LatticeStripe.Billing.Guards` when `require_explicit_proration: true`
+    and the `proration_behavior` param is missing from a proration-sensitive request
   """
   @type error_type ::
           :card_error
@@ -61,6 +65,9 @@ defmodule LatticeStripe.Error do
           | :api_error
           | :idempotency_error
           | :connection_error
+          | :test_clock_timeout
+          | :test_clock_failed
+          | :proration_required
 
   @typedoc """
   A structured Stripe API error.

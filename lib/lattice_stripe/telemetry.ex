@@ -220,6 +220,30 @@ defmodule LatticeStripe.Telemetry do
   ]
   ```
 
+  ## Invoice Auto-Advance Events
+
+  ### `[:lattice_stripe, :invoice, :auto_advance_scheduled]`
+
+  Emitted after a successful `Invoice.create/3` when the returned invoice has
+  `auto_advance: true`. This signals that Stripe will automatically finalize the
+  draft invoice after approximately 1 hour. Attach a handler to log a warning or
+  trigger a monitoring alert when auto-advance invoices are created.
+
+  **Measurements:**
+
+  | Key | Type | Description |
+  |-----|------|-------------|
+  | `:system_time` | `integer` | System time at emission (in native time units). See `System.system_time/0`. |
+
+  **Metadata:**
+
+  | Key | Type | Description |
+  |-----|------|-------------|
+  | `:invoice_id` | `String.t()` | The created invoice ID (e.g. `"in_123"`) |
+  | `:customer` | `String.t() \\| nil` | Customer ID associated with the invoice, or `nil` |
+
+  ---
+
   ## Attaching a Default Logger
 
   For instant visibility during development or to log all Stripe requests in production,
@@ -238,6 +262,7 @@ defmodule LatticeStripe.Telemetry do
   ```
   [info] POST /v1/customers => 200 in 145ms (1 attempt, req_abc123)
   [warn] GET /v1/payment_intents/pi_123 => :error in 301ms (3 attempts, connection_error)
+  [warning] Invoice in_123 (customer: cus_456) has auto_advance: true — Stripe will auto-finalize in ~1 hour
   ```
 
   ## Converting Duration
@@ -256,7 +281,9 @@ defmodule LatticeStripe.Telemetry do
   @request_event [:lattice_stripe, :request]
   @webhook_verify_event [:lattice_stripe, :webhook, :verify]
   @retry_event [:lattice_stripe, :request, :retry]
+  @auto_advance_event [:lattice_stripe, :invoice, :auto_advance_scheduled]
   @default_logger_id :lattice_stripe_default_logger
+  @auto_advance_logger_id :lattice_stripe_auto_advance_logger
 
   # ---------------------------------------------------------------------------
   # Public API
@@ -288,6 +315,23 @@ defmodule LatticeStripe.Telemetry do
       {result, _attempts} = fun.()
       result
     end
+  end
+
+  # Emits the [:lattice_stripe, :invoice, :auto_advance_scheduled] event after a successful
+  # Invoice.create/3 when the returned invoice has auto_advance: true.
+  # @doc false — implementation detail; event catalog documented in @moduledoc.
+  @doc false
+  @spec emit_auto_advance_scheduled(LatticeStripe.Client.t(), map()) :: :ok
+  def emit_auto_advance_scheduled(client, invoice) do
+    if client.telemetry_enabled do
+      :telemetry.execute(
+        @auto_advance_event,
+        %{system_time: System.system_time()},
+        %{invoice_id: invoice.id, customer: invoice.customer}
+      )
+    end
+
+    :ok
   end
 
   # Emits the per-retry telemetry event. Called once per retry, before the delay sleep.
@@ -334,17 +378,29 @@ defmodule LatticeStripe.Telemetry do
 
       [info] POST /v1/customers => 200 in 145ms (1 attempt, req_abc123)
       [warning] GET /v1/customers/cus_xxx => 404 in 12ms (1 attempt, req_yyy)
+
+  Also logs a warning when an invoice is created with `auto_advance: true`:
+
+      [warning] Invoice in_123 (customer: cus_456) has auto_advance: true — Stripe will auto-finalize in ~1 hour
   """
   @spec attach_default_logger(keyword()) :: :ok
   def attach_default_logger(opts \\ []) do
     level = Keyword.get(opts, :level, :info)
     :telemetry.detach(@default_logger_id)
+    :telemetry.detach(@auto_advance_logger_id)
 
     :telemetry.attach(
       @default_logger_id,
       [:lattice_stripe, :request, :stop],
       &__MODULE__.handle_default_log/4,
       %{level: level}
+    )
+
+    :telemetry.attach(
+      @auto_advance_logger_id,
+      @auto_advance_event,
+      &__MODULE__.handle_auto_advance_log/4,
+      %{}
     )
 
     :ok
@@ -363,6 +419,16 @@ defmodule LatticeStripe.Telemetry do
       "#{method} #{metadata.path} #{status_part}in #{duration_ms}ms (#{attempts} #{attempt_word}, #{req_id})"
 
     Logger.log(level, message)
+  end
+
+  @doc false
+  def handle_auto_advance_log(_event, _measurements, metadata, _config) do
+    customer_part =
+      if metadata[:customer], do: " (customer: #{metadata.customer})", else: ""
+
+    Logger.warning(
+      "Invoice #{metadata.invoice_id}#{customer_part} has auto_advance: true — Stripe will auto-finalize in ~1 hour"
+    )
   end
 
   # Wraps webhook verification in a telemetry span.
@@ -563,7 +629,7 @@ defmodule LatticeStripe.Telemetry do
   # Stripe IDs are prefixed with known object type codes (cus_, pi_, seti_, etc.)
   # or are alphanumeric strings longer than 10 characters that aren't known action words.
   defp id_segment?(segment) do
-    known_prefixes = ~w[cus_ pi_ seti_ pm_ re_ cs_ evt_ ch_ in_ sub_ prod_ price_]
+    known_prefixes = ~w[cus_ pi_ seti_ pm_ re_ cs_ evt_ ch_ in_ sub_ prod_ price_ ii_ il_]
 
     Enum.any?(known_prefixes, &String.starts_with?(segment, &1)) or
       (String.length(segment) > 10 and segment =~ ~r/^[a-zA-Z0-9_]+$/ and

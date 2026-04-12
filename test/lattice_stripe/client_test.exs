@@ -169,6 +169,22 @@ defmodule LatticeStripe.ClientTest do
       assert {:ok, _} = Client.request(client_a, get_request())
       assert {:ok, _} = Client.request(client_b, get_request())
     end
+
+    test "require_explicit_proration defaults to false" do
+      client = Client.new!(api_key: "sk_test_123", finch: MyApp.Finch)
+      assert client.require_explicit_proration == false
+    end
+
+    test "require_explicit_proration can be set to true" do
+      client =
+        Client.new!(
+          api_key: "sk_test_123",
+          finch: MyApp.Finch,
+          require_explicit_proration: true
+        )
+
+      assert client.require_explicit_proration == true
+    end
   end
 
   describe "request/2 headers" do
@@ -466,7 +482,9 @@ defmodule LatticeStripe.ClientTest do
         handler_id,
         [[:lattice_stripe, :request, :start], [:lattice_stripe, :request, :stop]],
         fn event, _measurements, metadata, _config ->
-          send(test_pid, {:telemetry_event, event, metadata})
+          if metadata[:path] == "/v1/customers/cus_123" do
+            send(test_pid, {:telemetry_event, event, metadata})
+          end
         end,
         nil
       )
@@ -479,8 +497,8 @@ defmodule LatticeStripe.ClientTest do
 
       Client.request(client, get_request())
 
-      refute_receive {:telemetry_event, [:lattice_stripe, :request, :start], _}
-      refute_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _}
+      refute_receive {:telemetry_event, [:lattice_stripe, :request, :start], _}, 100
+      refute_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _}, 100
     end
   end
 

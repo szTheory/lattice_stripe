@@ -25,6 +25,8 @@ defmodule LatticeStripe.MixProject do
           "guides/client-configuration.md",
           "guides/payments.md",
           "guides/checkout.md",
+          "guides/invoices.md",
+          "guides/subscriptions.md",
           "guides/webhooks.md",
           "guides/error-handling.md",
           "guides/testing.md",
@@ -56,6 +58,25 @@ defmodule LatticeStripe.MixProject do
           Checkout: [
             LatticeStripe.Checkout.Session,
             LatticeStripe.Checkout.LineItem
+          ],
+          Billing: [
+            LatticeStripe.Invoice,
+            LatticeStripe.Invoice.LineItem,
+            LatticeStripe.Invoice.StatusTransitions,
+            LatticeStripe.Invoice.AutomaticTax,
+            LatticeStripe.InvoiceItem,
+            LatticeStripe.InvoiceItem.Period,
+            LatticeStripe.Subscription,
+            LatticeStripe.Subscription.CancellationDetails,
+            LatticeStripe.Subscription.PauseCollection,
+            LatticeStripe.Subscription.TrialSettings,
+            LatticeStripe.SubscriptionItem,
+            LatticeStripe.SubscriptionSchedule,
+            LatticeStripe.SubscriptionSchedule.Phase,
+            LatticeStripe.SubscriptionSchedule.CurrentPhase,
+            LatticeStripe.SubscriptionSchedule.PhaseItem,
+            LatticeStripe.SubscriptionSchedule.AddInvoiceItem,
+            LatticeStripe.Billing.Guards
           ],
           Webhooks: [
             LatticeStripe.Webhook,
@@ -97,7 +118,7 @@ defmodule LatticeStripe.MixProject do
   defp deps do
     [
       # Runtime dependencies
-      {:finch, "~> 0.19"},
+      {:finch, "~> 0.21"},
       {:jason, "~> 1.4"},
       {:telemetry, "~> 1.0"},
       {:nimble_options, "~> 1.0"},

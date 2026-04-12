@@ -163,5 +163,33 @@ defmodule LatticeStripe.FormEncoderTest do
       result = FormEncoder.encode(%{adjustment: -500})
       assert result == "adjustment=-500"
     end
+
+    test "phases[].items[].price_data nested encoding (Phase 16 regression guard)" do
+      # Phase 16 regression guard: SubscriptionSchedule update accepts deeply
+      # nested params at phases[][items][][price_data][recurring][interval].
+      # If the form encoder ever drops a level here, stripe-mock would reject
+      # the request — but unit-level we want a fast feedback loop too.
+      params = %{
+        "phases" => [
+          %{
+            "items" => [
+              %{
+                "price_data" => %{
+                  "currency" => "usd",
+                  "recurring" => %{"interval" => "month"}
+                }
+              }
+            ],
+            "proration_behavior" => "create_prorations"
+          }
+        ]
+      }
+
+      result = FormEncoder.encode(params)
+
+      assert result =~ "phases[0][items][0][price_data][currency]=usd"
+      assert result =~ "phases[0][items][0][price_data][recurring][interval]=month"
+      assert result =~ "phases[0][proration_behavior]=create_prorations"
+    end
   end
 end
