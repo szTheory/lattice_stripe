@@ -71,6 +71,11 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Subscription.PauseCollection,
             LatticeStripe.Subscription.TrialSettings,
             LatticeStripe.SubscriptionItem,
+            LatticeStripe.SubscriptionSchedule,
+            LatticeStripe.SubscriptionSchedule.Phase,
+            LatticeStripe.SubscriptionSchedule.CurrentPhase,
+            LatticeStripe.SubscriptionSchedule.PhaseItem,
+            LatticeStripe.SubscriptionSchedule.AddInvoiceItem,
             LatticeStripe.Billing.Guards
           ],
           Webhooks: [

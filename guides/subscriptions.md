@@ -193,6 +193,140 @@ If none of the three locations carries `"proration_behavior"`, the SDK returns
 hitting the network. Valid values are `"create_prorations"`, `"always_invoice"`,
 and `"none"`.
 
+## Subscription Schedules
+
+A Subscription Schedule defines a phased billing timeline. Each phase
+specifies the prices, quantities, proration behavior, and trial settings
+for a slice of time. When a phase ends, the schedule automatically
+transitions to the next.
+
+Use schedules for flows like:
+
+- Free trial → discounted intro price → full price
+- Annual → monthly transition
+- Step-up pricing as usage grows
+- Contract-based fixed-term subscriptions
+
+See the [Stripe Subscription Schedules API](https://docs.stripe.com/api/subscription_schedules)
+for the full object reference.
+
+### When to use a Subscription Schedule
+
+Reach for a schedule when you need _deterministic_ future billing changes
+at known dates. For ad-hoc changes driven by user actions (upgrades,
+cancellations), use `LatticeStripe.Subscription.update/4` directly.
+
+### Creation modes
+
+Stripe accepts two mutually-exclusive parameter shapes on create.
+
+**Mode 1: from_subscription**
+
+Convert an existing Subscription into a schedule whose first phase
+captures the subscription's current state.
+
+```elixir
+LatticeStripe.SubscriptionSchedule.create(client, %{
+  "from_subscription" => "sub_1234567890"
+})
+```
+
+**Mode 2: customer + phases**
+
+Build a new schedule from scratch with an explicit phase timeline.
+
+```elixir
+LatticeStripe.SubscriptionSchedule.create(client, %{
+  "customer" => "cus_1234567890",
+  "start_date" => "now",
+  "end_behavior" => "release",
+  "phases" => [
+    %{
+      "items" => [%{"price" => "price_intro", "quantity" => 1}],
+      "iterations" => 3,
+      "proration_behavior" => "create_prorations"
+    },
+    %{
+      "items" => [%{"price" => "price_full", "quantity" => 1}],
+      "iterations" => 12
+    }
+  ]
+})
+```
+
+Mixing `from_subscription` with `customer`/`phases` in a single call
+raises a Stripe 400 that surfaces as
+`{:error, %LatticeStripe.Error{type: :invalid_request_error}}`.
+LatticeStripe does not client-side-validate the mode — Stripe's own error
+message is already actionable.
+
+### cancel vs release
+
+Two different ways to end phased billing.
+
+**`cancel/4`** terminates BOTH the schedule AND the underlying
+Subscription. Both entities move to `canceled` status.
+
+```elixir
+LatticeStripe.SubscriptionSchedule.cancel(client, sched.id, %{
+  "invoice_now" => true,
+  "prorate" => true
+})
+```
+
+**`release/4`** detaches the schedule from its Subscription. The
+Subscription remains active and billable but is no longer phase-governed
+— subsequent configuration changes must go through
+`LatticeStripe.Subscription.update/4` directly. **This is irreversible.**
+
+```elixir
+LatticeStripe.SubscriptionSchedule.release(client, sched.id)
+```
+
+Use `release/4` when you want to graduate a subscription off a phased
+plan into a flat ongoing subscription. Use `cancel/4` when you want to
+end billing entirely.
+
+Both dispatch `POST` to `/v1/subscription_schedules/:id/{cancel,release}`
+— not `DELETE` (which is what `LatticeStripe.Subscription.cancel/4` uses).
+This difference matters if you're reading wire logs.
+
+### Proration on update
+
+When a client has `require_explicit_proration: true`, `update/4` requires
+`proration_behavior` at either the top level of `params` OR inside any
+element of `params["phases"][]`:
+
+```elixir
+LatticeStripe.SubscriptionSchedule.update(client, sched.id, %{
+  "phases" => [
+    %{
+      "items" => [%{"price" => "price_full"}],
+      "proration_behavior" => "create_prorations"
+    }
+  ]
+})
+```
+
+Stripe does NOT accept `proration_behavior` at `phases[].items[]` — only
+at top-level and per-phase. The guard reflects this wire shape and does
+not walk deeper. If your Phase 15 Subscription mutations worked, your
+Phase 16 Schedule mutations use the same mental model — just one level
+deeper into `phases[]`.
+
+### Webhook-driven state transitions
+
+As with Subscriptions (Phase 15), **drive your application state from
+webhook events, not from SDK responses**. An SDK response reflects the
+state at the moment of the call, but Stripe may transition the schedule
+moments later (phase boundaries, billing failures, automatic release,
+etc.).
+
+Wire `subscription_schedule.created`, `subscription_schedule.updated`,
+`subscription_schedule.canceled`, `subscription_schedule.released`, and
+`subscription_schedule.aborted` into your webhook handler via
+`LatticeStripe.Webhook`.
+
 ## SubscriptionItem operations
 
 `LatticeStripe.SubscriptionItem` gives you direct CRUD on individual items.
