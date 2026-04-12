@@ -1,34 +1,35 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: verifying
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-04-04T00:28:14.169Z"
-last_activity: 2026-04-04
+milestone: v2.0
+milestone_name: Billing & Connect
+status: planning
+stopped_at: v1.0 archived — v2.0 milestone initialized, requirements pending
+last_updated: "2026-04-12T00:00:00.000Z"
+last_activity: 2026-04-12
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 31
-  completed_plans: 31
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-03)
+See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 11 — ci-cd-release
+**Current focus:** v2.0 Billing & Connect — defining requirements
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-04
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-12 — v1.0 milestone archived, v2.0 Billing & Connect initialized
+Last activity: 2026-04-12
 
 Progress: [████████████████████] 11/11 plans (100%)
 
