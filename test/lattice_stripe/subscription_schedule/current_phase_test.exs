@@ -9,9 +9,11 @@ defmodule LatticeStripe.SubscriptionSchedule.CurrentPhaseTest do
     end
 
     test "decodes start_date and end_date" do
-      result = CurrentPhase.from_map(%{"start_date" => 1_700_000_000, "end_date" => 1_702_678_400})
+      result =
+        CurrentPhase.from_map(%{"start_date" => 1_700_000_000, "end_date" => 1_702_678_400})
 
-      assert %CurrentPhase{start_date: 1_700_000_000, end_date: 1_702_678_400, extra: %{}} = result
+      assert %CurrentPhase{start_date: 1_700_000_000, end_date: 1_702_678_400, extra: %{}} =
+               result
     end
 
     test "puts unknown fields in :extra" do
