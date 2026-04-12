@@ -133,6 +133,20 @@ defmodule LatticeStripe.Testing.TestClock do
 
       @doc false
       def __lattice_test_clock_client__, do: @__lattice_test_clock_client__
+
+      setup do
+        client_spec = @__lattice_test_clock_client__
+
+        client =
+          if is_atom(client_spec) and function_exported?(client_spec, :stripe_client, 0) do
+            apply(client_spec, :stripe_client, [])
+          else
+            client_spec
+          end
+
+        Process.put(:__lattice_stripe_bound_client__, client)
+        :ok
+      end
     end
   end
 
