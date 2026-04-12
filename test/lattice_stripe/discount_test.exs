@@ -46,10 +46,10 @@ defmodule LatticeStripe.DiscountTest do
       assert result.coupon == "cpn_abc"
     end
 
-    test "coupon expanded (map) is kept as map for now (Plan 06 tightens)" do
+    test "coupon expanded (map) decodes to %Coupon{} (Plan 06 tightening)" do
       coupon_map = %{"id" => "cpn_abc", "object" => "coupon", "percent_off" => 25}
       result = Discount.from_map(%{"coupon" => coupon_map})
-      assert result.coupon == coupon_map
+      assert %LatticeStripe.Coupon{id: "cpn_abc", percent_off: 25} = result.coupon
     end
 
     test "coupon nil stays nil" do
@@ -78,6 +78,29 @@ defmodule LatticeStripe.DiscountTest do
 
     test "struct has default extra of empty map" do
       assert %Discount{}.extra == %{}
+    end
+  end
+
+  describe "from_map/1 — D-08 coupon dispatch (tightened in Plan 06)" do
+    alias LatticeStripe.Coupon
+
+    test "expanded coupon (map) decodes to %Coupon{}" do
+      result =
+        LatticeStripe.Discount.from_map(%{
+          "id" => "di_1",
+          "coupon" => %{"id" => "cpn_1", "object" => "coupon", "percent_off" => 25}
+        })
+
+      assert %Coupon{id: "cpn_1", percent_off: 25} = result.coupon
+    end
+
+    test "unexpanded coupon (string ID) stays as string" do
+      result = LatticeStripe.Discount.from_map(%{"coupon" => "cpn_1"})
+      assert result.coupon == "cpn_1"
+    end
+
+    test "nil coupon stays nil" do
+      assert LatticeStripe.Discount.from_map(%{"coupon" => nil}).coupon == nil
     end
   end
 end
