@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: ready_to_plan
-stopped_at: Phase 14 code review fixes landed (WR-02/03/04); Phase 15 draft at ~/.claude/plans/lazy-shimmying-ladybug.md
-last_updated: "2026-04-12T00:00:00.000Z"
+milestone: v2.0-billing
+milestone_name: Billing (Subscriptions, Invoices, Schedules)
+status: shipped_pending_merge
+stopped_at: Phase 15 shipped as PR #4 (Billing track 14+15); awaiting merge. Next up Phase 16 subscription-schedules.
+last_updated: "2026-04-12T19:00:00.000Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 17
-  completed_phases: 12
-  total_plans: 36
-  completed_plans: 36
-  percent: 70
+  completed_phases: 14
+  total_plans: 44
+  completed_plans: 44
+  percent: 82
 ---
 
 # Project State
@@ -21,18 +21,30 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 15 — subscriptions-subscription-items (Billing track)
+**Current focus:** Phase 16 — subscription-schedules (next in Billing track, after PR #4 merges)
 
 ## Current Position
 
-Phase: 15
-Plan: Not started (draft at ~/.claude/plans/lazy-shimmying-ladybug.md — 5 decisions D1–D5, 4 sequenced tasks)
-Status: Ready to plan — Phase 14 complete (5/5 summaries, REVIEW-FIX landed; VERIFICATION.md stale re: WR-01 fixed in 0628bbd)
+Phase: 16 (not yet started)
+Plan: None
+Status: Awaiting PR #4 merge (Billing track: Phase 14 + Phase 15) → then `/gsd-plan-phase 16`
 Last activity: 2026-04-12
 
-Progress: [██████████████░░░░░░] 12/17 phases (70%) · 36/36 planned plans complete
+Progress: [████████████████░░░░] 14/17 phases (82%) · 44/44 planned plans complete
 
-**Milestone scope note:** Phases 1–11 shipped as v1.0. Phases 12–13 were deleted in commit 39b98c9 (Product/Price/Coupon/TestClock — recoverable from `git show 39b98c9^:<path>`). Phases 14–19 form the post-v1.0 Billing track; ROADMAP.md currently only documents 1–11 and should be refreshed separately.
+**Open PR:** [#4 Billing track: Phase 14 (Invoices) + Phase 15 (Subscriptions + SubscriptionItems)](https://github.com/szTheory/lattice_stripe/pull/4) — 137 commits, 975 unit tests + 11 Phase 15 integration tests green, code review HIGH+MEDIUM auto-fixed.
+
+**Phase 15 shipped delivers:**
+- `LatticeStripe.Subscription` — CRUD + search + streams + bang variants + lifecycle verbs (`cancel/3..4`, `resume/3`, `pause_collection/5` with atom guard)
+- `LatticeStripe.SubscriptionItem` — flat namespace, full CRUD, `subscription` param required on list/stream
+- 3 new nested typed structs: `Subscription.{PauseCollection, CancellationDetails, TrialSettings}`
+- `Invoice.AutomaticTax` reused (not duplicated) as `Subscription.automatic_tax`; also fixed to capture unknown fields in `:extra`
+- `Billing.Guards.has_proration_behavior?/1` extended to detect `items[].proration_behavior`; guard wired into 5 call sites
+- `guides/subscriptions.md` with webhook-handoff callout; Billing ExDoc module group extended
+
+**D1 restore (part of PR #4):** Recovered Phase 12/13 billing catalog (`Product`, `Price`, `Coupon`, `PromotionCode`) and `TestClock` time-travel testing from commit `39b98c9^` (20 files, `TestSupport → TestHelpers` rename fixup).
+
+**Milestone framing:** v1.0 (Phases 1–11) was released as 0.2.0. v2.0-billing covers Phases 14 (done), 15 (done), 16 (next — Subscription Schedules). Connect (17/18) and cross-cutting polish (19) are deferred to a later milestone — not in the Billing track critical path for the downstream Cashier/Pay analogue library. ROADMAP.md still documents only 1–11; refresh is overdue but separate from phase work.
 
 ## Performance Metrics
 
@@ -47,6 +59,7 @@ Progress: [██████████████░░░░░░] 12/17 p
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 14 | 5 | - | - |
+| 15 | 3 | - | - |
 
 **Recent Trend:**
 
@@ -155,6 +168,19 @@ Recent decisions affecting current work:
 - [Phase 11-ci-cd-release]: security@latticestripe.dev as private vulnerability reporting channel with 48h ack, 7-day assessment, 30-day patch SLA
 - [Phase 11-ci-cd-release]: Three CI jobs run in parallel (no needs:) per D-01 — lint, test matrix, integration each independent
 - [Phase 11-ci-cd-release]: Cache keys include Elixir/OTP version strings to prevent cross-version _build cache poisoning (RESEARCH.md Pitfall 2)
+- [Phase 14-invoices]: Nested typed struct cutoff — promote fields users pattern-match on (items, status_transitions, automatic_tax, period); leave simple key-value fields as plain maps (D-06 heuristic)
+- [Phase 14-invoices]: Billing namespace for cross-resource guards — `LatticeStripe.Billing.Guards.check_proration_required/2` is the canonical way to gate mutations that touch proration behavior
+- [Phase 14-invoices]: create_preview_lines/3 uses GET verb, not POST — verified against stripe-mock (IN-01 fix in commit 4709ad8)
+- [Phase 15-subscriptions]: D1 restore of Phase 12/13 artifacts (Product/Price/Coupon/PromotionCode/TestClock) from 39b98c9^ — separate commit from Phase 15 work so downstream code can use real Price + TestClock primitives
+- [Phase 15-subscriptions]: D4 flat namespace — `LatticeStripe.SubscriptionItem` at top level (not `LatticeStripe.Subscription.Item`); Subscription-specific nested typed structs (PauseCollection, CancellationDetails, TrialSettings) live under `LatticeStripe.Subscription.*`
+- [Phase 15-subscriptions]: D4 reuse over duplicate — `Invoice.AutomaticTax` used verbatim as `Subscription.automatic_tax`; review fix F-001 added `@known_fields` + `:extra` split so unknown Stripe fields no longer drop silently (affects both Invoice and Subscription)
+- [Phase 15-subscriptions]: D5 pause helper — `Subscription.pause_collection(client, id, behavior, params, opts) when behavior in [:keep_as_draft, :mark_uncollectible, :void]` — function-head atom guard for compile-time typo protection; no generic `pause/4` (Stripe has no dedicated pause endpoint; helper dispatches to `update/4`)
+- [Phase 15-subscriptions]: Proration guard extended — `has_proration_behavior?/1` now detects `params["items"][].proration_behavior` in addition to top-level and `subscription_details`; wired into 5 call sites across Subscription + SubscriptionItem
+- [Phase 15-subscriptions]: `List.stream!/2` is 2-arg only — resources compose it with `Stream.map(&from_map/1)` rather than expecting a 3-arg form; `search_stream!` delegates to the same pattern (no `List.search_stream!` helper exists)
+- [Phase 15-subscriptions]: `SubscriptionItem.id` preservation is mandatory when decoded as part of `Subscription.items` — stripity_stripe had a well-known bug where nested items lost their id; LatticeStripe has a regression guard test
+- [Phase 15-subscriptions]: No subscription-specific telemetry events — piggyback on the general `[:lattice_stripe, :request, *]` events; subscription state transitions belong to user webhook handlers, not the SDK
+- [Phase 15-subscriptions]: `guides/subscriptions.md` contains a mandatory webhook-handoff callout ("drive application state from webhook events, not SDK responses") — T-15-04 mitigation
+- [Phase 15-subscriptions]: Async test isolation fragility fixes — `Code.ensure_loaded!/1` in `function_exported?` describe blocks (product/coupon/price/promotion_code test files); `client_test.exs:476` telemetry handler now filters by `metadata[:path]` to ignore events from concurrent tests
 
 ### Pending Todos
 
@@ -173,5 +199,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-12
-Stopped at: Session resumed — STATE.md drift repaired; awaiting user direction on Phase 15 kickoff
-Resume file: ~/.claude/plans/lazy-shimmying-ladybug.md (Phase 15 draft plan)
+Stopped at: Phase 15 shipped as PR #4 (Billing track 14+15). D1 restore landed. Code review complete (4 findings auto-fixed). Verification 6/6 passed. 975 unit tests + 11 integration tests green. Awaiting PR merge.
+Resume path: After PR #4 merges, `git fetch && git checkout main && git pull`, then `/gsd-plan-phase 16` (subscription-schedules).
