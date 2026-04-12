@@ -26,6 +26,7 @@ defmodule LatticeStripe.MixProject do
           "guides/payments.md",
           "guides/checkout.md",
           "guides/invoices.md",
+          "guides/subscriptions.md",
           "guides/webhooks.md",
           "guides/error-handling.md",
           "guides/testing.md",
@@ -65,6 +66,11 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Invoice.AutomaticTax,
             LatticeStripe.InvoiceItem,
             LatticeStripe.InvoiceItem.Period,
+            LatticeStripe.Subscription,
+            LatticeStripe.Subscription.CancellationDetails,
+            LatticeStripe.Subscription.PauseCollection,
+            LatticeStripe.Subscription.TrialSettings,
+            LatticeStripe.SubscriptionItem,
             LatticeStripe.Billing.Guards
           ],
           Webhooks: [
