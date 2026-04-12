@@ -295,4 +295,202 @@ defmodule LatticeStripe.TestHelpers.TestClock do
       when is_binary(id) and is_integer(frozen_time) do
     advance(client, id, frozen_time, opts) |> Resource.unwrap_bang!()
   end
+
+  # ---------------------------------------------------------------------------
+  # advance_and_wait/4 (Plan 13-04)
+  # ---------------------------------------------------------------------------
+
+  @default_timeout 60_000
+  @default_initial_interval 500
+  @default_max_interval 5_000
+  @default_multiplier 1.5
+  @sleep_floor 500
+
+  @telemetry_event [:lattice_stripe, :test_clock, :advance_and_wait]
+
+  @doc """
+  Advances a Test Clock and polls until it reaches `status: :ready`.
+
+  This is the differentiating helper for Stripe test-clock workflows: you
+  almost never want to call `advance/4` directly in a test, because the
+  clock returns `status: :advancing` and you have to poll for completion
+  yourself. `advance_and_wait/4` does the advance + the polling + the
+  terminal-failure detection + a well-behaved timeout, returning either
+  a ready clock or a typed `%LatticeStripe.Error{}`.
+
+  ## Polling strategy
+
+  - **First poll has zero delay** — catches already-ready clocks and
+    stripe-mock's instant fixture without waiting 500ms.
+  - **Exponential backoff with full jitter, floored at 500ms.** Subsequent
+    sleeps are `max(500, :rand.uniform(delay))` where `delay` starts at
+    500ms, multiplies by 1.5 each iteration, and caps at 5000ms. Stripe's
+    docs warn about tight-loop rate limits on test clocks; the 500ms floor
+    is non-negotiable.
+  - **Monotonic deadline.** The timeout uses `System.monotonic_time/1`, not
+    system time — NTP adjustments during long test runs do not cause
+    premature timeouts.
+  - **Default timeout: 60 seconds.** Override via `opts[:timeout]`
+    (milliseconds).
+
+  ## Errors
+
+  - **Timeout** — returns `{:error, %LatticeStripe.Error{type: :test_clock_timeout,
+    raw_body: %{"clock_id" => _, "last_status" => _, "attempts" => _, "elapsed_ms" => _}}}`
+  - **Internal failure** — returns `{:error, %LatticeStripe.Error{type: :test_clock_failed,
+    raw_body: %{"clock_id" => _, "last_status" => "internal_failure", "attempts" => _}}}` —
+    Stripe entered a terminal failure state, retrying will not help.
+  - **HTTP failure during poll** — the underlying `retrieve/3` error propagates unchanged.
+
+  ## Telemetry
+
+  Emits `[:lattice_stripe, :test_clock, :advance_and_wait, :start]` and
+  `[..., :stop]` via `:telemetry.span/3`. Stop metadata includes
+  `%{clock_id:, status:, attempts:, outcome: :ok | :error}`. Gated by
+  `client.telemetry_enabled`.
+
+  ## Options
+
+  - `:timeout` — total deadline in ms (default 60_000)
+  - `:initial_interval` — first non-zero sleep in ms (default 500, clamped to 500 floor)
+  - `:max_interval` — maximum sleep in ms (default 5_000)
+  - `:multiplier` — per-iteration growth factor (default 1.5)
+
+  ## Example
+
+      {:ok, ready} =
+        LatticeStripe.TestHelpers.TestClock.advance_and_wait(
+          client,
+          clock.id,
+          System.system_time(:second) + 86_400 * 30
+        )
+
+      assert ready.status == :ready
+  """
+  @spec advance_and_wait(Client.t(), String.t(), integer(), keyword()) ::
+          {:ok, t()} | {:error, Error.t()}
+  def advance_and_wait(%Client{} = client, id, frozen_time, opts \\ [])
+      when is_binary(id) and is_integer(frozen_time) do
+    timeout = Keyword.get(opts, :timeout, @default_timeout)
+    initial = max(Keyword.get(opts, :initial_interval, @default_initial_interval), @sleep_floor)
+    max_int = Keyword.get(opts, :max_interval, @default_max_interval)
+    mult = Keyword.get(opts, :multiplier, @default_multiplier)
+
+    started_at = System.monotonic_time(:millisecond)
+    deadline = started_at + timeout
+
+    backoff = %{
+      delay: initial,
+      max_interval: max_int,
+      multiplier: mult,
+      deadline: deadline,
+      started_at: started_at
+    }
+
+    run = fn ->
+      result =
+        with {:ok, _advancing} <- advance(client, id, frozen_time, opts) do
+          poll_until_ready(client, id, backoff, opts, 0)
+        end
+
+      {result, build_stop_meta(id, result)}
+    end
+
+    if client.telemetry_enabled do
+      :telemetry.span(@telemetry_event, %{clock_id: id, timeout: timeout}, run)
+    else
+      {result, _meta} = run.()
+      result
+    end
+  end
+
+  @doc """
+  Bang variant of `advance_and_wait/4`. Returns `%TestClock{}` on success,
+  raises `LatticeStripe.Error` on failure (timeout or internal_failure).
+  """
+  @spec advance_and_wait!(Client.t(), String.t(), integer(), keyword()) :: t() | no_return()
+  def advance_and_wait!(%Client{} = client, id, frozen_time, opts \\ []) do
+    case advance_and_wait(client, id, frozen_time, opts) do
+      {:ok, clock} -> clock
+      {:error, %Error{} = e} -> raise e
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Internal poll loop
+  # ---------------------------------------------------------------------------
+
+  # Always poll FIRST — even on attempt 0 there is no sleep. This catches
+  # already-ready clocks and stripe-mock's instant fixture (D-13b).
+  #
+  # `backoff` is a map with keys: :delay, :max_interval, :multiplier,
+  # :deadline, :started_at — bundled to keep arity within Credo limits.
+  defp poll_until_ready(client, id, backoff, opts, attempts) do
+    case retrieve(client, id, opts) do
+      {:ok, %__MODULE__{status: :ready} = clock} ->
+        {:ok, clock}
+
+      {:ok, %__MODULE__{status: :internal_failure}} ->
+        {:error,
+         %Error{
+           type: :test_clock_failed,
+           message: "Test clock #{id} entered internal_failure state",
+           raw_body: %{
+             "clock_id" => id,
+             "last_status" => "internal_failure",
+             "attempts" => attempts + 1
+           }
+         }}
+
+      {:ok, %__MODULE__{status: status}} ->
+        handle_non_ready(client, id, backoff, opts, attempts, status)
+
+      {:error, %Error{}} = err ->
+        err
+    end
+  end
+
+  defp handle_non_ready(client, id, backoff, opts, attempts, status) do
+    now = System.monotonic_time(:millisecond)
+
+    if now >= backoff.deadline do
+      timeout_val = Keyword.get(opts, :timeout, @default_timeout)
+
+      {:error,
+       %Error{
+         type: :test_clock_timeout,
+         message: "Test clock #{id} did not reach :ready within #{timeout_val}ms",
+         raw_body: %{
+           "clock_id" => id,
+           "last_status" => to_string(status),
+           "attempts" => attempts + 1,
+           "elapsed_ms" => now - backoff.started_at
+         }
+       }}
+    else
+      # A-13b: max(500, :rand.uniform(delay)) — floor wins over jitter.
+      sleep_ms = max(@sleep_floor, :rand.uniform(backoff.delay))
+      Process.sleep(sleep_ms)
+      next_delay = min(backoff.max_interval, round(backoff.delay * backoff.multiplier))
+      poll_until_ready(client, id, %{backoff | delay: next_delay}, opts, attempts + 1)
+    end
+  end
+
+  # Build telemetry :stop metadata from the final result tuple.
+  defp build_stop_meta(clock_id, {:ok, %__MODULE__{status: status}}) do
+    %{clock_id: clock_id, status: status, attempts: nil, outcome: :ok}
+  end
+
+  defp build_stop_meta(clock_id, {:error, %Error{type: type, raw_body: raw}}) do
+    attempts = if is_map(raw), do: Map.get(raw, "attempts"), else: nil
+    last = if is_map(raw), do: Map.get(raw, "last_status"), else: nil
+
+    %{
+      clock_id: clock_id,
+      status: last,
+      attempts: attempts,
+      outcome: :error,
+      error_type: type
+    }
+  end
 end
