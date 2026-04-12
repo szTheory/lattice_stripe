@@ -245,6 +245,88 @@ defmodule LatticeStripe.TestHelpers.TestClock do
   # NOTE: NO update/3,4 and NO search/2,3 — Stripe Test Clock API absence.
 
   # ---------------------------------------------------------------------------
+  # cleanup_tagged/2 — shared deletion core (Plan 13-05)
+  # ---------------------------------------------------------------------------
+
+  @default_older_than_ms 3_600_000
+
+  @doc """
+  Lists and optionally deletes test clocks older than a threshold.
+
+  This is the shared deletion core used by both
+  `LatticeStripe.Testing.TestClock.Owner.cleanup/2` (per-test) and
+  `mix lattice_stripe.test_clock.cleanup` (backstop). See those callers
+  for the user-facing entry points.
+
+  ## Metadata limitation (A-13g)
+
+  Stripe's Test Clock API does **not** support `metadata`, so this
+  function cannot filter by a LatticeStripe-specific marker. It filters
+  by age only. This means the Mix task cannot distinguish
+  LatticeStripe-managed clocks from user-created ones. The primary
+  cleanup path (Owner + `on_exit`) is unaffected.
+
+  ## Options
+
+  - `:older_than_ms` -- only consider clocks older than N milliseconds
+    (default: `3_600_000` = 1 hour)
+  - `:delete` -- `true` to actually delete, `false` to return candidates
+    only (default: `false`)
+  - `:name_prefix` -- optional string prefix filter on clock name
+    (e.g., `"lattice_stripe_test"`)
+
+  ## Returns
+
+  - `delete: false` -- `{:ok, [%TestClock{}, ...]}`
+  - `delete: true` -- `{:ok, %{deleted: n, failed: n, total_matched: n}}`
+  """
+  @spec cleanup_tagged(Client.t(), keyword()) :: {:ok, term()}
+  def cleanup_tagged(%Client{} = client, opts \\ []) do
+    older_than_ms = Keyword.get(opts, :older_than_ms, @default_older_than_ms)
+    delete? = Keyword.get(opts, :delete, false)
+    name_prefix = Keyword.get(opts, :name_prefix)
+    now = System.system_time(:second)
+    cutoff = now - div(older_than_ms, 1000)
+
+    matching =
+      client
+      |> stream!(%{}, [])
+      |> Enum.filter(fn clock ->
+        old_enough?(clock, cutoff) and name_matches?(clock, name_prefix)
+      end)
+
+    if delete? do
+      {deleted, failed} = do_delete_each(client, matching)
+      {:ok, %{deleted: deleted, failed: failed, total_matched: length(matching)}}
+    else
+      {:ok, matching}
+    end
+  end
+
+  defp old_enough?(%__MODULE__{created: created}, cutoff) when is_integer(created) do
+    created <= cutoff
+  end
+
+  defp old_enough?(_, _), do: false
+
+  defp name_matches?(_clock, nil), do: true
+
+  defp name_matches?(%__MODULE__{name: name}, prefix) when is_binary(name) do
+    String.starts_with?(name, prefix)
+  end
+
+  defp name_matches?(_, _prefix), do: false
+
+  defp do_delete_each(client, clocks) do
+    Enum.reduce(clocks, {0, 0}, fn clock, {d, f} ->
+      case delete(client, clock.id) do
+        {:ok, _} -> {d + 1, f}
+        {:error, _} -> {d, f + 1}
+      end
+    end)
+  end
+
+  # ---------------------------------------------------------------------------
   # advance/4 (Plan 13-04)
   # ---------------------------------------------------------------------------
 
