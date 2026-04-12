@@ -75,5 +75,52 @@ defmodule LatticeStripe.Billing.GuardsTest do
 
       assert error.message =~ "create_prorations"
     end
+
+    test "items[] with proration_behavior returns :ok" do
+      client = test_client(require_explicit_proration: true)
+
+      params = %{
+        "items" => [
+          %{"id" => "si_1", "quantity" => 2, "proration_behavior" => "create_prorations"}
+        ]
+      }
+
+      assert Guards.check_proration_required(client, params) == :ok
+    end
+
+    test "items[] without proration_behavior returns error" do
+      client = test_client(require_explicit_proration: true)
+      params = %{"items" => [%{"id" => "si_1", "quantity" => 2}]}
+
+      assert {:error, %Error{type: :proration_required}} =
+               Guards.check_proration_required(client, params)
+    end
+
+    test "items[] empty list returns error" do
+      client = test_client(require_explicit_proration: true)
+
+      assert {:error, %Error{type: :proration_required}} =
+               Guards.check_proration_required(client, %{"items" => []})
+    end
+
+    test "items[] with non-map element does not crash" do
+      client = test_client(require_explicit_proration: true)
+
+      assert {:error, %Error{type: :proration_required}} =
+               Guards.check_proration_required(client, %{"items" => ["not_a_map"]})
+    end
+
+    test "items[] with mixed elements — one has proration_behavior — returns :ok" do
+      client = test_client(require_explicit_proration: true)
+
+      params = %{
+        "items" => [
+          %{"id" => "si_1"},
+          %{"id" => "si_2", "proration_behavior" => "none"}
+        ]
+      }
+
+      assert Guards.check_proration_required(client, params) == :ok
+    end
   end
 end

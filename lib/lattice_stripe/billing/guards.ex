@@ -37,6 +37,19 @@ defmodule LatticeStripe.Billing.Guards do
   defp has_proration_behavior?(params) do
     Map.has_key?(params, "proration_behavior") or
       (is_map(params["subscription_details"]) and
-         Map.has_key?(params["subscription_details"], "proration_behavior"))
+         Map.has_key?(params["subscription_details"], "proration_behavior")) or
+      items_has?(params["items"])
   end
+
+  # Detects whether any element of an `items[]` array carries a
+  # `"proration_behavior"` key. Defensive against nil, non-list, and
+  # non-map list elements.
+  defp items_has?(items) when is_list(items) do
+    Enum.any?(items, fn
+      item when is_map(item) -> Map.has_key?(item, "proration_behavior")
+      _ -> false
+    end)
+  end
+
+  defp items_has?(_), do: false
 end
