@@ -99,12 +99,14 @@ defmodule LatticeStripe.BalanceTransaction do
   `id` is empty.
   """
   @spec retrieve(Client.t(), String.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
-  def retrieve(%Client{} = client, id, opts \\ []) when is_binary(id) do
-    if id == "" do
-      raise ArgumentError,
-            "BalanceTransaction.retrieve/3 requires a non-empty balance_transaction id"
-    end
+  def retrieve(client, id, opts \\ [])
 
+  def retrieve(%Client{}, id, _opts) when id in [nil, ""] do
+    raise ArgumentError,
+          "BalanceTransaction.retrieve/3 requires a non-empty balance transaction id"
+  end
+
+  def retrieve(%Client{} = client, id, opts) when is_binary(id) do
     %Request{method: :get, path: "/v1/balance_transactions/#{id}", params: %{}, opts: opts}
     |> then(&Client.request(client, &1))
     |> Resource.unwrap_singular(&from_map/1)
@@ -114,7 +116,14 @@ defmodule LatticeStripe.BalanceTransaction do
   Like `retrieve/3` but raises `LatticeStripe.Error` on failure.
   """
   @spec retrieve!(Client.t(), String.t(), keyword()) :: t()
-  def retrieve!(%Client{} = client, id, opts \\ []) when is_binary(id) do
+  def retrieve!(client, id, opts \\ [])
+
+  def retrieve!(%Client{}, id, _opts) when id in [nil, ""] do
+    raise ArgumentError,
+          "BalanceTransaction.retrieve!/3 requires a non-empty balance transaction id"
+  end
+
+  def retrieve!(%Client{} = client, id, opts) when is_binary(id) do
     retrieve(client, id, opts) |> Resource.unwrap_bang!()
   end
 
