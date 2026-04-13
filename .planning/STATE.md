@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
-status: "Billing track complete (PR #4 merged as 21e63fe). Next: Connect track — `/gsd-discuss-phase 17`"
-stopped_at: Phase 16 complete — Billing track shipped (Phases 14+15+16 in PR #4)
-last_updated: "2026-04-12T23:00:00.000Z"
-last_activity: 2026-04-12
+milestone_name: Release
+status: executing
+stopped_at: "Billing track complete (PR #4 merged). Beginning Connect track — Phase 17 scope definition."
+last_updated: "2026-04-13T00:16:01.814Z"
+last_activity: 2026-04-13 -- Phase 17 execution started
 progress:
-  total_phases: 17
-  completed_phases: 14
-  total_plans: 44
-  completed_plans: 44
-  percent: 82
+  total_phases: 14
+  completed_phases: 11
+  total_plans: 37
+  completed_plans: 33
+  percent: 89
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 17 — Connect Accounts & Account Links (first phase of Connect track; Billing track shipped)
+**Current focus:** Phase 17 — connect-accounts-links
 
 ## Current Position
 
-Phase: 17
-Plan: Not started — needs scope definition (`/gsd-discuss-phase 17`)
-Status: Billing track complete (PR #4 merged as 21e63fe). Next: flesh out Phase 17 Connect scope.
-Last activity: 2026-04-12
+Phase: 17 (connect-accounts-links) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 17
+Last activity: 2026-04-13 -- Phase 17 execution started
 
 Progress: [████████████████░░░░] 14/17 phases (82%) · 44/44 planned plans complete
 

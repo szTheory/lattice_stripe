@@ -68,7 +68,7 @@ defmodule LatticeStripe.Account.RequirementsTest do
       assert %Requirements{} = future_req_struct
 
       # Both have the same fields populated
-      assert req_struct.currently_due == ["external_account"]
+      assert req_struct.currently_due == ["business_profile.mcc", "business_profile.url"]
       assert future_req_struct.currently_due == []
 
       # Structural equivalence: both have all 8 known fields accessible

@@ -43,7 +43,7 @@ defmodule LatticeStripe.Account.BusinessProfileTest do
       assert result.name == "Acme Corp"
       assert result.support_email == "support@acme.test"
       assert result.url == "https://acme.test"
-      assert result.mcc == "7372"
+      assert result.mcc == "5734"
       assert Map.has_key?(result.extra, "zzz_forward_compat_field")
       assert result.extra["zzz_forward_compat_field"] == "extra_value_in_business_profile"
     end

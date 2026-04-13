@@ -45,7 +45,7 @@ defmodule LatticeStripe.Account.CompanyTest do
     test "full fixture round-trip" do
       result = AccountFixtures.basic()["company"] |> Company.from_map()
       assert %Company{} = result
-      assert result.name == "Acme Corp"
+      assert result.name == "Acme Corp LLC"
       assert result.directors_provided == true
     end
   end
