@@ -123,16 +123,3 @@ LatticeStripe 1.0 marks our commitment to API stability for the Elixir + Stripe 
 * remove deprecated 'command' input from release-please-action v4 ([3ff8a12](https://github.com/szTheory/lattice_stripe/commit/3ff8a12fa3090eb69344a2c4d4ba418036cb5d7d))
 * skip invalid-id integration tests — stripe-mock returns stubs for any ID ([e986f1b](https://github.com/szTheory/lattice_stripe/commit/e986f1bb67c9bf51602d108ab7d6af23a5323844))
 * update GitHub org from lattice-stripe to szTheory ([ad46956](https://github.com/szTheory/lattice_stripe/commit/ad469565578f4791ba29c6bb46544750bee7018e))
-
-## [Unreleased]
-
-### Added
-
-- Initial release of LatticeStripe
-- Core: Client configuration, transport behaviour, JSON codec, form encoding
-- Resources: Customer, PaymentIntent, SetupIntent, PaymentMethod, Refund, Checkout.Session
-- Webhook signature verification with Phoenix Plug integration
-- Auto-pagination via Elixir Streams
-- Automatic retry with exponential backoff and idempotency keys
-- Telemetry events for request lifecycle monitoring
-- Test helpers for webhook event construction
