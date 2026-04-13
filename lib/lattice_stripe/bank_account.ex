@@ -14,9 +14,13 @@ defmodule LatticeStripe.BankAccount do
   `inspect/1` shows only `id`, `object`, `bank_name`, `country`, `currency`,
   and `status`. The following fields are deliberately hidden because they are
   sensitive banking information that must never appear in logs or error
-  reports: `routing_number`, `account_number` (if ever present — Stripe
-  normally strips it after tokenization), `fingerprint`, `last4`,
-  `account_holder_name`, `account_holder_type`.
+  reports: `routing_number`, `fingerprint`, `last4`, `account_holder_name`,
+  `account_holder_type`.
+
+  The struct intentionally does NOT define an `:account_number` field —
+  Stripe strips the raw number after tokenization, and if a future API
+  version ever returned it, it would flow into `:extra` (never into
+  `Inspect` output). Never add `:account_number` to `defstruct`.
 
   ## F-001 forward-compat
 
