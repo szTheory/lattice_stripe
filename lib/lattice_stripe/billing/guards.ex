@@ -1,11 +1,5 @@
 defmodule LatticeStripe.Billing.Guards do
-  @moduledoc """
-  Shared pre-request guards for Billing operations.
-
-  Used by `Invoice.upcoming/3`, `Invoice.create_preview/3` (Phase 14),
-  `Subscription`/`SubscriptionItem` mutations (Phase 15), and
-  `SubscriptionSchedule.update/4` (Phase 16).
-  """
+  @moduledoc false
   alias LatticeStripe.{Client, Error}
 
   @doc """

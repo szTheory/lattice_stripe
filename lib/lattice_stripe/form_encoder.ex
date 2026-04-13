@@ -1,27 +1,5 @@
 defmodule LatticeStripe.FormEncoder do
-  @moduledoc """
-  Recursive Stripe-compatible form encoder.
-
-  Encodes Elixir maps and keyword lists into URL-encoded form strings
-  compatible with Stripe's v1 API format.
-
-  Stripe uses bracket notation for nested parameters:
-
-  - Nested maps: `metadata[key]=value`
-  - Arrays of maps: `items[0][price]=price_123`
-  - Arrays of scalars: `expand[0]=data.customer`
-
-  ## Example
-
-      iex> LatticeStripe.FormEncoder.encode(%{email: "user@example.com"})
-      "email=user%40example.com"
-
-      iex> LatticeStripe.FormEncoder.encode(%{metadata: %{plan: "pro"}})
-      "metadata[plan]=pro"
-
-      iex> LatticeStripe.FormEncoder.encode(%{items: [%{price: "price_123", quantity: 1}]})
-      "items[0][price]=price_123&items[0][quantity]=1"
-  """
+  @moduledoc false
 
   @doc """
   Encodes a map or keyword list to a URL-encoded query string.
