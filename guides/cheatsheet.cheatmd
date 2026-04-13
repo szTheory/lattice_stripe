@@ -149,7 +149,7 @@ case LatticeStripe.PaymentIntent.create(client, params) do
   {:error, %Error{type: :rate_limit_error}} ->
     {:error, "Rate limited — retry later"}
 
-  {:error, %Error{type: :auth_error}} ->
+  {:error, %Error{type: :authentication_error}} ->
     {:error, "Invalid API key"}
 
   {:error, %Error{} = err} ->
