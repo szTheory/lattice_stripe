@@ -39,14 +39,18 @@ They are visible in the source tree — this is Elixir, there is no
 privacy enforcement — but they are explicitly excluded from the semver
 contract. These modules may change in any patch release without notice:
 
-- `LatticeStripe.FormEncoder`
-- `LatticeStripe.Request`
-- `LatticeStripe.Resource`
-- `LatticeStripe.Transport.Finch`
-- `LatticeStripe.Json.Jason`
-- `LatticeStripe.RetryStrategy.Default`
-- `LatticeStripe.Webhook.CacheBodyReader`
-- `LatticeStripe.Billing.Guards`
+- LatticeStripe.FormEncoder
+- LatticeStripe.Resource
+- LatticeStripe.Transport.Finch
+- LatticeStripe.Json.Jason
+- LatticeStripe.RetryStrategy.Default
+- LatticeStripe.Webhook.CacheBodyReader
+- LatticeStripe.Billing.Guards
+
+Note: `LatticeStripe.Request` was previously documented as internal but is
+retained as public API in 1.0 because `LatticeStripe.Client.request/2`
+accepts a `Request.t()` struct — see Phase 19 Plan 01 summary for the
+Rule 1 deviation that kept `Request` public.
 
 If your application depends on any of these modules, you are relying on
 an implementation detail and should expect breakage. Prefer the public

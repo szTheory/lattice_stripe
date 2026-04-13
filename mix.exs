@@ -28,10 +28,13 @@ defmodule LatticeStripe.MixProject do
           "guides/invoices.md",
           "guides/subscriptions.md",
           "guides/connect.md",
+          "guides/connect-accounts.md",
+          "guides/connect-money-movement.md",
           "guides/webhooks.md",
           "guides/error-handling.md",
           "guides/testing.md",
           "guides/telemetry.md",
+          "guides/api_stability.md",
           "guides/extending-lattice-stripe.md",
           "guides/cheatsheet.cheatmd",
           "CHANGELOG.md"
