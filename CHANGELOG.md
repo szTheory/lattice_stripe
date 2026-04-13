@@ -6,6 +6,20 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0](https://github.com/szTheory/lattice_stripe/compare/v0.2.0...v1.0.0) (2026-04-13)
 
+### Highlights
+
+LatticeStripe 1.0 marks our commitment to API stability for the Elixir + Stripe integration story. The 0.2 → 1.0 journey spans four major milestones: a solid foundation of transport, retries, pagination, and observability (Phases 1-11); full Billing coverage for Invoices, Subscriptions, SubscriptionItems, and Subscription Schedules (Phases 14-16); end-to-end Connect support including accounts, onboarding links, external accounts, transfers, payouts, balance, and balance transactions (Phases 17-18); and a formalized public API surface with `@moduledoc false` internals and an explicit semver contract (Phase 19). Starting with 1.0.0, LatticeStripe follows standard semver: patch releases for bug fixes, minor releases for additive features, major releases for breaking public API changes — see [API Stability](guides/api_stability.md) for the full contract.
+
+**What's in the box:**
+- **Payments.** Customers, PaymentIntents, SetupIntents, PaymentMethods, Refunds, Checkout Sessions.
+- **Billing.** Invoices (create, finalize, pay, void, send, search), Subscriptions with lifecycle verbs and pause helpers, Subscription Schedules with proration guards, Invoice Items.
+- **Connect.** Accounts (Standard/Express/Custom), Account Links, Login Links, External Accounts (BankAccount/Card), Transfers + TransferReversals, Payouts (with TraceId), Balance + BalanceTransactions, Charge retrieve for fee reconciliation.
+- **Webhooks.** Timing-safe signature verification, `Event` struct, Phoenix `Webhook.Plug`, `Webhook.Handler` behaviour.
+- **Operational glue.** Pluggable `Transport`/`Json`/`RetryStrategy` behaviours, Telemetry events for every request, `LatticeStripe.Testing` helpers with TestClock support.
+
+**Upgrading from 0.2.x.** No breaking API changes from 0.2. The public surface has been frozen; previously-visible internal modules (`FormEncoder`, `Request`, `Resource`, `Transport.Finch`, `Json.Jason`, `RetryStrategy.Default`, `Webhook.CacheBodyReader`, `Billing.Guards`) are now documented as private via `@moduledoc false` and are excluded from the semver contract.
+
+**Supported versions.** Elixir 1.15+ on OTP 26+, tested up to Elixir 1.19 on OTP 28.
 
 ### Features
 
@@ -46,55 +60,6 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 * **18:** WR-03 add nil/empty id guards to BalanceTransaction.retrieve/3 and retrieve!/3 ([e60f220](https://github.com/szTheory/lattice_stripe/commit/e60f2201bf5596ac8357c0dfcee745f3e356cda7))
 * **18:** WR-03 add nil/empty id guards to Payout.update/4 and update!/4 ([4614b1c](https://github.com/szTheory/lattice_stripe/commit/4614b1c501443d04208f5fecf6a07b002da998ab))
 * **18:** WR-03 restore balance_transaction id error message for test contract ([10a8827](https://github.com/szTheory/lattice_stripe/commit/10a882718bb277f25f39a5e62a5f90894eac70c5))
-
-## [Unreleased]
-
-<!--
-  v1.0.0 Highlights narrative — staged here for the human checkpoint (Phase 19 D-11, D-12).
-  When the Release Please PR opens with a `## [1.0.0](...)` heading, LIFT the
-  `### Highlights` block below and prepend it directly under that generated heading
-  (before the auto-generated `### Features` / `### Bug Fixes` sections).
-  Do NOT edit the `## [1.0.0](...)` heading line itself — release-please uses it for
-  idempotency matching (19-RESEARCH.md Pitfall 2).
--->
-
-### Highlights
-
-LatticeStripe 1.0 marks our commitment to API stability for the Elixir + Stripe integration story. The 0.2 → 1.0 journey spans four major milestones: a solid foundation of transport, retries, pagination, and observability (Phases 1-11); full Billing coverage for Invoices, Subscriptions, SubscriptionItems, and Subscription Schedules (Phases 14-16); end-to-end Connect support including accounts, onboarding links, external accounts, transfers, payouts, balance, and balance transactions (Phases 17-18); and a formalized public API surface with `@moduledoc false` internals and an explicit semver contract (Phase 19). Starting with 1.0.0, LatticeStripe follows standard semver: patch releases for bug fixes, minor releases for additive features, major releases for breaking public API changes — see [API Stability](guides/api_stability.md) for the full contract.
-
-**What's in the box:**
-- **Payments.** Customers, PaymentIntents, SetupIntents, PaymentMethods, Refunds, Checkout Sessions.
-- **Billing.** Invoices (create, finalize, pay, void, send, search), Subscriptions with lifecycle verbs and pause helpers, Subscription Schedules with proration guards, Invoice Items.
-- **Connect.** Accounts (Standard/Express/Custom), Account Links, Login Links, External Accounts (BankAccount/Card), Transfers + TransferReversals, Payouts (with TraceId), Balance + BalanceTransactions, Charge retrieve for fee reconciliation.
-- **Webhooks.** Timing-safe signature verification, `Event` struct, Phoenix `Webhook.Plug`, `Webhook.Handler` behaviour.
-- **Operational glue.** Pluggable `Transport`/`Json`/`RetryStrategy` behaviours, Telemetry events for every request, `LatticeStripe.Testing` helpers with TestClock support.
-
-**Upgrading from 0.2.x.** No breaking API changes from 0.2. The public surface has been frozen; previously-visible internal modules (`FormEncoder`, `Request`, `Resource`, `Transport.Finch`, `Json.Jason`, `RetryStrategy.Default`, `Webhook.CacheBodyReader`, `Billing.Guards`) are now documented as private via `@moduledoc false` and are excluded from the semver contract.
-
-**Supported versions.** Elixir 1.15+ on OTP 26+, tested up to Elixir 1.19 on OTP 28.
-
-### Features — Phase 18: Connect money movement
-
-* **external-account:** polymorphic `ExternalAccount` dispatcher with `BankAccount`, `Card`, and `Unknown` fallback structs; full CRUDL on `/v1/accounts/:account/external_accounts`. PII hidden from `Inspect` for both bank and card surfaces.
-* **charge:** retrieve-only `LatticeStripe.Charge` (41-field struct) for Connect fee reconciliation. No `create`/`update`/`capture`/`cancel`/`list` — see `LatticeStripe.PaymentIntent` for payment creation.
-* **transfer:** full CRUDL `LatticeStripe.Transfer` with embedded `reversals` decoding; wrapper metadata preserved under `extra["reversals_meta"]`.
-* **transfer-reversal:** standalone top-level `LatticeStripe.TransferReversal` module addressed by `(transfer_id, reversal_id)`. No `Transfer.reverse` delegator by design.
-* **payout:** full CRUDL `LatticeStripe.Payout` with `cancel/4` and `reverse/4` on the canonical `(client, id, params \\ %{}, opts \\ [])` signature, plus nested `Payout.TraceId` struct.
-* **balance:** `LatticeStripe.Balance` singleton (retrieve-only, no `:id`) with nested `Amount` and `SourceTypes` structs; `stripe_account:` opt threads through for connected-account balances.
-* **balance-transaction:** `LatticeStripe.BalanceTransaction` retrieve/list/stream with nested `FeeDetail`. `source` field kept as raw `binary | map()` for polymorphic safety across 16+ Stripe object types.
-* **guide:** new `guides/connect.md` with dual reconciliation idiom (platform fees + connected-account balances), webhook-handoff callouts, and antipattern warnings.
-* **exdoc:** 13 new Connect-track modules grouped under "Connect"; `Charge` grouped under "Payments" per D-06.
-
-### Bug Fixes — Phase 18 code review
-
-* **typespecs:** add `map()` variant to expandable reference typespecs in `Transfer`, `TransferReversal`, and `Charge` (`destination`, `source_transfer`) so expanded responses type-check.
-* **validation:** normalize pre-network id validation to `when id in [nil, ""]` clause guards raising `ArgumentError`; applied to `Payout.update/4` and `BalanceTransaction.retrieve/3` (plus bang variants) to match the phase-wide contract.
-* **docs:** correct `BankAccount` moduledoc reference to a non-existent `:account_number` field (removed).
-* **internal:** `ExternalAccount.Unknown.cast/1` now derives its key set from `@known_fields` instead of hardcoding; `Payout.update/4` gains an `is_map(params)` guard; `Transfer.from_map/1` preserves unexpected `reversals` shapes under `extra["reversals_meta"]` instead of silently dropping them.
-
-### Security — Phase 18 threat audit
-
-* 29/29 threats verified in `18-SECURITY.md`: 24 mitigated in code, 5 accepted risks documented (no-PII surfaces + pre-existing Phase 17 `Stripe-Account` header).
 
 ## [0.2.0](https://github.com/szTheory/lattice_stripe/compare/v0.1.0...v0.2.0) (2026-04-04)
 
