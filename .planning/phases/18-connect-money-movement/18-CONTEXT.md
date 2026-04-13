@@ -231,7 +231,7 @@ All four follow F-001 (`@known_fields` + `:extra` + `Map.split/2` in `cast/1`).
 
 **Rationale (per user selection in discussion):** The per-payout reconciliation flow walks `BalanceTransaction.source` back to a Charge id; letting users type that result via `LatticeStripe.Charge.retrieve/3` instead of dropping to `LatticeStripe.Client.request/2` makes the Connect guide read cleanly and gives `@spec` typing on the return. This is **not** fake ergonomics — `Charge.retrieve/3` is a direct HTTP endpoint binding, not a wrapper. Stripe's modern API is PaymentIntent-first for *creation*, but *retrieval* of already-created charges is the canonical way to read settled fee details.
 
-**Research correction:** the memory note claiming "Charge was deleted in commit 39b98c9" is inaccurate — `lib/lattice_stripe/charge.ex` has never existed in git history. Commit 39b98c9 deletes `Price`/`Product`/`Coupon`/`TestClock` scaffolding; `Charge` is being added fresh in Phase 18, not revived. See `project_phase12_13_deletion.md` memory for follow-up correction.
+**Historical note:** `lib/lattice_stripe/charge.ex` has never existed in git history. `Charge` is being added fresh in Phase 18, not revived. Commit `39b98c9` (the Phase 12/13 obliteration commit per memory) deletes `Product`/`Price`/`Coupon`/`PromotionCode`/`TestClock` scaffolding but does NOT touch Charge — no correction to existing memory needed.
 
 **`@known_fields` — Connect-relevant surface only:**
 
@@ -427,7 +427,7 @@ The following fall under Claude's judgment during planning and execution — no 
 - **`Balance.SourceTypes` is the second in-production application of P17 D-02's typed-inner-open-outer pattern** — stable `{card, bank_account, fpx}` inner shape, open outer map via `:extra` for forward-compat. The pattern is proving itself as a template.
 - **`Payout.TraceId` promotion was a close call** that the user explicitly confirmed during discussion — 2-field shape with clear pattern-match target on `status` enum, promoted despite thin shape because every typed peer SDK promotes it.
 - **User explicitly chose to ship `Charge.retrieve` in Phase 18** — rather than defer to planning; reduces risk that guide execution blocks on a missing module.
-- **Research flagged a memory correction** — the `project_phase12_13_deletion.md` memory claims "Charge was deleted in commit 39b98c9" but `lib/lattice_stripe/charge.ex` has never existed in git history. Commit 39b98c9 deletes `Price`/`Product`/`Coupon`/`TestClock` scaffolding. The memory should be updated to remove the Charge claim. (Not a blocker for Phase 18; logged here for memory-hygiene follow-up.)
+- **No Charge module has ever existed in git history** — during research the advisor agent initially suspected the `project_phase12_13_deletion.md` memory mentioned Charge, but re-verification against the memory file confirms it only lists `Product`/`Price`/`Coupon`/`PromotionCode`/`TestClock`. `Charge` is being added fresh in Phase 18, not revived. No memory correction needed.
 - **Unknown dispatcher fallback** — `ExternalAccount.Unknown` is the first use of a "fallback object type" in LatticeStripe; the pattern may be useful elsewhere if Stripe's polymorphic response shapes grow (e.g., `payment_method_details` sub-types). Not generalized in Phase 18, but noted for future phases.
 - **The reconciliation guide section must include both idioms side-by-side** — per-object `expand: ["balance_transaction"]` AND per-payout `BalanceTransaction.list(client, %{payout: po.id})`. They serve different use cases (one payment vs entire payout ledger) and users need to know when to reach for which.
 - **Webhook-handoff callouts are mandatory at every money-movement narrative transition** — `charge.succeeded`, `application_fee.created`, `payout.paid`, `transfer.reversed`. Phase 15 D5 precedent applies: LatticeStripe tells users "drive application state from webhook events, not SDK responses," and Connect money movement is the most critical place to repeat that.
@@ -449,7 +449,6 @@ The following fall under Claude's judgment during planning and execution — no 
 - **`Payout.create_destination_charge/4` and separate-charge-and-transfer wrappers** — rejected as fake ergonomics. Guide content only.
 - **`stream!/3` on `TransferReversal.list`** — ship in Phase 18 (listed above); this is NOT deferred, noting here only because it's the one `stream!` that could have been trimmed and wasn't.
 - **`ExternalAccount.Unknown` generalization to other polymorphic response shapes** — pattern may apply to `payment_method_details` sub-types, `charge.source` variants, etc. Not generalized in Phase 18. If a third use-case appears, consider promoting to a shared helper.
-- **Memory hygiene follow-up** — update `project_phase12_13_deletion.md` memory to remove the inaccurate "Charge was deleted" claim. Not a Phase 18 code deliverable; handle in a separate `/gsd-note` or memory-edit task.
 
 ### Reviewed Todos (not folded)
 
