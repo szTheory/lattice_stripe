@@ -89,13 +89,13 @@ defmodule LatticeStripe.TransferReversal do
           id: String.t() | nil,
           object: String.t(),
           amount: integer() | nil,
-          balance_transaction: String.t() | nil,
+          balance_transaction: String.t() | map() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
-          destination_payment_refund: String.t() | nil,
+          destination_payment_refund: String.t() | map() | nil,
           metadata: map() | nil,
-          source_refund: String.t() | nil,
-          transfer: String.t() | nil,
+          source_refund: String.t() | map() | nil,
+          transfer: String.t() | map() | nil,
           extra: map()
         }
 
