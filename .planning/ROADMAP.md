@@ -219,7 +219,7 @@ Plans:
   3. Developer can act on behalf of a connected account by setting the `Stripe-Account` header on any resource call (per-request and per-client)
   4. All operations follow Phase 4/5/14/15 conventions (flat namespace, nested typed structs, bang variants, streams, PII-safe Inspect, no `Jason.Encoder`)
   5. Integration tests via stripe-mock cover the account lifecycle and account-link creation
-**Plans:** 2/6 plans executed
+**Plans:** 4/6 plans executed
 
 ### Phase 18: Connect Money Movement
 **Goal**: Developers can move money on the Connect platform — attach external accounts, transfer between accounts, pay out to bank accounts, and inspect balance
