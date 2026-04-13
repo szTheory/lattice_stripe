@@ -985,22 +985,22 @@ end
 - `Charge.create` — PaymentIntent replaces it. Not shipped in Phase 18.
 - `Transfer.reversal_id` singular field — Stripe now always returns a `reversals` sublist even for single reversals; D-02 handles both shapes via `[%TransferReversal{}]`.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does stripe-mock return non-trivial `fee_details` entries for BalanceTransaction list calls?**
    - What we know: stripe-mock returns OpenAPI-spec-generated sample payloads; the spec defines `fee_details` shape.
    - What's unclear: whether the generated samples include a realistic `type == "application_fee"` entry by default, or return an empty list.
-   - Recommendation: First integration test pass asserts the **shape** of `fee_details` (list of `%FeeDetail{}` or empty), not the **content**. Unit tests via fixtures cover the `application_fee` filter logic.
+   - **RESOLVED:** Integration tests assert the **shape** of `fee_details` only (list of `%FeeDetail{}` or empty). Unit tests via Mox fixtures cover the `application_fee` filter logic end-to-end with synthetic payloads. No blocker for planning.
 
 2. **Does the Phase 8 telemetry path parser handle nested URLs (`/v1/transfers/:id/reversals/:rid`) cleanly?**
    - What we know: `parse_resource_and_operation/2` derives resource from URL path (STATE.md line 112); Phase 17 shipped `/v1/account_links` which is flat.
    - What's unclear: whether the parser emits a sensible `resource: "transfer_reversal"` or something like `"transfers/:id/reversals"` for the nested path.
-   - Recommendation: Add a targeted Phase 18 telemetry unit test that asserts the derived resource name for at least one nested URL. If broken, fix as an in-phase micro-change to the parser (Phase 8 territory but low-risk).
+   - **RESOLVED:** Plan 03 adds one targeted telemetry unit test asserting the derived resource name for a `/v1/transfers/:id/reversals` request. If the parser emits a malformed name, Plan 03 fixes `parse_resource_and_operation/2` as an in-phase micro-change (Phase 8 code, but low-risk and scope-adjacent to Phase 18 needs).
 
 3. **Does `BankAccount.account_holder_name` actually appear in recent Stripe API responses, or is it deprecated in favor of `account_holder_type`?**
    - What we know: stripe-ruby and stripe-node still document `account_holder_name`.
    - What's unclear: whether Stripe's current API version (pinned in `Client`) still returns it.
-   - Recommendation: Include in `@known_fields`; F-001 guarantees that if Stripe drops it, nothing breaks (becomes `nil`). Hide in `Inspect` preemptively.
+   - **RESOLVED:** Include `account_holder_name` in `@known_fields` and add to the PII Inspect hide-list preemptively. F-001 (nested-struct open-outer policy) guarantees that if Stripe drops the field, it simply decodes as `nil` — no breakage. No blocker for planning.
 
 ## Sources
 
