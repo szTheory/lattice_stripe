@@ -362,6 +362,12 @@ defmodule LatticeStripe.Account do
   defp cast_capabilities(nil), do: nil
 
   defp cast_capabilities(caps) when is_map(caps) do
-    Map.new(caps, fn {name, obj} -> {name, Capability.cast(obj)} end)
+    Map.new(caps, fn
+      # Real Stripe API returns capability objects as maps (e.g. %{"status" => "active", ...}).
+      # stripe-mock may return capability values as plain status strings (e.g. "active").
+      # Normalize plain strings to a map so Capability.cast/1 can handle them uniformly.
+      {name, obj} when is_binary(obj) -> {name, Capability.cast(%{"status" => obj})}
+      {name, obj} -> {name, Capability.cast(obj)}
+    end)
   end
 end
