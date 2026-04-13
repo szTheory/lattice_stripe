@@ -103,7 +103,7 @@ defmodule LatticeStripe.BalanceTransaction do
 
   def retrieve(%Client{}, id, _opts) when id in [nil, ""] do
     raise ArgumentError,
-          "BalanceTransaction.retrieve/3 requires a non-empty balance transaction id"
+          "BalanceTransaction.retrieve/3 requires a non-empty balance_transaction id"
   end
 
   def retrieve(%Client{} = client, id, opts) when is_binary(id) do
@@ -120,7 +120,7 @@ defmodule LatticeStripe.BalanceTransaction do
 
   def retrieve!(%Client{}, id, _opts) when id in [nil, ""] do
     raise ArgumentError,
-          "BalanceTransaction.retrieve!/3 requires a non-empty balance transaction id"
+          "BalanceTransaction.retrieve!/3 requires a non-empty balance_transaction id"
   end
 
   def retrieve!(%Client{} = client, id, opts) when is_binary(id) do
