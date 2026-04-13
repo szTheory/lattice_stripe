@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Release
 status: executing
-stopped_at: "Billing track complete (PR #4 merged). Beginning Connect track — Phase 17 scope definition."
-last_updated: "2026-04-13T00:16:01.814Z"
-last_activity: 2026-04-13 -- Phase 17 execution started
+stopped_at: Completed 17-04-link-modules-PLAN.md
+last_updated: "2026-04-13T00:23:24.641Z"
+last_activity: 2026-04-13
 progress:
   total_phases: 14
   completed_phases: 11
-  total_plans: 37
+  total_plans: 31
   completed_plans: 33
-  percent: 89
+  percent: 100
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 ## Current Position
 
 Phase: 17 (connect-accounts-links) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 17
-Last activity: 2026-04-13 -- Phase 17 execution started
+Plan: 2 of 6
+Status: Ready to execute
+Last activity: 2026-04-13
 
 Progress: [████████████████░░░░] 14/17 phases (82%) · 44/44 planned plans complete
 
@@ -98,6 +98,7 @@ Progress: [████████████████░░░░] 14/17 p
 | Phase 11-ci-cd-release P02 | 5 | 2 tasks | 5 files |
 | Phase 11-ci-cd-release P03 | 3 | 2 tasks | 5 files |
 | Phase 11-ci-cd-release P01 | 2 | 2 tasks | 4 files |
+| Phase 17 P04 | 20 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -183,6 +184,8 @@ Recent decisions affecting current work:
 - [Phase 15-subscriptions]: No subscription-specific telemetry events — piggyback on the general `[:lattice_stripe, :request, *]` events; subscription state transitions belong to user webhook handlers, not the SDK
 - [Phase 15-subscriptions]: `guides/subscriptions.md` contains a mandatory webhook-handoff callout ("drive application state from webhook events, not SDK responses") — T-15-04 mitigation
 - [Phase 15-subscriptions]: Async test isolation fragility fixes — `Code.ensure_loaded!/1` in `function_exported?` describe blocks (product/coupon/price/promotion_code test files); `client_test.exs:476` telemetry handler now filters by `metadata[:path]` to ignore events from concurrent tests
+- [Phase 17]: D-04c enforced: AccountLink.create/3 takes params map (no positional type arg); locked by regression test
+- [Phase 17]: LoginLink.create/4 deviates from SDK-wide shape: account_id as 2nd positional arg because endpoint is URL-path-scoped; documented in moduledoc
 
 ### Pending Todos
 
@@ -200,6 +203,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T23:00:00.000Z
-Stopped at: Billing track complete (PR #4 merged). Beginning Connect track — Phase 17 scope definition.
+Last session: 2026-04-13T00:23:24.637Z
+Stopped at: Completed 17-04-link-modules-PLAN.md
 Resume path: `/gsd-discuss-phase 17` to flesh out Connect Accounts + AccountLinks scope, then plan/execute.
