@@ -254,29 +254,35 @@ defmodule LatticeStripe.Transfer do
   def from_map(nil), do: nil
 
   def from_map(map) when is_map(map) do
-    raw_reversals = map["reversals"] || %{}
+    # Decode the embedded `reversals` sublist. F-001 requires that nothing
+    # is silently lost: if Stripe ever returns an unexpected shape (e.g.
+    # `false` or a bare string — API drift), preserve the raw value under
+    # `extra["reversals_raw"]` rather than dropping it.
+    {reversal_structs, reversals_meta, reversals_raw} =
+      case map["reversals"] do
+        %{"data" => data} = m when is_list(data) ->
+          {Enum.map(data, &TransferReversal.from_map/1), Map.drop(m, ["data"]), nil}
 
-    reversal_structs =
-      case raw_reversals do
-        %{"data" => data} when is_list(data) ->
-          Enum.map(data, &TransferReversal.from_map/1)
+        %{} = m ->
+          {[], Map.drop(m, ["data"]), nil}
 
-        _ ->
-          []
-      end
+        nil ->
+          {[], %{}, nil}
 
-    reversals_meta =
-      case raw_reversals do
-        %{} = m -> Map.drop(m, ["data"])
-        _ -> %{}
+        other ->
+          {[], %{}, other}
       end
 
     base_extra = Map.drop(map, @known_fields)
 
     extra =
-      if map_size(reversals_meta) > 0,
-        do: Map.put(base_extra, "reversals_meta", reversals_meta),
-        else: base_extra
+      base_extra
+      |> then(fn e ->
+        if map_size(reversals_meta) > 0, do: Map.put(e, "reversals_meta", reversals_meta), else: e
+      end)
+      |> then(fn e ->
+        if is_nil(reversals_raw), do: e, else: Map.put(e, "reversals_raw", reversals_raw)
+      end)
 
     %__MODULE__{
       id: map["id"],
