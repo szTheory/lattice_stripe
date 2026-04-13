@@ -1,6 +1,6 @@
 {
   "release-type": "elixir",
-  "bump-minor-pre-major": true,
+  "bump-minor-pre-major": false,
   "bump-patch-for-minor-pre-major": false,
   "changelog-sections": [
     {"type": "feat", "section": "Features"},
@@ -10,8 +10,6 @@
     {"type": "chore", "section": "Miscellaneous", "hidden": true}
   ],
   "packages": {
-    ".": {
-      "release-as": "1.0.0"
-    }
+    ".": {}
   }
 }
