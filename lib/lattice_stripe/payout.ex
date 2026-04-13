@@ -228,7 +228,15 @@ defmodule LatticeStripe.Payout do
   on a Payout.
   """
   @spec update(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
-  def update(%Client{} = client, id, params, opts \\ []) when is_binary(id) do
+  def update(client, id, params, opts \\ [])
+
+  def update(%Client{}, nil, _params, _opts),
+    do: raise(ArgumentError, ~s|Payout.update/4 requires a non-empty "payout id"|)
+
+  def update(%Client{}, "", _params, _opts),
+    do: raise(ArgumentError, ~s|Payout.update/4 requires a non-empty "payout id"|)
+
+  def update(%Client{} = client, id, params, opts) when is_binary(id) do
     %Request{method: :post, path: "/v1/payouts/#{id}", params: params, opts: opts}
     |> then(&Client.request(client, &1))
     |> Resource.unwrap_singular(&from_map/1)
@@ -352,7 +360,15 @@ defmodule LatticeStripe.Payout do
 
   @doc "Like `update/4` but raises `LatticeStripe.Error` on failure."
   @spec update!(Client.t(), String.t(), map(), keyword()) :: t()
-  def update!(%Client{} = client, id, params, opts \\ []) when is_binary(id) do
+  def update!(client, id, params, opts \\ [])
+
+  def update!(%Client{}, nil, _params, _opts),
+    do: raise(ArgumentError, ~s|Payout.update!/4 requires a non-empty "payout id"|)
+
+  def update!(%Client{}, "", _params, _opts),
+    do: raise(ArgumentError, ~s|Payout.update!/4 requires a non-empty "payout id"|)
+
+  def update!(%Client{} = client, id, params, opts) when is_binary(id) do
     update(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
