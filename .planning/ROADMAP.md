@@ -27,7 +27,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 15: Subscriptions & Subscription Items** - Subscription lifecycle + SubscriptionItem CRUD (completed 2026-04-12, PR #4)
 - [x] **Phase 16: Subscription Schedules** - Phased subscription scheduling with proration guards (completed 2026-04-12, PR #4)
 - [x] **Phase 17: Connect Accounts & Account Links** - Connect account lifecycle and onboarding URLs (CNCT-01) (completed 2026-04-13)
-- [ ] **Phase 18: Connect Money Movement** - Transfers, Payouts, Balance, Balance Transactions, destination charges (CNCT-02 through CNCT-05)
+- [x] **Phase 18: Connect Money Movement** - Transfers, Payouts, Balance, Balance Transactions, destination charges (CNCT-02 through CNCT-05) (completed 2026-04-13)
 - [ ] **Phase 19: Cross-cutting Polish & v1.0 Release** - Final docs pass, release cut, accumulated cleanup
 
 ## Phase Details
@@ -233,7 +233,15 @@ Plans:
   5. Destination charges and separate charge/transfer patterns documented with runnable examples
   6. Platform fee reconciliation surfaced through Balance Transaction expansion
 **Scope note:** External Accounts moved from Phase 17 to Phase 18 per Phase 17 D-03 — they semantically belong with the payout consumers that use them, matching every other Stripe SDK's placement (stripity_stripe, stripe-node, stripe-python, stripe-go, stripe-java) and Stripe's own API reference grouping.
-**Plans:** TBD
+**Plans:** 6/6 plans complete
+
+Plans:
+- [x] 18-01-external-account-PLAN.md — BankAccount + Card + ExternalAccount polymorphic dispatcher + Unknown fallback (CNCT-02)
+- [x] 18-02-charge-retrieve-PLAN.md — Charge retrieve-only resource for fee reconciliation typing (CNCT-04)
+- [x] 18-03-transfer-reversal-PLAN.md — Transfer CRUDL + standalone TransferReversal module (CNCT-02, CNCT-03)
+- [x] 18-04-payout-PLAN.md — Payout CRUDL + cancel + reverse + Payout.TraceId nested struct (CNCT-02)
+- [x] 18-05-balance-transactions-PLAN.md — Balance singleton + Balance.Amount/SourceTypes + BalanceTransaction + FeeDetail (CNCT-04, CNCT-05)
+- [x] 18-06-integration-guide-exdoc-PLAN.md — stripe-mock integration tests + connect.md money-movement section + ExDoc wiring (CNCT-02..05)
 
 ### Phase 19: Cross-cutting Polish & v1.0 Release
 **Goal**: LatticeStripe ships v1.0 — final documentation pass, accumulated cleanup, and release cut
