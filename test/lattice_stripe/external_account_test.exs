@@ -19,16 +19,17 @@ defmodule LatticeStripe.ExternalAccountTest do
   # ---------------------------------------------------------------------------
 
   describe "cast/1" do
-    test "dispatches %{\"object\" => \"bank_account\"} -> %BankAccount{}" do
+    test ~S[dispatches %{"object" => "bank_account"} -> %BankAccount{}] do
       assert %BankAccount{id: @ba_id} = ExternalAccount.cast(Fixtures.bank_account())
     end
 
-    test "dispatches %{\"object\" => \"card\"} -> %Card{}" do
+    test ~S[dispatches %{"object" => "card"} -> %Card{}] do
       assert %Card{id: @card_id} = ExternalAccount.cast(Fixtures.card())
     end
 
     test "dispatches unknown object -> %ExternalAccount.Unknown{} with payload in :extra" do
       raw = Fixtures.unknown()
+
       assert %Unknown{id: "xa_future1234567890abc", object: "future_thing", extra: extra} =
                ExternalAccount.cast(raw)
 

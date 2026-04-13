@@ -20,12 +20,13 @@ defmodule LatticeStripe.Account.TosAcceptanceTest do
     end
 
     test "casts known fields correctly" do
-      result = TosAcceptance.from_map(%{
-        "date" => 1_700_000_000,
-        "ip" => "203.0.113.42",
-        "service_agreement" => "full",
-        "user_agent" => "Mozilla/5.0 Test"
-      })
+      result =
+        TosAcceptance.from_map(%{
+          "date" => 1_700_000_000,
+          "ip" => "203.0.113.42",
+          "service_agreement" => "full",
+          "user_agent" => "Mozilla/5.0 Test"
+        })
 
       assert result.date == 1_700_000_000
       assert result.ip == "203.0.113.42"
@@ -79,7 +80,13 @@ defmodule LatticeStripe.Account.TosAcceptanceTest do
     end
 
     test "nil PII fields do not print [REDACTED]" do
-      tos = %TosAcceptance{date: 1_700_000_000, service_agreement: "full", ip: nil, user_agent: nil}
+      tos = %TosAcceptance{
+        date: 1_700_000_000,
+        service_agreement: "full",
+        ip: nil,
+        user_agent: nil
+      }
+
       output = inspect(tos)
       refute output =~ "[REDACTED]"
     end

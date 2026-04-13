@@ -25,16 +25,17 @@ defmodule LatticeStripe.Account.RequirementsTest do
     end
 
     test "casts known fields correctly" do
-      result = Requirements.from_map(%{
-        "currently_due" => ["external_account"],
-        "eventually_due" => ["external_account"],
-        "past_due" => [],
-        "pending_verification" => [],
-        "disabled_reason" => nil,
-        "current_deadline" => 1_702_678_400,
-        "errors" => [],
-        "alternatives" => []
-      })
+      result =
+        Requirements.from_map(%{
+          "currently_due" => ["external_account"],
+          "eventually_due" => ["external_account"],
+          "past_due" => [],
+          "pending_verification" => [],
+          "disabled_reason" => nil,
+          "current_deadline" => 1_702_678_400,
+          "errors" => [],
+          "alternatives" => []
+        })
 
       assert result.currently_due == ["external_account"]
       assert result.eventually_due == ["external_account"]

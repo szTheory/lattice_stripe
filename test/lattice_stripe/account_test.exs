@@ -128,8 +128,11 @@ defmodule LatticeStripe.AccountTest do
     test "casts capabilities into a map of string keys to %Capability{}" do
       account = Account.from_map(Fixtures.basic())
 
-      assert %{"card_payments" => card_pay, "transfers" => transfers,
-               "us_bank_account_payments" => us_bank} = account.capabilities
+      assert %{
+               "card_payments" => card_pay,
+               "transfers" => transfers,
+               "us_bank_account_payments" => us_bank
+             } = account.capabilities
 
       assert %Capability{status: "active", requested: true} = card_pay
       assert %Capability{status: "pending", requested: true} = transfers
@@ -141,6 +144,7 @@ defmodule LatticeStripe.AccountTest do
 
       assert Capability.status_atom(account.capabilities["card_payments"]) == :active
       assert Capability.status_atom(account.capabilities["transfers"]) == :pending
+
       assert Capability.status_atom(account.capabilities["us_bank_account_payments"]) ==
                :unrequested
     end

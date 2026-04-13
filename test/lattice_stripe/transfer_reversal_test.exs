@@ -66,7 +66,12 @@ defmodule LatticeStripe.TransferReversalTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
-        assert String.ends_with?(req.url, "/v1/transfers/#{@transfer_id}/reversals/#{@reversal_id}")
+
+        assert String.ends_with?(
+                 req.url,
+                 "/v1/transfers/#{@transfer_id}/reversals/#{@reversal_id}"
+               )
+
         ok_response(transfer_reversal_json())
       end)
 
@@ -109,7 +114,12 @@ defmodule LatticeStripe.TransferReversalTest do
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
-        assert String.ends_with?(req.url, "/v1/transfers/#{@transfer_id}/reversals/#{@reversal_id}")
+
+        assert String.ends_with?(
+                 req.url,
+                 "/v1/transfers/#{@transfer_id}/reversals/#{@reversal_id}"
+               )
+
         assert req.body =~ "metadata"
         ok_response(transfer_reversal_json(%{"metadata" => %{"k" => "v"}}))
       end)
@@ -203,7 +213,9 @@ defmodule LatticeStripe.TransferReversalTest do
     test "retrieve! returns struct on success" do
       client = test_client()
 
-      expect(LatticeStripe.MockTransport, :request, fn _ -> ok_response(transfer_reversal_json()) end)
+      expect(LatticeStripe.MockTransport, :request, fn _ ->
+        ok_response(transfer_reversal_json())
+      end)
 
       assert %TransferReversal{id: @reversal_id} =
                TransferReversal.retrieve!(client, @transfer_id, @reversal_id)

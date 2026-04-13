@@ -19,14 +19,15 @@ defmodule LatticeStripe.Account.CompanyTest do
     end
 
     test "casts known fields correctly" do
-      result = Company.from_map(%{
-        "name" => "Acme Corp",
-        "tax_id" => "00-0000000",
-        "phone" => "+15555550101",
-        "directors_provided" => true,
-        "owners_provided" => true,
-        "structure" => nil
-      })
+      result =
+        Company.from_map(%{
+          "name" => "Acme Corp",
+          "tax_id" => "00-0000000",
+          "phone" => "+15555550101",
+          "directors_provided" => true,
+          "owners_provided" => true,
+          "structure" => nil
+        })
 
       assert result.name == "Acme Corp"
       assert result.tax_id == "00-0000000"

@@ -54,7 +54,8 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Customer,
             LatticeStripe.PaymentMethod,
             LatticeStripe.SetupIntent,
-            LatticeStripe.Refund
+            LatticeStripe.Refund,
+            LatticeStripe.Charge
           ],
           Checkout: [
             LatticeStripe.Checkout.Session,
@@ -89,7 +90,20 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Account.Individual,
             LatticeStripe.Account.Requirements,
             LatticeStripe.Account.Settings,
-            LatticeStripe.Account.TosAcceptance
+            LatticeStripe.Account.TosAcceptance,
+            LatticeStripe.BankAccount,
+            LatticeStripe.Card,
+            LatticeStripe.ExternalAccount,
+            LatticeStripe.ExternalAccount.Unknown,
+            LatticeStripe.Transfer,
+            LatticeStripe.TransferReversal,
+            LatticeStripe.Payout,
+            LatticeStripe.Payout.TraceId,
+            LatticeStripe.Balance,
+            LatticeStripe.Balance.Amount,
+            LatticeStripe.Balance.SourceTypes,
+            LatticeStripe.BalanceTransaction,
+            LatticeStripe.BalanceTransaction.FeeDetail
           ],
           Webhooks: [
             LatticeStripe.Webhook,

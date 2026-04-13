@@ -22,10 +22,11 @@ defmodule LatticeStripe.Account.SettingsTest do
     end
 
     test "sub-objects (branding, payouts, etc.) remain as plain maps — NOT converted to structs" do
-      result = Settings.from_map(%{
-        "branding" => %{"icon" => nil, "primary_color" => "#ff0000"},
-        "payouts" => %{"schedule" => %{"interval" => "daily"}}
-      })
+      result =
+        Settings.from_map(%{
+          "branding" => %{"icon" => nil, "primary_color" => "#ff0000"},
+          "payouts" => %{"schedule" => %{"interval" => "daily"}}
+        })
 
       assert is_map(result.branding)
       assert is_map(result.payouts)
@@ -42,7 +43,11 @@ defmodule LatticeStripe.Account.SettingsTest do
     end
 
     test "unknown top-level sub-objects land in :extra" do
-      result = Settings.from_map(%{"dashboard" => %{"display_name" => "Test"}, "zzz_new_setting" => %{"value" => true}})
+      result =
+        Settings.from_map(%{
+          "dashboard" => %{"display_name" => "Test"},
+          "zzz_new_setting" => %{"value" => true}
+        })
 
       assert is_map(result.dashboard)
       assert result.extra == %{"zzz_new_setting" => %{"value" => true}}

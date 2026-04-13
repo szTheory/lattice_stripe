@@ -10,13 +10,14 @@ defmodule LatticeStripe.Account.CapabilityTest do
     end
 
     test "casts fully-populated capability map" do
-      result = Capability.cast(%{
-        "status" => "active",
-        "requested" => true,
-        "requested_at" => 1_700_000_000,
-        "requirements" => %{"currently_due" => []},
-        "disabled_reason" => nil
-      })
+      result =
+        Capability.cast(%{
+          "status" => "active",
+          "requested" => true,
+          "requested_at" => 1_700_000_000,
+          "requirements" => %{"currently_due" => []},
+          "disabled_reason" => nil
+        })
 
       assert %Capability{} = result
       assert result.status == "active"
@@ -28,10 +29,11 @@ defmodule LatticeStripe.Account.CapabilityTest do
     end
 
     test "unknown top-level capability fields land in :extra" do
-      result = Capability.cast(%{
-        "status" => "active",
-        "zzz_future" => "x"
-      })
+      result =
+        Capability.cast(%{
+          "status" => "active",
+          "zzz_future" => "x"
+        })
 
       assert result.status == "active"
       assert result.extra == %{"zzz_future" => "x"}
@@ -88,7 +90,9 @@ defmodule LatticeStripe.Account.CapabilityTest do
 
   describe "status_atom/1 safety" do
     test "forward-compatible unknown status returns :unknown without raising" do
-      assert Capability.status_atom(%Capability{status: "zzz_totally_new_status_from_stripe_2030"}) == :unknown
+      assert Capability.status_atom(%Capability{
+               status: "zzz_totally_new_status_from_stripe_2030"
+             }) == :unknown
     end
 
     test "random unknown status returns :unknown without raising or leaking atoms" do

@@ -20,14 +20,15 @@ defmodule LatticeStripe.Account.IndividualTest do
     end
 
     test "casts known fields correctly" do
-      result = Individual.from_map(%{
-        "first_name" => "Jane",
-        "last_name" => "Doe",
-        "email" => "jane@test.invalid",
-        "ssn_last_4" => "1234",
-        "political_exposure" => "none",
-        "gender" => "female"
-      })
+      result =
+        Individual.from_map(%{
+          "first_name" => "Jane",
+          "last_name" => "Doe",
+          "email" => "jane@test.invalid",
+          "ssn_last_4" => "1234",
+          "political_exposure" => "none",
+          "gender" => "female"
+        })
 
       assert result.first_name == "Jane"
       assert result.last_name == "Doe"

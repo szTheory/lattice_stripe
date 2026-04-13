@@ -49,19 +49,21 @@ defmodule LatticeStripe.Account.BusinessProfileTest do
     end
 
     test "support_phone and support_url are cast correctly" do
-      result = BusinessProfile.from_map(%{
-        "support_phone" => "+15555550100",
-        "support_url" => "https://support.acme.test"
-      })
+      result =
+        BusinessProfile.from_map(%{
+          "support_phone" => "+15555550100",
+          "support_url" => "https://support.acme.test"
+        })
 
       assert result.support_phone == "+15555550100"
       assert result.support_url == "https://support.acme.test"
     end
 
     test "monthly_estimated_revenue is cast as map (nested object)" do
-      result = BusinessProfile.from_map(%{
-        "monthly_estimated_revenue" => %{"amount" => 10_000, "currency" => "usd"}
-      })
+      result =
+        BusinessProfile.from_map(%{
+          "monthly_estimated_revenue" => %{"amount" => 10_000, "currency" => "usd"}
+        })
 
       assert result.monthly_estimated_revenue == %{"amount" => 10_000, "currency" => "usd"}
     end
