@@ -23,12 +23,6 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 9: Testing Infrastructure** - Integration tests, unit tests, Mox contracts, test helpers
 - [x] **Phase 10: Documentation & Guides** - ExDoc, moduledocs, guides, README quickstart (completed 2026-04-03)
 - [x] **Phase 11: CI/CD & Release** - GitHub Actions, Release Please, Hex publishing, Dependabot (completed 2026-04-04)
-- [x] **Phase 14: Invoices & Invoice Line Items** - Invoice resource + line item operations (completed 2026-04-12, PR #4)
-- [x] **Phase 15: Subscriptions & Subscription Items** - Subscription lifecycle + SubscriptionItem CRUD (completed 2026-04-12, PR #4)
-- [x] **Phase 16: Subscription Schedules** - Phased subscription scheduling with proration guards (completed 2026-04-12, PR #4)
-- [ ] **Phase 17: Connect Accounts & Account Links** - Connect account lifecycle and onboarding URLs (CNCT-01)
-- [ ] **Phase 18: Connect Money Movement** - Transfers, Payouts, Balance, Balance Transactions, destination charges (CNCT-02 through CNCT-05)
-- [ ] **Phase 19: Cross-cutting Polish & v1.0 Release** - Final docs pass, release cut, accumulated cleanup
 
 ## Phase Details
 
@@ -209,48 +203,10 @@ Plans:
 - [x] 11-02-PLAN.md — Release Please workflow + manifest config + Dependabot + auto-merge
 - [x] 11-03-PLAN.md — Community files (CONTRIBUTING, SECURITY, issue/PR templates) + repo settings checkpoint
 
-### Phase 17: Connect Accounts & Account Links
-**Goal**: Developers can onboard Stripe Connect accounts end-to-end — manage connected account lifecycle and generate Stripe-hosted onboarding URLs
-**Depends on**: Phase 4 (resource module pattern), Phase 7 (webhook shape for account updates)
-**Requirements**: CNCT-01
-**Success Criteria** (what must be TRUE):
-  1. Developer can create, retrieve, update, delete, reject, and list Connect accounts via `LatticeStripe.Account`
-  2. Developer can generate an onboarding URL via `LatticeStripe.AccountLink.create/3` for Stripe-hosted onboarding flows
-  3. Developer can act on behalf of a connected account by setting the `Stripe-Account` header on any resource call (per-request and per-client)
-  4. All operations follow Phase 4/5/14/15 conventions (flat namespace, nested typed structs, bang variants, streams, PII-safe Inspect, no `Jason.Encoder`)
-  5. Integration tests via stripe-mock cover the account lifecycle and account-link creation
-**Plans:** TBD (discussion pending)
-
-### Phase 18: Connect Money Movement
-**Goal**: Developers can move money on the Connect platform — attach external accounts, transfer between accounts, pay out to bank accounts, and inspect balance
-**Depends on**: Phase 17
-**Requirements**: CNCT-02, CNCT-03, CNCT-04, CNCT-05
-**Success Criteria** (what must be TRUE):
-  1. Developer can create, retrieve, update, delete, and list External Accounts (bank accounts + debit cards) on a connected account via `LatticeStripe.ExternalAccount` (polymorphic module covering both object types)
-  2. Developer can create, retrieve, update, list, and reverse Transfers
-  3. Developer can create, retrieve, update, list, and cancel Payouts
-  4. Developer can retrieve the platform Balance and list Balance Transactions with filtering
-  5. Destination charges and separate charge/transfer patterns documented with runnable examples
-  6. Platform fee reconciliation surfaced through Balance Transaction expansion
-**Scope note:** External Accounts moved from Phase 17 to Phase 18 per Phase 17 D-03 — they semantically belong with the payout consumers that use them, matching every other Stripe SDK's placement (stripity_stripe, stripe-node, stripe-python, stripe-go, stripe-java) and Stripe's own API reference grouping.
-**Plans:** TBD
-
-### Phase 19: Cross-cutting Polish & v1.0 Release
-**Goal**: LatticeStripe ships v1.0 — final documentation pass, accumulated cleanup, and release cut
-**Depends on**: Phase 18
-**Requirements**: (cross-cutting, no new requirement IDs)
-**Success Criteria** (what must be TRUE):
-  1. All guides reviewed end-to-end and updated for Billing + Connect coverage
-  2. Module groups in ExDoc config reflect final public surface (Payments / Billing / Connect / Webhooks / Testing / Telemetry)
-  3. README quickstart still passes the 60-second test with current dependency versions
-  4. CHANGELOG reflects the full 0.2 → 1.0 arc
-  5. v1.0.0 published to Hex via Release Please
-**Plans:** TBD
-
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 after 1) -> 8 -> 9 -> 10 -> 11 -> 14 -> 15 -> 16 -> 17 -> 18 -> 19
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5/6/7 (5 and 6 after 4; 7 after 1) -> 8 -> 9 -> 10 -> 11
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
