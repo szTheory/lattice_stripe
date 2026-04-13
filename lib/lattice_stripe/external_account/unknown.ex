@@ -29,10 +29,12 @@ defmodule LatticeStripe.ExternalAccount.Unknown do
   def cast(nil), do: nil
 
   def cast(map) when is_map(map) do
+    known_string_keys = Enum.map(@known_fields, &Atom.to_string/1)
+
     %__MODULE__{
       id: map["id"],
       object: map["object"],
-      extra: Map.drop(map, ["id", "object"])
+      extra: Map.drop(map, known_string_keys)
     }
   end
 end
