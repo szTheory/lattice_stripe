@@ -236,7 +236,8 @@ defmodule LatticeStripe.Payout do
   def update(%Client{}, "", _params, _opts),
     do: raise(ArgumentError, ~s|Payout.update/4 requires a non-empty "payout id"|)
 
-  def update(%Client{} = client, id, params, opts) when is_binary(id) do
+  def update(%Client{} = client, id, params, opts)
+      when is_binary(id) and is_map(params) do
     %Request{method: :post, path: "/v1/payouts/#{id}", params: params, opts: opts}
     |> then(&Client.request(client, &1))
     |> Resource.unwrap_singular(&from_map/1)
@@ -368,7 +369,8 @@ defmodule LatticeStripe.Payout do
   def update!(%Client{}, "", _params, _opts),
     do: raise(ArgumentError, ~s|Payout.update!/4 requires a non-empty "payout id"|)
 
-  def update!(%Client{} = client, id, params, opts) when is_binary(id) do
+  def update!(%Client{} = client, id, params, opts)
+      when is_binary(id) and is_map(params) do
     update(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
