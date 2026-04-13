@@ -207,11 +207,7 @@ defmodule LatticeStripe.Charge do
   @spec retrieve(Client.t(), String.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def retrieve(client, id, opts \\ [])
 
-  def retrieve(%Client{}, nil, _opts) do
-    raise ArgumentError, ~s|Charge.retrieve/3 requires a non-empty "charge id"|
-  end
-
-  def retrieve(%Client{}, "", _opts) do
+  def retrieve(%Client{}, id, _opts) when id in [nil, ""] do
     raise ArgumentError, ~s|Charge.retrieve/3 requires a non-empty "charge id"|
   end
 
@@ -230,11 +226,7 @@ defmodule LatticeStripe.Charge do
   @spec retrieve!(Client.t(), String.t(), keyword()) :: t()
   def retrieve!(client, id, opts \\ [])
 
-  def retrieve!(%Client{}, nil, _opts) do
-    raise ArgumentError, ~s|Charge.retrieve!/3 requires a non-empty "charge id"|
-  end
-
-  def retrieve!(%Client{}, "", _opts) do
+  def retrieve!(%Client{}, id, _opts) when id in [nil, ""] do
     raise ArgumentError, ~s|Charge.retrieve!/3 requires a non-empty "charge id"|
   end
 

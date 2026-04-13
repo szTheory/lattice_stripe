@@ -209,10 +209,7 @@ defmodule LatticeStripe.Payout do
   @spec retrieve(Client.t(), String.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def retrieve(client, id, opts \\ [])
 
-  def retrieve(%Client{}, nil, _opts),
-    do: raise(ArgumentError, ~s|Payout.retrieve/3 requires a non-empty "payout id"|)
-
-  def retrieve(%Client{}, "", _opts),
+  def retrieve(%Client{}, id, _opts) when id in [nil, ""],
     do: raise(ArgumentError, ~s|Payout.retrieve/3 requires a non-empty "payout id"|)
 
   def retrieve(%Client{} = client, id, opts) when is_binary(id) do
@@ -230,10 +227,7 @@ defmodule LatticeStripe.Payout do
   @spec update(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def update(client, id, params, opts \\ [])
 
-  def update(%Client{}, nil, _params, _opts),
-    do: raise(ArgumentError, ~s|Payout.update/4 requires a non-empty "payout id"|)
-
-  def update(%Client{}, "", _params, _opts),
+  def update(%Client{}, id, _params, _opts) when id in [nil, ""],
     do: raise(ArgumentError, ~s|Payout.update/4 requires a non-empty "payout id"|)
 
   def update(%Client{} = client, id, params, opts)
@@ -297,10 +291,7 @@ defmodule LatticeStripe.Payout do
   @spec cancel(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def cancel(client, id, params \\ %{}, opts \\ [])
 
-  def cancel(%Client{}, nil, _params, _opts),
-    do: raise(ArgumentError, ~s|Payout.cancel/4 requires a non-empty "payout id"|)
-
-  def cancel(%Client{}, "", _params, _opts),
+  def cancel(%Client{}, id, _params, _opts) when id in [nil, ""],
     do: raise(ArgumentError, ~s|Payout.cancel/4 requires a non-empty "payout id"|)
 
   def cancel(%Client{} = client, id, params, opts) when is_binary(id) do
@@ -331,10 +322,7 @@ defmodule LatticeStripe.Payout do
   @spec reverse(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def reverse(client, id, params \\ %{}, opts \\ [])
 
-  def reverse(%Client{}, nil, _params, _opts),
-    do: raise(ArgumentError, ~s|Payout.reverse/4 requires a non-empty "payout id"|)
-
-  def reverse(%Client{}, "", _params, _opts),
+  def reverse(%Client{}, id, _params, _opts) when id in [nil, ""],
     do: raise(ArgumentError, ~s|Payout.reverse/4 requires a non-empty "payout id"|)
 
   def reverse(%Client{} = client, id, params, opts) when is_binary(id) do
@@ -363,10 +351,7 @@ defmodule LatticeStripe.Payout do
   @spec update!(Client.t(), String.t(), map(), keyword()) :: t()
   def update!(client, id, params, opts \\ [])
 
-  def update!(%Client{}, nil, _params, _opts),
-    do: raise(ArgumentError, ~s|Payout.update!/4 requires a non-empty "payout id"|)
-
-  def update!(%Client{}, "", _params, _opts),
+  def update!(%Client{}, id, _params, _opts) when id in [nil, ""],
     do: raise(ArgumentError, ~s|Payout.update!/4 requires a non-empty "payout id"|)
 
   def update!(%Client{} = client, id, params, opts)
