@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Release
 status: executing
-stopped_at: Phase 18 context gathered
-last_updated: "2026-04-13T02:17:10.561Z"
+stopped_at: Phase 18 complete — 29/29 threats closed, 8/8 review findings fixed
+last_updated: "2026-04-13T09:58:00.000Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 14
-  completed_phases: 13
+  completed_phases: 14
   total_plans: 43
   completed_plans: 43
   percent: 100
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-03)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 18 — connect-money-movement
+**Current focus:** Phase 19 — cross-cutting-polish-release (not started). Phase 18 shipped 2026-04-13.
 
 ## Current Position
 
 Phase: 19
 Plan: Not started
-Status: Executing Phase 18
+Status: Phase 18 complete; Phase 19 not started
 Last activity: 2026-04-13
 
-Progress: [████████████████░░░░] 14/17 phases (82%) · 44/44 planned plans complete
+Progress: [█████████████████░░░] 15/17 phases (88%) · 50/50 planned plans complete
 
 **PR #4 merged:** [Billing track: Phases 14 (Invoices) + 15 (Subscriptions) + 16 (Subscription Schedules)](https://github.com/szTheory/lattice_stripe/pull/4) — merged as commit 21e63fe.
 
@@ -45,7 +45,7 @@ Progress: [████████████████░░░░] 14/17 p
 
 **D1 restore (part of PR #4):** Recovered Phase 12/13 billing catalog (`Product`, `Price`, `Coupon`, `PromotionCode`) and `TestClock` time-travel testing from commit `39b98c9^` (20 files, `TestSupport → TestHelpers` rename fixup).
 
-**Milestone framing:** v1.0 (Phases 1–11) released as 0.2.0. v2.0-billing complete — Phases 14 (Invoices), 15 (Subscriptions + SubscriptionItems), 16 (Subscription Schedules) all shipped in merged PR #4. Next milestone is Connect: Phase 17 (Accounts + AccountLinks), Phase 18 (money movement — Transfers/Payouts/Balance), Phase 19 (cross-cutting polish + release). ROADMAP.md still documents only 1–11; refresh is overdue.
+**Milestone framing:** v1.0 (Phases 1–11) released as 0.2.0. v2.0-billing complete — Phases 14 (Invoices), 15 (Subscriptions + SubscriptionItems), 16 (Subscription Schedules) all shipped in merged PR #4. Connect track: Phase 17 (Accounts + AccountLinks) and Phase 18 (Connect money movement — ExternalAccount, Charge retrieve, Transfer + TransferReversal, Payout + TraceId, Balance + BalanceTransaction, Connect guide, ExDoc wiring) both shipped 2026-04-13. Phase 19 (cross-cutting polish + v1.0 release cut) remaining.
 
 ## Performance Metrics
 
