@@ -4,6 +4,49 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.0](https://github.com/szTheory/lattice_stripe/compare/v0.2.0...v1.0.0) (2026-04-13)
+
+
+### Features
+
+* **17-01:** add canonical Account/AccountLink/LoginLink fixtures ([a1a101c](https://github.com/szTheory/lattice_stripe/commit/a1a101cc15d87a1d47b15abad4d3a5109edb934a))
+* **17-01:** add stripe-mock reject probe script and record result in VALIDATION.md ([e3539e9](https://github.com/szTheory/lattice_stripe/commit/e3539e9ae0a524d27997028fafb5a5d108f7314a))
+* **17-02:** Account.Capability (D-02) with safe status_atom/1 ([3a80de4](https://github.com/szTheory/lattice_stripe/commit/3a80de499f52a4f4e93b7ab58ca33fd91c642fa0))
+* **17-02:** PII-safe nested structs — TosAcceptance, Company, Individual ([fddb864](https://github.com/szTheory/lattice_stripe/commit/fddb8647e6030f8634ade3c2f92fa3d1b5364e3d))
+* **17-02:** plain nested structs — BusinessProfile, Requirements, Settings ([4bd03c9](https://github.com/szTheory/lattice_stripe/commit/4bd03c9f6c0aeea3af1533150077f138dcaa408e))
+* **17-03:** LatticeStripe.Account resource module — CRUD + reject + stream + from_map ([92747d0](https://github.com/szTheory/lattice_stripe/commit/92747d09235ce8b8cc839231b807fa1ff41b6336))
+* **17-04:** LatticeStripe.AccountLink — create/3, create!/3, from_map/1 + tests ([7161f34](https://github.com/szTheory/lattice_stripe/commit/7161f34cddbce228ed8dfa7e8b91336b7ad166c6))
+* **17-04:** LatticeStripe.LoginLink — create/4, create!/4, from_map/1 + tests ([0bd48d7](https://github.com/szTheory/lattice_stripe/commit/0bd48d707a125f63c9d163e43814a8285e0d176f))
+* **17-05:** Account full-lifecycle integration test + fix cast_capabilities for stripe-mock ([e1364a6](https://github.com/szTheory/lattice_stripe/commit/e1364a6816d040006eb03a6885748225afaab188))
+* **17-05:** AccountLink + LoginLink integration tests (9 tests each) ([ecb7494](https://github.com/szTheory/lattice_stripe/commit/ecb74948400c1535c077ce418b07bbee9e0079c5))
+* **17-06:** add guides/connect.md — Connect onboarding narrative ([874dda9](https://github.com/szTheory/lattice_stripe/commit/874dda9ce161c9bb57581e8f58011420a8568836))
+* **18-01:** add BankAccount + Card structs with F-001 and PII Inspect ([f775aff](https://github.com/szTheory/lattice_stripe/commit/f775aff07ef162842e544070f75b610f713b8f71))
+* **18-01:** add ExternalAccount polymorphic dispatcher + Unknown fallback ([91148ac](https://github.com/szTheory/lattice_stripe/commit/91148ac963ada48c81da3e5d3ce2238c13b22f36))
+* **18-02:** add LatticeStripe.Charge retrieve-only resource ([44a0adb](https://github.com/szTheory/lattice_stripe/commit/44a0adb6cf05b2f4a342403cb335dafab7993c42))
+* **18-03:** add LatticeStripe.Transfer CRUDL with embedded reversals decoding ([90b1234](https://github.com/szTheory/lattice_stripe/commit/90b1234d730873dd0845f015cfe6818cf8c54fb6))
+* **18-03:** add LatticeStripe.TransferReversal standalone module ([5cddcb9](https://github.com/szTheory/lattice_stripe/commit/5cddcb91d4b22ca4bd12278eaff6e7ef94c47b8b))
+* **18-04:** add Payout CRUDL + cancel + reverse with TraceId integration ([79605ae](https://github.com/szTheory/lattice_stripe/commit/79605ae8c98fe2b3f9b6616c39a232459fc2bcd1))
+* **18-04:** add Payout.TraceId nested typed struct ([52f6d11](https://github.com/szTheory/lattice_stripe/commit/52f6d11647733a80d741a33779734ee7e33082fc))
+* **18-05:** add Balance singleton with Amount and SourceTypes nested structs ([5304b80](https://github.com/szTheory/lattice_stripe/commit/5304b80d0235b894b0148d2cd41c8c7e8d1c5d9c))
+* **18-05:** add BalanceTransaction retrieve/list/stream + FeeDetail struct ([6873c5f](https://github.com/szTheory/lattice_stripe/commit/6873c5f553773e4e55013a9e835749be3a8f1bf8))
+* **19-01:** rewrite mix.exs groups_for_modules to nine-group D-19 layout ([c66223b](https://github.com/szTheory/lattice_stripe/commit/c66223b2ed32a6c02eeddbdf704871cbb6e9288b))
+
+
+### Bug Fixes
+
+* **17-02:** align nested struct tests with 17-01 canonical fixture values ([025082a](https://github.com/szTheory/lattice_stripe/commit/025082a9fb04ca973394d1e818b8a1df098999ca))
+* **18:** IN-01 correct BankAccount docstring account_number reference ([b720afa](https://github.com/szTheory/lattice_stripe/commit/b720afa066fb10e762b6f5e52798c3505f8b234a))
+* **18:** IN-02 normalize nil/empty id guards to 'id in [nil, ""]' style ([542fc1b](https://github.com/szTheory/lattice_stripe/commit/542fc1bae0e3c88fae302e97e50b5e019ba95bac))
+* **18:** IN-03 derive ExternalAccount.Unknown.cast drop list from [@known](https://github.com/known)_fields ([00d618e](https://github.com/szTheory/lattice_stripe/commit/00d618ed285675fca67836acddd1ee9e6576b351))
+* **18:** IN-04 add is_map(params) guard to Payout.update/update! ([bdc4ab8](https://github.com/szTheory/lattice_stripe/commit/bdc4ab8c29f92e271ba0d1c0f83efa2fe8ebb582))
+* **18:** IN-05 preserve unexpected Transfer reversals shape in extra ([ae1c85e](https://github.com/szTheory/lattice_stripe/commit/ae1c85e5ffef88a9a903758a738f7bb736e67d5d))
+* **18:** WR-01 add map() to Transfer expandable typespecs ([772795e](https://github.com/szTheory/lattice_stripe/commit/772795e34c128552986a9063e75e6e8f3da598a7))
+* **18:** WR-01 add map() to TransferReversal expandable typespecs ([fe9bbdd](https://github.com/szTheory/lattice_stripe/commit/fe9bbddab275cfbc7827a73d4ca541be512bfc1a))
+* **18:** WR-02 add map() to Charge destination/source_transfer typespecs ([c26187d](https://github.com/szTheory/lattice_stripe/commit/c26187d10bddd32bf5130a2653193462ab0aeaac))
+* **18:** WR-03 add nil/empty id guards to BalanceTransaction.retrieve/3 and retrieve!/3 ([e60f220](https://github.com/szTheory/lattice_stripe/commit/e60f2201bf5596ac8357c0dfcee745f3e356cda7))
+* **18:** WR-03 add nil/empty id guards to Payout.update/4 and update!/4 ([4614b1c](https://github.com/szTheory/lattice_stripe/commit/4614b1c501443d04208f5fecf6a07b002da998ab))
+* **18:** WR-03 restore balance_transaction id error message for test contract ([10a8827](https://github.com/szTheory/lattice_stripe/commit/10a882718bb277f25f39a5e62a5f90894eac70c5))
+
 ## [Unreleased]
 
 <!--
