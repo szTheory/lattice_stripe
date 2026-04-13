@@ -3,8 +3,8 @@ defmodule LatticeStripe.RetryStrategy do
   Behaviour for controlling retry logic on failed Stripe API requests.
 
   Implement this behaviour to customize retry decisions. The default
-  implementation (`LatticeStripe.RetryStrategy.Default`) follows Stripe's
-  official SDK retry conventions.
+  implementation (shipped internally) follows Stripe's official SDK
+  retry conventions:
 
   ## Example
 

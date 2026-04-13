@@ -197,8 +197,8 @@ defmodule LatticeStripe.SubscriptionSchedule do
   > #### Proration guard {: .info}
   >
   > When the client has `require_explicit_proration: true`, this function
-  > runs `LatticeStripe.Billing.Guards.check_proration_required/2` BEFORE
-  > dispatching the request. Params must carry `"proration_behavior"` at
+  > runs the Billing proration guard BEFORE dispatching the request. Params
+  > must carry `"proration_behavior"` at
   > the top level OR at `phases[].proration_behavior` (but NOT
   > `phases[].items[]` — Stripe does not accept it there).
   """

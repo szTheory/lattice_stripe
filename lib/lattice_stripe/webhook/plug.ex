@@ -83,8 +83,11 @@ if Code.ensure_loaded?(Plug) do
 
     1. **Mount before `Plug.Parsers`** using `at:` — the plug reads the body
        directly before parsers consume it.
-    2. **Use `CacheBodyReader`** — configure `Plug.Parsers` to cache the raw bytes
-       in `conn.private[:raw_body]`. See `LatticeStripe.Webhook.CacheBodyReader`.
+    2. **Use a cache-body reader** — configure `Plug.Parsers` with a
+       `:body_reader` hook that caches the raw bytes in
+       `conn.private[:raw_body]`. LatticeStripe ships a ready-made reader
+       at LatticeStripe.Webhook.CacheBodyReader (hidden internal) that you
+       can wire into your endpoint.
 
     ## Secret Resolution
 

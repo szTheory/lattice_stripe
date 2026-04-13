@@ -100,7 +100,7 @@ Set `max_retries: 0` to disable retries entirely.
 ### `retry_strategy`
 
 A module implementing the `LatticeStripe.RetryStrategy` behaviour. Default:
-`LatticeStripe.RetryStrategy.Default`.
+an internal strategy that follows Stripe's official SDK retry conventions.
 
 Use this to customize retry behavior — for example, to always retry, never retry, or
 implement custom backoff logic:

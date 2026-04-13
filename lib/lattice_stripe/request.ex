@@ -1,5 +1,21 @@
 defmodule LatticeStripe.Request do
-  @moduledoc false
+  @moduledoc """
+  A Stripe API request as pure data.
+
+  Resource modules build `%LatticeStripe.Request{}` structs describing what to
+  call, then `LatticeStripe.Client.request/2` dispatches them through the
+  configured transport. Users rarely construct these directly — they come from
+  calling resource functions like `LatticeStripe.Customer.create/3` — but the
+  struct is part of the public API so it can appear in `@spec`s and be
+  inspected in test assertions.
+
+  ## Fields
+
+  - `method` - HTTP method (`:get`, `:post`, `:delete`)
+  - `path` - API path (e.g., `"/v1/customers"`, `"/v1/customers/cus_123"`)
+  - `params` - Request parameters (body for POST, query for GET)
+  - `opts` - Per-request overrides: `[stripe_account: "acct_...", timeout: 5_000, idempotency_key: "...", api_key: "sk_...", stripe_version: "...", expand: ["data.customer"]]`
+  """
 
   @typedoc """
   A Stripe API request as pure data.

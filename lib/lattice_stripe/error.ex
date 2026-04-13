@@ -54,7 +54,7 @@ defmodule LatticeStripe.Error do
   - `:connection_error` — Network-level failure, no HTTP response received
   - `:test_clock_timeout` — A test clock advance timed out waiting for the clock to reach the target time
   - `:test_clock_failed` — A test clock advance completed but the clock reported a failed status
-  - `:proration_required` — Returned by `LatticeStripe.Billing.Guards` when `require_explicit_proration: true`
+  - `:proration_required` — Returned by the Billing proration guard when `require_explicit_proration: true`
     and the `proration_behavior` param is missing from a proration-sensitive request
   """
   @type error_type ::

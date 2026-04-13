@@ -11,7 +11,7 @@ defmodule LatticeStripe.Testing.TestClock.Owner do
 
   ## Usage
 
-  The Owner is started automatically by `LatticeStripe.Testing.TestClock.start_link/1`
+  The Owner is started automatically by `LatticeStripe.Testing.TestClock.test_clock/1`
   and should not be called directly by application code.
   """
 
