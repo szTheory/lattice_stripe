@@ -169,3 +169,5 @@ The three orphaned requirement IDs (BILL-04b, BILL-04c, BILL-10) are an administ
 
 _Verified: 2026-04-12T17:00:00Z_
 _Verifier: Claude (gsd-verifier)_
+
+**UPDATE 2026-04-13 (Phase 19):** WR-01 proration guard nested check landed in commit 0628bbd. This VERIFICATION.md is historical; the concern is resolved.

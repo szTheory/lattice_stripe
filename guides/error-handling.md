@@ -140,6 +140,26 @@ def friendly_decline_message(_other),
   do: "Your card was declined. Please try a different card or contact your bank."
 ```
 
+### Invoice payment failures
+
+Billing failures don't come back from the SDK call that creates the
+invoice — Stripe attempts collection asynchronously and reports the
+outcome via webhooks. Handle `invoice.payment_failed` in your webhook
+handler to drive dunning workflows (notify the customer, pause the
+subscription, retry later). The corresponding `{:error, %LatticeStripe.Error{}}`
+from a synchronous call indicates the request itself failed, not the
+collection attempt. See [Webhooks](webhooks.md) for event wiring.
+
+### Connect account errors
+
+Connect-specific failures surface as `:invalid_request_error` with the
+`code` field set to values such as `account_invalid`,
+`account_country_invalid_address`, or `account_number_invalid`.
+Match on the `code` field rather than the `:type` atom to distinguish
+"the connected account id is wrong" from "the destination bank account
+is malformed". Drive downstream account state off
+`account.updated` webhooks, not off these synchronous error responses.
+
 ## Bang Variants
 
 All resource functions have a `!` variant that raises `LatticeStripe.Error` instead of returning
@@ -308,3 +328,9 @@ A `:connection_error` means the TCP connection failed or timed out. The request 
 reached Stripe. If you sent a POST without an idempotency key, you can't safely retry — you might
 create duplicate records. LatticeStripe auto-generates idempotency keys for POST requests to make
 safe retries possible.
+
+## See also
+
+- [Webhooks](webhooks.md) — asynchronous failure handling for billing and Connect
+- [Invoices](invoices.md) — dunning patterns for `invoice.payment_failed`
+- [Connect](connect.md) — Connect-specific error codes and account-state recovery

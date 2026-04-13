@@ -3,6 +3,8 @@
 This guide walks through the complete payment lifecycle in LatticeStripe — from creating
 a customer to confirming a payment to issuing refunds. For an overview of Stripe's payment
 model, see the [Stripe Payments documentation](https://docs.stripe.com/payments).
+For recurring billing see [Subscriptions](subscriptions.md); for marketplace or platform
+charges see [Connect](connect.md).
 
 ## Creating a Customer
 
@@ -320,3 +322,10 @@ leads to `requires_confirmation` status that never resolves.
 Newly created objects may not appear in search results for up to a few seconds. Don't use
 search for real-time workflows — use `retrieve/3` or `list/3` with filters instead. See
 [Stripe's search documentation](https://docs.stripe.com/search) for consistency guarantees.
+
+## See also
+
+- [Checkout](checkout.md) — Stripe-hosted payment pages for the same flows
+- [Subscriptions](subscriptions.md) — recurring billing on top of the payment primitives
+- [Error Handling](error-handling.md) — card errors, retries, and idempotency
+- [Webhooks](webhooks.md) — confirm payment completion via `payment_intent.succeeded`

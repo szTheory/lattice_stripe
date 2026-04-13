@@ -215,3 +215,8 @@ Finch). Just create the struct and pass it around. It's safe to share across pro
 **Validation errors raise, not return `{:error, ...}`.**
 If you pass invalid options to `Client.new!`, it raises `NimbleOptions.ValidationError`
 immediately. This catches typos and misconfiguration at startup, not at request time.
+
+## Next steps
+
+- See [Subscriptions](subscriptions.md) for recurring billing and dunning lifecycles.
+- See [Connect](connect.md) for marketplace and platform use cases.

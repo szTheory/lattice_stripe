@@ -88,7 +88,9 @@ Pass an existing customer ID to pre-fill their email and saved payment methods:
 ## Subscription Mode
 
 Use `"mode" => "subscription"` to set up recurring billing. The line items should
-reference prices with `recurring` intervals:
+reference prices with `recurring` intervals. See
+[Subscriptions](subscriptions.md) for lifecycle management of the resulting
+subscription object (trials, proration, cancellation):
 
 ```elixir
 {:ok, session} = LatticeStripe.Checkout.Session.create(client, %{
@@ -264,3 +266,9 @@ redirect URL can fail. The only reliable way to know a payment succeeded is the
 **Subscription mode requires a recurring price, not a one-time price.**
 If you use a one-time price with `"mode" => "subscription"`, Stripe returns a 400 error.
 Create a Price with `"recurring" => %{"interval" => "month"}` for subscription line items.
+
+## See also
+
+- [Payments](payments.md) — PaymentIntent-based flows when you need full control
+- [Subscriptions](subscriptions.md) — lifecycle management after subscription-mode checkout
+- [Webhooks](webhooks.md) — `checkout.session.completed` confirmation handling

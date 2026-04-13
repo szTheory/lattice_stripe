@@ -179,6 +179,17 @@ defmodule MyApp.StripeWebhookHandler do
 end
 ```
 
+### Additional event types
+
+Beyond the payment and checkout events shown above, Connect and Billing
+platforms will want to handle these event families. Match on
+`event.type` with the same pattern as the examples above:
+
+- `account.updated` — Connect account capability or requirements changes
+- `account.application.authorized` — Connect OAuth authorization
+- `invoice.payment_succeeded` / `invoice.payment_failed` — Billing lifecycle
+- `customer.subscription.created` / `customer.subscription.deleted` — Subscription lifecycle
+
 ### Handler Return Values
 
 The plug inspects your handler's return value and sends the appropriate HTTP response:
@@ -421,3 +432,9 @@ signature respects the 5-minute tolerance window by default.
 Stripe adds new event types regularly. If you don't have a catch-all `handle_event(_event), do: :ok`
 clause, new event types will cause function clause errors that result in 500 responses and
 Stripe retries.
+
+## See also
+
+- [Error Handling](error-handling.md) — retry semantics and error signalling from handlers
+- [Connect Accounts](connect-accounts.md) — `account.updated` and capability event patterns
+- [Subscriptions](subscriptions.md) — `customer.subscription.*` lifecycle events

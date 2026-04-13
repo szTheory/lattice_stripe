@@ -199,6 +199,53 @@ client
 |> Enum.each(&process_customer/1)
 ```
 
+## Billing
+{: .col-2}
+
+### Create a subscription
+
+```elixir
+subscription = LatticeStripe.Subscription.create!(client, %{
+  customer: "cus_...",
+  items: [%{price: "price_..."}]
+})
+```
+
+### Verify a webhook for a Connect account
+
+```elixir
+# construct_event!/3 returns the parsed LatticeStripe.Event.
+# The `stripe_account` header on the delivery tells you which
+# connected account the event belongs to; read it from the raw
+# request headers on your webhook plug.
+event =
+  LatticeStripe.Webhook.construct_event!(body, sig, secret)
+```
+
+## Connect
+{: .col-2}
+
+### Create a transfer
+
+```elixir
+transfer = LatticeStripe.Transfer.create!(client, %{
+  amount: 1000,
+  currency: "usd",
+  destination: "acct_..."
+})
+```
+
+### Create an onboarding link
+
+```elixir
+link = LatticeStripe.AccountLink.create!(client, %{
+  account: "acct_...",
+  type: "account_onboarding",
+  return_url: "https://example.com/return",
+  refresh_url: "https://example.com/refresh"
+})
+```
+
 ## Telemetry
 {: .col-2}
 
