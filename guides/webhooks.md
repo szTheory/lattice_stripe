@@ -375,8 +375,9 @@ production webhook secret.
 
 ### Testing in Your Test Suite
 
-LatticeStripe provides `LatticeStripe.Testing.generate_webhook_payload/3` to generate
-correctly-signed test webhook payloads:
+LatticeStripe provides `LatticeStripe.Webhook.generate_test_signature/3` to produce a
+valid `Stripe-Signature` header for test payloads (and `LatticeStripe.Testing.generate_webhook_payload/3`
+for building event payloads when you need both):
 
 ```elixir
 # In your ExUnit tests
