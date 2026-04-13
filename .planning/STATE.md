@@ -1,33 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: Release
-status: executing
-stopped_at: Phase 18 complete — 29/29 threats closed, 8/8 review findings fixed
-last_updated: "2026-04-13T09:58:00.000Z"
+milestone: v1.1
+milestone_name: Accrue unblockers (metering + portal)
+status: planning
+stopped_at: v1.0 milestone archived; awaiting /gsd-new-milestone for v1.1
+last_updated: "2026-04-13T18:21:00.000Z"
 last_activity: 2026-04-13
 progress:
-  total_phases: 14
-  completed_phases: 14
-  total_plans: 43
-  completed_plans: 43
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
+last_shipped_milestone: v1.0
+last_shipped_date: 2026-04-13
+next_milestone_brief: .planning/v1.1-accrue-context.md
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-03)
+See: .planning/PROJECT.md (updated 2026-04-13 after v1.0 milestone completion)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 19 — cross-cutting-polish-release (not started). Phase 18 shipped 2026-04-13.
+**Current focus:** Planning v1.1 milestone — see `.planning/v1.1-accrue-context.md`. Run `/gsd-new-milestone` to kick off. Two phases locked: Phase 20 (Billing.Meter + MeterEvent + MeterEventAdjustment) and Phase 21 (BillingPortal.Session). No release phase needed (zero-touch semver post-1.0).
 
 ## Current Position
 
-Phase: 19
-Plan: Not started
-Status: Phase 18 complete; Phase 19 not started
+Milestone: v1.1 (Accrue unblockers) — PLANNING
+Last shipped: v1.0 on 2026-04-13 (archived to .planning/milestones/v1.0-ROADMAP.md)
+Next action: /gsd-new-milestone
 Last activity: 2026-04-13
 
 Progress: [█████████████████░░░] 15/17 phases (88%) · 50/50 planned plans complete
