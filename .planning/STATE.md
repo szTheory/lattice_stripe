@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Release
-status: executing
-stopped_at: "Billing track complete (PR #4 merged). Beginning Connect track — Phase 17 scope definition."
-last_updated: "2026-04-13T00:16:01.814Z"
-last_activity: 2026-04-13 -- Phase 17 execution started
+status: "Phase 17 complete (Connect Accounts + AccountLink + LoginLink). Next: `/gsd-discuss-phase 18` for Connect money movement."
+stopped_at: Phase 17 complete — Connect Accounts track shipped
+last_updated: "2026-04-13T00:30:00.000Z"
+last_activity: 2026-04-13 -- Phase 17 verified PASS
 progress:
   total_phases: 14
-  completed_phases: 11
-  total_plans: 37
-  completed_plans: 33
-  percent: 89
+  completed_phases: 12
+  total_plans: 43
+  completed_plans: 39
+  percent: 91
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-03)
 
 ## Current Position
 
-Phase: 17 (connect-accounts-links) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 17
-Last activity: 2026-04-13 -- Phase 17 execution started
+Phase: 17 (connect-accounts-links) — COMPLETE
+Plan: 6 of 6
+Status: Phase 17 verified PASS — 1173 unit + 18 integration tests, 0 failures
+Last activity: 2026-04-13 -- Phase 17 shipped
 
 Progress: [████████████████░░░░] 14/17 phases (82%) · 44/44 planned plans complete
 
