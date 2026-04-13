@@ -1,28 +1,5 @@
 defmodule LatticeStripe.Resource do
-  @moduledoc """
-  Shared helper functions used by all resource modules.
-
-  This module provides the common response-unwrapping and validation primitives
-  that power every resource module's public API (Customer, PaymentIntent, etc.).
-  It is part of the LatticeStripe Internals and is not typically called directly
-  from application code.
-
-  ## Response Unwrapping
-
-  Resource modules call `unwrap_singular/2` or `unwrap_list/2` after `Client.request/2`
-  to convert raw response maps into typed structs:
-
-      %Request{method: :post, path: "/v1/customers", params: params}
-      |> then(&Client.request(client, &1))
-      |> Resource.unwrap_singular(&Customer.from_map/1)
-
-  ## Parameter Validation
-
-  `require_param!/3` validates required parameters before making any network call,
-  raising `ArgumentError` immediately so tests don't need a mock setup:
-
-      Resource.require_param!(params, "payment_intent", "payment_intent is required")
-  """
+  @moduledoc false
 
   alias LatticeStripe.{Error, List, Response}
 

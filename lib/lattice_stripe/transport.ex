@@ -2,9 +2,9 @@ defmodule LatticeStripe.Transport do
   @moduledoc """
   HTTP transport behaviour for LatticeStripe.
 
-  The default transport uses Finch (`LatticeStripe.Transport.Finch`).
-  To use a different HTTP client, implement this behaviour and pass
-  `transport: MyTransport` to `Client.new!/1`.
+  The default transport is a Finch-based adapter shipped with
+  LatticeStripe (internal). To use a different HTTP client, implement
+  this behaviour and pass `transport: MyTransport` to `Client.new!/1`.
 
   ## Example
 

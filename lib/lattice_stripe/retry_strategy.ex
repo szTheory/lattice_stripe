@@ -3,8 +3,8 @@ defmodule LatticeStripe.RetryStrategy do
   Behaviour for controlling retry logic on failed Stripe API requests.
 
   Implement this behaviour to customize retry decisions. The default
-  implementation (`LatticeStripe.RetryStrategy.Default`) follows Stripe's
-  official SDK retry conventions.
+  implementation (shipped internally) follows Stripe's official SDK
+  retry conventions:
 
   ## Example
 
@@ -36,17 +36,7 @@ defmodule LatticeStripe.RetryStrategy do
 end
 
 defmodule LatticeStripe.RetryStrategy.Default do
-  @moduledoc """
-  Default retry strategy following Stripe SDK conventions.
-
-  Behavior:
-  - `Stripe-Should-Retry: true` header forces retry regardless of status
-  - `Stripe-Should-Retry: false` header forces stop regardless of status
-  - Without header: retry on 429, 500+, and connection errors; stop on other 4xx
-  - 409 (idempotency conflict) is never retried
-  - `Retry-After` header respected on 429, capped at 5 seconds
-  - Exponential backoff: `min(500 * 2^(attempt-1), 5000)` with 50-100% jitter
-  """
+  @moduledoc false
 
   @behaviour LatticeStripe.RetryStrategy
 

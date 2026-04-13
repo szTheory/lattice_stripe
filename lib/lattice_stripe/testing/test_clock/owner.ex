@@ -1,11 +1,19 @@
 defmodule LatticeStripe.Testing.TestClock.Owner do
-  @moduledoc false
-  # Per-test cleanup GenServer. Tracks clock ids created during a test and
-  # deletes them on `cleanup/2` (called from an `on_exit` callback).
-  #
-  # NOT `start_supervised!` — the Owner must outlive the test pid so
-  # `on_exit` can call `delete/3` even when the test crashes or raises.
-  # This mirrors `Ecto.Adapters.SQL.Sandbox.start_owner!/2` (D-13f).
+  @moduledoc """
+  GenServer-backed registry that owns per-test `LatticeStripe.Testing.TestClock`
+  ids so integration tests can isolate time-travel state.
+
+  The Owner tracks clock ids created during a single test and deletes them on
+  `cleanup/2` (invoked from an `on_exit` callback), mirroring the pattern used
+  by `Ecto.Adapters.SQL.Sandbox.start_owner!/2`. The Owner is intentionally
+  NOT `start_supervised!` — it must outlive the test pid so `on_exit` can still
+  delete clocks even when the test crashes or raises.
+
+  ## Usage
+
+  The Owner is started automatically by `LatticeStripe.Testing.TestClock.test_clock/1`
+  and should not be called directly by application code.
+  """
 
   use GenServer
 

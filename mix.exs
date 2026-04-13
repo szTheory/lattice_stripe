@@ -41,21 +41,21 @@ defmodule LatticeStripe.MixProject do
           Changelog: ["CHANGELOG.md"]
         ],
         groups_for_modules: [
-          Core: [
+          "Client & Configuration": [
             LatticeStripe,
             LatticeStripe.Client,
             LatticeStripe.Config,
             LatticeStripe.Error,
             LatticeStripe.Response,
-            LatticeStripe.List
+            LatticeStripe.List,
+            LatticeStripe.Request
           ],
           Payments: [
             LatticeStripe.PaymentIntent,
             LatticeStripe.Customer,
             LatticeStripe.PaymentMethod,
             LatticeStripe.SetupIntent,
-            LatticeStripe.Refund,
-            LatticeStripe.Charge
+            LatticeStripe.Refund
           ],
           Checkout: [
             LatticeStripe.Checkout.Session,
@@ -77,13 +77,10 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.SubscriptionSchedule.Phase,
             LatticeStripe.SubscriptionSchedule.CurrentPhase,
             LatticeStripe.SubscriptionSchedule.PhaseItem,
-            LatticeStripe.SubscriptionSchedule.AddInvoiceItem,
-            LatticeStripe.Billing.Guards
+            LatticeStripe.SubscriptionSchedule.AddInvoiceItem
           ],
           Connect: [
             LatticeStripe.Account,
-            LatticeStripe.AccountLink,
-            LatticeStripe.LoginLink,
             LatticeStripe.Account.BusinessProfile,
             LatticeStripe.Account.Capability,
             LatticeStripe.Account.Company,
@@ -91,6 +88,8 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Account.Requirements,
             LatticeStripe.Account.Settings,
             LatticeStripe.Account.TosAcceptance,
+            LatticeStripe.AccountLink,
+            LatticeStripe.LoginLink,
             LatticeStripe.BankAccount,
             LatticeStripe.Card,
             LatticeStripe.ExternalAccount,
@@ -103,16 +102,24 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Balance.Amount,
             LatticeStripe.Balance.SourceTypes,
             LatticeStripe.BalanceTransaction,
-            LatticeStripe.BalanceTransaction.FeeDetail
+            LatticeStripe.BalanceTransaction.FeeDetail,
+            LatticeStripe.Charge
           ],
           Webhooks: [
             LatticeStripe.Webhook,
             LatticeStripe.Webhook.Plug,
+            LatticeStripe.Webhook.Handler,
+            LatticeStripe.Webhook.SignatureVerificationError,
             LatticeStripe.Event
           ],
-          "Telemetry & Testing": [
-            LatticeStripe.Telemetry,
-            LatticeStripe.Testing
+          Telemetry: [
+            LatticeStripe.Telemetry
+          ],
+          Testing: [
+            LatticeStripe.Testing,
+            LatticeStripe.Testing.TestClock,
+            LatticeStripe.Testing.TestClock.Owner,
+            LatticeStripe.Testing.TestClock.Error
           ],
           Internals: [
             LatticeStripe.Transport,
@@ -122,8 +129,8 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.RetryStrategy,
             LatticeStripe.RetryStrategy.Default,
             LatticeStripe.FormEncoder,
-            LatticeStripe.Request,
-            LatticeStripe.Resource
+            LatticeStripe.Resource,
+            LatticeStripe.Billing.Guards
           ]
         ]
       ],

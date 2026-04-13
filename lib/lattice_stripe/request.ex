@@ -2,8 +2,12 @@ defmodule LatticeStripe.Request do
   @moduledoc """
   A Stripe API request as pure data.
 
-  Resource modules build Request structs describing what to call.
-  `Client.request/2` dispatches them through the configured transport.
+  Resource modules build `%LatticeStripe.Request{}` structs describing what to
+  call, then `LatticeStripe.Client.request/2` dispatches them through the
+  configured transport. Users rarely construct these directly — they come from
+  calling resource functions like `LatticeStripe.Customer.create/3` — but the
+  struct is part of the public API so it can appear in `@spec`s and be
+  inspected in test assertions.
 
   ## Fields
 
