@@ -27,6 +27,7 @@ defmodule LatticeStripe.MixProject do
           "guides/checkout.md",
           "guides/invoices.md",
           "guides/subscriptions.md",
+          "guides/connect.md",
           "guides/webhooks.md",
           "guides/error-handling.md",
           "guides/testing.md",
@@ -77,6 +78,18 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.SubscriptionSchedule.PhaseItem,
             LatticeStripe.SubscriptionSchedule.AddInvoiceItem,
             LatticeStripe.Billing.Guards
+          ],
+          Connect: [
+            LatticeStripe.Account,
+            LatticeStripe.AccountLink,
+            LatticeStripe.LoginLink,
+            LatticeStripe.Account.BusinessProfile,
+            LatticeStripe.Account.Capability,
+            LatticeStripe.Account.Company,
+            LatticeStripe.Account.Individual,
+            LatticeStripe.Account.Requirements,
+            LatticeStripe.Account.Settings,
+            LatticeStripe.Account.TosAcceptance
           ],
           Webhooks: [
             LatticeStripe.Webhook,
