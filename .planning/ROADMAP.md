@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 14: Invoices & Invoice Line Items** - Invoice resource + line item operations (completed 2026-04-12, PR #4)
 - [x] **Phase 15: Subscriptions & Subscription Items** - Subscription lifecycle + SubscriptionItem CRUD (completed 2026-04-12, PR #4)
 - [x] **Phase 16: Subscription Schedules** - Phased subscription scheduling with proration guards (completed 2026-04-12, PR #4)
-- [ ] **Phase 17: Connect Accounts & Account Links** - Connect account lifecycle and onboarding URLs (CNCT-01)
+- [x] **Phase 17: Connect Accounts & Account Links** - Connect account lifecycle and onboarding URLs (CNCT-01) (completed 2026-04-13)
 - [ ] **Phase 18: Connect Money Movement** - Transfers, Payouts, Balance, Balance Transactions, destination charges (CNCT-02 through CNCT-05)
 - [ ] **Phase 19: Cross-cutting Polish & v1.0 Release** - Final docs pass, release cut, accumulated cleanup
 
@@ -219,7 +219,7 @@ Plans:
   3. Developer can act on behalf of a connected account by setting the `Stripe-Account` header on any resource call (per-request and per-client)
   4. All operations follow Phase 4/5/14/15 conventions (flat namespace, nested typed structs, bang variants, streams, PII-safe Inspect, no `Jason.Encoder`)
   5. Integration tests via stripe-mock cover the account lifecycle and account-link creation
-**Plans:** 4/6 plans executed
+**Plans:** 6/6 plans complete
 
 ### Phase 18: Connect Money Movement
 **Goal**: Developers can move money on the Connect platform — attach external accounts, transfer between accounts, pay out to bank accounts, and inspect balance
