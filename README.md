@@ -5,6 +5,8 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+> **What's new in v1.0** — LatticeStripe 1.0 ships with full Billing (Invoices, Subscriptions, Schedules) and Connect (Accounts, Transfers, Payouts, Balance) coverage. See the [v1.0 highlights in CHANGELOG](CHANGELOG.md#100).
+
 A production-grade, idiomatic Elixir SDK for the Stripe API.
 
 Full documentation available on [HexDocs](https://hexdocs.pm/lattice_stripe).
@@ -52,16 +54,36 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 
 ## Features
 
-- **Payments** — Customer, PaymentIntent, SetupIntent, PaymentMethod, Refund
-- **Checkout** — Checkout.Session (payment, subscription, and setup modes)
-- **Webhooks** — Signature verification and Phoenix Plug integration
-- **Auto-pagination** — Stream through large result sets lazily with Elixir Streams
-- **Telemetry** — Request lifecycle events compatible with any monitoring stack
-- **Configurable transport** — Finch by default; bring your own HTTP client via the Transport behaviour
-- **Retry with backoff** — Automatic exponential backoff respecting Stripe's `Stripe-Should-Retry` header
-- **Idempotency** — Automatic idempotency key generation and replay handling
-- **Structured errors** — Pattern-matchable error types: `:card_error`, `:auth_error`, `:rate_limit_error`, `:server_error`, and more
-- **Connect support** — Per-client and per-request `stripe_account` for platform integrations
+### Payments
+
+- Customers, PaymentIntents, SetupIntents, PaymentMethods, Refunds, Checkout Sessions (payment / subscription / setup modes)
+- Structured, pattern-matchable errors: `:card_error`, `:auth_error`, `:rate_limit_error`, `:server_error`, and more
+- Auto-pagination — stream through large result sets lazily with Elixir Streams
+- [Guide: Payments](guides/payments.md)
+
+### Billing
+
+- Invoices — create, finalize, pay, void, send, list, search
+- Subscriptions with lifecycle verbs (cancel, resume, pause_collection, trial settings)
+- Subscription Schedules for phased billing with proration guards
+- [Guide: Subscriptions](guides/subscriptions.md)
+
+### Connect
+
+- Connect accounts (Standard, Express, Custom) with onboarding AccountLinks
+- Transfers, TransferReversals, Payouts, External Accounts
+- Balance + BalanceTransactions for platform-fee reconciliation
+- Per-client and per-request `stripe_account` for platform integrations
+- [Guide: Connect](guides/connect.md)
+
+### Platform
+
+- Pluggable `Transport`, `Json`, and `RetryStrategy` behaviours — bring your own HTTP client
+- Automatic retry with exponential backoff, respecting Stripe's `Stripe-Should-Retry` header
+- Automatic idempotency-key generation and safe replay
+- Telemetry events for every request, compatible with any monitoring stack
+- Phoenix-ready `Webhook.Plug` with raw-body capture and signature verification
+- [Guide: Extending LatticeStripe](guides/extending-lattice-stripe.md)
 
 ## Compatibility
 
