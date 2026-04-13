@@ -6,6 +6,30 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+<!--
+  v1.0.0 Highlights narrative — staged here for the human checkpoint (Phase 19 D-11, D-12).
+  When the Release Please PR opens with a `## [1.0.0](...)` heading, LIFT the
+  `### Highlights` block below and prepend it directly under that generated heading
+  (before the auto-generated `### Features` / `### Bug Fixes` sections).
+  Do NOT edit the `## [1.0.0](...)` heading line itself — release-please uses it for
+  idempotency matching (19-RESEARCH.md Pitfall 2).
+-->
+
+### Highlights
+
+LatticeStripe 1.0 marks our commitment to API stability for the Elixir + Stripe integration story. The 0.2 → 1.0 journey spans four major milestones: a solid foundation of transport, retries, pagination, and observability (Phases 1-11); full Billing coverage for Invoices, Subscriptions, SubscriptionItems, and Subscription Schedules (Phases 14-16); end-to-end Connect support including accounts, onboarding links, external accounts, transfers, payouts, balance, and balance transactions (Phases 17-18); and a formalized public API surface with `@moduledoc false` internals and an explicit semver contract (Phase 19). Starting with 1.0.0, LatticeStripe follows standard semver: patch releases for bug fixes, minor releases for additive features, major releases for breaking public API changes — see [API Stability](guides/api_stability.md) for the full contract.
+
+**What's in the box:**
+- **Payments.** Customers, PaymentIntents, SetupIntents, PaymentMethods, Refunds, Checkout Sessions.
+- **Billing.** Invoices (create, finalize, pay, void, send, search), Subscriptions with lifecycle verbs and pause helpers, Subscription Schedules with proration guards, Invoice Items.
+- **Connect.** Accounts (Standard/Express/Custom), Account Links, Login Links, External Accounts (BankAccount/Card), Transfers + TransferReversals, Payouts (with TraceId), Balance + BalanceTransactions, Charge retrieve for fee reconciliation.
+- **Webhooks.** Timing-safe signature verification, `Event` struct, Phoenix `Webhook.Plug`, `Webhook.Handler` behaviour.
+- **Operational glue.** Pluggable `Transport`/`Json`/`RetryStrategy` behaviours, Telemetry events for every request, `LatticeStripe.Testing` helpers with TestClock support.
+
+**Upgrading from 0.2.x.** No breaking API changes from 0.2. The public surface has been frozen; previously-visible internal modules (`FormEncoder`, `Request`, `Resource`, `Transport.Finch`, `Json.Jason`, `RetryStrategy.Default`, `Webhook.CacheBodyReader`, `Billing.Guards`) are now documented as private via `@moduledoc false` and are excluded from the semver contract.
+
+**Supported versions.** Elixir 1.15+ on OTP 26+, tested up to Elixir 1.19 on OTP 28.
+
 ### Features — Phase 18: Connect money movement
 
 * **external-account:** polymorphic `ExternalAccount` dispatcher with `BankAccount`, `Card`, and `Unknown` fallback structs; full CRUDL on `/v1/accounts/:account/external_accounts`. PII hidden from `Inspect` for both bank and card surfaces.

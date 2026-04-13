@@ -10,6 +10,8 @@
     {"type": "chore", "section": "Miscellaneous", "hidden": true}
   ],
   "packages": {
-    ".": {}
+    ".": {
+      "release-as": "1.0.0"
+    }
   }
 }
