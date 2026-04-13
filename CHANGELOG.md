@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Features — Phase 18: Connect money movement
+
+* **external-account:** polymorphic `ExternalAccount` dispatcher with `BankAccount`, `Card`, and `Unknown` fallback structs; full CRUDL on `/v1/accounts/:account/external_accounts`. PII hidden from `Inspect` for both bank and card surfaces.
+* **charge:** retrieve-only `LatticeStripe.Charge` (41-field struct) for Connect fee reconciliation. No `create`/`update`/`capture`/`cancel`/`list` — see `LatticeStripe.PaymentIntent` for payment creation.
+* **transfer:** full CRUDL `LatticeStripe.Transfer` with embedded `reversals` decoding; wrapper metadata preserved under `extra["reversals_meta"]`.
+* **transfer-reversal:** standalone top-level `LatticeStripe.TransferReversal` module addressed by `(transfer_id, reversal_id)`. No `Transfer.reverse` delegator by design.
+* **payout:** full CRUDL `LatticeStripe.Payout` with `cancel/4` and `reverse/4` on the canonical `(client, id, params \\ %{}, opts \\ [])` signature, plus nested `Payout.TraceId` struct.
+* **balance:** `LatticeStripe.Balance` singleton (retrieve-only, no `:id`) with nested `Amount` and `SourceTypes` structs; `stripe_account:` opt threads through for connected-account balances.
+* **balance-transaction:** `LatticeStripe.BalanceTransaction` retrieve/list/stream with nested `FeeDetail`. `source` field kept as raw `binary | map()` for polymorphic safety across 16+ Stripe object types.
+* **guide:** new `guides/connect.md` with dual reconciliation idiom (platform fees + connected-account balances), webhook-handoff callouts, and antipattern warnings.
+* **exdoc:** 13 new Connect-track modules grouped under "Connect"; `Charge` grouped under "Payments" per D-06.
+
+### Bug Fixes — Phase 18 code review
+
+* **typespecs:** add `map()` variant to expandable reference typespecs in `Transfer`, `TransferReversal`, and `Charge` (`destination`, `source_transfer`) so expanded responses type-check.
+* **validation:** normalize pre-network id validation to `when id in [nil, ""]` clause guards raising `ArgumentError`; applied to `Payout.update/4` and `BalanceTransaction.retrieve/3` (plus bang variants) to match the phase-wide contract.
+* **docs:** correct `BankAccount` moduledoc reference to a non-existent `:account_number` field (removed).
+* **internal:** `ExternalAccount.Unknown.cast/1` now derives its key set from `@known_fields` instead of hardcoding; `Payout.update/4` gains an `is_map(params)` guard; `Transfer.from_map/1` preserves unexpected `reversals` shapes under `extra["reversals_meta"]` instead of silently dropping them.
+
+### Security — Phase 18 threat audit
+
+* 29/29 threats verified in `18-SECURITY.md`: 24 mitigated in code, 5 accepted risks documented (no-PII surfaces + pre-existing Phase 17 `Stripe-Account` header).
+
 ## [0.2.0](https://github.com/szTheory/lattice_stripe/compare/v0.1.0...v0.2.0) (2026-04-04)
 
 
