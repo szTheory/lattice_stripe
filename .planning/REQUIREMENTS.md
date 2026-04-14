@@ -51,13 +51,13 @@
 - [x] **TEST-02**: `test/support/fixtures/billing_portal.ex` provides a canonical `Session` fixture including at least one `FlowData` shape per flow type
 - [ ] **TEST-03**: Wave 0 `stripe-mock` probe in Phase 20 confirms the three metering endpoints behave as documented, including the exact `cancel` sub-object field shape for MeterEventAdjustment, and records any gaps (stripe-mock is stateless — lifecycle assertions must be shape-only, not state-transition)
 - [x] **TEST-04**: Wave 0 `stripe-mock` probe in Phase 21 confirms `/v1/billing_portal/sessions` and notes whether stripe-mock enforces `flow_data` required sub-fields (informs whether the client-side guard is fully tested via mock or requires unit tests in addition)
-- [ ] **TEST-05**: Full integration tests (tagged `:integration`) exercise: seed a meter → report events through it → adjust one → deactivate → list filtered by status → reactivate; and create a portal session for a real test customer and assert the returned `url` shape
+- [x] **TEST-05**: Full integration tests (tagged `:integration`) exercise: seed a meter → report events through it → adjust one → deactivate → list filtered by status → reactivate; and create a portal session for a real test customer and assert the returned `url` shape
 
 ### Documentation
 
 - [ ] **DOCS-01**: New `guides/metering.md` covers usage-reporting idiom (how to call `MeterEvent.create/3` from a hot-path worker), idempotency two-layer explainer (`identifier` vs `idempotency_key:`), reconciliation notes (monitor `v1.billing.meter.error_report_triggered` webhook), backdating window, aggregation formula semantics, and webhook handoff pointers
-- [ ] **DOCS-02**: `guides/customer-portal.md` is created (or extended if it exists) with an Accrue-style usage example showing create → return URL → redirect, covering all four flow types with required sub-fields
-- [ ] **DOCS-03**: `mix.exs` `groups_for_modules` gains a `"Billing Metering"` group (Meter, MeterEvent, MeterEventAdjustment, nested structs) and a `"Customer Portal"` group (Session, FlowData); both guides added to `extras`
+- [x] **DOCS-02**: `guides/customer-portal.md` is created (or extended if it exists) with an Accrue-style usage example showing create → return URL → redirect, covering all four flow types with required sub-fields
+- [x] **DOCS-03**: `mix.exs` `groups_for_modules` gains a `"Billing Metering"` group (Meter, MeterEvent, MeterEventAdjustment, nested structs) and a `"Customer Portal"` group (Session, FlowData); both guides added to `extras`
 - [ ] **DOCS-04**: Cross-links added from existing `guides/billing.md` (or equivalent) to `guides/metering.md`; new metering/portal modules appear in `LatticeStripe` moduledoc resource index
 
 ## Future Requirements (v1.2+)
@@ -129,7 +129,7 @@ Explicitly excluded for v1.1. Reasons must remain valid before these become acti
 | TEST-05 (metering: meter lifecycle + event + adjustment integration tests) | Phase 20 | Pending |
 | TEST-05 (portal: session create + url shape integration test) | Phase 21 | Pending |
 | DOCS-01 | Phase 20 | Pending |
-| DOCS-02 | Phase 21 | Pending |
+| DOCS-02 | Phase 21 | Complete |
 | DOCS-03 ("Billing Metering" group in groups_for_modules + guides/metering.md in extras) | Phase 20 | Pending |
 | DOCS-03 ("Customer Portal" group in groups_for_modules + guides/customer-portal.md in extras) | Phase 21 | Pending |
 | DOCS-04 | Phase 20 | Pending |
