@@ -1,200 +1,284 @@
-# Feature Landscape
+# Feature Research
 
-**Domain:** Elixir Stripe SDK (API client library)
-**Researched:** 2026-03-31
-**Overall confidence:** HIGH (based on extensive project research documents, official Stripe SDK analysis, and Elixir ecosystem review)
+**Domain:** Elixir SDK — Stripe Metering + Customer Portal (LatticeStripe v1.1)
+**Researched:** 2026-04-13
+**Confidence:** HIGH (Stripe API docs verified for all four resources)
 
-## Table Stakes
+---
 
-Features users expect from any serious Stripe SDK. Missing any of these means developers stick with stripity_stripe or consider switching languages.
+## Context: v1.1 Scope
 
-### Foundation Layer (Tier 0)
+This research covers only the **three new resource families** added in v1.1. Everything in v1.0
+(Subscriptions, Invoices, Payments, Connect, etc.) is already shipped. The downstream consumer
+is **Accrue** — a billing/payments library built on LatticeStripe — and the features below are
+driven entirely by Accrue's Phase 4 blockers.
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| HTTP transport with pluggable adapter | Every SDK needs a reliable HTTP layer; Elixir devs expect behaviour-based extensibility | Medium | Transport behaviour with Finch default. Must handle form-encoded v1 requests. |
-| Client configuration struct | Official SDKs all use instance-based StripeClient pattern (2024+). Multi-tenant Elixir apps require per-client config. | Low | API key, base URL, timeouts, retries, API version, telemetry toggle. |
-| Per-request option overrides | Every official SDK supports this. Essential for Connect (stripe_account), idempotency, and version overrides. | Low | idempotency_key, stripe_account, api_key, stripe_version, expand, timeout. |
-| Structured error model | All official SDKs implement same error hierarchy. Pattern matching is Elixir's strength -- errors must be matchable. | Medium | CardError, InvalidRequestError, AuthenticationError, RateLimitError, APIError, IdempotencyError, etc. Each carries type, code, message, param, request_id. |
-| Automatic retries with exponential backoff | Official SDKs do this by default since 2023+. Stripe-Should-Retry header support is expected. | Medium | Respect Stripe-Should-Retry, configurable max retries, jittered backoff. |
-| Idempotency key support | Stripe explicitly recommends idempotency on all mutations. SDKs auto-generate keys on retry. | Low | Auto-generation on retry, manual override, replay detection. |
-| `{:ok, result} \| {:error, reason}` returns | Elixir convention. Any library not following this pattern is dead on arrival. | Low | Bang variants (create!/2) layered on top. |
-| Cursor-based list pagination | Every official SDK provides this. Manual page fetching is baseline. | Low | starting_after, ending_before, limit parameters. Return List struct with has_more. |
-| Auto-pagination via Streams | Official SDKs all provide auto_paging_each or async iterators. Stream.resource/3 is the Elixir pattern. Community explicitly complained about stripity_stripe lacking this. | Medium | Lazy enumerable composable with Stream/Enum. This is a top community pain point. |
-| Webhook signature verification | The #1 community pain point in Elixir. Developers skip verification when it is hard. Must handle raw body correctly. | Medium | construct_event/3 function. Must document the Phoenix raw body problem explicitly. |
-| Raw response access | Official SDKs expose request_id, status, headers. Essential for debugging and support tickets. | Low | Available on response structs or via option. |
-| API version pinning | Stripe releases monthly versions. SDK must pin and allow override. | Low | Pin per library release, override per-client and per-request. |
+Resources in scope:
+- `LatticeStripe.Billing.Meter` — CRUDL + lifecycle verbs
+- `LatticeStripe.Billing.MeterEvent` + `MeterEventAdjustment` — fire-and-forget usage reporting
+- `LatticeStripe.BillingPortal.Session` — create-only portal redirect
 
-### Resource Coverage (Tier 1 -- Payments)
+---
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| PaymentIntents CRUD + lifecycle | The center of modern Stripe. Create, retrieve, update, confirm, capture, cancel, list. | Medium | State-machine-heavy. Must support confirm-on-create, manual capture, off-session. |
-| SetupIntents CRUD + lifecycle | Save-for-later is the second most common payment flow. | Low | create, retrieve, update, confirm, cancel, list. |
-| PaymentMethods CRUD + attach/detach | Backbone of subscriptions and off-session billing. | Low | create, retrieve, update, list, attach, detach. Customer-scoped listing. |
-| Customers CRUD + search | Foundational across all Stripe use cases. | Low | create, retrieve, update, delete, list, search. |
-| Refunds CRUD | Operationally critical for admin/support tooling. | Low | create, retrieve, update, list. Partial refunds. |
+## Category: Metering (Phase 20)
 
-### Resource Coverage (Tier 2 -- Checkout)
+### Table Stakes
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Checkout Sessions | Many devs judge the library by how easy Checkout is. Major integration path. | Medium | create, retrieve, list, expire. Payment/subscription/setup modes. Line items, customer prefill. |
+Features Accrue (and any downstream SaaS app) expects to work. Missing = integration is broken.
 
-### Webhook Handling
+| Feature | Why Expected | Complexity | Accrue Usage Notes |
+|---------|--------------|------------|-------------------|
+| `Billing.Meter.create/3` | Required to bootstrap a meter before any events can flow | LOW | Accrue seeds meters in test/staging setup; also needed for Accrue admin UI (BILL-11) |
+| `Billing.Meter.retrieve/3` | Fetch meter by id to verify config, render admin UI | LOW | Standard read-back after create; Accrue confirms meter settings |
+| `Billing.Meter.update/4` | Change `display_name` + mutable fields; Stripe allows this post-create | LOW | Accrue admin UI can rename meters |
+| `Billing.Meter.list/3` | List all meters for dashboard view | LOW | Accrue dashboard renders meter inventory |
+| `Billing.Meter.stream!/3` | Auto-paginate large meter lists | LOW | Follows v1.0 `List.stream!/2` convention; Accrue uses for admin exports |
+| `Billing.Meter.deactivate/3` | Explicit lifecycle verb — POST `/deactivate`; `status` -> `inactive` | LOW | Accrue deactivates retired feature meters |
+| `Billing.Meter.reactivate/3` | Inverse verb — POST `/reactivate`; `status` -> `active` | LOW | Accrue reactivates paused meters |
+| `Billing.MeterEvent.create/3` | Hot path — reports usage on every customer action | LOW | **Most critical function in v1.1.** Called by `Accrue.Billing.report_usage/3` on every event |
+| `Billing.MeterEventAdjustment.create/3` | Cancels an over-reported event (created in error or wrong customer) | LOW | Accrue's dunning-style correction flow; can only cancel events within last 24 hours |
+| Bang variants for all above | LatticeStripe convention — every function has `create!/3` etc. | TRIVIAL | Standard pattern; `Resource.unwrap_bang!/1` wraps tuples |
+| `Meter.DefaultAggregation` nested struct | `formula` field (`:sum`, `:count`, `:last`) must be a typed struct, not raw map | LOW | Accrue reads `default_aggregation.formula` to display in admin UI |
+| `Meter.CustomerMapping` nested struct | `type` + `event_payload_key` — determines how events map to customers | LOW | Accrue reads `customer_mapping.event_payload_key` to build event payloads correctly |
+| `Meter.ValueSettings` nested struct | `event_payload_key` — the payload key Stripe reads as the numeric value | LOW | Accrue reads this to know which payload key to populate in MeterEvent |
+| `Meter.StatusTransitions` nested struct | `deactivated_at` timestamp for audit trail | LOW | Accrue renders "deactivated on" in admin UI |
+| `MeterEvent` minimal struct fields | `event_name`, `identifier`, `payload`, `timestamp`, `created`, `livemode` | LOW | Accrue does not read MeterEvent back beyond ack — thin struct is correct |
+| `MeterEventAdjustment` minimal struct fields | `id`, `event_name`, `type` (`"cancel"`), `status`, `created`, `livemode`, `cancel` sub-map | LOW | Accrue confirms adjustment was accepted |
+| `idempotency_key:` opt threading | Standard per-request opt already in v1.0 Client plumbing | TRIVIAL | Accrue passes caller-generated idempotency key through LatticeStripe |
+| `stripe_account:` opt threading | Connect header forwarding — already in v1.0 | TRIVIAL | Required for Accrue Phase 5 (Connect metering) |
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Event parsing | Must deserialize webhook payloads into typed structs. | Low | v1 snapshot events. Type field for dispatch. |
-| Phoenix Plug for webhooks | Elixir devs use Phoenix. A drop-in Plug that handles raw body extraction is expected. | Medium | Must run before Plug.Parsers or handle raw body caching. This is the #1 Elixir Stripe pain point. |
-| Tolerance window configuration | Prevent replay attacks with configurable timestamp tolerance. | Low | Default 300 seconds, configurable. |
+### Differentiators
 
-### Developer Experience
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| ExDoc documentation with guides | Elixir devs expect excellent HexDocs. Grouped modules, examples, guides. | Medium | Quickstart guide, per-resource examples, error handling guide. |
-| Typespecs on all public functions | Convention in Elixir ecosystem even without Dialyzer enforcement. | Low | @spec on every public function. @type for all structs. |
-| Comprehensive test suite | Open source credibility. Integration tests primary, unit tests for pure logic. | High | stripe-mock, Stripe CLI, Mox for behaviour injection. |
-| README with <60 second quickstart | First impression. Copy-paste to working code. | Low | Install, configure, make first API call. |
-
-## Differentiators
-
-Features that set LatticeStripe apart from stripity_stripe and emerging competitors. Not expected, but highly valued.
+Features that distinguish LatticeStripe's metering implementation from a naive wrapper.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Search pagination support | stripity_stripe lacks this entirely. Page-based pagination for /search endpoints with eventual consistency caveats documented. | Low | Different pagination model from list endpoints (page, next_page). |
-| Telemetry events for request lifecycle | Elixir ecosystem standard (Phoenix, Ecto, Finch all emit telemetry). No existing Stripe lib does this well. | Medium | [:lattice_stripe, :request, :start\|:stop\|:exception] with duration, method, path, status, request_id. Also [:lattice_stripe, :webhook, :*]. |
-| Expand support as first-class concept | stripity_stripe supports expand but not ergonomically. Handling id-vs-expanded-object unions cleanly is a real differentiator. | High | Union types for expandable fields. Nested expansion. List expansions (data.*). |
-| Pattern-matchable domain types | Elixir's pattern matching is a superpower. Rich structs with atom-based status/type fields enable elegant case/with clauses. | Medium | Status atoms (:succeeded, :requires_action), currency atoms, type enums. stripe-kit (Swift) proves this approach works beautifully. |
-| Retry strategy as pluggable behaviour | Most SDKs hard-code retry logic. A behaviour allows custom backoff, circuit breaking, or retry budgets. | Low | Default exponential backoff. Users can implement custom RetryStrategy behaviour. |
-| JSON codec as pluggable behaviour | Most apps use Jason, but some use Poison or other encoders. | Low | Jason default, behaviour for override. Minimal effort, high flexibility signal. |
-| Test helpers and utilities | No Elixir Stripe library provides good testing support. Req.Test enables plug-based concurrent test stubs. | Medium | Test fixture helpers, mock webhook event construction, example factory functions. |
-| Stripe-Account header as first-class | Connect support baked into the request path from day one, not bolted on. Every request function accepts stripe_account option. | Low | Community explicitly complained about poor Connect support in stripity_stripe. |
-| Detailed error context for debugging | Beyond just type/code -- include request_id, HTTP status, full error body, suggestion text when available. | Low | Inspect-friendly error structs. Actionable error messages. |
-| Up-to-date API version (2026-03-25.dahlia) | stripity_stripe targets Stripe API 2019-12-03 -- a 6+ year gap. Being current is a major selling point. | Low | Just building new means being current. Competitors are years behind. |
-| Idempotency conflict detection | Parse 409 responses specifically. Surface idempotency key reuse conflicts as a distinct error type. | Low | IdempotencyError with original request_id and conflicting key info. |
+| `identifier` field clarity in docs + `@moduledoc` | Stripe's `identifier` is a **domain-level deduplication key**, separate from `Stripe-Idempotency-Key` header. Documenting the distinction prevents misuse. | LOW | See "MeterEvent Idempotency Decision" section below |
+| Explicit `deactivate/reactivate` verbs instead of status update | Matches LatticeStripe's established "explicit verbs for irreversible ops" philosophy (same pattern as `cancel`, `resume`, `reject` in v1.0) | TRIVIAL | Would be a regression to model this as `update(client, id, %{"status" => "inactive"})` |
+| Aggregation formula semantics in `@moduledoc` | `sum` (add values), `count` (ignore value, count events), `last` (snapshot — last value in window wins). Not obvious from field name alone. | LOW | Stripe docs confirm three formulas; `max` does NOT exist — do not document it |
+| `event_time_window` context in Meter struct docs | `"hour"` or `"day"` — determines the reset window for aggregation. Important for interpreting billing data. | LOW | Include in `Meter` `@typedoc` |
+| `from_map/1` + `@known_fields` + `:extra` on all structs | Survive new Stripe fields without crashing — already the v1.0 pattern | TRIVIAL | Apply to all four new structs (Meter, MeterEvent, MeterEventAdjustment, BillingPortal.Session) |
+| PII-safe `Inspect` for MeterEvent | `payload` map may contain customer identifiers — mask in Inspect output | LOW | Follows `Subscription` and `Checkout.Session` pattern |
 
-## Anti-Features
+### Anti-Features (Explicitly Out of Scope)
 
-Features to deliberately NOT build. Each exclusion is intentional.
+| Anti-Feature | Why Requested | Why Excluded for v1.1 | What to Do Instead |
+|--------------|---------------|----------------------|-------------------|
+| `meter_event_stream` (high-throughput streaming variant) | 10,000 events/second vs 1,000/second; looks like a natural upgrade | **Locked as D3.** Completely different semantics: stateless auth sessions, 15-minute token refresh, batch-oriented. Accrue does not need it for Phase 4. Adding it conflates two distinct APIs under one namespace. | Implement in v1.2+ as `Billing.MeterEventStream` with its own auth session management. Do NOT add a `stream: true` flag to `MeterEvent.create/3` |
+| `Billing.Meter.search/3` | Other resources have search | Stripe does not expose a `/billing/meters/search` endpoint. No search endpoint exists for meters. | Use `list/3` with `status` filter param |
+| `Billing.Meter.delete/3` | CRUD looks incomplete without delete | Stripe does not allow meter deletion. Meters can only be deactivated. | Use `deactivate/3` |
+| Aggregated usage queries / `meter_event_summaries` | Useful for building billing dashboards | Different API family (`/v1/billing/meters/:id/event_summaries`). Not required by Accrue Phase 4. Triples scope. | Defer to v1.2+ |
+| v2 API meter events (`/v2/billing/meter_events`) | Newer, synchronous validation | Accrue is pinned to `2026-03-25.dahlia`. The v2 path uses different auth flow and response shape. Mixing v1 and v2 endpoints in one minor is a footgun. | Revisit when Accrue upgrades API version |
 
-| Anti-Feature | Why Avoid | What to Do Instead |
-|--------------|-----------|-------------------|
-| Code generation from OpenAPI spec (v1) | PROJECT.md explicitly scopes v1 as handwritten. Codegen adds complexity, generates un-idiomatic code, and Stripe's custom OpenAPI extensions (x-expandableFields, x-expansionResources) break standard generators. Handwritten code enables polish and ergonomics over breadth. | Hand-craft Tier 0/1/2 resources. Consider codegen as a future milestone for breadth. |
-| Dialyzer/Dialyxir support | PROJECT.md decision: "feels janky." Typespecs serve as documentation, not enforcement. | Write comprehensive typespecs for documentation. Pattern matching + tagged tuples provide runtime safety. |
-| Higher-level billing abstractions | A "Pay gem" / "Laravel Cashier" style layer (Ecto schemas, subscription lifecycle management, billable traits) is a separate project with different change cadence and dependencies. | Build the API client first. Higher-level billing layer is a future separate package. |
-| Global module-level configuration | Official SDKs moved away from this (2024+). Global config creates problems for multi-tenant apps, test isolation, and concurrent usage. | Instance-based client struct pattern. Application config as fallback only. |
-| Ecto dependency | An API client library should not force Ecto on users. Not everyone uses Ecto. | Pure data structs. Ecto integration belongs in a separate billing-layer package. |
-| Phoenix dependency (except webhook Plug) | API client should work outside Phoenix. Webhook Plug is the one justified Phoenix touch point. | Optional Plug dependency for webhook handling only. Core library is framework-agnostic. |
-| v2 API namespace support | v2 is still evolving. v1 snapshot events cover the vast majority of use cases. Thin events and v2 semantics are a future milestone. | Focus on v1 completely. Document v2 as future scope. |
-| Legacy Charges/Tokens/Sources as primary API | Stripe explicitly recommends PaymentIntents. Building around legacy APIs sends the wrong signal. | Support Charges for read/retrieve only if needed. PaymentIntents are the primary path. |
-| Full API surface breadth | 30+ product categories with hundreds of resources. Covering everything in v1 means shallow quality everywhere. | Deep polish on Foundation + Payments + Checkout + Webhooks. Billing, Connect, Tax, Identity, etc. are future milestones. |
-| Mobile/frontend SDK | Backend-only. Stripe.js handles the frontend. | Document how to use with Stripe.js and Phoenix LiveView in guides. |
-| Automatic webhook event routing/dispatch | A pub/sub event routing system (like Pay gem's ActiveSupport::Notifications pattern) belongs in a higher-level layer, not the API client. | Provide construct_event/3 and a simple Phoenix Plug. Users implement their own dispatch. |
-| Billing test clocks | Specialized testing feature for subscriptions. Out of scope until Billing milestone. | Future milestone alongside subscription support. |
+---
+
+## Category: Customer Portal (Phase 21)
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Accrue Usage Notes |
+|---------|--------------|------------|-------------------|
+| `BillingPortal.Session.create/3` | Create a short-lived hosted URL for customers to manage their subscription | LOW | Accrue calls this and redirects customer to `session.url` — single call, single return |
+| `BillingPortal.Session.create!/3` | Bang variant per LatticeStripe convention | TRIVIAL | Standard pattern |
+| `session.url` field populated | The entire point of the resource — the hosted portal URL | TRIVIAL | Accrue reads `session.url` for the redirect |
+| `session.customer` field | Confirms which customer the session belongs to | TRIVIAL | Accrue uses for audit/logging |
+| `session.return_url` field | Where Stripe redirects after portal interaction | TRIVIAL | Accrue passes this on create; reads back to confirm |
+| `session.flow` field (echoed back) | When `flow_data` is passed on create, `flow` is echoed in response | LOW | Accrue reads this to confirm deep-link was set up correctly |
+| `session.configuration` field | Which portal configuration is active | TRIVIAL | Accrue may log this for debugging |
+| `session.created`, `session.livemode` | Standard metadata | TRIVIAL | Logging / audit |
+| `flow_data` create parameter support | Enables deep-linking to specific portal flows | MEDIUM | Accrue uses for `subscription_cancel` and `payment_method_update` deep links |
+| `Session.FlowData` nested struct | Typed struct for `flow_data` input | LOW | Accrue passes `FlowData` for deep-link flows; keeping it typed prevents missing required sub-fields |
+| `customer:` param required guard | Pre-network `ArgumentError` if `customer` is missing | LOW | Same pattern as `Checkout.Session` requiring `mode`; `customer` is required on BillingPortal.Session |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| All four `flow_data.type` values documented | `subscription_cancel`, `subscription_update`, `subscription_update_confirm`, `payment_method_update` — each has different required sub-fields | LOW | `subscription_cancel` requires subscription ID in `flow_data.subscription_cancel.subscription`; `subscription_update_confirm` requires `items` array. Document all four in `@moduledoc` to prevent API errors. |
+| `flow_data.after_completion` struct support | `hosted_confirmation`, `portal_homepage`, or `redirect` — controls where user lands after completing a flow | LOW | Include in `FlowData` struct and document in guide |
+| `on_behalf_of:` opt for Connect | Forwarded to Stripe for Connect platforms creating sessions on behalf of connected accounts | LOW | Accrue Phase 5 will need this; thread through as standard opt |
+| Namespace mirrors `Checkout.Session` | `LatticeStripe.BillingPortal.Session` matches existing `LatticeStripe.Checkout.Session` naming — discoverable by convention | TRIVIAL | Module naming decision already locked |
+
+### Anti-Features (Explicitly Out of Scope)
+
+| Anti-Feature | Why Requested | Why Excluded for v1.1 | What to Do Instead |
+|--------------|---------------|----------------------|-------------------|
+| `BillingPortal.Configuration` CRUDL | Portal config seems like a natural companion to Session | **Locked as D4.** Full CRUDL with deep UX structs (features, business_profile, login_page, etc.) triples Phase 21 scope. Accrue explicitly does not need it — hosts manage portal config via Stripe Dashboard for v1.1. | Implement in v1.2+ as `LatticeStripe.BillingPortal.Configuration` |
+| `Session.retrieve/3` | Looks like a missing CRUD operation | BillingPortal Sessions are **create-only** by Stripe's design. The API has no retrieve, list, update, or delete endpoint. Sessions are short-lived and expire after use. | N/A — this is a Stripe API constraint, not a LatticeStripe decision |
+| `Session.list/3` | Same as above | Same Stripe API constraint | N/A |
+
+---
+
+## MeterEvent Idempotency Decision
+
+This is the most nuanced feature decision in v1.1. Two separate idempotency mechanisms exist and
+they are **orthogonal** — they operate at different layers and must not be conflated.
+
+### Layer 1: `Stripe-Idempotency-Key` HTTP header
+
+- Passed via `idempotency_key:` opt in LatticeStripe (already in v1.0 Client plumbing)
+- Tells Stripe's API gateway to deduplicate the entire HTTP request
+- If the same idempotency key is sent twice within Stripe's window, Stripe returns the cached
+  HTTP response without re-executing the handler
+- Scope: the HTTP request itself
+- Stripe recommends using this for MeterEvent as well to prevent duplicate network submissions
+
+### Layer 2: `identifier` field in MeterEvent create params
+
+- A string field in the JSON request body (not a header)
+- Stripe's billing engine uses this to deduplicate within the **metering domain**
+- If the same `identifier` is received within the last ~24 hours, Stripe silently deduplicates
+  the event (does not create a duplicate meter_event)
+- Auto-generated by Stripe if not provided (max 100 characters)
+- Scope: the billing event itself, within a rolling 24-hour window
+- This is a **domain-level idempotency key** — survives across different HTTP connections,
+  retries, or even manually re-sent events
+
+### Why They Are Orthogonal, Not Redundant
+
+```
+HTTP request 1: idempotency_key="req_abc", body: {identifier: "evt_123", event_name: "api_call"}
+HTTP request 2: idempotency_key="req_xyz", body: {identifier: "evt_123", event_name: "api_call"}
+```
+
+Request 2 has a different `idempotency_key` (different HTTP request) but the same `identifier`.
+- The `Stripe-Idempotency-Key` header does NOT deduplicate request 2 (different header value)
+- The `identifier` DOES deduplicate request 2 (same billing event identifier, within 24h)
+
+This matters in Accrue's `report_usage/3` call pattern: Accrue generates a stable `identifier`
+from its own domain logic (e.g., `"#{customer_id}:#{event_name}:#{period}"`) so that billing
+events are idempotent regardless of retry behavior or process restarts. The `idempotency_key:`
+opt is an additional layer protecting the HTTP call itself.
+
+### SDK Recommendation
+
+- LatticeStripe should accept **both** mechanisms independently:
+  - `identifier` as a first-class key in the `params` map (JSON body)
+  - `idempotency_key:` as a standard opt (maps to `Stripe-Idempotency-Key` header)
+- Document both in `MeterEvent.create/3` `@doc` with clear labels ("domain-level deduplication"
+  vs "request-level idempotency")
+- Do NOT alias one to the other — they are not the same thing
+- Recommendation: always pass a stable `identifier`; also pass `idempotency_key:` for network
+  retry safety
+
+---
+
+## Meter Aggregation Formulas — Semantic Definitions
+
+All three formulas confirmed from Stripe API docs. No `max` formula exists.
+
+| Formula | Stripe Definition | Semantic Meaning | Example Use Case |
+|---------|-------------------|-----------------|-----------------|
+| `sum` | Sum each event's value | Accumulate: add every event's value within the window | API calls (value = 1 per call, sum = total calls) |
+| `count` | Count the number of events | Ignore the value field; every event contributes 1 | Simple event counting where magnitude doesn't matter |
+| `last` | Take the last event's value in the window | Snapshot: the most recent reading wins, previous values discarded | Seat counts, storage usage — where you want the current state, not the total |
+
+`event_time_window` (`"hour"` or `"day"`) controls when the aggregation window resets. This
+affects how `last` behaves: within the window, only the final event value is used. At window
+reset, the meter starts fresh.
+
+---
+
+## Meter Status Transitions
+
+| Status | Meaning | How to Reach It |
+|--------|---------|----------------|
+| `active` | Meter accepts events and aggregates usage | Default after `create/3`; also via `reactivate/3` |
+| `inactive` | No new events accepted; existing data preserved | Via `deactivate/3` (POST `/v1/billing/meters/:id/deactivate`) |
+
+`status_transitions.deactivated_at` (Unix timestamp) is populated when the meter transitions
+to `inactive`. No `activated_at` field exists on the object — only `created` (the creation time).
+
+No delete endpoint exists. `inactive` is the terminal state in the downward direction.
+
+---
 
 ## Feature Dependencies
 
 ```
-Transport Behaviour -----> HTTP Client (Finch adapter)
-       |
-       v
-Client Configuration ----> Per-request Options
-       |
-       v
-Request Building --------> Error Model (response parsing)
-       |                        |
-       v                        v
-Retry Logic <-----------> Idempotency Key Handling
-       |
-       v
-Pagination (List) -------> Auto-pagination (Streams)
-       |
-       v
-Resource Modules --------> PaymentIntents, SetupIntents, PaymentMethods, Customers, Refunds
-       |
-       v
-Checkout Sessions -------> (depends on all resource modules being pattern-established)
-       |
-       v
-Webhook Verification ----> Event Parsing --> Phoenix Plug
-       |
-       v
-Telemetry Events -------> (cross-cutting, can be added at any layer)
-       |
-       v
-Expand Support ----------> (cross-cutting, affects all resource modules)
+Billing.Meter nested structs (plan 20-02)
+    |--> Meter.DefaultAggregation
+    |--> Meter.CustomerMapping
+    |--> Meter.ValueSettings
+    +--> Meter.StatusTransitions
+         all required-before: Billing.Meter resource module (plan 20-03)
+
+Billing.Meter (plan 20-03)
+    required-at-runtime-by: Billing.MeterEvent (plan 20-04)
+    (event_name on MeterEvent must match event_name on a Meter)
+
+Billing.MeterEventAdjustment (plan 20-04)
+    sibling-of: Billing.MeterEvent (same plan, same file)
+
+Session.FlowData nested struct (plan 21-02)
+    required-before: BillingPortal.Session module (plan 21-03)
+
+BillingPortal.Session (Phase 21)
+    independent-of: Phase 20 (no code dependency, separate Stripe API family)
+
+All new resources inherit v1.0 plumbing:
+    Client / Request / Response / Error / Resource / List / Transport
+    (no changes to existing modules required)
 ```
 
-**Critical path:** Transport -> Client -> Errors -> Retries -> Pagination -> First Resource (Customers) -> Remaining Resources -> Webhooks
+---
 
-**Parallel work after foundation:**
-- Telemetry can be woven in alongside resource modules
-- ExDoc/guides can be written alongside implementation
-- Test infrastructure builds incrementally with each resource
+## v1.1 MVP Definition
 
-## MVP Recommendation
+### Phase 20: Ship All (required for Accrue BILL-11)
 
-**Prioritize (ship with v0.1.0):**
+- [ ] `Billing.Meter` CRUDL + `deactivate/reactivate` + 4 nested structs + bang variants
+- [ ] `Billing.MeterEvent.create/3` + `create!/3`
+- [ ] `Billing.MeterEventAdjustment.create/3` + `create!/3`
+- [ ] `guides/metering.md`
+- [ ] Integration tests against stripe-mock
 
-1. **Foundation layer complete** -- Transport, client config, per-request options, error model, retries, idempotency, pagination, auto-pagination Streams. This is the layer that makes everything "just work" and is the hardest to change later.
+### Phase 21: Ship All (required for Accrue CHKT-02)
 
-2. **Customers CRUD + search** -- Simplest resource, establishes the pattern for all other resources. Every Stripe integration touches Customers.
+- [ ] `BillingPortal.Session.create/3` + `create!/3`
+- [ ] `Session.FlowData` nested struct with all four flow types
+- [ ] `guides/customer-portal.md` extension
+- [ ] Integration test against stripe-mock
 
-3. **PaymentIntents full lifecycle** -- The center of modern Stripe. Create, confirm, capture, cancel, list. This is what developers evaluate first.
+### Defer to v1.2+
 
-4. **SetupIntents + PaymentMethods** -- Completes the payment flow story. Save-for-later is the second most common use case.
+- [ ] `Billing.MeterEventStream` (locked D3) — high-throughput streaming, different auth model
+- [ ] `BillingPortal.Configuration` (locked D4) — full CRUDL with UX config structs
+- [ ] `Billing.Meter.EventSummary` — aggregated usage queries per meter
+- [ ] v2 API metering endpoints — requires API version upgrade planning
 
-5. **Refunds** -- Operationally critical, low complexity, rounds out the payment story.
+---
 
-6. **Checkout Sessions** -- Many developers judge the whole library by how easy Checkout is. High-leverage polish target.
+## Feature Prioritization Matrix
 
-7. **Webhook signature verification + Phoenix Plug** -- The #1 Elixir community pain point. Solving this well is an immediate differentiator.
+| Feature | Accrue Value | Implementation Cost | Priority |
+|---------|-------------|---------------------|----------|
+| `MeterEvent.create/3` | HIGH — hot path for all usage reporting | LOW | P1 |
+| `Meter.create/3` + `retrieve/3` | HIGH — required to bootstrap and verify | LOW | P1 |
+| `Meter.deactivate/3` + `reactivate/3` | HIGH — lifecycle management | LOW | P1 |
+| `MeterEventAdjustment.create/3` | HIGH — correction flow required | LOW | P1 |
+| `BillingPortal.Session.create/3` | HIGH — sole unblock for Accrue CHKT-02 | LOW | P1 |
+| `Session.FlowData` struct (all 4 flow types) | MEDIUM — deep-link flows expected | LOW | P1 (cheap to add alongside create) |
+| `guides/metering.md` | HIGH — Accrue contributors need idioms | LOW | P1 |
+| `Meter.list/3` + `stream!/3` | MEDIUM — admin UI use case | LOW | P1 (negligible cost, follows existing pattern) |
+| `Meter.update/4` | LOW — admin use case, rare | LOW | P1 (negligible cost) |
+| `MeterEventStream` | LOW — Accrue doesn't need it | HIGH (separate auth model) | P3 (v1.2+) |
+| `BillingPortal.Configuration` | LOW — Stripe Dashboard covers it for v1.1 | HIGH (deep structs) | P3 (v1.2+) |
 
-8. **Telemetry events** -- Low effort, high signal. Establishes production-readiness credibility.
-
-**Defer to future milestones:**
-
-- **Billing (subscriptions, invoices, products, prices):** Large surface area, complex lifecycle. Second milestone.
-- **Connect (accounts, transfers, payouts):** Major surface, different user persona. Third milestone.
-- **Tax, Identity, Treasury, Issuing, Terminal:** Specialist domains. Coverage milestones.
-- **v2 API support (thin events, include, JSON encoding):** API is still evolving. Wait for stability.
-- **Code generation from OpenAPI:** Consider after v1 handwritten library proves the architecture.
-- **Higher-level billing layer (Ecto schemas, subscription management):** Separate package, separate project.
-
-## Competitive Analysis Summary
-
-| Feature | stripity_stripe | pin_stripe | tiger_stripe | LatticeStripe (target) |
-|---------|----------------|------------|--------------|----------------------|
-| API version | 2019-12-03 | Current | Current | 2026-03-25.dahlia |
-| Last release | May 2024 | Dec 2025 | Feb 2026 | New |
-| Auto-pagination | No | No | Unknown | Yes (Streams) |
-| Search pagination | No | No | Unknown | Yes |
-| Telemetry | No | No | Unknown | Yes |
-| Webhook Plug | Buggy (#855) | Yes (Spark DSL) | Unknown | Yes (solves raw body) |
-| Error types | Basic | Basic | Unknown | Full hierarchy, pattern-matchable |
-| Retries | No | No | Unknown | Yes (exponential backoff, Stripe-Should-Retry) |
-| Idempotency | Manual only | No | Unknown | Auto-generate + manual override |
-| Connect support | Poor | Unknown | Unknown | First-class (stripe_account on every request) |
-| Expand support | Basic | Basic | Unknown | First-class (union types) |
-| Transport | Hackney | Req | Unknown | Pluggable behaviour (Finch default) |
-| Test helpers | No | No | Unknown | Yes (Req.Test based) |
-| Typed structs | Codegen | Minimal | Codegen | Handcrafted, pattern-matchable |
+---
 
 ## Sources
 
-- Project research: `/prompts/stripe-lib-priority-user-flows-deep-research.md` -- Tier priority analysis
-- Project research: `/prompts/stripe-sdk-api-surface-area-deep-research.md` -- Complete API surface mapping
-- Project research: `/prompts/The definitive Stripe library gap in Elixir - a master research document.md` -- Ecosystem gap analysis, community pain points, prior art
-- [Stripe Auto-pagination docs](https://docs.stripe.com/api/pagination/auto?lang=ruby)
-- [stripe-ruby GitHub](https://github.com/stripe/stripe-ruby)
-- [stripe-node GitHub](https://github.com/stripe/stripe-node)
-- [Stripe Advanced Error Handling](https://docs.stripe.com/error-low-level)
-- [Stripe Idempotent Requests](https://docs.stripe.com/api/idempotent_requests)
-- [stripity-stripe GitHub](https://github.com/beam-community/stripity-stripe)
-- [PinStripe Hex Preview](https://preview.hex.pm/preview/pin_stripe/show/README.md)
-- [SDKs with Req: Stripe - Dashbit Blog](https://dashbit.co/blog/sdks-with-req-stripe)
-- [Stripe SDKs Documentation](https://docs.stripe.com/sdks)
-- [Stripe Server-side SDK Introduction](https://docs.stripe.com/sdks/server-side)
+- [Stripe Billing Meter API Reference](https://docs.stripe.com/api/billing/meter) — object, status values, formula enum confirmed HIGH confidence
+- [Stripe Billing Meter Create](https://docs.stripe.com/api/billing/meter/create) — all create parameters confirmed
+- [Stripe Meter Object Fields](https://docs.stripe.com/api/billing/meter/object) — formula values `count`/`sum`/`last` confirmed; status `active`/`inactive` confirmed; `status_transitions.deactivated_at` confirmed
+- [Stripe MeterEvent Create](https://docs.stripe.com/api/billing/meter-event/create) — `identifier`, `payload`, `event_name`, `timestamp` params confirmed; identifier 24-hour deduplication window confirmed
+- [Stripe Recording Usage API](https://docs.stripe.com/billing/subscriptions/usage-based/recording-usage-api) — identifier idempotency semantics, meter_event_stream 10k/s throughput comparison confirmed
+- [Stripe BillingPortal Session Create](https://docs.stripe.com/api/customer_portal/sessions/create) — all four `flow_data.type` values confirmed; `after_completion` sub-object confirmed; session object fields confirmed
+- [Stripe MeterEventAdjustment](https://docs.stripe.com/api/billing/meter-event-adjustment) — cancel semantics, 24-hour cancellation window, `status` field confirmed
+- v1.1 brief: `.planning/v1.1-accrue-context.md` — locked decisions D1-D5, Accrue minimum API surfaces
+
+---
+
+*Feature research for: LatticeStripe v1.1 — Billing.Meter + MeterEvent + BillingPortal.Session*
+*Researched: 2026-04-13*

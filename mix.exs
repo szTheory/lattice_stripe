@@ -26,10 +26,12 @@ defmodule LatticeStripe.MixProject do
           "guides/payments.md",
           "guides/checkout.md",
           "guides/invoices.md",
+          "guides/metering.md",
           "guides/subscriptions.md",
           "guides/connect.md",
           "guides/connect-accounts.md",
           "guides/connect-money-movement.md",
+          "guides/customer-portal.md",
           "guides/webhooks.md",
           "guides/error-handling.md",
           "guides/testing.md",
@@ -81,6 +83,24 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.SubscriptionSchedule.CurrentPhase,
             LatticeStripe.SubscriptionSchedule.PhaseItem,
             LatticeStripe.SubscriptionSchedule.AddInvoiceItem
+          ],
+          "Customer Portal": [
+            LatticeStripe.BillingPortal.Session,
+            LatticeStripe.BillingPortal.Session.FlowData,
+            LatticeStripe.BillingPortal.Session.FlowData.AfterCompletion,
+            LatticeStripe.BillingPortal.Session.FlowData.SubscriptionCancel,
+            LatticeStripe.BillingPortal.Session.FlowData.SubscriptionUpdate,
+            LatticeStripe.BillingPortal.Session.FlowData.SubscriptionUpdateConfirm
+          ],
+          "Billing Metering": [
+            LatticeStripe.Billing.Meter,
+            LatticeStripe.Billing.Meter.DefaultAggregation,
+            LatticeStripe.Billing.Meter.CustomerMapping,
+            LatticeStripe.Billing.Meter.ValueSettings,
+            LatticeStripe.Billing.Meter.StatusTransitions,
+            LatticeStripe.Billing.MeterEvent,
+            LatticeStripe.Billing.MeterEventAdjustment,
+            LatticeStripe.Billing.MeterEventAdjustment.Cancel
           ],
           Connect: [
             LatticeStripe.Account,

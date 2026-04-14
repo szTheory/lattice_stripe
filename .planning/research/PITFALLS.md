@@ -1,349 +1,414 @@
 # Domain Pitfalls
 
-**Domain:** Elixir Stripe SDK / API Client Library
-**Researched:** 2026-03-31
+**Domain:** LatticeStripe v1.1 — Billing.Meter, Billing.MeterEvent + MeterEventAdjustment, BillingPortal.Session
+**Researched:** 2026-04-13
+**Confidence:** HIGH (Stripe API docs verified; MEDIUM where undocumented behavior noted)
+
+> **Scope note:** This file covers ONLY pitfalls specific to the three new v1.1 resources.
+> The v1.0 foundation pitfalls (webhook raw-body, global config, retry double-charge, etc.)
+> are resolved and are NOT carried forward — they are permanently closed as of v1.0.0.
+
+---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, security vulnerabilities, or major user frustration.
+### Pitfall 1: MeterEvent Idempotency Two-Layer Trap
 
-### Pitfall 1: Webhook Raw Body Consumed by Phoenix Plug.Parsers
+**What goes wrong:**
 
-**What goes wrong:** Phoenix's `Plug.Parsers` automatically parses the request body into JSON, consuming the raw bytes. Stripe's webhook signature verification requires the exact original bytes. Once parsed, the raw body is gone and HMAC verification fails silently or produces cryptic errors. This is the single most complained-about issue in the Elixir Stripe ecosystem -- multiple ElixirForum threads describe it as the worst DX experience in the Elixir ecosystem. Developers either skip verification entirely (security hole) or copy-paste `Plug.Parsers` source code into their app to hack in raw body capture.
+Two orthogonal idempotency mechanisms exist and they are NOT interchangeable:
 
-**Why it happens:** Stripe signs the raw HTTP body bytes with HMAC-SHA256. Any transformation (JSON parsing, whitespace normalization, key reordering) invalidates the signature. Phoenix's default plug pipeline parses bodies before user code sees them.
+- **Layer 1 — HTTP header:** `Stripe-Idempotency-Key` (maps to `idempotency_key:` opt in LatticeStripe). Deduplicates the HTTP *request* at Stripe's API gateway layer. Scope: the specific HTTP call. Stripe's standard 24-hour window for idempotency key replay.
+- **Layer 2 — Body field:** `identifier` in the MeterEvent JSON body. Deduplicates within the *metering domain*. If two requests share the same `identifier`, the second event is silently ignored regardless of whether the HTTP idempotency key matches. The deduplication window is "at least 24 hours" (Stripe docs), rolling. Max 100 characters.
 
-**Consequences:** Webhook verification fails in production. Developers disable verification (security vulnerability). Support burden from confused users dominates library issue trackers.
+The trap: a developer who sets `idempotency_key:` but omits `identifier` (or auto-generates a new UUID each retry) is only protected at the HTTP layer. If the HTTP retry uses a different idempotency key (e.g., after a process restart that lost the in-memory key), no deduplication occurs and a duplicate billing event is created — double-charging the customer.
 
-**Prevention:**
-- Provide a dedicated `LatticeStripe.WebhookPlug` that captures the raw body before `Plug.Parsers` runs, using `Plug.Conn.read_body/2` and storing it in `conn.assigns` or `conn.private`
-- Document the plug ordering requirement prominently: webhook plug MUST be placed before `Plug.Parsers` in the endpoint pipeline, or use a separate pipeline for the webhook route
-- Provide a Phoenix router example showing the correct pipeline configuration
-- Include a "troubleshooting webhook verification" guide in ExDoc
+Conversely, a developer who uses `identifier` but omits `idempotency_key:` is protected against domain-level duplicates but not against concurrent racing requests that each send the same event before Stripe's dedup window fires.
 
-**Detection:** Users reporting "webhook signature verification failed" errors when using the library with Phoenix. Integration tests that parse JSON before verification will catch this early.
+stripe-mock is stateless and cannot reproduce the `identifier`-based dedup behavior. Tests that verify this layer must be documented as requiring real Stripe test mode.
 
-**Phase:** Foundation (Tier 0) -- webhook infrastructure must solve this from day one.
+**Why it happens:**
 
-**Confidence:** HIGH -- documented extensively in ElixirForum, GitHub issues on stripity_stripe (#855), and the master research document.
+The two mechanisms look similar ("both prevent duplicates") but operate independently. Stripe's documentation describes them in separate sections and neither explicitly warns about the two-layer interaction. Most SDK docs show only the idempotency key header and don't mention `identifier`.
 
----
+**How to avoid:**
 
-### Pitfall 2: Global Application Config Instead of Per-Request Client Configuration
+1. Document both mechanisms clearly and separately in `MeterEvent.create/3` `@doc` — label them `identifier` (domain-level, 24h rolling, body field) and `idempotency_key:` (request-level, gateway, header).
+2. In the `guides/metering.md`, show the recommended pattern:
+   ```elixir
+   # Generate a stable identifier from domain data (survives process restarts)
+   identifier = "#{customer_id}:#{event_name}:#{unix_second}"
+   MeterEvent.create(client, %{
+     "event_name" => "api_call",
+     "payload" => %{"stripe_customer_id" => customer_id, "value" => 1},
+     "identifier" => identifier
+   }, idempotency_key: identifier)
+   ```
+3. Do NOT alias or conflate the two in the implementation — `identifier` is a body param, `idempotency_key:` is an opt passed to `Client.request/2` as a header. They both accept the same string value in the recommended pattern above, but they travel through different code paths.
+4. Add a doctest or note: "stripe-mock cannot reproduce identifier-based deduplication. Test domain-level idempotency against Stripe test mode."
 
-**What goes wrong:** The library stores API keys and configuration in `Application.get_env/3` (global process dictionary), making it impossible to use multiple Stripe accounts simultaneously. This breaks multi-tenant SaaS apps, Stripe Connect workflows (which need per-request `Stripe-Account` headers), and async test suites.
+**Warning signs:**
 
-**Why it happens:** `Application.get_env` is the path of least resistance in Elixir. Early library versions (stripity_stripe v2) used it exclusively. But Elixir's application environment is global mutable state -- changing it in one process affects all others.
+- Accrue's `report_usage/3` logs show duplicate `billing.meter_event.created` webhook events on retries.
+- Stripe dashboard shows usage summed at 2× expected value for a period.
+- MeterEvent test passes with stripe-mock but produces duplicates in staging.
 
-**Consequences:**
-- Multi-tenant apps cannot use different API keys per tenant
-- Stripe Connect (`stripe_account` header) requires per-request overrides that fight the global config
-- Tests must use `async: false` because config changes in one test leak into concurrent tests
-- Race conditions in production when multiple requests modify shared config
-
-**Prevention:**
-- Follow the modern StripeClient pattern (all official SDKs converged on this in 2024+): explicit client structs passed to every function call
-- Accept `api_key`, `stripe_account`, `api_version`, `idempotency_key` as per-request options on every API call
-- Use `Application.get_env` only as fallback defaults, never as the primary config mechanism
-- Design the client struct to be created once and passed through -- `LatticeStripe.client(api_key: "sk_...")` returns a reusable struct
-- This enables `async: true` in all user tests
-
-**Detection:** Users filing issues about "how to use different API keys per request" or "Connect account header not working." Test suite requiring `async: false`.
-
-**Phase:** Foundation (Tier 0) -- client configuration architecture must be correct from the start; retrofitting is a breaking change.
-
-**Confidence:** HIGH -- official Stripe SDKs all moved to instance-based clients. ElixirForum threads and the Elixir Application docs explicitly warn against global config in libraries.
+**Phase to address:** Phase 20, Plan 20-04 (MeterEvent module) — `@doc` for `create/3` must contain both mechanisms. Plan 20-06 (guide) — `guides/metering.md` must show the stable `identifier` pattern.
 
 ---
 
-### Pitfall 3: Timing-Vulnerable Webhook Signature Comparison
+### Pitfall 2: MeterEvent Timestamp Backdating Window
 
-**What goes wrong:** Using `==` or `===` to compare HMAC signatures allows timing attacks. An attacker can determine the correct signature byte-by-byte by measuring response times.
+**What goes wrong:**
 
-**Why it happens:** String equality operators in most languages short-circuit on the first differing byte. This is a subtle security issue that looks correct in code review.
+The `timestamp` field in a MeterEvent create request must be:
+- No more than **35 calendar days** in the past — Stripe returns `timestamp_too_far_in_past` error (HTTP 400).
+- No more than **5 minutes** in the future — Stripe returns `timestamp_in_future` error (HTTP 400).
 
-**Consequences:** Webhook endpoint becomes vulnerable to signature forgery via timing side-channel. Attackers can forge webhook events to trigger actions in the application (refunds, subscription changes, etc.).
+If Accrue's usage reporting pipeline batches events and flushes them later (e.g., reporting yesterday's usage at batch time), any event timestamp older than 35 days is silently dropped by the batch with a 400. If the batch failure is not surfaced to the caller, the usage is permanently lost — Stripe cannot accept the event after the window closes.
 
-**Prevention:**
-- Use Erlang's `:crypto.hash_equals/2` (available since OTP 25) or implement constant-time comparison via XOR-and-reduce pattern
-- Never use `==`, `===`, or pattern matching for signature comparison
-- Add explicit code comments explaining why constant-time comparison is required
-- Test that the verification module uses the correct comparison function
+**Why it happens:**
 
-**Detection:** Security audit or code review catching `==` in signature verification path. No runtime detection possible (that is the nature of timing attacks).
+Developers assume Stripe accepts arbitrary backdated timestamps for reconciliation. The 35-day window is specific to the v1 `meter_events` endpoint and is not prominently documented in the SDK integration guides. The v2 endpoint has different constraints.
 
-**Phase:** Foundation (Tier 0) -- webhook signature verification is a security-critical path.
+**How to avoid:**
 
-**Confidence:** HIGH -- well-documented cryptographic best practice. Stripe's own documentation and all official SDKs use constant-time comparison.
+1. Document the constraint prominently in `MeterEvent.create/3` `@doc` and `guides/metering.md`:
+   - "timestamp must be within the past 35 calendar days and no more than 5 minutes in the future"
+   - Include the exact error codes: `timestamp_too_far_in_past`, `timestamp_in_future`
+2. Accrue's `report_usage/3` should pass `timestamp` at the time of the event (not at flush time). LatticeStripe does not need to enforce this — it passes through whatever timestamp the caller provides — but the guide must warn about batch-flush anti-patterns.
+3. Note in docs: if no timestamp is provided, Stripe uses the current server time.
 
----
+**Warning signs:**
 
-### Pitfall 4: Structs That Break on Stripe API Changes
+- Batch billing reconciliation jobs return 400 errors with `timestamp_too_far_in_past` code.
+- Usage for customers in a specific billing period is unexpectedly zero despite events being sent.
+- Stripe `billing.meter.error_report_triggered` webhook fires with `timestamp_too_far_in_past` errors.
 
-**What goes wrong:** Defining Elixir structs with `defstruct` for every Stripe resource field creates a rigid schema. When Stripe adds new fields (monthly), the library either drops them silently or requires a library update for every Stripe API change. When Stripe removes or renames fields, user code pattern-matching on struct fields breaks.
-
-**Why it happens:** Elixir structs have a fixed set of keys defined at compile time. Stripe's API evolves constantly (the OpenAPI spec has 2,196+ releases). The temptation to provide "type-safe" structs conflicts with the reality of a rapidly changing upstream API.
-
-**Consequences:**
-- New Stripe fields silently dropped until library updates
-- Users stuck on old library versions miss important response data
-- Adding struct fields is technically a non-breaking change but removing them is breaking
-- Pattern matching on struct module name (`%LatticeStripe.Customer{}`) couples user code to internal types
-
-**Prevention:**
-- Use structs with an `__extra__` or `metadata` catch-all map field that captures unknown keys from the API response
-- Or use a hybrid approach: typed structs for well-known fields + pass-through map for the rest
-- Store the raw decoded map alongside parsed fields (the Pay gem's `object` column pattern)
-- Provide `Access` behaviour implementation so users can do `customer[:unknown_field]`
-- Document that structs represent the library's known fields, not the complete Stripe response
-- Consider making struct fields liberal (allow nil for most fields) since Stripe responses vary by expand options and API version
-
-**Detection:** Users reporting "missing field X in response" issues. Stripe changelog showing new fields not reflected in library structs.
-
-**Phase:** Foundation (Tier 0) -- response type design is architectural and cannot be easily changed later.
-
-**Confidence:** HIGH -- stripity_stripe's GitHub issues (#878, #879, #568) are dominated by missing/incorrect struct fields. This is the primary maintenance burden of any Stripe library.
+**Phase to address:** Phase 20, Plan 20-04 (`@doc` constraint) and Plan 20-06 (guide anti-pattern section).
 
 ---
 
-### Pitfall 5: Incorrect Retry Logic That Causes Double Charges
+### Pitfall 3: MeterEvent customer_mapping Key Silent-Drop
 
-**What goes wrong:** Retrying non-idempotent requests (or retrying with a new idempotency key) after ambiguous failures (timeouts, 500s) can cause duplicate charges, double subscription creations, or other duplicate side effects.
+**What goes wrong:**
 
-**Why it happens:** Network timeouts and 500 errors are ambiguous -- the request may have succeeded server-side before the client received the response. Retrying with a different idempotency key creates a new operation. Retrying without an idempotency key on POST endpoints also creates a new operation.
+When a MeterEvent arrives at Stripe, the payload is checked for the key configured in `customer_mapping.event_payload_key` (typically `"stripe_customer_id"`). If that key is absent from the payload, Stripe does NOT return a synchronous 400 — it accepts the event with HTTP 200, processes it asynchronously, and then fires a `v1.billing.meter.error_report_triggered` webhook event with error code `meter_event_no_customer_defined`.
 
-**Consequences:** Customers charged twice. Duplicate subscriptions created. Duplicate refunds issued. Financial and trust damage that is difficult to recover from.
+The result: the event is silently dropped from billing aggregation. No usage is recorded. No synchronous error surfaces to Accrue's `report_usage/3` call. The customer is not billed for real usage.
 
-**Prevention:**
-- Auto-generate idempotency keys for all POST requests (Stripe recommends this)
-- On retry, always reuse the same idempotency key (this is the entire point of idempotency)
-- Respect the `Stripe-Should-Retry` response header -- Stripe explicitly tells you when retrying is safe
-- Do NOT retry 400-level errors (except 409 Conflict and 429 Rate Limit)
-- DO retry 500+ errors and network errors, but with the same idempotency key
-- Implement exponential backoff with jitter to avoid thundering herd
-- Document that idempotency keys expire after 24 hours
-- Raise/warn if user provides an idempotency key AND the library would auto-generate one (avoid confusion)
-- Handle the idempotency error case where parameters differ from the original request
+Similarly, if the customer ID value in the payload refers to a customer that does not exist in Stripe, the error code is `meter_event_customer_not_found` — same silent async failure pattern.
 
-**Detection:** Users reporting duplicate charges or subscriptions. Stripe dashboard showing duplicate objects with different IDs but same parameters.
+**Why it happens:**
 
-**Phase:** Foundation (Tier 0) -- retry and idempotency logic is core HTTP infrastructure.
+Stripe's v1 meter events endpoint is fire-and-forget by design (high throughput, low latency). Synchronous validation is limited to request-level checks (auth, schema). Domain-level validation (does this customer exist? does the payload have the right key?) is asynchronous. Developers testing against stripe-mock see consistent 200s and do not discover the silent-drop until production billing data is missing.
 
-**Confidence:** HIGH -- Stripe's official blog post on idempotency design, official SDK implementations, and API documentation all detail these requirements.
+**How to avoid:**
 
----
+1. Document the async failure mode explicitly in `MeterEvent.create/3` `@doc`:
+   - "A successful `{:ok, %MeterEvent{}}` response means Stripe accepted the event for processing, not that it was recorded. Subscribe to `v1.billing.meter.error_report_triggered` to catch customer mapping failures."
+2. In `guides/metering.md`, include a "Monitoring" section with the `billing.meter.error_report_triggered` webhook and the relevant error codes: `meter_event_no_customer_defined`, `meter_event_customer_not_found`.
+3. LatticeStripe does NOT need to pre-validate the payload key — that would require knowing the meter configuration at call time, coupling the two resources unnecessarily. The guide-level warning is sufficient.
+4. Accrue must subscribe to the error webhook in its own webhook handler.
 
-## Moderate Pitfalls
+**Warning signs:**
 
-### Pitfall 6: Finch Pool Lifecycle Mismanagement
+- Billing period usage shows zero despite `{:ok, %MeterEvent{}}` responses.
+- `v1.billing.meter.error_report_triggered` webhook fires repeatedly.
+- Stripe error report shows `meter_event_no_customer_defined` or `meter_event_customer_not_found` samples.
 
-**What goes wrong:** The library either (a) forces users to start a Finch pool in their supervision tree with a specific name the library expects, creating tight coupling, or (b) starts its own Finch pool via an OTP application, creating an unnecessary process that conflicts with users' existing Finch instances. Libraries should not start processes users do not expect.
-
-**Why it happens:** Finch requires a named process started in a supervision tree. The question of "who owns the Finch pool" is a design decision with no obvious right answer for a library.
-
-**Prevention:**
-- Accept a Finch pool name as a client configuration option (e.g., `LatticeStripe.client(finch: MyApp.Finch)`)
-- Provide sensible defaults: if no Finch name given, check if a well-known default exists or start a supervised pool lazily
-- Use the Transport behaviour so users can swap out Finch entirely
-- Document clearly: "LatticeStripe does not start its own HTTP connection pool. You must include Finch in your supervision tree."
-- Provide a copy-paste supervision tree example in the README
-
-**Detection:** Users reporting "Finch pool not started" errors or "I already have Finch, how do I reuse it?"
-
-**Phase:** Foundation (Tier 0) -- transport layer architecture.
-
-**Confidence:** MEDIUM -- this is an Elixir ecosystem convention issue. The Dashbit blog post on Req-based SDKs sidesteps it by using Req (which manages its own pools), but for a Finch-based library this is a real design decision.
+**Phase to address:** Phase 20, Plan 20-04 (`@doc` on `create/3`) and Plan 20-06 (guide monitoring section). Note this during Plan 20-01 wave-0 probe — confirm stripe-mock returns 200 without validating the customer mapping key.
 
 ---
 
-### Pitfall 7: Auto-Pagination Streams That Exhaust Rate Limits or Memory
+### Pitfall 4: formula: sum with No value_settings — Silent Zero Aggregation
 
-**What goes wrong:** Elixir Streams are lazy, which is great for pagination. But without guardrails, `Stream.map(pages, &process/1) |> Enum.to_list()` will eagerly fetch ALL pages, potentially hitting Stripe's rate limit (100 requests/second per API key) or loading millions of objects into memory.
+**What goes wrong:**
 
-**Why it happens:** Developers unfamiliar with Stripe's data volumes treat auto-pagination like iterating a small list. Stripe accounts can have millions of customers, charges, or events.
+When a Meter is created with `default_aggregation.formula = "sum"`, Stripe expects each MeterEvent's payload to contain a numeric value at the key specified in `value_settings.event_payload_key` (default key: `"value"`). If `value_settings` is omitted from the Meter create request, Stripe uses `"value"` as the default key — but if MeterEvents subsequently arrive with no `"value"` key in their payloads (or with a string instead of a number), Stripe fires `meter_event_value_not_found` or `meter_event_invalid_value` async error events, and the aggregated sum for the billing period is zero.
 
-**Consequences:** Rate limit errors (429) cascading through the stream. OOM crashes from materializing large lists. Long-running requests that time out.
+For `formula: "count"`, `value_settings` is irrelevant — Stripe counts events, not values. A developer who builds the count flow correctly may copy the same payload shape for a sum meter and forget to include the numeric value — the count meter worked fine, the sum meter silently aggregates zero.
 
-**Prevention:**
-- Document that `Stream` functions are lazy but `Enum` functions materialize everything
-- Provide a `max_pages` or `max_items` option on auto-pagination to prevent runaway fetches
-- Log or emit telemetry events at page boundaries so users can monitor progress
-- Consider built-in rate limiting (respect `Retry-After` headers on 429 responses)
-- Provide both `stream_` variants (lazy) and `list_` variants (single page) so the API makes the distinction clear
-- Document examples showing `Stream.take/2` for bounded iteration
+**Why it happens:**
 
-**Detection:** Users reporting 429 errors when paginating. High memory usage when listing large collections.
+The `value_settings` field is optional on Meter create (it has a default), which masks the dependency. The async validation path means the error only surfaces at billing time, not at event submission time. stripe-mock does not validate numeric types in the payload.
 
-**Phase:** Foundation (Tier 0) -- pagination is core infrastructure.
+**How to avoid:**
 
-**Confidence:** MEDIUM -- documented in stripe-node issue #575 and general Stripe pagination docs. The Elixir Stream integration is novel territory without direct precedent.
+1. In `Meter.DefaultAggregation` `@typedoc`, document the formula semantics clearly:
+   - `sum`: requires numeric value at `value_settings.event_payload_key` in each MeterEvent payload
+   - `count`: ignores payload values; event presence is the unit
+   - `last`: takes the last value in the window; same payload requirement as `sum`
+2. In `guides/metering.md`, include a code example for each formula showing the corresponding MeterEvent payload shape.
+3. Add a guard in `Meter.create/3` that raises when `default_aggregation.formula` is `"sum"` or `"last"` and `value_settings` is absent from params — fail fast before the API call rather than silently producing zero usage at billing time:
+   ```elixir
+   def create(%Client{} = client, params, opts \\ []) do
+     formula = get_in(params, ["default_aggregation", "formula"])
+     if formula in ["sum", "last"] and not Map.has_key?(params, "value_settings") do
+       raise ArgumentError,
+         "Meter.create/3 with formula \"#{formula}\" requires value_settings. " <>
+         "Omitting value_settings means MeterEvent payloads must use the default key \"value\"."
+     end
+     # ... rest of create
+   end
+   ```
+   Note: this is a warning guard, not a blocking error — Stripe itself allows omitting value_settings (it defaults to `"value"`). But the guide must document the implicit contract.
 
----
+**Warning signs:**
 
-### Pitfall 8: API Version Mismatch Between Library Structs and Actual Responses
+- Billing period usage shows zero despite MeterEvents being reported.
+- `meter_event_value_not_found` or `meter_event_invalid_value` in error reports.
+- Swapping from a count meter to a sum meter without updating payload shape.
 
-**What goes wrong:** The library pins to a specific Stripe API version but allows per-request version overrides. When a user overrides the version, the response shape may differ from what the library's structs/decoders expect, causing decoding failures or silently dropped data.
-
-**Why it happens:** Stripe's API version affects response shapes (field names, nesting, presence of fields). The library's decoders are written against one version but users can send any version.
-
-**Consequences:** Decoding crashes on unexpected response shapes. Silent data loss when fields are renamed between versions. Confusing error messages that don't mention version mismatch as the cause.
-
-**Prevention:**
-- Pin a default API version per library release (document it prominently)
-- When users override the version, log a warning that response shapes may differ from library expectations
-- Make decoders tolerant of unknown/missing fields (do not crash on unexpected keys)
-- Test against at least two API versions in CI
-- Document which Stripe API version the library is built against in the module docs and README
-- Consider the Java SDK bug (v27.x.y) as a cautionary tale: version pinning bugs can cascade
-
-**Detection:** Users reporting decoding errors after setting a custom API version. Stripe deprecation notices for the pinned version.
-
-**Phase:** Foundation (Tier 0) -- response decoding architecture.
-
-**Confidence:** HIGH -- documented in Stripe's versioning docs and the Java/dotnet SDK version pinning bug.
+**Phase to address:** Phase 20, Plan 20-02 (nested struct `@typedoc` documentation) and Plan 20-03 (guard in `Meter.create/3`).
 
 ---
 
-### Pitfall 9: Expand Parameter Handling That Degrades Performance
+### Pitfall 5: Meter Status Lifecycle — Events to Inactive Meter Return archived_meter Error
 
-**What goes wrong:** The library makes it too easy to expand deeply nested objects on list endpoints, causing Stripe to return massive payloads that are slow to generate and slow to decode. Users copy-paste expand examples without understanding the performance implications.
+**What goes wrong:**
 
-**Why it happens:** Stripe supports up to 4 levels of expansion nesting. On list endpoints with 100 items, each expansion multiplies the response size. A `list customers` with `expand: ["data.subscriptions.data.default_payment_method"]` on 100 customers generates an enormous response.
+When a meter is deactivated (status → `inactive`), any subsequent MeterEvent with a matching `event_name` returns an error with code `archived_meter`. This is a **synchronous** error — unlike customer mapping failures, this surfaces immediately as a non-200 response. LatticeStripe will correctly map this to `{:error, %Error{type: :invalid_request_error, code: "archived_meter"}}`.
 
-**Prevention:**
-- Document performance implications of expand on list endpoints prominently
-- Consider warning or raising when expand depth exceeds 2 on list endpoints
-- Provide examples showing the right way: fetch the list, then expand on individual retrieve calls
-- Validate expand paths at request build time (catch typos before the API call)
+However, Accrue's `report_usage/3` hot path may not be monitoring for this error code. If Accrue does not check `error.code` and treats all `{:error, _}` uniformly (e.g., retry), it will retry an event against a deactivated meter indefinitely, burning rate limit budget.
 
-**Detection:** Users reporting slow API calls or timeouts on list endpoints with expansions.
+Deactivation is reversible via `reactivate/3` (POST `/v1/billing/meters/:id/reactivate`). Historical aggregation data from before deactivation persists — reactivation does not reset the meter's event history. However: events submitted while the meter was inactive are NOT retroactively processed; they are permanently lost.
 
-**Phase:** Foundation (Tier 0) -- expand is part of request building.
+**Why it happens:**
 
-**Confidence:** MEDIUM -- Stripe's own docs warn about this. Less of a library design pitfall and more of a documentation/DX pitfall.
+Meter lifecycle management is an ops concern. Accrue's hot path is built assuming the meter is always active. Deactivation of the wrong meter in a Stripe dashboard or via an admin script can silently break billing for all customers on that meter until the error is noticed.
 
----
+**How to avoid:**
 
-### Pitfall 10: Testing Strategy That Creates Brittle or Meaningless Tests
+1. Document `deactivate/3` behavior clearly: "Deactivating a meter causes all subsequent MeterEvents with that event_name to fail with `archived_meter`. Events submitted during the inactive period are permanently lost — reactivation does not retroactively process them."
+2. Add a `@doc` note to `MeterEvent.create/3`: "If the error code is `archived_meter`, do not retry. Reactivate the meter first via `Meter.reactivate/3`."
+3. Accrue should pattern-match `archived_meter` as a non-retryable error in its billing pipeline — but this is Accrue's concern, not LatticeStripe's. LatticeStripe's job is to surface the error code clearly via `%Error{code: "archived_meter"}`.
+4. Verify the `archived_meter` error is normalized into a pattern-matchable `error.code` in the existing error model (it should be, as all Stripe API errors flow through the same error normalization path in v1.0).
 
-**What goes wrong:** The library either (a) encourages mocking at the wrong level (mocking HTTP responses with hardcoded JSON, creating tests that pass but don't verify real behavior), or (b) requires a live Stripe test-mode key for all tests (slow, flaky, requires network, leaks test data into Stripe dashboard).
+**Warning signs:**
 
-**Why it happens:** Stripe's `stripe-mock` is stateless and limited. VCR/cassette recording captures exact responses but breaks when the API changes. Mocking at the HTTP level is easy but tests nothing meaningful. There is no perfect testing strategy.
+- `{:error, %Error{code: "archived_meter"}}` responses from `MeterEvent.create/3`.
+- Usage reporting stops for all customers simultaneously.
+- Retry loops on `archived_meter` errors exhausting rate limits.
 
-**Prevention:**
-- Use the Transport behaviour as the test seam: provide a `LatticeStripe.Transport.Mock` or document how to use Mox with the Transport behaviour
-- Test at the right level: unit test request building and response decoding with known fixtures; integration test against stripe-mock or Stripe test mode for API correctness
-- Provide test helpers that make it easy to build fixture data (e.g., `LatticeStripe.Testing.customer_fixture()`)
-- Document the recommended testing strategy: Mox the transport for unit tests, stripe-mock for integration, Stripe test mode for smoke tests
-- Make the test helper module opt-in (`use LatticeStripe.Testing` or a separate hex package)
-
-**Detection:** Users asking "how do I test my Stripe integration?" on forums. Users with 100% passing tests that break in production.
-
-**Phase:** Developer Experience -- but the Transport behaviour enabling this must be in Foundation.
-
-**Confidence:** MEDIUM -- PaperTiger's existence validates this is a real pain point. The testing strategy is well-understood in principle but poorly executed in practice across the ecosystem.
+**Phase to address:** Phase 20, Plan 20-03 (document `deactivate/3` behavior) and Plan 20-04 (`@doc` on `MeterEvent.create/3`). Plan 20-05 integration test should assert shape of 400-level errors from stripe-mock when applicable.
 
 ---
 
-## Minor Pitfalls
+### Pitfall 6: MeterEventAdjustment — Wrong Field Names in cancel Sub-Object
 
-### Pitfall 11: Inconsistent Error Shapes Across Endpoints
+**What goes wrong:**
 
-**What goes wrong:** Different API calls return errors in different shapes (card errors have `decline_code`, validation errors have `param`, rate limit errors have `Retry-After` header). The library normalizes some but not all, leaving users to handle raw maps for edge cases.
+The `cancel` sub-object in `MeterEventAdjustment.create/3` params uses the field `cancel.identifier` — this is the `identifier` string from the original MeterEvent being cancelled, NOT a sub-object nested further. The exact shape is:
 
-**Prevention:**
-- Define a clear error type hierarchy: `LatticeStripe.Error.CardError`, `.InvalidRequestError`, `.AuthenticationError`, `.RateLimitError`, `.APIError`, `.ConnectionError`
-- Each error type carries all relevant fields for that category
-- Pattern matching on error types should be the primary error handling mechanism
-- Include `request_id` on every error for support debugging
+```elixir
+%{
+  "event_name" => "api_call",
+  "type" => "cancel",
+  "cancel" => %{
+    "identifier" => "evt_abc123"
+  }
+}
+```
 
-**Phase:** Foundation (Tier 0).
+Common mistake: using `"id"` or `"event_identifier"` instead of `"identifier"`. Stripe returns a 400 with a param error. A second mistake is sending `"identifier"` at the top level rather than nested inside `"cancel"`.
 
-**Confidence:** HIGH -- Stripe's error hierarchy is well-documented and all official SDKs implement it.
+The 24-hour cancellation window is hard: events older than 24 hours cannot be adjusted. Stripe returns a 400. stripe-mock does not enforce the 24-hour window (stateless) — tests pass in CI but adjustments fail in production for events older than a day.
 
----
+**Why it happens:**
 
-### Pitfall 12: Not Preserving Request ID for Debugging
+The API shape is `cancel.identifier` but developers conflate it with the top-level `identifier` field on MeterEvent (a different field serving a different purpose). The naming is similar enough to cause confusion. stripe-mock's inability to simulate the time window gives false confidence.
 
-**What goes wrong:** When users contact Stripe support, the first thing support asks for is the `Request-Id` header. If the library discards response headers, users cannot provide this, making debugging production issues extremely difficult.
+**How to avoid:**
 
-**Prevention:**
-- Include `request_id` on every successful response and error response
-- Make it accessible without digging into raw HTTP headers
-- Log it via Telemetry events so it appears in structured logs automatically
-- Consider a "raw response" mode that returns full headers alongside the parsed body
+1. In `MeterEventAdjustment` `@typedoc` and `create/3` `@doc`, show the exact param map shape with a code example. Use the literal field names from Stripe docs (`"cancel"` → `"identifier"`).
+2. In `MeterEventAdjustment` struct's `@typedoc`, explicitly document the `cancel` sub-field:
+   - `cancel: %{identifier: String.t() | nil}` — the `identifier` of the original MeterEvent to cancel
+3. In `guides/metering.md`, include a reconciliation example showing `MeterEventAdjustment.create/3` with the exact nested map.
+4. In unit tests (Plan 20-04), assert the `from_map/1` correctly decodes `cancel.identifier` from the fixture.
+5. Document the 24-hour limit with a note: "stripe-mock does not enforce the 24-hour cancellation window — integration test coverage is best-effort in CI; test against Stripe test mode for full validation."
 
-**Phase:** Foundation (Tier 0).
+**Warning signs:**
 
-**Confidence:** HIGH -- every official Stripe SDK surfaces request_id prominently.
+- `{:error, %Error{param: "cancel[identifier]"}}` or similar param errors from Stripe.
+- Adjustment integration tests pass but production corrections fail with 400.
+- Accrue correction flows silently fail when trying to fix over-reported events.
 
----
-
-### Pitfall 13: Blocking the Caller During Pagination
-
-**What goes wrong:** Synchronous pagination (fetch page, process, fetch next page) blocks the calling process. In a Phoenix request handler, this means the connection is held open for the entire pagination duration.
-
-**Prevention:**
-- Use Elixir Streams (lazy evaluation) so callers can process items incrementally
-- Document that long-running pagination should be done in a background Task or GenServer, not in a Phoenix controller
-- Consider providing a `LatticeStripe.Task` helper for background processing patterns
-
-**Phase:** Foundation (Tier 0) for Stream-based pagination. Developer Experience for helpers.
-
-**Confidence:** LOW -- this is more of a usage pattern issue than a library design flaw. Most users will not paginate millions of records.
+**Phase to address:** Phase 20, Plan 20-04 (MeterEventAdjustment module and unit tests).
 
 ---
 
-### Pitfall 14: Hex Package Name Collision or Confusion
+### Pitfall 7: FlowData Type Validation — Server-Side 400 for Missing Required Sub-Fields
 
-**What goes wrong:** Publishing a Stripe-related package on Hex with a name that is too generic, conflicts with existing packages, or is confusable with the incumbent (`stripity_stripe`). Users install the wrong package.
+**What goes wrong:**
 
-**Prevention:**
-- `lattice_stripe` is already chosen and verified unique on Hex -- this pitfall is mitigated
-- Use `LatticeStripe` module prefix consistently (not `Stripe` which would conflict)
-- Document the distinction from `stripity_stripe` in the README for users searching
+`BillingPortal.Session.create/3` accepts a `flow_data` parameter that deep-links the customer to a specific portal flow. The `type` field is an enum:
 
-**Phase:** Pre-development (already resolved).
+| Flow Type | Required sub-fields |
+|-----------|-------------------|
+| `payment_method_update` | None (type alone is sufficient) |
+| `subscription_cancel` | `subscription_cancel.subscription` (subscription ID) |
+| `subscription_update` | `subscription_update.subscription` |
+| `subscription_update_confirm` | `subscription_update_confirm.subscription` + `subscription_update_confirm.items` array |
 
-**Confidence:** HIGH -- the `lattice-stripe-oss-lib-name.md` research document addresses this.
+If a developer passes `flow_data: %{"type" => "subscription_cancel"}` without `"subscription_cancel" => %{"subscription" => "sub_..."}`, Stripe returns a 400 `invalid_request_error`. The error is late — it surfaces only after the HTTP round-trip, not at struct construction time.
+
+The v1.0 precedent for this class of problem is `pause_collection/5`'s atom guard at the function head: `when behavior in [:keep_as_draft, :mark_uncollectible, :void]`. The analogue for FlowData is a client-side validation that raises early when required sub-fields are missing.
+
+**Why it happens:**
+
+Flow types have different required shapes, but all flow through the same `create/3` params map. Without client-side validation, the error is a generic 400 from Stripe that may not clearly identify which sub-field is missing. stripe-mock may or may not enforce required sub-fields for all flow types.
+
+**How to avoid:**
+
+Use `Resource.require_param!` (already in v1.0) for basic validation, and add a flow-type sub-field check in `Session.create/3` that mirrors the existing pattern:
+
+```elixir
+def create(%Client{} = client, params, opts \\ []) do
+  Resource.require_param!(params, "customer",
+    ~s|BillingPortal.Session.create/3 requires "customer". Example: %{"customer" => "cus_..."}|)
+
+  case get_in(params, ["flow_data", "type"]) do
+    nil -> :ok
+    "payment_method_update" -> :ok
+    "subscription_cancel" ->
+      unless get_in(params, ["flow_data", "subscription_cancel", "subscription"]) do
+        raise ArgumentError, ~s|flow_data.type "subscription_cancel" requires flow_data.subscription_cancel.subscription|
+      end
+    "subscription_update" ->
+      unless get_in(params, ["flow_data", "subscription_update", "subscription"]) do
+        raise ArgumentError, ~s|flow_data.type "subscription_update" requires flow_data.subscription_update.subscription|
+      end
+    "subscription_update_confirm" ->
+      unless get_in(params, ["flow_data", "subscription_update_confirm", "subscription"]) do
+        raise ArgumentError, ~s|flow_data.type "subscription_update_confirm" requires subscription + items|
+      end
+    unknown ->
+      raise ArgumentError, ~s|Unknown flow_data.type "#{unknown}". Valid: payment_method_update, subscription_cancel, subscription_update, subscription_update_confirm|
+  end
+  # ... rest of create
+end
+```
+
+This follows `pause_collection/5`'s atom guard precedent — fail fast at the SDK boundary before touching the network.
+
+**Warning signs:**
+
+- 400 errors from `Session.create/3` with param errors referencing `flow_data`.
+- Accrue portal redirect fails for subscription cancellation deep links but works for plain sessions.
+- stripe-mock returns 200 but Stripe test mode returns 400 (if stripe-mock is lenient about sub-fields).
+
+**Phase to address:** Phase 21, Plan 21-03 (Session module) — the validation guard belongs in `create/3` alongside the `customer` require check.
 
 ---
 
-## Phase-Specific Warnings
+## Technical Debt Patterns
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Foundation: HTTP Transport | Finch pool ownership confusion (Pitfall 6) | Transport behaviour + documented supervision tree |
-| Foundation: Client Config | Global config anti-pattern (Pitfall 2) | Per-request client struct from day one |
-| Foundation: Error Handling | Inconsistent error shapes (Pitfall 11) | Comprehensive error type hierarchy |
-| Foundation: Retry Logic | Double charges from bad retries (Pitfall 5) | Auto-idempotency + Stripe-Should-Retry |
-| Foundation: Response Types | Rigid structs breaking on API changes (Pitfall 4) | Tolerant decoders with extra field capture |
-| Foundation: Pagination | Rate limit exhaustion (Pitfall 7) | Stream-based with guardrails and telemetry |
-| Foundation: API Versioning | Version mismatch decoding failures (Pitfall 8) | Tolerant decoders + version warning |
-| Webhooks | Raw body consumption (Pitfall 1) | Dedicated Plug with raw body capture |
-| Webhooks | Timing attack on signature (Pitfall 3) | Constant-time HMAC comparison |
-| Testing/DX | Brittle or meaningless tests (Pitfall 10) | Transport behaviour as test seam + fixtures |
-| All phases | Request ID not preserved (Pitfall 12) | Surface request_id on every response/error |
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Omit `identifier` in MeterEvent, rely only on `idempotency_key:` | Simpler call site | Double-billing on process-restart retries (different idempotency keys) | Never — always set a stable `identifier` |
+| Raw map for `FlowData` sub-objects (`subscription_cancel`, etc.) instead of typed structs | Less code in Phase 21 | Pattern-match on `session.flow.subscription_cancel.subscription` fails with raw map | Acceptable for v1.1 — Accrue does not pattern-match sub-flow internals (confirmed in v1.1 brief) |
+| Skip guard for `formula: sum` missing `value_settings` | Fewer lines in `Meter.create/3` | Silent zero usage at billing time; no early error | Never — add the warning guard |
+| Omit webhook monitoring guidance for `billing.meter.error_report_triggered` | Shorter guide | Accrue operators unaware of silent payload drop failures | Never — include in `guides/metering.md` |
+
+---
+
+## Integration Gotchas
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| MeterEvent + stripe-mock | Assuming stripe-mock validates customer mapping keys | stripe-mock returns 200 for any payload shape; domain validation is async in real Stripe. stripe-mock covers request shape only. |
+| MeterEvent + stripe-mock | Assuming stripe-mock enforces `identifier` deduplication | stripe-mock is stateless — identical identifiers both succeed in tests. Test dedup against Stripe test mode only. |
+| MeterEventAdjustment + stripe-mock | Assuming stripe-mock enforces the 24-hour cancellation window | stripe-mock accepts any adjustment. The window is only enforced by real Stripe. Document this constraint in the integration test file. |
+| BillingPortal.Session + Connect | Using `stripe_account:` opt without awareness that `on_behalf_of` is a distinct param | `stripe_account:` routes the entire request through a connected account (direct charges). `on_behalf_of` filters which subscriptions appear in the portal. Both may be needed simultaneously for Connect platforms. Thread both through the existing v1.0 opts plumbing; document the distinction. |
+| BillingPortal.Session URL | Attempting to reuse a session URL for multiple customers or browser sessions | Portal session URLs are single-use and short-lived. Create a new session per redirect. |
+| Billing.Meter + Billing.MeterEvent | Using `event_name` that doesn't match any Meter's `event_name` | Stripe returns `no_meter` error (async). Create the Meter first and match event names exactly — Stripe is case-sensitive. |
+
+---
+
+## Performance Traps
+
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Synchronous MeterEvent reporting on every user request in Accrue | p99 latency spikes when Stripe is slow | Accrue (not LatticeStripe) should enqueue events and flush asynchronously. LatticeStripe provides the flush call. | At any scale — Stripe's v1 endpoint is sub-100ms but blocking adds latency variability |
+| `Meter.list/3` without `status` filter on large accounts | Slow list fetches, unnecessary data | Use `Meter.list(client, %{"status" => "active"})` to scope results. Document in guide. | At 50+ meters |
+
+---
+
+## Security Mistakes
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Logging MeterEvent `payload` map in production | PII exposure — payload typically contains `stripe_customer_id` and usage values; could contain PII if caller embeds email/name | Implement custom `Inspect` for `MeterEvent` struct that masks `:payload` field — same pattern as `Subscription` and `Checkout.Session` in v1.0 |
+| Logging BillingPortal.Session `url` | The session URL is a single-use authentication link; logging it creates an audit trail that could be replayed | Add `Inspect` guard for `BillingPortal.Session` that masks `:url`. Treat it like a token. |
+| Embedding customer ID in `identifier` and logging it | Structured logs may capture `identifier` values that encode customer IDs, leaking PII | Note in `guides/metering.md`: "if your identifier scheme encodes customer IDs, filter it from production log aggregation" |
+
+---
+
+## "Looks Done But Isn't" Checklist
+
+- [ ] **MeterEvent.create/3 docs:** Mentions both `identifier` (domain-level, body, 24h) and `idempotency_key:` (request-level, header) — not just one.
+- [ ] **MeterEvent.create/3 docs:** States the 35-day backdating limit and 5-minute future limit with exact error codes.
+- [ ] **MeterEvent.create/3 docs:** Warns that `{:ok, %MeterEvent{}}` is an accepted-for-processing ack, not a billing-recorded confirmation. Points to `v1.billing.meter.error_report_triggered` webhook.
+- [ ] **MeterEventAdjustment.create/3 docs + unit tests:** Uses `"cancel" => %{"identifier" => ...}` (nested), not `"identifier"` at top level.
+- [ ] **Meter.create/3:** Guard raises `ArgumentError` when `formula` is `"sum"` or `"last"` and `value_settings` is absent.
+- [ ] **Meter.deactivate/3 docs:** States that events submitted during inactive period are permanently lost (not queued).
+- [ ] **BillingPortal.Session.create/3:** `Resource.require_param!` guard for `"customer"` present.
+- [ ] **BillingPortal.Session.create/3:** Flow-type sub-field validation for `subscription_cancel`, `subscription_update`, `subscription_update_confirm` present.
+- [ ] **BillingPortal.Session struct:** `Inspect` protocol implementation masks `:url` field.
+- [ ] **MeterEvent struct:** `Inspect` protocol implementation masks `:payload` field.
+- [ ] **guides/metering.md:** Contains "Monitoring" section covering `v1.billing.meter.error_report_triggered` and the relevant error codes.
+- [ ] **Integration tests (Plan 20-05):** Contains comment explaining which behaviors cannot be verified against stripe-mock (identifier dedup, 24-hour windows).
+
+---
+
+## Recovery Strategies
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| MeterEvent duplicate from two-layer idempotency misuse | HIGH — requires Stripe support to investigate billing anomalies | (1) Identify duplicate events via `billing.meter.event` webhook history. (2) Submit `MeterEventAdjustment.create/3` with `type: "cancel"` for the duplicate — only works within 24h. (3) After 24h: requires Stripe support ticket. Prevent recurrence by fixing `identifier` generation. |
+| Events sent to inactive meter lost (archived_meter) | MEDIUM — usage data for the gap period is unrecoverable | (1) Reactivate meter via `Meter.reactivate/3`. (2) For lost events within the 35-day window: re-submit with original timestamps. (3) For events outside the 35-day window: data is permanently lost; file Stripe support ticket for manual adjustment. |
+| Missing customer_mapping key in payload — silent drop | MEDIUM | (1) Subscribe to `billing.meter.error_report_triggered` to detect going forward. (2) Identify affected customers and time range. (3) Re-submit corrected events with original timestamps (only if within 35-day window). |
+| FlowData missing required sub-field — 400 from Stripe | LOW — synchronous error, immediate recovery | Fix the `flow_data` params map in the calling code. No data loss, just a failed redirect attempt. |
+| Timestamp outside 35-day window | HIGH — irrecoverable | Usage data permanently lost for that billing period. Prevention: always report events close to when they occur. |
+
+---
+
+## Pitfall-to-Phase Mapping
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| MeterEvent two-layer idempotency trap | Phase 20 (Plan 20-04 + 20-06) | `@doc` mentions both mechanisms separately; `guides/metering.md` shows stable identifier pattern |
+| Timestamp backdating window (35 days / 5 min) | Phase 20 (Plan 20-04 + 20-06) | `@doc` lists exact constraints and error codes; guide has anti-pattern warning |
+| customer_mapping key silent drop | Phase 20 (Plan 20-04 + 20-06) | `@doc` warns about async validation; guide has monitoring section |
+| formula: sum + missing value_settings | Phase 20 (Plans 20-02, 20-03) | `Meter.DefaultAggregation` `@typedoc` documents formula semantics; `Meter.create/3` has warning guard |
+| Events to inactive meter (archived_meter) | Phase 20 (Plan 20-03 + 20-04) | `deactivate/3` and `MeterEvent.create/3` docs state behavior; error code pattern-matchable |
+| MeterEventAdjustment cancel.identifier field name | Phase 20 (Plan 20-04) | Unit test asserts correct `from_map/1` on `cancel.identifier`; `@doc` shows exact param shape |
+| FlowData type sub-field validation | Phase 21 (Plan 21-03) | `Session.create/3` has per-type guard; unit test exercises each flow type validation |
+| PII in MeterEvent payload / Session url | Phase 20 + 21 (Plans 20-04, 21-03) | `Inspect` implementations present for `MeterEvent` and `BillingPortal.Session`; `mix run` with inspect call shows masked fields |
+| Connect: stripe_account vs on_behalf_of distinction | Phase 21 (Plan 21-03 + 21-04) | Guide documents both opts; integration test uses `stripe_account:` opt |
+
+---
 
 ## Sources
 
-- [ElixirForum: Is Stripity Stripe maintained?](https://elixirforum.com/t/is-stripity-stripe-maintained/73673)
-- [Dashbit Blog: SDKs with Req: Stripe](https://dashbit.co/blog/sdks-with-req-stripe)
-- [Stripe: Designing robust APIs with idempotency](https://stripe.com/blog/idempotency)
-- [Stripe: Idempotent requests API docs](https://docs.stripe.com/api/idempotent_requests)
-- [Stripe: Webhook signature verification](https://docs.stripe.com/webhooks/signature)
-- [Stripe: API versioning](https://docs.stripe.com/api/versioning)
-- [Stripe: Expanding responses](https://docs.stripe.com/api/expanding_objects)
-- [Stripe: Automated testing](https://docs.stripe.com/automated-testing)
-- [Stripe: Pagination](https://docs.stripe.com/api/pagination)
-- [stripe-node: Auto-pagination rate limiting issue #575](https://github.com/stripe/stripe-node/issues/575)
-- [stripe-node: Webhook signature verification issue #341](https://github.com/stripe/stripe-node/issues/341)
-- [stripity-stripe: GitHub issues](https://github.com/beam-community/stripity-stripe/issues)
-- [Elixir: Application behaviour docs (global config warning)](https://hexdocs.pm/elixir/Application.html)
-- [Elixir: Design-related anti-patterns](https://hexdocs.pm/elixir/design-anti-patterns.html)
-- [Michal Muskala: Configuring Elixir Libraries](https://michal.muskala.eu/post/configuring-elixir-libraries/)
-- [Felt: Tips for improving Elixir configuration](https://felt.com/blog/elixir-configuration)
-- [stripe-mock: GitHub (statelessness limitations)](https://github.com/stripe/stripe-mock)
-- [Stripe: SDK versioning and support policy](https://docs.stripe.com/sdks/versioning)
-- [Hacker News: Stripe Elixir support frustration](https://news.ycombinator.com/item?id=24436079)
-- Master research document: `/prompts/The definitive Stripe library gap in Elixir - a master research document.md`
+- [Stripe MeterEvent Create API](https://docs.stripe.com/api/billing/meter-event/create) — `identifier` field, 24-hour dedup window, 100-char max (HIGH confidence)
+- [Stripe Recording Usage API Guide](https://docs.stripe.com/billing/subscriptions/usage-based/recording-usage-api) — timestamp 35-day window, 5-minute future limit, async validation, error codes `timestamp_too_far_in_past`, `meter_event_no_customer_defined`, `meter_event_customer_not_found`, `archived_meter`, `meter_event_value_not_found` (HIGH confidence)
+- [Stripe Meter Object API](https://docs.stripe.com/api/billing/meter/object) — `inactive` status description: "No more events for this meter will be accepted" (HIGH confidence)
+- [Stripe MeterEventAdjustment Object](https://docs.stripe.com/api/billing/meter-event-adjustment/object) — exact `cancel.identifier` field name; 24-hour cancellation window (HIGH confidence)
+- [Stripe MeterEventAdjustment Create](https://docs.stripe.com/api/billing/meter-event-adjustment/create) — `type: "cancel"`, required fields `event_name` and `type` (HIGH confidence)
+- [Stripe Portal Deep Links Guide](https://docs.stripe.com/customer-management/portal-deep-links) — all four flow types, required sub-fields per type (HIGH confidence)
+- [Stripe BillingPortal Session Create](https://docs.stripe.com/api/customer_portal/sessions/create) — `flow_data` parameter structure, `on_behalf_of` semantics (HIGH confidence)
+- [Stripe BillingPortal Session Object](https://docs.stripe.com/api/customer_portal/sessions/object) — `url`, `flow`, `on_behalf_of` fields confirmed (HIGH confidence)
+- [Stripe Configure a Meter Guide](https://docs.stripe.com/billing/subscriptions/usage-based/meters/configure) — formula semantics, `value_settings` default key `"value"` (MEDIUM confidence — silent zero behavior extrapolated from formula semantics)
+- [stripe-mock GitHub (statelessness note)](https://github.com/stripe/stripe-mock) — confirmed stateless; dedup/time windows not simulated (HIGH confidence, per STACK.md v1.1 addendum)
+- `lib/lattice_stripe/subscription.ex` — `pause_collection/5` atom guard pattern (`when behavior in [:keep_as_draft, :mark_uncollectible, :void]`) as precedent for FlowData type guard
+- `lib/lattice_stripe/resource.ex` — `Resource.require_param!/3` pattern as precedent for `BillingPortal.Session.create/3` customer guard
+- `.planning/v1.1-accrue-context.md` — locked decisions D1-D5, Accrue minimum API surfaces, confirmed Accrue does not pattern-match FlowData sub-flow internals
+- FEATURES.md (sibling research, 2026-04-13) — idempotency two-layer system documented; formula semantics; flow types list
+- STACK.md (sibling research, 2026-04-13) — stripe-mock statelessness; all endpoints confirmed present in stripe-mock without beta flags
+
+---
+
+*Pitfalls research for: LatticeStripe v1.1 — Billing.Meter + MeterEvent + MeterEventAdjustment + BillingPortal.Session*
+*Researched: 2026-04-13*

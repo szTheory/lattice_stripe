@@ -1,20 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: Accrue unblockers (metering + portal)
-status: planning
-stopped_at: v1.0 milestone archived; awaiting /gsd-new-milestone for v1.1
-last_updated: "2026-04-13T18:21:00.000Z"
-last_activity: 2026-04-13
+milestone_name: — Accrue unblockers (metering + portal)
+status: verifying
+stopped_at: Completed 21-04-integration-guide-docs-PLAN.md
+last_updated: "2026-04-14T20:25:58.660Z"
+last_activity: 2026-04-14
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
-last_shipped_milestone: v1.0
-last_shipped_date: 2026-04-13
-next_milestone_brief: .planning/v1.1-accrue-context.md
+  total_phases: 2
+  completed_phases: 2
+  total_plans: 11
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -24,169 +21,63 @@ next_milestone_brief: .planning/v1.1-accrue-context.md
 See: .planning/PROJECT.md (updated 2026-04-13 after v1.0 milestone completion)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Planning v1.1 milestone — see `.planning/v1.1-accrue-context.md`. Run `/gsd-new-milestone` to kick off. Two phases locked: Phase 20 (Billing.Meter + MeterEvent + MeterEventAdjustment) and Phase 21 (BillingPortal.Session). No release phase needed (zero-touch semver post-1.0).
+**Current focus:** Phase 21 — customer-portal
 
 ## Current Position
 
 Milestone: v1.1 (Accrue unblockers) — PLANNING
-Last shipped: v1.0 on 2026-04-13 (archived to .planning/milestones/v1.0-ROADMAP.md)
-Next action: /gsd-new-milestone
-Last activity: 2026-04-13
+Phase: 21
+Plan: Not started
+Status: Phase complete — ready for verification
+Last activity: 2026-04-14
 
-Progress: [█████████████████░░░] 15/17 phases (88%) · 50/50 planned plans complete
-
-**PR #4 merged:** [Billing track: Phases 14 (Invoices) + 15 (Subscriptions) + 16 (Subscription Schedules)](https://github.com/szTheory/lattice_stripe/pull/4) — merged as commit 21e63fe.
-
-**Phase 15 shipped delivers:**
-
-- `LatticeStripe.Subscription` — CRUD + search + streams + bang variants + lifecycle verbs (`cancel/3..4`, `resume/3`, `pause_collection/5` with atom guard)
-- `LatticeStripe.SubscriptionItem` — flat namespace, full CRUD, `subscription` param required on list/stream
-- 3 new nested typed structs: `Subscription.{PauseCollection, CancellationDetails, TrialSettings}`
-- `Invoice.AutomaticTax` reused (not duplicated) as `Subscription.automatic_tax`; also fixed to capture unknown fields in `:extra`
-- `Billing.Guards.has_proration_behavior?/1` extended to detect `items[].proration_behavior`; guard wired into 5 call sites
-- `guides/subscriptions.md` with webhook-handoff callout; Billing ExDoc module group extended
-
-**D1 restore (part of PR #4):** Recovered Phase 12/13 billing catalog (`Product`, `Price`, `Coupon`, `PromotionCode`) and `TestClock` time-travel testing from commit `39b98c9^` (20 files, `TestSupport → TestHelpers` rename fixup).
-
-**Milestone framing:** v1.0 (Phases 1–11) released as 0.2.0. v2.0-billing complete — Phases 14 (Invoices), 15 (Subscriptions + SubscriptionItems), 16 (Subscription Schedules) all shipped in merged PR #4. Connect track: Phase 17 (Accounts + AccountLinks) and Phase 18 (Connect money movement — ExternalAccount, Charge retrieve, Transfer + TransferReversal, Payout + TraceId, Balance + BalanceTransaction, Connect guide, ExDoc wiring) both shipped 2026-04-13. Phase 19 (cross-cutting polish + v1.0 release cut) remaining.
+Progress: [░░░░░░░░░░] 0% (0/10 plans complete across 2 phases)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 14
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed (v1.1): 0
+- Average duration: —
+- Total execution time: —
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 14 | 5 | - | - |
-| 15 | 3 | - | - |
-| 16 | 3 | - | - |
-| 18 | 6 | - | - |
+| 20 | 0/6 | — | — |
+| 21 | 4 | - | - |
 
 **Recent Trend:**
 
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: —
+- Trend: —
 
 *Updated after each plan completion*
-| Phase 01 P01 | 3min | 2 tasks | 8 files |
-| Phase 01-transport-client-configuration P03 | 2 | 2 tasks | 6 files |
-| Phase 01-transport-client-configuration P04 | 119 | 2 tasks | 4 files |
-| Phase 01-transport-client-configuration P05 | 6 | 2 tasks | 2 files |
-| Phase 02-error-handling-retry P01 | 15 | 2 tasks | 5 files |
-| Phase 02-error-handling-retry P02 | 3 | 2 tasks | 5 files |
-| Phase 02-error-handling-retry P03 | 8 | 1 tasks | 5 files |
-| Phase 03-pagination-response P01 | 5 | 2 tasks | 9 files |
-| Phase 03-pagination-response P02 | 4 | 2 tasks | 2 files |
-| Phase 03-pagination-response P03 | 3 | 1 tasks | 2 files |
-| Phase 04-customers-paymentintents P02 | 15 | 1 tasks | 2 files |
-| Phase 05-setupintents-paymentmethods P01 | 7 | 2 tasks | 10 files |
-| Phase 05-setupintents-paymentmethods P02 | 5 | 1 tasks | 2 files |
-| Phase 06-refunds-checkout P01 | 5 | 2 tasks | 11 files |
-| Phase 06-refunds-checkout P02 | 12 | 1 tasks | 5 files |
-| Phase 07-webhooks P01 | 15 | 2 tasks | 8 files |
-| Phase 07-webhooks P02 | 3 | 2 tasks | 3 files |
-| Phase 08-telemetry-observability P01 | 4 | 2 tasks | 2 files |
-| Phase 08-telemetry-observability P02 | 22 | 2 tasks | 3 files |
-| Phase 09-testing-infrastructure P03 | 15 | 2 tasks | 5 files |
-| Phase 09-testing-infrastructure P02 | 9 | 2 tasks | 31 files |
-| Phase 09-testing-infrastructure P01 | 12 | 2 tasks | 8 files |
-| Phase 10-documentation-guides P01 | 5 | 2 tasks | 13 files |
-| Phase 10-documentation-guides P02 | 5 | 2 tasks | 19 files |
-| Phase 10-documentation-guides P03 | 15 | 2 tasks | 5 files |
-| Phase 10-documentation-guides P04 | 5 | 2 tasks | 4 files |
-| Phase 11-ci-cd-release P02 | 5 | 2 tasks | 5 files |
-| Phase 11-ci-cd-release P03 | 3 | 2 tasks | 5 files |
-| Phase 11-ci-cd-release P01 | 2 | 2 tasks | 4 files |
+| Phase 21 P01 | 15 | 3 tasks | 7 files |
+| Phase 21 P02 | 2 | 2 tasks | 6 files |
+| Phase 21 P03 | 3 | 2 tasks | 4 files |
+| Phase 21-customer-portal P04 | 10 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Recent v1.1 decisions (locked — do not relitigate):
 
-- Foundation-first architecture: HTTP/errors/pagination must be solid before resource coverage
-- Transport behaviour with Finch default: library doesn't force HTTP client choice
-- Client struct is plain struct, no GenServer, no global state
-- [Phase 01]: Stub Transport/Json behaviours created in scaffolding plan so Mox.defmock compiles; Plans 02/03 expand them
-- [Phase 01-transport-client-configuration]: Transport behaviour uses single request/1 callback with plain map for narrowest possible contract
-- [Phase 01-transport-client-configuration]: Error.from_response/3 falls back to :api_error for unknown types and non-standard response bodies
-- [Phase 01-transport-client-configuration]: NimbleOptions.new! schema compiled once at module load time for efficient runtime validation
-- [Phase 01-transport-client-configuration]: Finch transport unit tests avoid real pool; integration via stripe-mock in Phase 9
-- [Phase 01-transport-client-configuration]: Client.request/2 completes Phase 1: telemetry_enabled flag on client, @version module attribute for User-Agent, per-request opts override client defaults via Keyword.get
-- [Phase 02-error-handling-retry]: Error struct enriched additively with :param, :decline_code, :charge, :doc_url, :raw_body fields; :idempotency_error type added for 409 conflicts; String.Chars protocol delegates to Exception.message/1
-- [Phase 02-error-handling-retry]: Json behaviour has 4 callbacks (encode!/decode! bang + encode/decode non-bang); non-bang variants return {:ok, result} | {:error, exception} for graceful non-JSON response handling
-- [Phase 02-error-handling-retry]: RetryStrategy.Default.retry?/2 reads stripe_should_retry from pre-parsed context map (boolean), not raw headers — caller parses headers before building context
-- [Phase 02-error-handling-retry]: max_retries default changed from 0 to 2 matching Stripe SDK convention (3 total attempts)
-- [Phase 02-error-handling-retry]: 409 Idempotency conflicts non-retriable: retrying same key with different params hits same conflict
-- [Phase 02-error-handling-retry]: Option B for header threading — 3-tuple {:error, error, headers} internally, strips to {:error, error} at public boundary so retry loop can read Stripe-Should-Retry without leaking to callers
-- [Phase 03-pagination-response]: Response Access behaviour returns {nil, resp} without calling fun when data is a struct — prevents misleading get_and_update behavior on List responses (D-21)
-- [Phase 03-pagination-response]: API version '2026-03-25.dahlia' hardcoded in Config and Client defstruct, not via api_version/0 at compile time; test asserts they match (RESEARCH.md Pitfall 2)
-- [Phase 03-pagination-response]: client_user_agent_json/0 uses Jason.encode! directly — SDK metadata header, not user data, so json_codec behaviour abstraction not applicable
-- [Phase 03-pagination-response]: Params/opts threaded via _params/_req_opts keys in transport_request map — transport only reads method/url/headers/body/opts so extra keys are ignored, avoiding arity explosion in retry loop
-- [Phase 03-pagination-response]: telemetry_stop_metadata pattern matches %Response{} to also emit http_status and request_id in stop event metadata
-- [Phase 03-pagination-response]: _first_id/_last_id extracted at from_json/3 time so cursors survive buffer drain in stream state machine
-- [Phase 03-pagination-response]: Stream.resource/3 start_fun makes initial fetch synchronously — stream is truly lazy, no fetch until evaluation
-- [Phase 04-customers-paymentintents]: PaymentIntent Inspect uses Inspect.Algebra concat/to_doc (not Inspect.Any.inspect with fake struct) to exclude client_secret field name entirely from output
-- [Phase 04-customers-paymentintents]: Action verbs confirm/capture/cancel follow same unwrap_singular pattern as CRUD with optional params defaulting to empty map
-- [Phase 05-setupintents-paymentmethods]: LatticeStripe.Resource module extracts shared unwrap_singular/2, unwrap_list/2, unwrap_bang!/1 helpers — all resource modules use this instead of private defp copies
-- [Phase 05-setupintents-paymentmethods]: elixirc_paths(:test) compiles test/support/ as real modules — importable via import LatticeStripe.TestHelpers in test files
-- [Phase 05-setupintents-paymentmethods]: SetupIntent.latest_attempt kept as raw value (string or map) — Stripe API returns either, no forced typing applied
-- [Phase 05-setupintents-paymentmethods]: PaymentMethod list/stream require_param! called before Request construction — validation is pre-network, ArgumentError tests need no mock setup
-- [Phase 05-setupintents-paymentmethods]: PaymentMethod stream!/3 params has no default value — customer required, making API constraint explicit
-- [Phase 05-setupintents-paymentmethods]: PaymentMethod 53-field struct intentional — all type-specific nested objects (card, us_bank_account, sepa_debit, etc.) as nil-able fields per Stripe API shape
-- [Phase 06-refunds-checkout]: Fixture modules extracted to test/support/fixtures/ with realistic Stripe IDs — reusable across all resource test files
-- [Phase 06-refunds-checkout]: Refund.create/3 validates payment_intent pre-network via Resource.require_param! — ArgumentError raised before any HTTP call
-- [Phase 06-refunds-checkout]: Refund has no delete or search functions — Stripe API constraints; cancel/4 is the analog for pending refunds
-- [Phase 06-refunds-checkout]: Checkout.Session has no update or delete — Stripe API constraint; expire/4 is the cancellation mechanism
-- [Phase 06-refunds-checkout]: Checkout.Session.create validates mode param pre-network via Resource.require_param! — ArgumentError raised before any HTTP call
-- [Phase 06-refunds-checkout]: client_secret and PII fields hidden from Checkout.Session Inspect output — security requirement
-- [Phase 07-webhooks]: plug_crypto added as required runtime dep; plug optional for Plug.Webhook in plan 02
-- [Phase 07-webhooks]: Event.from_map/1 keeps data and request as raw maps - event data varies by type
-- [Phase 07-webhooks]: Webhook uses Jason.decode! directly (not json_codec behaviour) for SDK metadata path
-- [Phase 07-webhooks]: Webhook.Plug uses four call/2 clauses ordered by specificity: POST+path match, POST+no-path, non-POST+path match, fallthrough — pattern matching is the dispatch mechanism
-- [Phase 07-webhooks]: CacheBodyReader handles :more tuple for chunked bodies, stashing partial body in conn.private[:raw_body] consistent with Plug.Conn.read_body semantics
-- [Phase 08-telemetry-observability]: LatticeStripe.Telemetry module centralized as single source of truth for all telemetry event schemas — Client delegates via request_span/4 and emit_retry/5 (D-09, D-10)
-- [Phase 08-telemetry-observability]: parse_resource_and_operation/2 derives resource and operation from URL path at telemetry layer — zero changes to resource modules (D-05)
-- [Phase 08-telemetry-observability]: webhook_verify_span always fires regardless of client.telemetry_enabled — infrastructure-level observability
-- [Phase 08-telemetry-observability]: attach_default_logger/1 is idempotent via :telemetry.detach before each attach call
-- [Phase 08-telemetry-observability]: handle_default_log/4 is public @doc false so :telemetry.attach can use MFA for performance
-- [Phase 09-testing-infrastructure]: TEST-06 (CI matrix) deferred to Phase 11 — local quality gates (mix ci) cover current Elixir version; the CI matrix is GitHub Actions scope
-- [Phase 09-testing-infrastructure]: Transport.behaviour_info(:callbacks) exact match assertion chosen over membership check — strict contract, fails loudly on API expansion
-- [Phase 09-testing-infrastructure]: LatticeStripe.Testing builds raw map then calls Event.from_map to avoid struct JSON encoding issues in generate_webhook_payload
-- [Phase 09-testing-infrastructure]: mix ci uses preferred_envs [ci: :test] and ex_doc in [:dev, :test] to ensure all 5 quality gates run in the correct MIX_ENV
-- [Phase 09-testing-infrastructure]: ExUnit 1.19 does not support {:skip, reason} from setup_all — use raise with descriptive docker command for integration test infrastructure guard
-- [Phase 09-testing-infrastructure]: LatticeStripe.IntegrationFinch as Finch pool name in integration tests separates from app-level pools; test_integration_client/0 points at stripe-mock localhost:12111
-- [Phase 10-documentation-guides]: Logo key commented out in mix.exs docs config — no logo asset exists yet, avoids mix docs --warnings-as-errors failure per D-05 guidance
-- [Phase 10-documentation-guides]: resource.ex @moduledoc false changed to real @moduledoc with 4 @doc annotations per D-03 (internal modules shown in ExDoc Internals group)
-- [Phase 10-documentation-guides]: @typedoc added to all 13 key public structs (Error, Response, List, Request, Client, Event, Customer, PaymentIntent, SetupIntent, PaymentMethod, Refund, Checkout.Session, Checkout.LineItem)
-- [Phase 10-documentation-guides]: Webhooks guide documents both mounting strategies (before Plug.Parsers and CacheBodyReader) since both are supported
-- [Phase 10-documentation-guides]: Telemetry guide uses actual measurements/metadata tables from telemetry.ex moduledoc as source of truth
-- [Phase 10-documentation-guides]: Extending guide shows ReqTransport with decode_body: false and retry: false to avoid conflict with LatticeStripe retry handling
-- [Phase 11-ci-cd-release]: Release Please manifest mode with release-please-config.json + .release-please-manifest.json — required for elixir release type
-- [Phase 11-ci-cd-release]: Dependabot auto-merge via GitHub Actions workflow (not native) — enables required CI status-check gate before merge
-- [Phase 11-ci-cd-release]: Docs-only PR bypass caveat documented in CONTRIBUTING.md — CI skips doc-only paths so maintainer bypass may be needed for docs PRs
-- [Phase 11-ci-cd-release]: security@latticestripe.dev as private vulnerability reporting channel with 48h ack, 7-day assessment, 30-day patch SLA
-- [Phase 11-ci-cd-release]: Three CI jobs run in parallel (no needs:) per D-01 — lint, test matrix, integration each independent
-- [Phase 11-ci-cd-release]: Cache keys include Elixir/OTP version strings to prevent cross-version _build cache poisoning (RESEARCH.md Pitfall 2)
-- [Phase 14-invoices]: Nested typed struct cutoff — promote fields users pattern-match on (items, status_transitions, automatic_tax, period); leave simple key-value fields as plain maps (D-06 heuristic)
-- [Phase 14-invoices]: Billing namespace for cross-resource guards — `LatticeStripe.Billing.Guards.check_proration_required/2` is the canonical way to gate mutations that touch proration behavior
-- [Phase 14-invoices]: create_preview_lines/3 uses GET verb, not POST — verified against stripe-mock (IN-01 fix in commit 4709ad8)
-- [Phase 15-subscriptions]: D1 restore of Phase 12/13 artifacts (Product/Price/Coupon/PromotionCode/TestClock) from 39b98c9^ — separate commit from Phase 15 work so downstream code can use real Price + TestClock primitives
-- [Phase 15-subscriptions]: D4 flat namespace — `LatticeStripe.SubscriptionItem` at top level (not `LatticeStripe.Subscription.Item`); Subscription-specific nested typed structs (PauseCollection, CancellationDetails, TrialSettings) live under `LatticeStripe.Subscription.*`
-- [Phase 15-subscriptions]: D4 reuse over duplicate — `Invoice.AutomaticTax` used verbatim as `Subscription.automatic_tax`; review fix F-001 added `@known_fields` + `:extra` split so unknown Stripe fields no longer drop silently (affects both Invoice and Subscription)
-- [Phase 15-subscriptions]: D5 pause helper — `Subscription.pause_collection(client, id, behavior, params, opts) when behavior in [:keep_as_draft, :mark_uncollectible, :void]` — function-head atom guard for compile-time typo protection; no generic `pause/4` (Stripe has no dedicated pause endpoint; helper dispatches to `update/4`)
-- [Phase 15-subscriptions]: Proration guard extended — `has_proration_behavior?/1` now detects `params["items"][].proration_behavior` in addition to top-level and `subscription_details`; wired into 5 call sites across Subscription + SubscriptionItem
-- [Phase 15-subscriptions]: `List.stream!/2` is 2-arg only — resources compose it with `Stream.map(&from_map/1)` rather than expecting a 3-arg form; `search_stream!` delegates to the same pattern (no `List.search_stream!` helper exists)
-- [Phase 15-subscriptions]: `SubscriptionItem.id` preservation is mandatory when decoded as part of `Subscription.items` — stripity_stripe had a well-known bug where nested items lost their id; LatticeStripe has a regression guard test
-- [Phase 15-subscriptions]: No subscription-specific telemetry events — piggyback on the general `[:lattice_stripe, :request, *]` events; subscription state transitions belong to user webhook handlers, not the SDK
-- [Phase 15-subscriptions]: `guides/subscriptions.md` contains a mandatory webhook-handoff callout ("drive application state from webhook events, not SDK responses") — T-15-04 mitigation
-- [Phase 15-subscriptions]: Async test isolation fragility fixes — `Code.ensure_loaded!/1` in `function_exported?` describe blocks (product/coupon/price/promotion_code test files); `client_test.exs:476` telemetry handler now filters by `metadata[:path]` to ignore events from concurrent tests
+- [v1.1 D1]: Bundle Billing.Meter + MeterEvent into single Phase 20 — shared fixtures, tests, guide
+- [v1.1 D2]: Include MeterEventAdjustment.create/3 in Phase 20 plan 20-04 — tight cohesion, ~30 lines
+- [v1.1 D3]: Defer /v2/billing/meter-event-stream to v1.2+ — different auth model, Accrue doesn't need it
+- [v1.1 D4]: Defer BillingPortal.Configuration CRUDL to v1.2+ — triples scope, Accrue uses Stripe dashboard
+- [v1.1 D5]: Phase 20 (metering) before Phase 21 (portal) — higher priority, larger scope, hot path
+- [Phase 21]: stripe-mock returns HTTP 400 not 422 for validation errors; probe accepts 400 or 422
+- [Phase 21]: RESEARCH Finding 1 confirmed: stripe-mock does NOT enforce flow_data sub-field validation; D-01 guard is the only enforcement layer
+- [Phase 21]: FlowData sub-structs + parent committed together in single GREEN phase (test file uses both struct patterns, splitting would leave compile error between tasks)
+- [Phase 21]: Leaf sub-objects (retention, items, discounts, redirect, hosted_confirmation) kept as raw map() per D-02 — shallow leaf objects do not warrant dedicated modules
+- [Phase 21]: Guards module implemented VERBATIM from CONTEXT.md D-01 — pattern-match clause dispatch, all 4 flow types, unknown type catchall, malformed flow_data catchall
+- [Phase 21]: Inspect impl placed after Session module end in session.ex — consistent with Checkout.Session precedent; hides :url (T-21-05) and :flow (T-21-10)
+- [Phase 21-customer-portal]: BillingPortal.Guards excluded from Customer Portal ExDoc group — @moduledoc false per RESEARCH Pitfall 5; mix docs --warnings-as-errors failures are pre-existing (meter.ex + hidden Guards refs from session.ex moduledoc)
 
 ### Pending Todos
 
@@ -196,14 +87,8 @@ None yet.
 
 None yet.
 
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260402-wte | Research how Elixir Plug-based libraries handle path matching and mounting strategies | 2026-04-03 | 8e7c6cd | [260402-wte-research-how-elixir-plug-based-libraries](./quick/260402-wte-research-how-elixir-plug-based-libraries/) |
-
 ## Session Continuity
 
-Last session: 2026-04-13T00:56:37.229Z
-Stopped at: Phase 18 context gathered
-Resume path: `/gsd-discuss-phase 17` to flesh out Connect Accounts + AccountLinks scope, then plan/execute.
+Last session: 2026-04-14T20:10:53.944Z
+Stopped at: Completed 21-04-integration-guide-docs-PLAN.md
+Resume path: `/gsd-plan-phase 20` to begin planning the metering phase

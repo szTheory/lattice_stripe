@@ -8,6 +8,18 @@ A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe aims 
 
 Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated by v1.0 shipping with a downstream consumer (Accrue) already building on top.
 
+## Current Milestone: v1.1 Accrue unblockers (metering + portal)
+
+**Goal:** Unblock Accrue Phase 4 by adding three Stripe resources: `Billing.Meter`, `Billing.MeterEvent` (+ `MeterEventAdjustment`), and `BillingPortal.Session`.
+
+**Target features:**
+- `LatticeStripe.Billing.Meter` CRUDL + `deactivate/reactivate` verbs + 4 nested typed structs
+- `LatticeStripe.Billing.MeterEvent.create/3` + `MeterEventAdjustment.create/3` — fire-and-forget usage reporting
+- `LatticeStripe.BillingPortal.Session.create/3` — create-only with `FlowData` nested struct
+- New `guides/metering.md` + extended `guides/customer-portal.md`
+
+**Scope & constraints:** Locked decisions D1-D5 in `.planning/v1.1-accrue-context.md` — bundled metering phase, `MeterEventAdjustment` included with MeterEvent, `meter_event_stream` and `BillingPortal.Configuration` deferred to v1.2+. **No release phase** — post-1.0 release-please config makes 1.0→1.1 zero-touch; do NOT add "Phase 22" by analogy with Phase 19.
+
 ## Current State (post-v1.0)
 
 **Shipped:** v1.0.0 live on `hex.pm/packages/lattice_stripe`. 17 phases complete (1-11, 14-19; phases 12/13 were intentionally obliterated and rebuilt in Phase 14). ~47 plans executed. Nine-group ExDoc `groups_for_modules` layout, 16 guides, `api_stability.md` semver contract published, `test/readme_test.exs` quickstart harness, `CHANGELOG.md` with v1.0.0 Highlights, release pipeline fully automated via release-please + Hex publish.
@@ -201,4 +213,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Move shipped requirements to Validated, add next-milestone requirements to Active
 
 ---
-*Last updated: 2026-04-13 after v1.0 milestone completion — Foundation + Payments + Webhooks + Telemetry + Testing + Docs + CI/CD + Billing + Connect + Cross-cutting polish. v1.0.0 live on Hex.pm.*
+*Last updated: 2026-04-13 — v1.1 milestone (Accrue unblockers) started. v1.0.0 live on Hex.pm.*

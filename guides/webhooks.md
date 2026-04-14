@@ -189,6 +189,7 @@ platforms will want to handle these event families. Match on
 - `account.application.authorized` — Connect OAuth authorization
 - `invoice.payment_succeeded` / `invoice.payment_failed` — Billing lifecycle
 - `customer.subscription.created` / `customer.subscription.deleted` — Subscription lifecycle
+- `v1.billing.meter.error_report_triggered` — Metering async errors; see [metering.md](metering.md#reconciliation-via-webhooks)
 
 ### Handler Return Values
 
@@ -439,3 +440,4 @@ Stripe retries.
 - [Error Handling](error-handling.md) — retry semantics and error signalling from handlers
 - [Connect Accounts](connect-accounts.md) — `account.updated` and capability event patterns
 - [Subscriptions](subscriptions.md) — `customer.subscription.*` lifecycle events
+- [Customer Portal — Security and session lifetime](customer-portal.html#security-and-session-lifetime) — portal flows dispatch state changes via webhooks, not return-URL payloads

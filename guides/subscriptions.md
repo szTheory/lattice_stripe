@@ -72,6 +72,10 @@ trialing -----> active -----> past_due -----> unpaid
 
 ## Lifecycle operations
 
+> #### See also {: .tip}
+>
+> - [Customer Portal — Canceling a subscription](customer-portal.html#canceling-a-subscription) — let customers self-serve via Stripe's hosted portal.
+
 ### `update/4`
 
 Pass any subscription field:
@@ -141,6 +145,10 @@ Subscription.pause_collection(client, sub.id, :keep_as_draft, %{
 ```
 
 ## Proration
+
+> #### See also {: .tip}
+>
+> - [Customer Portal — Updating a subscription](customer-portal.html#updating-a-subscription) — portal-hosted proration preview.
 
 When you change a subscription's items (swap a price, change quantity, add or
 remove items), Stripe prorates charges by default. The default behavior may
@@ -405,3 +413,6 @@ may contain personal information. The raw value remains accessible via
 
 Similarly, `%LatticeStripe.SubscriptionItem{}` masks `metadata` and
 `billing_thresholds` as `:present` markers when populated.
+
+For reporting metered usage events against a subscription with
+`usage_type: "metered"`, see [metering.md](metering.md#reporting-usage-the-hot-path).

@@ -218,7 +218,8 @@ Emitted when an uncaught exception escapes webhook verification.
 ## Custom Telemetry Handlers
 
 Attach handlers to any LatticeStripe event using `:telemetry.attach/4`. Here are common patterns
-for integrating with observability stacks.
+for integrating with observability stacks. See [metering.md](metering.md#observability) for the
+hot-path telemetry recipe specific to `MeterEvent.create/3`.
 
 ### Request Latency Histogram
 
