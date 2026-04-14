@@ -1,14 +1,13 @@
 defmodule LatticeStripe.BillingPortal.SessionTest do
   use ExUnit.Case, async: true
 
-  # Mox, TestHelpers, Session, and Fixtures are referenced in skipped test
-  # bodies below. Plan 21-03 will activate them when implementation lands.
   import Mox
   import LatticeStripe.TestHelpers
 
   @moduletag :billing_portal
 
   alias LatticeStripe.BillingPortal.Session
+  alias LatticeStripe.BillingPortal.Session.FlowData
   alias LatticeStripe.Test.Fixtures.BillingPortal, as: Fixtures
 
   setup :verify_on_exit!
@@ -20,63 +19,140 @@ defmodule LatticeStripe.BillingPortal.SessionTest do
   # ---------------------------------------------------------------------------
 
   describe "create/3" do
-    @tag :skip
     test "returns {:ok, %Session{}} on success" do
-      # PORTAL-01 — implement in plan 21-03
-      # Arrange: stub MockTransport to return Fixtures.BillingPortal.Session.basic()
-      # Act: Session.create(client, %{"customer" => "cus_test123"})
-      # Assert: {:ok, %Session{id: "bps_123", url: "https://billing.stripe.com/session/test_token"}}
+      client = test_client()
+      fixture = Fixtures.Session.basic()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(fixture)
+      end)
+
+      assert {:ok, %Session{id: "bps_123", customer: "cus_test123"}} =
+               Session.create(client, %{"customer" => "cus_test123"})
     end
 
-    @tag :skip
     test "returns {:error, %LatticeStripe.Error{}} on API error" do
-      # PORTAL-01 error path — implement in plan 21-03
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert {:error, %LatticeStripe.Error{}} =
+               Session.create(client, %{"customer" => "cus_test123"})
     end
 
-    @tag :skip
+    test "raises ArgumentError pre-network when customer param is missing" do
+      client = test_client()
+
+      # Mox verify_on_exit! will confirm no transport call was made
+      assert_raise ArgumentError, ~r/requires a customer param/, fn ->
+        Session.create(client, %{})
+      end
+    end
+
+    test "raises via Guards pre-network when flow_data is malformed" do
+      client = test_client()
+
+      params = %{
+        "customer" => "cus_123",
+        "flow_data" => %{"type" => "subscription_cancel"}
+      }
+
+      assert_raise ArgumentError, ~r/subscription_cancel\.subscription/, fn ->
+        Session.create(client, params)
+      end
+    end
+
     test "threads stripe_account: opt as Stripe-Account header" do
-      # PORTAL-06 Connect — implement in plan 21-03
-      # Verify MockTransport receives Stripe-Account: acct_123 header
+      client = test_client()
+      fixture = Fixtures.Session.basic()
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        assert {"stripe-account", "acct_test"} in req_map.headers
+        ok_response(fixture)
+      end)
+
+      assert {:ok, %Session{}} =
+               Session.create(client, %{"customer" => "cus_test123"},
+                 stripe_account: "acct_test"
+               )
     end
   end
 
   describe "create!/3" do
-    @tag :skip
     test "returns %Session{} on success" do
-      # PORTAL-02 — implement in plan 21-03
+      client = test_client()
+      fixture = Fixtures.Session.basic()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(fixture)
+      end)
+
+      assert %Session{id: "bps_123"} =
+               Session.create!(client, %{"customer" => "cus_test123"})
     end
 
-    @tag :skip
     test "raises LatticeStripe.Error on API error" do
-      # PORTAL-02 bang error path — implement in plan 21-03
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response()
+      end)
+
+      assert_raise LatticeStripe.Error, fn ->
+        Session.create!(client, %{"customer" => "cus_test123"})
+      end
     end
   end
 
   # ---------------------------------------------------------------------------
   # PORTAL-05
-  # from_map/1 — decodes all 10 struct fields from string-keyed wire map
+  # from_map/1 — decodes all 11 struct fields from string-keyed wire map
   # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
-    @tag :skip
     test "decodes all struct fields from basic fixture" do
-      # PORTAL-05 — implement in plan 21-03
-      # map = Fixtures.Session.basic()
-      # session = Session.from_map(map)
-      # assert %Session{id: "bps_123", object: "billing_portal.session", ...} = session
+      map = Fixtures.Session.basic()
+      session = Session.from_map(map)
+
+      assert %Session{
+               id: "bps_123",
+               object: "billing_portal.session",
+               customer: "cus_test123",
+               url: "https://billing.stripe.com/session/test_token",
+               return_url: "https://example.com/account",
+               configuration: "bpc_123",
+               on_behalf_of: nil,
+               locale: nil,
+               created: 1_712_345_678,
+               livemode: false,
+               flow: nil
+             } = session
     end
 
-    @tag :skip
     test "decodes flow field into %FlowData{} when present" do
-      # PORTAL-05 / PORTAL-03 integration — implement in plan 21-03
-      # map = Fixtures.Session.with_subscription_cancel_flow()
-      # session = Session.from_map(map)
-      # assert %FlowData{type: "subscription_cancel"} = session.flow
+      map = Fixtures.Session.with_subscription_cancel_flow()
+      session = Session.from_map(map)
+
+      assert %FlowData{type: "subscription_cancel"} = session.flow
+      assert session.flow.subscription_cancel.subscription == "sub_123"
     end
 
-    @tag :skip
     test "decodes flow as nil when absent" do
-      # PORTAL-05 nil flow — implement in plan 21-03
+      map = Fixtures.Session.basic(%{"flow" => nil})
+      session = Session.from_map(map)
+      assert session.flow == nil
+    end
+
+    test "returns nil when given nil" do
+      assert Session.from_map(nil) == nil
+    end
+
+    test "captures unknown keys into :extra" do
+      map = Fixtures.Session.basic(%{"unknown_future_field" => "some_value"})
+      session = Session.from_map(map)
+      assert session.extra == %{"unknown_future_field" => "some_value"}
     end
   end
 
@@ -88,28 +164,47 @@ defmodule LatticeStripe.BillingPortal.SessionTest do
   # ---------------------------------------------------------------------------
 
   describe "Inspect impl" do
-    @tag :skip
     test "visible fields appear in inspect output" do
-      # D-03 — implement in plan 21-03
-      # session = Session.from_map(Fixtures.Session.basic())
-      # inspected = inspect(session)
-      # assert inspected =~ "id:"
-      # assert inspected =~ "customer:"
-      # assert inspected =~ "livemode:"
+      session = Session.from_map(Fixtures.Session.basic())
+      output = inspect(session)
+
+      assert output =~ "#LatticeStripe.BillingPortal.Session<"
+      assert output =~ "id:"
+      assert output =~ "customer:"
+      assert output =~ "livemode:"
+      assert output =~ "return_url:"
     end
 
-    @tag :skip
+    test "masks :url and :flow in Inspect output" do
+      session = %Session{
+        id: "bps_123",
+        object: "billing_portal.session",
+        livemode: false,
+        customer: "cus_test",
+        url: "https://billing.stripe.com/secret_abc",
+        return_url: "https://example.com",
+        created: 123,
+        flow: %FlowData{type: "subscription_cancel"}
+      }
+
+      output = inspect(session)
+
+      assert output =~ "#LatticeStripe.BillingPortal.Session<"
+      assert output =~ "id: \"bps_123\""
+      assert output =~ "customer: \"cus_test\""
+      refute output =~ session.url
+      refute output =~ "FlowData"
+      refute output =~ "secret_abc"
+    end
+
     test "url is masked in inspect output" do
-      # D-03 Inspect masking — implement in plan 21-03
-      # session = Session.from_map(Fixtures.Session.basic())
-      # refute inspect(session) =~ session.url
+      session = Session.from_map(Fixtures.Session.basic())
+      refute inspect(session) =~ session.url
     end
 
-    @tag :skip
     test "flow is masked in inspect output" do
-      # D-03 Inspect masking for flow — implement in plan 21-03
-      # session = Session.from_map(Fixtures.Session.with_subscription_cancel_flow())
-      # refute inspect(session) =~ "FlowData"
+      session = Session.from_map(Fixtures.Session.with_subscription_cancel_flow())
+      refute inspect(session) =~ "FlowData"
     end
   end
 end
