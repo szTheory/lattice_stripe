@@ -120,4 +120,32 @@ defmodule LatticeStripe.Billing.Guards do
        do: true
 
   defp valid_event_payload_key?(_), do: false
+
+  @doc """
+  Pre-flight guard for `LatticeStripe.Billing.MeterEventAdjustment.create/3`.
+
+  Raises `ArgumentError` when `params["cancel"]` is not a map containing an
+  `"identifier"` binary — catches the top-level-identifier footgun and the
+  `cancel.id` / `cancel.event_id` typos that would otherwise reach Stripe as
+  a 400.
+  """
+  @spec check_adjustment_cancel_shape!(map()) :: :ok
+  def check_adjustment_cancel_shape!(%{"cancel" => %{"identifier" => id}})
+      when is_binary(id) and byte_size(id) > 0,
+      do: :ok
+
+  def check_adjustment_cancel_shape!(%{"cancel" => cancel}) do
+    raise ArgumentError,
+          ~s[LatticeStripe.Billing.MeterEventAdjustment.create/3: `cancel` must be ] <>
+            ~s[a map shaped %{"identifier" => "<meter_event_identifier>"}, got: ] <>
+            "#{inspect(cancel)}. Common mistakes: putting `identifier` at the top " <>
+            "level, using `cancel.id`, or using `cancel.event_id`."
+  end
+
+  def check_adjustment_cancel_shape!(params) do
+    raise ArgumentError,
+          ~s[LatticeStripe.Billing.MeterEventAdjustment.create/3: missing `cancel` ] <>
+            ~s[sub-object. Expected %{"cancel" => %{"identifier" => "..."}}, ] <>
+            "got: #{inspect(params)}"
+  end
 end
