@@ -791,7 +791,7 @@ Framework install: ExUnit is stdlib, no install needed. Mox already in `mix.exs`
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`MeterEventAdjustment.Cancel` — separate file or inline?**
    - What we know: `Cancel` is a single-field struct. The CONTEXT.md D-04 says "nested typed struct" but doesn't specify file placement.

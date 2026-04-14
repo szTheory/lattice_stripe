@@ -54,7 +54,14 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
   3. `MeterEvent.create/3` `@doc` documents both idempotency layers (`identifier` body field and `idempotency_key:` opt) with separate labeled explanations, and explicitly states that `{:ok, %MeterEvent{}}` is an "accepted for processing" acknowledgment — not a billing confirmation — with a pointer to the `v1.billing.meter.error_report_triggered` webhook.
   4. `MeterEventAdjustment.create/3` `@doc` shows the exact `cancel.identifier` nested param shape (not top-level `identifier`, not `id`) and unit tests assert correct `from_map/1` decoding of `cancel.identifier`.
   5. The new `guides/metering.md` contains a Monitoring section covering `v1.billing.meter.error_report_triggered` error codes, a two-layer idempotency example with a stable domain-derived `identifier`, a backdating window warning with exact error codes, and cross-links from `guides/billing.md` (or equivalent) land correctly.
-**Plans**: TBD
+**Plans:** 6 plans
+Plans:
+- [ ] 20-01-PLAN.md — Wave 0 bootstrap (stripe-mock probe, fixtures, test skeletons)
+- [ ] 20-02-PLAN.md — Nested Meter.* typed structs (4 sub-modules)
+- [ ] 20-03-PLAN.md — Billing.Meter resource + GUARD-01 value_settings trap
+- [ ] 20-04-PLAN.md — Billing.MeterEvent + Inspect payload masking + async-ack @doc
+- [ ] 20-05-PLAN.md — Billing.MeterEventAdjustment + Cancel nested struct + GUARD-03 shape guard
+- [ ] 20-06-PLAN.md — guides/metering.md + ExDoc "Billing Metering" group + reciprocal crosslinks
 
 ### Phase 21: Customer Portal
 **Goal**: Elixir developers (and Accrue) can create a Stripe customer portal session with a single function call, receiving a short-lived URL they can redirect customers to — with deep-link flow support and early validation that prevents server-side 400s for missing required sub-fields.
