@@ -32,12 +32,12 @@
 
 ### Customer Portal — Session creation
 
-- [ ] **PORTAL-01**: User can create a portal session via `LatticeStripe.BillingPortal.Session.create/3` with required `customer`, optional `return_url`, `configuration`, `locale`, `flow_data`, `on_behalf_of`, and receive a `%LatticeStripe.BillingPortal.Session{}` struct with a usable `url`
-- [ ] **PORTAL-02**: `Session.create!/3` bang variant exists; no retrieve/list/update/delete functions exist (sessions are create-only per Stripe API)
+- [x] **PORTAL-01**: User can create a portal session via `LatticeStripe.BillingPortal.Session.create/3` with required `customer`, optional `return_url`, `configuration`, `locale`, `flow_data`, `on_behalf_of`, and receive a `%LatticeStripe.BillingPortal.Session{}` struct with a usable `url`
+- [x] **PORTAL-02**: `Session.create!/3` bang variant exists; no retrieve/list/update/delete functions exist (sessions are create-only per Stripe API)
 - [x] **PORTAL-03**: `flow_data` is accepted as a map and decoded back into a `LatticeStripe.BillingPortal.Session.FlowData` typed struct covering all four flow types (`:subscription_cancel`, `:subscription_update`, `:subscription_update_confirm`, `:payment_method_update`) with `@known_fields + :extra` for forward compatibility
-- [ ] **PORTAL-04**: `Session.create/3` validates `flow_data.type` client-side with an atom guard or `Resource.require_param!` — parallel to `Subscription.pause_collection/5` precedent — so invalid flow types raise `ArgumentError` before the network call
-- [ ] **PORTAL-05**: Session struct exposes `id`, `object`, `customer`, `url`, `return_url`, `created`, `livemode`, `locale`, `configuration`, `flow` (echoed back)
-- [ ] **PORTAL-06**: `Session.create/3` honors the standard `stripe_account:` opt for Connect-hosted portal sessions
+- [x] **PORTAL-04**: `Session.create/3` validates `flow_data.type` client-side with an atom guard or `Resource.require_param!` — parallel to `Subscription.pause_collection/5` precedent — so invalid flow types raise `ArgumentError` before the network call
+- [x] **PORTAL-05**: Session struct exposes `id`, `object`, `customer`, `url`, `return_url`, `created`, `livemode`, `locale`, `configuration`, `flow` (echoed back)
+- [x] **PORTAL-06**: `Session.create/3` honors the standard `stripe_account:` opt for Connect-hosted portal sessions
 
 ### Safety guards (pitfall mitigations)
 
@@ -113,12 +113,12 @@ Explicitly excluded for v1.1. Reasons must remain valid before these become acti
 | EVENT-03 | Phase 20 | Pending |
 | EVENT-04 | Phase 20 | Pending |
 | EVENT-05 | Phase 20 | Pending |
-| PORTAL-01 | Phase 21 | Pending |
-| PORTAL-02 | Phase 21 | Pending |
+| PORTAL-01 | Phase 21 | Complete |
+| PORTAL-02 | Phase 21 | Complete |
 | PORTAL-03 | Phase 21 | Complete |
-| PORTAL-04 | Phase 21 | Pending |
-| PORTAL-05 | Phase 21 | Pending |
-| PORTAL-06 | Phase 21 | Pending |
+| PORTAL-04 | Phase 21 | Complete |
+| PORTAL-05 | Phase 21 | Complete |
+| PORTAL-06 | Phase 21 | Complete |
 | GUARD-01 | Phase 20 | Pending |
 | GUARD-02 | Phase 20 | Pending |
 | GUARD-03 | Phase 20 | Pending |
