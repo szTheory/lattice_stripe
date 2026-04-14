@@ -2,8 +2,8 @@ defmodule LatticeStripe.Billing.MeterIntegrationTest do
   use ExUnit.Case, async: false
   @moduletag :integration
 
+  alias LatticeStripe.Billing.{Meter, MeterEvent, MeterEventAdjustment}
   alias LatticeStripe.Client
-  alias LatticeStripe.Billing.Meter
 
   # Guard: check stripe-mock connectivity before running any tests in this module.
   # If stripe-mock is not running on localhost:12111, all tests are skipped.
@@ -37,10 +37,12 @@ defmodule LatticeStripe.Billing.MeterIntegrationTest do
   # stripe-mock is stateless — state transitions (active→inactive) are NOT
   # asserted. Only the return shape (%Meter{}) is checked for each verb.
   test "full lifecycle: create → retrieve → update → list → deactivate → reactivate", %{client: client} do
+    event_name = "api_call_#{System.unique_integer([:positive])}"
+
     {:ok, %Meter{id: id}} =
       Meter.create(client, %{
         "display_name" => "API Calls",
-        "event_name" => "api_call_#{System.unique_integer([:positive])}",
+        "event_name" => event_name,
         "default_aggregation" => %{"formula" => "sum"},
         "customer_mapping" => %{
           "event_payload_key" => "stripe_customer_id",
@@ -50,6 +52,31 @@ defmodule LatticeStripe.Billing.MeterIntegrationTest do
       })
 
     assert is_binary(id)
+
+    # TEST-05 (metering side) — report an event through the meter we just created.
+    # stripe-mock is stateless: we assert {:ok, %MeterEvent{}} shape only, NOT
+    # that the event was persisted against any customer. The point of this test
+    # is that the HTTP call round-trips through LatticeStripe.Billing.MeterEvent
+    # and decodes via from_map/1 without raising or returning an error tuple.
+    event_identifier = "req_#{System.unique_integer([:positive])}"
+
+    assert {:ok, %MeterEvent{}} =
+             MeterEvent.create(client, %{
+               "event_name" => event_name,
+               "payload" => %{"stripe_customer_id" => "cus_test_123", "value" => "1"},
+               "identifier" => event_identifier
+             })
+
+    # TEST-05 continued — adjust the event we just reported, using the exact
+    # cancel.identifier nested shape enforced by Guards.check_adjustment_cancel_shape!/1.
+    # Shape-only assertion: stripe-mock does not enforce the 24-hour window or
+    # verify the identifier exists.
+    assert {:ok, %MeterEventAdjustment{}} =
+             MeterEventAdjustment.create(client, %{
+               "event_name" => event_name,
+               "type" => "cancel",
+               "cancel" => %{"identifier" => event_identifier}
+             })
 
     {:ok, %Meter{}} = Meter.retrieve(client, id)
     {:ok, %Meter{}} = Meter.update(client, id, %{"display_name" => "API Calls v2"})
