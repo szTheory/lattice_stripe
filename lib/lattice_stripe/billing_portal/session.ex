@@ -38,7 +38,7 @@ defmodule LatticeStripe.BillingPortal.Session do
     AND `flow_data.subscription_update_confirm.items` (non-empty list)
   - `"payment_method_update"` — no required sub-fields
 
-  `LatticeStripe.BillingPortal.Guards` validates these shapes pre-network and raises
+  A pre-flight guard validates these shapes pre-network and raises
   `ArgumentError` with an actionable message if required sub-fields are missing.
   See `LatticeStripe.BillingPortal.Session.FlowData` for the full nested struct schema.
 

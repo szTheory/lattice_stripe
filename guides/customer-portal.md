@@ -49,7 +49,7 @@ The `"customer"` param is required. All other params are optional:
 
 Pass `"flow_data"` with a `"type"` key to bypass the portal homepage and take the
 customer directly into a specific task. Each flow type has its own required sub-fields,
-validated pre-network by `LatticeStripe.BillingPortal.Guards`.
+validated pre-network by a pre-flight guard module.
 
 See `LatticeStripe.BillingPortal.Session.FlowData` for the full nested struct schema
 returned on the session response.

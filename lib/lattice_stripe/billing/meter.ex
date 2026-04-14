@@ -79,10 +79,9 @@ defmodule LatticeStripe.Billing.Meter do
   Create a billing meter.
 
   Requires `display_name`, `event_name`, and `default_aggregation` params
-  (string keys — Stripe wire format). Calls
-  `LatticeStripe.Billing.Guards.check_meter_value_settings!/1` after param
-  validation; that guard raises `ArgumentError` on present-but-malformed
-  `value_settings` for sum/last formulas (T-20-01 silent-zero trap).
+  (string keys — Stripe wire format). After param validation, a pre-flight
+  guard raises `ArgumentError` on present-but-malformed `value_settings` for
+  sum/last formulas (T-20-01 silent-zero trap).
   """
   @spec create(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, LatticeStripe.Error.t()}
   def create(%Client{} = client, params, opts \\ []) when is_map(params) do
