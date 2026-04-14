@@ -48,9 +48,9 @@
 ### Testing & integration
 
 - [ ] **TEST-01**: `test/support/fixtures/metering.ex` provides canonical `Meter`, `MeterEvent`, and `MeterEventAdjustment` fixtures reusable across unit and integration tests
-- [ ] **TEST-02**: `test/support/fixtures/billing_portal.ex` provides a canonical `Session` fixture including at least one `FlowData` shape per flow type
+- [x] **TEST-02**: `test/support/fixtures/billing_portal.ex` provides a canonical `Session` fixture including at least one `FlowData` shape per flow type
 - [ ] **TEST-03**: Wave 0 `stripe-mock` probe in Phase 20 confirms the three metering endpoints behave as documented, including the exact `cancel` sub-object field shape for MeterEventAdjustment, and records any gaps (stripe-mock is stateless — lifecycle assertions must be shape-only, not state-transition)
-- [ ] **TEST-04**: Wave 0 `stripe-mock` probe in Phase 21 confirms `/v1/billing_portal/sessions` and notes whether stripe-mock enforces `flow_data` required sub-fields (informs whether the client-side guard is fully tested via mock or requires unit tests in addition)
+- [x] **TEST-04**: Wave 0 `stripe-mock` probe in Phase 21 confirms `/v1/billing_portal/sessions` and notes whether stripe-mock enforces `flow_data` required sub-fields (informs whether the client-side guard is fully tested via mock or requires unit tests in addition)
 - [ ] **TEST-05**: Full integration tests (tagged `:integration`) exercise: seed a meter → report events through it → adjust one → deactivate → list filtered by status → reactivate; and create a portal session for a real test customer and assert the returned `url` shape
 
 ### Documentation
@@ -123,9 +123,9 @@ Explicitly excluded for v1.1. Reasons must remain valid before these become acti
 | GUARD-02 | Phase 20 | Pending |
 | GUARD-03 | Phase 20 | Pending |
 | TEST-01 | Phase 20 | Pending |
-| TEST-02 | Phase 21 | Pending |
+| TEST-02 | Phase 21 | Complete |
 | TEST-03 | Phase 20 | Pending |
-| TEST-04 | Phase 21 | Pending |
+| TEST-04 | Phase 21 | Complete |
 | TEST-05 (metering: meter lifecycle + event + adjustment integration tests) | Phase 20 | Pending |
 | TEST-05 (portal: session create + url shape integration test) | Phase 21 | Pending |
 | DOCS-01 | Phase 20 | Pending |

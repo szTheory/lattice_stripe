@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Accrue unblockers (metering + portal)
 status: executing
-stopped_at: Phase 21 context gathered
-last_updated: "2026-04-14T18:26:02.897Z"
+stopped_at: Completed 21-01-wave0-bootstrap-PLAN.md
+last_updated: "2026-04-14T19:55:15.931Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 7
-  percent: 100
+  total_plans: 11
+  completed_plans: 8
+  percent: 73
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-13 after v1.0 milestone completion)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 20 — billing-metering
+**Current focus:** Phase 21 — customer-portal
 
 ## Current Position
 
 Milestone: v1.1 (Accrue unblockers) — PLANNING
-Phase: 20 (billing-metering) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 20
+Phase: 21 (customer-portal) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-04-14
 
 Progress: [░░░░░░░░░░] 0% (0/10 plans complete across 2 phases)
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0% (0/10 plans complete across 2 phas
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 21 P01 | 15 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent v1.1 decisions (locked — do not relitigate):
 - [v1.1 D3]: Defer /v2/billing/meter-event-stream to v1.2+ — different auth model, Accrue doesn't need it
 - [v1.1 D4]: Defer BillingPortal.Configuration CRUDL to v1.2+ — triples scope, Accrue uses Stripe dashboard
 - [v1.1 D5]: Phase 20 (metering) before Phase 21 (portal) — higher priority, larger scope, hot path
+- [Phase 21]: stripe-mock returns HTTP 400 not 422 for validation errors; probe accepts 400 or 422
+- [Phase 21]: RESEARCH Finding 1 confirmed: stripe-mock does NOT enforce flow_data sub-field validation; D-01 guard is the only enforcement layer
 
 ### Pending Todos
 
@@ -78,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T18:26:02.894Z
-Stopped at: Phase 21 context gathered
+Last session: 2026-04-14T19:55:15.928Z
+Stopped at: Completed 21-01-wave0-bootstrap-PLAN.md
 Resume path: `/gsd-plan-phase 20` to begin planning the metering phase
