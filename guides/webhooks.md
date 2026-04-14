@@ -440,3 +440,4 @@ Stripe retries.
 - [Error Handling](error-handling.md) — retry semantics and error signalling from handlers
 - [Connect Accounts](connect-accounts.md) — `account.updated` and capability event patterns
 - [Subscriptions](subscriptions.md) — `customer.subscription.*` lifecycle events
+- [Customer Portal — Security and session lifetime](customer-portal.html#security-and-session-lifetime) — portal flows dispatch state changes via webhooks, not return-URL payloads
