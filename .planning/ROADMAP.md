@@ -81,4 +81,4 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 1-11, 14-19 | v1.0 | All | ✅ Shipped | 2026-04-13 |
 | 20. Billing Metering | v1.1 | 7/7 | Complete   | 2026-04-14 |
-| 21. Customer Portal | v1.1 | 1/4 | In Progress|  |
+| 21. Customer Portal | v1.1 | 2/4 | In Progress|  |

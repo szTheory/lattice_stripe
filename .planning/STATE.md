@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Accrue unblockers (metering + portal)
 status: executing
-stopped_at: Completed 21-01-wave0-bootstrap-PLAN.md
-last_updated: "2026-04-14T19:55:15.931Z"
+stopped_at: Completed 21-02-flow-data-structs-PLAN.md
+last_updated: "2026-04-14T19:58:44.046Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 11
-  completed_plans: 8
-  percent: 73
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-13 after v1.0 milestone completion)
 
 Milestone: v1.1 (Accrue unblockers) — PLANNING
 Phase: 21 (customer-portal) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0% (0/10 plans complete across 2 phas
 
 *Updated after each plan completion*
 | Phase 21 P01 | 15 | 3 tasks | 7 files |
+| Phase 21 P02 | 2 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Recent v1.1 decisions (locked — do not relitigate):
 - [v1.1 D5]: Phase 20 (metering) before Phase 21 (portal) — higher priority, larger scope, hot path
 - [Phase 21]: stripe-mock returns HTTP 400 not 422 for validation errors; probe accepts 400 or 422
 - [Phase 21]: RESEARCH Finding 1 confirmed: stripe-mock does NOT enforce flow_data sub-field validation; D-01 guard is the only enforcement layer
+- [Phase 21]: FlowData sub-structs + parent committed together in single GREEN phase (test file uses both struct patterns, splitting would leave compile error between tasks)
+- [Phase 21]: Leaf sub-objects (retention, items, discounts, redirect, hosted_confirmation) kept as raw map() per D-02 — shallow leaf objects do not warrant dedicated modules
 
 ### Pending Todos
 
@@ -81,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T19:55:15.928Z
-Stopped at: Completed 21-01-wave0-bootstrap-PLAN.md
+Last session: 2026-04-14T19:58:44.044Z
+Stopped at: Completed 21-02-flow-data-structs-PLAN.md
 Resume path: `/gsd-plan-phase 20` to begin planning the metering phase
