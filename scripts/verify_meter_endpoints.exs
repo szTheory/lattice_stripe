@@ -121,4 +121,6 @@ IO.puts("=== Results: #{ok_count}/#{total} OK ===")
 if failures > 0 do
   IO.puts("#{failures} endpoint(s) FAILED — check stripe-mock is running and accessible")
   System.halt(1)
+else
+  System.halt(0)
 end
