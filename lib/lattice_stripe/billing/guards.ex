@@ -1,5 +1,6 @@
 defmodule LatticeStripe.Billing.Guards do
   @moduledoc false
+  require Logger
   alias LatticeStripe.{Client, Error}
 
   @doc """
@@ -65,4 +66,58 @@ defmodule LatticeStripe.Billing.Guards do
   end
 
   defp phases_has?(_), do: false
+
+  @doc """
+  Pre-flight guard for `LatticeStripe.Billing.Meter.create/3`.
+
+  Raises `ArgumentError` when `default_aggregation.formula` is `"sum"` or `"last"`
+  AND `value_settings` is present-but-malformed (`event_payload_key` missing, nil,
+  or empty). This blocks the silent-zero trap where Stripe returns HTTP 200 but
+  every event's value contribution is silently dropped.
+
+  Silent-passes when `value_settings` is omitted — Stripe defaults `event_payload_key`
+  to `"value"`, which is a legal and common shape.
+
+  Logs `Logger.warning/1` when `formula == "count"` and `value_settings` is passed,
+  because Stripe silently ignores `value_settings` for count meters.
+
+  Reads string keys only (Stripe wire format). Atom-keyed params bypass the guard.
+  """
+  @spec check_meter_value_settings!(map()) :: :ok
+  def check_meter_value_settings!(params) when is_map(params) do
+    formula = get_in(params, ["default_aggregation", "formula"])
+    value_settings = Map.get(params, "value_settings")
+
+    cond do
+      formula in ["sum", "last"] and is_map(value_settings) and
+          not valid_event_payload_key?(value_settings) ->
+        raise ArgumentError,
+              "LatticeStripe.Billing.Meter.create/3: default_aggregation.formula " <>
+                "is #{inspect(formula)} but value_settings.event_payload_key is " <>
+                "missing or empty. Stripe would accept this and silently drop " <>
+                "every MeterEvent's value. Either omit value_settings entirely " <>
+                "(defaults to \"value\") or pass " <>
+                "%{\"event_payload_key\" => \"<your_key>\"}."
+
+      formula == "count" and not is_nil(value_settings) ->
+        Logger.warning(
+          "LatticeStripe.Billing.Meter.create/3: value_settings is ignored " <>
+            "when default_aggregation.formula is \"count\". Stripe will drop " <>
+            "this field silently."
+        )
+
+        :ok
+
+      true ->
+        :ok
+    end
+  end
+
+  def check_meter_value_settings!(_non_map), do: :ok
+
+  defp valid_event_payload_key?(%{"event_payload_key" => key})
+       when is_binary(key) and byte_size(key) > 0,
+       do: true
+
+  defp valid_event_payload_key?(_), do: false
 end
