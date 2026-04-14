@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0](https://github.com/szTheory/lattice_stripe/compare/v1.0.0...v1.1.0) (2026-04-14)
+
+
+### Features
+
+* release v1.1.0 — Accrue unblockers (Billing Metering + Customer Portal) ([f69a11f](https://github.com/szTheory/lattice_stripe/commit/f69a11f0bcb20c19fe18dc22a0a4873ec63811bd))
+
 ## [1.0.0](https://github.com/szTheory/lattice_stripe/compare/v0.2.0...v1.0.0) (2026-04-13)
 
 ### Highlights
