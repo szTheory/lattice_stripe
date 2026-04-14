@@ -45,10 +45,9 @@ defmodule LatticeStripe.Billing.MeterEventAdjustment do
     Resource.require_param!(params, "event_name",
       "LatticeStripe.Billing.MeterEventAdjustment.create/3 requires an event_name param")
 
-    Resource.require_param!(params, "cancel",
-      "LatticeStripe.Billing.MeterEventAdjustment.create/3 requires a cancel param " <>
-        "shaped as %{\"identifier\" => \"<meter_event_identifier>\"}")
-
+    # Note: `cancel` presence + shape is enforced by check_adjustment_cancel_shape!/1
+    # below (it has a fallthrough clause that raises ArgumentError when `cancel`
+    # is missing or malformed). No separate require_param! call needed.
     Guards.check_adjustment_cancel_shape!(params)
 
     %Request{method: :post, path: "/v1/billing/meter_event_adjustments", params: params, opts: opts}
