@@ -74,9 +74,7 @@ defmodule LatticeStripe.BillingPortal.SessionTest do
       end)
 
       assert {:ok, %Session{}} =
-               Session.create(client, %{"customer" => "cus_test123"},
-                 stripe_account: "acct_test"
-               )
+               Session.create(client, %{"customer" => "cus_test123"}, stripe_account: "acct_test")
     end
   end
 

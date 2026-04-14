@@ -36,7 +36,9 @@ defmodule LatticeStripe.Billing.MeterIntegrationTest do
   # TEST-05: Full lifecycle against stripe-mock.
   # stripe-mock is stateless — state transitions (active→inactive) are NOT
   # asserted. Only the return shape (%Meter{}) is checked for each verb.
-  test "full lifecycle: create → retrieve → update → list → deactivate → reactivate", %{client: client} do
+  test "full lifecycle: create → retrieve → update → list → deactivate → reactivate", %{
+    client: client
+  } do
     event_name = "api_call_#{System.unique_integer([:positive])}"
 
     {:ok, %Meter{id: id}} =

@@ -42,15 +42,23 @@ defmodule LatticeStripe.Billing.MeterEventAdjustment do
   """
   @spec create(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, LatticeStripe.Error.t()}
   def create(%Client{} = client, params, opts \\ []) when is_map(params) do
-    Resource.require_param!(params, "event_name",
-      "LatticeStripe.Billing.MeterEventAdjustment.create/3 requires an event_name param")
+    Resource.require_param!(
+      params,
+      "event_name",
+      "LatticeStripe.Billing.MeterEventAdjustment.create/3 requires an event_name param"
+    )
 
     # Note: `cancel` presence + shape is enforced by check_adjustment_cancel_shape!/1
     # below (it has a fallthrough clause that raises ArgumentError when `cancel`
     # is missing or malformed). No separate require_param! call needed.
     Guards.check_adjustment_cancel_shape!(params)
 
-    %Request{method: :post, path: "/v1/billing/meter_event_adjustments", params: params, opts: opts}
+    %Request{
+      method: :post,
+      path: "/v1/billing/meter_event_adjustments",
+      params: params,
+      opts: opts
+    }
     |> then(&Client.request(client, &1))
     |> Resource.unwrap_singular(&from_map/1)
   end

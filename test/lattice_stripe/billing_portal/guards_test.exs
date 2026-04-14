@@ -161,6 +161,7 @@ defmodule LatticeStripe.BillingPortal.GuardsTest do
 
       for params <- cases do
         error = assert_raise ArgumentError, fn -> Guards.check_flow_data!(params) end
+
         assert error.message =~ fn_name,
                "Expected message to contain '#{fn_name}', got: #{error.message}"
       end

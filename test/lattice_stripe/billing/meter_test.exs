@@ -5,7 +5,14 @@ defmodule LatticeStripe.Billing.MeterTest do
   import LatticeStripe.TestHelpers
 
   alias LatticeStripe.Billing.Meter
-  alias LatticeStripe.Billing.Meter.{CustomerMapping, DefaultAggregation, StatusTransitions, ValueSettings}
+
+  alias LatticeStripe.Billing.Meter.{
+    CustomerMapping,
+    DefaultAggregation,
+    StatusTransitions,
+    ValueSettings
+  }
+
   alias LatticeStripe.Test.Fixtures.Metering
 
   setup :verify_on_exit!
@@ -50,7 +57,11 @@ defmodule LatticeStripe.Billing.MeterTest do
 
   describe "CustomerMapping.from_map/1" do
     test "round-trips known fields" do
-      assert %CustomerMapping{event_payload_key: "stripe_customer_id", type: "by_id", extra: extra} =
+      assert %CustomerMapping{
+               event_payload_key: "stripe_customer_id",
+               type: "by_id",
+               extra: extra
+             } =
                CustomerMapping.from_map(%{
                  "event_payload_key" => "stripe_customer_id",
                  "type" => "by_id"
@@ -109,7 +120,10 @@ defmodule LatticeStripe.Billing.MeterTest do
              } = result
 
       assert %DefaultAggregation{formula: "sum"} = result.default_aggregation
-      assert %CustomerMapping{event_payload_key: "stripe_customer_id", type: "by_id"} = result.customer_mapping
+
+      assert %CustomerMapping{event_payload_key: "stripe_customer_id", type: "by_id"} =
+               result.customer_mapping
+
       assert %ValueSettings{event_payload_key: "value"} = result.value_settings
       assert %StatusTransitions{deactivated_at: nil} = result.status_transitions
       assert result.extra == %{}
@@ -261,7 +275,8 @@ defmodule LatticeStripe.Billing.MeterTest do
         ok_response(Metering.Meter.deactivated())
       end)
 
-      assert {:ok, %Meter{id: "mtr_123", status: "inactive"}} = Meter.deactivate(client, "mtr_123")
+      assert {:ok, %Meter{id: "mtr_123", status: "inactive"}} =
+               Meter.deactivate(client, "mtr_123")
     end
   end
 

@@ -56,7 +56,9 @@ defmodule LatticeStripe.Billing.MeterEventAdjustmentTest do
       end
     end
 
-    test "raises ArgumentError when cancel.id used instead of cancel.identifier", %{client: client} do
+    test "raises ArgumentError when cancel.id used instead of cancel.identifier", %{
+      client: client
+    } do
       assert_raise ArgumentError, ~r/identifier/, fn ->
         MeterEventAdjustment.create(client, %{
           "event_name" => "api_call",

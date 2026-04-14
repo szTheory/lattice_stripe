@@ -65,11 +65,17 @@ defmodule LatticeStripe.Billing.MeterEvent do
   """
   @spec create(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, LatticeStripe.Error.t()}
   def create(%Client{} = client, params, opts \\ []) when is_map(params) do
-    Resource.require_param!(params, "event_name",
-      "LatticeStripe.Billing.MeterEvent.create/3 requires an event_name param")
+    Resource.require_param!(
+      params,
+      "event_name",
+      "LatticeStripe.Billing.MeterEvent.create/3 requires an event_name param"
+    )
 
-    Resource.require_param!(params, "payload",
-      "LatticeStripe.Billing.MeterEvent.create/3 requires a payload param")
+    Resource.require_param!(
+      params,
+      "payload",
+      "LatticeStripe.Billing.MeterEvent.create/3 requires a payload param"
+    )
 
     %Request{method: :post, path: "/v1/billing/meter_events", params: params, opts: opts}
     |> then(&Client.request(client, &1))

@@ -30,7 +30,14 @@ defmodule LatticeStripe.Billing.Meter do
   """
 
   alias LatticeStripe.Billing
-  alias LatticeStripe.Billing.Meter.{CustomerMapping, DefaultAggregation, StatusTransitions, ValueSettings}
+
+  alias LatticeStripe.Billing.Meter.{
+    CustomerMapping,
+    DefaultAggregation,
+    StatusTransitions,
+    ValueSettings
+  }
+
   alias LatticeStripe.{Client, Request, Resource}
 
   @known_fields ~w(id object display_name event_name status default_aggregation
@@ -85,14 +92,23 @@ defmodule LatticeStripe.Billing.Meter do
   """
   @spec create(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, LatticeStripe.Error.t()}
   def create(%Client{} = client, params, opts \\ []) when is_map(params) do
-    Resource.require_param!(params, "display_name",
-      "LatticeStripe.Billing.Meter.create/3 requires a display_name param")
+    Resource.require_param!(
+      params,
+      "display_name",
+      "LatticeStripe.Billing.Meter.create/3 requires a display_name param"
+    )
 
-    Resource.require_param!(params, "event_name",
-      "LatticeStripe.Billing.Meter.create/3 requires an event_name param")
+    Resource.require_param!(
+      params,
+      "event_name",
+      "LatticeStripe.Billing.Meter.create/3 requires an event_name param"
+    )
 
-    Resource.require_param!(params, "default_aggregation",
-      "LatticeStripe.Billing.Meter.create/3 requires a default_aggregation param")
+    Resource.require_param!(
+      params,
+      "default_aggregation",
+      "LatticeStripe.Billing.Meter.create/3 requires a default_aggregation param"
+    )
 
     Billing.Guards.check_meter_value_settings!(params)
 
@@ -113,7 +129,8 @@ defmodule LatticeStripe.Billing.Meter do
   @doc """
   Retrieve a billing meter by ID.
   """
-  @spec retrieve(Client.t(), String.t(), keyword()) :: {:ok, t()} | {:error, LatticeStripe.Error.t()}
+  @spec retrieve(Client.t(), String.t(), keyword()) ::
+          {:ok, t()} | {:error, LatticeStripe.Error.t()}
   def retrieve(%Client{} = client, id, opts \\ []) when is_binary(id) do
     %Request{method: :get, path: "/v1/billing/meters/#{id}", params: %{}, opts: opts}
     |> then(&Client.request(client, &1))

@@ -57,7 +57,9 @@ defmodule LatticeStripe.Billing.MeterEventTest do
       refute r =~ ~s("value" => "1")
     end
 
-    test "shows allowlist fields (event_name, identifier, timestamp, created, livemode)", %{rendered: r} do
+    test "shows allowlist fields (event_name, identifier, timestamp, created, livemode)", %{
+      rendered: r
+    } do
       assert r =~ "event_name:"
       assert r =~ "identifier:"
       assert r =~ "timestamp:"
