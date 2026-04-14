@@ -95,7 +95,7 @@ defmodule LatticeStripe.Billing.Meter do
     Resource.require_param!(params, "default_aggregation",
       "LatticeStripe.Billing.Meter.create/3 requires a default_aggregation param")
 
-    :ok = Billing.Guards.check_meter_value_settings!(params)
+    Billing.Guards.check_meter_value_settings!(params)
 
     %Request{method: :post, path: "/v1/billing/meters", params: params, opts: opts}
     |> then(&Client.request(client, &1))

@@ -49,7 +49,7 @@ defmodule LatticeStripe.Billing.MeterEventAdjustment do
       "LatticeStripe.Billing.MeterEventAdjustment.create/3 requires a cancel param " <>
         "shaped as %{\"identifier\" => \"<meter_event_identifier>\"}")
 
-    :ok = Guards.check_adjustment_cancel_shape!(params)
+    Guards.check_adjustment_cancel_shape!(params)
 
     %Request{method: :post, path: "/v1/billing/meter_event_adjustments", params: params, opts: opts}
     |> then(&Client.request(client, &1))
