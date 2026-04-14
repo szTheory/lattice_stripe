@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Accrue unblockers (metering + portal)
-status: executing
-stopped_at: Completed 21-03-session-resource-guards-PLAN.md
-last_updated: "2026-04-14T20:04:03.534Z"
+status: verifying
+stopped_at: Completed 21-04-integration-guide-docs-PLAN.md
+last_updated: "2026-04-14T20:10:53.946Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 11
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 100
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-13 after v1.0 milestone completion)
 Milestone: v1.1 (Accrue unblockers) — PLANNING
 Phase: 21 (customer-portal) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-14
 
 Progress: [░░░░░░░░░░] 0% (0/10 plans complete across 2 phases)
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0% (0/10 plans complete across 2 phas
 | Phase 21 P01 | 15 | 3 tasks | 7 files |
 | Phase 21 P02 | 2 | 2 tasks | 6 files |
 | Phase 21 P03 | 3 | 2 tasks | 4 files |
+| Phase 21-customer-portal P04 | 10 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,7 @@ Recent v1.1 decisions (locked — do not relitigate):
 - [Phase 21]: Leaf sub-objects (retention, items, discounts, redirect, hosted_confirmation) kept as raw map() per D-02 — shallow leaf objects do not warrant dedicated modules
 - [Phase 21]: Guards module implemented VERBATIM from CONTEXT.md D-01 — pattern-match clause dispatch, all 4 flow types, unknown type catchall, malformed flow_data catchall
 - [Phase 21]: Inspect impl placed after Session module end in session.ex — consistent with Checkout.Session precedent; hides :url (T-21-05) and :flow (T-21-10)
+- [Phase 21-customer-portal]: BillingPortal.Guards excluded from Customer Portal ExDoc group — @moduledoc false per RESEARCH Pitfall 5; mix docs --warnings-as-errors failures are pre-existing (meter.ex + hidden Guards refs from session.ex moduledoc)
 
 ### Pending Todos
 
@@ -87,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T20:04:03.532Z
-Stopped at: Completed 21-03-session-resource-guards-PLAN.md
+Last session: 2026-04-14T20:10:53.944Z
+Stopped at: Completed 21-04-integration-guide-docs-PLAN.md
 Resume path: `/gsd-plan-phase 20` to begin planning the metering phase

@@ -38,7 +38,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 > Full brief: `.planning/v1.1-accrue-context.md` — locked decisions D1-D5, Accrue gap list verbatim, phase structure, entry-point runbook.
 
 - [x] **Phase 20: Billing Metering** — `Billing.Meter` CRUDL + `deactivate/reactivate`, four nested typed structs, `MeterEvent.create/3`, `MeterEventAdjustment.create/3`, integration tests, `guides/metering.md` (completed 2026-04-14)
-- [ ] **Phase 21: Customer Portal** — `BillingPortal.Session.create/3`, `Session.FlowData` nested struct, integration tests, `guides/customer-portal.md`
+- [x] **Phase 21: Customer Portal** — `BillingPortal.Session.create/3`, `Session.FlowData` nested struct, integration tests, `guides/customer-portal.md` (completed 2026-04-14)
 
 **No release phase.** v1.1 ships zero-touch when the last `feat:` commit of Phase 21 lands on main — release-please auto-bumps 1.0.0 → 1.1.0, tags, and publishes to Hex. See `v1.1-accrue-context.md` for why (post-1.0 cleanup in PR #8 flipped `bump-minor-pre-major` to `false`).
 
@@ -81,4 +81,4 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 1-11, 14-19 | v1.0 | All | ✅ Shipped | 2026-04-13 |
 | 20. Billing Metering | v1.1 | 7/7 | Complete   | 2026-04-14 |
-| 21. Customer Portal | v1.1 | 3/4 | In Progress|  |
+| 21. Customer Portal | v1.1 | 4/4 | Complete   | 2026-04-14 |
