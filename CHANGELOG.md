@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0](https://github.com/szTheory/lattice_stripe/compare/v1.0.0...v1.1.0) (2026-04-14)
+
+### Highlights
+
+The first post-1.0 minor release. Adds the two downstream unblockers needed by [Accrue](https://github.com/szTheory/accrue): usage-based billing (Billing Metering) and customer self-service (Customer Portal). Full phase history is in [PR #9](https://github.com/szTheory/lattice_stripe/pull/9).
+
+**What's new:**
+- **Billing Metering.** `Billing.Meter` CRUDL plus `deactivate/3` and `reactivate/3`, usage event ingestion via `MeterEvent.create/3`, and late corrections via `MeterEventAdjustment.create/3`. A pre-flight guard (`GUARD-03`) raises `ArgumentError` on malformed `value_settings` before the network call, preventing Stripe's silent-zero trap for `sum`/`last` aggregation formulas.
+- **Customer Portal.** `BillingPortal.Session.create/3` returns a short-lived portal URL for a given customer. Full deep-link flow support (`subscription_cancel`, `subscription_update`, `subscription_update_confirm`, `payment_method_update`) via a 5-module nested `FlowData` struct tree. A pre-flight guard raises `ArgumentError` with actionable messages for missing required flow sub-fields, so malformed requests fail before they hit Stripe. The `Inspect` protocol masks the portal URL and flow to keep short-lived secrets out of log output.
+- **Docs.** New `guides/metering.md` (usage-reporting idiom, idempotency two-layer explainer, reconciliation, backdating window, aggregation semantics) and `guides/customer-portal.md` (all 4 flow types with required sub-fields, Accrue-style Phoenix controller example, Inspect masking security teaching). New ExDoc groups: "Billing Metering" and "Customer Portal". Reciprocal cross-links from existing `guides/subscriptions.md` and `guides/webhooks.md`.
+
+**Verification.** 1488 tests passing. Integration tests run against `stripe-mock`. `mix compile --warnings-as-errors`, `mix credo --strict`, and `mix docs --warnings-as-errors` all clean. Phase 20 and Phase 21 verification reports: passed.
+
+**Upgrading from 1.0.x.** No breaking changes. Additive only — `Billing.Meter`, `Billing.MeterEvent`, `Billing.MeterEventAdjustment`, and `BillingPortal.Session` are new public modules. Existing code keeps working unchanged.
+
+### Features
+
+* **Billing.Meter:** `create/3`, `retrieve/3`, `update/4`, `list/2`, `deactivate/3`, `reactivate/3`
+* **Billing.Meter.ValueSettings, DefaultAggregation, CustomerMapping, StatusTransitions:** nested typed structs with `:extra` forward-compat
+* **Billing.MeterEvent:** `create/3` with two-layer idempotency (`identifier` vs `idempotency_key:`)
+* **Billing.MeterEventAdjustment:** `create/3` with nested `Cancel` struct for late corrections
+* **Billing.Guards.check_meter_value_settings!/1:** pre-flight shape guard for `value_settings` (GUARD-03, prevents silent-zero trap)
+* **BillingPortal.Session:** `create/3` returns `{:ok, %Session{url: ..., flow: ...}}`
+* **BillingPortal.Session.FlowData:** 5-module nested struct tree — `FlowData`, `AfterCompletion`, `SubscriptionCancel`, `SubscriptionUpdate`, `SubscriptionUpdateConfirm`
+* **BillingPortal Guards:** pre-flight `check_flow_data!/1` raises `ArgumentError` for missing flow sub-fields, enumerating valid flow types on unknown input
+* **Inspect masking for BillingPortal.Session:** hides `:url` and `:flow` fields via explicit allowlist to keep short-lived portal URLs out of logs
+* **guides/metering.md:** usage-reporting idiom, idempotency layers, reconciliation, aggregation semantics
+* **guides/customer-portal.md:** all 4 flow types, Accrue-style Phoenix controller example, Inspect masking security teaching
+* **mix.exs:** `groups_for_modules` entries for "Billing Metering" and "Customer Portal"; both guides added to `extras`
+
 ## [1.0.0](https://github.com/szTheory/lattice_stripe/compare/v0.2.0...v1.0.0) (2026-04-13)
 
 ### Highlights
