@@ -1,5 +1,16 @@
 defmodule LatticeStripe.Billing.Guards do
   @moduledoc false
+  # Guard numbering scheme (discoverability entry point):
+  #
+  #   GUARD-01 — check_meter_value_settings!/1 (sum/last formula requires value_settings)
+  #   GUARD-02 — @doc contract on MeterEvent.create/3 documenting 35-day window,
+  #              24-hour identifier dedup, and async-ack semantics. This is a
+  #              documentation guarantee enforced by a Code.fetch_docs test,
+  #              not a function in this module.
+  #   GUARD-03 — check_adjustment_cancel_shape!/1 (cancel must nest identifier)
+  #
+  # PII masking on %MeterEvent{} is implemented via a custom Inspect protocol in
+  # lib/lattice_stripe/billing/meter_event.ex (tagged PII-01), not a guard here.
   require Logger
   alias LatticeStripe.{Client, Error}
 

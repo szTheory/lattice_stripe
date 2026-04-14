@@ -41,7 +41,7 @@ defmodule LatticeStripe.Billing.MeterEventTest do
     end
   end
 
-  describe "Inspect masking (GUARD-02 / T-20-04 payload masking)" do
+  describe "Inspect masking (PII-01 / T-20-04 payload masking)" do
     setup do
       event = MeterEvent.from_map(Metering.MeterEvent.basic())
       %{event: event, rendered: inspect(event)}
