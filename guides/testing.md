@@ -474,3 +474,6 @@ Stripe's API contract — that's a real bug. stripe-mock is more strict than jus
 
 The real Stripe API rejects test key formatting issues. With stripe-mock, any `sk_test_` value works.
 Never use real API keys in tests.
+
+For metering-specific integration test guidance and the nightly batch flush
+anti-pattern, see [metering.md](metering.md#what-not-to-do-nightly-batch-flush).

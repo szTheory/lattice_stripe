@@ -405,3 +405,6 @@ may contain personal information. The raw value remains accessible via
 
 Similarly, `%LatticeStripe.SubscriptionItem{}` masks `metadata` and
 `billing_thresholds` as `:present` markers when populated.
+
+For reporting metered usage events against a subscription with
+`usage_type: "metered"`, see [metering.md](metering.md#reporting-usage-the-hot-path).
