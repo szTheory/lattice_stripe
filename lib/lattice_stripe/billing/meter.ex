@@ -131,7 +131,12 @@ defmodule LatticeStripe.Billing.Meter do
   # ---------------------------------------------------------------------------
 
   @doc """
-  Update a billing meter. Only `display_name` is mutable per Stripe API docs.
+  Update a billing meter.
+
+  At time of writing, Stripe only mutates `display_name`; other keys in
+  `params` are passed through to the API for forward compatibility. If Stripe
+  later exposes additional mutable fields, this function will begin accepting
+  them automatically without a library change.
   """
   @spec update(Client.t(), String.t(), map(), keyword()) ::
           {:ok, t()} | {:error, LatticeStripe.Error.t()}
