@@ -17,7 +17,8 @@ defmodule LatticeStripe.Billing.Guards do
   @spec check_proration_required(Client.t(), map()) :: :ok | {:error, Error.t()}
   def check_proration_required(%Client{require_explicit_proration: false}, _params), do: :ok
 
-  def check_proration_required(%Client{require_explicit_proration: true}, params) do
+  def check_proration_required(%Client{require_explicit_proration: true}, params)
+      when is_map(params) do
     if has_proration_behavior?(params) do
       :ok
     else
@@ -28,6 +29,15 @@ defmodule LatticeStripe.Billing.Guards do
            "proration_behavior is required when require_explicit_proration is enabled. Valid values: \"create_prorations\", \"always_invoice\", \"none\""
        }}
     end
+  end
+
+  def check_proration_required(%Client{require_explicit_proration: true}, _params) do
+    {:error,
+     %Error{
+       type: :proration_required,
+       message:
+         "proration_behavior is required when require_explicit_proration is enabled, and params must be a map. Valid values: \"create_prorations\", \"always_invoice\", \"none\""
+     }}
   end
 
   defp has_proration_behavior?(params) do
