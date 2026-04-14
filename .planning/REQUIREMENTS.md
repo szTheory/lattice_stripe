@@ -97,8 +97,6 @@ Explicitly excluded for v1.1. Reasons must remain valid before these become acti
 
 ## Traceability
 
-Mapping populated during roadmap creation (`/gsd-plan-phase` phase).
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | METER-01 | Phase 20 | Pending |
@@ -128,17 +126,20 @@ Mapping populated during roadmap creation (`/gsd-plan-phase` phase).
 | TEST-02 | Phase 21 | Pending |
 | TEST-03 | Phase 20 | Pending |
 | TEST-04 | Phase 21 | Pending |
-| TEST-05 | Phase 20 / Phase 21 | Pending |
+| TEST-05 (metering: meter lifecycle + event + adjustment integration tests) | Phase 20 | Pending |
+| TEST-05 (portal: session create + url shape integration test) | Phase 21 | Pending |
 | DOCS-01 | Phase 20 | Pending |
 | DOCS-02 | Phase 21 | Pending |
-| DOCS-03 | Phase 20 / Phase 21 | Pending |
+| DOCS-03 ("Billing Metering" group in groups_for_modules + guides/metering.md in extras) | Phase 20 | Pending |
+| DOCS-03 ("Customer Portal" group in groups_for_modules + guides/customer-portal.md in extras) | Phase 21 | Pending |
 | DOCS-04 | Phase 20 | Pending |
 
-**Coverage (provisional — finalized by roadmapper):**
-- v1.1 requirements: 32 total
+**Coverage:**
+- v1.1 requirements: 32 total (counting TEST-05 and DOCS-03 as 1 requirement each, split across phases in execution)
 - Mapped to phases: 32
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-14*
+*Traceability finalized: 2026-04-13 (roadmap creation)*
 *Driven by: `.planning/v1.1-accrue-context.md` (D1–D5) and `.planning/research/SUMMARY.md`*
