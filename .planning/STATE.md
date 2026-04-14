@@ -4,7 +4,7 @@ milestone: v1.1
 milestone_name: — Accrue unblockers (metering + portal)
 status: verifying
 stopped_at: Completed 21-04-integration-guide-docs-PLAN.md
-last_updated: "2026-04-14T20:10:53.946Z"
+last_updated: "2026-04-14T20:22:01.881Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 2
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-13 after v1.0 milestone completion)
 ## Current Position
 
 Milestone: v1.1 (Accrue unblockers) — PLANNING
-Phase: 21 (customer-portal) — EXECUTING
-Plan: 4 of 4
+Phase: 21
+Plan: Not started
 Status: Phase complete — ready for verification
 Last activity: 2026-04-14
 
@@ -46,7 +46,7 @@ Progress: [░░░░░░░░░░] 0% (0/10 plans complete across 2 phas
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 20 | 0/6 | — | — |
-| 21 | 0/4 | — | — |
+| 21 | 4 | - | - |
 
 **Recent Trend:**
 
