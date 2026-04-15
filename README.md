@@ -5,7 +5,7 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **What's new in v1.0** — LatticeStripe 1.0 ships with full Billing (Invoices, Subscriptions, Schedules) and Connect (Accounts, Transfers, Payouts, Balance) coverage. See the [v1.0 highlights in CHANGELOG](CHANGELOG.md#100).
+> **What's new in v1.1** — Usage-based billing via Billing Metering (`Meter`, `MeterEvent`, `MeterEventAdjustment`) and self-service Customer Portal sessions (`BillingPortal.Session` with 4 flow types). Building on v1.0's full Billing (Invoices, Subscriptions, Schedules) and Connect (Accounts, Transfers, Payouts, Balance) coverage. See the [v1.1 highlights in CHANGELOG](CHANGELOG.md#110).
 
 A production-grade, idiomatic Elixir SDK for the Stripe API.
 
@@ -18,7 +18,7 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:lattice_stripe, "~> 0.2"}
+    {:lattice_stripe, "~> 1.1"}
   ]
 end
 ```
@@ -66,7 +66,9 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 - Invoices — create, finalize, pay, void, send, list, search
 - Subscriptions with lifecycle verbs (cancel, resume, pause_collection, trial settings)
 - Subscription Schedules for phased billing with proration guards
-- [Guide: Subscriptions](guides/subscriptions.md)
+- Billing Metering — usage-based billing with `Meter`, `MeterEvent`, and `MeterEventAdjustment`; two-layer idempotency and pre-flight value guards
+- Customer Portal — `BillingPortal.Session` for self-service portal URLs with 4 flow types (subscription_cancel, subscription_update, subscription_update_confirm, payment_method_update) and Inspect masking
+- [Guide: Subscriptions](guides/subscriptions.md) · [Guide: Metering](guides/metering.md) · [Guide: Customer Portal](guides/customer-portal.md)
 
 ### Connect
 
@@ -104,6 +106,8 @@ Guides available:
 - [Client Configuration](https://hexdocs.pm/lattice_stripe/client-configuration.html)
 - [Payments](https://hexdocs.pm/lattice_stripe/payments.html)
 - [Checkout](https://hexdocs.pm/lattice_stripe/checkout.html)
+- [Metering](https://hexdocs.pm/lattice_stripe/metering.html)
+- [Customer Portal](https://hexdocs.pm/lattice_stripe/customer-portal.html)
 - [Webhooks](https://hexdocs.pm/lattice_stripe/webhooks.html)
 - [Error Handling](https://hexdocs.pm/lattice_stripe/error-handling.html)
 - [Testing](https://hexdocs.pm/lattice_stripe/testing.html)
