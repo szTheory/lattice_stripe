@@ -179,7 +179,10 @@ Plans:
   2. A developer can send a batch of meter events via `MeterEventStream.send_events/3` within an active session and receive `{:ok, results}` or a clear `{:error, :session_expired}` error when the session has expired.
   3. The module's `@doc` clearly documents that `MeterEventStream` cannot reuse `Client.request/2` directly — the session-token auth model is different — and shows the correct two-step (create session, send events) usage pattern.
   4. Integration tests against stripe-mock (or a documented skip with a clear stripe-mock support flag) cover the session create + event send lifecycle.
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 28-01-PLAN.md — Session struct + fixture + Inspect masking
+- [ ] 28-02-PLAN.md — MeterEventStream module + unit tests + integration skip + ExDoc + guide
 **UI hint**: no
 
 ### Phase 29: Changeset-Style Param Builders
@@ -225,7 +228,7 @@ Plans:
 | 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 27. Request Batching | v1.2 | 1/1 | Complete    | 2026-04-16 |
-| 28. meter_event_stream v2 | v1.2 | 0/? | Not started | - |
+| 28. meter_event_stream v2 | v1.2 | 0/2 | Planned | - |
 | 29. Changeset-Style Param Builders | v1.2 | 0/? | Not started | - |
 | 30. Stripe API Drift Detection | v1.2 | 0/? | Not started | - |
 | 31. LiveBook Notebook | v1.2 | 0/? | Not started | - |
