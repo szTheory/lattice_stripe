@@ -49,7 +49,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 24: Rate-Limit Awareness & Richer Errors** — `RateLimit-*` header capture via telemetry, fuzzy param name suggestions in `invalid_request_error` (completed 2026-04-16)
 - [x] **Phase 25: Performance Guide, Per-Op Timeouts & Connection Warm-Up** — `guides/performance.md`, opt-in `Client` timeout field, Finch warm-up helper (completed 2026-04-16)
 - [x] **Phase 26: Circuit Breaker & OpenTelemetry Guides** — `:fuse`-based `RetryStrategy` example guide, OTel integration guide with Honeycomb/Datadog examples (completed 2026-04-16)
-- [ ] **Phase 27: Request Batching** — `LatticeStripe.Batch` module with `Task.async_stream`, `try/rescue` per task, `{:ok, results} | {:error, reason}` contract
+- [x] **Phase 27: Request Batching** — `LatticeStripe.Batch` module with `Task.async_stream`, `try/rescue` per task, `{:ok, results} | {:error, reason}` contract (completed 2026-04-16)
 - [ ] **Phase 28: meter_event_stream v2** — `Billing.MeterEventStream` session-token API, `create_session/2`, event send loop, expiry handling
 - [ ] **Phase 29: Changeset-Style Param Builders** — optional fluent builders for `SubscriptionSchedule` phases and `BillingPortal` flows
 - [ ] **Phase 30: Stripe API Drift Detection** — Mix task + GitHub Actions weekly cron, compares Stripe OpenAPI spec `@known_fields` against current modules
@@ -166,9 +166,9 @@ Plans:
   1. A developer can call `LatticeStripe.Batch.run/2` (or equivalent) with a list of `{module, :function, args}` tuples and receive a list of `{:ok, result} | {:error, %Error{}}` tuples — one per input — preserving order.
   2. When an individual task raises or times out, its slot in the result list contains `{:error, %Error{}}` and the caller process is not crashed — all other tasks continue to completion.
   3. The module's `@doc` includes a "when to use" note explaining that `Batch.run/2` is for fan-out patterns (e.g., fetching customer + subscriptions + invoices in parallel) and is not a substitute for Stripe's native batch API.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 27-01-PLAN.md — TDD: Batch.run/3 implementation + unit tests + ExDoc grouping
+- [x] 27-01-PLAN.md — TDD: Batch.run/3 implementation + unit tests + ExDoc grouping
 
 ### Phase 28: meter_event_stream v2
 **Goal**: Developers who need high-throughput metering can send batches of meter events via Stripe's v2 session-token API — creating a short-lived session, sending event batches within it, and handling session expiry gracefully.
@@ -224,7 +224,7 @@ Plans:
 | 24. Rate-Limit Awareness & Richer Errors | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 27. Request Batching | v1.2 | 0/1 | Planned | - |
+| 27. Request Batching | v1.2 | 1/1 | Complete   | 2026-04-16 |
 | 28. meter_event_stream v2 | v1.2 | 0/? | Not started | - |
 | 29. Changeset-Style Param Builders | v1.2 | 0/? | Not started | - |
 | 30. Stripe API Drift Detection | v1.2 | 0/? | Not started | - |
