@@ -62,7 +62,7 @@ defmodule LatticeStripe.Billing.Meter do
 
   defstruct [
     :id,
-    :object,
+    object: "billing.meter",
     :display_name,
     :event_name,
     :status,
@@ -256,7 +256,7 @@ defmodule LatticeStripe.Billing.Meter do
 
     %__MODULE__{
       id: known["id"],
-      object: known["object"],
+      object: known["object"] || "billing.meter",
       display_name: known["display_name"],
       event_name: known["event_name"],
       status: atomize_status(known["status"]),
