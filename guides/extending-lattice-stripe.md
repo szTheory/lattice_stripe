@@ -336,6 +336,9 @@ defmodule MyApp.CircuitBreakerRetry do
 end
 ```
 
+> For a production-ready implementation using the `:fuse` library, see the
+> [Circuit Breaker](circuit-breaker.html) guide.
+
 ### Example: No Retries
 
 For contexts where you want immediate failure (your caller has its own retry logic):
