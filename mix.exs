@@ -166,6 +166,10 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.FormEncoder,
             LatticeStripe.Resource,
             LatticeStripe.Billing.Guards
+          ],
+          "Param Builders": [
+            LatticeStripe.Builders.SubscriptionSchedule,
+            LatticeStripe.Builders.BillingPortal
           ]
         ]
       ],
