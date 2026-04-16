@@ -44,7 +44,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 
 ### 🚧 v1.2 — Production Hardening & DX
 
-- [ ] **Phase 22: Expand Deserialization & Status Atomization** — typed struct dispatch for `expand:`, dot-path support, status field atomization sweep across 84+ modules, union type specs + CHANGELOG migration note
+- [x] **Phase 22: Expand Deserialization & Status Atomization** — typed struct dispatch for `expand:`, dot-path support, status field atomization sweep across 84+ modules, union type specs + CHANGELOG migration note (completed 2026-04-16)
 - [ ] **Phase 23: BillingPortal.Configuration CRUDL** — portal branding/features customization resource, Level 1+2 typed structs, Level 3+ in `extra`
 - [ ] **Phase 24: Rate-Limit Awareness & Richer Errors** — `RateLimit-*` header capture via telemetry, fuzzy param name suggestions in `invalid_request_error`
 - [ ] **Phase 25: Performance Guide, Per-Op Timeouts & Connection Warm-Up** — `guides/performance.md`, opt-in `Client` timeout field, Finch warm-up helper
@@ -202,7 +202,7 @@ Plans:
 | 1-11, 14-19 | v1.0 | All | ✅ Shipped | 2026-04-13 |
 | 20. Billing Metering | v1.1 | 7/7 | ✅ Complete | 2026-04-14 |
 | 21. Customer Portal | v1.1 | 4/4 | ✅ Complete | 2026-04-14 |
-| 22. Expand Deserialization & Status Atomization | v1.2 | 3/4 | In Progress|  |
+| 22. Expand Deserialization & Status Atomization | v1.2 | 4/4 | Complete   | 2026-04-16 |
 | 23. BillingPortal.Configuration CRUDL | v1.2 | 0/? | Not started | - |
 | 24. Rate-Limit Awareness & Richer Errors | v1.2 | 0/? | Not started | - |
 | 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 0/? | Not started | - |
