@@ -150,6 +150,24 @@ defmodule LatticeStripe.Builders.SubscriptionScheduleTest do
       assert phase["proration_behavior"] == "create_prorations"
       assert phase["trial_continuation"] == "resume"
     end
+
+    test "phase_start_date(:now) produces 'now' in phase_build/1 output" do
+      phase =
+        SSBuilder.phase_new()
+        |> SSBuilder.phase_start_date(:now)
+        |> SSBuilder.phase_build()
+
+      assert phase["start_date"] == "now"
+    end
+
+    test "phase_end_date(:now) produces 'now' in phase_build/1 output" do
+      phase =
+        SSBuilder.phase_new()
+        |> SSBuilder.phase_end_date(:now)
+        |> SSBuilder.phase_build()
+
+      assert phase["end_date"] == "now"
+    end
   end
 
   describe "add_phase/2" do

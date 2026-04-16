@@ -126,7 +126,10 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
 
   @doc "Set the schedule start date. Accepts `:now`, a Unix timestamp integer, or a string."
   @spec start_date(t(), :now | integer() | String.t()) :: t()
-  def start_date(%__MODULE__{} = b, date), do: %{b | start_date: date}
+  def start_date(%__MODULE__{} = b, :now), do: %{b | start_date: :now}
+
+  def start_date(%__MODULE__{} = b, date) when is_integer(date) or is_binary(date),
+    do: %{b | start_date: date}
 
   @doc "Set the end behavior atom or string (e.g. `:release`, `:cancel`)."
   @spec end_behavior(t(), atom() | String.t()) :: t()
@@ -218,9 +221,12 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
   @spec phase_description(Phase.t(), String.t()) :: Phase.t()
   def phase_description(%Phase{} = p, desc) when is_binary(desc), do: %{p | description: desc}
 
-  @doc "Set the end date (Unix timestamp) for this phase."
-  @spec phase_end_date(Phase.t(), integer() | String.t()) :: Phase.t()
-  def phase_end_date(%Phase{} = p, date), do: %{p | end_date: date}
+  @doc "Set the end date for this phase. Accepts `:now`, a Unix timestamp integer, or a string."
+  @spec phase_end_date(Phase.t(), :now | integer() | String.t()) :: Phase.t()
+  def phase_end_date(%Phase{} = p, :now), do: %{p | end_date: :now}
+
+  def phase_end_date(%Phase{} = p, date) when is_integer(date) or is_binary(date),
+    do: %{p | end_date: date}
 
   @doc "Set metadata map for this phase."
   @spec phase_metadata(Phase.t(), map()) :: Phase.t()
@@ -231,9 +237,12 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
   def phase_on_behalf_of(%Phase{} = p, acct_id) when is_binary(acct_id),
     do: %{p | on_behalf_of: acct_id}
 
-  @doc "Set the start date for this phase."
-  @spec phase_start_date(Phase.t(), integer() | String.t()) :: Phase.t()
-  def phase_start_date(%Phase{} = p, date), do: %{p | start_date: date}
+  @doc "Set the start date for this phase. Accepts `:now`, a Unix timestamp integer, or a string."
+  @spec phase_start_date(Phase.t(), :now | integer() | String.t()) :: Phase.t()
+  def phase_start_date(%Phase{} = p, :now), do: %{p | start_date: :now}
+
+  def phase_start_date(%Phase{} = p, date) when is_integer(date) or is_binary(date),
+    do: %{p | start_date: date}
 
   @doc "Set trial_continuation behavior (e.g. `:resume`, `:none`)."
   @spec phase_trial_continuation(Phase.t(), atom() | String.t()) :: Phase.t()
@@ -305,7 +314,7 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
       "default_tax_rates" => p.default_tax_rates,
       "description" => p.description,
       "discounts" => p.discounts,
-      "end_date" => p.end_date,
+      "end_date" => stringify_date(p.end_date),
       "invoice_settings" => p.invoice_settings,
       "items" => nilify_empty(p.items),
       "iterations" => p.iterations,
@@ -314,7 +323,7 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
       "pause_collection" => p.pause_collection,
       "prebilling" => p.prebilling,
       "proration_behavior" => to_string_if_atom(p.proration_behavior),
-      "start_date" => p.start_date,
+      "start_date" => stringify_date(p.start_date),
       "transfer_data" => p.transfer_data,
       "trial_continuation" => to_string_if_atom(p.trial_continuation),
       "trial_end" => p.trial_end
