@@ -65,4 +65,75 @@ defmodule LatticeStripe do
   """
   @spec api_version() :: String.t()
   def api_version, do: @stripe_api_version
+
+  @doc """
+  Pre-establishes Finch connections to the Stripe API.
+
+  Call this in your `Application.start/2` callback after starting Finch and creating
+  a client. It sends a lightweight `GET /v1/` request through the configured transport,
+  establishing the TLS handshake and HTTP connection. Subsequent API calls skip the
+  handshake latency.
+
+  Returns `{:ok, :warmed}` on any HTTP response (including Stripe's expected 404 from
+  `GET /v1/` — the TLS handshake is what matters). Only transport-level failures
+  (network unreachable, timeout) return `{:error, reason}`.
+
+  ## Example
+
+      def start(_type, _args) do
+        children = [
+          {Finch, name: MyApp.Finch}
+        ]
+        {:ok, sup} = Supervisor.start_link(children, strategy: :one_for_one)
+
+        client = LatticeStripe.Client.new!(
+          api_key: System.fetch_env!("STRIPE_SECRET_KEY"),
+          finch: MyApp.Finch
+        )
+        case LatticeStripe.warm_up(client) do
+          {:ok, :warmed} -> :ok
+          {:error, reason} ->
+            require Logger
+            Logger.warning("Stripe connection warm-up failed: \#{inspect(reason)}")
+        end
+
+        {:ok, sup}
+      end
+  """
+  @spec warm_up(LatticeStripe.Client.t()) :: {:ok, :warmed} | {:error, term()}
+  def warm_up(%LatticeStripe.Client{} = client) do
+    url = client.base_url <> "/v1/"
+
+    transport_request = %{
+      method: :get,
+      url: url,
+      headers: [{"authorization", "Bearer #{client.api_key}"}],
+      body: nil,
+      opts: [finch: client.finch, timeout: client.timeout]
+    }
+
+    case client.transport.request(transport_request) do
+      {:ok, _response} -> {:ok, :warmed}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @doc """
+  Pre-establishes Finch connections to the Stripe API, raising on failure.
+
+  Same as `warm_up/1` but raises `RuntimeError` if the transport connection fails.
+  Returns `:warmed` on success.
+
+  ## Example
+
+      # In Application.start/2 when warm-up failure should crash startup:
+      :warmed = LatticeStripe.warm_up!(client)
+  """
+  @spec warm_up!(LatticeStripe.Client.t()) :: :warmed
+  def warm_up!(%LatticeStripe.Client{} = client) do
+    case warm_up(client) do
+      {:ok, :warmed} -> :warmed
+      {:error, reason} -> raise "Stripe connection warm-up failed: #{inspect(reason)}"
+    end
+  end
 end
