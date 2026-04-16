@@ -129,7 +129,11 @@ defmodule LatticeStripe.Error do
         %__MODULE__{
           type: parse_type(type_str),
           code: Map.get(error_map, "code"),
-          message: Map.get(error_map, "message"),
+          message: maybe_enrich_message(
+            parse_type(type_str),
+            Map.get(error_map, "message"),
+            Map.get(error_map, "param")
+          ),
           param: Map.get(error_map, "param"),
           decline_code: Map.get(error_map, "decline_code"),
           charge: Map.get(error_map, "charge"),
@@ -159,6 +163,109 @@ defmodule LatticeStripe.Error do
   defp parse_type("api_error"), do: :api_error
   defp parse_type("idempotency_error"), do: :idempotency_error
   defp parse_type(_), do: :api_error
+
+  # Append fuzzy param suggestion to invalid_request_error messages (D-03).
+  # Only fires when type is :invalid_request_error and param is a non-nil binary.
+  # Guard clause + catch-all mirrors parse_type/1 multi-clause style.
+  defp maybe_enrich_message(:invalid_request_error, message, param)
+       when is_binary(param) and byte_size(param) > 0 do
+    case suggest_param(param) do
+      nil -> message
+      match -> message <> "; did you mean :#{match}?"
+    end
+  end
+
+  defp maybe_enrich_message(_type, message, _param), do: message
+
+  # Response-only fields that should never appear as param suggestions (D-02).
+  # These are read-only fields returned by Stripe, never sent as request params.
+  @response_only_fields ~w[id object created livemode url deleted has_more
+                           total_count next_page previous_page data]
+
+  # Find the closest matching field name for a param string (D-02).
+  # Uses String.jaro_distance/2 (Elixir stdlib) with 0.8 threshold and
+  # minimum length 4 to avoid noisy short-name matches.
+  defp suggest_param(param) do
+    leaf = extract_leaf_param(param)
+
+    if String.length(leaf) < 4 do
+      nil
+    else
+      candidates =
+        all_known_fields()
+        |> Enum.reject(&(&1 in @response_only_fields))
+
+      case Enum.max_by(candidates, &String.jaro_distance(leaf, &1), fn -> nil end) do
+        nil -> nil
+        best -> if String.jaro_distance(leaf, best) >= 0.8, do: best, else: nil
+      end
+    end
+  end
+
+  # Extract the leaf field name from bracket notation params.
+  # "card[nubmer]" -> "nubmer", "payment_method_type" -> "payment_method_type"
+  defp extract_leaf_param(param) do
+    case Regex.run(~r/\[(\w+)\]$/, param) do
+      [_, leaf] -> leaf
+      nil -> param
+    end
+  end
+
+  # All resource modules whose struct keys serve as the global param candidate pool.
+  # Struct keys mirror @known_fields in every resource module.
+  # When a new resource module is added to ObjectTypes, add it here too.
+  # (Phase 30 drift detection can automate this check.)
+  @all_resource_modules [
+    LatticeStripe.Account,
+    LatticeStripe.AccountLink,
+    LatticeStripe.Balance,
+    LatticeStripe.BalanceTransaction,
+    LatticeStripe.BankAccount,
+    LatticeStripe.Card,
+    LatticeStripe.Charge,
+    LatticeStripe.Checkout.Session,
+    LatticeStripe.Coupon,
+    LatticeStripe.Customer,
+    LatticeStripe.Event,
+    LatticeStripe.Invoice,
+    LatticeStripe.Invoice.LineItem,
+    LatticeStripe.InvoiceItem,
+    LatticeStripe.LoginLink,
+    LatticeStripe.PaymentIntent,
+    LatticeStripe.PaymentMethod,
+    LatticeStripe.Payout,
+    LatticeStripe.Price,
+    LatticeStripe.Product,
+    LatticeStripe.PromotionCode,
+    LatticeStripe.Refund,
+    LatticeStripe.SetupIntent,
+    LatticeStripe.Subscription,
+    LatticeStripe.SubscriptionItem,
+    LatticeStripe.SubscriptionSchedule,
+    LatticeStripe.Transfer,
+    LatticeStripe.TransferReversal,
+    LatticeStripe.Billing.Meter,
+    LatticeStripe.Billing.MeterEvent,
+    LatticeStripe.Billing.MeterEventAdjustment,
+    LatticeStripe.BillingPortal.Configuration,
+    LatticeStripe.BillingPortal.Session,
+    LatticeStripe.TestHelpers.TestClock
+  ]
+
+  # Build global param candidate list from all resource module struct keys at compile time.
+  # Struct keys mirror @known_fields in every resource module.
+  @all_resource_known_fields (
+    Enum.flat_map(@all_resource_modules, fn mod ->
+      mod.__struct__()
+      |> Map.keys()
+      |> Enum.reject(&(&1 == :__struct__))
+      |> Enum.map(&Atom.to_string/1)
+    end)
+    |> Enum.uniq()
+  )
+
+  # Collect all field names across all resource modules for fuzzy matching.
+  defp all_known_fields, do: @all_resource_known_fields
 end
 
 defimpl String.Chars, for: LatticeStripe.Error do
