@@ -22,7 +22,7 @@ defmodule LatticeStripe.Account.Capability do
   defstruct @known_fields ++ [extra: %{}]
 
   @type t :: %__MODULE__{
-          status: String.t() | nil,
+          status: atom() | String.t() | nil,
           requested: boolean() | nil,
           requested_at: integer() | nil,
           requirements: map() | nil,
@@ -38,7 +38,7 @@ defmodule LatticeStripe.Account.Capability do
     {known, extra} = Map.split(map, known_string_keys)
 
     struct(__MODULE__,
-      status: known["status"],
+      status: atomize_status(known["status"]),
       requested: known["requested"],
       requested_at: known["requested_at"],
       requirements: known["requirements"],
@@ -47,24 +47,21 @@ defmodule LatticeStripe.Account.Capability do
     )
   end
 
-  @known_statuses ~w(active inactive pending unrequested disabled)
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
 
-  # Ensure atoms pre-exist in the atom table so String.to_existing_atom/1 is safe.
-  # These literals compile the atoms into the BEAM module at load time, meaning
-  # @known_statuses (string list) can safely call String.to_existing_atom/1 for any
-  # of these five values — the atoms already exist before that call is reached.
-  @known_status_atoms [:active, :inactive, :pending, :unrequested, :disabled]
-  @doc false
-  def known_status_atoms, do: @known_status_atoms
+  defp atomize_status("active"),      do: :active
+  defp atomize_status("inactive"),    do: :inactive
+  defp atomize_status("pending"),     do: :pending
+  defp atomize_status("unrequested"), do: :unrequested
+  defp atomize_status("disabled"),    do: :disabled
+  defp atomize_status(other),         do: other
 
-  @doc """
-  Returns `status` as an atom from a known set, or `:unknown` for
-  forward compatibility. Never calls `String.to_atom/1` on user input.
-  """
+  @deprecated "Status is now automatically atomized in cast/1. Access capability.status directly."
   @spec status_atom(t() | String.t() | nil) :: atom()
-  # CONTEXT D-02 code example shorthand corrected: %__MODULE__{s} → %__MODULE__{status: s}
-  def status_atom(%__MODULE__{status: s}), do: status_atom(s)
+  def status_atom(%__MODULE__{status: s}), do: s
   def status_atom(nil), do: nil
-  def status_atom(s) when s in @known_statuses, do: String.to_existing_atom(s)
-  def status_atom(_), do: :unknown
+  def status_atom(s) when is_atom(s), do: s
+  def status_atom(s), do: atomize_status(s)
 end

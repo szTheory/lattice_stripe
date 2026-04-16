@@ -36,7 +36,7 @@ defmodule LatticeStripe.BalanceTransaction do
   """
 
   alias LatticeStripe.BalanceTransaction.FeeDetail
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   @known_fields ~w[
     id object amount available_on created currency description exchange_rate
@@ -81,9 +81,9 @@ defmodule LatticeStripe.BalanceTransaction do
           fee_details: [FeeDetail.t()] | nil,
           net: integer() | nil,
           reporting_category: String.t() | nil,
-          source: String.t() | map() | nil,
-          status: String.t() | nil,
-          type: String.t() | nil,
+          source: struct() | String.t() | nil,
+          status: atom() | String.t() | nil,
+          type: atom() | String.t() | nil,
           extra: map()
         }
 
@@ -175,29 +175,64 @@ defmodule LatticeStripe.BalanceTransaction do
   def from_map(nil), do: nil
 
   def from_map(map) when is_map(map) do
+    {known, extra} = Map.split(map, @known_fields)
+
     fee_details =
-      case map["fee_details"] do
+      case known["fee_details"] do
         list when is_list(list) -> Enum.map(list, &FeeDetail.cast/1)
         _ -> nil
       end
 
     %__MODULE__{
-      id: map["id"],
-      object: map["object"] || "balance_transaction",
-      amount: map["amount"],
-      available_on: map["available_on"],
-      created: map["created"],
-      currency: map["currency"],
-      description: map["description"],
-      exchange_rate: map["exchange_rate"],
-      fee: map["fee"],
+      id: known["id"],
+      object: known["object"] || "balance_transaction",
+      amount: known["amount"],
+      available_on: known["available_on"],
+      created: known["created"],
+      currency: known["currency"],
+      description: known["description"],
+      exchange_rate: known["exchange_rate"],
+      fee: known["fee"],
       fee_details: fee_details,
-      net: map["net"],
-      reporting_category: map["reporting_category"],
-      source: map["source"],
-      status: map["status"],
-      type: map["type"],
-      extra: Map.drop(map, @known_fields)
+      net: known["net"],
+      reporting_category: known["reporting_category"],
+      source:
+        if is_map(known["source"]),
+          do: ObjectTypes.maybe_deserialize(known["source"]),
+          else: known["source"],
+      status: atomize_status(known["status"]),
+      type: atomize_type(known["type"]),
+      extra: extra
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
+
+  defp atomize_status("available"), do: :available
+  defp atomize_status("pending"),   do: :pending
+  defp atomize_status(other),       do: other
+
+  defp atomize_type("charge"),                         do: :charge
+  defp atomize_type("refund"),                         do: :refund
+  defp atomize_type("adjustment"),                     do: :adjustment
+  defp atomize_type("application_fee"),                do: :application_fee
+  defp atomize_type("application_fee_refund"),         do: :application_fee_refund
+  defp atomize_type("transfer"),                       do: :transfer
+  defp atomize_type("payment"),                        do: :payment
+  defp atomize_type("payment_refund"),                 do: :payment_refund
+  defp atomize_type("payout"),                         do: :payout
+  defp atomize_type("payout_cancel"),                  do: :payout_cancel
+  defp atomize_type("payout_failure"),                 do: :payout_failure
+  defp atomize_type("stripe_fee"),                     do: :stripe_fee
+  defp atomize_type("network_cost"),                   do: :network_cost
+  defp atomize_type("issuing_authorization_hold"),     do: :issuing_authorization_hold
+  defp atomize_type("issuing_authorization_release"),  do: :issuing_authorization_release
+  defp atomize_type("issuing_dispute"),                do: :issuing_dispute
+  defp atomize_type("issuing_transaction"),            do: :issuing_transaction
+  defp atomize_type("topup"),                          do: :topup
+  defp atomize_type("topup_reversal"),                 do: :topup_reversal
+  defp atomize_type("connect_collection_transfer"),    do: :connect_collection_transfer
+  defp atomize_type(other),                            do: other
 end

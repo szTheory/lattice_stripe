@@ -9,7 +9,7 @@ defmodule LatticeStripe.Account.CapabilityTest do
       assert Capability.cast(nil) == nil
     end
 
-    test "casts fully-populated capability map" do
+    test "casts fully-populated capability map and auto-atomizes status" do
       result =
         Capability.cast(%{
           "status" => "active",
@@ -20,7 +20,7 @@ defmodule LatticeStripe.Account.CapabilityTest do
         })
 
       assert %Capability{} = result
-      assert result.status == "active"
+      assert result.status == :active
       assert result.requested == true
       assert result.requested_at == 1_700_000_000
       assert result.requirements == %{"currently_due" => []}
@@ -35,7 +35,7 @@ defmodule LatticeStripe.Account.CapabilityTest do
           "zzz_future" => "x"
         })
 
-      assert result.status == "active"
+      assert result.status == :active
       assert result.extra == %{"zzz_future" => "x"}
     end
 
@@ -44,77 +44,71 @@ defmodule LatticeStripe.Account.CapabilityTest do
       result = Capability.cast(cap)
 
       assert %Capability{} = result
-      assert result.status == "active"
+      assert result.status == :active
       assert result.requested == true
     end
   end
 
-  describe "status_atom/1" do
-    test "returns :active for status 'active'" do
-      assert Capability.status_atom(%Capability{status: "active"}) == :active
+  describe "cast/1 status atomization" do
+    test "atomizes 'active' to :active" do
+      cap = Capability.cast(%{"status" => "active"})
+      assert cap.status == :active
     end
 
-    test "returns :inactive for status 'inactive'" do
-      assert Capability.status_atom(%Capability{status: "inactive"}) == :inactive
+    test "atomizes 'inactive' to :inactive" do
+      cap = Capability.cast(%{"status" => "inactive"})
+      assert cap.status == :inactive
     end
 
-    test "returns :pending for status 'pending'" do
-      assert Capability.status_atom(%Capability{status: "pending"}) == :pending
+    test "atomizes 'pending' to :pending" do
+      cap = Capability.cast(%{"status" => "pending"})
+      assert cap.status == :pending
     end
 
-    test "returns :unrequested for status 'unrequested'" do
-      assert Capability.status_atom(%Capability{status: "unrequested"}) == :unrequested
+    test "atomizes 'unrequested' to :unrequested" do
+      cap = Capability.cast(%{"status" => "unrequested"})
+      assert cap.status == :unrequested
     end
 
-    test "returns :disabled for status 'disabled'" do
-      assert Capability.status_atom(%Capability{status: "disabled"}) == :disabled
+    test "atomizes 'disabled' to :disabled" do
+      cap = Capability.cast(%{"status" => "disabled"})
+      assert cap.status == :disabled
     end
 
-    test "returns nil for nil status" do
-      assert Capability.status_atom(%Capability{status: nil}) == nil
+    test "passes through nil status" do
+      cap = Capability.cast(%{"status" => nil})
+      assert cap.status == nil
     end
 
-    test "returns nil for nil argument" do
-      assert Capability.status_atom(nil) == nil
-    end
-
-    test "accepts bare string 'active'" do
-      assert Capability.status_atom("active") == :active
-    end
-
-    test "fixture round-trip: card_payments status_atom returns :active" do
-      cap = AccountFixtures.basic()["capabilities"]["card_payments"] |> Capability.cast()
-      assert Capability.status_atom(cap) == :active
+    test "passes through unknown future status string" do
+      cap = Capability.cast(%{"status" => "zzz_future_2030"})
+      assert cap.status == "zzz_future_2030"
     end
   end
 
-  describe "status_atom/1 safety" do
-    test "forward-compatible unknown status returns :unknown without raising" do
-      assert Capability.status_atom(%Capability{
-               status: "zzz_totally_new_status_from_stripe_2030"
-             }) == :unknown
+  describe "status_atom/1 (deprecated — backward compat)" do
+    test "struct with atom status returns atom directly (via apply)" do
+      cap = Capability.cast(%{"status" => "active"})
+      assert apply(Capability, :status_atom, [cap]) == :active
     end
 
-    test "random unknown status returns :unknown without raising or leaking atoms" do
-      unknown_status = "zzz_never_before_seen_#{:rand.uniform(1_000_000)}"
-      result = Capability.status_atom(%Capability{status: unknown_status})
-      assert result == :unknown
+    test "struct with inactive status returns :inactive (via apply)" do
+      cap = Capability.cast(%{"status" => "inactive"})
+      assert apply(Capability, :status_atom, [cap]) == :inactive
     end
 
-    test "unknown bare string returns :unknown without raising" do
-      assert Capability.status_atom("zzz_unknown_status") == :unknown
+    test "nil returns nil (via apply)" do
+      assert apply(Capability, :status_atom, [nil]) == nil
     end
 
-    test "status_atom never calls String.to_atom on unknown input (safe fallthrough)" do
-      # If this test runs without raising ArgumentError, the atom-leak guard is working.
-      # String.to_existing_atom raises only if we call it on an unknown string,
-      # but the @known_statuses guard prevents reaching that call.
-      statuses = ["active", "inactive", "pending", "unrequested", "disabled", "zzz_new", nil]
+    test "bare atom :active returns :active (via apply)" do
+      assert apply(Capability, :status_atom, [:active]) == :active
+    end
 
-      for s <- statuses do
-        result = Capability.status_atom(%Capability{status: s})
-        assert result in [:active, :inactive, :pending, :unrequested, :disabled, :unknown, nil]
-      end
+    test "unknown string passthrough (via apply)" do
+      # Now returns the string itself (not :unknown) since atomize_status/1 has no :unknown clause
+      result = apply(Capability, :status_atom, ["zzz_unknown"])
+      assert result == "zzz_unknown"
     end
   end
 end
