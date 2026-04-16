@@ -88,7 +88,7 @@ defmodule LatticeStripe.Payout do
   - [Reverse a payout](https://docs.stripe.com/api/payouts/reverse)
   """
 
-  alias LatticeStripe.{Client, Error, List, Payout.TraceId, Request, Resource, Response}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Payout.TraceId, Request, Resource, Response}
 
   # Known top-level fields from the Stripe Payout object (string sigil — matches
   # Jason's default string-key output).
@@ -144,25 +144,25 @@ defmodule LatticeStripe.Payout do
           application_fee_amount: integer() | nil,
           arrival_date: integer() | nil,
           automatic: boolean() | nil,
-          balance_transaction: String.t() | map() | nil,
+          balance_transaction: LatticeStripe.BalanceTransaction.t() | String.t() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
           description: String.t() | nil,
-          destination: String.t() | map() | nil,
-          failure_balance_transaction: String.t() | map() | nil,
+          destination: LatticeStripe.BankAccount.t() | LatticeStripe.Card.t() | String.t() | nil,
+          failure_balance_transaction: LatticeStripe.BalanceTransaction.t() | String.t() | nil,
           failure_code: String.t() | nil,
           failure_message: String.t() | nil,
           livemode: boolean() | nil,
           metadata: map() | nil,
-          method: String.t() | nil,
+          method: atom() | String.t() | nil,
           original_payout: String.t() | nil,
           reconciliation_status: String.t() | nil,
           reversed_by: String.t() | nil,
           source_type: String.t() | nil,
           statement_descriptor: String.t() | nil,
-          status: String.t() | nil,
+          status: atom() | String.t() | nil,
           trace_id: TraceId.t() | nil,
-          type: String.t() | nil,
+          type: atom() | String.t() | nil,
           extra: map()
         }
 
@@ -392,34 +392,64 @@ defmodule LatticeStripe.Payout do
   def from_map(nil), do: nil
 
   def from_map(map) when is_map(map) do
+    {known, extra} = Map.split(map, @known_fields)
+
     %__MODULE__{
-      id: map["id"],
-      object: map["object"] || "payout",
-      amount: map["amount"],
-      application_fee: map["application_fee"],
-      application_fee_amount: map["application_fee_amount"],
-      arrival_date: map["arrival_date"],
-      automatic: map["automatic"],
-      balance_transaction: map["balance_transaction"],
-      created: map["created"],
-      currency: map["currency"],
-      description: map["description"],
-      destination: map["destination"],
-      failure_balance_transaction: map["failure_balance_transaction"],
-      failure_code: map["failure_code"],
-      failure_message: map["failure_message"],
-      livemode: map["livemode"],
-      metadata: map["metadata"],
-      method: map["method"],
-      original_payout: map["original_payout"],
-      reconciliation_status: map["reconciliation_status"],
-      reversed_by: map["reversed_by"],
-      source_type: map["source_type"],
-      statement_descriptor: map["statement_descriptor"],
-      status: map["status"],
-      trace_id: TraceId.cast(map["trace_id"]),
-      type: map["type"],
-      extra: Map.drop(map, @known_fields)
+      id: known["id"],
+      object: known["object"] || "payout",
+      amount: known["amount"],
+      application_fee: known["application_fee"],
+      application_fee_amount: known["application_fee_amount"],
+      arrival_date: known["arrival_date"],
+      automatic: known["automatic"],
+      balance_transaction:
+        if is_map(known["balance_transaction"]),
+          do: ObjectTypes.maybe_deserialize(known["balance_transaction"]),
+          else: known["balance_transaction"],
+      created: known["created"],
+      currency: known["currency"],
+      description: known["description"],
+      destination:
+        if is_map(known["destination"]),
+          do: ObjectTypes.maybe_deserialize(known["destination"]),
+          else: known["destination"],
+      failure_balance_transaction:
+        if is_map(known["failure_balance_transaction"]),
+          do: ObjectTypes.maybe_deserialize(known["failure_balance_transaction"]),
+          else: known["failure_balance_transaction"],
+      failure_code: known["failure_code"],
+      failure_message: known["failure_message"],
+      livemode: known["livemode"],
+      metadata: known["metadata"],
+      method: atomize_method(known["method"]),
+      original_payout: known["original_payout"],
+      reconciliation_status: known["reconciliation_status"],
+      reversed_by: known["reversed_by"],
+      source_type: known["source_type"],
+      statement_descriptor: known["statement_descriptor"],
+      status: atomize_status(known["status"]),
+      trace_id: TraceId.cast(known["trace_id"]),
+      type: atomize_type(known["type"]),
+      extra: extra
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
+
+  defp atomize_status("paid"),       do: :paid
+  defp atomize_status("pending"),    do: :pending
+  defp atomize_status("in_transit"), do: :in_transit
+  defp atomize_status("canceled"),   do: :canceled
+  defp atomize_status("failed"),     do: :failed
+  defp atomize_status(other),        do: other
+
+  defp atomize_type("bank_account"), do: :bank_account
+  defp atomize_type("card"),         do: :card
+  defp atomize_type(other),          do: other
+
+  defp atomize_method("standard"), do: :standard
+  defp atomize_method("instant"),  do: :instant
+  defp atomize_method(other),      do: other
 end

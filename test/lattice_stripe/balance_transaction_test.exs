@@ -191,15 +191,93 @@ defmodule LatticeStripe.BalanceTransactionTest do
       assert bt.source == "ch_test1234567890abc"
     end
 
-    test "source is a map when expanded, round-tripping without crashing" do
+    test "source is deserialized to typed struct when expanded with known object type" do
       bt = BalanceTransaction.from_map(with_source_expanded())
-      assert %{"id" => "ch_test1234567890abc", "object" => "charge"} = bt.source
+      assert %LatticeStripe.Charge{id: "ch_test1234567890abc"} = bt.source
     end
   end
 
   describe "from_map/1 nil" do
     test "nil returns nil" do
       assert BalanceTransaction.from_map(nil) == nil
+    end
+  end
+
+  describe "from_map/1 status atomization" do
+    test "atomizes 'available' to :available" do
+      bt = BalanceTransaction.from_map(basic(%{"status" => "available"}))
+      assert bt.status == :available
+    end
+
+    test "atomizes 'pending' to :pending" do
+      bt = BalanceTransaction.from_map(basic(%{"status" => "pending"}))
+      assert bt.status == :pending
+    end
+
+    test "passes through unknown status string" do
+      bt = BalanceTransaction.from_map(basic(%{"status" => "future_status"}))
+      assert bt.status == "future_status"
+    end
+
+    test "passes through nil status" do
+      bt = BalanceTransaction.from_map(basic(%{"status" => nil}))
+      assert bt.status == nil
+    end
+  end
+
+  describe "from_map/1 type atomization" do
+    test "atomizes 'charge' to :charge" do
+      bt = BalanceTransaction.from_map(basic(%{"type" => "charge"}))
+      assert bt.type == :charge
+    end
+
+    test "atomizes 'refund' to :refund" do
+      bt = BalanceTransaction.from_map(basic(%{"type" => "refund"}))
+      assert bt.type == :refund
+    end
+
+    test "atomizes 'payout' to :payout" do
+      bt = BalanceTransaction.from_map(basic(%{"type" => "payout"}))
+      assert bt.type == :payout
+    end
+
+    test "atomizes 'stripe_fee' to :stripe_fee" do
+      bt = BalanceTransaction.from_map(basic(%{"type" => "stripe_fee"}))
+      assert bt.type == :stripe_fee
+    end
+
+    test "atomizes 'application_fee' to :application_fee" do
+      bt = BalanceTransaction.from_map(basic(%{"type" => "application_fee"}))
+      assert bt.type == :application_fee
+    end
+
+    test "atomizes 'transfer' to :transfer" do
+      bt = BalanceTransaction.from_map(basic(%{"type" => "transfer"}))
+      assert bt.type == :transfer
+    end
+
+    test "passes through unknown type string" do
+      bt = BalanceTransaction.from_map(basic(%{"type" => "future_type"}))
+      assert bt.type == "future_type"
+    end
+  end
+
+  describe "from_map/1 source expand guard" do
+    test "source stays as string ID when not expanded" do
+      bt = BalanceTransaction.from_map(basic(%{"source" => "ch_abc"}))
+      assert bt.source == "ch_abc"
+    end
+
+    test "source with unknown object type stays as raw map" do
+      bt =
+        BalanceTransaction.from_map(
+          basic(%{
+            "source" => %{"id" => "unk_abc", "object" => "unknown_future_type"}
+          })
+        )
+
+      assert is_map(bt.source)
+      assert bt.source["id"] == "unk_abc"
     end
   end
 
