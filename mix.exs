@@ -90,7 +90,13 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.BillingPortal.Session.FlowData.AfterCompletion,
             LatticeStripe.BillingPortal.Session.FlowData.SubscriptionCancel,
             LatticeStripe.BillingPortal.Session.FlowData.SubscriptionUpdate,
-            LatticeStripe.BillingPortal.Session.FlowData.SubscriptionUpdateConfirm
+            LatticeStripe.BillingPortal.Session.FlowData.SubscriptionUpdateConfirm,
+            LatticeStripe.BillingPortal.Configuration,
+            LatticeStripe.BillingPortal.Configuration.Features,
+            LatticeStripe.BillingPortal.Configuration.Features.CustomerUpdate,
+            LatticeStripe.BillingPortal.Configuration.Features.PaymentMethodUpdate,
+            LatticeStripe.BillingPortal.Configuration.Features.SubscriptionCancel,
+            LatticeStripe.BillingPortal.Configuration.Features.SubscriptionUpdate
           ],
           "Billing Metering": [
             LatticeStripe.Billing.Meter,

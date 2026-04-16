@@ -28,8 +28,9 @@ defmodule LatticeStripe.ObjectTypes do
     "subscription_schedule"    => LatticeStripe.SubscriptionSchedule,
     "transfer"                 => LatticeStripe.Transfer,
     "transfer_reversal"        => LatticeStripe.TransferReversal,
-    "billing.meter"            => LatticeStripe.Billing.Meter,
-    "billing_portal.session"   => LatticeStripe.BillingPortal.Session,
+    "billing.meter"                => LatticeStripe.Billing.Meter,
+    "billing_portal.configuration" => LatticeStripe.BillingPortal.Configuration,
+    "billing_portal.session"       => LatticeStripe.BillingPortal.Session,
     "checkout.session"         => LatticeStripe.Checkout.Session,
     "test_helpers.test_clock"  => LatticeStripe.TestHelpers.TestClock,
     "line_item"                => LatticeStripe.Invoice.LineItem

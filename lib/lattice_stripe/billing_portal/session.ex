@@ -21,9 +21,9 @@ defmodule LatticeStripe.BillingPortal.Session do
   - `"flow_data"` — Deep-links the customer into a specific flow instead of the
     default portal homepage. See `LatticeStripe.BillingPortal.Session.FlowData`
     for the full schema and per-flow required sub-fields.
-  - `"configuration"` — A `bpc_*` Billing Portal configuration ID. In v1.1,
-    portal configuration is managed via the Stripe Dashboard;
-    `LatticeStripe.BillingPortal.Configuration` is planned for v1.2+.
+  - `"configuration"` — A `bpc_*` Billing Portal configuration ID.
+    See `LatticeStripe.BillingPortal.Configuration` for portal configuration
+    management (create, retrieve, update, list).
   - `"locale"` — Override the portal language (e.g. `"en"`, `"fr"`, `"auto"`).
   - `"on_behalf_of"` — Connect account ID when creating a portal session for a
     connected account. See the `stripe_account:` opt for per-request Connect routing.
@@ -96,9 +96,10 @@ defmodule LatticeStripe.BillingPortal.Session do
   ## Portal configuration
 
   Portal configuration (branding, allowed features, default behavior) is managed
-  via the Stripe Dashboard in v1.1. `LatticeStripe.BillingPortal.Configuration`
-  is planned for v1.2+. Pass a `bpc_*` configuration ID in `params["configuration"]`
-  to select a specific portal configuration at session creation time.
+  via `LatticeStripe.BillingPortal.Configuration` (create, retrieve, update, list).
+  Pass a `bpc_*` configuration ID in `params["configuration"]` to select a specific
+  portal configuration at session creation time. Pass `expand: ["configuration"]` to
+  receive a `%Configuration{}` struct instead of a string ID in the session response.
 
   ## Stripe API Reference
 
@@ -108,7 +109,7 @@ defmodule LatticeStripe.BillingPortal.Session do
 
   alias LatticeStripe.BillingPortal.Guards
   alias LatticeStripe.BillingPortal.Session.FlowData
-  alias LatticeStripe.{Client, Request, Resource}
+  alias LatticeStripe.{Client, ObjectTypes, Request, Resource}
 
   @known_fields ~w(id object customer url return_url created livemode locale configuration on_behalf_of flow)
 
@@ -121,7 +122,7 @@ defmodule LatticeStripe.BillingPortal.Session do
           created: integer() | nil,
           livemode: boolean() | nil,
           locale: String.t() | nil,
-          configuration: String.t() | nil,
+          configuration: LatticeStripe.BillingPortal.Configuration.t() | String.t() | nil,
           on_behalf_of: String.t() | nil,
           flow: FlowData.t() | nil,
           extra: map()
@@ -239,7 +240,10 @@ defmodule LatticeStripe.BillingPortal.Session do
       created: map["created"],
       livemode: map["livemode"],
       locale: map["locale"],
-      configuration: map["configuration"],
+      configuration:
+        (if is_map(map["configuration"]),
+           do: ObjectTypes.maybe_deserialize(map["configuration"]),
+           else: map["configuration"]),
       on_behalf_of: map["on_behalf_of"],
       flow: FlowData.from_map(map["flow"]),
       extra: Map.drop(map, @known_fields)
