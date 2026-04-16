@@ -8,25 +8,40 @@ A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe aims 
 
 Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated by v1.0 shipping with a downstream consumer (Accrue) already building on top.
 
-## Current Milestone: v1.1 Accrue unblockers (metering + portal)
+## Current Milestone: v1.2 Production Hardening & DX
 
-**Goal:** Unblock Accrue Phase 4 by adding three Stripe resources: `Billing.Meter`, `Billing.MeterEvent` (+ `MeterEventAdjustment`), and `BillingPortal.Session`.
+**Goal:** Make LatticeStripe the SDK that production teams recommend to each other — polish DX, add performance/reliability guidance, and complete deferred feature gaps.
 
 **Target features:**
-- `LatticeStripe.Billing.Meter` CRUDL + `deactivate/reactivate` verbs + 4 nested typed structs
-- `LatticeStripe.Billing.MeterEvent.create/3` + `MeterEventAdjustment.create/3` — fire-and-forget usage reporting
-- `LatticeStripe.BillingPortal.Session.create/3` — create-only with `FlowData` nested struct
-- New `guides/metering.md` + extended `guides/customer-portal.md`
 
-**Scope & constraints:** Locked decisions D1-D5 in `.planning/v1.1-accrue-context.md` — bundled metering phase, `MeterEventAdjustment` included with MeterEvent, `meter_event_stream` and `BillingPortal.Configuration` deferred to v1.2+. **No release phase** — post-1.0 release-please config makes 1.0→1.1 zero-touch; do NOT add "Phase 22" by analogy with Phase 19.
+*Wave 1 — High-impact:*
+- Expand deserialization (`expand: ["customer"]` returns `%Customer{}`, dot-path support, status atomization audit)
+- Performance guide + Finch pool tuning docs (`guides/performance.md`)
+- Circuit breaker pattern (custom `RetryStrategy` or `:fuse` integration)
 
-## Current State (post-v1.0)
+*Wave 2 — Focused polish:*
+- Richer error context (fuzzy param suggestions, contextual hints)
+- Request batching / concurrent helpers (`Task.async_stream`-based parallel requests)
+- Timeout tuning per-operation (resource-level defaults)
+- Status field atomization audit (sweep all resources for string status fields)
+- Rate-limit awareness (track `RateLimit-*` headers, expose via telemetry)
+- OpenTelemetry integration guide
 
-**Shipped:** v1.0.0 live on `hex.pm/packages/lattice_stripe`. 17 phases complete (1-11, 14-19; phases 12/13 were intentionally obliterated and rebuilt in Phase 14). ~47 plans executed. Nine-group ExDoc `groups_for_modules` layout, 16 guides, `api_stability.md` semver contract published, `test/readme_test.exs` quickstart harness, `CHANGELOG.md` with v1.0.0 Highlights, release pipeline fully automated via release-please + Hex publish.
+*Wave 3 — Feature completion:*
+- BillingPortal.Configuration CRUDL (deferred from v1.1)
+- `meter_event_stream` endpoint (deferred from v1.1)
+- Changeset-style param builders (fluent builders for complex nested params)
+- Stripe API changelog tracking (CI mechanism for field/resource drift detection)
+- LiveBook notebook (interactive SDK exploration)
+- Connection warm-up helper (pool pre-establishment on app start)
 
-**Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phase 3 (Core Subscription Lifecycle) is fully unblocked by LatticeStripe 1.0. Accrue Phase 4 (Advanced Billing + Checkout/Portal) drives LatticeStripe v1.1 scope.
+## Current State (post-v1.1)
 
-**Release mechanics:** Post-1.0 cleanup (PR #8) removed `release-as` and flipped `bump-minor-pre-major` to `false`. Normal semver kicks in automatically — a `feat:` commit on main auto-bumps 1.0.0 → 1.1.0 via release-please, tag + Hex publish run automatically. Zero-touch releases going forward.
+**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 19 phases complete (1-11, 14-21). ~58 plans executed. Billing Metering (Meter, MeterEvent, MeterEventAdjustment) and Customer Portal (BillingPortal.Session) shipped. 1488 tests / 0 failures. Zero-touch release via release-please.
+
+**Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
+
+**Release mechanics:** Zero-touch semver via release-please. `feat:` commits auto-bump minor, `fix:` auto-bump patch. Tag + Hex publish automated.
 
 ## Requirements
 
@@ -94,26 +109,43 @@ All foundation, payment, webhook, telemetry, testing, docs, CI/CD, Billing, and 
 - ✓ Connect guide split into overview + accounts + money-movement — v1.0
 - ✓ Release Please 1.0.0 cut with CHANGELOG Highlights narrative — v1.0
 
-### Active (v1.1 — Accrue unblockers)
+### Validated (v1.1 — Accrue unblockers)
 
-Scope locked in `.planning/v1.1-accrue-context.md`. Two phases, no release phase (zero-touch semver).
+**Billing Metering (Phase 20)**
+- ✓ `LatticeStripe.Billing.Meter` CRUDL + `deactivate/3` + `reactivate/3` verbs + 4 nested typed structs — v1.1
+- ✓ `LatticeStripe.Billing.MeterEvent.create/3` — fire-and-forget with `identifier:` idempotency — v1.1
+- ✓ `LatticeStripe.Billing.MeterEventAdjustment.create/3` — dunning-style corrections — v1.1
+- ✓ `guides/metering.md` — v1.1
 
-**Phase 20 — Billing metering (hot path)**
-- [ ] `LatticeStripe.Billing.Meter` CRUDL + `deactivate/3` + `reactivate/3` verbs (no delete, no search)
-- [ ] `LatticeStripe.Billing.Meter.DefaultAggregation` / `CustomerMapping` / `ValueSettings` / `StatusTransitions` nested typed structs
-- [ ] `LatticeStripe.Billing.MeterEvent.create/3` — fire-and-forget usage reporting with `identifier:` idempotency
-- [ ] `LatticeStripe.Billing.MeterEventAdjustment.create/3` — dunning-style corrections for over-reports
-- [ ] `guides/metering.md` with usage-reporting idiom, reconciliation notes, webhook handoff pointers
+**Customer Portal (Phase 21)**
+- ✓ `LatticeStripe.BillingPortal.Session.create/3` with `FlowData` nested struct — v1.1
+- ✓ `guides/customer-portal.md` — v1.1
 
-**Phase 21 — Customer portal**
-- [ ] `LatticeStripe.BillingPortal.Session.create/3` — create-only (no retrieve/list/update/delete), required `customer`, optional `return_url` / `configuration` / `locale` / `flow_data` / `on_behalf_of`
-- [ ] `LatticeStripe.BillingPortal.Session.FlowData` nested struct (for deep-link flows: `subscription_cancel`, `payment_method_update`)
-- [ ] `guides/customer-portal.md` extension with Accrue-style usage example
+### Active (v1.2 — Production Hardening & DX)
 
-**Post-1.0 carry-overs** (deferred from original v1.0 charter)
-- [ ] Expand-deserialization into typed structs (EXPD-02): currently `expand:` returns string IDs; deserializing into `%Resource{}` is deferred to v1.2+
-- [ ] Nested expand dot-paths (EXPD-03): `expand: ["data.customer"]` parser support deferred to v1.2+
-- [ ] Status-field atomization audit (EXPD-05): most resources already use atoms; sweep for any string-typed status fields deferred to v1.2+
+**Expand deserialization (EXPD carry-overs from v1.0)**
+- [ ] Expand-deserialization into typed structs (EXPD-02): `expand: ["customer"]` returns `%Customer{}` instead of string ID
+- [ ] Nested expand dot-paths (EXPD-03): `expand: ["data.customer"]` parser support
+- [ ] Status-field atomization audit (EXPD-05): sweep all resources for string-typed status fields, add `_atom` converters
+
+**Performance & reliability**
+- [ ] Performance guide + Finch pool tuning (`guides/performance.md`) with production pool sizing, supervision tree examples, warm-up patterns
+- [ ] Circuit breaker pattern — custom `RetryStrategy` example or `:fuse` integration for cascading failure prevention
+- [ ] Connection warm-up helper — health-check / pool pre-establishment function for app start
+- [ ] Timeout tuning per-operation — resource-level timeout defaults (search/list get longer timeouts than creates)
+- [ ] Rate-limit awareness — track `RateLimit-*` response headers, expose via telemetry metadata
+
+**Developer experience**
+- [ ] Richer error context — fuzzy param name suggestions in `invalid_request_error` ("Did you mean `:payment_method_types`?")
+- [ ] Request batching / concurrent helpers — `Task.async_stream`-based parallel request ergonomics
+- [ ] Changeset-style param builders — optional fluent builders for complex nested params (SubscriptionSchedule phases, BillingPortal flows)
+- [ ] OpenTelemetry integration guide — connect telemetry events to `opentelemetry_api` with worked examples
+- [ ] LiveBook notebook — interactive SDK exploration for onboarding
+- [ ] Stripe API changelog tracking — CI mechanism to detect when Stripe adds new fields/resources
+
+**Feature completion (deferred from v1.1)**
+- [ ] `BillingPortal.Configuration` CRUDL — portal customization (branding, features, business info)
+- [ ] `/v1/billing/meter_event_stream` — high-throughput streaming variant for metering
 
 ### Out of Scope
 
@@ -124,15 +156,17 @@ Scope locked in `.planning/v1.1-accrue-context.md`. Two phases, no release phase
 - Mobile/frontend SDK — backend only
 - Thin event support (v2 webhook style) — v1 snapshot events ship; v2 thin events deferred to a future minor
 
-**Deferred to v1.2+**:
-- `/v1/billing/meter_event_stream` (high-throughput streaming variant) — Accrue doesn't need it, different semantics than fire-and-forget `meter_events`
-- `BillingPortal.Configuration` CRUDL — Accrue manages portal config via Stripe dashboard for v1.1; full CRUDL with deep UX structs triples v1.1 scope
-- Specialist families (Tax, Identity, Treasury, Issuing, Terminal) — not on Accrue's roadmap
-- Full expand-deserialization story (EXPD-02/03/05)
+**Deferred to v1.3+**:
+- Specialist families (Tax, Identity, Treasury, Issuing, Terminal) — not on Accrue's roadmap, large surface area
 
-**No longer out of scope** (shipped in v1.0):
-- ~~Billing (subscriptions, invoices, products, prices) — future milestone~~ → shipped in Phases 14-16
-- ~~Connect (platform accounts, transfers, payouts) — future milestone~~ → shipped in Phases 17-18
+**No longer deferred** (moved to v1.2 Active):
+- ~~`/v1/billing/meter_event_stream`~~ → v1.2 Active
+- ~~`BillingPortal.Configuration` CRUDL~~ → v1.2 Active
+- ~~Full expand-deserialization story (EXPD-02/03/05)~~ → v1.2 Active
+
+**No longer out of scope** (shipped):
+- ~~Billing (subscriptions, invoices, products, prices)~~ → shipped in Phases 14-16 (v1.0)
+- ~~Connect (platform accounts, transfers, payouts)~~ → shipped in Phases 17-18 (v1.0)
 
 ## Context
 
@@ -213,4 +247,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Move shipped requirements to Validated, add next-milestone requirements to Active
 
 ---
-*Last updated: 2026-04-13 — v1.1 milestone (Accrue unblockers) started. v1.0.0 live on Hex.pm.*
+*Last updated: 2026-04-16 — v1.2 milestone (Production Hardening & DX) started. v1.1.0 live on Hex.pm.*
