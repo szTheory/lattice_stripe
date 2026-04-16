@@ -23,6 +23,7 @@ defmodule LatticeStripe.MixProject do
         extras: [
           "guides/getting-started.md",
           "guides/client-configuration.md",
+          "guides/performance.md",
           "guides/payments.md",
           "guides/checkout.md",
           "guides/invoices.md",
