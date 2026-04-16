@@ -59,6 +59,7 @@ defmodule LatticeStripe.Client do
     json_codec: LatticeStripe.Json.Jason,
     retry_strategy: LatticeStripe.RetryStrategy.Default,
     timeout: 30_000,
+    operation_timeouts: nil,
     max_retries: 2,
     telemetry_enabled: true,
     require_explicit_proration: false
@@ -79,6 +80,7 @@ defmodule LatticeStripe.Client do
   - `json_codec` - JSON codec module implementing `LatticeStripe.Json`
   - `retry_strategy` - Retry strategy module implementing `LatticeStripe.RetryStrategy`
   - `timeout` - Default request timeout in milliseconds (default: `30_000`)
+  - `operation_timeouts` - Per-operation timeout overrides in milliseconds (keys: `:list`, `:search`, `:create`, `:retrieve`, `:update`, `:delete`), or `nil` to use `timeout` for all operations
   - `max_retries` - Max retry attempts after initial failure (default: `2`)
   - `telemetry_enabled` - Whether to emit telemetry events (default: `true`)
   - `require_explicit_proration` - When `true`, proration-sensitive operations require explicit `proration_behavior` param (default: `false`)
@@ -93,6 +95,7 @@ defmodule LatticeStripe.Client do
           json_codec: module(),
           retry_strategy: module(),
           timeout: pos_integer(),
+          operation_timeouts: %{atom() => pos_integer()} | nil,
           max_retries: non_neg_integer(),
           telemetry_enabled: boolean(),
           require_explicit_proration: boolean()
@@ -174,7 +177,21 @@ defmodule LatticeStripe.Client do
   def request(%__MODULE__{} = client, %Request{} = req) do
     effective_api_key = Keyword.get(req.opts, :api_key, client.api_key)
     effective_api_version = Keyword.get(req.opts, :stripe_version, client.api_version)
-    effective_timeout = Keyword.get(req.opts, :timeout, client.timeout)
+    effective_timeout =
+      case Keyword.fetch(req.opts, :timeout) do
+        {:ok, t} ->
+          t
+
+        :error ->
+          case client.operation_timeouts do
+            %{} = timeouts ->
+              op_type = classify_operation(req)
+              Map.get(timeouts, op_type, client.timeout)
+
+            nil ->
+              client.timeout
+          end
+      end
     effective_stripe_account = Keyword.get(req.opts, :stripe_account, client.stripe_account)
     effective_max_retries = Keyword.get(req.opts, :max_retries, client.max_retries)
     expand = Keyword.get(req.opts, :expand, [])
@@ -551,6 +568,27 @@ defmodule LatticeStripe.Client do
     |> Enum.find_value(fn {name, value} ->
       if String.downcase(name) == "request-id", do: value
     end)
+  end
+
+  # Classify a request into an operation atom for per-operation timeout lookup.
+  # Mirrors the URL parsing logic from Telemetry.parse_resource_and_operation/2 but
+  # returns atoms per D-02. Only called when operation_timeouts is non-nil (hot path opt).
+  defp classify_operation(%Request{method: method, path: path}) do
+    segments =
+      path
+      |> String.replace_prefix("/v1/", "")
+      |> String.replace_prefix("/v1", "")
+      |> String.split("/", trim: true)
+
+    case {method, segments} do
+      {:get, [_resource]} -> :list
+      {:get, [_resource, "search"]} -> :search
+      {:get, [_resource, _id]} -> :retrieve
+      {:post, [_resource]} -> :create
+      {:post, [_resource, _id]} -> :update
+      {:delete, [_resource, _id]} -> :delete
+      _ -> :other
+    end
   end
 
   # Parse the Stripe-Should-Retry header into a boolean or nil (D-09).

@@ -986,6 +986,99 @@ defmodule LatticeStripe.ClientTest do
     end
   end
 
+  describe "operation_timeouts" do
+    # Test: nil operation_timeouts uses client.timeout for all operations
+    test "nil operation_timeouts uses client.timeout for all operations" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        assert req_map.opts[:timeout] == 30_000
+        ok_response()
+      end)
+
+      assert {:ok, _} = Client.request(client, get_request("/v1/customers"))
+    end
+
+    # Test: list operation uses operation_timeouts[:list]
+    test "list operation uses operation_timeouts[:list]" do
+      client = test_client(operation_timeouts: %{list: 60_000})
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        assert req_map.opts[:timeout] == 60_000
+        ok_response()
+      end)
+
+      req = %Request{method: :get, path: "/v1/customers", params: %{}, opts: []}
+      assert {:ok, _} = Client.request(client, req)
+    end
+
+    # Test: retrieve operation falls back to client.timeout when not in operation_timeouts
+    test "retrieve operation falls back to client.timeout when not in operation_timeouts" do
+      client = test_client(operation_timeouts: %{list: 60_000})
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        assert req_map.opts[:timeout] == 30_000
+        ok_response()
+      end)
+
+      req = %Request{method: :get, path: "/v1/customers/cus_123", params: %{}, opts: []}
+      assert {:ok, _} = Client.request(client, req)
+    end
+
+    # Test: per-request opts[:timeout] overrides operation_timeouts
+    test "per-request opts[:timeout] overrides operation_timeouts" do
+      client = test_client(operation_timeouts: %{list: 60_000})
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        assert req_map.opts[:timeout] == 5_000
+        ok_response()
+      end)
+
+      req = %Request{method: :get, path: "/v1/customers", params: %{}, opts: [timeout: 5_000]}
+      assert {:ok, _} = Client.request(client, req)
+    end
+
+    # Test: search operation classified from GET /v1/{resource}/search
+    test "search operation classified from GET /v1/{resource}/search" do
+      client = test_client(operation_timeouts: %{search: 45_000})
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        assert req_map.opts[:timeout] == 45_000
+        ok_response()
+      end)
+
+      req = %Request{method: :get, path: "/v1/customers/search", params: %{}, opts: []}
+      assert {:ok, _} = Client.request(client, req)
+    end
+
+    # Test: create operation classified from POST /v1/{resource}
+    test "create operation classified from POST /v1/{resource}" do
+      client = test_client(operation_timeouts: %{create: 15_000})
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        assert req_map.opts[:timeout] == 15_000
+        ok_response()
+      end)
+
+      req = %Request{method: :post, path: "/v1/customers", params: %{}, opts: []}
+      assert {:ok, _} = Client.request(client, req)
+    end
+
+    # Test: edge case path falls through to client.timeout
+    test "edge case path falls through to client.timeout" do
+      client = test_client(operation_timeouts: %{list: 60_000})
+
+      expect(LatticeStripe.MockTransport, :request, fn req_map ->
+        assert req_map.opts[:timeout] == 30_000
+        ok_response()
+      end)
+
+      # POST /v1/charges/ch_123/capture => :other (3 segments, no match)
+      req = %Request{method: :post, path: "/v1/charges/ch_123/capture", params: %{}, opts: []}
+      assert {:ok, _} = Client.request(client, req)
+    end
+  end
+
   describe "request/2 Stripe-Should-Retry" do
     # Test 51: Stripe-Should-Retry: true on 400 causes retry
     test "Stripe-Should-Retry: true on 400 causes retry" do

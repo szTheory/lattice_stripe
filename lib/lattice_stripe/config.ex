@@ -71,6 +71,20 @@ defmodule LatticeStripe.Config do
               default: 30_000,
               doc: "Default request timeout in milliseconds."
             ],
+            operation_timeouts: [
+              type: {:or, [{:map, :atom, :pos_integer}, nil]},
+              default: nil,
+              doc: """
+              Per-operation timeout overrides in milliseconds. Keys: `:list`, `:search`,
+              `:create`, `:retrieve`, `:update`, `:delete`.
+
+              When `nil` (default), all operations use the `timeout` value. When set,
+              operations matching a key use the specified timeout; unmatched operations
+              fall back to `timeout`.
+
+                  operation_timeouts: %{list: 60_000, search: 45_000}
+              """
+            ],
             max_retries: [
               type: :non_neg_integer,
               default: 2,
