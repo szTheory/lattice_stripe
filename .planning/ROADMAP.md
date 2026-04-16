@@ -123,10 +123,10 @@ Plans:
   1. When Stripe returns a 429 response with a `Stripe-Rate-Limited-Reason` header, the telemetry stop event's metadata map includes a `:rate_limited_reason` key with the header value, observable by attaching a telemetry handler.
   2. When a developer passes an invalid parameter name (e.g., `payment_method_type` instead of `payment_method_types`) and Stripe returns an `invalid_request_error`, the `%Error{}` message includes a "Did you mean `:payment_method_types`?" suggestion computed via client-side fuzzy matching.
   3. The fuzzy param suggestion is purely additive — it does not change the `%Error{type}` atom, `%Error{code}` field, or any other existing `Error` struct fields, preserving all existing pattern-match contracts.
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 Plans:
-- [ ] 24-01-PLAN.md — Rate-limit telemetry pipeline (header threading + metadata enrichment + 429 warning escalation)
-- [ ] 24-02-PLAN.md — Fuzzy param suggestion in Error.from_response/3 (Jaro distance + global @known_fields pool)
+- [x] 24-01-PLAN.md — Rate-limit telemetry pipeline (header threading + metadata enrichment + 429 warning escalation)
+- [x] 24-02-PLAN.md — Fuzzy param suggestion in Error.from_response/3 (Jaro distance + global @known_fields pool)
 - [ ] 24-03-PLAN.md — Telemetry documentation (moduledoc table + guides/telemetry.md Rate Limiting section)
 
 ### Phase 25: Performance Guide, Per-Op Timeouts & Connection Warm-Up
@@ -212,7 +212,7 @@ Plans:
 | 21. Customer Portal | v1.1 | 4/4 | ✅ Complete | 2026-04-14 |
 | 22. Expand Deserialization & Status Atomization | v1.2 | 4/4 | Complete    | 2026-04-16 |
 | 23. BillingPortal.Configuration CRUDL | v1.2 | 3/3 | Complete    | 2026-04-16 |
-| 24. Rate-Limit Awareness & Richer Errors | v1.2 | 0/3 | Planned | - |
+| 24. Rate-Limit Awareness & Richer Errors | v1.2 | 2/3 | In Progress|  |
 | 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 0/? | Not started | - |
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 0/? | Not started | - |
 | 27. Request Batching | v1.2 | 0/? | Not started | - |
