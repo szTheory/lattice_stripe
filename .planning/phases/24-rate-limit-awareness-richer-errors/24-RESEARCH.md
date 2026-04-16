@@ -730,9 +730,9 @@ by the "no atomize" constraint in D-04 and CONTEXT.md specifics section.
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Injection point for `Error.from_response/3`**
+1. **Injection point for `Error.from_response/3`** — RESOLVED: Option A (global candidate pool) selected. Implemented in Plan 24-02, Task 1 (`maybe_suggest_param/2` in error.ex uses global `@known_fields` aggregation with no path context needed).
    - What we know: The function has no access to the request path, which the CONTEXT.md says to use
      for module resolution.
    - What's unclear: Whether Option A (global pool) is acceptable or Option C (enrich in `do_request`
@@ -741,7 +741,7 @@ by the "no atomize" constraint in D-04 and CONTEXT.md specifics section.
      threshold of 0.8 + minimum length 4 + `@response_only_fields` exclusion is sufficient noise
      filtering for a global pool.
 
-2. **`build_stop_metadata` arity or tuple wrapping**
+2. **`build_stop_metadata` arity or tuple wrapping** — RESOLVED: Arity 5 selected. Implemented in Plan 24-01, Task 2 (`build_stop_metadata/5` with explicit `resp_headers` parameter).
    - What we know: Adding `resp_headers` adds a 5th parameter to a 3-clause function. Credo has an
      arity/clause awareness; it's fine for 5-arity.
    - What's unclear: Whether the planner prefers to wrap `{result, resp_headers}` in a single tuple
