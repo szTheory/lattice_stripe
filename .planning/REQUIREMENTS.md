@@ -68,29 +68,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXPD-01 | — | Pending |
-| EXPD-02 | — | Pending |
-| EXPD-03 | — | Pending |
-| EXPD-04 | — | Pending |
-| PERF-01 | — | Pending |
-| PERF-02 | — | Pending |
-| PERF-03 | — | Pending |
-| PERF-04 | — | Pending |
-| PERF-05 | — | Pending |
-| DX-01 | — | Pending |
-| DX-02 | — | Pending |
-| DX-03 | — | Pending |
-| DX-04 | — | Pending |
-| DX-05 | — | Pending |
-| DX-06 | — | Pending |
-| FEAT-01 | — | Pending |
-| FEAT-02 | — | Pending |
+| EXPD-01 | Phase 22 | Pending |
+| EXPD-02 | Phase 22 | Pending |
+| EXPD-03 | Phase 22 | Pending |
+| EXPD-04 | Phase 22 | Pending |
+| PERF-01 | Phase 25 | Pending |
+| PERF-02 | Phase 26 | Pending |
+| PERF-03 | Phase 25 | Pending |
+| PERF-04 | Phase 25 | Pending |
+| PERF-05 | Phase 24 | Pending |
+| DX-01 | Phase 24 | Pending |
+| DX-02 | Phase 27 | Pending |
+| DX-03 | Phase 29 | Pending |
+| DX-04 | Phase 26 | Pending |
+| DX-05 | Phase 31 | Pending |
+| DX-06 | Phase 30 | Pending |
+| FEAT-01 | Phase 23 | Pending |
+| FEAT-02 | Phase 28 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17 ⚠️
+- Mapped to phases: 17
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 after initial definition*
+*Last updated: 2026-04-16 after roadmap creation (all 17 requirements mapped to Phases 22-31)*
