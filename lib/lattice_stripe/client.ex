@@ -283,7 +283,8 @@ defmodule LatticeStripe.Client do
   end
 
   # Entry point for retry loop — starts with attempt 1, total_attempts 1.
-  # Returns {result, total_attempts} so telemetry can record attempt count.
+  # Returns {result, total_attempts, last_resp_headers} so telemetry can record attempt count
+  # and the rate-limit reason header from the final response.
   defp do_request_with_retries(client, transport_request, method, idempotency_key, max_retries) do
     do_request_with_retries(
       client,
@@ -306,8 +307,8 @@ defmodule LatticeStripe.Client do
          total_attempts
        ) do
     case do_request(client, transport_request) do
-      {:ok, _} = success ->
-        {success, total_attempts}
+      {:ok, %Response{} = resp} = success ->
+        {success, total_attempts, resp.headers}
 
       {:error, %Error{} = error, resp_headers} = _failure ->
         retry_state = %{
@@ -343,7 +344,7 @@ defmodule LatticeStripe.Client do
 
       apply_retry_decision(client, transport_request, retry_state, error, context)
     else
-      {{:error, error}, total_attempts}
+      {{:error, error}, total_attempts, resp_headers}
     end
   end
 
@@ -382,7 +383,7 @@ defmodule LatticeStripe.Client do
         )
 
       :stop ->
-        {{:error, error}, total}
+        {{:error, error}, total, context.headers}
     end
   end
 
