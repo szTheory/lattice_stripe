@@ -37,7 +37,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State (post-v1.1)
 
-**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 20 phases complete (1-11, 14-22). ~62 plans executed. Phase 22 added expand deserialization (typed struct dispatch for `expand:` fields), status atomization across all resource modules, and union typespecs. 1611 tests / 0 failures. Zero-touch release via release-please.
+**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 24 phases complete (1-11, 14-24). ~71 plans executed. Phase 24 added rate-limit telemetry (`:rate_limited_reason` in stop metadata, 429 warning escalation) and fuzzy param suggestions ("did you mean?" in `invalid_request_error` messages). 1675 tests / 0 failures. Zero-touch release via release-please.
 
 **Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
 
@@ -133,10 +133,10 @@ All foundation, payment, webhook, telemetry, testing, docs, CI/CD, Billing, and 
 - [ ] Circuit breaker pattern — custom `RetryStrategy` example or `:fuse` integration for cascading failure prevention
 - [ ] Connection warm-up helper — health-check / pool pre-establishment function for app start
 - [ ] Timeout tuning per-operation — resource-level timeout defaults (search/list get longer timeouts than creates)
-- [ ] Rate-limit awareness — track `RateLimit-*` response headers, expose via telemetry metadata
+- [x] Rate-limit awareness — track `Stripe-Rate-Limited-Reason` header, expose via telemetry stop metadata as `:rate_limited_reason` — Phase 24
 
 **Developer experience**
-- [ ] Richer error context — fuzzy param name suggestions in `invalid_request_error` ("Did you mean `:payment_method_types`?")
+- [x] Richer error context — fuzzy param name suggestions in `invalid_request_error` ("did you mean `:payment_method_types`?") via `String.jaro_distance/2` — Phase 24
 - [ ] Request batching / concurrent helpers — `Task.async_stream`-based parallel request ergonomics
 - [ ] Changeset-style param builders — optional fluent builders for complex nested params (SubscriptionSchedule phases, BillingPortal flows)
 - [ ] OpenTelemetry integration guide — connect telemetry events to `opentelemetry_api` with worked examples
@@ -247,4 +247,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Move shipped requirements to Validated, add next-milestone requirements to Active
 
 ---
-*Last updated: 2026-04-16 — Phase 23 complete (BillingPortal.Configuration CRUDL — 6 typed modules, expand guard, ExDoc grouping). v1.2 milestone in progress.*
+*Last updated: 2026-04-16 — Phase 24 complete (rate-limit telemetry + fuzzy param suggestions — 1675 tests). v1.2 milestone in progress.*
