@@ -202,7 +202,7 @@ Plans:
 | 1-11, 14-19 | v1.0 | All | ✅ Shipped | 2026-04-13 |
 | 20. Billing Metering | v1.1 | 7/7 | ✅ Complete | 2026-04-14 |
 | 21. Customer Portal | v1.1 | 4/4 | ✅ Complete | 2026-04-14 |
-| 22. Expand Deserialization & Status Atomization | v1.2 | 0/? | Not started | - |
+| 22. Expand Deserialization & Status Atomization | v1.2 | 1/4 | In Progress|  |
 | 23. BillingPortal.Configuration CRUDL | v1.2 | 0/? | Not started | - |
 | 24. Rate-Limit Awareness & Richer Errors | v1.2 | 0/? | Not started | - |
 | 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 0/? | Not started | - |

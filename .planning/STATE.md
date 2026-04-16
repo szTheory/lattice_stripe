@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: — Production Hardening & DX
-status: Roadmap created
+status: executing
 stopped_at: Phase 22 context gathered
-last_updated: "2026-04-16T16:06:34.882Z"
-last_activity: 2026-04-16 — Roadmap created, 17 requirements mapped to Phases 22-31
+last_updated: "2026-04-16T16:37:00.482Z"
+last_activity: 2026-04-16 -- Phase 22 execution started
 progress:
   total_phases: 12
   completed_phases: 0
-  total_plans: 0
+  total_plans: 4
   completed_plans: 0
   percent: 0
 ---
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16 after v1.2 milestone start)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** v1.2 roadmap created — ready to begin Phase 22
+**Current focus:** Phase 22 — expand-deserialization-status-atomization
 
 ## Current Position
 
 Milestone: v1.2 (Production Hardening & DX)
-Phase: Not started (roadmap created, awaiting first plan)
-Plan: —
-Status: Roadmap created
-Last activity: 2026-04-16 — Roadmap created, 17 requirements mapped to Phases 22-31
+Phase: 22 (expand-deserialization-status-atomization) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 22
+Last activity: 2026-04-16 -- Phase 22 execution started
 
 ```
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (0/10 phases)
