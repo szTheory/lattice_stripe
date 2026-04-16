@@ -61,6 +61,7 @@ defmodule LatticeStripe.Telemetry do
   | `:retries` | `integer` | Number of retries (attempts - 1) |
   | `:error_type` | `atom \\| nil` | Error type atom on failure: `:connection_error`, `:card_error`, etc. |
   | `:idempotency_key` | `String.t() \\| nil` | Idempotency key used (on error only) |
+  | `:rate_limited_reason` | `String.t() \\| nil` | Stripe `Stripe-Rate-Limited-Reason` header value on 429 responses; `nil` for all non-429 responses. Do not atomize — values are Stripe-controlled strings. |
   | `:telemetry_span_context` | `reference` | Correlates with start event |
 
   ---
