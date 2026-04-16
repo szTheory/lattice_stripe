@@ -236,5 +236,5 @@ Plans:
 | 27. Request Batching | v1.2 | 1/1 | Complete    | 2026-04-16 |
 | 28. meter_event_stream v2 | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 29. Changeset-Style Param Builders | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 30. Stripe API Drift Detection | v1.2 | 2/2 | Complete   | 2026-04-16 |
+| 30. Stripe API Drift Detection | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 31. LiveBook Notebook | v1.2 | 0/? | Not started | - |
