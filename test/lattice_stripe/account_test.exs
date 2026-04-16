@@ -134,9 +134,9 @@ defmodule LatticeStripe.AccountTest do
                "us_bank_account_payments" => us_bank
              } = account.capabilities
 
-      assert %Capability{status: "active", requested: true} = card_pay
-      assert %Capability{status: "pending", requested: true} = transfers
-      assert %Capability{status: "unrequested", requested: false} = us_bank
+      assert %Capability{status: :active, requested: true} = card_pay
+      assert %Capability{status: :pending, requested: true} = transfers
+      assert %Capability{status: :unrequested, requested: false} = us_bank
     end
 
     test "Capability.status_atom/1 returns correct atom for capabilities" do

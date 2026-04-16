@@ -109,9 +109,9 @@ defmodule LatticeStripe.BankAccount do
       country: known["country"],
       currency: known["currency"],
       customer:
-        if is_map(known["customer"]),
-          do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"],
+        (if is_map(known["customer"]),
+           do: ObjectTypes.maybe_deserialize(known["customer"]),
+           else: known["customer"]),
       default_for_currency: known["default_for_currency"],
       fingerprint: known["fingerprint"],
       last4: known["last4"],

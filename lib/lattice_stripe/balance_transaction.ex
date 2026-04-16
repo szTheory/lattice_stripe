@@ -197,9 +197,9 @@ defmodule LatticeStripe.BalanceTransaction do
       net: known["net"],
       reporting_category: known["reporting_category"],
       source:
-        if is_map(known["source"]),
-          do: ObjectTypes.maybe_deserialize(known["source"]),
-          else: known["source"],
+        (if is_map(known["source"]),
+           do: ObjectTypes.maybe_deserialize(known["source"]),
+           else: known["source"]),
       status: atomize_status(known["status"]),
       type: atomize_type(known["type"]),
       extra: extra

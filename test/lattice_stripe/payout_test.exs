@@ -193,7 +193,7 @@ defmodule LatticeStripe.PayoutTest do
         ok_response(cancelled())
       end)
 
-      assert {:ok, %Payout{status: "canceled"}} =
+      assert {:ok, %Payout{status: :canceled}} =
                Payout.cancel(client, "po_1OoMpqJ2eZvKYlo20wxYzAbC", %{
                  "expand" => ["balance_transaction"]
                })
@@ -318,11 +318,11 @@ defmodule LatticeStripe.PayoutTest do
       assert payout.destination == "ba_test_dest_string"
     end
 
-    test "destination is a map when expanded" do
+    test "destination is a %BankAccount{} struct when expanded" do
       payout = Payout.from_map(with_destination_expanded())
-      assert is_map(payout.destination)
-      assert payout.destination["object"] == "bank_account"
-      assert payout.destination["last4"] == "6789"
+      assert %LatticeStripe.BankAccount{} = payout.destination
+      assert payout.destination.object == "bank_account"
+      assert payout.destination.last4 == "6789"
     end
   end
 
