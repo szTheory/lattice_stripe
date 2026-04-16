@@ -110,4 +110,27 @@ defmodule LatticeStripe.Test.Fixtures.Metering do
       |> Map.merge(overrides)
     end
   end
+
+  defmodule MeterEventStreamSession do
+    @moduledoc false
+
+    @doc """
+    Basic MeterEventStream.Session fixture matching Stripe's v2 wire format.
+
+    Fields match the documented response shape from POST /v2/billing/meter_event_session.
+    The `authentication_token` is a test placeholder — Inspect masking tests should
+    assert it does NOT appear in the rendered string.
+    """
+    def basic(overrides \\ %{}) do
+      %{
+        "id" => "mes_123",
+        "object" => "v2.billing.meter_event_session",
+        "authentication_token" => "tok_test_abc",
+        "created" => 1_712_345_678,
+        "expires_at" => 1_712_346_578,
+        "livemode" => false
+      }
+      |> Map.merge(overrides)
+    end
+  end
 end
