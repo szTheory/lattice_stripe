@@ -224,7 +224,7 @@ Plans:
 | 24. Rate-Limit Awareness & Richer Errors | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 27. Request Batching | v1.2 | 1/1 | Complete   | 2026-04-16 |
+| 27. Request Batching | v1.2 | 1/1 | Complete    | 2026-04-16 |
 | 28. meter_event_stream v2 | v1.2 | 0/? | Not started | - |
 | 29. Changeset-Style Param Builders | v1.2 | 0/? | Not started | - |
 | 30. Stripe API Drift Detection | v1.2 | 0/? | Not started | - |
