@@ -1,454 +1,673 @@
 # Architecture Patterns
 
-**Domain:** Elixir API SDK / Stripe client library
-**Researched:** 2026-04-13 (v1.1 update — metering + portal integration)
-**Scope:** v1.1 addition of `Billing.Meter`, `Billing.MeterEvent`, `Billing.MeterEventAdjustment`, and `BillingPortal.Session` into the existing v1.0 architecture.
+**Domain:** Elixir API SDK / Stripe client library — v1.2 Production Hardening & DX
+**Researched:** 2026-04-16
+**Confidence:** HIGH (based on direct codebase inspection)
+**Scope:** How v1.2 target features integrate with the existing architecture.
 
 ---
 
-## v1.1 Integration Overview
+## Existing Architecture Summary (Post-v1.1)
 
-Three new Stripe resource families slot into the existing architecture without any changes to the foundation layers (Client, Transport, Request, Response, Error, Telemetry, Webhook). Every new module follows the v1.0 resource module pattern exactly:
+The foundation established in v1.0 and extended in v1.1 is stable. Nine target features must each
+find their integration point without breaking the existing contract.
 
 ```
-defstruct + @known_fields + from_map/1 (drops unknowns into :extra)
-     |
-     v
-Resource.unwrap_singular/2 or unwrap_list/2
-     |
-     v
-Client.request/2 (unchanged — all opts threading already in place)
++-------------------------------------------------------------------+
+|  PUBLIC API LAYER                                                 |
+|  Resource modules: Customer, Invoice, Subscription, Billing.*,   |
+|  BillingPortal.*, Checkout.*, Account, Transfer, Payout, ...     |
+|  Each: defstruct + @known_fields + from_map/1                    |
+|        → Client.request/2                                         |
+|        → Resource.unwrap_singular/2 or unwrap_list/2             |
++-------------------------------------------------------------------+
+           |                          |
+           v                          v
++----------------------+    +---------------------+
+|  RESOURCE HELPER     |    |  WEBHOOK LAYER      |
+|  LatticeStripe.-     |    |  Webhook.Plug       |
+|  Resource            |    |  Webhook.Handler    |
+|  (unwrap_singular,   |    |  Webhook.Signature  |
+|   unwrap_list,       |    |  Verification       |
+|   unwrap_bang!,      |    +---------------------+
+|   require_param!)    |
++----------------------+
+           |
+           v
++-------------------------------------------------------------------+
+|  CLIENT LAYER — LatticeStripe.Client                             |
+|  - Config: api_key, finch, transport, json_codec, retry_strategy |
+|  - timeout (global default), max_retries, telemetry_enabled      |
+|  - Idempotency key resolution (auto-gen for POST)                |
+|  - Header building (auth, version, stripe-account, idk)         |
+|  - Retry loop: do_request_with_retries/7                         |
+|  - Response decode: JSON → Response/Error struct                 |
+|  - Telemetry span wrap (always at this layer)                    |
++-------------------------------------------------------------------+
+           |
+           v
++-------------------------------------------------------------------+
+|  RETRY LAYER — LatticeStripe.RetryStrategy behaviour            |
+|  Default: exponential backoff, Stripe-Should-Retry header,       |
+|  Retry-After header, 429/5xx status checks                       |
++-------------------------------------------------------------------+
+           |
+           v
++-------------------------------------------------------------------+
+|  TRANSPORT LAYER — LatticeStripe.Transport behaviour            |
+|  Default: Transport.Finch (Mint-based, connection pooling)        |
++-------------------------------------------------------------------+
+           |
+           v
++-------------------------------------------------------------------+
+|  INFRASTRUCTURE                                                   |
+|  Finch (HTTP/connection pool) | Jason (JSON) | Telemetry         |
++-------------------------------------------------------------------+
 ```
 
-The only architectural additions are new files in `lib/lattice_stripe/billing/` and a new `lib/lattice_stripe/billing_portal/` directory.
+### Request Pipeline (detailed)
+
+```
+Resource.create(client, params, opts)
+  → %Request{method: :post, path: "/v1/...", params: params, opts: opts}
+  → Client.request(client, req)
+      → resolve opts (api_key, api_version, timeout, stripe_account, expand)
+      → resolve idempotency_key (auto-gen UUID for POST)
+      → merge_expand (inject expand[] params)
+      → build_url_and_body (FormEncoder.encode → bracket notation)
+      → build_headers (auth, version, content-type, idk)
+      → Telemetry.request_span(client, req, idk, fn →)
+          → do_request_with_retries/7
+              → client.transport.request(transport_request)
+              → decode_response (json_codec.decode → Response/Error)
+              → maybe_retry (RetryStrategy.retry?/2)
+  → Resource.unwrap_singular(result, &Module.from_map/1)
+  → {:ok, %Module{}} | {:error, %Error{}}
+```
 
 ---
 
-## Q1: Module Namespacing
+## Feature Integration Analysis
 
-### Billing.* — existing namespace, new siblings
+### 1. Expand Deserialization (EXPD-02/03/05)
 
-`LatticeStripe.Billing.*` already exists in v1.0 but only contains `LatticeStripe.Billing.Guards` (internal, `@moduledoc false`). The three metering modules are the first **public** Billing-namespaced resources.
+**What it does:** `expand: ["customer"]` returns `%Customer{}` struct instead of raw string ID.
+Dot-paths like `expand: ["data.customer"]` for nested expands. Status field atomization audit.
 
-**Resolved namespace layout:**
+**Where it hooks in:** `Resource.unwrap_singular/2` and `Resource.unwrap_list/2` in `resource.ex`.
 
-```
-lib/lattice_stripe/billing/
-  guards.ex                          # EXISTING — internal proration guard
-  meter.ex                           # NEW — Billing.Meter resource module
-  meter/
-    default_aggregation.ex           # NEW — nested typed struct
-    customer_mapping.ex              # NEW — nested typed struct
-    value_settings.ex                # NEW — nested typed struct
-    status_transitions.ex            # NEW — nested typed struct
-  meter_event.ex                     # NEW — Billing.MeterEvent resource module
-  meter_event_adjustment.ex          # NEW — Billing.MeterEventAdjustment resource module
-```
+Currently these functions call `from_map_fn.(data)` on the raw decoded map. The raw map already
+contains expanded sub-objects as maps when Stripe expands them — a customer becomes
+`%{"id" => "cus_...", "object" => "customer", "email" => ...}` instead of `"cus_..."`.
 
-There are no sibling resource modules in `LatticeStripe.Billing.*` in v1.0. The existing billing resources (`Invoice`, `Subscription`, `SubscriptionItem`, `SubscriptionSchedule`) live at `LatticeStripe.Invoice`, `LatticeStripe.Subscription`, etc. — NOT under `LatticeStripe.Billing.*`. The `billing/` directory in v1.0 exists only for the internal `Guards` module.
+The hook is `from_map/1` on each resource. When a field contains a map with `"object" => "customer"`,
+the resource's `from_map/1` must recognize that and call `Customer.from_map/1` on it instead of
+storing the raw map.
 
-This means the metering modules are the first public inhabitants of the `Billing` namespace. That is appropriate because Stripe's metering API lives under `/v1/billing/meters` and `/v1/billing/meter_events` — the URL prefix maps directly to the module namespace.
+**New components needed:**
+- `LatticeStripe.Expand` module (new) — a dispatch table mapping Stripe object type strings to their
+  `from_map/1` functions. `Expand.decode_field(value)` checks if value is a map with `"object"` key,
+  looks up the module, calls `from_map/1`.
+- Per-resource `from_map/1` updates — each resource that can appear as an expanded field gets an
+  updated `from_map/1` that calls `Expand.decode_field/1` on expandable fields.
 
-**Stripe URL → Module mapping:**
+**What stays the same:** `Client.request/2`, `Resource.unwrap_singular/2`, `Transport`, telemetry.
+The `expand:` opt is already threaded through to the query params — that part is done. This is
+purely response decoding.
 
-| Stripe URL | Module |
-|------------|--------|
-| `/v1/billing/meters` | `LatticeStripe.Billing.Meter` |
-| `/v1/billing/meter_events` | `LatticeStripe.Billing.MeterEvent` |
-| `/v1/billing/meter_event_adjustments` | `LatticeStripe.Billing.MeterEventAdjustment` |
-| `/v1/billing_portal/sessions` | `LatticeStripe.BillingPortal.Session` |
+**Status atomization (EXPD-05):** Audit all resources for string status fields and add `status_atom`
+virtual getters or convert the field in `from_map/1`. Pattern: `Account.Capability.status_atom/1`
+already exists as precedent. The sweep is surgical per-file, no architectural change needed.
 
-### BillingPortal — new top-level namespace
+**Integration point:** `from_map/1` in each resource module. No pipeline changes.
 
-**Decision: `LatticeStripe.BillingPortal` is a new top-level namespace, NOT nested under `Billing`.**
+---
 
-Rationale:
-1. Stripe's API uses `/v1/billing_portal/` as a distinct URL prefix, separate from `/v1/billing/`. These are different Stripe product areas.
-2. The v1.0 precedent is `LatticeStripe.Checkout.Session` — a namespace created solely for `Checkout.Session`, with `Checkout.LineItem` as a companion. `BillingPortal` follows the same pattern: a namespace that currently holds only `Session`, with `Configuration` as the future sibling (deferred to v1.2+).
-3. `LatticeStripe.BillingPortal` matches the downstream Accrue usage (`Accrue.Billing.create_portal_session/2` calling `LatticeStripe.BillingPortal.Session.create/3`) — the module name reads naturally in user code.
-4. Mixing billing_portal resources under `Billing.*` would confuse the namespace: `LatticeStripe.Billing.Portal.Session` looks like a sub-resource of a Billing family, not a standalone portal session.
+### 2. Circuit Breaker Pattern
 
-**New directory:**
+**What it does:** Prevents cascading failures when Stripe is down. After N consecutive failures,
+stop sending requests immediately (fail-fast) instead of exhausting retry budget.
 
-```
-lib/lattice_stripe/billing_portal/
-  session.ex                         # NEW — BillingPortal.Session resource module
-  session/
-    flow_data.ex                     # NEW — nested typed struct
-```
+**Where it hooks in:** The `RetryStrategy` behaviour is the correct integration point. The behaviour
+already receives full error context including status codes and headers. A circuit breaker
+`RetryStrategy` implementation can track state and open the circuit.
 
-### mix.exs groups_for_modules additions
+**The problem with stateless RetryStrategy:** Circuit breakers are inherently stateful — they track
+failure counts across multiple requests. The current `RetryStrategy` behaviour is stateless
+(pure function, `retry?(attempt, context) :: {:retry, delay} | :stop`). Circuit state cannot live
+inside the behaviour callback.
 
-Two new groups must be added to the nine-group ExDoc layout. Current groups: `Client & Configuration`, `Payments`, `Checkout`, `Billing`, `Connect`, `Webhooks`, `Telemetry`, `Testing`, `Internals`.
+**Two valid approaches:**
 
-**Add two groups:**
+*Option A — `:fuse` integration (external GenServer state)*
+
+`:fuse` is an Erlang OTP library that provides named circuit breakers backed by a GenServer. The
+user starts a `:fuse` supervisor in their app tree, registers a fuse named `:stripe`, and wraps
+calls with `:fuse.ask(:stripe, :sync)`. A custom `RetryStrategy` can call `:fuse.melt(:stripe)`
+on failures to melt the fuse and `:fuse.ask(:stripe, :sync)` to check if blown.
+
+This requires adding `:fuse` as an optional dep and the user running a supervisor. It is the
+correct long-term solution for production circuit breaking.
+
+*Option B — Custom RetryStrategy with ETS state*
+
+A `RetryStrategy.CircuitBreaker` shipped in the library uses ETS for shared failure count state.
+Callable without a separate supervisor. More complex to get right (counter TTL, reset logic).
+
+**Recommended approach for v1.2:** Ship as a **guide + example custom RetryStrategy** using
+`:fuse`, not as a built-in. Rationale:
+- Circuit state is application-global, not per-client. The user's supervision tree must own it.
+- The `RetryStrategy` behaviour already gives users the hook they need.
+- Shipping a half-baked built-in circuit breaker creates a maintenance burden.
+- The guide should show the `:fuse` pattern with a complete working implementation.
+
+**Integration point:** `RetryStrategy` behaviour (existing hook). No new components in the library.
+New file: `guides/circuit-breaker.md`.
+
+---
+
+### 3. Rate-Limit Awareness
+
+**What it does:** Parse `RateLimit-*` response headers and expose via telemetry metadata so users
+can back-pressure their own request rates.
+
+**Stripe's actual headers (verified):**
+- `Stripe-Rate-Limited-Reason` — present only on 429 responses; values: `global-rate`,
+  `global-concurrency`, `endpoint-rate`, `endpoint-concurrency`, `resource-specific`
+- Standard `Retry-After` — already parsed in `RetryStrategy.Default`
+
+**Where it hooks in:** `Client.decode_response/6` already has `resp_headers` in scope. The
+`build_stop_metadata/4` function in `Telemetry` builds the telemetry metadata map. Rate-limit
+header data should appear in the `:stop` event metadata.
+
+**Concrete change:** In `Client.build_decoded_response/6` (or a new private helper), extract
+`Stripe-Rate-Limited-Reason` from resp_headers when present. Thread this into the `Response` struct
+or pass it through to the telemetry stop metadata.
+
+**Two sub-options:**
+
+*A — Add to `Response` struct:* Add `rate_limit_reason: nil | String.t()` field to `%Response{}`.
+Simple, lets users inspect it directly. Downside: only present on 429 errors, which become `Error`
+not `Response` — so this field is always nil on success. Not useful.
+
+*B — Add to telemetry stop metadata only:* In `Telemetry.build_stop_metadata/4`, extract
+`Stripe-Rate-Limited-Reason` from the error's headers (currently available via the internal
+`{:error, error, resp_headers}` 3-tuple) and add `:rate_limit_reason` to the stop metadata map.
+Clean — telemetry is the right place for operational signals that users attach handlers to.
+
+**Recommended:** Option B. Telemetry metadata addition. Users attach a handler to
+`[:lattice_stripe, :request, :stop]` and inspect `:rate_limit_reason`.
+
+**What changes:**
+- `Client.apply_retry_decision/4` and `maybe_retry/5` already pass `resp_headers` to retry context.
+  The headers are also available when building error telemetry stop metadata.
+- `Telemetry.build_stop_metadata/4` — add `:rate_limit_reason` extraction from error struct's
+  `raw_body` or thread headers differently. Currently the error case has `resp_headers` in scope
+  in the retry loop but those headers aren't passed to `build_stop_metadata`. Minor threading change.
+- `guides/rate-limits.md` — new guide documenting what to do with the signal.
+
+**New telemetry metadata key:** `:rate_limit_reason` on `[:lattice_stripe, :request, :stop]` events.
+Nil when not rate-limited, string value when 429.
+
+**Integration point:** `Client.do_request/2` → `decode_response` → error branch → telemetry
+metadata. Minimal threading change.
+
+---
+
+### 4. Richer Errors (Fuzzy Param Suggestions)
+
+**What it does:** When Stripe returns `invalid_request_error` with a `:param` field, suggest
+the correct param name using fuzzy string matching. "Did you mean `:payment_method_types`?"
+
+**Where it hooks in:** `Error.from_response/3` in `error.ex`. This function constructs the
+`%Error{}` struct from the decoded Stripe error body. It already extracts `param` from the
+error map. A post-construction enrichment step can add a `:hint` field.
+
+**New components needed:**
+- `Error` struct — add `hint: nil | String.t()` field (new optional field, backward compatible).
+- `Error.from_response/3` — after building the base error struct, call a hint generator if
+  `type == :invalid_request_error` and `param != nil`.
+- `LatticeStripe.Hints` (new internal module, `@moduledoc false`) — contains the fuzzy matching
+  logic. Simple approach: Jaro-Winkler distance via `:string_distance` Erlang stdlib, or a
+  curated list of common Stripe param names with a distance threshold.
+
+**Scope constraint:** Keep it simple. The value is "Did you mean X?" for common typos — not a
+full NLP system. A curated list of ~50 commonly mistyped Stripe param names plus Jaro-Winkler
+distance (Elixir's stdlib `String.jaro_distance/2` — available in all supported versions) is
+sufficient.
+
+**Integration point:** `Error.from_response/3`. No pipeline changes.
+
+**What changes:**
+- `lib/lattice_stripe/error.ex` — add `:hint` field, call `Hints.suggest/1` in `from_response`.
+- `lib/lattice_stripe/hints.ex` (new internal module) — curated param list + Jaro-Winkler.
+- No changes to Client, Transport, Resource.
+
+---
+
+### 5. Request Batching / Concurrent Helpers
+
+**What it does:** Ergonomic API for firing multiple Stripe requests in parallel using
+`Task.async_stream`, collecting results.
+
+**Where it hooks in:** This is a utility layer ON TOP of `Client.request/2`. It does not modify
+the pipeline — it calls it concurrently.
+
+**Approach:** A new `LatticeStripe.Batch` module (or `LatticeStripe.Concurrent` — naming TBD)
+that wraps `Task.async_stream`. The public API could be:
 
 ```elixir
-# After the existing Billing group:
-"Billing Metering": [
-  LatticeStripe.Billing.Meter,
-  LatticeStripe.Billing.Meter.DefaultAggregation,
-  LatticeStripe.Billing.Meter.CustomerMapping,
-  LatticeStripe.Billing.Meter.ValueSettings,
-  LatticeStripe.Billing.Meter.StatusTransitions,
-  LatticeStripe.Billing.MeterEvent,
-  LatticeStripe.Billing.MeterEventAdjustment
-],
-"Customer Portal": [
-  LatticeStripe.BillingPortal.Session,
-  LatticeStripe.BillingPortal.Session.FlowData
-],
+# Fetch multiple customers concurrently
+requests = [
+  %Request{method: :get, path: "/v1/customers/cus_a"},
+  %Request{method: :get, path: "/v1/customers/cus_b"},
+  %Request{method: :get, path: "/v1/customers/cus_c"}
+]
+results = LatticeStripe.Batch.run(client, requests)
+# [{:ok, %Response{}}, {:ok, %Response{}}, {:error, %Error{}}]
 ```
 
-This keeps the existing `Billing` group (Invoice, Subscription, SubscriptionItem, SubscriptionSchedule) unchanged and groups the metering and portal resources in their own sections.
+Internally: `Task.async_stream(requests, &Client.request(client, &1), ordered: true, max_concurrency: N)`.
+
+**Key design constraint:** No new processes owned by the library. `Task.async_stream` spawns
+tasks in the caller's process group — supervised by the caller's supervisor. This is consistent
+with the "no GenServers for state" philosophy.
+
+**Integration point:** New module, calls `Client.request/2`. No changes to existing modules.
+
+**What changes:**
+- `lib/lattice_stripe/batch.ex` (new public module) — `run/3`, `run!/3` with configurable
+  `max_concurrency` and timeout per task. Returns `[{:ok, result} | {:error, error}]`.
+- Guide section on concurrent patterns.
 
 ---
 
-## Q2: Nested Typed Struct Structure
+### 6. Per-Operation Timeouts
 
-The rule established in v1.0 (Phase 14/17 pattern) is: promote a field to a typed nested struct only when callers need to pattern-match on its sub-fields. Raw maps are left as `map() | nil`. The `@known_fields` + `extra: %{}` pattern applies to nested structs that have room for unknown fields.
+**What it does:** Allow search/list operations (which can be slow) to use longer default timeouts
+than create/retrieve. Currently the single `client.timeout` applies to everything.
 
-Two sub-patterns exist in v1.0:
-
-- **Simple typed struct, no `extra`:** `Invoice.StatusTransitions` — all fields are known Unix timestamps, no unknown field risk. Defined as `defstruct` with no `extra` field. `from_map/1` returns `nil` for nil input.
-- **Complex nested struct with `extra`:** `Subscription.CancellationDetails`, `Account.Capability` — fields can grow (Stripe adds sub-fields), so `@known_fields` + `extra: %{}` is used. `from_map/1` uses `Map.split/2`.
-
-### Meter nested structs (Phase 20)
-
-**`LatticeStripe.Billing.Meter.DefaultAggregation`**
-
-Accrue reads `default_aggregation.formula` to display usage configuration. Promote to typed struct.
-
+**Where it hooks in:** `Client.request/2` resolves the effective timeout with:
+```elixir
+effective_timeout = Keyword.get(req.opts, :timeout, client.timeout)
 ```
-File: lib/lattice_stripe/billing/meter/default_aggregation.ex
-Fields: formula (string — "sum" | "count" | "last")
-Pattern: simple typed struct, no extra (only one known sub-field from Stripe spec)
-from_map: returns nil for nil input
-```
+The `:timeout` opt in `req.opts` already overrides the client default. Per-operation defaults
+are a layer above this — they set `req.opts[:timeout]` to the operation-specific default if the
+caller hasn't provided one.
 
-**`LatticeStripe.Billing.Meter.CustomerMapping`**
+**Two sub-options:**
 
-Accrue reads `customer_mapping.event_payload_key` and `customer_mapping.type`. Promote to typed struct.
-
-```
-File: lib/lattice_stripe/billing/meter/customer_mapping.ex
-Fields: event_payload_key (string), type (string — "by_id")
-Pattern: @known_fields + extra: %{} (Stripe may add mapping types)
-from_map: returns nil for nil input
-```
-
-**`LatticeStripe.Billing.Meter.ValueSettings`**
-
-Accrue reads `value_settings.event_payload_key`. Promote to typed struct.
-
-```
-File: lib/lattice_stripe/billing/meter/value_settings.ex
-Fields: event_payload_key (string)
-Pattern: simple typed struct, no extra (single known sub-field)
-from_map: returns nil for nil input
-```
-
-**`LatticeStripe.Billing.Meter.StatusTransitions`**
-
-Accrue does not directly read sub-fields, but the `StatusTransitions` name echoes `Invoice.StatusTransitions` — a strong v1.0 precedent. Promote to typed struct to match the existing naming convention and to give callers access to `deactivated_at`.
-
-```
-File: lib/lattice_stripe/billing/meter/status_transitions.ex
-Fields: deactivated_at (integer | nil)
-Pattern: simple typed struct, no extra (only one known field currently)
-from_map: returns nil for nil input
-Precedent: lib/lattice_stripe/invoice/status_transitions.ex (exact same shape)
-```
-
-### BillingPortal.Session nested struct (Phase 21)
-
-**`LatticeStripe.BillingPortal.Session.FlowData`**
-
-Accrue constructs `flow_data` on the way in (as a request param) and pattern-matches on `session.flow` on the way back (to confirm the deep-link flow type). Promote to typed struct.
-
-```
-File: lib/lattice_stripe/billing_portal/session/flow_data.ex
-Fields: type (string — "subscription_cancel" | "payment_method_update" | etc.),
-        subscription_cancel (map | nil), subscription_update (map | nil),
-        payment_method_update (map | nil), after_completion (map | nil)
-Pattern: @known_fields + extra: %{} (flow types can expand)
-from_map: returns nil for nil input
-```
-
-The sub-flow maps (`subscription_cancel`, `payment_method_update`, etc.) are left as raw `map() | nil` — Accrue does not pattern-match their internal structure, and Stripe's spec shows they have varied shapes per flow type.
-
-### Fields left as raw maps (not promoted)
-
-These Meter fields are not promoted to typed structs because Accrue does not pattern-match their sub-fields and they are not named sub-objects in Stripe's stable schema:
-
-- `metadata` — always left as `map() | nil` across all v1.0 resources
-- `event_time_window` — string value, not a nested object
-
----
-
-## Q3: Fixtures and Test Helpers
-
-### What can be reused from v1.0
-
-**`test/support/test_helpers.ex`** — fully reusable. `test_client/1` and `test_integration_client/0` are unchanged. New integration tests for metering and portal use `test_integration_client()` exactly as account and subscription integration tests do.
-
-**Pattern from `test/support/fixtures/subscription.ex`** — the `basic(overrides \\ %{})` + named variants pattern is the direct model for new fixture modules.
-
-**Pattern from `test/support/fixtures/checkout_session.ex`** — the `Checkout.Session` fixture demonstrates Session-specific patterns (create-only workflows, `url` field) applicable to `BillingPortal.Session`.
-
-**`test/support/fixtures/customer.ex`** — used as-is in metering integration tests: a meter requires a customer to send events through. The existing `LatticeStripe.Test.Fixtures.Customer` can be used directly in integration test `setup` blocks.
-
-### New fixtures to build
-
-**`test/support/fixtures/metering.ex`** — single new file for all three metering resources:
+*A — Resource module sets default timeout in opts*
 
 ```elixir
-defmodule LatticeStripe.Test.Fixtures.Metering do
-  @moduledoc false
-
-  # Canonical Meter response fixture (active status, full nested struct coverage)
-  def meter(overrides \\ %{}) ...
-
-  # Meter with inactive status (post-deactivate shape)
-  def meter_inactive(overrides \\ %{}) ...
-
-  # MeterEvent create response fixture (thin ack shape)
-  def meter_event(overrides \\ %{}) ...
-
-  # MeterEventAdjustment create response fixture
-  def meter_event_adjustment(overrides \\ %{}) ...
+def list(client, params, opts \\ []) do
+  opts = Keyword.put_new(opts, :timeout, 60_000)  # list gets 60s default
+  %Request{method: :get, path: "/v1/customers", params: params, opts: opts}
+  |> then(&Client.request(client, &1))
+  |> Resource.unwrap_list(&from_map/1)
 end
 ```
 
-Rationale for a single file: Meter, MeterEvent, and MeterEventAdjustment are bundled in Phase 20 (decision D1/D2). Separating them into three fixture files adds overhead without benefit — they always appear together in integration tests.
+Simple. No new infrastructure. User's explicit `:timeout` still wins (via `Keyword.put_new`).
 
-**`test/support/fixtures/billing_portal.ex`** — new file for portal resources:
+*B — Client struct gains per-operation timeout map*
+
+`%Client{timeout_overrides: %{list: 60_000, search: 90_000}}`. Client.request inspects the
+request method and path to pick the right timeout.
+
+More powerful but adds complexity to Client and breaks the "Client is a dumb config holder" pattern.
+
+**Recommended:** Option A. Resource modules use `Keyword.put_new(opts, :timeout, N)` for operations
+that commonly need longer timeouts (list/stream/search). Clean, no new infrastructure, user override
+still works.
+
+**Integration point:** Individual resource module operations. No changes to Client pipeline.
+
+**What changes:** Surgical `Keyword.put_new` additions to slow operations across resource modules.
+An audit identifies which operations warrant longer defaults. No new files.
+
+---
+
+### 7. meter_event_stream (v2 API)
+
+**What it does:** High-throughput metering via Stripe's v2 endpoint. Two-step flow:
+1. `POST /v2/billing/meter_event_session` — creates a short-lived session token (15 min TTL).
+2. `POST /v2/billing/meter_event_stream` — submits events using the session token as auth.
+
+**Architecture challenge:** This is NOT a standard `Client.request/2` call. Differences:
+- The base URL is still `https://api.stripe.com` but the path is `/v2/billing/...` (not `/v1/...`).
+- Authentication uses a session token (Bearer), not the API key.
+- The session token expires and must be refreshed.
+- The v2 endpoint accepts JSON body (not form-encoded) — `Content-Type: application/json`.
+
+**Where it hooks in:**
+
+The session creation (`POST /v2/billing/meter_event_session`) can go through `Client.request/2`
+normally — it uses the API key for auth, just a different path. The response contains the session
+token.
+
+The event stream itself needs different header construction:
+- `Authorization: Bearer <session_token>` instead of `Bearer <api_key>`
+- `Content-Type: application/json` instead of `application/x-www-form-urlencoded`
+- Path is `/v2/billing/meter_event_stream`
+
+**Two options:**
+
+*A — Expose raw Transport call in a dedicated module*
+
+`LatticeStripe.Billing.MeterEventStream` holds the session and fires events directly via the
+Transport behaviour, bypassing `Client.request/2`'s header-building. The session is managed
+externally (caller stores the token, checks expiry, calls `refresh_session/2` when needed).
+
+*B — Add v2 path + JSON body support to Client*
+
+Extend `Client.request/2` to accept `content_type: :json` and `auth_token: token` opts in
+`req.opts`. The `build_headers` private function branches on these opts.
+
+**Recommended:** Option B with a thin wrapper module. Rationale: Transport layer already handles
+different content types. Adding `content_type: :json` and `auth_token:` opts to the request
+pipeline is surgical (two branches in `build_headers` and `build_url_and_body`). The
+`MeterEventStream` module exposes a clean public API hiding the v2 complexity.
+
+**New components:**
+- `LatticeStripe.Billing.MeterEventStream` (new public module):
+  - `create_session/2` — calls `/v2/billing/meter_event_session`, returns `%{token: ..., expires_at: ...}`
+  - `send/3` — sends events to `/v2/billing/meter_event_stream` using session token
+  - Session management is the caller's responsibility (Accrue or user app).
+- `Client.request/2` — minor extension: recognize `:auth_token` opt (overrides api_key in auth
+  header) and `:content_type` opt (`:json` triggers JSON encoding + `application/json` header).
+- `Json.Jason` encode path — already exists for webhook, just needs to be callable from Client.
+
+**Integration point:** `Client.build_headers/5` and `build_url_and_body/4`. Targeted changes.
+
+---
+
+### 8. BillingPortal.Configuration CRUDL
+
+**What it does:** Full CRUD on `/v1/billing_portal/configurations`. Create/retrieve/update/list.
+(No delete — Stripe deactivates, not deletes.)
+
+**Where it hooks in:** Follows the exact same resource module pattern as every other CRUDL resource.
+
+**Stripe API operations available (verified):**
+- `POST /v1/billing_portal/configurations` — create
+- `GET /v1/billing_portal/configurations/:id` — retrieve
+- `POST /v1/billing_portal/configurations/:id` — update
+- `GET /v1/billing_portal/configurations` — list
+
+**Key nested structure:** `features` object with sub-objects `customer_update`, `invoice_history`,
+`payment_method_update`, `subscription_cancel`, `subscription_update`. Plus `business_profile`,
+`login_page`, `default_return_url`, `metadata`, `name`.
+
+**New components:**
+- `LatticeStripe.BillingPortal.Configuration` (new resource module) — standard CRUDL pattern.
+- `LatticeStripe.BillingPortal.Configuration.Features` (new nested struct) — wraps the features
+  sub-object. Each sub-feature (CustomerUpdate, InvoiceHistory, etc.) can start as raw maps —
+  promote to typed structs only if Accrue needs to pattern-match their fields.
+- `lib/lattice_stripe/billing_portal/guards.ex` (existing) — add any portal-specific guards here.
+
+**Integration point:** New files. `mix.exs` group update to add `Configuration` to the
+"Customer Portal" ExDoc group.
+
+**What changes:**
+- `lib/lattice_stripe/billing_portal/configuration.ex` (new) — CRUDL resource module.
+- `lib/lattice_stripe/billing_portal/configuration/features.ex` (new) — nested typed struct.
+- `mix.exs` — add `LatticeStripe.BillingPortal.Configuration` to "Customer Portal" group.
+
+---
+
+### 9. Changeset-Style Param Builders
+
+**What it does:** Optional fluent builders for complex nested params like SubscriptionSchedule
+phases and BillingPortal flows. Reduces the friction of building deeply nested maps.
+
+**Where it hooks in:** These are pre-`Client` utilities. They produce the `params` map that the
+caller passes to resource functions. They don't touch the pipeline.
+
+**Approach:** Builder structs with an `encode/1` function that produces the Stripe-ready map:
 
 ```elixir
-defmodule LatticeStripe.Test.Fixtures.BillingPortal do
-  @moduledoc false
+phase =
+  LatticeStripe.Build.Phase.new()
+  |> LatticeStripe.Build.Phase.add_item(price: "price_123", quantity: 1)
+  |> LatticeStripe.Build.Phase.set_iterations(3)
 
-  # Canonical BillingPortal.Session fixture (basic create response)
-  def session(overrides \\ %{}) ...
-
-  # Session with flow_data echoed back (deep-link flow variant)
-  def session_with_flow(overrides \\ %{}) ...
-end
+params = %{"phases" => [LatticeStripe.Build.Phase.encode(phase)]}
 ```
 
-### No existing portal fixtures
+**Scope for v1.2:** Start with the two highest-friction cases:
+1. SubscriptionSchedule phase building (deeply nested, error-prone)
+2. BillingPortal FlowData construction (already has a pre-flight guard — builder can make it
+   impossible to build invalid flow data)
 
-There is no existing `billing_portal_session.ex` or similar in `test/support/fixtures/`. The portal is entirely new in v1.1. The `checkout_session.ex` fixture is the closest structural analogue (Session, create-only, returns `url`).
+**New components:**
+- `LatticeStripe.Build.*` namespace (new, `@moduledoc` showing it's optional DX sugar).
+- Each builder is a plain struct with `new/0`, field setters, and `encode/1 :: map()`.
+- No GenServers, no processes. Pure data transformation.
+
+**Integration point:** Pre-`Client`. No changes to existing pipeline.
 
 ---
 
-## Q4: Build Order Within Each Phase
+## Component Map: New vs Modified
 
-The Phase 17 (Connect) plan structure is the primary precedent. Its six-plan wave matches the v1.1 brief exactly. Confirmed build order:
+### New Components
 
-**Phase 20 (Billing.Meter + MeterEvent + MeterEventAdjustment):**
+| Component | Type | Integration Layer |
+|-----------|------|-------------------|
+| `LatticeStripe.Expand` | New internal module | `from_map/1` in resource modules |
+| `LatticeStripe.Hints` | New internal module | `Error.from_response/3` |
+| `LatticeStripe.Batch` | New public module | Wraps `Client.request/2` |
+| `LatticeStripe.Billing.MeterEventStream` | New public module | Client (with minor extension) |
+| `LatticeStripe.BillingPortal.Configuration` | New resource module | Standard resource pattern |
+| `LatticeStripe.BillingPortal.Configuration.Features` | New nested struct | `Configuration.from_map/1` |
+| `LatticeStripe.Build.*` | New builder modules | Pre-Client, pure data |
+| `guides/circuit-breaker.md` | Documentation | Guide only, no code |
+| `guides/performance.md` | Documentation | Guide only, no code |
+| `guides/opentelemetry.md` | Documentation | Guide only, no code |
+| `guides/rate-limits.md` | Documentation | Guide only, no code |
 
-```
-Plan 20-01  Wave 0 bootstrap
-            - Create test/support/fixtures/metering.ex with canonical Meter, MeterEvent,
-              MeterEventAdjustment maps
-            - stripe-mock probe: verify /v1/billing/meters, /v1/billing/meter_events,
-              /v1/billing/meter_event_adjustments all respond (some stripe-mock versions
-              may not have the metering endpoints — document if any endpoint is absent
-              and use fixture-only unit tests for that endpoint)
-            - Dependency: none
+### Modified Components
 
-Plan 20-02  Nested structs (Meter sub-modules)
-            - lib/lattice_stripe/billing/meter/default_aggregation.ex
-            - lib/lattice_stripe/billing/meter/customer_mapping.ex
-            - lib/lattice_stripe/billing/meter/value_settings.ex
-            - lib/lattice_stripe/billing/meter/status_transitions.ex
-            - Unit tests: from_map/1 round-trips, nil guard, extra field split
-            - Dependency: fixtures from 20-01 (for from_map test inputs)
+| Component | Change | Scope |
+|-----------|--------|-------|
+| `LatticeStripe.Error` | Add `:hint` field; call `Hints.suggest/1` in `from_response/3` | Backward compatible (nil default) |
+| `LatticeStripe.Telemetry` | Add `:rate_limit_reason` to stop metadata | Additive to existing metadata map |
+| `LatticeStripe.Client` | Add `:auth_token` and `:content_type` opts recognition | Gated by opt presence, backward compatible |
+| Per-resource `from_map/1` (expandable fields) | Call `Expand.decode_field/1` on expandable fields | Additive — no behavior change when expand not used |
+| Slow resource operations (list/search/stream) | `Keyword.put_new(opts, :timeout, N)` | No-op when caller provides explicit timeout |
+| `mix.exs` groups_for_modules | Add Configuration to Customer Portal group | Additive |
 
-Plan 20-03  Billing.Meter resource module
-            - lib/lattice_stripe/billing/meter.ex
-            - create/3, retrieve/3, update/4, list/3, stream/3
-            - deactivate/3, reactivate/3 (POST to /v1/billing/meters/:id/deactivate etc.)
-            - Bang variants for all
-            - Struct embeds nested structs from 20-02 via from_map/1
-            - Unit tests using Mox + fixtures from 20-01
-            - Dependency: nested structs from 20-02
+### Unchanged Components
 
-Plan 20-04  Billing.MeterEvent + Billing.MeterEventAdjustment
-            - lib/lattice_stripe/billing/meter_event.ex (create/3 only)
-            - lib/lattice_stripe/billing/meter_event_adjustment.ex (create/3 only)
-            - Both minimal structs (no nested sub-structs needed)
-            - idempotency_key: and stripe_account: opts threaded through (standard Client opts)
-            - Unit tests using Mox + fixtures from 20-01
-            - Dependency: 20-01 fixtures only (no dependency on 20-02/03)
-              Note: 20-04 CAN be built in parallel with 20-03 if desired
-
-Plan 20-05  Integration tests
-            - test/integration/meter_integration_test.exs
-            - Lifecycle: create meter → report event → adjust → deactivate → list
-            - Verifies: struct shapes, id prefixes (mtr_...), status transitions
-            - Depends on: 20-03 and 20-04 both complete
-
-Plan 20-06  Guide + ExDoc
-            - guides/metering.md (new)
-            - mix.exs groups_for_modules: add "Billing Metering" group
-            - mix.exs extras: add guides/metering.md
-            - Cross-link from guides/subscriptions.md or guides/getting-started.md
-            - Dependency: 20-03 and 20-04 complete (need real module docs to link)
-```
-
-**Phase 21 (BillingPortal.Session):**
-
-```
-Plan 21-01  Wave 0 bootstrap
-            - Create test/support/fixtures/billing_portal.ex
-            - stripe-mock probe: verify /v1/billing_portal/sessions responds to POST
-            - Dependency: none
-
-Plan 21-02  Nested structs (Session.FlowData)
-            - lib/lattice_stripe/billing_portal/session/flow_data.ex
-            - Unit tests: from_map/1, nil guard, extra field split
-            - Dependency: fixtures from 21-01
-
-Plan 21-03  BillingPortal.Session resource module
-            - lib/lattice_stripe/billing_portal/session.ex
-            - create/3 and create!/3 only — no retrieve, list, update, delete
-            - Resource.require_param!(params, "customer", ...) guard (matches Checkout.Session "mode" guard pattern)
-            - Embeds FlowData via from_map/1 on the `flow` field in the response
-            - Unit tests using Mox + fixtures from 21-01
-            - Dependency: 21-02
-
-Plan 21-04  Integration test + guide
-            - test/integration/billing_portal_session_integration_test.exs
-            - Test: create session returns {:ok, %Session{url: url}} with non-empty url
-            - guides/customer-portal.md (new or extend existing)
-            - mix.exs groups_for_modules: add "Customer Portal" group
-            - mix.exs extras: add guides/customer-portal.md
-            - Dependency: 21-03 complete
-```
-
-**Critical path dependency:**
-- Within Phase 20: 20-02 must precede 20-03 (Meter resource embeds nested structs). 20-01 must precede 20-02 and 20-04. 20-03 and 20-04 can be parallelized. 20-05 requires both 20-03 and 20-04.
-- Within Phase 21: strictly sequential (21-01 → 21-02 → 21-03 → 21-04).
-- Cross-phase: Phase 21 has no code dependency on Phase 20. Planning can begin immediately after Phase 20 scope is locked.
+Transport, RetryStrategy.Default, RetryStrategy behaviour contract, Request, Response struct,
+FormEncoder, Json, List (pagination), Webhook stack, existing resource module public APIs.
 
 ---
 
-## Q5: MeterEventAdjustment as Sibling vs Nested
+## Build Order (Dependency Graph)
 
-**Decision: `LatticeStripe.Billing.MeterEventAdjustment` is a sibling module, NOT nested under `MeterEvent`.**
+Features grouped by dependency isolation:
 
-Rationale:
+### Isolated — No Dependencies on Other v1.2 Features
 
-1. **Stripe API position.** The endpoint is `/v1/billing/meter_event_adjustments` — a separate top-level resource under `/v1/billing/`, not a sub-resource of `/v1/billing/meter_events/:id/adjustments`. Stripe's object is `"billing.meter_event_adjustment"`, distinct from `"billing.meter_event"`. The API shape mirrors other sibling corrections (e.g., `TransferReversal` is a sibling of `Transfer`, not `Transfer.Reversal`).
+These can be built in any order, in parallel if desired:
 
-2. **v1.0 precedent.** `LatticeStripe.TransferReversal` lives at `lib/lattice_stripe/transfer_reversal.ex` as a sibling of `LatticeStripe.Transfer`, not `LatticeStripe.Transfer.Reversal`. MeterEventAdjustment follows the same pattern.
+1. **BillingPortal.Configuration CRUDL** — pure resource pattern, no new infrastructure needed.
+   Standard template: bootstrap → nested structs → resource module → integration test → guide.
 
-3. **Module usage clarity.** `LatticeStripe.Billing.MeterEventAdjustment.create/3` reads more clearly than `LatticeStripe.Billing.MeterEvent.Adjustment.create/3`. The latter implies it's a namespace for a sub-resource type; the former is an independent operation.
+2. **Richer Errors (Hints)** — isolated to `error.ex` + new `hints.ex`. No pipeline changes.
+   Can be a single small plan.
 
-4. **File placement.** `lib/lattice_stripe/billing/meter_event_adjustment.ex` alongside `lib/lattice_stripe/billing/meter_event.ex`. No sub-directory needed.
+3. **Per-Operation Timeouts** — surgical `Keyword.put_new` across resource modules. Pure audit
+   + one-liner additions. No new modules.
 
-5. **Bundle scope.** Both live in Plan 20-04 per the locked decision D2 — bundled together in one plan, one file per resource.
+4. **Changeset-Style Builders** — new `Build.*` namespace, no changes to existing code.
+   Start with SubscriptionSchedule Phase builder (highest pain point) + FlowData builder.
 
----
+5. **Circuit Breaker Guide** — documentation only. Can be written anytime.
 
-## New vs Modified Files Summary
+6. **Performance Guide** — documentation only. Covers Finch pool tuning, supervision, warm-up.
 
-### Phase 20 — new files
+7. **OpenTelemetry Integration Guide** — documentation only.
 
-| File | Type |
-|------|------|
-| `lib/lattice_stripe/billing/meter.ex` | New resource module |
-| `lib/lattice_stripe/billing/meter/default_aggregation.ex` | New nested struct |
-| `lib/lattice_stripe/billing/meter/customer_mapping.ex` | New nested struct |
-| `lib/lattice_stripe/billing/meter/value_settings.ex` | New nested struct |
-| `lib/lattice_stripe/billing/meter/status_transitions.ex` | New nested struct |
-| `lib/lattice_stripe/billing/meter_event.ex` | New resource module |
-| `lib/lattice_stripe/billing/meter_event_adjustment.ex` | New resource module |
-| `test/support/fixtures/metering.ex` | New fixture module |
-| `test/integration/meter_integration_test.exs` | New integration test |
-| `guides/metering.md` | New guide |
+### Light Dependency
 
-### Phase 20 — modified files
+8. **Rate-Limit Awareness** — depends on understanding exactly where headers are available in
+   the error flow. Requires reading the Client internals carefully. Minor threading change to
+   Telemetry. Small but requires attention to the internal `{:error, error, resp_headers}` 3-tuple.
 
-| File | Modification |
-|------|--------------|
-| `mix.exs` | Add `"Billing Metering"` group to `groups_for_modules`; add `guides/metering.md` to `extras` |
+9. **Status Atomization Audit (EXPD-05)** — parallel sweep across all resource `from_map/1`
+   functions. No new infrastructure. Fastest to do after familiarizing with the codebase.
 
-### Phase 21 — new files
+### Has Prerequisite
 
-| File | Type |
-|------|------|
-| `lib/lattice_stripe/billing_portal/session.ex` | New resource module |
-| `lib/lattice_stripe/billing_portal/session/flow_data.ex` | New nested struct |
-| `test/support/fixtures/billing_portal.ex` | New fixture module |
-| `test/integration/billing_portal_session_integration_test.exs` | New integration test |
-| `guides/customer-portal.md` | New guide (or extend existing) |
+10. **Expand Deserialization (EXPD-02/03)** — depends on `LatticeStripe.Expand` dispatch module
+    being built first, then per-resource `from_map/1` updates. The EXPD-05 status audit can
+    happen concurrently (different field types).
 
-### Phase 21 — modified files
+11. **meter_event_stream** — depends on `Client.request/2` extension for `:auth_token`/
+    `:content_type` opts (must be done before or alongside the new module). Can be done in one
+    plan that does both the Client extension and the new module.
 
-| File | Modification |
-|------|--------------|
-| `mix.exs` | Add `"Customer Portal"` group to `groups_for_modules`; add `guides/customer-portal.md` to `extras` |
+### Parallel
 
----
+12. **Request Batching (Batch module)** — no changes to Client. Pure wrapper. Can be done
+    anytime. Recommend building after MeterEventStream since concurrent patterns are relevant
+    to high-throughput metering use cases.
 
-## Key Architectural Decisions (v1.1)
-
-| Decision | Rationale | Precedent |
-|----------|-----------|-----------|
-| `BillingPortal` as new top-level namespace, not nested under `Billing` | Stripe uses `/v1/billing_portal/` as distinct prefix; matches `Checkout` namespace pattern | `LatticeStripe.Checkout.Session` in v1.0 |
-| `MeterEventAdjustment` as sibling of `MeterEvent`, not nested | Stripe API is a top-level resource, not a sub-resource; sibling pattern for corrections | `LatticeStripe.TransferReversal` in v1.0 |
-| All four Meter nested structs promoted, even `StatusTransitions` | Matches `Invoice.StatusTransitions` naming convention; gives callers `deactivated_at` access | `lib/lattice_stripe/invoice/status_transitions.ex` |
-| `FlowData` uses `@known_fields + extra` (not simple typed struct) | Flow types can expand; Stripe regularly adds portal flow types | `Subscription.CancellationDetails` pattern |
-| Single `metering.ex` fixture file for all three metering resources | D1/D2 bundles them; they appear together in integration tests | `lib/lattice_stripe/billing/guards.ex` cohesion |
-| `Resource.require_param!` guard on `BillingPortal.Session.create` for `"customer"` | `customer` is the only required param; fail fast pre-network | `Checkout.Session` requires `"mode"` guard |
-| `deactivate/3` and `reactivate/3` as explicit verbs, not `update(params: %{"status" => "inactive"})` | Stripe exposes these as distinct POST endpoints; explicit verb philosophy | `Payout.cancel/4`, `Account.reject/4` in v1.0 |
-| No new foundation layer changes | All infrastructure (Client, Transport, Request, Response, Error, Telemetry, Retry) unchanged | Entire v1.0 foundation |
-
----
-
-## Foundation Architecture (Unchanged from v1.0)
-
-The v1.0 layered architecture is unchanged. New resource modules slot into the Public API Layer without touching any lower layer:
+### Recommended Build Sequence
 
 ```
-+---------------------------------------------------------------+
-|  PUBLIC API LAYER (new modules slot here)                     |
-|  Billing.Meter, Billing.MeterEvent, Billing.MeterEventAdj,   |
-|  BillingPortal.Session — each builds Request structs,         |
-|  delegates to Client, unwraps with Resource helpers           |
-+---------------------------------------------------------------+
-        |
-        v
-+---------------------------------------------------------------+
-|  CLIENT LAYER — LatticeStripe.Client (UNCHANGED)             |
-|  idempotency_key:, stripe_account:, expand: opts already      |
-|  threaded through; metering and portal get them for free      |
-+---------------------------------------------------------------+
-        |
-        v
-+---------------------------------------------------------------+
-|  HTTP / TRANSPORT LAYER — UNCHANGED                          |
-+---------------------------------------------------------------+
+Wave 1 (Quick wins, high value):
+  - Status atomization audit (EXPD-05) — sweep + fix, establishes expand-readiness
+  - BillingPortal.Configuration CRUDL — deferred feature, unblocks Accrue
+  - Richer errors (Hints) — isolated, clear DX improvement
+  - Per-operation timeouts — surgical, quick
+
+Wave 2 (Infrastructure):
+  - Expand deserialization (EXPD-02/03) — builds on EXPD-05 sweep
+  - Rate-limit awareness (telemetry metadata)
+  - meter_event_stream (Client extension + new module)
+
+Wave 3 (DX sugar + docs):
+  - Request batching (Batch module)
+  - Changeset-style builders (Build.*)
+  - Circuit breaker guide
+  - Performance guide
+  - OpenTelemetry guide
+  - LiveBook notebook
 ```
 
-Telemetry spans emit automatically at the Client level for all new resources — no per-resource telemetry additions needed.
+---
+
+## Data Flow Changes
+
+### Before v1.2 (Current)
+
+```
+Client.decode_response → decoded map → Resource.unwrap_singular → from_map/1 → %Struct{}
+                                                                              (expand fields = raw strings or maps)
+```
+
+### After EXPD-02 (Typed Expand)
+
+```
+Client.decode_response → decoded map → Resource.unwrap_singular → from_map/1
+                                                                    → calls Expand.decode_field/1 on expandable fields
+                                                                    → Expand dispatches to SubResource.from_map/1
+                                                                    → %Struct{customer: %Customer{...}}
+```
+
+### After Rate-Limit Awareness
+
+```
+Client.do_request → {:error, error, resp_headers}
+  → maybe_retry → Telemetry.build_stop_metadata
+      → extracts Stripe-Rate-Limited-Reason from resp_headers
+      → adds rate_limit_reason: "endpoint-rate" to stop metadata
+      → [:lattice_stripe, :request, :stop] event carries :rate_limit_reason
+```
+
+### After meter_event_stream
+
+```
+MeterEventStream.send(client, session_token, events)
+  → Client.request(client, %Request{
+      method: :post,
+      path: "/v2/billing/meter_event_stream",
+      params: events,
+      opts: [auth_token: session_token, content_type: :json]
+    })
+  → Client.build_headers detects :auth_token → uses token not api_key
+  → Client.build_url_and_body detects :content_type :json → Json.encode(params)
+```
+
+---
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: GenServer for Circuit Breaker State
+
+**What people do:** Ship a `CircuitBreaker.Server` GenServer inside the library that holds failure
+counts globally.
+**Why it's wrong:** The library doesn't own the user's supervision tree. A library GenServer
+that crashes takes the user's supervision strategy hostage. `:fuse` is purpose-built and battle-tested.
+**Do this instead:** Guide + example `RetryStrategy` using `:fuse`. User starts the fuse supervisor.
+
+### Anti-Pattern 2: Expand Deserialization at the Client Layer
+
+**What people do:** Put expansion logic inside `Client.decode_response/6` — inspect the decoded
+map for known object types and auto-decode.
+**Why it's wrong:** Client doesn't know about resource modules (that creates a circular dependency
+since resource modules call Client). Expand belongs in `from_map/1`.
+**Do this instead:** `Expand.decode_field/1` dispatch in each resource's `from_map/1`.
+
+### Anti-Pattern 3: New Struct Fields for Rate-Limit Info
+
+**What people do:** Add `:rate_limit_reason` to `%Response{}` struct.
+**Why it's wrong:** Rate-limit info only exists on error responses (429), which become `%Error{}`,
+not `%Response{}`. The field would always be nil on success.
+**Do this instead:** Telemetry stop metadata. Users attach handlers; operational signals belong
+in the observability layer.
+
+### Anti-Pattern 4: Modifying the Transport Behaviour for v2 API
+
+**What people do:** Add a new Transport callback for JSON requests or create a separate
+`Transport.V2Finch` adapter.
+**Why it's wrong:** The v2 difference is auth header and content-type, not transport semantics.
+The Transport behaviour is already capable — it takes `headers` and `body` as raw values.
+**Do this instead:** Let `Client.request/2` build different headers/body based on `req.opts`,
+then pass to the existing Transport. No Transport changes needed.
+
+### Anti-Pattern 5: Changeset Builders That Return Requests
+
+**What people do:** Build `Build.Phase.to_request()` or similar that produce `%Request{}` structs.
+**Why it's wrong:** Couples the builder to the request pipeline. Builders should produce Stripe
+param maps, which the caller passes to the existing resource functions.
+**Do this instead:** Builders produce `map()` via `encode/1`. The caller does:
+`SubscriptionSchedule.create(client, %{"phases" => [Build.Phase.encode(phase)]})`.
 
 ---
 
 ## Sources
 
-- `lib/lattice_stripe/billing/guards.ex` — confirms existing `Billing` namespace is internal-only in v1.0
-- `lib/lattice_stripe/checkout/session.ex` — direct precedent for `BillingPortal.Session` namespace and create-only pattern
-- `lib/lattice_stripe/invoice/status_transitions.ex` — simple typed struct pattern (no `extra` field)
-- `lib/lattice_stripe/subscription/cancellation_details.ex` — `@known_fields + extra` nested struct pattern
-- `lib/lattice_stripe/account/capability.ex` — `@known_fields + extra` with atom list variant
-- `lib/lattice_stripe/transfer_reversal.ex` — sibling-not-nested pattern for `MeterEventAdjustment` decision
-- `lib/lattice_stripe/payout.ex` — lifecycle verb pattern (`cancel/4`, `reverse/4`) for `deactivate/3`/`reactivate/3`
-- `mix.exs` — nine-group ExDoc layout to extend with two new groups
-- `test/support/fixtures/checkout_session.ex` — fixture module structure for BillingPortal fixtures
-- `test/support/fixtures/subscription.ex` — `basic/1 + named variants` fixture pattern
-- `test/integration/account_integration_test.exs` — integration test structure (stripe-mock guard, setup_all, shape assertions)
-- `.planning/v1.1-accrue-context.md` — locked decisions D1-D5, phase structure, Accrue field access requirements
+- Direct inspection of `lib/lattice_stripe/client.ex` — pipeline, header building, retry loop
+- Direct inspection of `lib/lattice_stripe/retry_strategy.ex` — behaviour contract
+- Direct inspection of `lib/lattice_stripe/telemetry.ex` — metadata building, event catalog
+- Direct inspection of `lib/lattice_stripe/error.ex` — from_response/3 structure
+- Direct inspection of `lib/lattice_stripe/resource.ex` — unwrap_singular/list pattern
+- Direct inspection of `lib/lattice_stripe/response.ex` — Response struct fields
+- Direct inspection of `lib/lattice_stripe/transport.ex` — Transport behaviour contract
+- Direct inspection of `lib/lattice_stripe/billing/meter_event.ex` — existing metering pattern
+- Direct inspection of `lib/lattice_stripe/billing_portal/session.ex` — BillingPortal namespace
+- [Stripe Rate Limits documentation](https://docs.stripe.com/rate-limits) — `Stripe-Rate-Limited-Reason` header names
+- [Stripe Meter Event Stream v2 API](https://docs.stripe.com/api/v2/billing-meter-stream) — two-step session token auth
+- [Stripe BillingPortal Configuration create](https://docs.stripe.com/api/customer_portal/configurations/create) — available operations and fields
+- [`:fuse` Erlang circuit breaker library](https://github.com/jlouis/fuse) — OTP-native circuit breaker
+- [external_service Elixir library](https://github.com/jvoegele/external_service) — wraps `:fuse` for Elixir
+
+---
+
+*Architecture research for: LatticeStripe v1.2 Production Hardening & DX*
+*Researched: 2026-04-16*
