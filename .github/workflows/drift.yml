@@ -1,0 +1,85 @@
+name: Stripe API Drift Check
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Mondays at 9:00 UTC
+  workflow_dispatch:       # Allow manual trigger from Actions tab
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift-check:
+    name: Stripe API Drift Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-mix-
+
+      - name: Cache _build
+        uses: actions/cache@v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-build-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile
+        run: mix compile
+
+      - name: Ensure drift issue label exists
+        run: |
+          gh label create "stripe-drift" \
+            --color "#e4e669" \
+            --description "Stripe OpenAPI spec fields not yet in @known_fields" \
+            --force
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run drift check
+        id: drift
+        continue-on-error: true
+        run: |
+          mix lattice_stripe.check_drift 2>&1 | tee /tmp/drift_report.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Create or update drift issue
+        if: steps.drift.outputs.exit_code == '1'
+        run: |
+          EXISTING=$(gh issue list \
+            --label "stripe-drift" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          BODY=$(cat /tmp/drift_report.txt)
+          TITLE="Stripe API drift detected - $(date +%Y-%m-%d)"
+
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" \
+              --body "$BODY"
+          else
+            gh issue create \
+              --title "$TITLE" \
+              --body "$BODY" \
+              --label "stripe-drift"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
