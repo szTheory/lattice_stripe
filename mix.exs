@@ -110,7 +110,9 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Billing.Meter.StatusTransitions,
             LatticeStripe.Billing.MeterEvent,
             LatticeStripe.Billing.MeterEventAdjustment,
-            LatticeStripe.Billing.MeterEventAdjustment.Cancel
+            LatticeStripe.Billing.MeterEventAdjustment.Cancel,
+            LatticeStripe.Billing.MeterEventStream,
+            LatticeStripe.Billing.MeterEventStream.Session
           ],
           Connect: [
             LatticeStripe.Account,

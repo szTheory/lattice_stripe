@@ -606,6 +606,189 @@ Never use this in production application paths.
    **permanently lost**. Migrate all reporters to a new `event_name` before
    deactivating. Treat it as a destructive migration, not a pause.
 
+## High-throughput metering (v2 event stream)
+
+For use cases where you need to send **100+ events per second**, the v1
+`MeterEvent.create/3` approach has too much per-request overhead. Each call is
+a separate HTTP request with form-encoding, idempotency key generation, and
+API key authentication overhead.
+
+Stripe's v2 Billing Meter Event Stream API solves this with a session-token
+model and JSON batch encoding. You create a short-lived session once (15 minutes),
+then send batches of up to 100 events per request to a dedicated high-throughput
+host (`meter-events.stripe.com`).
+
+For lower-volume use cases, see `MeterEvent.create/3` above.
+
+### Key differences from v1
+
+| Aspect | v1 `MeterEvent.create/3` | v2 `MeterEventStream.send_events/4` |
+|--------|--------------------------|--------------------------------------|
+| Auth | API key (Bearer) | Session token (Bearer, 15-min TTL) |
+| Host | `api.stripe.com` | `meter-events.stripe.com` |
+| Encoding | form-urlencoded | JSON |
+| Batch size | Single event | Up to 100 events |
+| Response | Returns event object | Returns empty `%{}` |
+| Idempotency | `identifier` body field + `Idempotency-Key` header | `identifier` field per event |
+
+### Two-step usage
+
+**Step 1: Create a session**
+
+Call `MeterEventStream.create_session/2` once. It uses your standard API key
+to POST to `api.stripe.com` and returns a `%Session{}` containing an
+`authentication_token` valid for 15 minutes.
+
+```elixir
+alias LatticeStripe.Billing.MeterEventStream
+
+{:ok, session} = MeterEventStream.create_session(client)
+# session.authentication_token — bearer credential for send_events/4
+# session.expires_at — Unix timestamp when the session expires
+```
+
+**Step 2: Send event batches**
+
+Use the session to send batches of events to `meter-events.stripe.com`. Each
+event map has the same shape as v1: `event_name`, `payload`, and optional
+`identifier` and `timestamp` fields.
+
+```elixir
+events = [
+  %{
+    "event_name" => "api_call",
+    "payload" => %{"stripe_customer_id" => "cus_001", "value" => "1"},
+    "identifier" => "req_abc"
+  },
+  %{
+    "event_name" => "api_call",
+    "payload" => %{"stripe_customer_id" => "cus_002", "value" => "3"},
+    "identifier" => "req_def"
+  }
+]
+
+case MeterEventStream.send_events(client, session, events) do
+  {:ok, %{}} ->
+    # Events accepted — fire-and-forget like v1
+    :ok
+
+  {:error, :session_expired} ->
+    # Session token has expired — create a new session
+    {:ok, new_session} = MeterEventStream.create_session(client)
+    MeterEventStream.send_events(client, new_session, events)
+
+  {:error, %LatticeStripe.Error{} = err} ->
+    # Handle API or connection error
+    Logger.error("meter event stream error", type: err.type, message: err.message)
+    {:error, err}
+end
+```
+
+### Session renewal
+
+Sessions have a 15-minute TTL. `send_events/4` performs a **client-side expiry
+check** before each call — if `session.expires_at` is in the past, it returns
+`{:error, :session_expired}` immediately without making a network request.
+
+If the server returns a 401 with code `billing_meter_event_session_expired`
+(can happen due to clock skew within the TTL window), `send_events/4` also
+normalizes this to `{:error, :session_expired}`.
+
+There is **no automatic session renewal**. The recommended pattern is to hold
+the session in your process state and refresh on expiry:
+
+```elixir
+defmodule MyApp.MeterEventWorker do
+  @moduledoc """
+  GenServer that maintains a live v2 meter event stream session and sends
+  batched events at high throughput.
+  """
+  use GenServer
+
+  alias LatticeStripe.Billing.MeterEventStream
+
+  def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+
+  def init(opts) do
+    client = Keyword.fetch!(opts, :client)
+    {:ok, session} = MeterEventStream.create_session(client)
+    {:ok, %{client: client, session: session}}
+  end
+
+  def send_batch(events), do: GenServer.call(__MODULE__, {:send, events})
+
+  def handle_call({:send, events}, _from, %{client: client, session: session} = state) do
+    case MeterEventStream.send_events(client, session, events) do
+      {:ok, result} ->
+        {:reply, {:ok, result}, state}
+
+      {:error, :session_expired} ->
+        # Renew and retry once
+        {:ok, new_session} = MeterEventStream.create_session(client)
+
+        result = MeterEventStream.send_events(client, new_session, events)
+        {:reply, result, %{state | session: new_session}}
+
+      {:error, _} = error ->
+        {:reply, error, state}
+    end
+  end
+end
+```
+
+### Empty events list
+
+`send_events/4` returns `{:error, %LatticeStripe.Error{type: :invalid_request_error}}`
+immediately if given an empty list. No network call is made.
+
+```elixir
+{:error, %LatticeStripe.Error{type: :invalid_request_error, message: msg}} =
+  MeterEventStream.send_events(client, session, [])
+# msg: "events list cannot be empty"
+```
+
+### Telemetry
+
+`MeterEventStream` emits telemetry spans for both operations:
+
+- `[:lattice_stripe, :meter_event_stream, :create_session, :start | :stop | :exception]`
+- `[:lattice_stripe, :meter_event_stream, :send_events, :start | :stop | :exception]`
+
+Attach handlers to measure session creation overhead and batch send latency
+separately:
+
+```elixir
+:telemetry.attach(
+  "myapp-meter-stream-send",
+  [:lattice_stripe, :meter_event_stream, :send_events, :stop],
+  fn _event, measurements, metadata, _cfg ->
+    ms = System.convert_time_unit(measurements.duration, :native, :millisecond)
+    MyApp.Metrics.histogram("stripe.meter_stream.send_ms", ms, %{status: metadata.status})
+  end,
+  nil
+)
+```
+
+### Security — session token masking
+
+`%MeterEventStream.Session{}` implements a custom `Inspect` protocol that hides
+the `authentication_token` field. The token is a bearer credential valid for
+15 minutes — leaking it in Logger output or crash dumps would allow unauthorized
+event submissions during the TTL window.
+
+```
+iex> IO.inspect(session)
+#LatticeStripe.Billing.MeterEventStream.Session<id: "mes_123",
+  object: "v2.billing.meter_event_session", created: 1712345678,
+  expires_at: 1712346578, livemode: false>
+```
+
+Access the token directly when needed:
+
+```elixir
+session.authentication_token
+```
+
 ## See also
 
 - [subscriptions.md](subscriptions.md#subscription-schedules) — setting up
