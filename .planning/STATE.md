@@ -4,8 +4,8 @@ milestone: v1.2
 milestone_name: — Production Hardening & DX
 status: executing
 stopped_at: Phase 25 context gathered
-last_updated: "2026-04-16T19:51:03.072Z"
-last_activity: 2026-04-16 -- Phase 25 planning complete
+last_updated: "2026-04-16T19:51:25.741Z"
+last_activity: 2026-04-16 -- Phase 25 execution started
 progress:
   total_phases: 12
   completed_phases: 3
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16 after v1.2 milestone start)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 24 — Rate-Limit Awareness & Richer Errors
+**Current focus:** Phase 25 — Performance Guide, Per-Op Timeouts & Connection Warm-Up
 
 ## Current Position
 
 Milestone: v1.2 (Production Hardening & DX)
-Phase: 25
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-16 -- Phase 25 planning complete
+Phase: 25 (Performance Guide, Per-Op Timeouts & Connection Warm-Up) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 25
+Last activity: 2026-04-16 -- Phase 25 execution started
 
 ```
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (0/10 phases)

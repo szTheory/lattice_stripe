@@ -138,10 +138,10 @@ Plans:
   2. A developer can add `operation_timeouts: %{list: 60_000, search: 45_000}` to their `Client.new!/1` config and have those timeouts applied per operation type, with nil as the default (preserving the existing 30s behavior for all callers who do not opt in).
   3. A developer can call `LatticeStripe.warm_up/1` (or equivalent) on application start and have Finch connections pre-established, with the function returning `{:ok, :warmed}` on success.
   4. `guides/performance.md` includes a connection warm-up section with a complete `Application.start/2` example and explains what "warm" means in terms of observable behavior.
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 Plans:
-- [ ] 25-01-PLAN.md — Per-operation timeouts (Config schema + Client struct + classify_operation + timeout resolution + tests)
-- [ ] 25-02-PLAN.md — Connection warm-up (warm_up/1 + warm_up!/1 + Mox tests)
+- [x] 25-01-PLAN.md — Per-operation timeouts (Config schema + Client struct + classify_operation + timeout resolution + tests)
+- [x] 25-02-PLAN.md — Connection warm-up (warm_up/1 + warm_up!/1 + Mox tests)
 - [ ] 25-03-PLAN.md — Performance guide (guides/performance.md + ExDoc wiring)
 
 ### Phase 26: Circuit Breaker & OpenTelemetry Guides
@@ -217,7 +217,7 @@ Plans:
 | 22. Expand Deserialization & Status Atomization | v1.2 | 4/4 | Complete    | 2026-04-16 |
 | 23. BillingPortal.Configuration CRUDL | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 24. Rate-Limit Awareness & Richer Errors | v1.2 | 3/3 | Complete    | 2026-04-16 |
-| 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 0/3 | Planned | - |
+| 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 2/3 | In Progress|  |
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 0/? | Not started | - |
 | 27. Request Batching | v1.2 | 0/? | Not started | - |
 | 28. meter_event_stream v2 | v1.2 | 0/? | Not started | - |
