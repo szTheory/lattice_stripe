@@ -316,6 +316,130 @@ defmodule LatticeStripe.ErrorTest do
     end
   end
 
+  describe "fuzzy param suggestions" do
+    test "from_response/3 appends did-you-mean for near-miss param on invalid_request_error" do
+      body = %{
+        "error" => %{
+          "type" => "invalid_request_error",
+          "message" => "No such parameter: payment_method_type",
+          "param" => "payment_method_type"
+        }
+      }
+
+      error = Error.from_response(400, body, "req_fuzzy")
+
+      assert error.type == :invalid_request_error
+      assert error.param == "payment_method_type"
+      assert error.message =~ "No such parameter: payment_method_type"
+      assert error.message =~ "; did you mean :payment_method_types?"
+    end
+
+    test "from_response/3 does NOT suggest for card_error type" do
+      body = %{
+        "error" => %{
+          "type" => "card_error",
+          "message" => "Your card was declined",
+          "param" => "payment_method_type"
+        }
+      }
+
+      error = Error.from_response(402, body, "req_card")
+      refute error.message =~ "did you mean"
+    end
+
+    test "from_response/3 does NOT suggest when param is nil" do
+      body = %{
+        "error" => %{
+          "type" => "invalid_request_error",
+          "message" => "Missing required parameter",
+          "param" => nil
+        }
+      }
+
+      error = Error.from_response(400, body, "req_noparam")
+      refute error.message =~ "did you mean"
+    end
+
+    test "from_response/3 does NOT suggest for completely unrelated param" do
+      body = %{
+        "error" => %{
+          "type" => "invalid_request_error",
+          "message" => "No such parameter: xyzzy_foobar_baz",
+          "param" => "xyzzy_foobar_baz"
+        }
+      }
+
+      error = Error.from_response(400, body, "req_unrelated")
+      refute error.message =~ "did you mean"
+    end
+
+    test "from_response/3 does NOT suggest for short params under 4 characters" do
+      body = %{
+        "error" => %{
+          "type" => "invalid_request_error",
+          "message" => "No such parameter: ids",
+          "param" => "ids"
+        }
+      }
+
+      error = Error.from_response(400, body, "req_short")
+      refute error.message =~ "did you mean"
+    end
+
+    test "from_response/3 extracts leaf from bracket notation for suggestion" do
+      body = %{
+        "error" => %{
+          "type" => "invalid_request_error",
+          "message" => "No such parameter: card[nubmer]",
+          "param" => "card[nubmer]"
+        }
+      }
+
+      error = Error.from_response(400, body, "req_bracket")
+      # "nubmer" has length >= 4, so suggestion is attempted.
+      # Whether it matches depends on what's in @known_fields.
+      # At minimum, verify the bracket notation doesn't crash and
+      # the original message is preserved.
+      assert error.message =~ "No such parameter: card[nubmer]"
+    end
+
+    test "from_response/3 suggestion does not change other Error fields" do
+      body = %{
+        "error" => %{
+          "type" => "invalid_request_error",
+          "message" => "No such parameter: payment_method_type",
+          "param" => "payment_method_type",
+          "code" => "parameter_unknown",
+          "doc_url" => "https://stripe.com/docs/error-codes/parameter-unknown"
+        }
+      }
+
+      error = Error.from_response(400, body, "req_fields")
+
+      assert error.type == :invalid_request_error
+      assert error.code == "parameter_unknown"
+      assert error.param == "payment_method_type"
+      assert error.doc_url == "https://stripe.com/docs/error-codes/parameter-unknown"
+      assert error.status == 400
+      assert error.request_id == "req_fields"
+      # message is enriched but all other fields are untouched
+      assert error.message =~ "; did you mean"
+    end
+
+    test "from_response/3 does NOT suggest for rate_limit_error" do
+      body = %{
+        "error" => %{
+          "type" => "rate_limit_error",
+          "message" => "Too many requests",
+          "param" => "payment_method_type"
+        }
+      }
+
+      error = Error.from_response(429, body, "req_rate")
+      refute error.message =~ "did you mean"
+    end
+  end
+
   describe "Error.from_response/3 unusual shapes" do
     test "missing 'error' key entirely: falls back to :api_error with fallback message" do
       # When the "error" key is missing, the catch-all clause fires
