@@ -25,6 +25,7 @@ defmodule LatticeStripe.MixProject do
           "guides/client-configuration.md",
           "guides/performance.md",
           "guides/circuit-breaker.md",
+          "guides/opentelemetry.md",
           "guides/payments.md",
           "guides/checkout.md",
           "guides/invoices.md",
@@ -195,7 +196,10 @@ defmodule LatticeStripe.MixProject do
       {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:fuse, "~> 2.5", only: [:dev, :test]}
+      {:fuse, "~> 2.5", only: [:dev, :test]},
+      {:opentelemetry_exporter, "~> 1.8", only: [:dev, :test]},
+      {:opentelemetry, "~> 1.5", only: [:dev, :test]},
+      {:opentelemetry_api, "~> 1.4", only: [:dev, :test]}
     ]
   end
 
