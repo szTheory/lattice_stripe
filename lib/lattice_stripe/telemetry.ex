@@ -296,7 +296,7 @@ defmodule LatticeStripe.Telemetry do
           LatticeStripe.Client.t(),
           LatticeStripe.Request.t(),
           String.t() | nil,
-          (-> {term(), non_neg_integer()})
+          (-> {term(), non_neg_integer(), list()})
         ) :: {:ok, Response.t()} | {:error, Error.t()}
   def request_span(client, req, idempotency_key, fun) do
     if client.telemetry_enabled do
@@ -306,13 +306,13 @@ defmodule LatticeStripe.Telemetry do
         @request_event,
         start_meta,
         fn ->
-          {result, attempts} = fun.()
-          stop_meta = build_stop_metadata(result, idempotency_key, attempts, start_meta)
+          {result, attempts, resp_headers} = fun.()
+          stop_meta = build_stop_metadata(result, idempotency_key, attempts, resp_headers, start_meta)
           {result, stop_meta}
         end
       )
     else
-      {result, _attempts} = fun.()
+      {result, _attempts, _resp_headers} = fun.()
       result
     end
   end
@@ -415,10 +415,17 @@ defmodule LatticeStripe.Telemetry do
     attempts = Map.get(metadata, :attempts, 1)
     attempt_word = if attempts == 1, do: "attempt", else: "attempts"
 
-    message =
-      "#{method} #{metadata.path} #{status_part}in #{duration_ms}ms (#{attempts} #{attempt_word}, #{req_id})"
+    rate_limit_suffix =
+      case Map.get(metadata, :rate_limited_reason) do
+        nil -> ""
+        reason -> " (rate_limited: #{reason})"
+      end
 
-    Logger.log(level, message)
+    message =
+      "#{method} #{metadata.path} #{status_part}in #{duration_ms}ms (#{attempts} #{attempt_word}, #{req_id})#{rate_limit_suffix}"
+
+    effective_level = if metadata[:http_status] == 429, do: :warning, else: level
+    Logger.log(effective_level, message)
   end
 
   @doc false
@@ -469,13 +476,14 @@ defmodule LatticeStripe.Telemetry do
 
   # Build stop metadata for a successful response.
   # Merges all start_meta fields so stop event has full context (RESEARCH Pitfall 2).
-  defp build_stop_metadata({:ok, %Response{} = resp}, _idempotency_key, attempts, start_meta) do
+  defp build_stop_metadata({:ok, %Response{} = resp}, _idempotency_key, attempts, resp_headers, start_meta) do
     Map.merge(start_meta, %{
       status: :ok,
       http_status: resp.status,
       request_id: resp.request_id,
       attempts: attempts,
-      retries: attempts - 1
+      retries: attempts - 1,
+      rate_limited_reason: parse_rate_limited_reason(resp_headers)
     })
   end
 
@@ -484,6 +492,7 @@ defmodule LatticeStripe.Telemetry do
          {:error, %Error{type: :connection_error}},
          idempotency_key,
          attempts,
+         resp_headers,
          start_meta
        ) do
     Map.merge(start_meta, %{
@@ -491,12 +500,13 @@ defmodule LatticeStripe.Telemetry do
       error_type: :connection_error,
       idempotency_key: idempotency_key,
       attempts: attempts,
-      retries: attempts - 1
+      retries: attempts - 1,
+      rate_limited_reason: parse_rate_limited_reason(resp_headers)
     })
   end
 
   # Build stop metadata for an API error (has HTTP status, error type, request_id).
-  defp build_stop_metadata({:error, %Error{} = error}, idempotency_key, attempts, start_meta) do
+  defp build_stop_metadata({:error, %Error{} = error}, idempotency_key, attempts, resp_headers, start_meta) do
     Map.merge(start_meta, %{
       status: :error,
       http_status: error.status,
@@ -504,9 +514,21 @@ defmodule LatticeStripe.Telemetry do
       request_id: error.request_id,
       idempotency_key: idempotency_key,
       attempts: attempts,
-      retries: attempts - 1
+      retries: attempts - 1,
+      rate_limited_reason: parse_rate_limited_reason(resp_headers)
     })
   end
+
+  # Parse the Stripe-Rate-Limited-Reason header value (case-insensitive).
+  # Returns the raw string value or nil when absent. Do NOT atomize — values
+  # are Stripe-controlled strings; atomizing risks atom table growth.
+  defp parse_rate_limited_reason(headers) when is_list(headers) do
+    Enum.find_value(headers, fn {k, v} ->
+      if String.downcase(k) == "stripe-rate-limited-reason", do: v
+    end)
+  end
+
+  defp parse_rate_limited_reason(_), do: nil
 
   # Extract just the path component from a full URL for telemetry metadata.
   # Falls back to the raw URL if parsing fails or produces no path.

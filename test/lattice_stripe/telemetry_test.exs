@@ -58,6 +58,18 @@ defmodule LatticeStripe.TelemetryTest do
     {:ok, %{status: status, headers: [{"request-id", "req_err456"}], body: body}}
   end
 
+  defp rate_limited_response(reason) do
+    body = Jason.encode!(%{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}})
+    {:ok, %{
+      status: 429,
+      headers: [
+        {"stripe-rate-limited-reason", reason},
+        {"request-id", "req_rl_test"}
+      ],
+      body: body
+    }}
+  end
+
   defp get_request(path \\ "/v1/customers/cus_123") do
     %Request{method: :get, path: path}
   end
@@ -1022,6 +1034,77 @@ defmodule LatticeStripe.TelemetryTest do
       LatticeStripe.Telemetry.attach_default_logger()
       # Second call should not raise
       assert :ok = LatticeStripe.Telemetry.attach_default_logger()
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # 11. Rate-limit telemetry
+  # ---------------------------------------------------------------------------
+
+  describe "rate-limit telemetry" do
+    setup do
+      on_exit(fn ->
+        :telemetry.detach(:lattice_stripe_default_logger)
+        :telemetry.detach(:lattice_stripe_auto_advance_logger)
+      end)
+
+      :ok
+    end
+
+    test "stop event includes :rate_limited_reason on 429 with header" do
+      attach_handler([[:lattice_stripe, :request, :stop]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        rate_limited_response("too_many_requests")
+      end)
+
+      Client.request(client, get_request())
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :stop], _measurements, metadata}
+      assert metadata.rate_limited_reason == "too_many_requests"
+    end
+
+    test "stop event has nil :rate_limited_reason on success" do
+      attach_handler([[:lattice_stripe, :request, :stop]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response() end)
+
+      Client.request(client, get_request())
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :stop], _measurements, metadata}
+      assert metadata.rate_limited_reason == nil
+    end
+
+    test "stop event has nil :rate_limited_reason on non-429 error" do
+      attach_handler([[:lattice_stripe, :request, :stop]])
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response(400, "invalid_request_error", "Bad request")
+      end)
+
+      Client.request(client, get_request())
+
+      assert_receive {:telemetry, [:lattice_stripe, :request, :stop], _measurements, metadata}
+      assert metadata.rate_limited_reason == nil
+    end
+
+    test "default logger logs 429 at warning level with rate_limited suffix" do
+      LatticeStripe.Telemetry.attach_default_logger(level: :info)
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        rate_limited_response("too_many_requests")
+      end)
+
+      log = capture_log(fn ->
+        Client.request(client, get_request())
+      end)
+
+      assert log =~ "[warning]"
+      assert log =~ "(rate_limited: too_many_requests)"
     end
   end
 end
