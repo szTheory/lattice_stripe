@@ -37,7 +37,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State (post-v1.1)
 
-**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 29 phases complete (1-11, 14-29). ~81 plans executed. Phase 29 added `LatticeStripe.Builders.SubscriptionSchedule` and `LatticeStripe.Builders.BillingPortal` — optional pipe-based changeset-style param builders for complex nested Stripe params. 1758 tests / 0 failures. Zero-touch release via release-please.
+**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 30 phases complete (1-11, 14-30). ~83 plans executed. Phase 30 added `mix lattice_stripe.check_drift` Mix task and `.github/workflows/drift.yml` weekly cron — CI automatically detects when Stripe's OpenAPI spec adds fields/resources not yet in `@known_fields`. 1783 tests / 0 failures. Zero-touch release via release-please.
 
 **Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
 
