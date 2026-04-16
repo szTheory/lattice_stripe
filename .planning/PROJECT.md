@@ -247,4 +247,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Move shipped requirements to Validated, add next-milestone requirements to Active
 
 ---
-*Last updated: 2026-04-16 — Phase 22 complete (expand deserialization + status atomization). v1.2 milestone in progress.*
+*Last updated: 2026-04-16 — Phase 23 complete (BillingPortal.Configuration CRUDL — 6 typed modules, expand guard, ExDoc grouping). v1.2 milestone in progress.*
