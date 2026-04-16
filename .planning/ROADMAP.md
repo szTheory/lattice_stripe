@@ -199,14 +199,17 @@ Plans:
 - [x] 29-02-PLAN.md — TDD: BillingPortal FlowData builder (4 named constructors) + ExDoc Param Builders group
 
 ### Phase 30: Stripe API Drift Detection
-**Goal**: CI automatically detects when Stripe's OpenAPI specification adds new fields or resources that are not yet reflected in LatticeStripe's `@known_fields` — surfacing drift as a PR comment or failed check before it reaches users.
+**Goal**: CI automatically detects when Stripe's OpenAPI specification adds new fields or resources that are not yet reflected in LatticeStripe's `@known_fields` — surfacing drift as a GitHub issue before it reaches users.
 **Depends on**: Phase 22 (the atomization sweep establishes accurate, consistent `@known_fields` baselines across all 84+ modules that drift detection will compare against)
 **Requirements**: DX-06
 **Success Criteria** (what must be TRUE):
   1. A developer can run `mix lattice_stripe.check_drift` locally and see a report listing any fields present in Stripe's published OpenAPI spec that are absent from the corresponding module's `@known_fields`.
   2. A GitHub Actions cron job runs `mix lattice_stripe.check_drift` weekly and opens a draft PR or creates an issue when drift is detected — with the diff clearly labeled per resource module.
   3. The Mix task exits with a non-zero code when drift is found, making it usable as a CI gate if desired.
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 30-01-PLAN.md — ObjectTypes accessor + Drift core module + test fixture + unit tests
+- [ ] 30-02-PLAN.md — Mix task shell + GitHub Actions weekly drift workflow
 
 ### Phase 31: LiveBook Notebook
 **Goal**: Developers new to LatticeStripe can explore the complete v1.2 API surface interactively — from basic auth through payments, subscriptions, metering, and portal flows — without reading documentation linearly.
@@ -233,5 +236,5 @@ Plans:
 | 27. Request Batching | v1.2 | 1/1 | Complete    | 2026-04-16 |
 | 28. meter_event_stream v2 | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 29. Changeset-Style Param Builders | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 30. Stripe API Drift Detection | v1.2 | 0/? | Not started | - |
+| 30. Stripe API Drift Detection | v1.2 | 0/2 | Planned | - |
 | 31. LiveBook Notebook | v1.2 | 0/? | Not started | - |
