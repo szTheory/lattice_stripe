@@ -61,7 +61,7 @@ defmodule LatticeStripe.SetupIntent do
   object reference and available parameters.
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   # Known top-level fields from the Stripe SetupIntent object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -120,25 +120,25 @@ defmodule LatticeStripe.SetupIntent do
           cancellation_reason: String.t() | nil,
           client_secret: String.t() | nil,
           created: integer() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           customer_account: map() | nil,
           description: String.t() | nil,
           excluded_payment_method_types: [String.t()] | nil,
           flow_directions: [String.t()] | nil,
           last_setup_error: map() | nil,
-          latest_attempt: String.t() | map() | nil,
+          latest_attempt: map() | String.t() | nil,
           livemode: boolean() | nil,
           mandate: String.t() | nil,
           metadata: map() | nil,
           next_action: map() | nil,
           on_behalf_of: String.t() | nil,
-          payment_method: String.t() | nil,
+          payment_method: LatticeStripe.PaymentMethod.t() | String.t() | nil,
           payment_method_configuration_details: map() | nil,
           payment_method_options: map() | nil,
           payment_method_types: [String.t()] | nil,
           single_use_mandate: String.t() | nil,
-          status: String.t() | nil,
-          usage: String.t() | nil,
+          status: atom() | String.t() | nil,
+          usage: atom() | String.t() | nil,
           extra: map()
         }
 
@@ -470,37 +470,61 @@ defmodule LatticeStripe.SetupIntent do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
+    {known, extra} = Map.split(map, @known_fields)
+
     %__MODULE__{
-      id: map["id"],
-      object: map["object"] || "setup_intent",
-      application: map["application"],
-      attach_to_self: map["attach_to_self"],
-      automatic_payment_methods: map["automatic_payment_methods"],
-      cancellation_reason: map["cancellation_reason"],
-      client_secret: map["client_secret"],
-      created: map["created"],
-      customer: map["customer"],
-      customer_account: map["customer_account"],
-      description: map["description"],
-      excluded_payment_method_types: map["excluded_payment_method_types"],
-      flow_directions: map["flow_directions"],
-      last_setup_error: map["last_setup_error"],
-      latest_attempt: map["latest_attempt"],
-      livemode: map["livemode"],
-      mandate: map["mandate"],
-      metadata: map["metadata"],
-      next_action: map["next_action"],
-      on_behalf_of: map["on_behalf_of"],
-      payment_method: map["payment_method"],
-      payment_method_configuration_details: map["payment_method_configuration_details"],
-      payment_method_options: map["payment_method_options"],
-      payment_method_types: map["payment_method_types"],
-      single_use_mandate: map["single_use_mandate"],
-      status: map["status"],
-      usage: map["usage"],
-      extra: Map.drop(map, @known_fields)
+      id: known["id"],
+      object: known["object"] || "setup_intent",
+      application: known["application"],
+      attach_to_self: known["attach_to_self"],
+      automatic_payment_methods: known["automatic_payment_methods"],
+      cancellation_reason: known["cancellation_reason"],
+      client_secret: known["client_secret"],
+      created: known["created"],
+      customer:
+        (if is_map(known["customer"]),
+          do: ObjectTypes.maybe_deserialize(known["customer"]),
+          else: known["customer"]),
+      customer_account: known["customer_account"],
+      description: known["description"],
+      excluded_payment_method_types: known["excluded_payment_method_types"],
+      flow_directions: known["flow_directions"],
+      last_setup_error: known["last_setup_error"],
+      latest_attempt: known["latest_attempt"],
+      livemode: known["livemode"],
+      mandate: known["mandate"],
+      metadata: known["metadata"],
+      next_action: known["next_action"],
+      on_behalf_of: known["on_behalf_of"],
+      payment_method:
+        (if is_map(known["payment_method"]),
+          do: ObjectTypes.maybe_deserialize(known["payment_method"]),
+          else: known["payment_method"]),
+      payment_method_configuration_details: known["payment_method_configuration_details"],
+      payment_method_options: known["payment_method_options"],
+      payment_method_types: known["payment_method_types"],
+      single_use_mandate: known["single_use_mandate"],
+      status: atomize_status(known["status"]),
+      usage: atomize_usage(known["usage"]),
+      extra: extra
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
+
+  defp atomize_status("requires_payment_method"), do: :requires_payment_method
+  defp atomize_status("requires_confirmation"),   do: :requires_confirmation
+  defp atomize_status("requires_action"),         do: :requires_action
+  defp atomize_status("processing"),              do: :processing
+  defp atomize_status("canceled"),                do: :canceled
+  defp atomize_status("succeeded"),               do: :succeeded
+  defp atomize_status(other),                     do: other
+
+  defp atomize_usage("off_session"), do: :off_session
+  defp atomize_usage("on_session"),  do: :on_session
+  defp atomize_usage(other),         do: other
 end
 
 defimpl Inspect, for: LatticeStripe.SetupIntent do

@@ -58,7 +58,7 @@ defmodule LatticeStripe.PaymentIntent do
   object reference and available parameters.
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   # Known top-level fields from the Stripe PaymentIntent object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -145,18 +145,18 @@ defmodule LatticeStripe.PaymentIntent do
           confirmation_method: String.t() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           customer_account: map() | nil,
           description: String.t() | nil,
           excluded_payment_method_types: [String.t()] | nil,
           hooks: map() | nil,
           last_payment_error: map() | nil,
-          latest_charge: String.t() | nil,
+          latest_charge: LatticeStripe.Charge.t() | String.t() | nil,
           livemode: boolean() | nil,
           metadata: map() | nil,
           next_action: map() | nil,
           on_behalf_of: String.t() | nil,
-          payment_method: String.t() | nil,
+          payment_method: LatticeStripe.PaymentMethod.t() | String.t() | nil,
           payment_method_configuration_details: map() | nil,
           payment_method_options: map() | nil,
           payment_method_types: [String.t()] | nil,
@@ -168,7 +168,7 @@ defmodule LatticeStripe.PaymentIntent do
           source: String.t() | nil,
           statement_descriptor: String.t() | nil,
           statement_descriptor_suffix: String.t() | nil,
-          status: String.t() | nil,
+          status: atom() | String.t() | nil,
           transfer_data: map() | nil,
           transfer_group: String.t() | nil,
           extra: map()
@@ -569,52 +569,76 @@ defmodule LatticeStripe.PaymentIntent do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
+    {known, extra} = Map.split(map, @known_fields)
+
     %__MODULE__{
-      id: map["id"],
-      object: map["object"] || "payment_intent",
-      amount: map["amount"],
-      amount_capturable: map["amount_capturable"],
-      amount_details: map["amount_details"],
-      amount_received: map["amount_received"],
-      application: map["application"],
-      application_fee_amount: map["application_fee_amount"],
-      automatic_payment_methods: map["automatic_payment_methods"],
-      canceled_at: map["canceled_at"],
-      cancellation_reason: map["cancellation_reason"],
-      capture_method: map["capture_method"],
-      client_secret: map["client_secret"],
-      confirmation_method: map["confirmation_method"],
-      created: map["created"],
-      currency: map["currency"],
-      customer: map["customer"],
-      customer_account: map["customer_account"],
-      description: map["description"],
-      excluded_payment_method_types: map["excluded_payment_method_types"],
-      hooks: map["hooks"],
-      last_payment_error: map["last_payment_error"],
-      latest_charge: map["latest_charge"],
-      livemode: map["livemode"],
-      metadata: map["metadata"],
-      next_action: map["next_action"],
-      on_behalf_of: map["on_behalf_of"],
-      payment_method: map["payment_method"],
-      payment_method_configuration_details: map["payment_method_configuration_details"],
-      payment_method_options: map["payment_method_options"],
-      payment_method_types: map["payment_method_types"],
-      processing: map["processing"],
-      receipt_email: map["receipt_email"],
-      review: map["review"],
-      setup_future_usage: map["setup_future_usage"],
-      shipping: map["shipping"],
-      source: map["source"],
-      statement_descriptor: map["statement_descriptor"],
-      statement_descriptor_suffix: map["statement_descriptor_suffix"],
-      status: map["status"],
-      transfer_data: map["transfer_data"],
-      transfer_group: map["transfer_group"],
-      extra: Map.drop(map, @known_fields)
+      id: known["id"],
+      object: known["object"] || "payment_intent",
+      amount: known["amount"],
+      amount_capturable: known["amount_capturable"],
+      amount_details: known["amount_details"],
+      amount_received: known["amount_received"],
+      application: known["application"],
+      application_fee_amount: known["application_fee_amount"],
+      automatic_payment_methods: known["automatic_payment_methods"],
+      canceled_at: known["canceled_at"],
+      cancellation_reason: known["cancellation_reason"],
+      capture_method: known["capture_method"],
+      client_secret: known["client_secret"],
+      confirmation_method: known["confirmation_method"],
+      created: known["created"],
+      currency: known["currency"],
+      customer:
+        (if is_map(known["customer"]),
+          do: ObjectTypes.maybe_deserialize(known["customer"]),
+          else: known["customer"]),
+      customer_account: known["customer_account"],
+      description: known["description"],
+      excluded_payment_method_types: known["excluded_payment_method_types"],
+      hooks: known["hooks"],
+      last_payment_error: known["last_payment_error"],
+      latest_charge:
+        (if is_map(known["latest_charge"]),
+          do: ObjectTypes.maybe_deserialize(known["latest_charge"]),
+          else: known["latest_charge"]),
+      livemode: known["livemode"],
+      metadata: known["metadata"],
+      next_action: known["next_action"],
+      on_behalf_of: known["on_behalf_of"],
+      payment_method:
+        (if is_map(known["payment_method"]),
+          do: ObjectTypes.maybe_deserialize(known["payment_method"]),
+          else: known["payment_method"]),
+      payment_method_configuration_details: known["payment_method_configuration_details"],
+      payment_method_options: known["payment_method_options"],
+      payment_method_types: known["payment_method_types"],
+      processing: known["processing"],
+      receipt_email: known["receipt_email"],
+      review: known["review"],
+      setup_future_usage: known["setup_future_usage"],
+      shipping: known["shipping"],
+      source: known["source"],
+      statement_descriptor: known["statement_descriptor"],
+      statement_descriptor_suffix: known["statement_descriptor_suffix"],
+      status: atomize_status(known["status"]),
+      transfer_data: known["transfer_data"],
+      transfer_group: known["transfer_group"],
+      extra: extra
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
+
+  defp atomize_status("requires_payment_method"), do: :requires_payment_method
+  defp atomize_status("requires_confirmation"),   do: :requires_confirmation
+  defp atomize_status("requires_action"),         do: :requires_action
+  defp atomize_status("processing"),              do: :processing
+  defp atomize_status("requires_capture"),        do: :requires_capture
+  defp atomize_status("canceled"),                do: :canceled
+  defp atomize_status("succeeded"),               do: :succeeded
+  defp atomize_status(other),                     do: other
 end
 
 defimpl Inspect, for: LatticeStripe.PaymentIntent do

@@ -69,7 +69,7 @@ defmodule LatticeStripe.Checkout.Session do
   """
 
   alias LatticeStripe.Checkout.LineItem
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   # Known top-level fields from the Stripe Checkout Session object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -174,38 +174,38 @@ defmodule LatticeStripe.Checkout.Session do
           currency_conversion: map() | nil,
           custom_fields: [map()] | nil,
           custom_text: map() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           customer_creation: String.t() | nil,
           customer_details: map() | nil,
           customer_email: String.t() | nil,
           discounts: [map()] | nil,
           expires_at: integer() | nil,
-          invoice: String.t() | nil,
+          invoice: LatticeStripe.Invoice.t() | String.t() | nil,
           invoice_creation: map() | nil,
           line_items: map() | nil,
           livemode: boolean() | nil,
           locale: String.t() | nil,
           metadata: map() | nil,
-          mode: String.t() | nil,
-          payment_intent: String.t() | nil,
+          mode: atom() | String.t() | nil,
+          payment_intent: LatticeStripe.PaymentIntent.t() | String.t() | nil,
           payment_link: String.t() | nil,
           payment_method_collection: String.t() | nil,
           payment_method_configuration_details: map() | nil,
           payment_method_options: map() | nil,
           payment_method_types: [String.t()] | nil,
-          payment_status: String.t() | nil,
+          payment_status: atom() | String.t() | nil,
           phone_number_collection: map() | nil,
           recovered_from: String.t() | nil,
           redirect_on_completion: String.t() | nil,
           return_url: String.t() | nil,
-          setup_intent: String.t() | nil,
+          setup_intent: LatticeStripe.SetupIntent.t() | String.t() | nil,
           shipping_address_collection: map() | nil,
           shipping_cost: map() | nil,
           shipping_details: map() | nil,
           shipping_options: [map()] | nil,
-          status: String.t() | nil,
+          status: atom() | String.t() | nil,
           submit_type: String.t() | nil,
-          subscription: String.t() | nil,
+          subscription: LatticeStripe.Subscription.t() | String.t() | nil,
           success_url: String.t() | nil,
           tax_id_collection: map() | nil,
           total_details: map() | nil,
@@ -593,66 +593,102 @@ defmodule LatticeStripe.Checkout.Session do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
+    {known, extra} = Map.split(map, @known_fields)
+
     %__MODULE__{
-      id: map["id"],
-      object: map["object"] || "checkout.session",
-      adaptive_pricing: map["adaptive_pricing"],
-      after_expiration: map["after_expiration"],
-      allow_promotion_codes: map["allow_promotion_codes"],
-      amount_subtotal: map["amount_subtotal"],
-      amount_total: map["amount_total"],
-      automatic_tax: map["automatic_tax"],
-      billing_address_collection: map["billing_address_collection"],
-      cancel_url: map["cancel_url"],
-      client_reference_id: map["client_reference_id"],
-      client_secret: map["client_secret"],
-      consent: map["consent"],
-      consent_collection: map["consent_collection"],
-      created: map["created"],
-      currency: map["currency"],
-      currency_conversion: map["currency_conversion"],
-      custom_fields: map["custom_fields"],
-      custom_text: map["custom_text"],
-      customer: map["customer"],
-      customer_creation: map["customer_creation"],
-      customer_details: map["customer_details"],
-      customer_email: map["customer_email"],
-      discounts: map["discounts"],
-      expires_at: map["expires_at"],
-      invoice: map["invoice"],
-      invoice_creation: map["invoice_creation"],
-      line_items: map["line_items"],
-      livemode: map["livemode"],
-      locale: map["locale"],
-      metadata: map["metadata"],
-      mode: map["mode"],
-      payment_intent: map["payment_intent"],
-      payment_link: map["payment_link"],
-      payment_method_collection: map["payment_method_collection"],
-      payment_method_configuration_details: map["payment_method_configuration_details"],
-      payment_method_options: map["payment_method_options"],
-      payment_method_types: map["payment_method_types"],
-      payment_status: map["payment_status"],
-      phone_number_collection: map["phone_number_collection"],
-      recovered_from: map["recovered_from"],
-      redirect_on_completion: map["redirect_on_completion"],
-      return_url: map["return_url"],
-      setup_intent: map["setup_intent"],
-      shipping_address_collection: map["shipping_address_collection"],
-      shipping_cost: map["shipping_cost"],
-      shipping_details: map["shipping_details"],
-      shipping_options: map["shipping_options"],
-      status: map["status"],
-      submit_type: map["submit_type"],
-      subscription: map["subscription"],
-      success_url: map["success_url"],
-      tax_id_collection: map["tax_id_collection"],
-      total_details: map["total_details"],
-      ui_mode: map["ui_mode"],
-      url: map["url"],
-      extra: Map.drop(map, @known_fields)
+      id: known["id"],
+      object: known["object"] || "checkout.session",
+      adaptive_pricing: known["adaptive_pricing"],
+      after_expiration: known["after_expiration"],
+      allow_promotion_codes: known["allow_promotion_codes"],
+      amount_subtotal: known["amount_subtotal"],
+      amount_total: known["amount_total"],
+      automatic_tax: known["automatic_tax"],
+      billing_address_collection: known["billing_address_collection"],
+      cancel_url: known["cancel_url"],
+      client_reference_id: known["client_reference_id"],
+      client_secret: known["client_secret"],
+      consent: known["consent"],
+      consent_collection: known["consent_collection"],
+      created: known["created"],
+      currency: known["currency"],
+      currency_conversion: known["currency_conversion"],
+      custom_fields: known["custom_fields"],
+      custom_text: known["custom_text"],
+      customer:
+        if is_map(known["customer"]),
+          do: ObjectTypes.maybe_deserialize(known["customer"]),
+          else: known["customer"],
+      customer_creation: known["customer_creation"],
+      customer_details: known["customer_details"],
+      customer_email: known["customer_email"],
+      discounts: known["discounts"],
+      expires_at: known["expires_at"],
+      invoice:
+        if is_map(known["invoice"]),
+          do: ObjectTypes.maybe_deserialize(known["invoice"]),
+          else: known["invoice"],
+      invoice_creation: known["invoice_creation"],
+      line_items: known["line_items"],
+      livemode: known["livemode"],
+      locale: known["locale"],
+      metadata: known["metadata"],
+      mode: atomize_mode(known["mode"]),
+      payment_intent:
+        if is_map(known["payment_intent"]),
+          do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
+          else: known["payment_intent"],
+      payment_link: known["payment_link"],
+      payment_method_collection: known["payment_method_collection"],
+      payment_method_configuration_details: known["payment_method_configuration_details"],
+      payment_method_options: known["payment_method_options"],
+      payment_method_types: known["payment_method_types"],
+      payment_status: atomize_payment_status(known["payment_status"]),
+      phone_number_collection: known["phone_number_collection"],
+      recovered_from: known["recovered_from"],
+      redirect_on_completion: known["redirect_on_completion"],
+      return_url: known["return_url"],
+      setup_intent:
+        if is_map(known["setup_intent"]),
+          do: ObjectTypes.maybe_deserialize(known["setup_intent"]),
+          else: known["setup_intent"],
+      shipping_address_collection: known["shipping_address_collection"],
+      shipping_cost: known["shipping_cost"],
+      shipping_details: known["shipping_details"],
+      shipping_options: known["shipping_options"],
+      status: atomize_status(known["status"]),
+      submit_type: known["submit_type"],
+      subscription:
+        if is_map(known["subscription"]),
+          do: ObjectTypes.maybe_deserialize(known["subscription"]),
+          else: known["subscription"],
+      success_url: known["success_url"],
+      tax_id_collection: known["tax_id_collection"],
+      total_details: known["total_details"],
+      ui_mode: known["ui_mode"],
+      url: known["url"],
+      extra: extra
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
+
+  defp atomize_status("open"),     do: :open
+  defp atomize_status("complete"), do: :complete
+  defp atomize_status("expired"),  do: :expired
+  defp atomize_status(other),      do: other
+
+  defp atomize_mode("payment"),      do: :payment
+  defp atomize_mode("setup"),        do: :setup
+  defp atomize_mode("subscription"), do: :subscription
+  defp atomize_mode(other),          do: other
+
+  defp atomize_payment_status("paid"),                do: :paid
+  defp atomize_payment_status("unpaid"),              do: :unpaid
+  defp atomize_payment_status("no_payment_required"), do: :no_payment_required
+  defp atomize_payment_status(other),                 do: other
 end
 
 defimpl Inspect, for: LatticeStripe.Checkout.Session do

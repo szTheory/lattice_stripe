@@ -33,6 +33,8 @@ defmodule LatticeStripe.BankAccount do
   - https://docs.stripe.com/api/external_account_bank_accounts
   """
 
+  alias LatticeStripe.ObjectTypes
+
   # Known top-level fields. String sigil (no `a`) matches Jason's default string-key output.
   @known_fields ~w[
     id object account account_holder_name account_holder_type account_type
@@ -73,13 +75,13 @@ defmodule LatticeStripe.BankAccount do
           bank_name: String.t() | nil,
           country: String.t() | nil,
           currency: String.t() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           default_for_currency: boolean() | nil,
           fingerprint: String.t() | nil,
           last4: String.t() | nil,
           metadata: map() | nil,
           routing_number: String.t() | nil,
-          status: String.t() | nil,
+          status: atom() | String.t() | nil,
           extra: map()
         }
 
@@ -93,27 +95,43 @@ defmodule LatticeStripe.BankAccount do
   def cast(nil), do: nil
 
   def cast(map) when is_map(map) do
+    {known, extra} = Map.split(map, @known_fields)
+
     %__MODULE__{
-      id: map["id"],
-      object: map["object"] || "bank_account",
-      account: map["account"],
-      account_holder_name: map["account_holder_name"],
-      account_holder_type: map["account_holder_type"],
-      account_type: map["account_type"],
-      available_payout_methods: map["available_payout_methods"],
-      bank_name: map["bank_name"],
-      country: map["country"],
-      currency: map["currency"],
-      customer: map["customer"],
-      default_for_currency: map["default_for_currency"],
-      fingerprint: map["fingerprint"],
-      last4: map["last4"],
-      metadata: map["metadata"],
-      routing_number: map["routing_number"],
-      status: map["status"],
-      extra: Map.drop(map, @known_fields)
+      id: known["id"],
+      object: known["object"] || "bank_account",
+      account: known["account"],
+      account_holder_name: known["account_holder_name"],
+      account_holder_type: known["account_holder_type"],
+      account_type: known["account_type"],
+      available_payout_methods: known["available_payout_methods"],
+      bank_name: known["bank_name"],
+      country: known["country"],
+      currency: known["currency"],
+      customer:
+        if is_map(known["customer"]),
+          do: ObjectTypes.maybe_deserialize(known["customer"]),
+          else: known["customer"],
+      default_for_currency: known["default_for_currency"],
+      fingerprint: known["fingerprint"],
+      last4: known["last4"],
+      metadata: known["metadata"],
+      routing_number: known["routing_number"],
+      status: atomize_status(known["status"]),
+      extra: extra
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
+
+  defp atomize_status("new"),                 do: :new
+  defp atomize_status("validated"),           do: :validated
+  defp atomize_status("verified"),            do: :verified
+  defp atomize_status("verification_failed"), do: :verification_failed
+  defp atomize_status("errored"),             do: :errored
+  defp atomize_status(other),                 do: other
 
   @doc "Alias for `cast/1`. Provided for callers that prefer the `from_map` naming."
   @spec from_map(map() | nil) :: t() | nil

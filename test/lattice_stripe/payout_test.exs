@@ -38,7 +38,7 @@ defmodule LatticeStripe.PayoutTest do
         ok_response(basic(%{"method" => "instant"}))
       end)
 
-      assert {:ok, %Payout{method: "instant"}} =
+      assert {:ok, %Payout{method: :instant}} =
                Payout.create(client, %{
                  "amount" => 5000,
                  "currency" => "usd",
@@ -175,7 +175,7 @@ defmodule LatticeStripe.PayoutTest do
         ok_response(cancelled())
       end)
 
-      assert {:ok, %Payout{status: "canceled"}} =
+      assert {:ok, %Payout{status: :canceled}} =
                Payout.cancel(client, "po_1OoMpqJ2eZvKYlo20wxYzAbC")
     end
   end
@@ -350,6 +350,131 @@ defmodule LatticeStripe.PayoutTest do
   end
 
   # ---------------------------------------------------------------------------
+  # from_map/1 — atomization
+  # ---------------------------------------------------------------------------
+
+  describe "from_map/1 status atomization" do
+    test "atomizes 'paid' to :paid" do
+      payout = Payout.from_map(basic(%{"status" => "paid"}))
+      assert payout.status == :paid
+    end
+
+    test "atomizes 'pending' to :pending" do
+      payout = Payout.from_map(basic(%{"status" => "pending"}))
+      assert payout.status == :pending
+    end
+
+    test "atomizes 'in_transit' to :in_transit" do
+      payout = Payout.from_map(basic(%{"status" => "in_transit"}))
+      assert payout.status == :in_transit
+    end
+
+    test "atomizes 'canceled' to :canceled" do
+      payout = Payout.from_map(basic(%{"status" => "canceled"}))
+      assert payout.status == :canceled
+    end
+
+    test "atomizes 'failed' to :failed" do
+      payout = Payout.from_map(basic(%{"status" => "failed"}))
+      assert payout.status == :failed
+    end
+
+    test "passes through unknown status string" do
+      payout = Payout.from_map(basic(%{"status" => "future_status"}))
+      assert payout.status == "future_status"
+    end
+
+    test "passes through nil status" do
+      payout = Payout.from_map(basic(%{"status" => nil}))
+      assert payout.status == nil
+    end
+  end
+
+  describe "from_map/1 type atomization" do
+    test "atomizes 'bank_account' to :bank_account" do
+      payout = Payout.from_map(basic(%{"type" => "bank_account"}))
+      assert payout.type == :bank_account
+    end
+
+    test "atomizes 'card' to :card" do
+      payout = Payout.from_map(basic(%{"type" => "card"}))
+      assert payout.type == :card
+    end
+
+    test "passes through unknown type string" do
+      payout = Payout.from_map(basic(%{"type" => "future_type"}))
+      assert payout.type == "future_type"
+    end
+  end
+
+  describe "from_map/1 method atomization" do
+    test "atomizes 'standard' to :standard" do
+      payout = Payout.from_map(basic(%{"method" => "standard"}))
+      assert payout.method == :standard
+    end
+
+    test "atomizes 'instant' to :instant" do
+      payout = Payout.from_map(basic(%{"method" => "instant"}))
+      assert payout.method == :instant
+    end
+
+    test "passes through unknown method string" do
+      payout = Payout.from_map(basic(%{"method" => "future_method"}))
+      assert payout.method == "future_method"
+    end
+  end
+
+  describe "from_map/1 expand guards" do
+    test "balance_transaction stays as string when not expanded" do
+      payout = Payout.from_map(basic(%{"balance_transaction" => "txn_abc"}))
+      assert payout.balance_transaction == "txn_abc"
+    end
+
+    test "balance_transaction dispatches to BalanceTransaction.from_map when expanded map" do
+      payout =
+        Payout.from_map(
+          basic(%{
+            "balance_transaction" => %{
+              "id" => "txn_abc",
+              "object" => "balance_transaction",
+              "amount" => 1000,
+              "currency" => "usd"
+            }
+          })
+        )
+
+      assert %LatticeStripe.BalanceTransaction{id: "txn_abc"} = payout.balance_transaction
+    end
+
+    test "destination dispatches to BankAccount.from_map when expanded bank_account map" do
+      payout = Payout.from_map(with_destination_expanded())
+      assert %LatticeStripe.BankAccount{id: "ba_test_dest_expanded"} = payout.destination
+    end
+
+    test "failure_balance_transaction stays as nil when absent" do
+      payout = Payout.from_map(basic())
+      assert payout.failure_balance_transaction == nil
+    end
+
+    test "failure_balance_transaction dispatches to BalanceTransaction.from_map when expanded" do
+      payout =
+        Payout.from_map(
+          basic(%{
+            "failure_balance_transaction" => %{
+              "id" => "txn_fail",
+              "object" => "balance_transaction",
+              "amount" => -5000,
+              "currency" => "usd"
+            }
+          })
+        )
+
+      assert %LatticeStripe.BalanceTransaction{id: "txn_fail"} =
+               payout.failure_balance_transaction
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Module surface — D-03 / D-04 guards
   # ---------------------------------------------------------------------------
 
@@ -439,7 +564,7 @@ defmodule LatticeStripe.PayoutTest do
       client = test_client()
       expect(LatticeStripe.MockTransport, :request, fn _req -> ok_response(cancelled()) end)
 
-      assert %Payout{status: "canceled"} = Payout.cancel!(client, "po_1OoMpqJ2eZvKYlo20wxYzAbC")
+      assert %Payout{status: :canceled} = Payout.cancel!(client, "po_1OoMpqJ2eZvKYlo20wxYzAbC")
     end
 
     test "reverse! returns bare struct on success" do

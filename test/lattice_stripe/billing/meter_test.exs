@@ -113,7 +113,7 @@ defmodule LatticeStripe.Billing.MeterTest do
                object: "billing.meter",
                display_name: "API Calls",
                event_name: "api_call",
-               status: "active",
+               status: :active,
                livemode: false,
                created: 1_712_345_678,
                updated: 1_712_345_678
@@ -136,28 +136,48 @@ defmodule LatticeStripe.Billing.MeterTest do
   end
 
   # ---------------------------------------------------------------------------
-  # Billing.Meter.status_atom/1
+  # Billing.Meter.from_map/1 — auto-atomization (EXPD-03)
   # ---------------------------------------------------------------------------
 
-  describe "Meter.status_atom/1" do
-    test "returns :active for \"active\"" do
-      assert :active = Meter.status_atom("active")
+  describe "Meter.from_map/1 auto-atomizes status" do
+    test "from_map/1 auto-atomizes status to :active" do
+      result = Meter.from_map(%{"id" => "mtr_123", "status" => "active", "object" => "billing.meter"})
+      assert result.status == :active
     end
 
-    test "returns :inactive for \"inactive\"" do
-      assert :inactive = Meter.status_atom("inactive")
+    test "from_map/1 auto-atomizes status to :inactive" do
+      result = Meter.from_map(%{"id" => "mtr_123", "status" => "inactive", "object" => "billing.meter"})
+      assert result.status == :inactive
     end
 
-    test "returns :unknown for nil" do
-      assert :unknown = Meter.status_atom(nil)
+    test "from_map/1 passes through unknown status string" do
+      result = Meter.from_map(%{"id" => "mtr_123", "status" => "future_status"})
+      assert result.status == "future_status"
     end
 
-    test "returns :unknown for empty string" do
-      assert :unknown = Meter.status_atom("")
+    test "from_map/1 passes through nil status" do
+      result = Meter.from_map(%{"id" => "mtr_123", "status" => nil})
+      assert result.status == nil
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Billing.Meter.status_atom/1 — deprecated backward compat
+  # ---------------------------------------------------------------------------
+
+  describe "Meter.status_atom/1 (deprecated — backward compat)" do
+    test "still returns :active from struct (via apply to suppress deprecation warning)" do
+      meter = Meter.from_map(%{"id" => "mtr_123", "status" => "active", "object" => "billing.meter"})
+      assert apply(Meter, :status_atom, [meter]) == :active
     end
 
-    test "returns :unknown for unknown string" do
-      assert :unknown = Meter.status_atom("frozen")
+    test "still returns :inactive from struct (via apply)" do
+      meter = Meter.from_map(%{"id" => "mtr_123", "status" => "inactive", "object" => "billing.meter"})
+      assert apply(Meter, :status_atom, [meter]) == :inactive
+    end
+
+    test "returns nil for nil (via apply)" do
+      assert apply(Meter, :status_atom, [nil]) == nil
     end
   end
 
@@ -275,7 +295,7 @@ defmodule LatticeStripe.Billing.MeterTest do
         ok_response(Metering.Meter.deactivated())
       end)
 
-      assert {:ok, %Meter{id: "mtr_123", status: "inactive"}} =
+      assert {:ok, %Meter{id: "mtr_123", status: :inactive}} =
                Meter.deactivate(client, "mtr_123")
     end
   end
@@ -290,7 +310,7 @@ defmodule LatticeStripe.Billing.MeterTest do
         ok_response(Metering.Meter.basic())
       end)
 
-      assert {:ok, %Meter{id: "mtr_123", status: "active"}} = Meter.reactivate(client, "mtr_123")
+      assert {:ok, %Meter{id: "mtr_123", status: :active}} = Meter.reactivate(client, "mtr_123")
     end
   end
 end

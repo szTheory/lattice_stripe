@@ -43,7 +43,7 @@ defmodule LatticeStripe.ChargeTest do
                payment_intent: "pi_3OoLpqJ2eZvKYlo21fGhIjKl",
                payment_method: "pm_1OoLqrJ2eZvKYlo2NoPqRsTu",
                refunded: false,
-               status: "succeeded"
+               status: :succeeded
              } = charge
     end
 
@@ -59,13 +59,16 @@ defmodule LatticeStripe.ChargeTest do
         ok_response(with_balance_transaction_expanded())
       end)
 
-      assert {:ok, %Charge{balance_transaction: %{"fee_details" => fee_details}}} =
+      assert {:ok, %Charge{balance_transaction: bt}} =
                Charge.retrieve(client, "ch_3OoLqrJ2eZvKYlo20wxYzAbC",
                  expand: ["balance_transaction"]
                )
 
+      # When expanded, balance_transaction is deserialized to a %BalanceTransaction{} struct.
+      assert %LatticeStripe.BalanceTransaction{fee_details: fee_details} = bt
+
       application_fees =
-        Enum.filter(fee_details, fn fd -> fd["type"] == "application_fee" end)
+        Enum.filter(fee_details, fn fd -> fd.type == "application_fee" end)
 
       assert length(application_fees) == 1
     end
@@ -163,7 +166,7 @@ defmodule LatticeStripe.ChargeTest do
       assert charge.payment_intent == "pi_3OoLpqJ2eZvKYlo21fGhIjKl"
       assert charge.payment_method == "pm_1OoLqrJ2eZvKYlo2NoPqRsTu"
       assert charge.refunded == false
-      assert charge.status == "succeeded"
+      assert charge.status == :succeeded
       assert is_map(charge.outcome)
       assert is_map(charge.refunds)
     end
@@ -195,6 +198,37 @@ defmodule LatticeStripe.ChargeTest do
     test "defaults object to 'charge' when missing" do
       charge = Charge.from_map(%{"id" => "ch_x"})
       assert charge.object == "charge"
+    end
+
+    test "atomizes status to atom" do
+      charge = Charge.from_map(%{"object" => "charge", "status" => "succeeded"})
+      assert charge.status == :succeeded
+    end
+
+    test "passes through unknown status as string" do
+      charge = Charge.from_map(%{"object" => "charge", "status" => "future_unknown"})
+      assert charge.status == "future_unknown"
+    end
+
+    test "handles nil status" do
+      charge = Charge.from_map(%{"object" => "charge", "status" => nil})
+      assert charge.status == nil
+    end
+
+    test "customer field: keeps string ID when not expanded" do
+      charge = Charge.from_map(%{"object" => "charge", "customer" => "cus_123"})
+      assert charge.customer == "cus_123"
+    end
+
+    test "customer field: deserializes to %Customer{} when expanded" do
+      expanded = %{"object" => "customer", "id" => "cus_123", "email" => "x@y.com"}
+      charge = Charge.from_map(%{"object" => "charge", "customer" => expanded})
+      assert %LatticeStripe.Customer{id: "cus_123"} = charge.customer
+    end
+
+    test "customer field: handles nil" do
+      charge = Charge.from_map(%{"object" => "charge", "customer" => nil})
+      assert charge.customer == nil
     end
   end
 

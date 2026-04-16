@@ -25,7 +25,7 @@ defmodule LatticeStripe.BankAccountTest do
       assert ba.last4 == "6789"
       assert ba.metadata == %{}
       assert ba.routing_number == "110000000"
-      assert ba.status == "new"
+      assert ba.status == :new
       assert ba.extra == %{}
     end
 
@@ -49,6 +49,70 @@ defmodule LatticeStripe.BankAccountTest do
 
     test "from_map/1 is an alias for cast/1" do
       assert BankAccount.from_map(basic()) == BankAccount.cast(basic())
+    end
+  end
+
+  describe "cast/1 status atomization" do
+    test "atomizes 'new' to :new" do
+      ba = BankAccount.cast(basic(%{"status" => "new"}))
+      assert ba.status == :new
+    end
+
+    test "atomizes 'validated' to :validated" do
+      ba = BankAccount.cast(basic(%{"status" => "validated"}))
+      assert ba.status == :validated
+    end
+
+    test "atomizes 'verified' to :verified" do
+      ba = BankAccount.cast(basic(%{"status" => "verified"}))
+      assert ba.status == :verified
+    end
+
+    test "atomizes 'verification_failed' to :verification_failed" do
+      ba = BankAccount.cast(basic(%{"status" => "verification_failed"}))
+      assert ba.status == :verification_failed
+    end
+
+    test "atomizes 'errored' to :errored" do
+      ba = BankAccount.cast(basic(%{"status" => "errored"}))
+      assert ba.status == :errored
+    end
+
+    test "passes through unknown status string" do
+      ba = BankAccount.cast(basic(%{"status" => "future_status"}))
+      assert ba.status == "future_status"
+    end
+
+    test "passes through nil status" do
+      ba = BankAccount.cast(basic(%{"status" => nil}))
+      assert ba.status == nil
+    end
+  end
+
+  describe "cast/1 customer expand guard" do
+    test "customer stays as nil when absent" do
+      ba = BankAccount.cast(basic())
+      assert ba.customer == nil
+    end
+
+    test "customer stays as string ID when not expanded" do
+      ba = BankAccount.cast(basic(%{"customer" => "cus_abc"}))
+      assert ba.customer == "cus_abc"
+    end
+
+    test "customer dispatches to Customer.from_map when expanded map" do
+      ba =
+        BankAccount.cast(
+          basic(%{
+            "customer" => %{
+              "id" => "cus_abc",
+              "object" => "customer",
+              "email" => "test@example.com"
+            }
+          })
+        )
+
+      assert %LatticeStripe.Customer{id: "cus_abc"} = ba.customer
     end
   end
 
