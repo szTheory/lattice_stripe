@@ -50,7 +50,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 25: Performance Guide, Per-Op Timeouts & Connection Warm-Up** — `guides/performance.md`, opt-in `Client` timeout field, Finch warm-up helper (completed 2026-04-16)
 - [x] **Phase 26: Circuit Breaker & OpenTelemetry Guides** — `:fuse`-based `RetryStrategy` example guide, OTel integration guide with Honeycomb/Datadog examples (completed 2026-04-16)
 - [x] **Phase 27: Request Batching** — `LatticeStripe.Batch` module with `Task.async_stream`, `try/rescue` per task, `{:ok, results} | {:error, reason}` contract (completed 2026-04-16)
-- [ ] **Phase 28: meter_event_stream v2** — `Billing.MeterEventStream` session-token API, `create_session/2`, event send loop, expiry handling
+- [x] **Phase 28: meter_event_stream v2** — `Billing.MeterEventStream` session-token API, `create_session/2`, event send loop, expiry handling (completed 2026-04-16)
 - [ ] **Phase 29: Changeset-Style Param Builders** — optional fluent builders for `SubscriptionSchedule` phases and `BillingPortal` flows
 - [ ] **Phase 30: Stripe API Drift Detection** — Mix task + GitHub Actions weekly cron, compares Stripe OpenAPI spec `@known_fields` against current modules
 - [ ] **Phase 31: LiveBook Notebook** — `notebooks/stripe_explorer.livemd` interactive SDK exploration, exercises complete v1.2 API surface
@@ -179,10 +179,10 @@ Plans:
   2. A developer can send a batch of meter events via `MeterEventStream.send_events/3` within an active session and receive `{:ok, results}` or a clear `{:error, :session_expired}` error when the session has expired.
   3. The module's `@doc` clearly documents that `MeterEventStream` cannot reuse `Client.request/2` directly — the session-token auth model is different — and shows the correct two-step (create session, send events) usage pattern.
   4. Integration tests against stripe-mock (or a documented skip with a clear stripe-mock support flag) cover the session create + event send lifecycle.
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 28-01-PLAN.md — Session struct + fixture + Inspect masking
-- [ ] 28-02-PLAN.md — MeterEventStream module + unit tests + integration skip + ExDoc + guide
+- [x] 28-02-PLAN.md — MeterEventStream module + unit tests + integration skip + ExDoc + guide
 **UI hint**: no
 
 ### Phase 29: Changeset-Style Param Builders
@@ -228,7 +228,7 @@ Plans:
 | 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 27. Request Batching | v1.2 | 1/1 | Complete    | 2026-04-16 |
-| 28. meter_event_stream v2 | v1.2 | 1/2 | In Progress|  |
+| 28. meter_event_stream v2 | v1.2 | 2/2 | Complete   | 2026-04-16 |
 | 29. Changeset-Style Param Builders | v1.2 | 0/? | Not started | - |
 | 30. Stripe API Drift Detection | v1.2 | 0/? | Not started | - |
 | 31. LiveBook Notebook | v1.2 | 0/? | Not started | - |
