@@ -126,11 +126,13 @@ defmodule LatticeStripe.Error do
   def from_response(status, decoded_body, request_id) do
     case decoded_body do
       %{"error" => %{"type" => type_str} = error_map} ->
+        parsed_type = parse_type(type_str)
+
         %__MODULE__{
-          type: parse_type(type_str),
+          type: parsed_type,
           code: Map.get(error_map, "code"),
           message: maybe_enrich_message(
-            parse_type(type_str),
+            parsed_type,
             Map.get(error_map, "message"),
             Map.get(error_map, "param")
           ),
