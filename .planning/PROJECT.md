@@ -37,7 +37,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State (post-v1.1)
 
-**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 26 phases complete (1-11, 14-26). ~76 plans executed. Phase 26 added `guides/circuit-breaker.md` (`:fuse`-based RetryStrategy guide with state machine prose) and `guides/opentelemetry.md` (OTel bridge with Honeycomb + Datadog examples). 1699 tests / 0 failures. Zero-touch release via release-please.
+**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 27 phases complete (1-11, 14-27). ~77 plans executed. Phase 27 added `LatticeStripe.Batch` module — concurrent request fan-out using `Task.async_stream` with crash isolation via `on_timeout: :kill_task`. 1706 tests / 0 failures. Zero-touch release via release-please.
 
 **Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
 
@@ -137,7 +137,7 @@ All foundation, payment, webhook, telemetry, testing, docs, CI/CD, Billing, and 
 
 **Developer experience**
 - [x] Richer error context — fuzzy param name suggestions in `invalid_request_error` ("did you mean `:payment_method_types`?") via `String.jaro_distance/2` — Phase 24
-- [ ] Request batching / concurrent helpers — `Task.async_stream`-based parallel request ergonomics
+- [x] Request batching / concurrent helpers — `LatticeStripe.Batch.run/3` with `Task.async_stream`, crash isolation via `on_timeout: :kill_task` — Phase 27
 - [ ] Changeset-style param builders — optional fluent builders for complex nested params (SubscriptionSchedule phases, BillingPortal flows)
 - [ ] OpenTelemetry integration guide — connect telemetry events to `opentelemetry_api` with worked examples
 - [ ] LiveBook notebook — interactive SDK exploration for onboarding
@@ -247,4 +247,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Move shipped requirements to Validated, add next-milestone requirements to Active
 
 ---
-*Last updated: 2026-04-16 — Phase 26 complete (circuit breaker + OpenTelemetry guides — 1699 tests). v1.2 milestone in progress.*
+*Last updated: 2026-04-16 — Phase 27 complete (request batching — LatticeStripe.Batch with Task.async_stream fan-out — 1706 tests). v1.2 milestone in progress.*
