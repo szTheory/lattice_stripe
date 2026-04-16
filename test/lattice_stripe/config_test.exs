@@ -130,6 +130,78 @@ defmodule LatticeStripe.ConfigTest do
     end
   end
 
+  describe "operation_timeouts validation" do
+    test "operation_timeouts defaults to nil" do
+      result = Config.validate!(api_key: "sk_test_123", finch: MyFinch)
+      assert result[:operation_timeouts] == nil
+    end
+
+    test "accepts valid map with atom keys and pos_integer values" do
+      result =
+        Config.validate!(
+          api_key: "sk_test_123",
+          finch: MyFinch,
+          operation_timeouts: %{list: 60_000, search: 45_000}
+        )
+
+      assert result[:operation_timeouts] == %{list: 60_000, search: 45_000}
+    end
+
+    test "accepts nil explicitly" do
+      result =
+        Config.validate!(api_key: "sk_test_123", finch: MyFinch, operation_timeouts: nil)
+
+      assert result[:operation_timeouts] == nil
+    end
+
+    test "accepts empty map" do
+      result =
+        Config.validate!(api_key: "sk_test_123", finch: MyFinch, operation_timeouts: %{})
+
+      assert result[:operation_timeouts] == %{}
+    end
+
+    test "rejects string values" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate!(
+          api_key: "sk_test_123",
+          finch: MyFinch,
+          operation_timeouts: %{list: "sixty"}
+        )
+      end
+    end
+
+    test "rejects string keys" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate!(
+          api_key: "sk_test_123",
+          finch: MyFinch,
+          operation_timeouts: %{"list" => 60_000}
+        )
+      end
+    end
+
+    test "rejects zero timeout" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate!(
+          api_key: "sk_test_123",
+          finch: MyFinch,
+          operation_timeouts: %{list: 0}
+        )
+      end
+    end
+
+    test "rejects negative timeout" do
+      assert_raise NimbleOptions.ValidationError, fn ->
+        Config.validate!(
+          api_key: "sk_test_123",
+          finch: MyFinch,
+          operation_timeouts: %{list: -1_000}
+        )
+      end
+    end
+  end
+
   describe "validate/1" do
     test "returns {:ok, validated} on success" do
       assert {:ok, result} = Config.validate(api_key: "sk_test_123", finch: MyFinch)

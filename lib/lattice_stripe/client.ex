@@ -59,6 +59,7 @@ defmodule LatticeStripe.Client do
     json_codec: LatticeStripe.Json.Jason,
     retry_strategy: LatticeStripe.RetryStrategy.Default,
     timeout: 30_000,
+    operation_timeouts: nil,
     max_retries: 2,
     telemetry_enabled: true,
     require_explicit_proration: false
@@ -79,6 +80,7 @@ defmodule LatticeStripe.Client do
   - `json_codec` - JSON codec module implementing `LatticeStripe.Json`
   - `retry_strategy` - Retry strategy module implementing `LatticeStripe.RetryStrategy`
   - `timeout` - Default request timeout in milliseconds (default: `30_000`)
+  - `operation_timeouts` - Per-operation timeout overrides in milliseconds (keys: `:list`, `:search`, `:create`, `:retrieve`, `:update`, `:delete`), or `nil` to use `timeout` for all operations
   - `max_retries` - Max retry attempts after initial failure (default: `2`)
   - `telemetry_enabled` - Whether to emit telemetry events (default: `true`)
   - `require_explicit_proration` - When `true`, proration-sensitive operations require explicit `proration_behavior` param (default: `false`)
@@ -93,6 +95,7 @@ defmodule LatticeStripe.Client do
           json_codec: module(),
           retry_strategy: module(),
           timeout: pos_integer(),
+          operation_timeouts: %{atom() => pos_integer()} | nil,
           max_retries: non_neg_integer(),
           telemetry_enabled: boolean(),
           require_explicit_proration: boolean()
