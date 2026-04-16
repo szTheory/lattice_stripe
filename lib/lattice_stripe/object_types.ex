@@ -36,6 +36,9 @@ defmodule LatticeStripe.ObjectTypes do
     "line_item"                => LatticeStripe.Invoice.LineItem
   }
 
+  @doc false
+  def object_map, do: @object_map
+
   @spec maybe_deserialize(map() | String.t() | nil) :: struct() | map() | String.t() | nil
   def maybe_deserialize(nil), do: nil
   def maybe_deserialize(val) when is_binary(val), do: val
