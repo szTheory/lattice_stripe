@@ -152,6 +152,21 @@ defmodule LatticeStripe.BillingPortal.SessionTest do
       session = Session.from_map(map)
       assert session.extra == %{"unknown_future_field" => "some_value"}
     end
+
+    test "decodes configuration as %Configuration{} when expanded" do
+      expanded_config = LatticeStripe.Test.Fixtures.BillingPortal.Configuration.basic()
+      map = Fixtures.Session.basic(%{"configuration" => expanded_config})
+      session = Session.from_map(map)
+
+      assert %LatticeStripe.BillingPortal.Configuration{id: "bpc_123"} = session.configuration
+    end
+
+    test "keeps configuration as string when not expanded" do
+      map = Fixtures.Session.basic(%{"configuration" => "bpc_123"})
+      session = Session.from_map(map)
+
+      assert session.configuration == "bpc_123"
+    end
   end
 
   # ---------------------------------------------------------------------------
