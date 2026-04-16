@@ -434,9 +434,9 @@ defmodule LatticeStripe.PaymentMethod do
     Resource.require_param!(
       params,
       "customer",
-      ~s|PaymentMethod.list/3 requires a "customer" key in params. | <>
+      ~s|PaymentMethod.stream!/3 requires a "customer" key in params. | <>
         ~s|Stripe requires customer-scoped listing. | <>
-        ~s|Example: PaymentMethod.list(client, %{"customer" => "cus_123"})|
+        ~s|Example: PaymentMethod.stream!(client, %{"customer" => "cus_123"})|
     )
 
     req = %Request{method: :get, path: "/v1/payment_methods", params: params, opts: opts}
