@@ -130,7 +130,7 @@ defmodule LatticeStripe.SetupIntentTest do
         ok_response(setup_intent_json(%{"status" => "succeeded"}))
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: "succeeded"}} =
+      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: :succeeded}} =
                SetupIntent.confirm(client, "seti_test1234567890abc", %{
                  "payment_method" => "pm_card_visa"
                })
@@ -145,7 +145,7 @@ defmodule LatticeStripe.SetupIntentTest do
         ok_response(setup_intent_json(%{"status" => "succeeded"}))
       end)
 
-      assert {:ok, %SetupIntent{status: "succeeded"}} =
+      assert {:ok, %SetupIntent{status: :succeeded}} =
                SetupIntent.confirm(client, "seti_test1234567890abc")
     end
   end
@@ -164,7 +164,7 @@ defmodule LatticeStripe.SetupIntentTest do
         ok_response(setup_intent_json(%{"status" => "canceled"}))
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: "canceled"}} =
+      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: :canceled}} =
                SetupIntent.cancel(client, "seti_test1234567890abc")
     end
 
@@ -184,7 +184,7 @@ defmodule LatticeStripe.SetupIntentTest do
         )
       end)
 
-      assert {:ok, %SetupIntent{status: "canceled", cancellation_reason: "abandoned"}} =
+      assert {:ok, %SetupIntent{status: :canceled, cancellation_reason: "abandoned"}} =
                SetupIntent.cancel(client, "seti_test1234567890abc", %{
                  "cancellation_reason" => "abandoned"
                })
@@ -210,7 +210,7 @@ defmodule LatticeStripe.SetupIntentTest do
         ok_response(setup_intent_json(%{"status" => "succeeded"}))
       end)
 
-      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: "succeeded"}} =
+      assert {:ok, %SetupIntent{id: "seti_test1234567890abc", status: :succeeded}} =
                SetupIntent.verify_microdeposits(client, "seti_test1234567890abc", %{
                  "amounts" => [32, 45]
                })
@@ -299,8 +299,8 @@ defmodule LatticeStripe.SetupIntentTest do
       si = SetupIntent.from_map(map)
 
       assert si.id == "seti_test1234567890abc"
-      assert si.status == "requires_payment_method"
-      assert si.usage == "off_session"
+      assert si.status == :requires_payment_method
+      assert si.usage == :off_session
       assert si.client_secret == "seti_test1234567890abc_secret_abc"
       assert si.livemode == false
       assert si.customer == "cus_abc"
@@ -335,6 +335,47 @@ defmodule LatticeStripe.SetupIntentTest do
         SetupIntent.from_map(setup_intent_json(%{"latest_attempt" => %{"id" => "setatt_123"}}))
 
       assert si_with_map.latest_attempt == %{"id" => "setatt_123"}
+    end
+
+    test "atomizes status to atom" do
+      si = SetupIntent.from_map(setup_intent_json(%{"status" => "succeeded"}))
+      assert si.status == :succeeded
+    end
+
+    test "passes through unknown status as string" do
+      si = SetupIntent.from_map(setup_intent_json(%{"status" => "future_unknown"}))
+      assert si.status == "future_unknown"
+    end
+
+    test "handles nil status" do
+      si = SetupIntent.from_map(setup_intent_json(%{"status" => nil}))
+      assert si.status == nil
+    end
+
+    test "atomizes usage to atom" do
+      si = SetupIntent.from_map(setup_intent_json(%{"usage" => "off_session"}))
+      assert si.usage == :off_session
+    end
+
+    test "atomizes on_session usage to atom" do
+      si = SetupIntent.from_map(setup_intent_json(%{"usage" => "on_session"}))
+      assert si.usage == :on_session
+    end
+
+    test "customer field: keeps string ID when not expanded" do
+      si = SetupIntent.from_map(setup_intent_json(%{"customer" => "cus_123"}))
+      assert si.customer == "cus_123"
+    end
+
+    test "customer field: deserializes to %Customer{} when expanded" do
+      expanded = %{"object" => "customer", "id" => "cus_123", "email" => "x@y.com"}
+      si = SetupIntent.from_map(setup_intent_json(%{"customer" => expanded}))
+      assert %LatticeStripe.Customer{id: "cus_123"} = si.customer
+    end
+
+    test "customer field: handles nil" do
+      si = SetupIntent.from_map(setup_intent_json(%{"customer" => nil}))
+      assert si.customer == nil
     end
   end
 

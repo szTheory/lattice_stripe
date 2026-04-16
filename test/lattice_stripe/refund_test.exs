@@ -150,7 +150,7 @@ defmodule LatticeStripe.RefundTest do
         ok_response(refund_pending_json(%{"status" => "canceled"}))
       end)
 
-      assert {:ok, %Refund{id: "re_test1234567890abc", status: "canceled"}} =
+      assert {:ok, %Refund{id: "re_test1234567890abc", status: :canceled}} =
                Refund.cancel(client, "re_test1234567890abc")
     end
 
@@ -163,7 +163,7 @@ defmodule LatticeStripe.RefundTest do
         ok_response(refund_json(%{"status" => "canceled"}))
       end)
 
-      assert {:ok, %Refund{status: "canceled"}} =
+      assert {:ok, %Refund{status: :canceled}} =
                Refund.cancel(client, "re_test1234567890abc", %{})
     end
 
@@ -349,7 +349,7 @@ defmodule LatticeStripe.RefundTest do
         ok_response(refund_json(%{"status" => "canceled"}))
       end)
 
-      assert %Refund{status: "canceled"} = Refund.cancel!(client, "re_test1234567890abc")
+      assert %Refund{status: :canceled} = Refund.cancel!(client, "re_test1234567890abc")
     end
   end
 
@@ -378,7 +378,7 @@ defmodule LatticeStripe.RefundTest do
       assert refund.object == "refund"
       assert refund.amount == 2000
       assert refund.currency == "usd"
-      assert refund.status == "succeeded"
+      assert refund.status == :succeeded
       assert refund.payment_intent == "pi_test1234567890abc"
       assert refund.charge == "ch_test1234567890abc"
       assert refund.reason == "requested_by_customer"
@@ -401,6 +401,37 @@ defmodule LatticeStripe.RefundTest do
     test "defaults extra to empty map" do
       refund = Refund.from_map(%{"id" => "re_abc"})
       assert refund.extra == %{}
+    end
+
+    test "atomizes status to atom" do
+      refund = Refund.from_map(refund_json(%{"status" => "succeeded"}))
+      assert refund.status == :succeeded
+    end
+
+    test "passes through unknown status as string" do
+      refund = Refund.from_map(refund_json(%{"status" => "future_unknown"}))
+      assert refund.status == "future_unknown"
+    end
+
+    test "handles nil status" do
+      refund = Refund.from_map(refund_json(%{"status" => nil}))
+      assert refund.status == nil
+    end
+
+    test "charge field: keeps string ID when not expanded" do
+      refund = Refund.from_map(refund_json(%{"charge" => "ch_123"}))
+      assert refund.charge == "ch_123"
+    end
+
+    test "charge field: deserializes to %Charge{} when expanded" do
+      expanded = %{"object" => "charge", "id" => "ch_123", "amount" => 2000}
+      refund = Refund.from_map(refund_json(%{"charge" => expanded}))
+      assert %LatticeStripe.Charge{id: "ch_123"} = refund.charge
+    end
+
+    test "charge field: handles nil" do
+      refund = Refund.from_map(refund_json(%{"charge" => nil}))
+      assert refund.charge == nil
     end
   end
 

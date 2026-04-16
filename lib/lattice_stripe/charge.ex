@@ -59,7 +59,7 @@ defmodule LatticeStripe.Charge do
   full object reference.
   """
 
-  alias LatticeStripe.{Client, Error, Request, Resource}
+  alias LatticeStripe.{Client, Error, ObjectTypes, Request, Resource}
 
   # Known top-level fields from the Stripe Charge object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -135,25 +135,25 @@ defmodule LatticeStripe.Charge do
           application: String.t() | nil,
           application_fee: String.t() | nil,
           application_fee_amount: integer() | nil,
-          balance_transaction: String.t() | map() | nil,
+          balance_transaction: LatticeStripe.BalanceTransaction.t() | String.t() | nil,
           billing_details: map() | nil,
           captured: boolean() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           description: String.t() | nil,
-          destination: String.t() | map() | nil,
+          destination: LatticeStripe.Account.t() | String.t() | nil,
           failure_code: String.t() | nil,
           failure_message: String.t() | nil,
           fraud_details: map() | nil,
-          invoice: String.t() | nil,
+          invoice: LatticeStripe.Invoice.t() | String.t() | nil,
           livemode: boolean() | nil,
           metadata: map() | nil,
           on_behalf_of: String.t() | nil,
           outcome: map() | nil,
           paid: boolean() | nil,
-          payment_intent: String.t() | nil,
-          payment_method: String.t() | nil,
+          payment_intent: LatticeStripe.PaymentIntent.t() | String.t() | nil,
+          payment_method: LatticeStripe.PaymentMethod.t() | String.t() | nil,
           payment_method_details: map() | nil,
           receipt_email: String.t() | nil,
           receipt_number: String.t() | nil,
@@ -161,10 +161,10 @@ defmodule LatticeStripe.Charge do
           refunded: boolean() | nil,
           refunds: map() | nil,
           review: String.t() | nil,
-          source_transfer: String.t() | map() | nil,
+          source_transfer: LatticeStripe.Transfer.t() | String.t() | nil,
           statement_descriptor: String.t() | nil,
           statement_descriptor_suffix: String.t() | nil,
-          status: String.t() | nil,
+          status: atom() | String.t() | nil,
           transfer_data: map() | nil,
           transfer_group: String.t() | nil,
           extra: map()
@@ -251,50 +251,82 @@ defmodule LatticeStripe.Charge do
   def from_map(nil), do: nil
 
   def from_map(map) when is_map(map) do
+    {known, extra} = Map.split(map, @known_fields)
+
     %__MODULE__{
-      id: map["id"],
-      object: map["object"] || "charge",
-      amount: map["amount"],
-      amount_captured: map["amount_captured"],
-      amount_refunded: map["amount_refunded"],
-      application: map["application"],
-      application_fee: map["application_fee"],
-      application_fee_amount: map["application_fee_amount"],
-      balance_transaction: map["balance_transaction"],
-      billing_details: map["billing_details"],
-      captured: map["captured"],
-      created: map["created"],
-      currency: map["currency"],
-      customer: map["customer"],
-      description: map["description"],
-      destination: map["destination"],
-      failure_code: map["failure_code"],
-      failure_message: map["failure_message"],
-      fraud_details: map["fraud_details"],
-      invoice: map["invoice"],
-      livemode: map["livemode"],
-      metadata: map["metadata"],
-      on_behalf_of: map["on_behalf_of"],
-      outcome: map["outcome"],
-      paid: map["paid"],
-      payment_intent: map["payment_intent"],
-      payment_method: map["payment_method"],
-      payment_method_details: map["payment_method_details"],
-      receipt_email: map["receipt_email"],
-      receipt_number: map["receipt_number"],
-      receipt_url: map["receipt_url"],
-      refunded: map["refunded"],
-      refunds: map["refunds"],
-      review: map["review"],
-      source_transfer: map["source_transfer"],
-      statement_descriptor: map["statement_descriptor"],
-      statement_descriptor_suffix: map["statement_descriptor_suffix"],
-      status: map["status"],
-      transfer_data: map["transfer_data"],
-      transfer_group: map["transfer_group"],
-      extra: Map.drop(map, @known_fields)
+      id: known["id"],
+      object: known["object"] || "charge",
+      amount: known["amount"],
+      amount_captured: known["amount_captured"],
+      amount_refunded: known["amount_refunded"],
+      application: known["application"],
+      application_fee: known["application_fee"],
+      application_fee_amount: known["application_fee_amount"],
+      balance_transaction:
+        (if is_map(known["balance_transaction"]),
+          do: ObjectTypes.maybe_deserialize(known["balance_transaction"]),
+          else: known["balance_transaction"]),
+      billing_details: known["billing_details"],
+      captured: known["captured"],
+      created: known["created"],
+      currency: known["currency"],
+      customer:
+        (if is_map(known["customer"]),
+          do: ObjectTypes.maybe_deserialize(known["customer"]),
+          else: known["customer"]),
+      description: known["description"],
+      destination:
+        (if is_map(known["destination"]),
+          do: ObjectTypes.maybe_deserialize(known["destination"]),
+          else: known["destination"]),
+      failure_code: known["failure_code"],
+      failure_message: known["failure_message"],
+      fraud_details: known["fraud_details"],
+      invoice:
+        (if is_map(known["invoice"]),
+          do: ObjectTypes.maybe_deserialize(known["invoice"]),
+          else: known["invoice"]),
+      livemode: known["livemode"],
+      metadata: known["metadata"],
+      on_behalf_of: known["on_behalf_of"],
+      outcome: known["outcome"],
+      paid: known["paid"],
+      payment_intent:
+        (if is_map(known["payment_intent"]),
+          do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
+          else: known["payment_intent"]),
+      payment_method:
+        (if is_map(known["payment_method"]),
+          do: ObjectTypes.maybe_deserialize(known["payment_method"]),
+          else: known["payment_method"]),
+      payment_method_details: known["payment_method_details"],
+      receipt_email: known["receipt_email"],
+      receipt_number: known["receipt_number"],
+      receipt_url: known["receipt_url"],
+      refunded: known["refunded"],
+      refunds: known["refunds"],
+      review: known["review"],
+      source_transfer:
+        (if is_map(known["source_transfer"]),
+          do: ObjectTypes.maybe_deserialize(known["source_transfer"]),
+          else: known["source_transfer"]),
+      statement_descriptor: known["statement_descriptor"],
+      statement_descriptor_suffix: known["statement_descriptor_suffix"],
+      status: atomize_status(known["status"]),
+      transfer_data: known["transfer_data"],
+      transfer_group: known["transfer_group"],
+      extra: extra
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
+
+  defp atomize_status("succeeded"), do: :succeeded
+  defp atomize_status("pending"),   do: :pending
+  defp atomize_status("failed"),    do: :failed
+  defp atomize_status(other),       do: other
 end
 
 defimpl Inspect, for: LatticeStripe.Charge do

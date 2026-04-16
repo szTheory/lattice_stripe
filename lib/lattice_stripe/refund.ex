@@ -60,7 +60,7 @@ defmodule LatticeStripe.Refund do
   object reference and available parameters.
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   # Known top-level fields from the Stripe Refund object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -105,7 +105,7 @@ defmodule LatticeStripe.Refund do
           object: String.t(),
           amount: integer() | nil,
           balance_transaction: String.t() | nil,
-          charge: String.t() | nil,
+          charge: LatticeStripe.Charge.t() | String.t() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
           destination_details: map() | nil,
@@ -114,11 +114,11 @@ defmodule LatticeStripe.Refund do
           instructions_email: String.t() | nil,
           metadata: map() | nil,
           next_action: map() | nil,
-          payment_intent: String.t() | nil,
+          payment_intent: LatticeStripe.PaymentIntent.t() | String.t() | nil,
           reason: String.t() | nil,
           receipt_number: String.t() | nil,
           source_transfer_reversal: String.t() | nil,
-          status: String.t() | nil,
+          status: atom() | String.t() | nil,
           transfer_reversal: String.t() | nil,
           extra: map()
         }
@@ -367,29 +367,48 @@ defmodule LatticeStripe.Refund do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
+    {known, extra} = Map.split(map, @known_fields)
+
     %__MODULE__{
-      id: map["id"],
-      object: map["object"] || "refund",
-      amount: map["amount"],
-      balance_transaction: map["balance_transaction"],
-      charge: map["charge"],
-      created: map["created"],
-      currency: map["currency"],
-      destination_details: map["destination_details"],
-      failure_balance_transaction: map["failure_balance_transaction"],
-      failure_reason: map["failure_reason"],
-      instructions_email: map["instructions_email"],
-      metadata: map["metadata"],
-      next_action: map["next_action"],
-      payment_intent: map["payment_intent"],
-      reason: map["reason"],
-      receipt_number: map["receipt_number"],
-      source_transfer_reversal: map["source_transfer_reversal"],
-      status: map["status"],
-      transfer_reversal: map["transfer_reversal"],
-      extra: Map.drop(map, @known_fields)
+      id: known["id"],
+      object: known["object"] || "refund",
+      amount: known["amount"],
+      balance_transaction: known["balance_transaction"],
+      charge:
+        (if is_map(known["charge"]),
+          do: ObjectTypes.maybe_deserialize(known["charge"]),
+          else: known["charge"]),
+      created: known["created"],
+      currency: known["currency"],
+      destination_details: known["destination_details"],
+      failure_balance_transaction: known["failure_balance_transaction"],
+      failure_reason: known["failure_reason"],
+      instructions_email: known["instructions_email"],
+      metadata: known["metadata"],
+      next_action: known["next_action"],
+      payment_intent:
+        (if is_map(known["payment_intent"]),
+          do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
+          else: known["payment_intent"]),
+      reason: known["reason"],
+      receipt_number: known["receipt_number"],
+      source_transfer_reversal: known["source_transfer_reversal"],
+      status: atomize_status(known["status"]),
+      transfer_reversal: known["transfer_reversal"],
+      extra: extra
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
+
+  defp atomize_status("pending"),         do: :pending
+  defp atomize_status("requires_action"), do: :requires_action
+  defp atomize_status("succeeded"),       do: :succeeded
+  defp atomize_status("failed"),          do: :failed
+  defp atomize_status("canceled"),        do: :canceled
+  defp atomize_status(other),             do: other
 end
 
 defimpl Inspect, for: LatticeStripe.Refund do
