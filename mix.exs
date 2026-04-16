@@ -52,6 +52,7 @@ defmodule LatticeStripe.MixProject do
           "Client & Configuration": [
             LatticeStripe,
             LatticeStripe.Client,
+            LatticeStripe.Batch,
             LatticeStripe.Config,
             LatticeStripe.Error,
             LatticeStripe.Response,
