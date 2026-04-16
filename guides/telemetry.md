@@ -29,7 +29,7 @@ This attaches a handler that logs one line per completed request:
 ```
 [info] POST /v1/customers => 200 in 145ms (1 attempt, req_abc123xyz)
 [info] GET /v1/customers/cus_abc => 200 in 42ms (1 attempt, req_def456)
-[warning] POST /v1/payment_intents => 429 in 312ms (3 attempts, req_ghi789)
+[warning] POST /v1/payment_intents => 429 in 312ms (3 attempts, req_ghi789) (rate_limited: too_many_requests)
 [warning] GET /v1/customers/cus_xyz => :error in 5001ms (3 attempts, no-req-id)
 ```
 
@@ -100,6 +100,7 @@ a 500 Server Error. All completed requests (including API errors) emit this even
 | `:retries` | `integer` | Number of retries (`attempts - 1`) |
 | `:error_type` | `atom \| nil` | Error type atom on failure (e.g. `:card_error`, `:connection_error`); `nil` on success |
 | `:idempotency_key` | `String.t() \| nil` | Idempotency key used (present on failure only) |
+| `:rate_limited_reason` | `String.t() \| nil` | Stripe `Stripe-Rate-Limited-Reason` header value on 429 responses; `nil` for all non-429 responses |
 | `:telemetry_span_context` | `reference` | Correlates with start event |
 
 ### `[:lattice_stripe, :request, :exception]`
@@ -306,6 +307,53 @@ hot-path telemetry recipe specific to `MeterEvent.create/3`.
   %{level: :info}
 )
 ```
+
+## Rate Limiting
+
+When Stripe returns a 429 (Too Many Requests) response, LatticeStripe captures the
+`Stripe-Rate-Limited-Reason` header value in the telemetry stop event metadata as
+`:rate_limited_reason`. This key is `nil` for all non-429 responses.
+
+The default logger automatically escalates 429 responses to `:warning` level and appends the
+rate-limit reason:
+
+```
+[warning] POST /v1/customers => 429 in 312ms (3 attempts, req_ghi789) (rate_limited: too_many_requests)
+```
+
+### Monitoring Rate Limits with Telemetry.Metrics
+
+Track rate-limiting frequency with a counter tagged by reason:
+
+```elixir
+Telemetry.Metrics.counter("lattice_stripe.request.stop.duration",
+  tags: [:resource, :rate_limited_reason],
+  tag_values: fn metadata -> Map.take(metadata, [:resource, :rate_limited_reason]) end,
+  keep: &(&1[:rate_limited_reason] != nil)
+)
+```
+
+### Custom Rate-Limit Handler
+
+For rate-limit-specific alerting, attach a handler that filters on the `:rate_limited_reason` key:
+
+```elixir
+:telemetry.attach(
+  "my-app-rate-limit-alert",
+  [:lattice_stripe, :request, :stop],
+  fn _event, _measurements, metadata, _config ->
+    if reason = metadata[:rate_limited_reason] do
+      Logger.warning("Stripe rate limited: #{reason}")
+      MyApp.Metrics.increment("stripe.rate_limited", tags: [reason: reason])
+    end
+  end,
+  nil
+)
+```
+
+> **Note:** The `:rate_limited_reason` value is a raw string from Stripe (e.g., `"too_many_requests"`),
+> not an atom. Do not convert it to an atom — Stripe controls these values and unexpected strings
+> would grow the BEAM atom table.
 
 ## Integration with Telemetry.Metrics
 
