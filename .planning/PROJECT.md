@@ -37,7 +37,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State (post-v1.1)
 
-**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 24 phases complete (1-11, 14-24). ~71 plans executed. Phase 24 added rate-limit telemetry (`:rate_limited_reason` in stop metadata, 429 warning escalation) and fuzzy param suggestions ("did you mean?" in `invalid_request_error` messages). 1675 tests / 0 failures. Zero-touch release via release-please.
+**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 25 phases complete (1-11, 14-25). ~74 plans executed. Phase 25 added per-operation timeouts (`operation_timeouts` in Client), connection warm-up (`warm_up/1`), and `guides/performance.md` (286 lines). 1699 tests / 0 failures. Zero-touch release via release-please.
 
 **Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
 
@@ -129,10 +129,10 @@ All foundation, payment, webhook, telemetry, testing, docs, CI/CD, Billing, and 
 - [ ] Status-field atomization audit (EXPD-05): sweep all resources for string-typed status fields, add `_atom` converters
 
 **Performance & reliability**
-- [ ] Performance guide + Finch pool tuning (`guides/performance.md`) with production pool sizing, supervision tree examples, warm-up patterns
+- [x] Performance guide + Finch pool tuning (`guides/performance.md`) with production pool sizing, supervision tree examples, warm-up patterns — Phase 25
 - [ ] Circuit breaker pattern — custom `RetryStrategy` example or `:fuse` integration for cascading failure prevention
-- [ ] Connection warm-up helper — health-check / pool pre-establishment function for app start
-- [ ] Timeout tuning per-operation — resource-level timeout defaults (search/list get longer timeouts than creates)
+- [x] Connection warm-up helper — `LatticeStripe.warm_up/1` pre-establishes Finch connections on app start — Phase 25
+- [x] Timeout tuning per-operation — `operation_timeouts` map in Client with three-tier cascade — Phase 25
 - [x] Rate-limit awareness — track `Stripe-Rate-Limited-Reason` header, expose via telemetry stop metadata as `:rate_limited_reason` — Phase 24
 
 **Developer experience**
@@ -247,4 +247,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Move shipped requirements to Validated, add next-milestone requirements to Active
 
 ---
-*Last updated: 2026-04-16 — Phase 24 complete (rate-limit telemetry + fuzzy param suggestions — 1675 tests). v1.2 milestone in progress.*
+*Last updated: 2026-04-16 — Phase 25 complete (performance guide + per-op timeouts + warm-up — 1699 tests). v1.2 milestone in progress.*
