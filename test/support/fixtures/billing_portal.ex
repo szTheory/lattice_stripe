@@ -116,4 +116,58 @@ defmodule LatticeStripe.Test.Fixtures.BillingPortal do
       |> Map.merge(overrides)
     end
   end
+
+  defmodule Configuration do
+    @moduledoc false
+
+    @doc """
+    Basic BillingPortal.Configuration fixture with all wire-format fields populated.
+
+    Returns a string-keyed map matching Stripe's wire format. Suitable for
+    unit tests that call `LatticeStripe.BillingPortal.Configuration.from_map/1`
+    and feature sub-struct tests.
+    """
+    def basic(overrides \\ %{}) do
+      %{
+        "id" => "bpc_123",
+        "object" => "billing_portal.configuration",
+        "active" => true,
+        "application" => nil,
+        "business_profile" => %{
+          "headline" => nil,
+          "privacy_policy_url" => nil,
+          "terms_of_service_url" => nil
+        },
+        "created" => 1_712_345_678,
+        "default_return_url" => nil,
+        "features" => %{
+          "customer_update" => %{"allowed_updates" => [], "enabled" => false},
+          "invoice_history" => %{"enabled" => true},
+          "payment_method_update" => %{"enabled" => false, "payment_method_configuration" => nil},
+          "subscription_cancel" => %{
+            "cancellation_reason" => %{"enabled" => false, "options" => []},
+            "enabled" => false,
+            "mode" => "at_period_end",
+            "proration_behavior" => "none"
+          },
+          "subscription_update" => %{
+            "billing_cycle_anchor" => nil,
+            "default_allowed_updates" => [],
+            "enabled" => false,
+            "products" => [],
+            "proration_behavior" => "none",
+            "schedule_at_period_end" => nil,
+            "trial_update_behavior" => nil
+          }
+        },
+        "is_default" => false,
+        "livemode" => false,
+        "login_page" => %{"enabled" => false, "url" => nil},
+        "metadata" => %{},
+        "name" => nil,
+        "updated" => 1_712_345_678
+      }
+      |> Map.merge(overrides)
+    end
+  end
 end
