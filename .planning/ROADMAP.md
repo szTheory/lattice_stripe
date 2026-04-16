@@ -193,7 +193,10 @@ Plans:
   1. A developer can use `LatticeStripe.Builders.SubscriptionSchedule` to construct a phase params map via chained function calls and pass the result directly to `SubscriptionSchedule.create/3` — the builder output is a plain map, not a special struct.
   2. A developer can use `LatticeStripe.Builders.BillingPortal` to construct `flow_data` params for portal session creation — builder functions match the valid `type` atoms documented in `BillingPortal.Session`.
   3. Both builder modules are marked `@doc` optional in their module docs — they coexist with the existing map-based API and do not replace it.
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 29-01-PLAN.md — TDD: SubscriptionSchedule changeset-style builder (new/0, setter chain, phase sub-builder, build/1)
+- [ ] 29-02-PLAN.md — TDD: BillingPortal FlowData builder (4 named constructors) + ExDoc Param Builders group
 
 ### Phase 30: Stripe API Drift Detection
 **Goal**: CI automatically detects when Stripe's OpenAPI specification adds new fields or resources that are not yet reflected in LatticeStripe's `@known_fields` — surfacing drift as a PR comment or failed check before it reaches users.
@@ -229,6 +232,6 @@ Plans:
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 27. Request Batching | v1.2 | 1/1 | Complete    | 2026-04-16 |
 | 28. meter_event_stream v2 | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 29. Changeset-Style Param Builders | v1.2 | 0/? | Not started | - |
+| 29. Changeset-Style Param Builders | v1.2 | 0/2 | Not started | - |
 | 30. Stripe API Drift Detection | v1.2 | 0/? | Not started | - |
 | 31. LiveBook Notebook | v1.2 | 0/? | Not started | - |
