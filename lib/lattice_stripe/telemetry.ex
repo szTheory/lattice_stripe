@@ -484,6 +484,8 @@ defmodule LatticeStripe.Telemetry do
       request_id: resp.request_id,
       attempts: attempts,
       retries: attempts - 1,
+      # rate_limited_reason is always present (nil on success) so handlers can safely
+      # do `Map.get(metadata, :rate_limited_reason)` without `Map.has_key?` guards.
       rate_limited_reason: parse_rate_limited_reason(resp_headers)
     })
   end
