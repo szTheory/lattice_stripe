@@ -37,7 +37,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State (post-v1.1)
 
-**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 28 phases complete (1-11, 14-28). ~79 plans executed. Phase 28 added `LatticeStripe.Billing.MeterEventStream` — v2 session-token API for high-throughput metering with dual-host transport (`api.stripe.com` + `meter-events.stripe.com`). 1727 tests / 0 failures. Zero-touch release via release-please.
+**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 29 phases complete (1-11, 14-29). ~81 plans executed. Phase 29 added `LatticeStripe.Builders.SubscriptionSchedule` and `LatticeStripe.Builders.BillingPortal` — optional pipe-based changeset-style param builders for complex nested Stripe params. 1758 tests / 0 failures. Zero-touch release via release-please.
 
 **Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
 
