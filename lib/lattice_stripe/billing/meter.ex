@@ -62,7 +62,6 @@ defmodule LatticeStripe.Billing.Meter do
 
   defstruct [
     :id,
-    object: "billing.meter",
     :display_name,
     :event_name,
     :status,
@@ -73,6 +72,7 @@ defmodule LatticeStripe.Billing.Meter do
     :created,
     :updated,
     :livemode,
+    object: "billing.meter",
     extra: %{}
   ]
 
