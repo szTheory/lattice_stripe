@@ -85,7 +85,7 @@ defmodule LatticeStripe.Transfer do
   See the [Stripe Transfer API](https://docs.stripe.com/api/transfers).
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response, TransferReversal}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response, TransferReversal}
 
   # Known top-level fields from the Stripe Transfer object.
   # String sigil (no `a`) matches Jason's default string-key output.
@@ -131,17 +131,17 @@ defmodule LatticeStripe.Transfer do
           object: String.t(),
           amount: integer() | nil,
           amount_reversed: integer() | nil,
-          balance_transaction: String.t() | map() | nil,
+          balance_transaction: LatticeStripe.BalanceTransaction.t() | String.t() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
           description: String.t() | nil,
-          destination: String.t() | map() | nil,
-          destination_payment: String.t() | map() | nil,
+          destination: LatticeStripe.Account.t() | String.t() | nil,
+          destination_payment: LatticeStripe.Charge.t() | String.t() | nil,
           livemode: boolean() | nil,
           metadata: map() | nil,
           reversals: [TransferReversal.t()],
           reversed: boolean() | nil,
-          source_transaction: String.t() | map() | nil,
+          source_transaction: LatticeStripe.Charge.t() | String.t() | nil,
           source_type: String.t() | nil,
           transfer_group: String.t() | nil,
           extra: map()
@@ -289,17 +289,29 @@ defmodule LatticeStripe.Transfer do
       object: map["object"] || "transfer",
       amount: map["amount"],
       amount_reversed: map["amount_reversed"],
-      balance_transaction: map["balance_transaction"],
+      balance_transaction:
+        (if is_map(map["balance_transaction"]),
+           do: ObjectTypes.maybe_deserialize(map["balance_transaction"]),
+           else: map["balance_transaction"]),
       created: map["created"],
       currency: map["currency"],
       description: map["description"],
-      destination: map["destination"],
-      destination_payment: map["destination_payment"],
+      destination:
+        (if is_map(map["destination"]),
+           do: ObjectTypes.maybe_deserialize(map["destination"]),
+           else: map["destination"]),
+      destination_payment:
+        (if is_map(map["destination_payment"]),
+           do: ObjectTypes.maybe_deserialize(map["destination_payment"]),
+           else: map["destination_payment"]),
       livemode: map["livemode"],
       metadata: map["metadata"],
       reversals: reversal_structs,
       reversed: map["reversed"],
-      source_transaction: map["source_transaction"],
+      source_transaction:
+        (if is_map(map["source_transaction"]),
+           do: ObjectTypes.maybe_deserialize(map["source_transaction"]),
+           else: map["source_transaction"]),
       source_type: map["source_type"],
       transfer_group: map["transfer_group"],
       extra: extra

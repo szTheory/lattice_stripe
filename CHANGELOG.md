@@ -4,6 +4,45 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- **Expand deserialization** — When you pass `expand: ["customer"]` (or any expandable field), the response struct now contains a fully typed struct (e.g., `%Customer{}`) instead of a raw map. Fields that are not expanded remain as string IDs, unchanged. This applies to all resource modules.
+
+  **Migration note:** If your code pattern-matches on expanded fields expecting a raw map, update to match on the typed struct:
+
+  ```elixir
+  # Before (v1.1):
+  {:ok, %PaymentIntent{customer: %{"id" => id}}} = PaymentIntent.retrieve(client, id, expand: ["customer"])
+
+  # After (v1.2):
+  {:ok, %PaymentIntent{customer: %Customer{id: id}}} = PaymentIntent.retrieve(client, id, expand: ["customer"])
+  ```
+
+  If you were not passing `expand:`, your code is unaffected — unexpanded fields are still string IDs.
+
+- **Status atomization** — All resource modules with a documented finite `status` field now return atoms (e.g., `:active`, `:succeeded`) instead of strings from `from_map/1`. Unknown or future status values pass through as raw strings for forward-compatibility.
+
+  **Migration note:** If your code compares status as a string, update to atom comparison:
+
+  ```elixir
+  # Before (v1.1):
+  if pi.status == "succeeded" do ...
+
+  # After (v1.2):
+  if pi.status == :succeeded do ...
+  ```
+
+  Affected modules: PaymentIntent, Subscription, SubscriptionSchedule, Charge, Refund, SetupIntent, Payout, BalanceTransaction, BankAccount, Checkout.Session, Billing.Meter, Account.Capability.
+
+- **Deprecated** `Billing.Meter.status_atom/1` and `Account.Capability.status_atom/1` — status is now automatically atomized in `from_map/1`/`cast/1`. Access `.status` directly on the struct.
+
+### Added
+
+- `LatticeStripe.ObjectTypes` — internal module for Stripe object type dispatch (not part of public API).
+- Union type specs (`Customer.t() | String.t() | nil`) on all expandable fields across all resource modules.
+
 ## [1.1.0](https://github.com/szTheory/lattice_stripe/compare/v1.0.0...v1.1.0) (2026-04-14)
 
 ### Highlights

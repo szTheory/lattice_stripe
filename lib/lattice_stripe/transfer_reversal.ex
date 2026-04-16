@@ -56,7 +56,7 @@ defmodule LatticeStripe.TransferReversal do
   See the [Stripe Transfer Reversal API](https://docs.stripe.com/api/transfer_reversals).
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   # Known top-level fields from the Stripe TransferReversal object.
   # String sigil (no `a`) matches Jason's default string-key output.
@@ -89,13 +89,13 @@ defmodule LatticeStripe.TransferReversal do
           id: String.t() | nil,
           object: String.t(),
           amount: integer() | nil,
-          balance_transaction: String.t() | map() | nil,
+          balance_transaction: LatticeStripe.BalanceTransaction.t() | String.t() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
-          destination_payment_refund: String.t() | map() | nil,
+          destination_payment_refund: LatticeStripe.Refund.t() | String.t() | nil,
           metadata: map() | nil,
-          source_refund: String.t() | map() | nil,
-          transfer: String.t() | map() | nil,
+          source_refund: LatticeStripe.Refund.t() | String.t() | nil,
+          transfer: LatticeStripe.Transfer.t() | String.t() | nil,
           extra: map()
         }
 
@@ -293,13 +293,25 @@ defmodule LatticeStripe.TransferReversal do
       id: map["id"],
       object: map["object"] || "transfer_reversal",
       amount: map["amount"],
-      balance_transaction: map["balance_transaction"],
+      balance_transaction:
+        (if is_map(map["balance_transaction"]),
+           do: ObjectTypes.maybe_deserialize(map["balance_transaction"]),
+           else: map["balance_transaction"]),
       created: map["created"],
       currency: map["currency"],
-      destination_payment_refund: map["destination_payment_refund"],
+      destination_payment_refund:
+        (if is_map(map["destination_payment_refund"]),
+           do: ObjectTypes.maybe_deserialize(map["destination_payment_refund"]),
+           else: map["destination_payment_refund"]),
       metadata: map["metadata"],
-      source_refund: map["source_refund"],
-      transfer: map["transfer"],
+      source_refund:
+        (if is_map(map["source_refund"]),
+           do: ObjectTypes.maybe_deserialize(map["source_refund"]),
+           else: map["source_refund"]),
+      transfer:
+        (if is_map(map["transfer"]),
+           do: ObjectTypes.maybe_deserialize(map["transfer"]),
+           else: map["transfer"]),
       extra: Map.drop(map, @known_fields)
     }
   end
