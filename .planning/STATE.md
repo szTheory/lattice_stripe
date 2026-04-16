@@ -4,8 +4,8 @@ milestone: v1.2
 milestone_name: — Production Hardening & DX
 status: executing
 stopped_at: Phase 29 context gathered
-last_updated: "2026-04-16T22:37:39.731Z"
-last_activity: 2026-04-16 -- Phase 29 planning complete
+last_updated: "2026-04-16T22:38:16.108Z"
+last_activity: 2026-04-16 -- Phase 29 execution started
 progress:
   total_phases: 12
   completed_phases: 7
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16 after v1.2 milestone start)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 28 — meter_event_stream v2
+**Current focus:** Phase 29 — Changeset-Style Param Builders
 
 ## Current Position
 
 Milestone: v1.2 (Production Hardening & DX)
-Phase: 29
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-16 -- Phase 29 planning complete
+Phase: 29 (Changeset-Style Param Builders) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 29
+Last activity: 2026-04-16 -- Phase 29 execution started
 
 ```
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (0/10 phases)

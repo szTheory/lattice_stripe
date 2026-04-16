@@ -51,7 +51,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 26: Circuit Breaker & OpenTelemetry Guides** — `:fuse`-based `RetryStrategy` example guide, OTel integration guide with Honeycomb/Datadog examples (completed 2026-04-16)
 - [x] **Phase 27: Request Batching** — `LatticeStripe.Batch` module with `Task.async_stream`, `try/rescue` per task, `{:ok, results} | {:error, reason}` contract (completed 2026-04-16)
 - [x] **Phase 28: meter_event_stream v2** — `Billing.MeterEventStream` session-token API, `create_session/2`, event send loop, expiry handling (completed 2026-04-16)
-- [ ] **Phase 29: Changeset-Style Param Builders** — optional fluent builders for `SubscriptionSchedule` phases and `BillingPortal` flows
+- [x] **Phase 29: Changeset-Style Param Builders** — optional fluent builders for `SubscriptionSchedule` phases and `BillingPortal` flows (completed 2026-04-16)
 - [ ] **Phase 30: Stripe API Drift Detection** — Mix task + GitHub Actions weekly cron, compares Stripe OpenAPI spec `@known_fields` against current modules
 - [ ] **Phase 31: LiveBook Notebook** — `notebooks/stripe_explorer.livemd` interactive SDK exploration, exercises complete v1.2 API surface
 
@@ -193,10 +193,10 @@ Plans:
   1. A developer can use `LatticeStripe.Builders.SubscriptionSchedule` to construct a phase params map via chained function calls and pass the result directly to `SubscriptionSchedule.create/3` — the builder output is a plain map, not a special struct.
   2. A developer can use `LatticeStripe.Builders.BillingPortal` to construct `flow_data` params for portal session creation — builder functions match the valid `type` atoms documented in `BillingPortal.Session`.
   3. Both builder modules are marked `@doc` optional in their module docs — they coexist with the existing map-based API and do not replace it.
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 29-01-PLAN.md — TDD: SubscriptionSchedule changeset-style builder (new/0, setter chain, phase sub-builder, build/1)
-- [ ] 29-02-PLAN.md — TDD: BillingPortal FlowData builder (4 named constructors) + ExDoc Param Builders group
+- [x] 29-01-PLAN.md — TDD: SubscriptionSchedule changeset-style builder (new/0, setter chain, phase sub-builder, build/1)
+- [x] 29-02-PLAN.md — TDD: BillingPortal FlowData builder (4 named constructors) + ExDoc Param Builders group
 
 ### Phase 30: Stripe API Drift Detection
 **Goal**: CI automatically detects when Stripe's OpenAPI specification adds new fields or resources that are not yet reflected in LatticeStripe's `@known_fields` — surfacing drift as a PR comment or failed check before it reaches users.
@@ -232,6 +232,6 @@ Plans:
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 27. Request Batching | v1.2 | 1/1 | Complete    | 2026-04-16 |
 | 28. meter_event_stream v2 | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 29. Changeset-Style Param Builders | v1.2 | 0/2 | Not started | - |
+| 29. Changeset-Style Param Builders | v1.2 | 2/2 | Complete   | 2026-04-16 |
 | 30. Stripe API Drift Detection | v1.2 | 0/? | Not started | - |
 | 31. LiveBook Notebook | v1.2 | 0/? | Not started | - |
