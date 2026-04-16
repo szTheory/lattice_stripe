@@ -45,7 +45,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 ### 🚧 v1.2 — Production Hardening & DX
 
 - [x] **Phase 22: Expand Deserialization & Status Atomization** — typed struct dispatch for `expand:`, dot-path support, status field atomization sweep across 84+ modules, union type specs + CHANGELOG migration note (completed 2026-04-16)
-- [ ] **Phase 23: BillingPortal.Configuration CRUDL** — portal branding/features customization resource, Level 1+2 typed structs, Level 3+ in `extra`
+- [x] **Phase 23: BillingPortal.Configuration CRUDL** — portal branding/features customization resource, Level 1+2 typed structs, Level 3+ in `extra` (completed 2026-04-16)
 - [ ] **Phase 24: Rate-Limit Awareness & Richer Errors** — `RateLimit-*` header capture via telemetry, fuzzy param name suggestions in `invalid_request_error`
 - [ ] **Phase 25: Performance Guide, Per-Op Timeouts & Connection Warm-Up** — `guides/performance.md`, opt-in `Client` timeout field, Finch warm-up helper
 - [ ] **Phase 26: Circuit Breaker & OpenTelemetry Guides** — `:fuse`-based `RetryStrategy` example guide, OTel integration guide with Honeycomb/Datadog examples
@@ -108,11 +108,11 @@ Plans:
   2. `BillingPortal.Configuration.list/2` returns `{:ok, %List{data: [%Configuration{}, ...]}}` and supports `stream!/2` auto-pagination.
   3. Level 1 and Level 2 nested objects (e.g., `features`, `business_profile`) are decoded into typed sub-structs; Level 3+ nesting is captured in the parent struct's `extra` map without crashing.
   4. The `BillingPortal.Configuration` module appears correctly in the ExDoc nine-group layout under the Billing group.
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 23-01-PLAN.md — Features container + 4 Level 2 sub-struct modules + fixtures + sub-struct unit tests
 - [x] 23-02-PLAN.md — Top-level Configuration CRUDL resource module + unit tests
-- [ ] 23-03-PLAN.md — ObjectTypes registration + Session.configuration expand upgrade + ExDoc grouping + integration test
+- [x] 23-03-PLAN.md — ObjectTypes registration + Session.configuration expand upgrade + ExDoc grouping + integration test
 **UI hint**: no
 
 ### Phase 24: Rate-Limit Awareness & Richer Errors
@@ -207,7 +207,7 @@ Plans:
 | 20. Billing Metering | v1.1 | 7/7 | ✅ Complete | 2026-04-14 |
 | 21. Customer Portal | v1.1 | 4/4 | ✅ Complete | 2026-04-14 |
 | 22. Expand Deserialization & Status Atomization | v1.2 | 4/4 | Complete    | 2026-04-16 |
-| 23. BillingPortal.Configuration CRUDL | v1.2 | 2/3 | In Progress|  |
+| 23. BillingPortal.Configuration CRUDL | v1.2 | 3/3 | Complete   | 2026-04-16 |
 | 24. Rate-Limit Awareness & Richer Errors | v1.2 | 0/? | Not started | - |
 | 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 0/? | Not started | - |
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 0/? | Not started | - |
