@@ -106,7 +106,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         ok_response(payment_intent_json(%{"status" => "requires_capture"}))
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", status: "requires_capture"}} =
+      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", status: :requires_capture}} =
                PaymentIntent.confirm(client, "pi_test1234567890abc", %{
                  "payment_method" => "pm_card_visa"
                })
@@ -121,7 +121,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         ok_response(payment_intent_json(%{"status" => "succeeded"}))
       end)
 
-      assert {:ok, %PaymentIntent{status: "succeeded"}} =
+      assert {:ok, %PaymentIntent{status: :succeeded}} =
                PaymentIntent.confirm(client, "pi_test1234567890abc")
     end
   end
@@ -140,7 +140,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         ok_response(payment_intent_json(%{"status" => "succeeded"}))
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", status: "succeeded"}} =
+      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", status: :succeeded}} =
                PaymentIntent.capture(client, "pi_test1234567890abc")
     end
 
@@ -154,7 +154,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         ok_response(payment_intent_json(%{"status" => "succeeded", "amount_received" => 1500}))
       end)
 
-      assert {:ok, %PaymentIntent{status: "succeeded", amount_received: 1500}} =
+      assert {:ok, %PaymentIntent{status: :succeeded, amount_received: 1500}} =
                PaymentIntent.capture(client, "pi_test1234567890abc", %{
                  "amount_to_capture" => 1500
                })
@@ -175,7 +175,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         ok_response(payment_intent_json(%{"status" => "canceled"}))
       end)
 
-      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", status: "canceled"}} =
+      assert {:ok, %PaymentIntent{id: "pi_test1234567890abc", status: :canceled}} =
                PaymentIntent.cancel(client, "pi_test1234567890abc")
     end
 
@@ -195,7 +195,7 @@ defmodule LatticeStripe.PaymentIntentTest do
         )
       end)
 
-      assert {:ok, %PaymentIntent{status: "canceled", cancellation_reason: "abandoned"}} =
+      assert {:ok, %PaymentIntent{status: :canceled, cancellation_reason: "abandoned"}} =
                PaymentIntent.cancel(client, "pi_test1234567890abc", %{
                  "cancellation_reason" => "abandoned"
                })
@@ -293,7 +293,7 @@ defmodule LatticeStripe.PaymentIntentTest do
       assert pi.id == "pi_test1234567890abc"
       assert pi.amount == 2000
       assert pi.currency == "usd"
-      assert pi.status == "requires_payment_method"
+      assert pi.status == :requires_payment_method
       assert pi.client_secret == "pi_test1234567890abc_secret_abc"
       assert pi.capture_method == "manual"
       assert pi.confirmation_method == "automatic"
@@ -323,7 +323,49 @@ defmodule LatticeStripe.PaymentIntentTest do
 
     test "preserves status field" do
       pi = PaymentIntent.from_map(payment_intent_json(%{"status" => "succeeded"}))
-      assert pi.status == "succeeded"
+      assert pi.status == :succeeded
+    end
+
+    test "atomizes status to atom" do
+      pi = PaymentIntent.from_map(payment_intent_json(%{"status" => "succeeded"}))
+      assert pi.status == :succeeded
+    end
+
+    test "passes through unknown status as string" do
+      pi = PaymentIntent.from_map(payment_intent_json(%{"status" => "future_unknown"}))
+      assert pi.status == "future_unknown"
+    end
+
+    test "handles nil status" do
+      pi = PaymentIntent.from_map(payment_intent_json(%{"status" => nil}))
+      assert pi.status == nil
+    end
+
+    test "customer field: keeps string ID when not expanded" do
+      pi = PaymentIntent.from_map(payment_intent_json(%{"customer" => "cus_123"}))
+      assert pi.customer == "cus_123"
+    end
+
+    test "customer field: deserializes to %Customer{} when expanded" do
+      expanded = %{"object" => "customer", "id" => "cus_123", "email" => "x@y.com"}
+      pi = PaymentIntent.from_map(payment_intent_json(%{"customer" => expanded}))
+      assert %LatticeStripe.Customer{id: "cus_123"} = pi.customer
+    end
+
+    test "customer field: handles nil" do
+      pi = PaymentIntent.from_map(payment_intent_json(%{"customer" => nil}))
+      assert pi.customer == nil
+    end
+
+    test "latest_charge field: keeps string ID when not expanded" do
+      pi = PaymentIntent.from_map(payment_intent_json(%{"latest_charge" => "ch_123"}))
+      assert pi.latest_charge == "ch_123"
+    end
+
+    test "latest_charge field: deserializes to %Charge{} when expanded" do
+      expanded = %{"object" => "charge", "id" => "ch_123", "amount" => 2000}
+      pi = PaymentIntent.from_map(payment_intent_json(%{"latest_charge" => expanded}))
+      assert %LatticeStripe.Charge{id: "ch_123"} = pi.latest_charge
     end
   end
 
@@ -416,7 +458,7 @@ defmodule LatticeStripe.PaymentIntentTest do
       pi = PaymentIntent.from_map(payment_intent_json())
       inspected = inspect(pi)
       assert inspected =~ "usd"
-      assert inspected =~ "requires_payment_method"
+      assert inspected =~ "requires_payment_method"  # atom :requires_payment_method renders as requires_payment_method
     end
 
     test "inspect output does NOT contain client_secret" do

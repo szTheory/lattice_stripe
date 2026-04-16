@@ -80,7 +80,7 @@ defmodule LatticeStripe.SubscriptionSchedule do
   See the [Stripe Subscription Schedules API](https://docs.stripe.com/api/subscription_schedules).
   """
 
-  alias LatticeStripe.{Billing, Client, Error, Request, Resource, Response}
+  alias LatticeStripe.{Billing, Client, Error, ObjectTypes, Request, Resource, Response}
   alias LatticeStripe.SubscriptionSchedule.{CurrentPhase, Phase}
 
   @known_fields ~w[
@@ -128,17 +128,17 @@ defmodule LatticeStripe.SubscriptionSchedule do
           completed_at: integer() | nil,
           created: integer() | nil,
           current_phase: CurrentPhase.t() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           customer_account: String.t() | nil,
           default_settings: Phase.t() | nil,
-          end_behavior: String.t() | nil,
+          end_behavior: atom() | String.t() | nil,
           livemode: boolean() | nil,
           metadata: map() | nil,
           phases: [Phase.t()] | nil,
           released_at: integer() | nil,
           released_subscription: String.t() | nil,
-          status: String.t() | nil,
-          subscription: String.t() | nil,
+          status: atom() | String.t() | nil,
+          subscription: LatticeStripe.Subscription.t() | String.t() | nil,
           test_clock: String.t() | nil,
           extra: map()
         }
@@ -391,21 +391,42 @@ defmodule LatticeStripe.SubscriptionSchedule do
       completed_at: known["completed_at"],
       created: known["created"],
       current_phase: CurrentPhase.from_map(known["current_phase"]),
-      customer: known["customer"],
+      customer:
+        (if is_map(known["customer"]),
+          do: ObjectTypes.maybe_deserialize(known["customer"]),
+          else: known["customer"]),
       customer_account: known["customer_account"],
       default_settings: Phase.from_map(known["default_settings"]),
-      end_behavior: known["end_behavior"],
+      end_behavior: atomize_end_behavior(known["end_behavior"]),
       livemode: known["livemode"],
       metadata: known["metadata"],
       phases: decode_phases(known["phases"]),
       released_at: known["released_at"],
       released_subscription: known["released_subscription"],
-      status: known["status"],
-      subscription: known["subscription"],
+      status: atomize_status(known["status"]),
+      subscription:
+        (if is_map(known["subscription"]),
+          do: ObjectTypes.maybe_deserialize(known["subscription"]),
+          else: known["subscription"]),
       test_clock: known["test_clock"],
       extra: extra
     }
   end
+
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
+
+  defp atomize_status("not_started"), do: :not_started
+  defp atomize_status("active"),      do: :active
+  defp atomize_status("completed"),   do: :completed
+  defp atomize_status("released"),    do: :released
+  defp atomize_status("canceled"),    do: :canceled
+  defp atomize_status(other),         do: other
+
+  defp atomize_end_behavior("release"), do: :release
+  defp atomize_end_behavior("cancel"),  do: :cancel
+  defp atomize_end_behavior(other),     do: other
 
   defp decode_phases(nil), do: nil
   defp decode_phases(phases) when is_list(phases), do: Enum.map(phases, &Phase.from_map/1)

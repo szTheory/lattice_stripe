@@ -25,7 +25,7 @@ defmodule LatticeStripe.SubscriptionTest do
 
       assert sub.id == "sub_test1234567890"
       assert sub.object == "subscription"
-      assert sub.status == "active"
+      assert sub.status == :active
       assert sub.customer == "cus_test123"
       assert sub.livemode == false
       assert sub.currency == "usd"
@@ -91,6 +91,47 @@ defmodule LatticeStripe.SubscriptionTest do
     test "unknown top-level fields land in :extra" do
       sub = Subscription.from_map(Fixtures.basic(%{"future_field" => "hello"}))
       assert sub.extra == %{"future_field" => "hello"}
+    end
+
+    test "atomizes status to atom" do
+      sub = Subscription.from_map(Fixtures.basic(%{"status" => "active"}))
+      assert sub.status == :active
+    end
+
+    test "passes through unknown status as string" do
+      sub = Subscription.from_map(Fixtures.basic(%{"status" => "future_unknown"}))
+      assert sub.status == "future_unknown"
+    end
+
+    test "handles nil status" do
+      sub = Subscription.from_map(Fixtures.basic(%{"status" => nil}))
+      assert sub.status == nil
+    end
+
+    test "atomizes collection_method to atom" do
+      sub = Subscription.from_map(Fixtures.basic(%{"collection_method" => "charge_automatically"}))
+      assert sub.collection_method == :charge_automatically
+    end
+
+    test "atomizes send_invoice collection_method to atom" do
+      sub = Subscription.from_map(Fixtures.basic(%{"collection_method" => "send_invoice"}))
+      assert sub.collection_method == :send_invoice
+    end
+
+    test "customer field: keeps string ID when not expanded" do
+      sub = Subscription.from_map(Fixtures.basic(%{"customer" => "cus_123"}))
+      assert sub.customer == "cus_123"
+    end
+
+    test "customer field: deserializes to %Customer{} when expanded" do
+      expanded = %{"object" => "customer", "id" => "cus_123", "email" => "x@y.com"}
+      sub = Subscription.from_map(Fixtures.basic(%{"customer" => expanded}))
+      assert %LatticeStripe.Customer{id: "cus_123"} = sub.customer
+    end
+
+    test "customer field: handles nil" do
+      sub = Subscription.from_map(Fixtures.basic(%{"customer" => nil}))
+      assert sub.customer == nil
     end
   end
 
@@ -250,7 +291,7 @@ defmodule LatticeStripe.SubscriptionTest do
         ok_response(Fixtures.canceled())
       end)
 
-      assert {:ok, %Subscription{status: "canceled"}} =
+      assert {:ok, %Subscription{status: :canceled}} =
                Subscription.cancel(client, "sub_test1234567890")
     end
 
@@ -535,7 +576,7 @@ defmodule LatticeStripe.SubscriptionTest do
         ok_response(Fixtures.canceled())
       end)
 
-      assert %Subscription{status: "canceled"} =
+      assert %Subscription{status: :canceled} =
                Subscription.cancel!(client, "sub_test1234567890")
     end
 

@@ -24,10 +24,10 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
 
       assert sched.id == "sub_sched_test1234567890"
       assert sched.object == "subscription_schedule"
-      assert sched.status == "active"
+      assert sched.status == :active
       assert sched.customer == "cus_test123"
       assert sched.subscription == "sub_test456"
-      assert sched.end_behavior == "release"
+      assert sched.end_behavior == :release
       assert sched.livemode == false
     end
 
@@ -75,6 +75,47 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
       sched = SubscriptionSchedule.from_map(Fixtures.basic(%{"future_field" => "hello"}))
 
       assert sched.extra == %{"future_field" => "hello"}
+    end
+
+    test "atomizes status to atom" do
+      sched = SubscriptionSchedule.from_map(Fixtures.basic(%{"status" => "active"}))
+      assert sched.status == :active
+    end
+
+    test "passes through unknown status as string" do
+      sched = SubscriptionSchedule.from_map(Fixtures.basic(%{"status" => "future_unknown"}))
+      assert sched.status == "future_unknown"
+    end
+
+    test "handles nil status" do
+      sched = SubscriptionSchedule.from_map(Fixtures.basic(%{"status" => nil}))
+      assert sched.status == nil
+    end
+
+    test "atomizes end_behavior to atom" do
+      sched = SubscriptionSchedule.from_map(Fixtures.basic(%{"end_behavior" => "release"}))
+      assert sched.end_behavior == :release
+    end
+
+    test "atomizes cancel end_behavior to atom" do
+      sched = SubscriptionSchedule.from_map(Fixtures.basic(%{"end_behavior" => "cancel"}))
+      assert sched.end_behavior == :cancel
+    end
+
+    test "customer field: keeps string ID when not expanded" do
+      sched = SubscriptionSchedule.from_map(Fixtures.basic(%{"customer" => "cus_123"}))
+      assert sched.customer == "cus_123"
+    end
+
+    test "customer field: deserializes to %Customer{} when expanded" do
+      expanded = %{"object" => "customer", "id" => "cus_123", "email" => "x@y.com"}
+      sched = SubscriptionSchedule.from_map(Fixtures.basic(%{"customer" => expanded}))
+      assert %LatticeStripe.Customer{id: "cus_123"} = sched.customer
+    end
+
+    test "customer field: handles nil" do
+      sched = SubscriptionSchedule.from_map(Fixtures.basic(%{"customer" => nil}))
+      assert sched.customer == nil
     end
   end
 
@@ -309,7 +350,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
         ok_response(Fixtures.basic(%{"status" => "canceled"}))
       end)
 
-      assert {:ok, %SubscriptionSchedule{status: "canceled"}} =
+      assert {:ok, %SubscriptionSchedule{status: :canceled}} =
                SubscriptionSchedule.cancel(client, "sub_sched_1")
     end
 
@@ -395,7 +436,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
         ok_response(Fixtures.basic(%{"status" => "released"}))
       end)
 
-      assert {:ok, %SubscriptionSchedule{status: "released"}} =
+      assert {:ok, %SubscriptionSchedule{status: :released}} =
                SubscriptionSchedule.release(client, "sub_sched_1")
     end
 
