@@ -44,14 +44,12 @@ defmodule LatticeStripe.Billing.Meter do
                    customer_mapping value_settings status_transitions created
                    updated livemode)
 
-  @known_statuses ~w(active inactive)
-
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t() | nil,
           display_name: String.t() | nil,
           event_name: String.t() | nil,
-          status: String.t() | nil,
+          status: atom() | String.t() | nil,
           default_aggregation: DefaultAggregation.t() | nil,
           customer_mapping: CustomerMapping.t() | nil,
           value_settings: ValueSettings.t() | nil,
@@ -254,32 +252,37 @@ defmodule LatticeStripe.Billing.Meter do
   """
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
+    {known, extra} = Map.split(map, @known_fields)
+
     %__MODULE__{
-      id: map["id"],
-      object: map["object"],
-      display_name: map["display_name"],
-      event_name: map["event_name"],
-      status: map["status"],
-      default_aggregation: DefaultAggregation.from_map(map["default_aggregation"]),
-      customer_mapping: CustomerMapping.from_map(map["customer_mapping"]),
-      value_settings: ValueSettings.from_map(map["value_settings"]),
-      status_transitions: StatusTransitions.from_map(map["status_transitions"]),
-      created: map["created"],
-      updated: map["updated"],
-      livemode: map["livemode"],
-      extra: Map.drop(map, @known_fields)
+      id: known["id"],
+      object: known["object"],
+      display_name: known["display_name"],
+      event_name: known["event_name"],
+      status: atomize_status(known["status"]),
+      default_aggregation: DefaultAggregation.from_map(known["default_aggregation"]),
+      customer_mapping: CustomerMapping.from_map(known["customer_mapping"]),
+      value_settings: ValueSettings.from_map(known["value_settings"]),
+      status_transitions: StatusTransitions.from_map(known["status_transitions"]),
+      created: known["created"],
+      updated: known["updated"],
+      livemode: known["livemode"],
+      extra: extra
     }
   end
 
-  @doc """
-  Decode `Meter.status` string into an atom.
+  # ---------------------------------------------------------------------------
+  # Private: atomization helpers
+  # ---------------------------------------------------------------------------
 
-  Returns `:active` or `:inactive` for known statuses, `:unknown` otherwise
-  (including `nil`). Mirrors `LatticeStripe.Account.Capability.status_atom/1`
-  pattern (Phase 17 D-02).
-  """
-  @spec status_atom(String.t() | nil) :: :active | :inactive | :unknown
-  def status_atom(nil), do: :unknown
-  def status_atom(s) when s in @known_statuses, do: String.to_existing_atom(s)
-  def status_atom(_), do: :unknown
+  defp atomize_status("active"),   do: :active
+  defp atomize_status("inactive"), do: :inactive
+  defp atomize_status(other),      do: other
+
+  @deprecated "Status is now automatically atomized in from_map/1. Access meter.status directly."
+  @spec status_atom(t() | String.t() | nil) :: atom()
+  def status_atom(%__MODULE__{status: s}), do: s
+  def status_atom(nil), do: nil
+  def status_atom(s) when is_atom(s), do: s
+  def status_atom(s), do: atomize_status(s)
 end

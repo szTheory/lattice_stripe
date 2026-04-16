@@ -26,7 +26,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
         ok_response(checkout_session_payment_json())
       end)
 
-      assert {:ok, %Session{id: "cs_test1234567890abc", mode: "payment", status: "open"}} =
+      assert {:ok, %Session{id: "cs_test1234567890abc", mode: :payment, status: :open}} =
                Session.create(client, %{
                  "mode" => "payment",
                  "success_url" => "https://example.com/success",
@@ -44,7 +44,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
         ok_response(checkout_session_subscription_json())
       end)
 
-      assert {:ok, %Session{mode: "subscription", subscription: "sub_test123"}} =
+      assert {:ok, %Session{mode: :subscription, subscription: "sub_test123"}} =
                Session.create(client, %{
                  "mode" => "subscription",
                  "success_url" => "https://example.com/success",
@@ -63,9 +63,9 @@ defmodule LatticeStripe.Checkout.SessionTest do
 
       assert {:ok,
               %Session{
-                mode: "setup",
+                mode: :setup,
                 setup_intent: "seti_test123",
-                payment_status: "no_payment_required"
+                payment_status: :no_payment_required
               }} =
                Session.create(client, %{
                  "mode" => "setup",
@@ -207,7 +207,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
         ok_response(checkout_session_expired_json())
       end)
 
-      assert {:ok, %Session{id: "cs_test1234567890abc", status: "expired"}} =
+      assert {:ok, %Session{id: "cs_test1234567890abc", status: :expired}} =
                Session.expire(client, "cs_test1234567890abc")
     end
 
@@ -442,7 +442,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
         ok_response(checkout_session_expired_json())
       end)
 
-      assert %Session{status: "expired"} = Session.expire!(client, "cs_test1234567890abc")
+      assert %Session{status: :expired} = Session.expire!(client, "cs_test1234567890abc")
     end
   end
 
@@ -484,9 +484,9 @@ defmodule LatticeStripe.Checkout.SessionTest do
 
       assert session.id == "cs_test1234567890abc"
       assert session.object == "checkout.session"
-      assert session.mode == "payment"
-      assert session.status == "open"
-      assert session.payment_status == "unpaid"
+      assert session.mode == :payment
+      assert session.status == :open
+      assert session.payment_status == :unpaid
       assert session.amount_total == 2000
       assert session.currency == "usd"
       assert session.success_url == "https://example.com/success"
@@ -533,6 +533,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
       assert inspected =~ "payment"
       assert inspected =~ "open"
       assert inspected =~ "unpaid"
+      # atoms inspect as bare words, e.g. :payment, :open, :unpaid
       assert inspected =~ "2000"
       assert inspected =~ "usd"
     end
@@ -579,6 +580,118 @@ defmodule LatticeStripe.Checkout.SessionTest do
       inspected = inspect(session)
 
       refute inspected =~ "shipping_details"
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # from_map/1 — atomization
+  # ---------------------------------------------------------------------------
+
+  describe "from_map/1 status atomization" do
+    test "atomizes 'open' to :open" do
+      session = Session.from_map(%{"id" => "cs_abc", "status" => "open"})
+      assert session.status == :open
+    end
+
+    test "atomizes 'complete' to :complete" do
+      session = Session.from_map(%{"id" => "cs_abc", "status" => "complete"})
+      assert session.status == :complete
+    end
+
+    test "atomizes 'expired' to :expired" do
+      session = Session.from_map(%{"id" => "cs_abc", "status" => "expired"})
+      assert session.status == :expired
+    end
+
+    test "passes through unknown status string" do
+      session = Session.from_map(%{"id" => "cs_abc", "status" => "future_status"})
+      assert session.status == "future_status"
+    end
+
+    test "passes through nil status" do
+      session = Session.from_map(%{"id" => "cs_abc", "status" => nil})
+      assert session.status == nil
+    end
+  end
+
+  describe "from_map/1 mode atomization" do
+    test "atomizes 'payment' to :payment" do
+      session = Session.from_map(%{"id" => "cs_abc", "mode" => "payment"})
+      assert session.mode == :payment
+    end
+
+    test "atomizes 'setup' to :setup" do
+      session = Session.from_map(%{"id" => "cs_abc", "mode" => "setup"})
+      assert session.mode == :setup
+    end
+
+    test "atomizes 'subscription' to :subscription" do
+      session = Session.from_map(%{"id" => "cs_abc", "mode" => "subscription"})
+      assert session.mode == :subscription
+    end
+
+    test "passes through unknown mode string" do
+      session = Session.from_map(%{"id" => "cs_abc", "mode" => "future_mode"})
+      assert session.mode == "future_mode"
+    end
+  end
+
+  describe "from_map/1 payment_status atomization" do
+    test "atomizes 'paid' to :paid" do
+      session = Session.from_map(%{"id" => "cs_abc", "payment_status" => "paid"})
+      assert session.payment_status == :paid
+    end
+
+    test "atomizes 'unpaid' to :unpaid" do
+      session = Session.from_map(%{"id" => "cs_abc", "payment_status" => "unpaid"})
+      assert session.payment_status == :unpaid
+    end
+
+    test "atomizes 'no_payment_required' to :no_payment_required" do
+      session = Session.from_map(%{"id" => "cs_abc", "payment_status" => "no_payment_required"})
+      assert session.payment_status == :no_payment_required
+    end
+
+    test "passes through unknown payment_status string" do
+      session = Session.from_map(%{"id" => "cs_abc", "payment_status" => "future_status"})
+      assert session.payment_status == "future_status"
+    end
+  end
+
+  describe "from_map/1 expand guards" do
+    test "customer stays as nil when absent" do
+      session = Session.from_map(%{"id" => "cs_abc", "customer" => nil})
+      assert session.customer == nil
+    end
+
+    test "customer stays as string ID when not expanded" do
+      session = Session.from_map(%{"id" => "cs_abc", "customer" => "cus_abc"})
+      assert session.customer == "cus_abc"
+    end
+
+    test "customer dispatches to Customer.from_map when expanded" do
+      session =
+        Session.from_map(%{
+          "id" => "cs_abc",
+          "customer" => %{"id" => "cus_abc", "object" => "customer", "email" => "test@example.com"}
+        })
+
+      assert %LatticeStripe.Customer{id: "cus_abc"} = session.customer
+    end
+
+    test "invoice stays as string ID when not expanded" do
+      session = Session.from_map(%{"id" => "cs_abc", "invoice" => "in_abc"})
+      assert session.invoice == "in_abc"
+    end
+
+    test "payment_intent stays as string ID when not expanded" do
+      session = Session.from_map(%{"id" => "cs_abc", "payment_intent" => "pi_abc"})
+      assert session.payment_intent == "pi_abc"
+    end
+
+    test "subscription stays as string ID when not expanded" do
+      session = Session.from_map(%{"id" => "cs_abc", "subscription" => "sub_abc"})
+      assert session.subscription == "sub_abc"
     end
   end
 
