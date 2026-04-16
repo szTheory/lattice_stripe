@@ -64,7 +64,7 @@ defmodule LatticeStripe.PaymentMethod do
   object reference and available parameters.
   """
 
-  alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   # Known top-level fields from the Stripe PaymentMethod object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -149,7 +149,7 @@ defmodule LatticeStripe.PaymentMethod do
           type: String.t() | nil,
           created: integer() | nil,
           livemode: boolean() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           metadata: map() | nil,
           allow_redisplay: String.t() | nil,
           billing_details: map() | nil,
@@ -524,7 +524,10 @@ defmodule LatticeStripe.PaymentMethod do
       type: map["type"],
       created: map["created"],
       livemode: map["livemode"],
-      customer: map["customer"],
+      customer:
+        (if is_map(map["customer"]),
+           do: ObjectTypes.maybe_deserialize(map["customer"]),
+           else: map["customer"]),
       metadata: map["metadata"],
       allow_redisplay: map["allow_redisplay"],
       billing_details: map["billing_details"],

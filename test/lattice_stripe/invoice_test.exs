@@ -250,6 +250,57 @@ defmodule LatticeStripe.InvoiceTest do
       invoice = Invoice.from_map(%{"id" => "in_abc"})
       assert invoice.object == "invoice"
     end
+
+    test "customer string ID is preserved when not expanded" do
+      invoice = Invoice.from_map(invoice_json(%{"customer" => "cus_test123"}))
+      assert invoice.customer == "cus_test123"
+    end
+
+    test "expanded customer map is deserialized to %Customer{}" do
+      invoice =
+        Invoice.from_map(
+          invoice_json(%{
+            "customer" => %{
+              "object" => "customer",
+              "id" => "cus_expanded",
+              "email" => "expanded@example.com"
+            }
+          })
+        )
+
+      assert %LatticeStripe.Customer{} = invoice.customer
+      assert invoice.customer.id == "cus_expanded"
+      assert invoice.customer.email == "expanded@example.com"
+    end
+
+    test "nil customer is preserved as nil" do
+      invoice = Invoice.from_map(invoice_json(%{"customer" => nil}))
+      assert invoice.customer == nil
+    end
+
+    test "dot-path expand: nested expanded customer in list data item deserializes to %Customer{} (EXPD-02)" do
+      # Simulates what Stripe returns for `expand: ["data.customer"]` on a list endpoint.
+      # Each data item's `customer` field contains the full expanded object instead of a string ID.
+      invoice_map = %{
+        "object" => "invoice",
+        "id" => "in_dot_path_test",
+        "status" => "open",
+        "customer" => %{
+          "object" => "customer",
+          "id" => "cus_expanded_via_dot_path",
+          "email" => "dotpath@example.com",
+          "name" => "Dot Path Test"
+        }
+      }
+
+      result = LatticeStripe.Invoice.from_map(invoice_map)
+
+      # The is_map guard in from_map/1 detects the expanded map and dispatches
+      # through ObjectTypes.maybe_deserialize/1 -- this is the EXPD-02 mechanism.
+      assert %LatticeStripe.Customer{} = result.customer
+      assert result.customer.id == "cus_expanded_via_dot_path"
+      assert result.customer.email == "dotpath@example.com"
+    end
   end
 
   # ---------------------------------------------------------------------------

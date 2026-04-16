@@ -54,7 +54,7 @@ defmodule LatticeStripe.Invoice do
   object reference and available parameters.
   """
 
-  alias LatticeStripe.{Billing, Client, Error, List, Request, Resource, Response, Telemetry}
+  alias LatticeStripe.{Billing, Client, Error, List, ObjectTypes, Request, Resource, Response, Telemetry}
   alias LatticeStripe.Invoice.{AutomaticTax, LineItem, StatusTransitions}
 
   # Known top-level fields from the Stripe Invoice object.
@@ -190,11 +190,11 @@ defmodule LatticeStripe.Invoice do
           auto_advance: boolean() | nil,
           automatic_tax: AutomaticTax.t() | nil,
           billing_reason: atom() | String.t() | nil,
-          charge: String.t() | nil,
+          charge: LatticeStripe.Charge.t() | String.t() | nil,
           collection_method: atom() | String.t() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           customer_address: map() | nil,
           customer_email: String.t() | nil,
           customer_name: String.t() | nil,
@@ -227,7 +227,7 @@ defmodule LatticeStripe.Invoice do
           on_behalf_of: String.t() | nil,
           paid: boolean() | nil,
           paid_out_of_band: boolean() | nil,
-          payment_intent: String.t() | nil,
+          payment_intent: LatticeStripe.PaymentIntent.t() | String.t() | nil,
           payment_settings: map() | nil,
           period_end: integer() | nil,
           period_start: integer() | nil,
@@ -243,7 +243,7 @@ defmodule LatticeStripe.Invoice do
           statement_descriptor: String.t() | nil,
           status: atom() | String.t() | nil,
           status_transitions: StatusTransitions.t() | nil,
-          subscription: String.t() | nil,
+          subscription: LatticeStripe.Subscription.t() | String.t() | nil,
           subscription_details: map() | nil,
           subscription_proration_date: integer() | nil,
           subtotal: integer() | nil,
@@ -944,11 +944,17 @@ defmodule LatticeStripe.Invoice do
       auto_advance: known["auto_advance"],
       automatic_tax: AutomaticTax.from_map(known["automatic_tax"]),
       billing_reason: atomize_billing_reason(known["billing_reason"]),
-      charge: known["charge"],
+      charge:
+        (if is_map(known["charge"]),
+           do: ObjectTypes.maybe_deserialize(known["charge"]),
+           else: known["charge"]),
       collection_method: atomize_collection_method(known["collection_method"]),
       created: known["created"],
       currency: known["currency"],
-      customer: known["customer"],
+      customer:
+        (if is_map(known["customer"]),
+           do: ObjectTypes.maybe_deserialize(known["customer"]),
+           else: known["customer"]),
       customer_address: known["customer_address"],
       customer_email: known["customer_email"],
       customer_name: known["customer_name"],
@@ -981,7 +987,10 @@ defmodule LatticeStripe.Invoice do
       on_behalf_of: known["on_behalf_of"],
       paid: known["paid"],
       paid_out_of_band: known["paid_out_of_band"],
-      payment_intent: known["payment_intent"],
+      payment_intent:
+        (if is_map(known["payment_intent"]),
+           do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
+           else: known["payment_intent"]),
       payment_settings: known["payment_settings"],
       period_end: known["period_end"],
       period_start: known["period_start"],
@@ -997,7 +1006,10 @@ defmodule LatticeStripe.Invoice do
       statement_descriptor: known["statement_descriptor"],
       status: atomize_status(known["status"]),
       status_transitions: StatusTransitions.from_map(known["status_transitions"]),
-      subscription: known["subscription"],
+      subscription:
+        (if is_map(known["subscription"]),
+           do: ObjectTypes.maybe_deserialize(known["subscription"]),
+           else: known["subscription"]),
       subscription_details: known["subscription_details"],
       subscription_proration_date: known["subscription_proration_date"],
       subtotal: known["subtotal"],

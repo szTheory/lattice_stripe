@@ -97,6 +97,32 @@ defmodule LatticeStripe.InvoiceItemTest do
       item = InvoiceItem.from_map(%{"id" => "ii_abc"})
       assert item.object == "invoiceitem"
     end
+
+    test "customer string ID is preserved when not expanded" do
+      item = InvoiceItem.from_map(invoice_item_json(%{"customer" => "cus_test123"}))
+      assert item.customer == "cus_test123"
+    end
+
+    test "expanded customer map is deserialized to %Customer{}" do
+      item =
+        InvoiceItem.from_map(
+          invoice_item_json(%{
+            "customer" => %{
+              "object" => "customer",
+              "id" => "cus_expanded",
+              "email" => "expanded@example.com"
+            }
+          })
+        )
+
+      assert %LatticeStripe.Customer{} = item.customer
+      assert item.customer.id == "cus_expanded"
+    end
+
+    test "nil customer is preserved as nil" do
+      item = InvoiceItem.from_map(invoice_item_json(%{"customer" => nil}))
+      assert item.customer == nil
+    end
   end
 
   # ---------------------------------------------------------------------------

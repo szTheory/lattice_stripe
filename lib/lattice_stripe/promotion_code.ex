@@ -65,7 +65,7 @@ defmodule LatticeStripe.PromotionCode do
   See the [Stripe Promotion Code API](https://docs.stripe.com/api/promotion_codes).
   """
 
-  alias LatticeStripe.{Client, Coupon, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Client, Coupon, Error, List, ObjectTypes, Request, Resource, Response}
 
   @known_fields ~w[
     id object active code coupon created customer expires_at livemode
@@ -96,7 +96,7 @@ defmodule LatticeStripe.PromotionCode do
           code: String.t() | nil,
           coupon: Coupon.t() | String.t() | nil,
           created: integer() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           expires_at: integer() | nil,
           livemode: boolean() | nil,
           max_redemptions: integer() | nil,
@@ -171,7 +171,10 @@ defmodule LatticeStripe.PromotionCode do
       code: map["code"],
       coupon: decode_coupon(map["coupon"]),
       created: map["created"],
-      customer: map["customer"],
+      customer:
+        (if is_map(map["customer"]),
+           do: ObjectTypes.maybe_deserialize(map["customer"]),
+           else: map["customer"]),
       expires_at: map["expires_at"],
       livemode: map["livemode"],
       max_redemptions: map["max_redemptions"],

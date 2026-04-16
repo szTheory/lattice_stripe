@@ -28,6 +28,8 @@ defmodule LatticeStripe.Card do
   - https://docs.stripe.com/api/external_account_cards
   """
 
+  alias LatticeStripe.ObjectTypes
+
   # Known top-level fields. String sigil (no `a`) matches Jason's default string-key output.
   @known_fields ~w[
     id object account address_city address_country address_line1
@@ -85,7 +87,7 @@ defmodule LatticeStripe.Card do
           brand: String.t() | nil,
           country: String.t() | nil,
           currency: String.t() | nil,
-          customer: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | String.t() | nil,
           cvc_check: String.t() | nil,
           default_for_currency: boolean() | nil,
           dynamic_last4: String.t() | nil,
@@ -126,7 +128,10 @@ defmodule LatticeStripe.Card do
       brand: map["brand"],
       country: map["country"],
       currency: map["currency"],
-      customer: map["customer"],
+      customer:
+        (if is_map(map["customer"]),
+           do: ObjectTypes.maybe_deserialize(map["customer"]),
+           else: map["customer"]),
       cvc_check: map["cvc_check"],
       default_for_currency: map["default_for_currency"],
       dynamic_last4: map["dynamic_last4"],

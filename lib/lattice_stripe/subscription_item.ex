@@ -37,7 +37,7 @@ defmodule LatticeStripe.SubscriptionItem do
   See the [Stripe Subscription Items API](https://docs.stripe.com/api/subscription_items).
   """
 
-  alias LatticeStripe.{Billing, Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.{Billing, Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   @known_fields ~w[
     id object billing_thresholds created discounts metadata plan price
@@ -72,7 +72,7 @@ defmodule LatticeStripe.SubscriptionItem do
           price: map() | nil,
           proration_behavior: String.t() | nil,
           quantity: integer() | nil,
-          subscription: String.t() | nil,
+          subscription: LatticeStripe.Subscription.t() | String.t() | nil,
           tax_rates: list() | nil,
           extra: map()
         }
@@ -250,7 +250,10 @@ defmodule LatticeStripe.SubscriptionItem do
       price: known["price"],
       proration_behavior: known["proration_behavior"],
       quantity: known["quantity"],
-      subscription: known["subscription"],
+      subscription:
+        (if is_map(known["subscription"]),
+           do: ObjectTypes.maybe_deserialize(known["subscription"]),
+           else: known["subscription"]),
       tax_rates: known["tax_rates"],
       extra: extra
     }
