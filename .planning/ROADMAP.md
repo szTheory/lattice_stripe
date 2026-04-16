@@ -48,7 +48,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 23: BillingPortal.Configuration CRUDL** — portal branding/features customization resource, Level 1+2 typed structs, Level 3+ in `extra` (completed 2026-04-16)
 - [x] **Phase 24: Rate-Limit Awareness & Richer Errors** — `RateLimit-*` header capture via telemetry, fuzzy param name suggestions in `invalid_request_error` (completed 2026-04-16)
 - [x] **Phase 25: Performance Guide, Per-Op Timeouts & Connection Warm-Up** — `guides/performance.md`, opt-in `Client` timeout field, Finch warm-up helper (completed 2026-04-16)
-- [ ] **Phase 26: Circuit Breaker & OpenTelemetry Guides** — `:fuse`-based `RetryStrategy` example guide, OTel integration guide with Honeycomb/Datadog examples
+- [x] **Phase 26: Circuit Breaker & OpenTelemetry Guides** — `:fuse`-based `RetryStrategy` example guide, OTel integration guide with Honeycomb/Datadog examples (completed 2026-04-16)
 - [ ] **Phase 27: Request Batching** — `LatticeStripe.Batch` module with `Task.async_stream`, `try/rescue` per task, `{:ok, results} | {:error, reason}` contract
 - [ ] **Phase 28: meter_event_stream v2** — `Billing.MeterEventStream` session-token API, `create_session/2`, event send loop, expiry handling
 - [ ] **Phase 29: Changeset-Style Param Builders** — optional fluent builders for `SubscriptionSchedule` phases and `BillingPortal` flows
@@ -153,10 +153,10 @@ Plans:
   2. The circuit breaker guide explains the failure/open/half-open state machine in prose, not just code, and explicitly documents why `:fuse` is not bundled.
   3. A developer can read an OpenTelemetry integration guide that shows how to bridge LatticeStripe telemetry events to `opentelemetry_api` with complete, runnable examples for at least two backends (Honeycomb and Datadog).
   4. The OTel guide's example code compiles cleanly (verified by doctest or a CI-excluded integration test) with `opentelemetry_api` declared as a `only: :dev` dependency.
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 26-01-PLAN.md — Config foundation + circuit breaker guide + :fuse integration test
-- [ ] 26-02-PLAN.md — OpenTelemetry guide + Honeycomb/Datadog examples + OTel integration test
+- [x] 26-02-PLAN.md — OpenTelemetry guide + Honeycomb/Datadog examples + OTel integration test
 
 ### Phase 27: Request Batching
 **Goal**: Developers can execute multiple independent Stripe API calls concurrently with a single ergonomic helper that returns structured results per-call without crashing the caller when individual requests fail or time out.
@@ -221,7 +221,7 @@ Plans:
 | 23. BillingPortal.Configuration CRUDL | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 24. Rate-Limit Awareness & Richer Errors | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 3/3 | Complete    | 2026-04-16 |
-| 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 1/2 | In Progress|  |
+| 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 2/2 | Complete   | 2026-04-16 |
 | 27. Request Batching | v1.2 | 0/? | Not started | - |
 | 28. meter_event_stream v2 | v1.2 | 0/? | Not started | - |
 | 29. Changeset-Style Param Builders | v1.2 | 0/? | Not started | - |
