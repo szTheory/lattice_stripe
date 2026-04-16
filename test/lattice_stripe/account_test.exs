@@ -139,14 +139,18 @@ defmodule LatticeStripe.AccountTest do
       assert %Capability{status: :unrequested, requested: false} = us_bank
     end
 
-    test "Capability.status_atom/1 returns correct atom for capabilities" do
+    test "capabilities auto-atomize status in cast/1" do
       account = Account.from_map(Fixtures.basic())
 
-      assert Capability.status_atom(account.capabilities["card_payments"]) == :active
-      assert Capability.status_atom(account.capabilities["transfers"]) == :pending
+      assert account.capabilities["card_payments"].status == :active
+      assert account.capabilities["transfers"].status == :pending
+      assert account.capabilities["us_bank_account_payments"].status == :unrequested
+    end
 
-      assert Capability.status_atom(account.capabilities["us_bank_account_payments"]) ==
-               :unrequested
+    test "deprecated status_atom/1 still works (backward compat)" do
+      account = Account.from_map(Fixtures.basic())
+      # Use apply/3 to avoid compile-time deprecation warning
+      assert apply(Capability, :status_atom, [account.capabilities["card_payments"]]) == :active
     end
 
     test "capabilities is nil when not present in map" do
