@@ -37,7 +37,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State (post-v1.1)
 
-**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 25 phases complete (1-11, 14-25). ~74 plans executed. Phase 25 added per-operation timeouts (`operation_timeouts` in Client), connection warm-up (`warm_up/1`), and `guides/performance.md` (286 lines). 1699 tests / 0 failures. Zero-touch release via release-please.
+**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 26 phases complete (1-11, 14-26). ~76 plans executed. Phase 26 added `guides/circuit-breaker.md` (`:fuse`-based RetryStrategy guide with state machine prose) and `guides/opentelemetry.md` (OTel bridge with Honeycomb + Datadog examples). 1699 tests / 0 failures. Zero-touch release via release-please.
 
 **Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
 
@@ -247,4 +247,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Move shipped requirements to Validated, add next-milestone requirements to Active
 
 ---
-*Last updated: 2026-04-16 — Phase 25 complete (performance guide + per-op timeouts + warm-up — 1699 tests). v1.2 milestone in progress.*
+*Last updated: 2026-04-16 — Phase 26 complete (circuit breaker + OpenTelemetry guides — 1699 tests). v1.2 milestone in progress.*
