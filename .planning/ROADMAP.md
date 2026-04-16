@@ -47,7 +47,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 22: Expand Deserialization & Status Atomization** — typed struct dispatch for `expand:`, dot-path support, status field atomization sweep across 84+ modules, union type specs + CHANGELOG migration note (completed 2026-04-16)
 - [x] **Phase 23: BillingPortal.Configuration CRUDL** — portal branding/features customization resource, Level 1+2 typed structs, Level 3+ in `extra` (completed 2026-04-16)
 - [x] **Phase 24: Rate-Limit Awareness & Richer Errors** — `RateLimit-*` header capture via telemetry, fuzzy param name suggestions in `invalid_request_error` (completed 2026-04-16)
-- [ ] **Phase 25: Performance Guide, Per-Op Timeouts & Connection Warm-Up** — `guides/performance.md`, opt-in `Client` timeout field, Finch warm-up helper
+- [x] **Phase 25: Performance Guide, Per-Op Timeouts & Connection Warm-Up** — `guides/performance.md`, opt-in `Client` timeout field, Finch warm-up helper (completed 2026-04-16)
 - [ ] **Phase 26: Circuit Breaker & OpenTelemetry Guides** — `:fuse`-based `RetryStrategy` example guide, OTel integration guide with Honeycomb/Datadog examples
 - [ ] **Phase 27: Request Batching** — `LatticeStripe.Batch` module with `Task.async_stream`, `try/rescue` per task, `{:ok, results} | {:error, reason}` contract
 - [ ] **Phase 28: meter_event_stream v2** — `Billing.MeterEventStream` session-token API, `create_session/2`, event send loop, expiry handling
@@ -138,11 +138,11 @@ Plans:
   2. A developer can add `operation_timeouts: %{list: 60_000, search: 45_000}` to their `Client.new!/1` config and have those timeouts applied per operation type, with nil as the default (preserving the existing 30s behavior for all callers who do not opt in).
   3. A developer can call `LatticeStripe.warm_up/1` (or equivalent) on application start and have Finch connections pre-established, with the function returning `{:ok, :warmed}` on success.
   4. `guides/performance.md` includes a connection warm-up section with a complete `Application.start/2` example and explains what "warm" means in terms of observable behavior.
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 25-01-PLAN.md — Per-operation timeouts (Config schema + Client struct + classify_operation + timeout resolution + tests)
 - [x] 25-02-PLAN.md — Connection warm-up (warm_up/1 + warm_up!/1 + Mox tests)
-- [ ] 25-03-PLAN.md — Performance guide (guides/performance.md + ExDoc wiring)
+- [x] 25-03-PLAN.md — Performance guide (guides/performance.md + ExDoc wiring)
 
 ### Phase 26: Circuit Breaker & OpenTelemetry Guides
 **Goal**: Developers who need cascading-failure protection or production observability have authoritative, worked-example guides — with copy-paste-ready code — without LatticeStripe bundling any new OTP processes or external runtime dependencies.
@@ -217,7 +217,7 @@ Plans:
 | 22. Expand Deserialization & Status Atomization | v1.2 | 4/4 | Complete    | 2026-04-16 |
 | 23. BillingPortal.Configuration CRUDL | v1.2 | 3/3 | Complete    | 2026-04-16 |
 | 24. Rate-Limit Awareness & Richer Errors | v1.2 | 3/3 | Complete    | 2026-04-16 |
-| 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 2/3 | In Progress|  |
+| 25. Performance Guide, Per-Op Timeouts & Connection Warm-Up | v1.2 | 3/3 | Complete   | 2026-04-16 |
 | 26. Circuit Breaker & OpenTelemetry Guides | v1.2 | 0/? | Not started | - |
 | 27. Request Batching | v1.2 | 0/? | Not started | - |
 | 28. meter_event_stream v2 | v1.2 | 0/? | Not started | - |
