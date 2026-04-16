@@ -37,7 +37,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State (post-v1.1)
 
-**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 19 phases complete (1-11, 14-21). ~58 plans executed. Billing Metering (Meter, MeterEvent, MeterEventAdjustment) and Customer Portal (BillingPortal.Session) shipped. 1488 tests / 0 failures. Zero-touch release via release-please.
+**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 20 phases complete (1-11, 14-22). ~62 plans executed. Phase 22 added expand deserialization (typed struct dispatch for `expand:` fields), status atomization across all resource modules, and union typespecs. 1611 tests / 0 failures. Zero-touch release via release-please.
 
 **Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
 
@@ -247,4 +247,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Move shipped requirements to Validated, add next-milestone requirements to Active
 
 ---
-*Last updated: 2026-04-16 — v1.2 milestone (Production Hardening & DX) started. v1.1.0 live on Hex.pm.*
+*Last updated: 2026-04-16 — Phase 22 complete (expand deserialization + status atomization). v1.2 milestone in progress.*
