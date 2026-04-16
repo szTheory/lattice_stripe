@@ -52,7 +52,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 27: Request Batching** — `LatticeStripe.Batch` module with `Task.async_stream`, `try/rescue` per task, `{:ok, results} | {:error, reason}` contract (completed 2026-04-16)
 - [x] **Phase 28: meter_event_stream v2** — `Billing.MeterEventStream` session-token API, `create_session/2`, event send loop, expiry handling (completed 2026-04-16)
 - [x] **Phase 29: Changeset-Style Param Builders** — optional fluent builders for `SubscriptionSchedule` phases and `BillingPortal` flows (completed 2026-04-16)
-- [ ] **Phase 30: Stripe API Drift Detection** — Mix task + GitHub Actions weekly cron, compares Stripe OpenAPI spec `@known_fields` against current modules
+- [x] **Phase 30: Stripe API Drift Detection** — Mix task + GitHub Actions weekly cron, compares Stripe OpenAPI spec `@known_fields` against current modules (completed 2026-04-16)
 - [ ] **Phase 31: LiveBook Notebook** — `notebooks/stripe_explorer.livemd` interactive SDK exploration, exercises complete v1.2 API surface
 
 ## Phase Details
@@ -206,10 +206,10 @@ Plans:
   1. A developer can run `mix lattice_stripe.check_drift` locally and see a report listing any fields present in Stripe's published OpenAPI spec that are absent from the corresponding module's `@known_fields`.
   2. A GitHub Actions cron job runs `mix lattice_stripe.check_drift` weekly and opens a draft PR or creates an issue when drift is detected — with the diff clearly labeled per resource module.
   3. The Mix task exits with a non-zero code when drift is found, making it usable as a CI gate if desired.
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 30-01-PLAN.md — ObjectTypes accessor + Drift core module + test fixture + unit tests
-- [ ] 30-02-PLAN.md — Mix task shell + GitHub Actions weekly drift workflow
+- [x] 30-02-PLAN.md — Mix task shell + GitHub Actions weekly drift workflow
 
 ### Phase 31: LiveBook Notebook
 **Goal**: Developers new to LatticeStripe can explore the complete v1.2 API surface interactively — from basic auth through payments, subscriptions, metering, and portal flows — without reading documentation linearly.
@@ -236,5 +236,5 @@ Plans:
 | 27. Request Batching | v1.2 | 1/1 | Complete    | 2026-04-16 |
 | 28. meter_event_stream v2 | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 29. Changeset-Style Param Builders | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 30. Stripe API Drift Detection | v1.2 | 1/2 | In Progress|  |
+| 30. Stripe API Drift Detection | v1.2 | 2/2 | Complete   | 2026-04-16 |
 | 31. LiveBook Notebook | v1.2 | 0/? | Not started | - |
