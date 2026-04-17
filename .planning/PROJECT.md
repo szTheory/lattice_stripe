@@ -12,6 +12,18 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Goal:** Make LatticeStripe the SDK that production teams recommend to each other — polish DX, add performance/reliability guidance, and complete deferred feature gaps. **All features shipped.**
 
+## Current Milestone: v1.3 Production Coverage & Adoption Polish
+
+**Goal:** Production SaaS developers never need to drop to raw HTTP for common workflows. Onboarding friction minimized.
+
+**Target features:**
+- Dispute & evidence submission (chargeback handling)
+- CreditNote (partial invoice credits/refunds)
+- Mandate & SetupAttempt (non-card payment tracking, setup failure diagnostics)
+- File & FileLink (document uploads for compliance and dispute evidence)
+- Quote (proposal-to-invoice SaaS workflow)
+- DX polish (doc fixes, Phoenix webhook recipe, test fixture builders, recipes guide)
+
 ## Current State (post-v1.2)
 
 **Shipped:** v1.2.0 pending release-please PR. 31 phases complete (1-11, 14-31). 85 plans executed. 108 source files, 21K LOC Elixir. 1783 tests / 0 failures. Zero-touch release via release-please.
@@ -133,8 +145,10 @@ All foundation, payment, webhook, telemetry, testing, docs, CI/CD, Billing, and 
 - Mobile/frontend SDK — backend only
 - Thin event support (v2 webhook style) — v1 snapshot events ship; v2 thin events deferred to a future minor
 
-**Deferred to v1.3+**:
+**Deferred to v1.4+**:
 - Specialist families (Tax, Identity, Treasury, Issuing, Terminal) — not on Accrue's roadmap, large surface area
+- LiveView payment helpers — backend SDK, not a frontend framework
+- Thin event support (v2 webhook style) — v1 snapshot events ship; v2 thin events deferred
 
 **No longer deferred** (shipped in v1.2):
 - ~~`/v1/billing/meter_event_stream`~~ → shipped in Phase 28 (v1.2)
@@ -224,4 +238,4 @@ This document evolves at phase transitions and milestone boundaries.
 5. Move shipped requirements to Validated, add next-milestone requirements to Active
 
 ---
-*Last updated: 2026-04-17 — Phase 31 complete (LiveBook Notebook — interactive SDK exploration with Kino widgets — 1783 tests). v1.2 milestone: all 10 phases (22-31) complete.*
+*Last updated: 2026-04-16 — Milestone v1.3 started (Production Coverage & Adoption Polish). 6 new resource families + DX polish phase.*
