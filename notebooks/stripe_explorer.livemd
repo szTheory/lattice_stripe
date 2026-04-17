@@ -369,7 +369,7 @@ raw_body = ~s({"id":"evt_test_001","object":"event","type":"payment_intent.succe
 secret = "whsec_test_secret_for_notebook"
 
 # Generate a test signature using LatticeStripe's test helper
-sig_header = LatticeStripe.Testing.generate_test_signature(raw_body, secret)
+sig_header = LatticeStripe.Webhook.generate_test_signature(raw_body, secret)
 
 case LatticeStripe.Webhook.construct_event(raw_body, sig_header, secret) do
   {:ok, %LatticeStripe.Event{} = event} ->
