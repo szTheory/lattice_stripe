@@ -1,19 +1,373 @@
 # Feature Research
 
-**Domain:** Production Elixir SDK for Stripe API (LatticeStripe v1.2 — Production Hardening & DX)
+**Domain:** Production Elixir SDK for Stripe API (LatticeStripe v1.3 — Production Coverage & Adoption Polish)
 **Researched:** 2026-04-16
-**Confidence:** HIGH (most features verified against official Stripe docs, Finch docs, stripe-ruby/go/python source, Elixir ecosystem)
+**Confidence:** HIGH (all API operations and fields verified against official Stripe API reference docs)
 
 ---
 
-## Context: v1.2 Scope
+## Context: v1.3 Scope
 
-This research covers 14 target features for v1.2. LatticeStripe v1.1 is live on Hex.pm with 84+
-resource modules, 1,488 tests, full Payments + Billing + Connect + Metering + Customer Portal
-coverage. The downstream consumer (Accrue) is already building on v1.1.
+This research covers 6 new Stripe resource families and 1 DX polish phase for v1.3.
+LatticeStripe v1.2 is live with 31 phases complete, 85 plans executed, 108 source files,
+21K LOC Elixir, 1783 tests / 0 failures. The downstream consumer (Accrue) is building on v1.1+.
 
-v1.2 goal: make LatticeStripe the SDK production teams recommend to each other — polish DX, add
-reliability primitives, and close the remaining feature gaps.
+v1.3 goal: Production SaaS developers never need to drop to raw HTTP for common workflows.
+Onboarding friction minimized.
+
+**New resource families:** Dispute, CreditNote, Mandate, SetupAttempt, File/FileLink, Quote
+**DX polish:** Phoenix webhook recipe, test fixture builders, recipes guide
+
+---
+
+## Per-Resource Family Analysis
+
+### 1. Dispute
+
+**What it is:** A record of a customer challenging a charge with their card issuer.
+Merchants submit evidence to defend against chargebacks.
+
+**Stripe API operations:**
+- `GET /v1/disputes/:id` — retrieve
+- `POST /v1/disputes/:id` — update (submit evidence, set `submit: true` to send to bank)
+- `GET /v1/disputes` — list
+- `POST /v1/disputes/:id/close` — close (concede the dispute)
+
+**No CREATE** — disputes are created by Stripe/card networks, not by merchants.
+**No DELETE** — disputes are permanent records.
+
+**Key fields:**
+- `id`, `amount`, `currency`, `charge` (expandable), `payment_intent` (expandable)
+- `status` — enum: `warning_needs_response`, `warning_under_review`, `warning_closed`, `needs_response`, `under_review`, `won`, `lost`
+- `reason` — enum: `bank_cannot_process`, `check_returned`, `credit_not_processed`, `customer_initiated`, `debit_not_authorized`, `duplicate`, `fraudulent`, `general`, `incorrect_account_details`, `insufficient_funds`, `product_not_received`, `product_unacceptable`, `subscription_canceled`, `unrecognized`
+- `balance_transactions` — array of BalanceTransaction objects showing fund movements
+- `is_charge_refundable` — boolean
+- `metadata`
+
+**Nested `evidence` object (27 fields):**
+
+File upload fields (each accepts a File object ID):
+- `cancellation_policy`, `customer_communication`, `customer_signature`
+- `duplicate_charge_documentation`, `receipt`, `refund_policy`
+- `service_documentation`, `shipping_documentation`, `uncategorized_file`
+
+Text fields (each up to 20,000 chars, combined limit 150,000):
+- `access_activity_log`, `billing_address`, `cancellation_policy_disclosure`
+- `cancellation_rebuttal`, `customer_email_address`, `customer_name`
+- `customer_purchase_ip`, `duplicate_charge_explanation`, `duplicate_charge_id`
+- `product_description`, `refund_policy_disclosure`, `refund_refusal_explanation`
+- `service_date`, `shipping_address`, `shipping_carrier`
+- `shipping_date`, `shipping_tracking_number`, `uncategorized_text`
+
+**Nested `evidence_details` object:**
+- `due_by` — deadline timestamp for evidence submission
+- `has_evidence` — boolean
+- `past_due` — boolean
+- `submission_count` — integer
+
+**Nested `payment_method_details` object:**
+- Varies by payment type: card (network reason code, case type), PayPal, Klarna, Amazon Pay
+
+**Enhanced evidence for Visa CE 3.0:**
+- `enhanced_evidence` nested object with additional structured data
+
+**Action verbs:**
+- `update` (with `submit: true`) — submit evidence to card network (irreversible; one shot)
+- `update` (with `submit: false`) — stage evidence without submitting
+- `close` — concede the dispute (stops evidence submission)
+
+**Key constraint:** Evidence submission is one-shot — Stripe immediately forwards to the issuing
+bank. A second submission is possible but uncommon. Model this with an explicit `submit_evidence/3`
+verb rather than embedding in `update`.
+
+**Dependencies on existing resources:** Charge, BalanceTransaction, File (for evidence uploads),
+PaymentIntent (expandable reference).
+
+---
+
+### 2. CreditNote
+
+**What it is:** A document that adjusts (reduces) a finalized Invoice's amount. Used for partial
+refunds, corrections, and goodwill credits.
+
+**Stripe API operations:**
+- `POST /v1/credit_notes` — create
+- `GET /v1/credit_notes/:id` — retrieve
+- `POST /v1/credit_notes/:id` — update (memo and metadata only; post-issuance)
+- `GET /v1/credit_notes` — list
+- `POST /v1/credit_notes/:id/void` — void (reverses credit; only on open invoices)
+- `GET /v1/credit_notes/preview` — preview (before creation; dry-run)
+- `GET /v1/credit_notes/preview/lines` — preview line items
+- `GET /v1/credit_notes/:id/lines` — retrieve line items
+
+**Key fields:**
+- `id`, `number` (customer-facing, on PDF), `created`, `voided_at`
+- `amount`, `subtotal`, `total` (all in cents)
+- `amount_shipping`, `discount_amount`, `out_of_band_amount`
+- `pre_payment_amount`, `post_payment_amount`
+- `status` — `issued` | `void`
+- `type` — `pre_payment` (on open invoice) | `post_payment` (on paid invoice) | `mixed`
+- `reason` — optional: `duplicate` | `fraudulent` | `order_change` | `product_unsatisfactory`
+- `customer`, `invoice` (expandable), `refunds` (array), `pdf` (URL), `memo`
+
+**Nested `lines` object:** paginated list of `CreditNoteLineItem`
+- `amount`, `description`, `quantity`, `unit_amount`
+- `type` — `invoice_line_item` | `custom_line_item`
+- `invoice_line_item` (ID reference, when type is invoice_line_item)
+- `tax_rates`, `tax_amounts`
+
+**Create params for paid invoices:**
+- `refund_amount` — refund to customer's payment method
+- `credit_amount` — credit to customer balance (applied to future invoices)
+- `out_of_band_amount` — credit outside Stripe (cash/check)
+- All three can be combined; remaining amount after refund+credit becomes out_of_band
+
+**Action verbs:**
+- `void` — reverse the credit note (only works on open invoices)
+- `preview` — dry-run before creating
+
+**Dependencies on existing resources:** Invoice (required), Customer (expandable),
+InvoiceLineItem (referenced in line items), Refund (referenced in `refunds` array).
+
+---
+
+### 3. Mandate
+
+**What it is:** A record of customer authorization to debit their payment method. Created
+automatically when SetupIntents or PaymentIntents create payment method authorizations.
+
+**Stripe API operations:**
+- `GET /v1/mandates/:id` — retrieve (only operation)
+
+**No CREATE, UPDATE, DELETE, or LIST.** Mandates are created automatically by Stripe during
+payment method setup flows. Developers read them to verify authorization state.
+
+**Key fields:**
+- `id`, `livemode`
+- `status` — `active` | `inactive` | `pending`
+- `type` — `single_use` | `multi_use`
+- `payment_method` (expandable)
+
+**Nested `customer_acceptance` object:**
+- `accepted_at` (timestamp)
+- `type` — `online` | `offline`
+- `online` — `{ ip_address, user_agent }` (for audit trails, compliance)
+- `offline` — `{ contact_email }` (for paper mandates)
+
+**Nested `payment_method_details` object (varies by payment type):**
+- SEPA Debit: `{ reference, url, network_status }`
+- ACH / US Bank: `{ collection_method }`
+- Bacs Debit: `{ network_status, reference, revocation_reason, url }`
+- PayPal: `{ billing_agreement_id, payer_id }`
+- Also: Amazon Pay, Klarna, Payto, Pix, UPI
+
+**Nested `single_use` object** (when type is single_use):
+- `amount`, `currency`
+
+**Nested `multi_use` object** (when type is multi_use):
+- (empty — presence means mandate is reusable)
+
+**Action verbs:** None. Read-only resource.
+
+**Dependencies on existing resources:** PaymentMethod (expandable).
+SetupIntent and PaymentIntent create mandates during confirmation.
+
+---
+
+### 4. SetupAttempt
+
+**What it is:** One attempted confirmation of a SetupIntent, capturing the specific details of
+that attempt (success or failure). A single SetupIntent can have multiple SetupAttempts if
+previous attempts failed.
+
+**Stripe API operations:**
+- `GET /v1/setup_attempts` — list (filter by `setup_intent`)
+
+**No CREATE, RETRIEVE (by ID), UPDATE, or DELETE.** SetupAttempts are created automatically
+by Stripe when a SetupIntent is confirmed. You list them by `setup_intent` to get history.
+
+**Key fields:**
+- `id`, `created`, `livemode`
+- `setup_intent` (expandable)
+- `customer` (expandable)
+- `payment_method` (expandable)
+- `application` (expandable)
+- `on_behalf_of` (expandable)
+- `attach_to_self` (boolean)
+- `flow_directions` — `["inbound"]` | `["outbound"]` | `["inbound", "outbound"]`
+- `usage` — `off_session` | `on_session`
+
+**Nested `setup_error` object** (present only on failed attempts):
+- `code`, `message`, `doc_url`
+- `decline_code`
+- `param`
+- `payment_method` (the PM that failed)
+- `type` — `api_error` | `card_error` | `idempotency_error` | `invalid_request_error`
+
+**Nested `payment_method_details` object** (confirmation-specific info, varies by type):
+- Card: `{ brand, checks, exp_month, exp_year, fingerprint, funding, last4, three_d_secure { ... } }`
+- Bank: `{ bank_code, bank_name, bic, iban_last4 }`
+- Digital wallets: Apple Pay, Google Pay
+- Regional: iDEAL, Bancontact, SEPA Debit
+- BNPL: Klarna, Affirm
+
+**Action verbs:** None. Read-only resource (list only).
+
+**Key use case:** Diagnosing why a SetupIntent failed. List attempts for a setup_intent,
+inspect the most recent `setup_error` to understand the failure reason and whether to retry.
+
+**Dependencies on existing resources:** SetupIntent (required filter param), Customer, PaymentMethod.
+
+---
+
+### 5. File and FileLink
+
+**What they are:** File — a document uploaded to Stripe's servers (multipart upload).
+FileLink — a shareable URL to access a File without authentication.
+
+#### File
+
+**Stripe API operations:**
+- `POST https://files.stripe.com/v1/files` — create (NOTE: different hostname from api.stripe.com)
+- `GET /v1/files/:id` — retrieve
+- `GET /v1/files` — list
+
+**No UPDATE or DELETE.** Files are immutable once uploaded.
+
+**Upload mechanics:**
+- Content-Type: `multipart/form-data` (not JSON)
+- Upload endpoint: `https://files.stripe.com/v1/files` (files subdomain)
+- Requires `purpose` parameter (see below)
+- Size limits vary by purpose
+
+**Key fields:**
+- `id`, `created`, `expires_at` (nullable), `filename`
+- `size` (bytes), `title` (nullable), `type` (csv | pdf | jpg | png)
+- `url` (authenticated download — requires API key)
+- `purpose` enum — see below
+- `links` (embedded list of FileLinks, expandable)
+
+**`purpose` enum values (20 total):**
+- `dispute_evidence` — primary use case for this SDK
+- `identity_document` — KYC document uploads
+- `identity_document_downloadable` — Stripe Identity output
+- `customer_signature`
+- `account_requirement` — Connect account verification docs
+- `additional_verification` — Connect custom account docs
+- `business_icon`, `business_logo`
+- `pci_document`
+- `platform_terms_of_service`
+- `finance_report_run`, `financial_account_statement`
+- `issuing_regulatory_reporting`
+- `selfie`
+- `sigma_scheduled_query`
+- `tax_document_user_upload`
+- `terminal_android_apk`, `terminal_reader_splashscreen`
+- `terminal_wifi_certificate`, `terminal_wifi_private_key`
+
+**Action verbs:** None (create/retrieve/list only).
+
+**SDK implementation note:** File upload requires multipart/form-data encoding, NOT the standard
+`application/x-www-form-urlencoded` that all other LatticeStripe requests use. Requires a
+separate codepath in the Transport layer or a dedicated upload function that sets the correct
+Content-Type and sends binary data. Also requires the `files.stripe.com` base URL, not
+`api.stripe.com`.
+
+#### FileLink
+
+**Stripe API operations:**
+- `POST /v1/file_links` — create
+- `GET /v1/file_links/:id` — retrieve
+- `POST /v1/file_links/:id` — update (expire_at, metadata only)
+- `GET /v1/file_links` — list
+
+**Key fields:**
+- `id`, `created`, `livemode`
+- `file` (expandable, the parent File)
+- `url` — public, unauthenticated download URL
+- `expires_at` (nullable) — if set, link expires at this timestamp
+- `expired` (boolean)
+- `metadata`
+
+**Action verbs:** None (CRUDL). Update can set expiry or mark as expired.
+
+**Dependencies on existing resources:** File (required to create a FileLink).
+Dispute Evidence (File IDs are submitted as dispute evidence fields).
+
+---
+
+### 6. Quote
+
+**What it is:** A proposal that models prices for a customer. Accepted quotes automatically
+generate an Invoice, Subscription, or SubscriptionSchedule. The proposal-to-subscription workflow.
+
+**Stripe API operations:**
+- `POST /v1/quotes` — create
+- `GET /v1/quotes/:id` — retrieve
+- `POST /v1/quotes/:id` — update
+- `GET /v1/quotes` — list
+- `POST /v1/quotes/:id/finalize` — finalize (draft → open; assigns quote number, ready to send)
+- `POST /v1/quotes/:id/accept` — accept (open → accepted; generates Invoice/Subscription)
+- `POST /v1/quotes/:id/cancel` — cancel (draft|open → canceled; terminal)
+- `GET /v1/quotes/:id/pdf` — download PDF
+- `GET /v1/quotes/:id/line_items` — list line items
+- `GET /v1/quotes/:id/computed_upfront_line_items` — list upfront computed line items
+
+**Lifecycle states (status field):**
+- `draft` → `open` (via finalize) → `accepted` | `canceled`
+- `draft` → `canceled`
+- Expired quotes auto-cancel when `expires_at` is reached
+
+**Key fields:**
+- `id`, `number` (assigned at finalize), `created`, `expires_at`
+- `status` — `draft` | `open` | `accepted` | `canceled`
+- `customer` (expandable), `customer_account`
+- `currency`
+- `amount_subtotal`, `amount_total`
+- `description`, `header`, `footer` (PDF display text)
+- `collection_method` — `charge_automatically` | `send_invoice`
+- `invoice` (expandable; set after accept if one-time items)
+- `subscription` (expandable; set after accept if recurring)
+- `subscription_schedule` (expandable; set after accept if future-dated recurring)
+- `on_behalf_of` (Connect)
+- `metadata`
+
+**Nested `computed` object:**
+- `upfront` — `{ amount_subtotal, amount_total, line_items, total_details }`
+- `recurring` — `{ amount_subtotal, amount_total, interval, interval_count, line_items, total_details }`
+
+**Nested `subscription_data` object:**
+- `billing_cycle_anchor`, `billing_cycle_anchor_config`
+- `description`, `effective_date`, `trial_period_days`
+- `metadata`, `prebilling`
+
+**Nested `invoice_settings` object:**
+- `days_until_due`, `issuer`
+
+**Nested `from_quote` object** (for cloned quotes):
+- `is_revision` (boolean), `quote` (parent quote ID)
+
+**Nested `automatic_tax` object:**
+- `enabled` (boolean), `liability`, `status`
+
+**Nested `status_transitions` object:**
+- `accepted_at`, `canceled_at`, `finalized_at`
+
+**Also:** `discounts`, `default_tax_rates`, `transfer_data`
+
+**What accepting a Quote generates:**
+- One-time items only → draft `Invoice` (with `auto_advance: false`, caller must finalize)
+- Recurring items, immediate start → `Subscription` (first invoice auto-generated as draft)
+- Recurring items, future start → `SubscriptionSchedule`
+
+**Action verbs (explicit, irreversible):**
+- `finalize` — draft → open; assigns number; can be emailed to customer
+- `accept` — customer agreed; generates downstream objects (Invoice/Subscription/Schedule)
+- `cancel` — customer declined or quote no longer valid; terminal state
+
+**Dependencies on existing resources:** Customer (required to finalize), Invoice (created on
+accept), Subscription (created on accept), SubscriptionSchedule (created on accept with future
+date), Product/Price (used in line items).
 
 ---
 
@@ -21,136 +375,195 @@ reliability primitives, and close the remaining feature gaps.
 
 ### Table Stakes (Users Expect These)
 
-Features users assume a production SDK provides. Missing these makes LatticeStripe feel incomplete
-relative to stripe-ruby, stripe-go, stripe-python, or stripity_stripe.
+Features users assume a production-grade Stripe SDK provides. Missing these forces raw HTTP.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Expand deserialization → typed structs | Every official Stripe SDK (ruby, go, python, node) returns typed objects from `expand:`. stripe-ruby returns `Stripe::Customer`; stripe-go uses custom `UnmarshalJSON` per type to handle ID-or-struct duality; stripe-python returns typed Python objects. LatticeStripe currently returns raw maps when `expand:` is used — the #1 ergonomic gap users notice. | HIGH | Requires a registry mapping Stripe's `"object"` field values (e.g., `"customer"`) to corresponding `from_map/1` functions. Stripe responses always include `"object": "customer"` in expanded payloads — this is the discriminator. The `from_map/1` + `@known_fields` + `extra` pattern already exists on all 84+ resources and is the exact foundation needed. `Resource.unwrap_singular/2` and `Resource.unwrap_list/2` need extension to apply the registry post-decode. |
-| Status field atomization audit | Idiomatic Elixir uses atoms for finite enumerations. String statuses like `"active"`, `"canceled"`, `"incomplete"` force downstream `String.to_atom/1` calls or guard chains everywhere. The `status_atom/1` pattern was already proven in Phase 17 (`Account.Capability.status_atom/1`). Users expect it everywhere. | MEDIUM | Audit scope: Subscription, SubscriptionItem, Invoice, PaymentIntent, SetupIntent, Refund, Payout, Transfer, Meter, BillingPortal resources, ExternalAccount, Checkout.Session. Add `status_atom/1` helper per resource where a string-enum status field exists. Keep original string field — backward compatible. No changes to struct field names. |
-| BillingPortal.Configuration CRUDL | Stripe provides a full CRUDL API for portal configurations (create/retrieve/update/list). `BillingPortal.Session` shipped in v1.1. Users building multi-tenant SaaS with branded portals need to configure the portal programmatically, not via the Stripe Dashboard. Stripe API docs confirm all four operations. | MEDIUM | Standard CRUDL module, same pattern as all other resource modules. No delete operation exists (Stripe doesn't allow configuration deletion). Configuration objects have a large nested `features` param (subscription cancellation, payment method update, invoice history, etc.) and a `business_profile` object. Typed nested structs or well-documented map params for these. |
-| Per-operation timeout tuning | Production systems need different timeout budgets: search/list endpoints (Stripe can be slow on large datasets, especially searches with complex queries) need longer timeouts than creates. Finch supports `receive_timeout` and `request_timeout` per-request natively. Users expect SDK-level sensible defaults that they can override. | LOW | Finch natively supports `:pool_timeout` (default 5s), `:receive_timeout` (default 15s), `:request_timeout` (default infinity, HTTP/1 only) per-request — confirmed from Finch docs. Current LatticeStripe already threads `timeout:` through. Need: resource-level default constants (e.g., `@search_receive_timeout 30_000`, `@default_receive_timeout 15_000`) merged into per-request opts. Zero new dependencies. |
-| Rate-limit awareness | Production apps hitting Stripe at scale need observability into rate limit headroom. Stripe returns `ratelimit-remaining`, `ratelimit-limit`, and `stripe-rate-limited-reason` (on 429s only) headers on all responses. Users expect these surfaced — at minimum via telemetry metadata. No official Stripe SDK exposes this prominently, but production teams always write their own header scrapers. | MEDIUM | Response headers are already captured in `Response.headers`. Pattern: extract rate limit headers in `Client` after receiving response, emit as metadata in `[:lattice_stripe, :request, :stop]` telemetry event, and optionally add `ratelimit_remaining` field to `Response` struct. Zero breaking changes. The `stripe-rate-limited-reason` header values: `global-concurrency`, `global-rate`, `endpoint-concurrency`, `endpoint-rate`, `resource-specific`. |
-| Connection warm-up helper | Production apps want Finch pools established at startup, not lazily on first request. Cold-start latency on the first Stripe call is user-observable. Finch supports pre-configured pools in supervision tree config via `pools:` map at start time, plus dynamic `Finch.start_pool/3` for runtime addition. | LOW | Finch pool config in supervision tree (`pools: %{"https://api.stripe.com" => [size: 10]}`) is the primary mechanism. The SDK contribution: document correct config in `guides/performance.md` and provide a `LatticeStripe.warmup/1` function that fires a lightweight request (e.g., list with limit 1, or a health-check endpoint) to pre-establish connections. Finch also supports `Finch.find_pool/2` to check if pool exists. |
+| Dispute retrieve + list | Chargeback handling is a production necessity for any merchant. `retrieve` and `list` are baseline CRUD. | LOW | Standard Resource pattern. Status enum, reason enum → `status_atom/1`, `reason_atom/1` helpers. BalanceTransaction list nested in response. |
+| Dispute evidence update | Submitting evidence is THE core dispute workflow. Without `update` (with `evidence:` and `submit: true`), the module is useless for its primary purpose. | MEDIUM | Evidence has 27 fields (9 File IDs + 18 text). Nested `evidence` struct with all fields. The `submit: true` semantics must be visible — explicit `submit_evidence/3` verb is idiomatic vs hiding it in a generic `update`. |
+| Dispute close | Concede a dispute programmatically. Needed in automated dispute pipelines. | LOW | Simple action verb. `close/2` or `close/3`. |
+| CreditNote CRUDL | Invoice credits are table stakes for any billing system. SaaS teams issue credits for: overcharges, refunds, proration errors, goodwill. Stripe Billing users need this immediately. | MEDIUM | Status (`issued`/`void`), type (`pre_payment`/`post_payment`/`mixed`), reason, line items list endpoint. Three separate refund amount fields on create. |
+| CreditNote void | Reversing a credit note is a required billing operation (e.g., issued a credit by mistake). | LOW | Action verb. `void/2` or `void/3`. Only works on open invoices. |
+| CreditNote preview | Before creating a credit note, preview the result without committing. Standard billing DX. | LOW | `preview/3` returning a CreditNote struct. Also `preview_lines/3` for line item preview. |
+| Mandate retrieve | Mandates are created automatically — retrieve is the only operation needed. Required for compliance (verify customer authorized the recurring debit), support workflows, and debugging failed debits. | LOW | Read-only. Nested `customer_acceptance` (online/offline), `payment_method_details` (varies by PM type), `single_use`/`multi_use`. Status atom helper. |
+| SetupAttempt list | Without list, developers cannot diagnose why a SetupIntent failed. The only operation. Filter by `setup_intent` is the primary access pattern. | LOW | List-only resource. Nested `setup_error` and `payment_method_details`. `status_atom/1` on outer object. Decode `setup_error` into same `%Error{}` struct shape for consistency. |
+| File retrieve + list | Read file metadata, list uploaded files. Required to reference files in dispute evidence and Connect verification flows. | LOW | Standard pattern. Purpose enum handling. Linked FileLinks embedded. |
+| File create (upload) | Upload documents for dispute evidence, identity verification, business logos. Core file management. | HIGH | Non-standard: multipart/form-data, `files.stripe.com` base URL. Requires dedicated upload function separate from standard API path. Binary data handling. |
+| FileLink CRUDL | Create shareable URLs for files (no auth needed to download). Required for sharing dispute evidence with issuers, or documents with customers/partners. | LOW | Standard pattern. Expiry management. `expired` boolean. |
+| Quote CRUDL | The proposal-to-subscription workflow is a full SaaS sales pattern. Create, read, update quotes as drafts, then finalize and share with customers. | MEDIUM | Complex nested structs: `computed`, `subscription_data`, `invoice_settings`, `from_quote`, `status_transitions`. Line items list endpoint. PDF download. |
+| Quote finalize | Assigns a number and makes the quote shareable. Required step before sending to customer. | LOW | Action verb. `finalize/2` or `finalize/3`. |
+| Quote accept | The customer agreed — generate downstream billing objects. Core of the Quote lifecycle. | LOW | Action verb. `accept/2` or `accept/3`. Returns Quote with `invoice`, `subscription`, or `subscription_schedule` populated. |
+| Quote cancel | Customer rejected or quote expired. Explicit cancellation. | LOW | Action verb. `cancel/2` or `cancel/3`. Terminal state. |
 
 ### Differentiators (Competitive Advantage)
 
-Features that set LatticeStripe apart from stripity_stripe, other Elixir HTTP wrappers, and even
-the official Stripe SDKs. Reinforce the "production-grade, idiomatic Elixir" positioning.
+Features that set LatticeStripe apart from stripity_stripe and generic HTTP wrappers.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Circuit breaker pattern | Prevents cascading failures when Stripe is degraded. No other Elixir Stripe library provides guidance here. Production SaaS teams need their app to fail fast when Stripe returns repeated 5xx or times out — opening the circuit prevents thread exhaustion and gives Stripe time to recover. | MEDIUM | The right approach: document as a custom `RetryStrategy` callback pattern (no new dep). The existing `RetryStrategy` behaviour makes this composable. Show a concrete implementation that tracks failure count and timestamps. Separately, mention `:fuse` (Erlang OTP circuit breaker, ETS-backed, production battle-tested, on Hex.pm, used by BEAM ecosystem) as optional for teams wanting a managed state machine. Do NOT add `:fuse` as a default dep — most users don't need it. |
-| Richer error context (fuzzy param suggestions) | `invalid_request_error` with `param: "payment_method_types"` is not actionable without a docs lookup. Client-side fuzzy suggestions ("Did you mean `:payment_method_types`?") in the SDK error enrichment substantially improve DX for new integrators. | MEDIUM | Stripe's API does NOT return hint/suggestion fields — confirmed by checking the full error object reference. This is 100% client-side SDK enrichment. Pattern: a `LatticeStripe.ParamSuggestions` module with a static map of `{resource, misspelled_key} => correct_key`. Applied when constructing `%Error{type: :invalid_request_error, param: param}`. Scope narrowly to ~30 common misspellings across Payment, Billing, Customer. A static lookup is more predictable and testable than Levenshtein distance. |
-| Request batching / concurrent helpers | `Task.async_stream`-based parallel request ergonomics. Users retrieving 50 customers by ID, or bulk-creating meter events, write their own `Task.async_stream` wrappers with manual error handling. A `LatticeStripe.Concurrent.map/3` with configurable concurrency, timeout, and error-collection semantics is a genuine DX win. | MEDIUM | Pure Elixir, no new dependencies. `Task.async_stream` is OTP stdlib. Pattern: `Concurrent.map(client, ids, &Customer.retrieve/2, max_concurrency: 10)` returning `[{:ok, struct} \| {:error, error}]`. Works with any resource function that accepts `(client, id)`. Optionally: `Concurrent.map_ok/3` that raises on first error. Fits naturally into LatticeStripe's `{:ok, _} \| {:error, _}` idiom. |
-| OpenTelemetry integration guide | The Elixir OTel ecosystem (opentelemetry_api, opentelemetry_phoenix, opentelemetry_ecto) expects span propagation. LatticeStripe already emits `:telemetry` events. The bridge from `:telemetry` to OTel spans is non-obvious. A concrete guide with working code is a top request from production teams running distributed tracing. | LOW | Pure documentation. LatticeStripe itself does not take a dep on opentelemetry_api (respects the "minimal deps" constraint). The guide shows: (1) adding `opentelemetry_api` + `opentelemetry` deps, (2) attaching a handler in `Application.start/2` that converts `[:lattice_stripe, :request, :stop]` events to OTel spans, (3) what telemetry metadata maps to OTel span attributes. No changes to LatticeStripe code. |
-| LiveBook notebook | Interactive SDK exploration for onboarding, documentation, and integration demos. Livebook (`.livemd` files) can be embedded in HexDocs with a "Run in Livebook" badge. Libraries like Nx, Bumblebee, and Explorer use this pattern successfully. Lowers the barrier for new integrators and makes conference demos trivially easy. | LOW | A `.livemd` file in `notebooks/` or `guides/`. Uses `Mix.install([{:lattice_stripe, "~> 1.2"}])` for zero-config setup. Demonstrates: client setup with test API key, creating a customer, a payment intent, handling errors, auto-pagination via `stream!`. Add HexDocs badge to README. Pure documentation artifact. |
-| Stripe API changelog / drift detection | CI mechanism detecting when Stripe adds new fields/resources to their OpenAPI spec that LatticeStripe has not yet modeled. The `stripe/openapi` repository on GitHub has 2,236+ versioned releases (v2241 as of April 2026) and updates frequently. A scheduled CI job diffing against the pinned spec surfaces new fields before users file bug reports. | HIGH | Complexity is in the diffing logic — parsing OpenAPI JSON and comparing field sets per resource against `@known_fields` in each module. Approach: `mix lattice_stripe.drift_check` Mix task that downloads latest Stripe OpenAPI spec JSON, diffs against `@known_fields` per resource, and reports new/removed fields as warnings. Wire to scheduled GitHub Actions workflow (weekly). OpenAPI JSON parsing in the Mix task (no prod dep needed — dev/test only). This is more important for LatticeStripe than for official SDKs because the official SDKs are auto-generated from the spec; LatticeStripe is handwritten and will inevitably drift. |
-| Changeset-style param builders | Fluent builders for complex nested params. SubscriptionSchedule phases, BillingPortal.Configuration features, and PaymentIntent confirmation params have deeply nested structures that are error-prone to build as plain maps. A composable builder pattern improves DX for the most complex resources. | HIGH | Risk of scope creep if too broad. Elixir community does not have a universal "HTTP params builder" pattern — Ecto.Changeset is for DB validation, not API params. Scope narrowly to 2-3 most complex resources (SubscriptionSchedule phases, BillingPortal.Configuration features). Use simple `Builder` modules with pipe-friendly `put/3` helpers rather than full changeset semantics. Example: `SubscriptionSchedule.Builder.new() \|> put_phase(items: [...]) \|> build()`. |
-| meter_event_stream v2 endpoint | High-throughput metering: 10,000 events/sec vs 1,000/sec for the v1 endpoint. Required for SaaS companies with high event volumes. Uses a two-step auth flow: `POST /v2/billing/meter_event_session` returns a 15-minute bearer token; `POST /v2/billing/meter_event_stream` uses that token. Deferred from v1.1 (locked as D3). | HIGH | The two-step auth with short-lived tokens (15-min expiry) maps to a GenServer or Agent holding the current token and proactively refreshing before expiry. This is a legitimate use of a process per PROJECT.md philosophy ("processes only when truly needed" — token lifecycle management IS that case). Users opt in by adding `LatticeStripe.Billing.MeterEventSession` to their supervision tree. The token manager handles: initial session creation, background refresh at ~12 minutes, error handling if session creation fails, vending current token to `MeterEventStream.create/3`. |
+| Explicit `submit_evidence/3` verb for disputes | Hiding evidence submission inside a generic `update` call obscures the irreversible nature of evidence submission. An explicit verb makes the "one-shot" semantics obvious and discoverable in docs. No other Elixir SDK does this. | LOW | `submit_evidence(client, id, evidence_params)` calls `POST /v1/disputes/:id` with `evidence: params, submit: true`. Separate `stage_evidence/3` for staging without submitting. Both return `{:ok, %Dispute{}}`. |
+| Typed `Dispute.Evidence` struct | Dispute evidence has 27 named fields. A typed struct (vs raw map) makes the field names discoverable via editor autocomplete and ExDoc. Idiomatic LatticeStripe. | MEDIUM | `%Dispute.Evidence{}` struct with all 27 fields, and `%Dispute.EvidenceDetails{}` for tracking. Decode from API response. Encode back when updating. |
+| `Dispute.PaymentMethodDetails` polymorphic struct | Disputes behave differently by payment method (card vs PayPal vs Klarna). Typed dispatch improves pattern matching. | MEDIUM | Same pattern as existing `ExternalAccount` polymorphic dispatcher. `Card`, `PayPal`, `Klarna`, `Unknown` variants. |
+| CreditNote line items stream | Auto-paginate credit note line items via `stream!/3`. SaaS invoices can have many line items. Consistent with existing `stream!/2` on other list endpoints. | LOW | Already have `stream!/2` pattern on other resources. Add `stream_lines!/3` for credit note line items endpoint. |
+| Mandate `status_atom/1` + `type_atom/1` | Idiomatic Elixir for finite enumerations. Status (`active`/`inactive`/`pending`) and type (`single_use`/`multi_use`) are natural atoms. | LOW | Consistent with existing `status_atom/1` pattern across all v1.2 resources. |
+| SetupAttempt `setup_error` decoded as `%LatticeStripe.Error{}` | When SetupAttempt has a `setup_error`, it has the same structure as a top-level API error. Decoding it into the same `%Error{}` struct allows callers to use identical error handling code for both immediate errors and historical attempt inspection. | MEDIUM | Reuse existing `Error.from_map/1` for the `setup_error` nested object. Add `error_type/1` convenience function returning the error type atom. |
+| File multipart upload with progress telemetry | Large file uploads (dispute evidence PDFs) benefit from upload progress visibility. LatticeStripe already emits telemetry events — adding byte count to the upload stop event gives users visibility into upload performance. | MEDIUM | Add `bytes_uploaded` to `[:lattice_stripe, :file, :upload, :stop]` telemetry event. Requires tracking content-length. |
+| Quote `what_will_be_created/1` introspection | Before accepting a quote, tell the caller whether it will produce an Invoice, a Subscription, or a SubscriptionSchedule. Eliminates the need for callers to inspect line items and dates to predict downstream behavior. | LOW | Pure computation on the quote struct. Check `computed.recurring` presence and `subscription_data.effective_date` vs now. Returns `:invoice | :subscription | :subscription_schedule`. |
+| Phoenix webhook recipe guide | Stripe + Phoenix webhook setup is the #1 integration search for Elixir developers. The raw-body problem (Phoenix's body parser consumes the raw body before `Webhook.Plug` can verify it) is a common gotcha. A complete, copy-paste-ready guide eliminates the single largest onboarding friction point. | LOW | Documentation only. Guide covers: raw body preservation via `Plug.Parsers` custom `body_reader`, router config, `LatticeStripe.Webhook.Plug` mounting, `Webhook.Handler` behaviour implementation, event type pattern matching, idempotency via `event.id` + Ecto. |
+| Test fixture builders for new resources | The existing `LatticeStripe.Testing` module provides fixture builders for Payment, Billing, Connect resources. Adding builders for Dispute, CreditNote, File, Quote lets library users write clean integration tests for their code that calls LatticeStripe. | MEDIUM | Same pattern as existing fixtures in `test/support/fixtures/`. Add `dispute_fixture/1`, `credit_note_fixture/1`, `file_fixture/1`, `quote_fixture/1`. Export from `LatticeStripe.Testing`. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Global rate limit auto-throttling (sleep between requests) | Users want the SDK to "handle" rate limits automatically by sleeping | Silently blocking the caller process is terrible in Elixir — blocks a BEAM scheduler thread (not just an OS thread), hurts concurrency, hides API abuse. 429s should propagate as `{:error, %Error{type: :rate_limit_error}}` and the caller should back off. | Expose rate limit headroom via telemetry metadata. Document retry-with-backoff pattern in `guides/performance.md`. Callers use `Task.async_stream` with `max_concurrency` to stay under limits proactively. |
-| Automatic expand for all requests by default | Users want to avoid manually specifying `expand:` | Dramatically increases response payload sizes and API latency. Stripe charges per API call, not per field. Silent expansion would obscure what data is actually being fetched and create unexpected cost increases. | Keep `expand:` explicit per-request. Document common expand patterns in guides. The typed deserialization feature (EXPD-02) is the correct answer — once `expand:` returns typed structs, users are incentivized to use it intentionally and surgically. |
-| SDK-managed idempotency key namespacing | Users want the SDK to namespace idempotency keys to prevent collisions | SDK has no knowledge of application-level namespacing. Auto-generated UUID4 keys already make collisions statistically impossible. Namespacing would require SDK config that varies per deployment. | Already auto-generate UUID4 idempotency keys per request (v1.0 behavior). Document that callers should provide their own deterministic keys when they need replay semantics (e.g., `idempotency_key: "order_#{order_id}_payment"`). |
-| Webhook event replay / queuing | Users want the SDK to handle webhook deduplication and retry logic | This is application-level infrastructure. Every production app already has a database. Putting queuing in the SDK creates coupling to persistence and process supervision that belongs in the application layer. Violates "library, not framework" principle. | `LatticeStripe.Webhook.Handler` behaviour (already shipped) is the right abstraction. Guide users to implement idempotent handlers using their DB. Document that `event.id` is the dedup key. |
-| `:fuse` as a required dep for circuit breaking | Adding circuit breaking to every LatticeStripe installation by default | Most LatticeStripe users don't need circuit breaking (normal SaaS load). Making `:fuse` required adds ETS-based global state and a process to every installation regardless of need. | Make circuit breaking optional via documentation. Show `RetryStrategy` callback pattern in `guides/circuit-breaker.md`. Users who want managed state add `:fuse` themselves. |
-| Full Ecto.Changeset-style validation for all params | Users want server-side validation recreated client-side | Stripe's validation is the source of truth — duplicating it client-side means maintaining a parallel validation spec that drifts with each Stripe API release. Better to let Stripe validate and improve the error messages we surface. | Scoped param builders for the 2-3 most complex resources (SubscriptionSchedule, BillingPortal.Configuration). For everything else, let Stripe's `invalid_request_error` with improved fuzzy suggestions handle it. |
+| Auto-retry dispute evidence submission | "The bank rejected my evidence — retry automatically" | Evidence submission to card networks is explicitly one-shot and irreversible. Stripe documents this prominently. Auto-retry would silently re-submit to the issuing bank, potentially triggering fraud flags or confusing reviewers. | Surface `submission_count` from `evidence_details`. Provide `stage_evidence/3` for drafting before committing. Make `submit_evidence/3` visually distinct from `update`. |
+| File streaming / chunked upload | Large file uploads should stream chunks | Stripe's file upload API does not support chunked/streaming uploads — it requires the full file in a single multipart request. Max size is per-purpose (dispute evidence: under 4.5MB combined across all files for a single dispute). | Document size limits clearly. For dispute evidence, multiple files per evidence field are not supported — one file per field. Verify size before upload. |
+| Automatic FileLink creation on file upload | "Just give me a URL immediately" | FileLinks have optional expiry and are a separate authorization concept from the file itself. Auto-creating a FileLink on every upload would create orphaned permanent links with no expiry — a security anti-pattern for compliance documents. | Require explicit `FileLink.create/3`. Document the pattern: upload file → get file_id → create link with appropriate expiry. |
+| Quote auto-finalize on create | "Just finalize when I create" | Draft state exists to allow iterative edits (line items, customer, pricing). Auto-finalizing skips the draft review stage and makes the quote number-assigned immediately, confusing teams with approval workflows. | Keep create → finalize as explicit two-step. The draft state IS the value — it's where edits happen. |
+| Mandate creation API | "I want to create a mandate directly" | Mandates are created by Stripe during payment authorization flows (SetupIntent confirmation, PaymentIntent confirmation with `setup_future_usage`). Direct creation bypasses the authorization verification that makes mandates legally enforceable. | Use SetupIntent to create payment method authorizations, which generate mandates as a side effect. Link SetupAttempt list to diagnose if the mandate wasn't created. |
+| Sync dispute polling | "Poll the dispute until it's resolved" | Dispute resolution takes days to weeks. Polling wastes API requests and rate limit budget. | Emit Stripe webhooks (`charge.dispute.updated`, `charge.dispute.won`, `charge.dispute.lost`). Handle via existing `LatticeStripe.Webhook.Plug`. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-Expand deserialization (EXPD-02)
-    └──requires──> Status atomization audit (EXPD-05)
-                       (same from_map/1 resource sweep; do together)
-    └──requires──> Nested dot-path parsing (EXPD-03)
-                       (dot-path is a parsing layer on top of the registry in EXPD-02)
-    └──builds_on──> @known_fields + from_map/1 pattern (already in all 84+ resources)
+Dispute
+    └──requires──> File (for evidence file IDs — upload first, reference ID in evidence)
+    └──expandable──> Charge (already shipped v1.0)
+    └──expandable──> PaymentIntent (already shipped v1.0)
+    └──expandable──> BalanceTransaction (already shipped v1.0)
+    └──independent_of──> CreditNote, Mandate, Quote
 
-Rate-limit awareness
-    └──enhances──> Telemetry (already shipped v1.0)
-    └──enhances──> Circuit breaker guide
-                       (rate limit headroom informs when to trip breaker)
+CreditNote
+    └──requires──> Invoice (already shipped v1.0 — invoice ID is mandatory create param)
+    └──references──> InvoiceLineItem (for line item type on create)
+    └──references──> Refund (populated in refunds array post-create)
+    └──independent_of──> Dispute, Mandate, Quote
 
-Connection warm-up helper
-    └──requires──> Performance guide (guides/performance.md)
-                       (warm-up is one section of the broader guide)
+Mandate
+    └──expandable──> PaymentMethod (already shipped v1.0)
+    └──created_by──> SetupIntent confirmation (side effect, not a dep)
+    └──created_by──> PaymentIntent confirmation (side effect, not a dep)
+    └──independent_of──> Dispute, CreditNote, Quote, File
 
-Per-operation timeout tuning
-    └──enhances──> Performance guide (guides/performance.md)
-                       (timeout defaults table belongs in the guide)
+SetupAttempt
+    └──requires──> SetupIntent (already shipped v1.0 — setup_intent is mandatory list filter)
+    └──expandable──> Customer (already shipped v1.0)
+    └──expandable──> PaymentMethod (already shipped v1.0)
+    └──independent_of──> Dispute, CreditNote, Quote, File, Mandate
 
-meter_event_stream v2
-    └──requires──> Session token GenServer (new supervised process)
-    └──depends_on──> MeterEvent.create/3 (already shipped v1.1)
-    └──uses──> v2 API base path (/v2/billing) with Bearer token auth (different from v1 API key auth)
+File
+    └──independent_of──> all other new resources (foundational upload primitive)
+    └──referenced_by──> Dispute (evidence file IDs)
+    └──referenced_by──> Account (identity_document purposes — Connect flow, already shipped)
 
-BillingPortal.Configuration
-    └──depends_on──> BillingPortal.Session (already shipped v1.1)
-    └──scopes──> Changeset-style param builders (Configuration has most complex nested params)
+FileLink
+    └──requires──> File (file ID mandatory on create)
+    └──independent_of──> Dispute, CreditNote, Mandate, SetupAttempt, Quote
 
-Changeset-style param builders
-    └──scoped_to──> SubscriptionSchedule phases + BillingPortal.Configuration features
-    └──conflicts──> scope creep if extended to all resources
+Quote
+    └──requires──> Customer (must exist to finalize)
+    └──generates──> Invoice (on accept with one-time items)
+    └──generates──> Subscription (on accept with recurring, immediate)
+    └──generates──> SubscriptionSchedule (on accept with recurring, future date)
+    └──uses──> Product/Price (in line items)
+    └──all_dependencies_already_shipped_in_v1.0_or_v1.1
 
-OpenTelemetry guide
-    └──depends_on──> Telemetry events (already shipped v1.0)
-    └──requires_no_code_changes──> to LatticeStripe itself
-
-LiveBook notebook
-    └──depends_on──> Stable v1.2 API surface (ships last)
-
-Stripe API drift detection
-    └──depends_on──> @known_fields accuracy (EXPD-05 sweep first)
-    └──depends_on──> stripe/openapi GitHub repository (external)
-
-Richer error context
-    └──builds_on──> Error struct (already shipped v1.0)
-    └──independent_of──> all other v1.2 features
+DX Polish (Phoenix webhook recipe, test fixtures, recipes guide)
+    └──depends_on──> All 6 resource families complete (fixture builders need the structs)
+    └──enhances──> Webhook.Plug + Webhook.Handler (already shipped v1.0)
+    └──references──> All major resource families
 ```
 
 ### Dependency Notes
 
-- **EXPD-02 and EXPD-05 are the same sweep:** Building the typed deserialization registry requires visiting every resource module anyway. The status atomization sweep is the same pass. Ship them together.
-- **Performance guide is a forcing function for Wave 1:** Connection warm-up and per-operation timeout tuning are both sections of the same guide. Define the guide structure first, then implement the helpers the guide documents.
-- **meter_event_stream v2 is self-contained:** The token manager GenServer does not depend on any other v1.2 feature. It can be designed and shipped independently, but is complex enough to warrant its own phase.
-- **Drift detection needs clean @known_fields:** The EXPD-05 status sweep will correct and extend `@known_fields` across all resources. Run drift detection after that sweep to avoid false positives from fields already in `extra` but not yet in `@known_fields`.
-- **BillingPortal.Configuration unblocks Changeset builders:** The Configuration `features` param is the best initial use case for a builder — complex enough to justify one, bounded enough to avoid open-ended scope.
+- **File before Dispute evidence:** Merchants upload files first (`File.create/3`), then reference
+  the returned `file.id` in `Dispute.submit_evidence/3`. File must be implemented before
+  Dispute evidence submission is exercisable end-to-end. However, Dispute retrieve/list/close
+  can ship independently of File.
+
+- **CreditNote is self-contained:** Depends only on Invoice (v1.0), which is stable. No new
+  resource dependencies. Can be implemented in any order relative to other v1.3 families.
+
+- **Mandate and SetupAttempt are read-only:** Both are list/retrieve only. No write operations,
+  no upstream dependencies on new v1.3 resources. Lowest complexity of the 6 families.
+  Natural candidates for a single combined phase.
+
+- **Quote depends on existing resources only:** All Quote dependencies (Customer, Invoice,
+  Subscription, SubscriptionSchedule, Product, Price) are already in v1.0/v1.1. Quote is
+  self-contained from a dependency standpoint but has the most complex nested struct surface.
+
+- **DX polish ships last:** Fixture builders reference structs from all 6 new families.
+  Phoenix webhook recipe can document all resource event types. Recipes guide needs complete
+  surface to write meaningful examples.
 
 ---
 
 ## MVP Definition
 
-### Wave 1 — High-Impact (ship first)
+### Phase 1 — File/FileLink (foundational)
 
-Minimum viable v1.2 — what makes the "production hardening" claim credible.
+File and FileLink are the most cross-cutting new primitives. File uploads unblock full dispute
+evidence workflows.
 
-- [ ] **Expand deserialization → typed structs (EXPD-02/03)** — The #1 ergonomic gap vs every other Stripe SDK. Every official Stripe SDK does this. Without it, `expand:` is half-baked.
-- [ ] **Status field atomization audit (EXPD-05)** — Natural companion to EXPD-02. Same resource sweep. Idiomatic Elixir. No additional complexity once you're touching all resource modules.
-- [ ] **Performance guide + Finch pool tuning (guides/performance.md)** — High value, low effort. Answers the #1 question every production team asks. Includes connection warm-up patterns.
-- [ ] **Circuit breaker guide** — Documentation + `RetryStrategy` example. No new dep. Answers the #2 question production teams ask. Can ship as a section of performance guide or standalone.
+- [x] `File.create/3` (multipart upload, files.stripe.com)
+- [x] `File.retrieve/3` + `File.list/3`
+- [x] `FileLink.create/3`, `retrieve/3`, `update/3`, `list/3`
+- [x] Typed `%File{}` and `%FileLink{}` structs
+- [x] Upload telemetry event
 
-### Wave 2 — Focused Polish
+### Phase 2 — Dispute
 
-- [ ] **Rate-limit awareness** — Emit `ratelimit-remaining` + `stripe-rate-limited-reason` via telemetry metadata. Low implementation cost, high production value.
-- [ ] **BillingPortal.Configuration CRUDL** — Deferred from v1.1. Standard module pattern. Required for teams managing portals programmatically.
-- [ ] **Request batching / concurrent helpers** — `LatticeStripe.Concurrent.map/3`. No new deps. Real DX win.
-- [ ] **Per-operation timeout tuning** — Resource-level timeout defaults. Finch already supports it. Add to performance guide.
-- [ ] **Richer error context** — Client-side fuzzy param suggestions. Scope to ~30 common misspellings.
-- [ ] **OpenTelemetry integration guide** — Documentation only. High value for enterprise/platform adopters.
+Chargeback handling is the most urgent production need. Requires File (Phase 1) for evidence.
 
-### Wave 3 — Feature Completion
+- [x] `Dispute.retrieve/3` + `Dispute.list/3`
+- [x] `Dispute.submit_evidence/3` (with `submit: true`)
+- [x] `Dispute.stage_evidence/3` (with `submit: false`)
+- [x] `Dispute.close/3`
+- [x] Typed `%Dispute{}`, `%Dispute.Evidence{}`, `%Dispute.EvidenceDetails{}` structs
+- [x] `status_atom/1` + `reason_atom/1` helpers
 
-- [ ] **meter_event_stream v2** — GenServer token lifecycle. Target high-volume metering users.
-- [ ] **Changeset-style param builders** — Scope to SubscriptionSchedule + BillingPortal.Configuration.
-- [ ] **Stripe API drift detection** — Mix task + scheduled CI. Best after EXPD-05 stabilizes `@known_fields`.
-- [ ] **LiveBook notebook** — Ships last. Exercises finished v1.2 surface. Launch artifact.
-- [ ] **Connection warm-up helper (`LatticeStripe.warmup/1`)** — Documented in performance guide; implement the function after guide is written.
+### Phase 3 — CreditNote
+
+Invoice credits are required for any production billing system.
+
+- [x] `CreditNote.create/3`, `retrieve/3`, `update/3`, `list/3`, `list_lines/3`
+- [x] `CreditNote.void/3`
+- [x] `CreditNote.preview/3` + `CreditNote.preview_lines/3`
+- [x] Typed `%CreditNote{}` + `%CreditNote.LineItem{}` structs
+- [x] `stream_lines!/3` auto-pagination
+- [x] `status_atom/1` + `type_atom/1` helpers
+
+### Phase 4 — Mandate + SetupAttempt
+
+Read-only diagnostic resources. Low complexity, high production value for debugging.
+
+- [x] `Mandate.retrieve/3`
+- [x] `SetupAttempt.list/3`
+- [x] Typed `%Mandate{}`, `%Mandate.CustomerAcceptance{}`, `%Mandate.PaymentMethodDetails{}` structs
+- [x] Typed `%SetupAttempt{}`, `%SetupAttempt.SetupError{}` structs
+- [x] `Mandate.status_atom/1` + `type_atom/1`
+- [x] `SetupAttempt.setup_error` decoded as `%LatticeStripe.Error{}`
+
+### Phase 5 — Quote
+
+SaaS proposal-to-subscription workflow. Most complex struct surface.
+
+- [x] `Quote.create/3`, `retrieve/3`, `update/3`, `list/3`
+- [x] `Quote.finalize/3`, `accept/3`, `cancel/3`
+- [x] `Quote.pdf/3` (PDF download)
+- [x] `Quote.list_line_items/3` + `Quote.list_upfront_line_items/3`
+- [x] Typed `%Quote{}` with all nested structs
+- [x] `status_atom/1` + `what_will_be_created/1` helpers
+
+### Phase 6 — DX Polish
+
+Ships after all resource families are complete.
+
+- [x] Phoenix webhook recipe guide (`guides/phoenix-webhooks.md`)
+- [x] Test fixture builders for all 6 new families (added to `LatticeStripe.Testing`)
+- [x] Recipes guide (`guides/recipes.md`) — common patterns across resource families
 
 ---
 
@@ -158,206 +571,154 @@ Minimum viable v1.2 — what makes the "production hardening" claim credible.
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Expand deserialization (EXPD-02/03) | HIGH | HIGH | P1 |
-| Status atomization audit (EXPD-05) | HIGH | MEDIUM | P1 |
-| Performance guide + pool tuning | HIGH | LOW | P1 |
-| Circuit breaker guide/pattern | HIGH | LOW | P1 |
-| BillingPortal.Configuration CRUDL | HIGH | MEDIUM | P1 |
-| Rate-limit awareness (telemetry) | HIGH | LOW | P2 |
-| Request batching / Concurrent helpers | MEDIUM | MEDIUM | P2 |
-| Per-operation timeout tuning | MEDIUM | LOW | P2 |
-| Richer error context (fuzzy params) | MEDIUM | MEDIUM | P2 |
-| OpenTelemetry integration guide | MEDIUM | LOW | P2 |
-| meter_event_stream v2 | MEDIUM | HIGH | P2 |
-| Changeset-style param builders | MEDIUM | HIGH | P3 |
-| Stripe API drift detection | LOW-MEDIUM | HIGH | P3 |
-| LiveBook notebook | MEDIUM | LOW | P3 |
-| Connection warm-up helper | LOW | LOW | P3 |
+| Dispute retrieve + list | HIGH | LOW | P1 |
+| Dispute evidence submission | HIGH | MEDIUM | P1 |
+| CreditNote CRUDL + void | HIGH | MEDIUM | P1 |
+| File create (upload) | HIGH | HIGH | P1 |
+| FileLink CRUDL | HIGH | LOW | P1 |
+| Quote full lifecycle | HIGH | HIGH | P1 |
+| Mandate retrieve | MEDIUM | LOW | P1 |
+| SetupAttempt list | MEDIUM | LOW | P1 |
+| CreditNote preview | MEDIUM | LOW | P2 |
+| Dispute close | MEDIUM | LOW | P2 |
+| Quote PDF download | MEDIUM | LOW | P2 |
+| Typed Evidence struct | MEDIUM | MEDIUM | P2 |
+| Phoenix webhook recipe | HIGH | LOW | P2 |
+| Test fixture builders | MEDIUM | MEDIUM | P2 |
+| CreditNote stream_lines! | LOW | LOW | P3 |
+| Quote what_will_be_created/1 | LOW | LOW | P3 |
+| File upload telemetry | LOW | LOW | P3 |
+| SetupAttempt setup_error as Error{} | MEDIUM | LOW | P3 |
+| Recipes guide | MEDIUM | LOW | P3 |
 
 **Priority key:**
-- P1: Must have for v1.2 to claim "production hardening" — ships in Wave 1
-- P2: Should have — increases production confidence and DX — ships in Wave 2
-- P3: Nice to have — completes the story, good for launch marketing — ships in Wave 3
+- P1: Must have for v1.3 to claim "production coverage" — ships in core phases
+- P2: Should have — increases production confidence and DX — ships in same phases
+- P3: Nice to have — completes the story — can ship in DX phase or later
 
 ---
 
 ## Competitor Feature Analysis
 
-| Feature | stripe-ruby | stripe-go | stripe-python | LatticeStripe v1.2 plan |
-|---------|-------------|-----------|---------------|------------------------|
-| Expand → typed structs | YES — `Util.convert_to_stripe_object` dispatches on `"object"` key | YES — custom `UnmarshalJSON` per type handles ID-or-struct duality | YES — typed Python classes from response | Registry of `"object"` → `from_map/1`, applied post-decode |
-| Status field atoms | NO — strings throughout | NO — string constants | NO — strings throughout | YES — `status_atom/1` per resource; idiomatic Elixir advantage over all competitors |
-| Rate-limit awareness | NO built-in exposure | NO built-in exposure | NO built-in exposure | YES — telemetry metadata on stop event; differentiator |
-| Circuit breaker | NO — retry only | NO — retry only | NO — retry only | YES — `RetryStrategy` callback guide; `:fuse` optional |
-| Per-operation timeout | YES — per-call options | YES — per-call context | YES — per-call timeout arg | YES — resource-level defaults + per-request override |
-| Concurrent helpers | NO | NO | NO | YES — `LatticeStripe.Concurrent.map/3`; differentiator |
-| Error param suggestions | NO | NO | NO | YES — client-side static fuzzy map; differentiator |
-| OTel guide | NO | NO | NO | YES — documented bridge from :telemetry to OTel spans; differentiator |
-| LiveBook | N/A | N/A | N/A | YES — Elixir-specific differentiator for onboarding |
-| Drift detection | N/A — auto-generated from OpenAPI | N/A — auto-generated | N/A — auto-generated | Mix task + scheduled CI; necessary because LatticeStripe is handwritten |
-| Changeset/fluent builders | NO | NO | NO | Scoped builders for 2-3 most complex resources |
-| BillingPortal.Configuration | YES | YES | YES | YES — standard CRUDL module (deferred from v1.1) |
-| meter_event_stream v2 | YES | YES | YES | YES — with GenServer token lifecycle |
-| Connection warm-up | NO explicit helper | NO explicit helper | NO explicit helper | `LatticeStripe.warmup/1` + performance guide |
-
-**Key insight on drift detection:** Official Stripe SDKs (ruby, go, python, node, java) are all
-auto-generated from the `stripe/openapi` spec, which updates with every Stripe API release. They
-cannot drift. LatticeStripe is handwritten, making drift an ongoing hygiene concern. A scheduled
-CI check against the spec is more important for LatticeStripe than it would be for any official
-SDK.
+| Feature | stripity_stripe (legacy) | stripe-ruby (official) | LatticeStripe v1.3 plan |
+|---------|--------------------------|------------------------|-------------------------|
+| Dispute evidence submission | YES — generic `update` only | YES — generic `update` | YES + explicit `submit_evidence/3` verb; idiomatic |
+| CreditNote void | YES | YES | YES + `type_atom/1` + line item streaming |
+| Mandate retrieve | YES | YES | YES + typed payment_method_details by PM type |
+| SetupAttempt list | YES | YES | YES + setup_error decoded as %Error{} |
+| File multipart upload | YES | YES | YES + telemetry; NOTE: different transport path |
+| Quote lifecycle | PARTIAL | YES | YES + `what_will_be_created/1` helper |
+| Typed nested structs | PARTIAL (inconsistent) | YES (auto-generated) | YES (fully typed, handwritten) |
+| Phoenix webhook guide | NO | N/A | YES (Elixir-specific differentiator) |
+| Test fixture builders | NO | YES (built-in fixtures) | YES via LatticeStripe.Testing |
+| status_atom helpers | NO | NO | YES (consistent with v1.2 pattern) |
 
 ---
 
 ## Implementation Notes Per Feature
 
-### Expand deserialization (EXPD-02/03)
+### File Upload — Transport Layer Challenge
 
-The discriminator is Stripe's `"object"` field — every Stripe resource includes `"object": "customer"`,
-`"object": "payment_intent"`, etc. in its JSON. When a field is expanded, Stripe returns the full
-object map (with `"object"`) instead of a bare string ID.
+All existing LatticeStripe requests use `application/x-www-form-urlencoded` to `api.stripe.com`.
+File uploads require `multipart/form-data` to `https://files.stripe.com/v1/files`.
 
-Registry pattern:
+Two options:
+1. **Dedicated upload function in Transport** — add `upload/4` alongside `request/5`. Finch
+   supports multipart via `:multipart` body type. Pass binary file data + purpose. Use
+   `files.stripe.com` base URL.
+2. **Configurable base URL per request** — allow per-request base URL override and content-type
+   override. More general but adds complexity to the public API.
+
+**Recommendation:** Option 1 — dedicated `Transport.upload/4` callback added to the `Transport`
+behaviour. Finch implementation wraps binary in multipart form. Clean separation from standard
+JSON API requests. The `File` module calls `transport.upload/4` instead of `transport.request/5`.
+
+### Dispute Evidence — Struct Design
+
+Evidence has 27 named fields. Three options:
+1. Raw map (current approach for unknown fields)
+2. `%Dispute.Evidence{}` typed struct with all 27 fields
+3. Nested keyword lists
+
+**Recommendation:** Option 2 — typed struct. The evidence fields are a fixed, documented schema.
+A typed struct makes all 27 fields discoverable in editor autocomplete and ExDoc. The struct
+decodes from API responses and encodes back when calling `update/3`. Uses the existing
+`from_map/1` + `@known_fields` + `extra` pattern.
+
+### Quote — Line Items vs Computed
+
+Quotes have two related concepts:
+- `line_items` (input: what was quoted)
+- `computed.upfront.line_items` and `computed.recurring.line_items` (output: what Stripe computed)
+
+The `GET /v1/quotes/:id/line_items` endpoint returns input line items (paginated).
+The `GET /v1/quotes/:id/computed_upfront_line_items` returns computed upfront line items.
+
+Both need `list_line_items/3` and `list_upfront_line_items/3` functions with `stream!/2` variants.
+
+### SetupAttempt — List-Only Access Pattern
+
+SetupAttempts have no `retrieve/:id` endpoint — only `list`. This is unusual in the Stripe API.
+The typical usage pattern:
+
 ```elixir
-# In a new LatticeStripe.ObjectRegistry module
-@registry %{
-  "customer"         => &LatticeStripe.Customer.from_map/1,
-  "payment_intent"   => &LatticeStripe.PaymentIntent.from_map/1,
-  "payment_method"   => &LatticeStripe.PaymentMethod.from_map/1,
-  # ... all 84+ resource "object" values
-}
+# Get all attempts for a SetupIntent to diagnose failures
+{:ok, page} = SetupAttempt.list(client, %{setup_intent: "seti_..."})
+# Most recent attempt is first
+latest = List.first(page.data)
+# Inspect setup_error if status is not succeeded
+```
 
-def from_object_map(%{"object" => type} = map) do
-  case Map.fetch(@registry, type) do
-    {:ok, from_map_fn} -> from_map_fn.(map)
-    :error              -> map  # unknown type: pass through as raw map
-  end
+The module should not expose a `retrieve/3` function (there is no such endpoint). This matches
+the Mandate pattern (retrieve-only) — both are asymmetric from the standard CRUDL pattern but
+for opposite reasons.
+
+### DX Polish — Phoenix Webhook Recipe
+
+The raw body problem is the #1 Phoenix + Stripe webhook gotcha. Pattern:
+
+```elixir
+# In endpoint.ex — preserve raw body for webhook verification
+plug Plug.Parsers,
+  parsers: [:urlencoded, :multipart, :json],
+  pass: ["*/*"],
+  body_reader: {LatticeStripe.Webhook.CacheBodyReader, :read_body, []},
+  json_decoder: Phoenix.json_library()
+
+# In router.ex
+scope "/webhooks" do
+  pipe_through :api
+  post "/stripe", MyAppWeb.StripeWebhookController, :handle
 end
 ```
 
-Applied recursively during response decode: walk response body, if a value is a map with
-`"object"` key, apply registry. This handles arbitrary nesting without explicit path traversal.
-
-Dot-path support (`expand: ["data.customer"]`) is automatic with the recursive walk — any expanded
-object anywhere in the response gets typed, regardless of depth. Maximum expand depth per Stripe
-docs is 4 levels.
-
-### Status atomization (EXPD-05)
-
-Pattern from Phase 17 (`Account.Capability.status_atom/1`):
-```elixir
-@status_map %{
-  "active"     => :active,
-  "canceled"   => :canceled,
-  "incomplete" => :incomplete,
-  # ... resource-specific values
-}
-
-@spec status_atom(t()) :: atom() | nil
-def status_atom(%__MODULE__{status: status}), do: Map.get(@status_map, status)
-```
-
-Keep the original `status` string field untouched. Add `status_atom/1` as a convenience converter.
-No breaking changes to existing users who pattern-match on string values.
-
-### meter_event_stream v2
-
-Two-phase auth (confirmed from Stripe docs):
-1. `POST /v2/billing/meter_event_session` → `{authentication_token: "...", expires_at: unix_ts}` (15-min lifetime)
-2. `POST /v2/billing/meter_event_stream` with `Authorization: Bearer <token>` (NOT the API secret key)
-
-GenServer design:
-```elixir
-defmodule LatticeStripe.Billing.MeterEventSession do
-  use GenServer
-  # Holds current token + expiry
-  # Refreshes proactively at ~12 minutes (3-min buffer before 15-min expiry)
-  # Vends token via get_token/1 to MeterEventStream.create/3
-  # Handles refresh failure (returns {:error, ...} to callers)
-end
-```
-
-Users add to supervision tree:
-```elixir
-children = [
-  {LatticeStripe.Billing.MeterEventSession, client: client}
-]
-```
-
-This is a legitimate process per PROJECT.md philosophy — token lifecycle IS the kind of state that needs a process.
-
-### Rate-limit awareness
-
-Stripe rate limit headers on all responses:
-- `ratelimit-remaining` — integer, requests remaining in current window
-- `ratelimit-limit` — integer, total requests allowed per window
-- `stripe-rate-limited-reason` — only on 429 responses; values: `global-concurrency`, `global-rate`, `endpoint-concurrency`, `endpoint-rate`, `resource-specific`
-
-Implementation: Extract in `Client` after response received, add to telemetry metadata:
-```elixir
-:telemetry.execute(
-  [:lattice_stripe, :request, :stop],
-  %{duration: duration},
-  %{
-    # existing metadata...
-    ratelimit_remaining: parse_int_header(headers, "ratelimit-remaining"),
-    ratelimit_limit: parse_int_header(headers, "ratelimit-limit"),
-    rate_limited_reason: get_header(headers, "stripe-rate-limited-reason")
-  }
-)
-```
-
-### Fuzzy param suggestions
-
-Stripe's API does NOT return hint or suggestion fields — confirmed by reviewing the complete error
-object schema. This is 100% client-side SDK enrichment.
-
-Static lookup approach (not Levenshtein — too unpredictable):
-```elixir
-# LatticeStripe.ParamSuggestions
-@suggestions %{
-  "paymentMethodType"     => "payment_method_types",
-  "paymentMethod_types"   => "payment_method_types",
-  "PaymentMethodTypes"    => "payment_method_types",
-  "customerId"            => "customer",
-  # ~30 most common misspellings across major resources
-}
-
-def suggest(param_name) do
-  Map.get(@suggestions, param_name)
-end
-```
-
-Applied when constructing `%Error{type: :invalid_request_error}`:
-```elixir
-message =
-  if suggestion = ParamSuggestions.suggest(param) do
-    "#{original_message} (Did you mean '#{suggestion}'?)"
-  else
-    original_message
-  end
-```
+The guide must show the `CacheBodyReader` module (if LatticeStripe should ship one) or reference
+how to implement it. This is a documentation artifact plus potentially a small helper module.
 
 ---
 
 ## Sources
 
-- [Stripe Expanding Objects API Reference](https://docs.stripe.com/api/expanding_objects) — expand behavior, `"object"` discriminator confirmed
-- [Stripe Expand Documentation](https://docs.stripe.com/expand) — dot-path syntax, 4-level depth limit confirmed
-- [Stripe API Errors Reference](https://docs.stripe.com/api/errors) — confirmed no hint/suggestion fields in error schema
-- [Stripe Rate Limits Documentation](https://docs.stripe.com/rate-limits) — `ratelimit-remaining`, `ratelimit-limit`, `stripe-rate-limited-reason` headers confirmed
-- [Stripe Meter Event Stream v2 Reference](https://docs.stripe.com/api/v2/billing-meter-stream) — 10,000 events/sec, 15-min token lifetime confirmed
-- [Stripe Usage Recording API](https://docs.stripe.com/billing/subscriptions/usage-based/recording-usage-api) — v1 (1,000/sec) vs v2 (10,000/sec) throughput limits confirmed
-- [Stripe BillingPortal Configuration API](https://docs.stripe.com/api/customer_portal/configurations) — create/retrieve/update/list operations confirmed; no delete operation
-- [Stripe OpenAPI Repository](https://github.com/stripe/openapi) — 2,236+ releases, v2241 as of April 2026, JSON + YAML, `/latest/` contains v1 + v2 specs
-- [stripe-ruby GitHub](https://github.com/stripe/stripe-ruby) — typed deserialization via `Util.convert_to_stripe_object` dispatching on `"object"` key confirmed
-- [stripe-go GitHub](https://github.com/stripe/stripe-go) — custom `UnmarshalJSON` per type for expand handling confirmed
-- [fuse Erlang library](https://github.com/jlouis/fuse) — circuit breaker, ETS-backed, production battle-tested, on Hex.pm
-- [Finch documentation](https://hexdocs.pm/finch/Finch.html) — `pool_timeout`, `receive_timeout`, `request_timeout` per-request confirmed; `Finch.start_pool/3` for dynamic pools confirmed
-- [Livebook](https://livebook.dev/) — `.livemd` format, `Mix.install`, HexDocs badge integration confirmed
-- [OpenTelemetry Erlang/Elixir](https://opentelemetry.io/docs/languages/erlang/) — `opentelemetry_api` + `:telemetry` bridge pattern confirmed
-- [oasdiff GitHub Action](https://github.com/oasdiff/oasdiff-action) — OpenAPI drift detection in CI
+- [Stripe Disputes API Reference](https://docs.stripe.com/api/disputes) — operations confirmed
+- [Stripe Dispute Update API](https://docs.stripe.com/api/disputes/update) — all 27 evidence fields confirmed
+- [Stripe Disputes Responding Guide](https://docs.stripe.com/disputes/api) — submit semantics, one-shot nature
+- [Stripe Credit Notes API Reference](https://docs.stripe.com/api/credit_notes) — operations confirmed
+- [Stripe Credit Note Object](https://docs.stripe.com/api/credit_notes/object) — all fields confirmed
+- [Stripe Programmatic Credit Notes Guide](https://docs.stripe.com/invoicing/integration/programmatic-credit-notes) — refund_amount/credit_amount/out_of_band_amount semantics
+- [Stripe Mandates API Reference](https://docs.stripe.com/api/mandates) — retrieve-only confirmed
+- [Stripe Mandate Object](https://docs.stripe.com/api/mandates/object) — nested objects confirmed
+- [Stripe Setup Attempts API Reference](https://docs.stripe.com/api/setup_attempts) — list-only confirmed
+- [Stripe SetupAttempt Object](https://docs.stripe.com/api/setup_attempts/object) — nested objects confirmed
+- [Stripe Files API Reference](https://docs.stripe.com/api/files) — operations confirmed
+- [Stripe File Object](https://docs.stripe.com/api/files/object) — all 20 purpose enum values confirmed
+- [Stripe File Upload Guide](https://docs.stripe.com/file-upload) — multipart/form-data, files.stripe.com URL confirmed
+- [Stripe FileLinks API Reference](https://docs.stripe.com/api/file_links) — CRUDL confirmed
+- [Stripe Quotes API Reference](https://docs.stripe.com/api/quotes) — all operations confirmed
+- [Stripe Quote Object](https://docs.stripe.com/api/quotes/object) — all nested objects confirmed
+- [Stripe Quotes Overview Guide](https://docs.stripe.com/quotes/overview) — lifecycle states and downstream object generation confirmed
+- [Phoenix Webhook Pattern](https://connerfritz.com/blog/stripe-webhooks-in-phoenix-with-elixir-pattern-matching/) — raw body problem confirmed
 
 ---
 
-*Feature research for: LatticeStripe v1.2 — Production Hardening & DX*
+*Feature research for: LatticeStripe v1.3 — Production Coverage & Adoption Polish*
 *Researched: 2026-04-16*

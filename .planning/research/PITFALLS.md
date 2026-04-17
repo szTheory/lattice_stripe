@@ -1,303 +1,502 @@
 # Pitfalls Research
 
-**Domain:** Elixir SDK for Stripe API — v1.2 Production Hardening & DX additions to a published library
+**Domain:** Adding Stripe resource families (Dispute, CreditNote, Mandate, SetupAttempt, File/FileLink, Quote) + DX polish to existing Elixir SDK
 **Researched:** 2026-04-16
-**Confidence:** HIGH (codebase read directly; Stripe docs verified; Elixir library guidelines confirmed)
+**Confidence:** HIGH (official Stripe API docs + direct codebase analysis); MEDIUM where noted
+
+---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Struct Field Expansion Breaks Downstream Pattern Matches at Runtime
+### Pitfall 1: File Upload Hits `api.stripe.com` Instead of `files.stripe.com`
 
 **What goes wrong:**
-The existing `from_map/1` + `@known_fields` pattern stores expandable fields (like `customer` on `PaymentIntent`) as `String.t() | nil` (the Stripe ID). When expand deserialization (EXPD-02/03) lands, these fields change type to `Customer.t() | String.t() | nil` when expanded. Downstream code that pattern-matches `%PaymentIntent{customer: id}` expecting a string ID will silently receive a `%Customer{}` struct. No compile error, no runtime error on the match itself — wrong behavior downstream.
+The Stripe Files API lives at `https://files.stripe.com/v1/files`, not
+`https://api.stripe.com/v1/files`. If the SDK's `base_url` is not overridden in
+`File.create/3`, Stripe will return a routing error or 404. FileLink creation
+(`POST /v1/file_links`) does use `api.stripe.com`, so only the upload step
+requires the alternate host.
 
 **Why it happens:**
-Elixir structs are open by construction. Adding a type union to a field is not flagged by the compiler. The `~> 1.x` semver constraint in Accrue means the new version is pulled automatically on `mix deps.update`, and nothing warns the consumer that a previously-string field may now be a struct.
+Every other resource in LatticeStripe uses `api.stripe.com`. Finch transport is
+built around a single `base_url` on the `Client` struct. A developer implementing
+`File.create/3` by copying `Invoice.create/3` will miss the subdomain difference.
 
 **How to avoid:**
-- Mark every expandable field in `@type t()` as a union: `customer: String.t() | Customer.t() | nil`. Makes the change visible in HexDocs.
-- Only return a typed struct when the raw Stripe response value `is_map(val)` — meaning `expand:` was passed and Stripe returned the full object. When the value is a string (unexpanded ID), leave it as a string. This makes the distinction load-bearing and testable.
-- Prominently warn in the expand deserialization guide: "If you pass `expand: [\"customer\"]`, the `customer` field becomes a `%Customer{}` struct instead of an ID string. Existing pattern matches on the raw string ID will receive a struct and must be updated."
-- Write a `feat:` CHANGELOG entry that explicitly calls out the type change per expandable field.
+Hardcode `"https://files.stripe.com/v1/files"` as the URL in `File.create/3`
+rather than deriving it from `client.base_url`. Alternatively, add a
+`files_base_url` field to `Client` (defaulted to `"https://files.stripe.com"`)
+so integration tests can override it to point at a stripe-mock instance. Verify
+whether stripe-mock routes `/v1/files` at the default port; if not, add a Mox
+unit test for the multipart body shape and flag the integration test as
+infrastructure-dependent.
 
 **Warning signs:**
-- Downstream code does `intent.customer <> "_suffix"` (string concatenation on what was an ID string) — crashes with `FunctionClauseError`.
-- Pattern `case intent.customer do "cus_" <> _ -> ...` stops matching after upgrade.
+- `404 Not Found` or unexpected error on `File.create` in integration tests
+- URL constructed from `Client.base_url <> "/v1/files"` in the module body
 
-**Phase to address:**
-EXPD-02 expand deserialization. Must include migration notes in the guide and explicit union types in `@type t()` for every expandable field.
+**Phase to address:** File & FileLink phase.
 
 ---
 
-### Pitfall 2: Adding New Client Struct Fields is a Semver Risk for Literal Construction
+### Pitfall 2: Multipart Body Missing `boundary` Parameter in `Content-Type` Header
 
 **What goes wrong:**
-Users who construct `%LatticeStripe.Client{}` directly (rather than via `Client.new!/1`) get a compile-time `KeyError` if a new field without a default is added to `defstruct`. If the field has a default, they silently get the library default rather than noticing a new option exists. More subtly, code using the update syntax `%{client | new_field: val}` fails at runtime with `ArgumentError: unknown key :new_field` against older client versions.
+Stripe's Files API requires `Content-Type: multipart/form-data; boundary=<value>`.
+If the header is set to `"multipart/form-data"` without the boundary parameter,
+Stripe (and Finch/Mint internally) rejects the request. The Elixir Forum records
+at least one instance of Finch returning "no multipart boundary param in
+Content-Type" for this exact mistake.
+
+The boundary value must appear in two places: the `Content-Type` header and as
+the delimiter between parts in the body (`--<boundary>\r\n` ... `--<boundary>--`).
 
 **Why it happens:**
-Elixir struct modules export their field list at compile time and check field names at construction time. When a library adds a field, dependent modules that were compiled against the old struct shape are recompiled. If a consumer pinned to a older compiled artifact (rare, but possible in some CI setups), mismatches occur.
+Elixir has no stdlib multipart encoder. Developers set the Content-Type from
+memory or copy a curl command — curl auto-appends `; boundary=...` transparently,
+so the header looks complete when it is not.
 
 **How to avoid:**
-- All new `Client` struct fields in v1.2 (e.g., `operation_timeouts`, `rate_limit_telemetry`) must have defaults. Never add new fields to `@enforce_keys` in a minor release.
-- Add a statement to `api_stability.md`: "Construct clients using `Client.new!/1` or `Client.new/1`. Direct struct literal construction `%Client{...}` is not covered by the semver guarantee — new fields may be added with defaults in minor releases."
-- Regression test: `test/readme_test.exs` calls `Client.new!(api_key: ..., finch: ...)` and verifies the output struct is valid. This catches any accidental `@enforce_keys` addition.
+Generate a random boundary (e.g., `:crypto.strong_rand_bytes(16) |> Base.encode16()`).
+Build the multipart body manually or via the `Multipart` hex library. The minimal
+body structure for Stripe file upload:
+
+```
+--<boundary>\r\n
+Content-Disposition: form-data; name="purpose"\r\n
+\r\n
+dispute_evidence\r\n
+--<boundary>\r\n
+Content-Disposition: form-data; name="file"; filename="evidence.pdf"\r\n
+Content-Type: application/pdf\r\n
+\r\n
+<binary file bytes>\r\n
+--<boundary>--\r\n
+```
+
+Set the header as `{"content-type", "multipart/form-data; boundary=#{boundary}"}`.
+Do not use `FormEncoder` (URL-encoded form) for this endpoint — it is exclusively
+for `application/x-www-form-urlencoded` requests.
 
 **Warning signs:**
-- A PR adds a field to `defstruct` without a default value.
-- Any field added to `@enforce_keys` in a v1.x PR.
+- `400` or `415` from Stripe on file creation
+- `content-type` header is a plain string without `boundary=` appended
+- `FormEncoder.encode/1` called inside `File.create/3`
 
-**Phase to address:**
-Any phase adding Client options (rate-limit tracking, warm-up, per-operation timeouts). Rule: every new field has a default.
+**Phase to address:** File & FileLink phase.
 
 ---
 
-### Pitfall 3: Circuit Breaker via :fuse Adds a Required OTP Process to a "No GenServer" Library
+### Pitfall 3: Quote PDF Endpoint Returns Binary, Not JSON — Standard Pipeline Crashes
 
 **What goes wrong:**
-`:fuse` works by running a named GenServer process (`:fuse_server`) that tracks circuit state. If LatticeStripe ships a first-class circuit breaker using `:fuse`, it silently requires the user to start `:fuse_server` in their supervision tree. A library that adds supervised processes contradicts PROJECT.md ("processes only when truly needed") and violates the principle that the library has no global state.
-
-The failure mode is non-obvious: if `:fuse_server` is not running, all `:fuse.ask/2` calls raise `{:not_found, :fuse_server}`. This crash happens at request time, not at startup, making it hard to diagnose in production.
-
-Additionally, the `:fuse` library's async call tracking is known to be unreliable — circuits may not trip correctly when called from async tasks, which is a common pattern in parallel Stripe request batching.
+`GET /v1/quotes/:id/pdf` returns a raw PDF binary stream with `Content-Type: application/pdf`,
+not a JSON object. The existing `Client.request/2` pipeline calls `Jason.decode!`
+on every response body. Routing the PDF endpoint through the standard pipeline
+causes a `Jason.DecodeError` at decode time or returns garbled data.
 
 **Why it happens:**
-`:fuse` is the obvious Erlang circuit breaker library and Tesla already uses it. Developers add it as a dep, add `:fuse.ask(:stripe_circuit, :sync)` in the transport path, and ship. It works in their dev environment because `:fuse_server` starts automatically via the `:fuse` OTP application. But the library consumer may not have included `:fuse` in their release, or the startup order may differ.
+Every other endpoint in LatticeStripe is JSON. Implementing `Quote.pdf/3` by
+copying another `get` function will accidentally send the PDF bytes through
+`Jason.decode!`.
 
 **How to avoid:**
-- Do not add `:fuse` as a runtime dep to LatticeStripe at all — not even optional.
-- Deliver circuit breaker as a guide + example `RetryStrategy` module in `guides/circuit-breaker.md`. The example can reference `:fuse` as a user-side dep they add to their own application.
-- If a built-in circuit breaker is desired, implement it using the existing `RetryStrategy` behaviour callback with ETS for state storage (the user creates and owns the ETS table, passes its name to the strategy). Zero extra library processes.
+Add a `raw: true` option to `Client.request/2` (or a dedicated
+`Client.request_raw/2` variant) that skips JSON decoding and returns
+`{:ok, binary()}` directly. `Quote.pdf/3` must use this path. The return type
+annotation must be `{:ok, binary()} | {:error, Error.t()}`, clearly distinct
+from other `Quote` functions.
+
+Also validate the quote status before calling: the PDF is only generated for
+`open` or `accepted` quotes. Calling against a `draft` or `canceled` quote
+returns a Stripe 404. `Quote.pdf/3` should document this precondition prominently.
 
 **Warning signs:**
-- Any PR adding `:fuse` to `mix.exs` in the runtime deps section.
-- Code calling `:fuse.ask/2` inside `LatticeStripe.Transport.Finch` or `LatticeStripe.RetryStrategy.Default`.
+- `Jason.DecodeError` in tests for `Quote.pdf/3`
+- Return type annotated as `{:ok, Quote.t()}`
+- No status precondition note in `@doc`
 
-**Phase to address:**
-Circuit breaker phase. Deliver as guide + example, not a bundled dep.
+**Phase to address:** Quote phase.
 
 ---
 
-### Pitfall 4: Rate-Limit Header Tracking Requires Shared State the Library Architecture Forbids
+### Pitfall 4: Dispute Evidence Submission Replaces All Fields — Partial Updates Silently Drop Previous Evidence
 
 **What goes wrong:**
-Stripe sends `Stripe-Rate-Limited-Reason` on 429 responses (values: `global-rate`, `global-concurrency`, `endpoint-rate`, `endpoint-concurrency`, `resource-specific`). A simple `RateLimit-Remaining` counter header is NOT documented by Stripe and likely does not exist. If the feature scope expands from "emit telemetry" to "track and throttle based on remaining budget," it needs shared mutable state across concurrent requests — a counter, timestamp, or budget per account. The library's architecture explicitly forbids this (no GenServer, no global state).
+`PATCH /v1/disputes/:id` with an `evidence` hash is not an incremental merge.
+Any call to update dispute evidence submits the entire provided hash for review.
+If a user calls `update_evidence` with only `customer_email`, then calls it
+again with only `service_documentation`, the second call does not include the
+email — Stripe only retains what was in the most recent submission.
 
-Common mistakes: using `Process` dictionary (per-process, not shared) or `Application.put_env/3` (not thread-safe under concurrent requests) to store rate limit state.
+If the SDK exposes a naive `update/3` with no documentation of this behavior,
+users lose previously-set evidence fields silently. There is no undo.
 
 **Why it happens:**
-Rate limit tracking looks like a natural extension of the existing retry strategy, which already reads `Retry-After`. Developers assume "track the header" and "throttle based on the header" are the same scope.
+Standard PATCH semantics imply "send only what you want to change." Stripe
+dispute evidence deviates from this expectation — the full intended evidence
+set must be sent in each call.
 
 **How to avoid:**
-- Scope v1.2 rate-limit tracking to telemetry emission only: emit `[:lattice_stripe, :request, :rate_limited]` with `reason: "global-rate"` (or whatever the header says) in metadata when a 429 is received.
-- This is purely additive to the existing telemetry span — no new state, no new behaviours.
-- Explicitly document the design boundary: "LatticeStripe emits rate-limit events. Proactive throttling belongs in the application layer via a custom `RetryStrategy` backed by an ETS table you control."
+Document this prominently in `@moduledoc` and in each `update_evidence` `@doc`.
+The recommended pattern is: retrieve the current dispute with
+`Dispute.retrieve/3`, merge desired changes onto `dispute.evidence` in the
+calling code, then submit the combined map. Do not implement implicit merge
+logic inside the SDK — that would require a hidden HTTP round-trip and violates
+the principle that SDK functions make exactly one request per call.
 
 **Warning signs:**
-- Code that writes to ETS, `Application.put_env`, or `Process.put` inside `Client.request/2` or any retry callback.
-- A new GenServer or Agent added to the library for "rate limit state."
+- Integration test makes two sequential evidence update calls without retrieving
+  first, and does not assert both fields are present after the second call
+- `@doc` for `update_evidence` does not mention the full-replace behavior
 
-**Phase to address:**
-Rate-limit awareness phase. Implement as telemetry metadata addition to the existing 429 handling path.
+**Phase to address:** Dispute phase.
 
 ---
 
-### Pitfall 5: Richer Error Suggestions Add a New Dependency or Run on Every Error Path
+### Pitfall 5: Dispute Evidence `submit: true` Is Irreversible — Wrong Default Locks the Dispute
 
 **What goes wrong:**
-Fuzzy param name suggestions ("Did you mean `:payment_method_types`?") require computing edit distance. If implemented via a library (`the_fuzz`, `akin`, `levenshtein`), it adds a runtime dep to a library that advertises "minimal dependencies" — every user gets the dep regardless of whether they want error suggestions. If implemented eagerly (running on every `{:error, ...}` return), it runs on `:connection_error` and `:api_error` types where Stripe's `param` field is nil, wasting CPU.
+Including `submit: true` in the `evidence` hash locks the dispute — Stripe
+will reject any further evidence updates with an error. If the SDK defaults
+`submit` to `true` (or includes it in a guide example without a warning), users
+accidentally lock disputes before they have finished gathering evidence.
 
-At 50 known params per resource with 30-character max names, the computation is trivial on its own — but multiplied across high-error-rate paths under load, it becomes visible in profiling.
+Stripe's own guide examples use `submit: true`. New implementers copy the example
+and make it the default.
 
 **Why it happens:**
-Developers reach for a fuzzy-match library because implementing Levenshtein from scratch feels wrong. The library is small and already solves the problem. Dependency added, tests pass, shipped. The condition narrowing ("only on invalid_request_error with non-nil param") is forgotten.
+The Stripe guide code snippets include `submit: true` as a working example.
+Developers ship the guide example as the function's default behavior without
+reading the irreversibility note.
 
 **How to avoid:**
-- Implement a 20-line inline Levenshtein with a max-distance early-exit at distance 2. The known-param lists are small enough that a hand-rolled function is faster and zero-dep.
-- Embed known-param maps per resource as compile-time module attributes, not runtime lookups.
-- Gate strictly: only compute when `error.type == :invalid_request_error` AND `error.param != nil`. No computation on `:api_error`, `:connection_error`, `:card_error`.
-- Keep suggestions as an addition to the existing `Error` struct (e.g., a `suggestion` field, `nil` by default), not a new struct or wrapping type. Avoids breaking existing pattern matches on `%Error{}`.
+Omit `submit` from the request params by default. Users opt in by passing
+`submit: true` explicitly. Add a `@doc` warning:
+"Passing `submit: true` locks evidence submission — no further updates are
+accepted. Default omits `submit`; Stripe treats omission as `false`."
 
 **Warning signs:**
-- `mix.exs` gains any new runtime dep for string similarity.
-- Suggestion computation runs in the `from_response/3` fallback clause (the `_` catch-all for non-`invalid_request_error` types).
+- Function signature includes `submit: true` in default opts
+- Integration test calls `update_evidence` with `submit: true` and then a
+  subsequent update succeeds — this would indicate a testing gap, not a fix
 
-**Phase to address:**
-Richer error context phase. Implement inline, zero new deps.
+**Phase to address:** Dispute phase.
 
 ---
 
-### Pitfall 6: Task.async_stream Batching Exposes Callers to Linked Process Crashes
+### Pitfall 6: CreditNote Cannot Be Created on a `draft` Invoice — Integration Tests Must Finalize First
 
 **What goes wrong:**
-`Task.async_stream` links the spawned tasks to the caller. If any individual Stripe request raises (rather than returning `{:error, ...}`), the exception propagates to the calling process. In an SDK that returns `{:ok, ...} | {:error, ...}` everywhere, a crash in a task is unexpected and breaks the contract. SDK consumers who wrap a batch helper in `try/rescue` will miss it because async_stream propagates crashes through the stream pipeline at `Enum.to_list/1` time, not at `Task.async_stream/3` invocation time.
+`CreditNote.create/3` against a `draft` invoice returns a Stripe 400. Credit
+notes can only be applied to finalized invoices (`open` or `paid`). Integration
+tests that create a draft invoice and immediately try to credit it will fail
+against stripe-mock with an unintuitive error.
 
-Additionally, with `on_timeout: :kill_task`, a timed-out task returns `{:exit, :timeout}` as a stream element — this is a stream value, not a raised exception. Code that unwraps results with `Enum.map(fn {:ok, v} -> v end)` will crash on the unmatched `{:exit, :timeout}` element.
+Additionally, `CreditNote.void/3` has a further constraint: voiding is only
+possible on credit notes attached to `open` invoices, not `paid` ones. A voided
+credit note reverses its adjustment, increasing the amount due on the invoice.
 
 **Why it happens:**
-`Task.async_stream` is the idiomatic Elixir concurrent-work pattern. SDK authors use it without realizing they are changing the failure semantics from "returns {:error, ...}" to "may crash caller."
+Developers assume credits work on any invoice, analogous to adding InvoiceItems
+to a draft. The Stripe constraint is Invoice lifecycle-gated and is buried in
+the CreditNote guide, not the `create` endpoint description.
 
 **How to avoid:**
-- Wrap every task body in `try/rescue` that returns `{:error, %Error{type: :connection_error, message: inspect(e)}}` on any raised exception.
-- Return `{:ok, result} | {:error, reason}` from each stream element. The public API returns `[{:ok, struct()} | {:error, Error.t()}]`, never raising by default.
-- Handle `{:exit, :timeout}` explicitly in the stream result mapping, converting it to `{:error, %Error{type: :connection_error, message: "request timeout"}}`.
-- Consider `Task.Supervisor.async_nolink/3` instead of `Task.async_stream` to avoid process linking entirely. Requires adding a `Task.Supervisor` to the user's supervision tree — document this requirement.
-- Bang variant `batch!/2` raises if ANY element errors.
+Document the `open` or `paid` precondition in `CreditNote` `@moduledoc`.
+All integration test fixtures for CreditNote must call `Invoice.finalize/3`
+before `CreditNote.create/3`. Add a `credited_invoice_fixture/2` helper to
+`test/support/fixtures/credit_note.ex` that creates and finalizes. Document
+void semantics separately: void is only valid on `open`-invoice credit notes.
 
 **Warning signs:**
-- `Task.async_stream` without a `try/rescue` in each task body.
-- Stream result mapped with `fn {:ok, v} -> v end` without a clause for `{:exit, :timeout}` or `{:exit, reason}`.
+- Integration test creates a draft invoice then immediately calls `CreditNote.create/3`
+- `CreditNote` `@moduledoc` does not mention invoice state requirements
 
-**Phase to address:**
-Request batching phase.
+**Phase to address:** CreditNote phase.
 
 ---
 
-### Pitfall 7: meter_event_stream Requires v2 Session Token Auth — Cannot Reuse Client.request/2 As-Is
+### Pitfall 7: CreditNote Line Items Require an Explicit `type` Field — Two Incompatible Subtypes
 
 **What goes wrong:**
-The `/v2/billing/meter_event_stream` endpoint is part of Stripe's v2 API with a different auth model: a short-lived session token (15-minute TTL), NOT the standard secret key. Auth flow: `POST /v2/billing/meter_event_session` → returns a session token → use that token for stream requests. Using `client.api_key` directly against the stream endpoint returns a 401. The session must be created first, stored, and refreshed before expiry.
+CreditNote line items have a `type` field with two values:
+- `"invoice_line_item"` — credits a specific line on the original invoice;
+  requires an `invoice_line_item` reference ID
+- `"custom_line_item"` — freeform credit; requires `description`, `quantity`,
+  `unit_amount`
 
-This means the feature cannot be a thin wrapper around the existing `Client.request/2` — it needs its own session lifecycle.
+Omitting `type` causes a Stripe 400. Passing `invoice_line_item` params for a
+`"custom_line_item"` entry (or vice versa) also fails. The two subtypes are
+documented only in the `credit_notes/line_item` sub-resource API page, not on
+the main CreditNote creation page.
 
 **Why it happens:**
-The endpoint resembles existing v1 metering endpoints. The naming pattern (`MeterEvent.create/3`) suggests the same API key auth. The v2 API is a separate authentication domain that is not obvious from the path name alone.
+The `type` distinction is not obvious from the CreditNote overview. Developers
+model `lines` as a flat list of maps without enforcing `type`, ship it, and hit
+validation errors in production.
 
 **How to avoid:**
-- Implement `MeterEventStream.create_session/2` as the documented first step, with the session `expires_at` stored in the returned struct.
-- Provide a `MeterEventStream.send_batch/3` helper that checks `expires_at` before each call and refreshes the session on 401 or expiry.
-- Verify against `stripe-mock` whether v2 endpoints are supported — some v2 endpoints may require real Stripe test mode. Integration tests for this endpoint may need to be tagged with `@tag :live_only` if stripe-mock does not support them.
-- Document the URL base for v2: confirm whether it's `api.stripe.com/v2/...` or `meter-events.stripe.com/...` against the Stripe v2 API reference.
+Define `CreditNote.LineItem` with `type`, `invoice_line_item`, `unit_amount`,
+`quantity`, `description`, and `tax_amounts` fields. Mirror the structure of
+`Invoice.LineItem` already in the codebase. The create-guide example must show
+both subtype patterns with working minimal params.
 
 **Warning signs:**
-- `MeterEventStream` module that calls `Client.request/2` with `client.api_key` without a session token step.
-- Missing `expires_at` check before stream calls.
-- Integration test for `meter_event_stream` that never mocks a 401 / token refresh scenario.
+- `from_map/1` returns plain maps instead of `%CreditNote.LineItem{}` structs
+- Guide or test only covers one subtype
 
-**Phase to address:**
-meter_event_stream phase. Treat as a distinct feature with its own session lifecycle, not a wrapper around existing metering code.
+**Phase to address:** CreditNote phase.
 
 ---
 
-### Pitfall 8: BillingPortal.Configuration Has 4 Levels of Nesting — Struct Generation Explodes
+### Pitfall 8: Mandate and SetupAttempt Are Read-Only — Implementing CRUD Verbs Causes 404s
 
 **What goes wrong:**
-The BillingPortal Configuration object (confirmed from Stripe API docs) has 4 nesting levels:
-- Level 1: `business_profile`, `features`, `login_page`
-- Level 2: `features` contains `customer_update`, `invoice_history`, `payment_method_update`, `subscription_cancel`, `subscription_update`
-- Level 3: Each feature has `enabled`, `mode`, `proration_behavior`, `products`, `conditions`, etc.
-- Level 4: `subscription_cancel.cancellation_reason` → `{enabled, options}`; `subscription_update.products` → `{product, prices, adjustable_quantity}`
-
-Fully typing all 4 levels requires approximately 10 nested struct modules with their own `from_map/1` implementations. Each one must stay in sync with Stripe's API. When Stripe adds a field to `subscription_update` in a future API version bump, 3 files need updating instead of 1.
+`Mandate` has exactly one API endpoint: `GET /v1/mandates/:id`. `SetupAttempt`
+has `GET /v1/setup_attempts/:id` and `GET /v1/setup_attempts` (list). Neither
+resource can be created, updated, or deleted via the API. Adding `create/3` or
+`update/3` by analogy with other resources will return 404 from Stripe and
+stripe-mock.
 
 **Why it happens:**
-The `from_map/1` + nested typed struct pattern scales cleanly to 2-level nesting (Meter has 4 nested structs, all 1 level deep). Developers assume linear extrapolation to 4 levels. The maintenance cost is not obvious until the first Stripe API drift event.
+LatticeStripe resource modules follow the CRUDL pattern. Developers scaffolding
+a new module copy an existing one (e.g., `Refund`) which includes all five verbs.
 
 **How to avoid:**
-- Decide the typing depth explicitly and document it as a code comment at the top of the resource module: "Level 1 and Level 2 are typed structs. Level 3+ fields are stored in parent struct's `extra` map."
-- Use the existing `extra` map pattern for Level 3+ fields. They remain accessible via `config.features.subscription_cancel["cancellation_reason"]` (map access) — not dropped.
-- Do NOT model `subscription_update.products` (a list of product references) as typed structs — it is too variable in shape.
-- Maximum 6 nested struct modules for BillingPortal.Configuration total.
+`LatticeStripe.Mandate` exposes only `retrieve/3`. `LatticeStripe.SetupAttempt`
+exposes `retrieve/3` and `list/3`. Add a comment at the top of each module:
+`# Stripe API: read-only resource. No create/update/delete endpoints exist.`
+
+Document that mandates are created implicitly by Stripe when a PaymentIntent or
+SetupIntent with `mandate_data` is confirmed. Document that SetupAttempts are
+created by Stripe on each SetupIntent confirmation.
 
 **Warning signs:**
-- More than 6 nested struct files in the `billing_portal/` directory tree for Configuration.
-- Any `from_map/1` calling more than 3 other `from_map/1` functions in sequence.
+- Module defines `create/3`, `update/3`, or `delete/3`
+- Integration test attempts to create a Mandate directly
 
-**Phase to address:**
-BillingPortal.Configuration phase. Define the typing depth contract in the first plan task before writing any code.
+**Phase to address:** Mandate & SetupAttempt phase.
 
 ---
 
-### Pitfall 9: Changeset-Style Builders Become Dead Code Unless Scope Is Bounded Up-Front
+### Pitfall 9: Mandate `payment_method_details` Has 15+ Variants — Over-Modeling Creates Maintenance Debt
 
 **What goes wrong:**
-Fluent param builders (e.g., `SubscriptionSchedule.Params.new() |> add_phase(...)`) add a second public API surface maintained in parallel with the raw `%{"phases" => [...]}` map approach. When Stripe adds a field to `subscription_schedule`, developers update `from_map/1` but forget the builder. The builder silently cannot express the new field, and users fall back to raw maps — making the builder an obstacle that ships alongside the real API.
+`payment_method_details` on a Mandate contains conditional sub-objects for
+every supported payment method: `sepa_debit`, `bacs_debit`, `acss_debit`,
+`paypal`, `payto`, `pix`, `upi`, `us_bank_account`, `amazon_pay`, `au_becs_debit`,
+`card`, `cashapp`, `klarna`, `link`, `naver_pay`, and others. Typing all 15+
+variants in v1.3 creates excessive boilerplate and a maintenance surface that
+must be updated every time Stripe adds a new payment method.
 
-The specific failure: builders that cover 80% of the API create more frustration than no builder, because users hit a wall mid-implementation and must start over with raw maps.
+The same applies to `SetupAttempt.payment_method_details`, which has similarly
+broad payment-method coverage.
 
 **Why it happens:**
-Builders feel ergonomic to write. The first version covering the common cases ships fast. But SubscriptionSchedule phases have many fields (billing cycle anchor, trial behavior, coupon, metadata, multiple items with their own pricing). A complete builder becomes more complex than the raw API it wraps.
+The impulse toward completeness and the `from_map/1` + nested struct pattern
+scales poorly here. The existing approach (e.g., `Payout.TraceId` for a single
+nested struct) does not foreshadow this combinatorial case.
 
 **How to avoid:**
-- Define the explicit scope limit BEFORE writing code: e.g., "SubscriptionScheduleBuilder covers `phases` with `items`, `start_date`, and `end_date` only. All other phase params use raw map merge."
-- Make builders produce `map()` output compatible with raw params, so `Map.merge(builder_output, %{"some_advanced_field" => val})` works. Never return a closed struct from a builder.
-- If the scope limit means the builder covers less than the top-3 use cases in the Accrue codebase, defer to v1.3 after real usage patterns are validated.
+For v1.3, store `payment_method_details` as a plain map on `Mandate` and
+`SetupAttempt` structs. Add a `TODO v1.4: typed payment_method_details variants`
+comment. The `extra` map fallback ensures no crash on unknown variants. The only
+case where typed sub-structs are warranted for v1.3 is if a payment method type
+is already modeled elsewhere in LatticeStripe (`card`, `sepa_debit`) — and even
+then, only if there is concrete downstream demand.
 
 **Warning signs:**
-- A builder function that accepts `Map.t()` as an escape hatch for "other stuff" — the symptom of an incomplete abstraction.
-- More than 5 `defp` helpers in a builder module to handle special cases.
+- `payment_method_details` struct has more than 3-4 typed sub-variants modeled
+- `from_map/1` contains a `case payment_method_type do` dispatch with 10+ clauses
 
-**Phase to address:**
-Changeset-style builders phase. Set and document scope limit before writing any code.
+**Phase to address:** Mandate & SetupAttempt phase.
 
 ---
 
-### Pitfall 10: Stripe API Drift Detection in CI Produces High Noise, Low Signal
+### Pitfall 10: `ObjectTypes` Registry Not Updated for New Resources — Expand Deserialization Silently Returns Raw Maps
 
 **What goes wrong:**
-Stripe adds new fields to existing objects frequently — each new beta feature, each API version bump. A naive CI job that diffs the full Stripe OpenAPI spec against LatticeStripe's known field lists fires on every Stripe OpenAPI push, including resources LatticeStripe does not implement (Tax, Treasury, Issuing, Terminal). CI becomes noisy, developers ignore it, real drift goes undetected.
+`LatticeStripe.ObjectTypes` maps Stripe `"object"` type strings to module names
+for expand-deserialization (Phase 22). If a new resource module is added but not
+registered in `@object_map`, then:
+
+1. Any field on an existing resource that expands to the new type returns a raw
+   `map()` instead of a typed struct — silently wrong, no crash
+2. `Invoice.from_map/1` will not recognize `"quote"` as an expandable type when
+   an Invoice has a `quote` field that was expanded
+3. The expand deserialization guide becomes incorrect for new resources
+
+The current `@object_map` does not include `"file"`, `"file_link"`,
+`"credit_note"`, `"mandate"`, `"setup_attempt"`, or `"quote"`.
 
 **Why it happens:**
-Developers build the alerting without filtering for scope. The Stripe OpenAPI spec covers thousands of endpoints and objects. Diffing the whole spec generates events on every Stripe release.
+`ObjectTypes` is a compile-time module attribute. There is no enforcement
+mechanism — the fallback silently returns the raw map, which does not crash but
+produces wrong types. It's easy to miss the registry step when adding a module.
 
 **How to avoid:**
-- Maintain an explicit allowlist of resource paths LatticeStripe implements (e.g., `/v1/customers`, `/v1/payment_intents`, `/v1/invoices`).
-- Separate signal types: new field on existing resource → INFO log, no CI failure. Field type change or field removal → WARNING, CI failure.
-- Run on a weekly schedule (not on every Stripe OpenAPI commit). Output a summary GitHub issue.
-- Build an ignore list of fields intentionally omitted (LatticeStripe's `extra` map handles unknown fields — the drift detector should not flag every new Stripe field as a required implementation).
+Each new resource phase must include an explicit checklist item: "Add
+`"<object_type>" => Module` to `ObjectTypes.@object_map`." This applies to
+all six new resources: `"file"`, `"file_link"`, `"credit_note"`, `"mandate"`,
+`"setup_attempt"`, `"quote"`.
+
+Verification: in at least one integration test per resource, retrieve the object
+with `expand:` targeting the new resource type and assert `is_struct(result.field)`.
 
 **Warning signs:**
-- CI job fails on additive Stripe API changes (new fields added to existing objects).
-- No scope filter — the job diffs all of Stripe's OpenAPI rather than the implemented resource subset.
+- `expand: ["invoice.quote"]` returns a raw map instead of `%Quote{}`
+- No entry for the new resource in `@object_map` after the phase ships
 
-**Phase to address:**
-Stripe API drift detection phase. Deliver as a weekly scheduled job with allowlist + ignore list before implementing.
+**Phase to address:** Every new resource phase. Final audit in DX polish phase.
 
 ---
 
-### Pitfall 11: Connection Warm-Up in Wrong Supervision Position Silently Does Nothing
+### Pitfall 11: Quote Has Two Distinct Line Item Endpoints — Implementing Only One Causes Incorrect Totals
 
 **What goes wrong:**
-A warm-up helper that pre-establishes Finch connections works by making a cheap HTTP request at app startup. If called before the Finch pool starts (wrong supervision tree ordering), the call fails with `{:error, :not_connected}` and the pool simply warms up on the first real request instead. The user gets false confidence that warm-up succeeded.
+The Quote API has two line item list endpoints with different semantics:
+- `GET /v1/quotes/:id/line_items` — the full set of billable items
+- `GET /v1/quotes/:id/computed_upfront_line_items` — upfront-only totals (one-time
+  charges that are not recurring)
 
-Child processes in Elixir supervision trees start in the order they are listed in `children`. If warm-up is triggered in `Application.start/2` before the Finch child spec starts, it silently does nothing.
+Implementing only `list_line_items/3` is correct but incomplete for users building
+proposal UIs or syncing quote totals. Missing the second endpoint means upfront
+charges (e.g., setup fees on a subscription quote) are invisible in the SDK.
 
 **Why it happens:**
-Developers add the warm-up call at the end of `Application.start/2` assuming all supervision tree children are running by then. They are — but only if the warm-up call is made after `Supervisor.start_link/2` returns. Calling it before `Supervisor.start_link/2` runs, or in the wrong supervision order, hits an unstarted pool.
+The Stripe API reference lists both endpoints on the same page without clearly
+distinguishing their semantics. An implementer reads the first, ships it, and
+the second is discovered only when a user reports missing charges.
 
 **How to avoid:**
-- Deliver warm-up as a child-spec-compatible module (`LatticeStripe.Warmup` with a `child_spec/1`) that the user adds to their supervision tree AFTER the Finch pool entry. Supervision tree ordering makes the dependency explicit.
-- The `Warmup` module should return `{:ok, :warmed}` on success and `{:error, reason}` on failure — never silently swallowing the error.
-- Guide example must show the correct supervision tree ordering, not a bare function call.
+Ship both endpoints with distinct names: `list_line_items/3` and
+`list_computed_upfront_line_items/3`. Add a `@moduledoc` section explaining the
+distinction between recurring and upfront line items. Both return paginated
+`List` responses and should use `Resource.unwrap_list`.
 
 **Warning signs:**
-- Warm-up function that returns `:ok` unconditionally rather than threading the actual HTTP result.
-- Guide examples showing warm-up as a bare function call in `Application.start/2` without supervision tree context.
+- Quote module has only one line item function
+- Integration test only exercises one endpoint
 
-**Phase to address:**
-Connection warm-up phase. Deliver as a `child_spec`-compatible module.
+**Phase to address:** Quote phase.
 
 ---
 
-### Pitfall 12: Per-Operation Timeout Defaults Change Existing Behavior Without User Opt-In
+### Pitfall 12: Quote `accept/3` Populates `invoice`/`subscription` as Expandable — Must Use `is_map` Guard
 
 **What goes wrong:**
-The `Client` struct has `timeout: 30_000` as the global default. If per-operation defaults are implemented by overriding the effective timeout inside resource modules (e.g., `list/3` silently uses 60s, `create/3` uses 15s), existing callers who relied on the 30s default see changed behavior. If any per-op default is LOWER than the client's configured timeout (e.g., a 15s create default for callers who set `timeout: 60_000`), it silently reduces the effective timeout, causing previously-succeeding requests to time out.
+When a quote is accepted, Stripe optionally sets `invoice`, `subscription`, or
+`subscription_schedule` on the returned Quote object. By default these fields are
+string IDs. With `expand: ["invoice"]` they are full objects. If `Quote.from_map/1`
+does not apply the same `is_map(val)` expand guard that `Invoice.from_map/1` uses
+for its `charge` and `customer` fields, one of these two modes will produce
+silently wrong data:
+- Without guard: a string ID gets passed to `ObjectTypes.maybe_deserialize`,
+  which is already guarded — but the logic is inconsistent with the rest of
+  the codebase and fragile to future changes
+- With naive struct wrapping: calling `Invoice.from_map(val)` on a string ID
+  crashes
 
 **Why it happens:**
-Per-operation defaults seem like a pure improvement ("list operations inherently take longer"). Developers set them as constants inside resource modules without considering that callers may have tuned infrastructure (load balancers, upstream timeouts, circuit breakers) around the existing 30s default.
+The expand-guard pattern is established (Phase 22) but must be consciously applied
+to every new resource. It is easy to forget on the three new expandable fields
+unique to Quote.
 
 **How to avoid:**
-- Per-operation timeout defaults must be opt-in via a new `operation_timeouts: %{list: 60_000, search: 60_000}` field on `Client`. Default: `nil` (no per-op override, existing behavior preserved).
-- When `operation_timeouts` is nil, existing behavior is unchanged — regression test verifies this.
-- Never hard-code a timeout value in milliseconds inside a resource module. All timeout values flow from the `Client` struct.
-- Per-op defaults should never reduce the effective timeout below the client's `timeout` value.
+Apply the same guard used throughout existing `from_map/1` implementations:
+```elixir
+invoice:
+  (if is_map(known["invoice"]),
+    do: ObjectTypes.maybe_deserialize(known["invoice"]),
+    else: known["invoice"]),
+```
+This pattern must be applied to `invoice`, `subscription`, and
+`subscription_schedule` on `Quote`. The same applies to `Invoice.from_map/1`
+for its `quote` field (the back-reference to a Quote object).
 
 **Warning signs:**
-- Any resource module with a literal timeout integer (e.g., `@list_timeout 60_000`).
-- A PR that changes `Client.request/2` timeout resolution without a behavior-unchanged regression test.
+- `Quote.from_map/1` calls `ObjectTypes.maybe_deserialize` without an `is_map`
+  guard on the expandable fields
+- No unit test covering the non-expanded (string ID) case for these fields
 
-**Phase to address:**
-Per-operation timeout phase. Implement as opt-in `Client` config field.
+**Phase to address:** Quote phase.
+
+---
+
+### Pitfall 13: Test Fixture Under-Coverage — `extra` Field Left Non-Empty
+
+**What goes wrong:**
+Fixture helpers in `test/support/fixtures/` mirror Stripe response shapes and are
+used in unit tests for `from_map/1`. If the fixture only includes the fields
+needed for the current test (minimal fixture anti-pattern), `from_map/1` may have
+incomplete `@known_fields`. Stripe fields in a full API response that are not in
+`@known_fields` silently fall into the `extra` map, where they are invisible to
+users unless they know to look.
+
+A fixture that drives a passing `from_map/1` unit test but produces
+`%CreditNote{..., extra: %{"effective_at" => ...}}` is hiding a modeling gap.
+
+**Why it happens:**
+Fixtures are written to make a specific test pass, not to model the full API
+response. The minimal approach ships fast but leaves `@known_fields` incomplete
+relative to what Stripe actually returns.
+
+**How to avoid:**
+For each new resource, include all top-level fields from the Stripe API reference
+in the initial fixture — not just the fields needed for the first test. Then add
+an assertion in at least one unit test:
+
+```elixir
+result = fixture |> ResourceModule.from_map()
+assert result.extra == %{}
+```
+
+This assertion fails if any fixture field is not in `@known_fields`, surfacing
+modeling gaps immediately during development rather than in production.
+
+**Warning signs:**
+- Fixture has fewer than 10 fields for a resource documented with 30+ in the
+  Stripe API reference
+- No unit test asserts `result.extra == %{}`
+- `extra` field is non-empty in integration test responses
+
+**Phase to address:** Each new resource phase.
+
+---
+
+### Pitfall 14: DX Guides Duplicate Existing `webhooks.md` Content — Creates Drift Between Two Sources
+
+**What goes wrong:**
+A new "Phoenix Webhook Recipe" guide that re-explains `Plug.Parsers` raw body
+configuration creates a second source of truth for the same content. When Phoenix
+changes raw body caching behavior (it has, between major versions), only one of
+the two documents gets updated. Users following the stale guide get broken
+webhook verification.
+
+Similarly, duplicate Finch supervision tree setup instructions across the
+getting-started guide and new recipe guides will drift.
+
+**Why it happens:**
+Recipe guides are written by copying complete working examples. The author
+includes every prerequisite step for completeness, not realizing the prerequisite
+is already documented and maintained elsewhere.
+
+**How to avoid:**
+The Phoenix Webhook Recipe must cross-link to the existing `webhooks.md` guide
+for `Plug.Parsers` configuration rather than reproducing it. The recipe covers
+only the Phoenix-specific routing and handler pattern — the "what to do with the
+verified event." Add a `# Last verified against LatticeStripe vX.X, Phoenix 1.7+`
+note to each new guide at the top. Avoid Ecto schema examples in SDK guides —
+data persistence belongs in Accrue or user applications.
+
+**Warning signs:**
+- New guide contains a `Plug.Parsers` configuration block identical to `webhooks.md`
+- New guide references `Phoenix.Endpoint` options without a "tested with Phoenix
+  1.7+" qualifier
+- Guide includes `Ecto.Schema` struct definitions
+
+**Phase to address:** DX polish phase.
 
 ---
 
@@ -305,110 +504,129 @@ Per-operation timeout phase. Implement as opt-in `Client` config field.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Adding fuzzy-match library dep | Correct edit-distance, no hand-rolling | Permanent runtime dep, version conflict surface for all downstream users | Never — inline 20-line Levenshtein is sufficient for small known-param lists |
-| Deep-typing all 4 BillingPortal.Configuration levels | Fully typed, self-documenting | ~10 nested struct modules, high maintenance burden as Stripe evolves the object | Never for Level 3+ — use `extra` map pattern |
-| Shipping `:fuse` as a bundled runtime dep | Out-of-the-box circuit breaker | Adds OTP process requirement, violates "no global state" philosophy | Never as a bundled dep — guide + example `RetryStrategy` only |
-| `Task.async_stream` without crash wrapper | Simpler concurrent batching code | Any raise propagates to caller, breaks `{:ok, ...} \| {:error, ...}` contract | Never — always wrap each task body |
-| Hard-coded per-op timeout constants in resource modules | Sensible defaults baked in | Changes existing behavior for all callers without opt-in | Never — opt-in via `Client` config only |
-| Rate-limit counter in `Application.put_env` | Simple global tracking | Not thread-safe under concurrent requests, incorrect under load | Never — telemetry emission only |
-| Changeset builders without a defined scope limit | Ergonomic for common cases | Users hit walls at advanced params, fall back to raw maps, builders become dead code | Acceptable only if scope limit is explicitly bounded and documented up-front |
+| Buffer entire file in memory for multipart upload | No streaming API needed; simpler transport layer | OOM risk for files approaching 4.5 MB ceiling under concurrent load | Acceptable for v1.3 — document the 4.5 MB cap; defer streaming to v1.4 |
+| Plain map for `Mandate.payment_method_details` | Avoids 15+ struct variants | Users cannot pattern-match on payment method type safely | Acceptable for v1.3 with a `TODO v1.4` comment |
+| Omit `submit: false` enforcement in Dispute update | Simpler function signature | Users accidentally lock disputes on first evidence submission | Never — always omit submit from defaults; require explicit opt-in |
+| Reuse standard JSON pipeline for Quote PDF | Zero new code | `Jason.DecodeError` crash at runtime | Never — PDF path requires raw binary bypass |
+| Implement only one Quote line item endpoint | Faster to ship | Missing upfront charge totals; users report incorrect amounts | Never — both endpoints serve different semantics |
+| Skip `ObjectTypes` registry for new resources | One less file to update | Expand deserialization silently returns raw maps forever | Never — always register new resources |
+| Minimal fixtures (only fields needed for current test) | Fast test authoring | Modeling gaps stay invisible; `extra` silently fills with missed fields | Never for public-facing resource modules |
+
+---
 
 ## Integration Gotchas
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Stripe expand deserialization | Returning `%Customer{}` when `expand:` was not requested | Only call `Customer.from_map(val)` when `is_map(val)` — string values are unexpanded IDs, leave them as strings |
-| meter_event_stream auth | Using `client.api_key` for stream POST calls | Create session first via `POST /v2/billing/meter_event_session`; use session token; check expiry before each call |
-| stripe-mock + v2 endpoints | Assuming stripe-mock supports all v2 endpoint shapes | Verify each v2 endpoint against stripe-mock changelog; tag integration tests with `@tag :live_only` if unsupported |
-| Finch warm-up supervision ordering | Warm-up before Finch pool starts | Add `LatticeStripe.Warmup` as a child spec entry AFTER the Finch pool in the supervision tree |
-| `:fuse` async circuit breaker | Expecting fuse to trip on async task failures | `:fuse`'s async tracking is unreliable; use synchronous fuse checks only, or use ETS-backed `RetryStrategy` |
-| Rate-limit telemetry | Emitting on every request | Only emit `[:lattice_stripe, :request, :rate_limited]` event on HTTP 429 responses |
+| Stripe Files API | POST to `api.stripe.com/v1/files` | POST to `files.stripe.com/v1/files` |
+| Stripe Files API | Set `Content-Type: multipart/form-data` without boundary | Set `Content-Type: multipart/form-data; boundary=<generated_value>` |
+| Stripe Files API | Pass URL-encoded form body (`FormEncoder`) | Build raw multipart body with part delimiters |
+| Quote PDF | Decode PDF response with `Jason.decode!` | Use `raw: true` transport path; return `{:ok, binary()}` |
+| Quote accept | Assume `invoice` field is always a string ID | Apply `is_map/1` guard before calling `ObjectTypes.maybe_deserialize` |
+| Dispute evidence | Call update twice with partial maps | Retrieve current evidence first; merge locally; submit full map once |
+| Dispute evidence | Include `submit: true` by default | Omit `submit`; require explicit opt-in |
+| CreditNote | Create against a draft invoice | Call `Invoice.finalize/3` first; credit notes require finalized invoices |
+| CreditNote void | Void on a paid invoice | Void is only valid on credit notes attached to `open` invoices |
+| Mandate / SetupAttempt | Call `create/3` or `update/3` | These resources are read-only; expose only `retrieve` (and `list` for SetupAttempt) |
+| stripe-mock | Assume file upload endpoint exists at default base URL | Verify stripe-mock routes `/v1/files`; if not, use Mox for multipart unit tests |
+
+---
 
 ## Performance Traps
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Fuzzy param matching on every error | Latency spike on error paths | Only run when `error.type == :invalid_request_error` and `error.param != nil`; compile-time known-param lists | Any error rate above ~1% at volume |
-| Recursive expand deserialization on list responses | `list/3` parsing latency multiplies with response size | Only expand fields explicitly requested via `expand:` opt; do not recursively expand nested fields without explicit depth limit | Lists of 25+ items with 3+ expand fields |
-| Connection warm-up blocking app startup | App start latency increases by HTTP round-trip (~100-500ms) | Implement warm-up asynchronously inside the Warmup child spec's `init`; do not block the supervision tree | Kubernetes liveness probe timeouts |
-| BillingPortal.Configuration deep `from_map` chain | CPU spike parsing config responses at high call volume | Cap at 2 levels of typed struct; level 3+ as plain map | High-frequency configuration retrieval |
+| Buffering the full file binary for multipart upload | High process heap per concurrent upload | Document the 4.5 MB ceiling; defer streaming to v1.4 | ~50 concurrent max-size dispute evidence uploads |
+| Fetching Quote line items without checking `has_more` | Silent truncation at 10 items | Use `stream!/2` or check `has_more` on list result | Quotes with >10 line items |
+| Dispute evidence char count not validated client-side | Stripe 400 after evidence is fully assembled | Optional pre-submission char count check against 150,000 limit | When multiple long text evidence fields are combined |
+| Large `Mandate.payment_method_details` dispatch in `from_map/1` | CPU spike on high-volume retrieve | Store as plain map for v1.3; no dispatch overhead | Not a v1.3 concern; becomes relevant only if typed variants are added |
+
+---
 
 ## Security Mistakes
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Rate-limit telemetry metadata including raw headers | API key or auth headers captured in telemetry spans | Rate-limit event metadata includes only the `reason` string value, not the full headers list |
-| meter_event_stream session token in library state | Token leaked via process inspection, crash dumps | Token stored in calling process state (GenServer assigns, Phoenix socket assigns) — not in LatticeStripe internals |
-| Expand deserialization logging `%Customer{}` | PII (email, name, phone) appears in logs via `inspect/1` | Verify `Customer` retains its `Inspect` implementation after expand changes; add an `inspect_test.exs` assertion |
-| Changeset builder logging raw params | Stripe params containing card details or bank data in logs | Builders must never call `Logger.*` on their input; leave sanitization to the caller |
+| Logging file binary body in transport telemetry | PII exposure — identity documents, signed contracts, dispute evidence images | Ensure telemetry spans omit `body` for `files.stripe.com` requests; follow existing PII-safe Inspect pattern for `BankAccount`/`Card` |
+| Caching uploaded file binaries beyond the request | Sensitive document bytes in process memory longer than needed | Return only the File ID after upload; do not retain the binary |
+| Not checking `dispute.is_charge_refundable` before refund attempt | API call wasted on a non-refundable dispute; user confusion | Expose `is_charge_refundable` as a typed boolean field on the `Dispute` struct; document the pre-refund check in guides |
 
-## UX Pitfalls
-
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Expand deserialization silently changes field type | Runtime `FunctionClauseError` on what was a string field | CHANGELOG callout + guide migration note + union type in `@type t()` |
-| meter_event_stream requires 2-step auth with no helper | Cryptic 401 when calling stream without session token | Ship `MeterEventStream.create_session/2` + `send_batch/3` that wraps refresh |
-| Per-op timeout defaults applied without opt-in | Infrastructure SLA violations, unexpected timeouts | Require explicit opt-in via `Client` field; default preserves existing 30s behavior |
-| Drift detector CI noise | Team ignores alerts; real drift goes undetected | Weekly schedule + allowlist + additive-only INFO filter |
-| Changeset builders that cover 80% of the API | Users hit a wall, must restart with raw maps | Document scope boundary explicitly; provide raw-map merge escape hatch |
+---
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Expand deserialization:** Test covers the case where `expand:` is NOT passed — field remains a string ID, not a struct.
-- [ ] **Expand deserialization:** `@type t()` updated to `Customer.t() | String.t() | nil` for every expandable field.
-- [ ] **Circuit breaker:** `:fuse` is NOT in `mix.exs` runtime deps. Feature delivered as guide + example module.
-- [ ] **Rate-limit telemetry:** Event fires only on HTTP 429, not on every request. Verified with a non-429 test.
-- [ ] **meter_event_stream:** `expires_at` checked before each send. Session refresh tested with a mocked 401 response.
-- [ ] **BillingPortal.Configuration:** Typing depth documented in a code comment. Level 3+ fields accessible in `extra` (not silently dropped).
-- [ ] **Changeset builders:** Builder output is `Map.merge`-compatible with raw params. Scope limit documented before code is written.
-- [ ] **Drift detector:** Allowlist of implemented resource paths defined before the CI job is wired. Additive changes produce INFO, not CI failure.
-- [ ] **Connection warm-up:** Returns `{:ok, :warmed} | {:error, reason}`. Tested with Finch pool absent — returns error, does not crash.
-- [ ] **Per-op timeouts:** Regression test verifies existing 30s default is unchanged when `operation_timeouts: nil`.
-- [ ] **Task.async_stream batch helper:** Every task body wrapped in `try/rescue`. Test verifies a raising task returns `{:error, %Error{}}`, not a crash.
-- [ ] **Richer errors:** Suggestion not computed for `:api_error` or `:connection_error`. Test verifies computation is gated on `error.type` + `error.param != nil`.
+- [ ] **File.create/3:** URL is `files.stripe.com/v1/files`, not `api.stripe.com/v1/files` — verify the URL literal in the function body
+- [ ] **File.create/3:** Multipart `Content-Type` header includes `; boundary=<value>` — verify with a unit test that checks the header sent to the transport
+- [ ] **File.create/3:** Does not call `FormEncoder.encode/1` — file uploads use a raw multipart body
+- [ ] **Quote.pdf/3:** Return type is `{:ok, binary()} | {:error, Error.t()}` — not `{:ok, Quote.t()}`
+- [ ] **Quote.pdf/3:** `@doc` notes that `draft` and `canceled` quotes have no PDF (Stripe 404)
+- [ ] **Quote:** Both `list_line_items/3` AND `list_computed_upfront_line_items/3` exist
+- [ ] **Quote.from_map/1:** `invoice`, `subscription`, `subscription_schedule` fields use `is_map/1` expand guard
+- [ ] **Dispute.update_evidence/3:** `submit` is absent from default params (not `submit: true`)
+- [ ] **Dispute.update_evidence/3:** `@doc` warns that evidence submission is a full replace, not an incremental merge
+- [ ] **CreditNote:** Integration tests call `Invoice.finalize/3` before `CreditNote.create/3`
+- [ ] **CreditNote.from_map/1:** Line items decoded via `CreditNote.LineItem.from_map/1`, not left as plain maps
+- [ ] **Mandate:** Only `retrieve/3` is defined — no `create`, `update`, `delete`
+- [ ] **SetupAttempt:** Only `retrieve/3` and `list/3` are defined — no `create`, `update`, `delete`
+- [ ] **Mandate / SetupAttempt:** `payment_method_details` stored as a plain map; `TODO v1.4` comment present
+- [ ] **ObjectTypes:** `"file"`, `"file_link"`, `"credit_note"`, `"mandate"`, `"setup_attempt"`, `"quote"` all registered in `@object_map`
+- [ ] **All new resources:** At least one unit test asserts `result.extra == %{}` against the full-field fixture
+- [ ] **DX guides:** New Phoenix recipe cross-links to existing `webhooks.md`; no duplicate `Plug.Parsers` block; "Last verified" header present
+
+---
 
 ## Recovery Strategies
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Expand type union breaks downstream pattern match | HIGH | Patch 1.2.x: ensure non-expand path returns string ID unchanged (was it already?); update CHANGELOG; notify Accrue maintainer |
-| `:fuse` dep added and must be removed | MEDIUM | Remove from `mix.exs`; mark as user-side dep in guide; bump minor if it was in any `@spec` |
-| Per-op timeout lowers effective timeout, causes failures | HIGH | Immediate patch: `nil` default restores existing behavior for all callers who did not opt in |
-| meter_event_stream session not refreshed, silent auth failures | MEDIUM | Patch: add `expires_at` check before every call; non-breaking (purely internal to `MeterEventStream`) |
-| Drift detector too noisy, team disables | LOW | Re-scope to allowlist + weekly schedule + INFO-only for additive changes; re-enable |
-| BillingPortal.Configuration Level 3+ fields silently dropped | MEDIUM | Add `extra` map to affected nested structs; release as patch (additive change) |
-| Changeset builder ships at 80% coverage, users bypass | LOW | Document boundary explicitly; add raw-map escape hatch; defer completion to v1.3 |
+| Wrong base URL for file uploads | LOW | Fix URL literal in `File.create/3`; bump patch version; no struct changes needed |
+| Missing multipart boundary | LOW | Fix header construction; no struct or API changes needed |
+| Quote PDF crashes with `Jason.DecodeError` | LOW | Add `raw: true` path to `Client`; change `Quote.pdf/3` return type; bump minor (return type change) |
+| Dispute evidence lost between updates | MEDIUM | Document replace semantics clearly in CHANGELOG; no breaking API change; add guide migration note |
+| `ObjectTypes` missing a new resource | LOW | Add one line to `@object_map`; recompile; no breaking change |
+| CreditNote tests fail due to draft invoice | LOW | Update integration tests to finalize invoice; no API change |
+| Guide duplicates webhook setup content | MEDIUM | Refactor guide to use cross-links; update "Last verified" header; verify against current Phoenix |
+
+---
 
 ## Pitfall-to-Phase Mapping
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Expand field type union breaks downstream | EXPD-02 expand deserialization | Test: expand off → string ID; expand on → typed struct; `@type t()` shows union |
-| New Client fields break literal construction | Any phase adding Client opts | Regression: `Client.new!(api_key:, finch:)` with no other opts produces valid struct with all new fields at defaults |
-| Circuit breaker adds OTP process dep | Circuit breaker phase | Verify: `:fuse` absent from runtime deps; feature in guide only |
-| Rate-limit tracking adds shared state | Rate-limit awareness phase | Verify: no ETS/Application env writes in request path; telemetry-only implementation |
-| Fuzzy error suggestions add dep | Richer error context phase | Verify: no new runtime dep; suggestion gated on `error.type == :invalid_request_error` AND `error.param != nil` |
-| Task.async_stream crash propagation | Request batching phase | Test: task that raises returns `{:error, %Error{}}`, not a caller crash |
-| meter_event_stream wrong auth model | meter_event_stream phase | Test: missing session token returns `{:error, ...}`; 401 triggers token refresh |
-| BillingPortal.Configuration struct depth explosion | BillingPortal.Configuration phase | Max 6 nested struct modules; Level 3+ accessible via `extra` map; typing depth in code comment |
-| Changeset builders become dead code | Changeset builders phase | Scope limit defined before coding; builder output is `map()`, not a closed struct |
-| Drift detector CI noise | Stripe API drift detection phase | Allowlist of implemented paths; additive changes → INFO only; weekly schedule not per-commit |
-| Warm-up in wrong supervision position | Connection warm-up phase | child_spec-compatible module; ordering shown in guide; error returned when pool absent |
-| Per-op timeouts change existing behavior | Per-operation timeouts phase | Regression: zero-config client uses 30s unchanged; per-op only applies when `operation_timeouts` explicitly set |
+| File uploads wrong base URL | File & FileLink phase | Unit test asserts URL contains `files.stripe.com` |
+| Multipart missing boundary | File & FileLink phase | Mox unit test: assert `content-type` header includes `boundary=` |
+| File using `FormEncoder` | File & FileLink phase | Code review: `FormEncoder` not imported in `File` module |
+| Quote PDF binary handling | Quote phase | Unit test: `Quote.pdf/3` returns `{:ok, <<_::binary>>}` |
+| Quote dual line item endpoints | Quote phase | Integration tests cover both `list_line_items` and `list_computed_upfront_line_items` |
+| Quote expand guard for invoice/subscription | Quote phase | Unit test: non-expanded quote has string IDs; expanded quote has typed structs |
+| Dispute evidence full-replace semantics | Dispute phase | Integration test: two sequential updates; assert first field retained in second call (by retrieving first) |
+| Dispute `submit` default | Dispute phase | Unit test: request params omit `submit` when not passed by caller |
+| CreditNote invoice state precondition | CreditNote phase | Integration test: finalize before credit note creation |
+| CreditNote line item types | CreditNote phase | Unit tests cover both `invoice_line_item` and `custom_line_item` variants |
+| Mandate read-only | Mandate & SetupAttempt phase | No `create`/`update`/`delete` functions in module (verified via `module_info(:exports)`) |
+| SetupAttempt read-only | Mandate & SetupAttempt phase | Same as Mandate |
+| Mandate `payment_method_details` over-modeling | Mandate & SetupAttempt phase | `payment_method_details` stored as map; `extra == %{}` assertion passes with full fixture |
+| `ObjectTypes` registry gaps | Each resource phase + DX polish | `expand:` integration test returns typed struct, not raw map |
+| Fixture under-coverage | Each resource phase | `assert result.extra == %{}` in unit test passes with full-field fixture |
+| DX guide duplication / staleness | DX polish phase | No `Plug.Parsers` block duplicated from `webhooks.md`; "Last verified" comment present in each new guide |
+
+---
 
 ## Sources
 
-- [LatticeStripe PROJECT.md](/.planning/PROJECT.md) — design philosophy, "no GenServer" constraint, existing `Client` struct shape
-- [LatticeStripe client.ex](lib/lattice_stripe/client.ex) — confirmed `timeout: 30_000` default, `@enforce_keys [:api_key, :finch]`
-- [LatticeStripe retry_strategy.ex](lib/lattice_stripe/retry_strategy.ex) — confirmed stateless behaviour pattern, no shared state
-- [Stripe Rate Limits documentation](https://docs.stripe.com/rate-limits) — confirmed `Stripe-Rate-Limited-Reason` header on 429; `RateLimit-Remaining` NOT documented
-- [Stripe Meter Event Stream v2 API](https://docs.stripe.com/api/v2/billing-meter-stream) — confirmed session token auth, 15-min TTL, `POST /v2/billing/meter_event_session` required first
-- [Stripe BillingPortal Configuration object](https://docs.stripe.com/api/customer_portal/configurations/object) — confirmed 4-level nesting, ~10 nested objects
-- [Elixir Library Guidelines](https://hexdocs.pm/elixir/library-guidelines.html) — optional dep compile-test requirement; flexible version constraint guidance; `~> x.y` vs `~> x.y.z` warning
-- [Task async_stream timeout bug](https://github.com/elixir-lang/elixir/issues/6395) — confirmed `{:exit, :timeout}` as stream element behavior with `on_timeout: :kill_task`
-- [Fuse async pitfall](https://elixirforum.com/t/fuse-circuit-breaker-not-breaking-when-called-asynchronously/24669) — confirmed async tracking unreliability in `:fuse`
-- [Elixir Code Anti-Patterns](https://hexdocs.pm/elixir/code-anti-patterns.html) — struct evolution, process anti-patterns
+- [Stripe File Upload — `files.stripe.com` distinct base URL and multipart requirement](https://docs.stripe.com/file-upload) — HIGH confidence (official docs, 2026)
+- [Stripe Files API — purpose enum, multipart/form-data, MIME type requirement](https://docs.stripe.com/api/files/create) — HIGH confidence
+- [Elixir Forum — Finch "no multipart boundary param in Content-Type"](https://elixirforum.com/t/how-to-make-a-multipart-http-request-using-finch/36217) — MEDIUM confidence (forum post, corroborated by Stripe docs and RFC 2388)
+- [Stripe Quote overview — state machine, accept semantics, upfront vs recurring line items](https://docs.stripe.com/quotes/overview) — HIGH confidence
+- [Stripe Quote PDF endpoint](https://docs.stripe.com/api/quotes/pdf) — HIGH confidence (endpoint confirmed; binary return inferred from `application/pdf` MIME type per Stripe standard)
+- [Stripe Disputes API — status values, evidence fields, `evidence_details.due_by`, 4.5 MB / 150k char limits](https://docs.stripe.com/api/disputes/object) — HIGH confidence
+- [Stripe Disputes — responding with evidence, `submit` behavior](https://docs.stripe.com/disputes/api) — HIGH confidence
+- [Stripe CreditNote — line item types `invoice_line_item` vs `custom_line_item`](https://docs.stripe.com/api/credit_notes/line_item) — HIGH confidence
+- [Stripe CreditNote — void semantics, open-invoice constraint](https://docs.stripe.com/billing/invoices/credit-notes) — HIGH confidence
+- [Stripe Mandate object — status values (active/pending/inactive), 15+ payment_method_details variants](https://docs.stripe.com/api/mandates/object) — HIGH confidence
+- [Stripe SetupAttempt object — immutable snapshot fields, read-only constraints](https://docs.stripe.com/api/setup_attempts/object) — HIGH confidence
+- LatticeStripe codebase — `ObjectTypes`, `FormEncoder`, `Resource`, `Transport.Finch`, `Invoice.from_map/1` expand guard patterns, fixture structure — HIGH confidence (direct source analysis)
 
 ---
-*Pitfalls research for: LatticeStripe v1.2 Production Hardening & DX — adding features to a published Elixir Stripe SDK*
+*Pitfalls research for: LatticeStripe v1.3 — new resource families (Dispute, CreditNote, Mandate, SetupAttempt, File/FileLink, Quote) + DX polish*
 *Researched: 2026-04-16*

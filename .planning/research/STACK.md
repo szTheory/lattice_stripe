@@ -1,8 +1,289 @@
 # Technology Stack
 
 **Project:** LatticeStripe (Elixir Stripe SDK)
-**Researched:** 2026-03-31 (v1.0); updated 2026-04-13 (v1.1 addendum); updated 2026-04-16 (v1.2 addendum)
+**Researched:** 2026-03-31 (v1.0); updated 2026-04-13 (v1.1 addendum); updated 2026-04-16 (v1.2 addendum); updated 2026-04-16 (v1.3 addendum)
 **Overall Confidence:** HIGH
+
+---
+
+## v1.3 Addendum — Production Coverage & Adoption Polish
+
+> This section was added at the start of the v1.3 milestone. It answers stack questions for the
+> six new resource families (Dispute, CreditNote, Mandate, SetupAttempt, File/FileLink, Quote)
+> and DX polish. The existing v1.2, v1.1, and v1.0 stack content follows unchanged below.
+
+### Verdict: One new optional runtime dependency (multipart), zero new hard dependencies
+
+The shipped `deps/0` block gains one entry: `{:multipart, "~> 0.4", optional: true}`.
+Everything else — Dispute, CreditNote, Mandate, SetupAttempt, FileLink, Quote (JSON responses),
+test fixture builders, and Phoenix recipe — is pure-Elixir with no new Hex deps.
+
+---
+
+### Feature-by-Feature Stack Analysis
+
+#### 1. File Upload — multipart/form-data to files.stripe.com
+
+**Requires: `{:multipart, "~> 0.4", optional: true}`**
+
+Stripe's `/v1/files` endpoint uses two non-standard properties:
+1. The base URL is `https://files.stripe.com/v1/files`, NOT `https://api.stripe.com/v1/files`.
+   This is the same pattern already established by `meter-events.stripe.com` in v1.2.
+2. The request body must be `multipart/form-data`, NOT `application/x-www-form-urlencoded`
+   (which `FormEncoder` produces for all other resources).
+
+Finch does NOT build multipart bodies natively — `Finch.build/4` accepts a pre-encoded binary
+or iodata as the body. The `multipart` library fills this gap: it constructs the RFC 7578
+`multipart/form-data` stream, calculates content length, and generates the `Content-Type` header
+with boundary. Finch then receives `body_binary(mp)` as the body.
+
+**Why `multipart` specifically:**
+- Transport-agnostic (only dep is `:mime ~> 1.2 or ~> 2.0` for MIME type lookup)
+- v0.6.0 released January 2026 — actively maintained
+- Explicitly designed for Finch integration (documented in its README)
+- 1.7M all-time downloads — community-validated
+- RFC 2046 + RFC 7578 compliant
+
+**Integration pattern with existing Transport behaviour:**
+
+```elixir
+# Inside LatticeStripe.File.create/3 (simplified)
+mp =
+  Multipart.new()
+  |> Multipart.add_part(Part.text_field(purpose, "purpose"))
+  |> Multipart.add_part(Part.file_field(file_binary, "file", filename, content_type))
+
+body = Multipart.body_binary(mp)
+content_type_header = Multipart.content_type(mp, "multipart/form-data")
+content_length = Multipart.content_length(mp)
+
+headers = [
+  {"content-type", content_type_header},
+  {"content-length", to_string(content_length)}
+  | base_headers
+]
+# url = "https://files.stripe.com/v1/files" (not api.stripe.com)
+transport.request(%{method: :post, url: upload_url, headers: headers, body: body, opts: opts})
+```
+
+The `body` key in `Transport.request_map()` is already typed as `binary() | nil`, so no
+transport contract change is needed. The upload URL is a separate config key
+(`upload_base_url`, defaulting to `"https://files.stripe.com"`) alongside the existing
+`base_url` — same pattern used for `meter-events.stripe.com`.
+
+**stripe-mock compatibility:** stripe-mock parses multipart form bodies and validates them
+against the OpenAPI spec. File upload integration tests run against stripe-mock via the
+existing Docker setup — confirmed via stripe-mock issue #35 (support added in v0.14.0+).
+stripe-mock returns a fixture `File` object; the file binary itself is not validated, only
+field presence.
+
+**Why NOT to roll multipart encoding by hand:** RFC 7578 boundary encoding is subtle — handling
+filenames with special characters, proper CRLF, binary content without corruption. `multipart`
+is 14 well-tested modules. The ratio of implementation effort to library footprint makes
+rolling your own indefensible.
+
+**Why NOT to use Req for uploads only:** Req supports `form_multipart:` as a built-in step
+and is built on Finch. But introducing Req as a one-off dep for multipart encoding only
+imports ~15 deps (Req's full battery) for a feature that `multipart` handles in 3 deps
+(multipart + mime + your existing Finch). Inconsistent request pipeline is also a footgun.
+
+**Confidence: HIGH** — multipart v0.6.0 confirmed on hex.pm (January 2026); transport-agnostic
+confirmed from mix.exs inspection; Finch integration pattern confirmed from library README;
+stripe-mock multipart support confirmed via GitHub issue history.
+
+---
+
+#### 2. Quote PDF Download — binary response, no JSON parsing
+
+**No new dependencies.** Finch already handles binary responses natively.
+
+The `GET /v1/quotes/:id/pdf` endpoint returns a raw PDF binary (content-type:
+`application/pdf`), not a JSON body. This is similar conceptually to the binary download
+case already handled by Finch's `stream/5`, though for Quote PDF the response is small
+enough that the standard `Finch.request/3` (used in `Transport.Finch`) collects the full
+body into a binary in one shot.
+
+The existing transport contract already types `body` as `binary()` in the response map —
+the transport returns raw bytes regardless of content-type. The change is purely in
+`LatticeStripe.Quote`:
+
+1. `pdf/2` function sends `GET /v1/quotes/:id/pdf` with `Accept: application/pdf` header.
+2. After the transport returns `{:ok, %{status: 200, body: binary}}`, skip JSON decoding
+   entirely and return `{:ok, binary}` directly.
+3. No JSON decode path is attempted — the response body is the PDF bytes.
+
+This is a caller-side contract deviation (returns `binary()` instead of a struct), documented
+explicitly in the `@spec` and `@doc`. Consistent with how the existing codebase handles
+non-struct responses (e.g., `LatticeStripe.Response` wraps the raw body).
+
+**Stripe API confirmed:** `GET /v1/quotes/:id/pdf` is in the Stripe OpenAPI spec, present in
+stripe-mock. The mock returns a fixture binary (not a real PDF, but the content-type header
+and response shape are exercised).
+
+**Confidence: HIGH** — Finch binary response confirmed via hexdocs.pm/finch (the `{:data, data}`
+callback in `stream/5` receives raw binary chunks; `Finch.request/3` collects them as a binary);
+no library needed.
+
+---
+
+#### 3. Dispute, CreditNote, Mandate, SetupAttempt — No new dependencies
+
+All four resource families are standard JSON CRUDL families on `api.stripe.com`. They use
+the existing `Transport.Finch` → `FormEncoder` → `Jason` → typed `from_map/1` pipeline
+without modification.
+
+| Resource | API path | Operations | Notes |
+|----------|----------|------------|-------|
+| Dispute | `/v1/disputes` | retrieve, update, list, close | `evidence` is a large nested map |
+| CreditNote | `/v1/credit_notes` | create, retrieve, update, void, list, preview | Nested `lines` array |
+| Mandate | `/v1/mandates/:id` | retrieve only | Read-only; nested `payment_method_details` |
+| SetupAttempt | `/v1/setup_attempts` | list only | Read-only; reference from SetupIntent |
+
+None of these require multipart encoding, binary responses, different base URLs, or special
+auth patterns. No new dependencies.
+
+**Confidence: HIGH** — all four resource paths present in Stripe API reference and OpenAPI
+spec on `api.stripe.com`; standard CRUDL patterns.
+
+---
+
+#### 4. FileLink — No new dependencies
+
+`FileLink` operations (`create`, `retrieve`, `update`, `list`) all use `api.stripe.com`
+with standard JSON encoding — NOT `files.stripe.com`. FileLink is a metadata record that
+points to an uploaded `File`; only `File.create` uses the upload URL and multipart encoding.
+
+No new dependencies.
+
+**Confidence: HIGH** — Stripe API reference confirms FileLink endpoints are on api.stripe.com.
+
+---
+
+#### 5. Test Fixture Builders for Consumers (DX Polish)
+
+**No new Hex dependency. Use the existing hand-rolled factory pattern.**
+
+The question is whether to add `ex_machina ~> 2.8` for factory-style test data generation
+in `LatticeStripe.Testing`.
+
+**ExMachina analysis:**
+- v2.8.0 (June 2024) — actively maintained by BEAM Community
+- Works without Ecto using `use ExMachina` (no `ExMachina.Ecto`)
+- Provides `build/2`, `build_pair/2`, `build_list/3` with attribute overrides
+- Only meaningful additions over plain functions: `sequence/2` for auto-incrementing
+  fields, and the `build/2` merge API
+
+**Verdict: Do NOT add ExMachina.** The `LatticeStripe.Testing` module already ships
+hand-rolled fixture helpers using plain Elixir functions (established in Phase 10). The
+existing pattern is:
+
+```elixir
+# test/support/fixtures/customer_fixtures.ex
+defmodule LatticeStripe.Testing do
+  def customer_fixture(attrs \\ %{}) do
+    %LatticeStripe.Customer{
+      id: attrs[:id] || "cus_test#{System.unique_integer([:positive])}",
+      email: attrs[:email] || "test@example.com",
+      # ...
+    }
+  end
+end
+```
+
+This is exactly what Ecto's own documentation recommends as the standard approach for
+test factories without a factory library. Adding ExMachina to satisfy `sequence/2` is
+not worth the dependency for a library that already has the pattern established.
+
+**What to actually ship for v1.3 DX polish:**
+- Extend the existing `LatticeStripe.Testing` module with `dispute_fixture/1`,
+  `credit_note_fixture/1`, `mandate_fixture/1`, `setup_attempt_fixture/1`,
+  `file_fixture/1`, `file_link_fixture/1`, `quote_fixture/1` helpers
+- Follow the existing `customer_fixture/1` / `invoice_fixture/1` conventions in the
+  codebase (established in Phase 10, Phase 16)
+- No external library needed
+
+**If consumers want ExMachina for their own apps:** Document in the testing guide that
+`ex_machina ~> 2.8` is the ecosystem standard for factory-based test data and users can
+define their own factories wrapping LatticeStripe.Testing helpers. LatticeStripe does not
+need to take an ExMachina dependency itself.
+
+**Confidence: HIGH** — ExMachina v2.8.0 confirmed on hex.pm (June 2024); existing pattern
+analysis based on codebase inspection of test/support/; Ecto factory docs confirm plain-
+function approach is idiomatic.
+
+---
+
+#### 6. Phoenix Webhook Recipe (DX Polish)
+
+**No new dependencies.** This is documentation + a guide file.
+
+The existing `LatticeStripe.Webhook.Plug` (Phase 7) and `guides/webhooks.md` cover the
+mechanics. The v1.3 DX polish item is a Phoenix-specific recipe showing:
+- Router integration (`forward "/stripe/webhooks", LatticeStripe.Webhook.Plug, ...`)
+- Raw body caching in Phoenix's endpoint (`Plug.Parsers` with raw body passthrough)
+- `handle_event/2` callback in a Phoenix context module
+- Recommended supervision tree for webhook processing (Task.Supervisor pattern)
+
+This is a `guides/phoenix-webhooks.md` addition only. No deps change.
+
+**Confidence: HIGH** — pattern is established Phoenix + Plug integration, no new tech.
+
+---
+
+### mix.exs Changes for v1.3
+
+**One new optional runtime entry:**
+
+```elixir
+{:multipart, "~> 0.4", optional: true},
+```
+
+Place it alongside the Plug optional dep in the runtime block:
+
+```elixir
+defp deps do
+  [
+    # Runtime dependencies
+    {:finch, "~> 0.21"},
+    {:jason, "~> 1.4"},
+    {:telemetry, "~> 1.0"},
+    {:nimble_options, "~> 1.0"},
+    {:plug_crypto, "~> 2.0"},
+    {:plug, "~> 1.16", optional: true},
+    {:multipart, "~> 0.4", optional: true},   # <-- new for v1.3 File uploads
+
+    # Dev/test dependencies
+    {:mox, "~> 1.2", only: :test},
+    {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
+    {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+    {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
+    {:fuse, "~> 2.5", only: [:dev, :test]},
+    {:opentelemetry_exporter, "~> 1.8", only: [:dev, :test]},
+    {:opentelemetry, "~> 1.5", only: [:dev, :test]},
+    {:opentelemetry_api, "~> 1.4", only: [:dev, :test]}
+  ]
+end
+```
+
+The `optional: true` marker means users who never call `LatticeStripe.File.create/3`
+do not need `multipart` in their own `deps/0`. Users who do call it must add
+`{:multipart, "~> 0.4"}` to their app's `mix.exs`. Document this in the File module
+`@moduledoc`.
+
+**What NOT to add for v1.3:**
+- `{:ex_machina, ...}` — existing hand-rolled fixture pattern is sufficient; ExMachina
+  is a user-side choice for their test suites, not an SDK dep
+- Any new dev-only dep — all six resources test fine against existing stripe-mock Docker
+- `{:mime, ...}` — transitively provided by `multipart`; do not declare separately
+
+---
+
+### Version Verification Summary (April 2026)
+
+| Package | Confirmed Version | Source |
+|---------|------------------|--------|
+| `multipart` | 0.6.0 | hex.pm/packages/multipart (January 2026) |
+| `ex_machina` | 2.8.0 | hex.pm/packages/ex_machina (June 2024) — NOT added |
 
 ---
 
@@ -534,11 +815,23 @@ Three combinations covering the floor, middle, and ceiling of supported versions
 | **`/v2/billing/meter-event-stream`** | v2 high-throughput streaming endpoint — different auth model (ephemeral 15-minute session tokens), different semantics. Deferred to v1.2+ per locked decision D3. v1.1 uses `/v1/billing/meter_events` with standard `Stripe-Key` auth. |
 | **`req_fuse`** | Circuit breaker wrapper for Req — wrong HTTP client. Also CC-BY-NC-ND licensed (non-commercial only). |
 | **`breaker`** | Less maintained Elixir circuit breaker alternative to `:fuse`. Fewer downloads, less community validation. |
+| **ExMachina** | External factory library not needed for LatticeStripe.Testing's fixture helpers. The existing hand-rolled `*_fixture/1` pattern is idiomatic, dep-free, and already established in the codebase. Users can add ExMachina to their own apps for integration with LatticeStripe types. |
+| **Req for file uploads** | Using Req only for multipart encoding would introduce ~15 transitive deps for a task the 3-dep `multipart` library handles. Inconsistent request pipeline (Finch everywhere except File) is a maintenance footgun. |
 
 ## Sources
 
 - [Finch on Hex.pm](https://hex.pm/packages/finch) -- v0.21.0 confirmed
-- [Finch Documentation](https://hexdocs.pm/finch/Finch.html) -- pool configuration, stream/5 function, HTTP/2 streaming support confirmed
+- [Finch Documentation](https://hexdocs.pm/finch/Finch.html) -- pool configuration, stream/5 function, HTTP/2 streaming support confirmed; binary `{:data, data}` callback confirmed
+- [multipart on Hex.pm](https://hex.pm/packages/multipart) -- v0.6.0 confirmed (January 2026), 1.7M downloads
+- [multipart GitHub](https://github.com/breakroom/multipart) -- transport-agnostic confirmed (only dep: `:mime`); Finch integration pattern in README
+- [multipart HexDocs](https://hexdocs.pm/multipart/Multipart.html) -- `body_binary/1`, `body_stream/1`, `content_type/2`, `content_length/1` API confirmed
+- [Stripe File Upload Guide](https://docs.stripe.com/file-upload) -- `files.stripe.com` base URL confirmed; multipart/form-data required; `file` + `purpose` fields required
+- [Stripe Files API Reference](https://docs.stripe.com/api/files/create) -- endpoint shape confirmed
+- [Stripe Quotes PDF Reference](https://docs.stripe.com/api/quotes/pdf) -- `GET /v1/quotes/:id/pdf` confirmed in OpenAPI spec; binary response
+- [stripe-mock GitHub issue #35](https://github.com/stripe/stripe-mock/issues/35) -- multipart upload support added in stripe-mock v0.14.0+
+- [ExMachina on Hex.pm](https://hex.pm/packages/ex_machina) -- v2.8.0 confirmed (June 2024); works without Ecto
+- [ExMachina HexDocs](https://hexdocs.pm/ex_machina/readme.html) -- `build/2` API confirmed, Ecto-free usage confirmed
+- [Ecto test factories guide](https://hexdocs.pm/ecto/test-factories.html) -- plain-function factory pattern recommended as idiomatic approach
 - [Jason on Hex.pm](https://hex.pm/packages/jason) -- v1.4.4 confirmed
 - [Telemetry on Hex.pm](https://hex.pm/packages/telemetry) -- v1.4.1 confirmed
 - [Plug on Hex.pm](https://hex.pm/packages/plug) -- v1.19.1 confirmed
@@ -561,7 +854,7 @@ Three combinations covering the floor, middle, and ceiling of supported versions
 - [opentelemetry_telemetry on Hex.pm](https://hex.pm/packages/opentelemetry_telemetry) -- v1.1.2 confirmed, telemetry-to-OTel bridge
 - [Livebook on Hex.pm](https://hex.pm/packages/livebook) -- v0.19.6 confirmed (March 2026)
 - [kino on Hex.pm](https://hex.pm/packages/kino) -- v0.19.0 confirmed, Livebook interactive widgets
-- [req_fuse on Hex.pm](https://hex.pm/packages/req_fuse) -- v0.3.2, CC-BY-NC-ND (non-commercial), Req-only integration, rejected
+- [req_fuse on Hex.pm](https://hex.pm/packages/req_fuse) -- v0.3.2, CC-BY-NC-UD (non-commercial), Req-only integration, rejected
 - [oasdiff GitHub Action](https://github.com/oasdiff/oasdiff-action) -- OpenAPI breaking change detection, alternative to custom mix task
 - [Elixir Compatibility Table](https://hexdocs.pm/elixir/compatibility-and-deprecations.html) -- version matrix verified
 - [Req on Hex.pm](https://hex.pm/packages/req) -- v0.5.17, confirmed Finch-based
