@@ -33,9 +33,11 @@ defmodule Mix.Tasks.LatticeStripe.CheckDrift do
 
     case LatticeStripe.Drift.run(opts) do
       {:ok, %{drift_count: 0} = result} ->
-        # No per-module drift. May still have new_resources (informational).
+        # No per-module drift. May still have new_resources — these ARE drift;
+        # Stripe has added object types not yet implemented in the SDK.
         if result.new_resources != [] do
           Mix.shell().info(LatticeStripe.Drift.format_report(result))
+          System.halt(1)
         else
           Mix.shell().info("No drift detected. @known_fields are up to date.")
         end
