@@ -273,7 +273,8 @@ LatticeStripe v1.2 adds support for Stripe's v2 high-throughput meter event stre
 # 2. Send events using the session token
 
 {:ok, session} = LatticeStripe.Billing.MeterEventStream.create_session(client)
-IO.puts("Session expires at: #{session.expires_at}")
+expires_readable = session.expires_at |> DateTime.from_unix!() |> to_string()
+IO.puts("Session expires at: #{expires_readable}")
 
 events = [
   %{
