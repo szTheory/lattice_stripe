@@ -53,7 +53,7 @@ See `.planning/milestones/v1.0-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 28: meter_event_stream v2** — `Billing.MeterEventStream` session-token API, `create_session/2`, event send loop, expiry handling (completed 2026-04-16)
 - [x] **Phase 29: Changeset-Style Param Builders** — optional fluent builders for `SubscriptionSchedule` phases and `BillingPortal` flows (completed 2026-04-16)
 - [x] **Phase 30: Stripe API Drift Detection** — Mix task + GitHub Actions weekly cron, compares Stripe OpenAPI spec `@known_fields` against current modules (completed 2026-04-16)
-- [ ] **Phase 31: LiveBook Notebook** — `notebooks/stripe_explorer.livemd` interactive SDK exploration, exercises complete v1.2 API surface
+- [x] **Phase 31: LiveBook Notebook** — `notebooks/stripe_explorer.livemd` interactive SDK exploration, exercises complete v1.2 API surface (completed 2026-04-17)
 
 ## Phase Details
 
@@ -219,10 +219,10 @@ Plans:
   1. A developer can open `notebooks/stripe_explorer.livemd` in LiveBook and run all cells — the notebook installs dependencies via `Mix.install/2`, connects to stripe-mock (or documents how to configure a test API key), and produces visible output for each section.
   2. The notebook covers at least: client configuration, payment intent lifecycle, subscription creation, meter event reporting, and portal session creation — with explanatory prose between each section.
   3. The notebook's `Mix.install/2` block pins `lattice_stripe` to the released v1.2.x version (or `path: "."` for local development) and includes `kino` for interactive widgets.
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 31-01-PLAN.md — Setup + Client & Configuration + Payments + Billing sections
-- [ ] 31-02-PLAN.md — Connect + Webhooks + v1.2 Highlights + human verification checkpoint
+- [x] 31-02-PLAN.md — Connect + Webhooks + v1.2 Highlights + human verification checkpoint
 
 ## Progress
 
@@ -240,4 +240,4 @@ Plans:
 | 28. meter_event_stream v2 | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 29. Changeset-Style Param Builders | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 30. Stripe API Drift Detection | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 31. LiveBook Notebook | v1.2 | 1/2 | In Progress|  |
+| 31. LiveBook Notebook | v1.2 | 2/2 | Complete   | 2026-04-17 |
