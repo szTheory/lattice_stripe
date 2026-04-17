@@ -65,7 +65,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details and decisions.
 
 **Milestone Goal:** Production SaaS developers never need to drop to raw HTTP for common workflows. Onboarding friction minimized.
 
-- [ ] **Phase 32: File & FileLink** - Upload and download infrastructure with multipart/binary transport, File and FileLink CRUDL
+- [x] **Phase 32: File & FileLink** - Upload and download infrastructure with multipart/binary transport, File and FileLink CRUDL (completed 2026-04-17)
 - [ ] **Phase 33: Disputes** - Full dispute lifecycle including evidence staging, submission, and close verb
 - [ ] **Phase 34: CreditNote** - Invoice credit workflow with preview, void, and line item streaming
 - [ ] **Phase 35: Mandate & SetupAttempt** - Read-only payment authorization tracking resources
@@ -84,11 +84,11 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details and decisions.
   3. Developer can create, retrieve, update, and list file links via `FileLink` CRUDL with `stream!/3`
   4. `Client.upload/3` sends a correct `multipart/form-data` request with proper boundary headers — standard `Client.request/2` is not used for uploads
   5. `Client.download/3` returns raw binary content (skips JSON decode) — usable for file/PDF download responses
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 32-01-PLAN.md — MultipartEncoder, Config/Response extensions, fixture builders
 - [x] 32-02-PLAN.md — Client.upload/4 and Client.download/2 transport functions
-- [ ] 32-03-PLAN.md — File and FileLink resource modules with tests
+- [x] 32-03-PLAN.md — File and FileLink resource modules with tests
 
 ### Phase 33: Disputes
 **Goal**: Developers can manage the full dispute lifecycle — retrieve, update metadata, stage evidence, irreversibly submit evidence, and accept disputes
@@ -155,7 +155,7 @@ Plans:
 | 1-11, 14-19 | v1.0 | All | Complete | 2026-04-13 |
 | 20-21 | v1.1 | 11/11 | Complete | 2026-04-14 |
 | 22-31 | v1.2 | 24/24 | Complete | 2026-04-17 |
-| 32. File & FileLink | v1.3 | 2/3 | In Progress|  |
+| 32. File & FileLink | v1.3 | 3/3 | Complete   | 2026-04-17 |
 | 33. Disputes | v1.3 | 0/? | Not started | - |
 | 34. CreditNote | v1.3 | 0/? | Not started | - |
 | 35. Mandate & SetupAttempt | v1.3 | 0/? | Not started | - |
