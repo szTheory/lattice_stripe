@@ -155,7 +155,7 @@ Plans:
 | 1-11, 14-19 | v1.0 | All | Complete | 2026-04-13 |
 | 20-21 | v1.1 | 11/11 | Complete | 2026-04-14 |
 | 22-31 | v1.2 | 24/24 | Complete | 2026-04-17 |
-| 32. File & FileLink | v1.3 | 3/3 | Complete   | 2026-04-17 |
+| 32. File & FileLink | v1.3 | 3/3 | Complete    | 2026-04-17 |
 | 33. Disputes | v1.3 | 0/? | Not started | - |
 | 34. CreditNote | v1.3 | 0/? | Not started | - |
 | 35. Mandate & SetupAttempt | v1.3 | 0/? | Not started | - |
