@@ -12,6 +12,8 @@ defmodule LatticeStripe.ObjectTypes do
     "coupon"                   => LatticeStripe.Coupon,
     "customer"                 => LatticeStripe.Customer,
     "event"                    => LatticeStripe.Event,
+    "file"                     => LatticeStripe.File,
+    "file_link"                => LatticeStripe.FileLink,
     "invoice"                  => LatticeStripe.Invoice,
     "invoiceitem"              => LatticeStripe.InvoiceItem,
     "login_link"               => LatticeStripe.LoginLink,
