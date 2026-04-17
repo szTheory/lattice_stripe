@@ -136,6 +136,13 @@ si_retrieved_resp.data
 Refunds reverse a confirmed PaymentIntent. Partial refunds are supported by providing an `amount`.
 
 ```elixir
+# Requires `confirmed` bound in the PaymentIntent → "confirm" cell above.
+# If you skipped that cell, substitute a real PaymentIntent ID here:
+# confirmed_id = "pi_..."
+# {:ok, refund_resp} = LatticeStripe.Refund.create(client, %{
+#   "payment_intent" => confirmed_id
+# })
+
 {:ok, refund_resp} = LatticeStripe.Refund.create(client, %{
   "payment_intent" => confirmed.id
 })
