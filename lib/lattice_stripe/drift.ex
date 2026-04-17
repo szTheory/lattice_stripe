@@ -226,28 +226,28 @@ defmodule LatticeStripe.Drift do
   defp fetch_spec do
     finch_name = LatticeStripe.Drift.Finch
 
-    case Finch.start_link(name: finch_name) do
+    with :ok <- start_finch(finch_name),
+         {:ok, response} <- do_request(finch_name) do
+      Jason.decode(response.body)
+    end
+  end
+
+  defp start_finch(name) do
+    case Finch.start_link(name: name) do
       {:ok, _pid} -> :ok
       {:error, {:already_started, _pid}} -> :ok
-      {:error, reason} -> throw({:finch_start_failed, reason})
+      {:error, reason} -> {:error, {:finch_start_failed, reason}}
     end
+  end
 
-    result =
-      :get
-      |> Finch.build(@spec_url, [], nil)
-      |> Finch.request(finch_name, receive_timeout: 30_000)
-
-    case result do
-      {:ok, %Finch.Response{status: 200, body: body}} ->
-        Jason.decode(body)
-
-      {:ok, %Finch.Response{status: status}} ->
-        {:error, {:http_error, status}}
-
-      {:error, exception} ->
-        {:error, exception}
+  defp do_request(finch_name) do
+    :get
+    |> Finch.build(@spec_url, [], nil)
+    |> Finch.request(finch_name, receive_timeout: 30_000)
+    |> case do
+      {:ok, %Finch.Response{status: 200} = resp} -> {:ok, resp}
+      {:ok, %Finch.Response{status: status}} -> {:error, {:http_error, status}}
+      {:error, exception} -> {:error, exception}
     end
-  catch
-    {:finch_start_failed, reason} -> {:error, {:finch_start_failed, reason}}
   end
 end
