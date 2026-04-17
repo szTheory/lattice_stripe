@@ -219,7 +219,10 @@ Plans:
   1. A developer can open `notebooks/stripe_explorer.livemd` in LiveBook and run all cells — the notebook installs dependencies via `Mix.install/2`, connects to stripe-mock (or documents how to configure a test API key), and produces visible output for each section.
   2. The notebook covers at least: client configuration, payment intent lifecycle, subscription creation, meter event reporting, and portal session creation — with explanatory prose between each section.
   3. The notebook's `Mix.install/2` block pins `lattice_stripe` to the released v1.2.x version (or `path: "."` for local development) and includes `kino` for interactive widgets.
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 31-01-PLAN.md — Setup + Client & Configuration + Payments + Billing sections
+- [ ] 31-02-PLAN.md — Connect + Webhooks + v1.2 Highlights + human verification checkpoint
 
 ## Progress
 
@@ -237,4 +240,4 @@ Plans:
 | 28. meter_event_stream v2 | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 29. Changeset-Style Param Builders | v1.2 | 2/2 | Complete    | 2026-04-16 |
 | 30. Stripe API Drift Detection | v1.2 | 2/2 | Complete    | 2026-04-16 |
-| 31. LiveBook Notebook | v1.2 | 0/? | Not started | - |
+| 31. LiveBook Notebook | v1.2 | 0/2 | Planned | - |
