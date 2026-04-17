@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: — Production Coverage & Adoption Polish
 status: executing
-stopped_at: Completed 32-01-PLAN.md
-last_updated: "2026-04-17T02:52:57.424Z"
+stopped_at: Completed 32-02-PLAN.md
+last_updated: "2026-04-17T02:56:54.435Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-16 after v1.3 milestone start)
 
 Milestone: v1.3 (Production Coverage & Adoption Polish)
 Phase: 32 (File & FileLink) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-17
 
@@ -62,6 +62,7 @@ v1.3 roadmap decisions (locked — do not relitigate):
 - [Phase 32-file-filelink]: Injectable boundary via opts[:boundary] for deterministic test output; random via :crypto.strong_rand_bytes(16) in production
 - [Phase 32-file-filelink]: files_base_url added to Config schema and Client struct with default https://files.stripe.com
 - [Phase 32-file-filelink]: Response @type t data widened to binary() | map() | LatticeStripe.List.t() | nil for download responses
+- [Phase 32-file-filelink]: upload/4 uses files_base_url; download/2 uses base_url; do_download_with_retries mirrors retry structure; replace_content_type/2 guarantees single content-type header
 
 ### Key Pitfalls (carried forward from v1.3 research)
 
@@ -79,6 +80,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-17T02:52:57.421Z
-Stopped at: Completed 32-01-PLAN.md
+Last session: 2026-04-17T02:56:54.432Z
+Stopped at: Completed 32-02-PLAN.md
 Resume path: `/gsd-plan-phase 32`

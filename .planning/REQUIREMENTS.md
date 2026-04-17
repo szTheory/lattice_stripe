@@ -37,7 +37,7 @@ Requirements for v1.3 (Production Coverage & Adoption Polish). Each maps to road
 - [ ] **FILE-02**: Developer can retrieve and list files with auto-pagination via `stream!/3`
 - [ ] **FILE-03**: Developer can create, retrieve, update, list file links via `FileLink` CRUDL with `stream!/3`
 - [x] **FILE-04**: `Client.upload/3` handles multipart/form-data encoding with correct boundary headers
-- [ ] **FILE-05**: `Client.download/3` handles binary responses (skips JSON decode) for file/PDF downloads
+- [x] **FILE-05**: `Client.download/3` handles binary responses (skips JSON decode) for file/PDF downloads
 
 ### Quotes & Proposals
 
@@ -93,7 +93,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-02 | Phase 32 | Pending |
 | FILE-03 | Phase 32 | Pending |
 | FILE-04 | Phase 32 | Complete |
-| FILE-05 | Phase 32 | Pending |
+| FILE-05 | Phase 32 | Complete |
 | DISP-01 | Phase 33 | Pending |
 | DISP-02 | Phase 33 | Pending |
 | DISP-03 | Phase 33 | Pending |

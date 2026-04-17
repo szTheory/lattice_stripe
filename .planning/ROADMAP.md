@@ -84,10 +84,10 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details and decisions.
   3. Developer can create, retrieve, update, and list file links via `FileLink` CRUDL with `stream!/3`
   4. `Client.upload/3` sends a correct `multipart/form-data` request with proper boundary headers — standard `Client.request/2` is not used for uploads
   5. `Client.download/3` returns raw binary content (skips JSON decode) — usable for file/PDF download responses
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 Plans:
 - [x] 32-01-PLAN.md — MultipartEncoder, Config/Response extensions, fixture builders
-- [ ] 32-02-PLAN.md — Client.upload/4 and Client.download/2 transport functions
+- [x] 32-02-PLAN.md — Client.upload/4 and Client.download/2 transport functions
 - [ ] 32-03-PLAN.md — File and FileLink resource modules with tests
 
 ### Phase 33: Disputes
@@ -155,7 +155,7 @@ Plans:
 | 1-11, 14-19 | v1.0 | All | Complete | 2026-04-13 |
 | 20-21 | v1.1 | 11/11 | Complete | 2026-04-14 |
 | 22-31 | v1.2 | 24/24 | Complete | 2026-04-17 |
-| 32. File & FileLink | v1.3 | 1/3 | In Progress|  |
+| 32. File & FileLink | v1.3 | 2/3 | In Progress|  |
 | 33. Disputes | v1.3 | 0/? | Not started | - |
 | 34. CreditNote | v1.3 | 0/? | Not started | - |
 | 35. Mandate & SetupAttempt | v1.3 | 0/? | Not started | - |
