@@ -167,7 +167,7 @@ defmodule LatticeStripe.Drift do
         {:error, :no_source}
 
       charlist ->
-        source_path = List.to_string(charlist)
+        source_path = resolve_source_path(charlist)
 
         case File.read(source_path) do
           {:ok, content} ->
@@ -187,6 +187,27 @@ defmodule LatticeStripe.Drift do
           {:error, reason} ->
             {:error, {:file_read, reason}}
         end
+    end
+  end
+
+  # Resolves the compile-time absolute source path to a readable file.
+  # In CI with a restored build cache the original absolute path may not exist
+  # (different runner, different checkout location). Fall back to a path
+  # derived from the current project root so cached builds still work.
+  defp resolve_source_path(charlist) do
+    absolute = List.to_string(charlist)
+
+    if File.exists?(absolute) do
+      absolute
+    else
+      project_root =
+        Mix.Project.build_path()
+        |> Path.join("../../")
+        |> Path.expand()
+
+      # Strip the leading "/" and re-join under the current project root.
+      rel = Path.relative_to(absolute, "/")
+      Path.join(project_root, rel)
     end
   end
 
