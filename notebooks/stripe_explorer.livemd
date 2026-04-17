@@ -1,0 +1,464 @@
+# Stripe Explorer
+
+Interactive exploration of the LatticeStripe SDK. Walk through client setup, payments, billing, connect, and webhooks — executing real API calls against stripe-mock.
+
+## Prerequisites
+
+- **LiveBook installed:** `mix escript.install hex livebook` or `brew install livebook`
+- **Docker for stripe-mock:** Start the mock server before running any cells:
+
+```
+docker run -p 12111-12112:12111-12112 stripe/stripe-mock:latest
+```
+
+> **To use a real Stripe test key instead of stripe-mock:** Paste your `sk_test_...` key in the API Key input below and change the Base URL to `https://api.stripe.com`. Test mode keys don't charge real cards — mistakes are harmless.
+
+## Setup
+
+```elixir
+Mix.install([
+  {:lattice_stripe, path: "."},
+  # For the released hex version, comment out above and uncomment:
+  # {:lattice_stripe, "~> 1.2"},
+  {:kino, "~> 0.14"},
+  {:finch, "~> 0.21"}
+])
+```
+
+```elixir
+# Start Finch for HTTP connection pooling.
+# This guard lets you re-run the cell without error if Finch is already started.
+case Finch.start_link(name: StripeExplorer.Finch) do
+  {:ok, _} -> :ok
+  {:error, {:already_started, _}} -> :ok
+end
+```
+
+```elixir
+api_key_input = Kino.Input.text("Stripe API Key", default: "sk_test_123")
+base_url_input = Kino.Input.text("Base URL", default: "http://localhost:12111")
+```
+
+Run the cell above, then optionally edit the values. Run the next cell to build your client.
+
+```elixir
+api_key = Kino.Input.read(api_key_input)
+base_url = Kino.Input.read(base_url_input)
+
+client = LatticeStripe.Client.new!(
+  api_key: api_key,
+  base_url: base_url,
+  finch: StripeExplorer.Finch
+)
+```
+
+## Payments
+
+Payments is the core of Stripe. PaymentIntents represent payment attempts — they track the lifecycle from creation through confirmation, capture, and settlement.
+
+### Customer
+
+A Customer is required to associate payments, subscriptions, and portal sessions. We create one here as a prerequisite for later sections.
+
+```elixir
+{:ok, customer_resp} = LatticeStripe.Customer.create(client, %{
+  "email" => "explorer@example.com",
+  "name" => "SDK Explorer"
+})
+
+customer = customer_resp.data
+IO.puts("Created customer: #{customer.id}")
+```
+
+### PaymentIntent
+
+```elixir
+{:ok, pi_resp} = LatticeStripe.PaymentIntent.create(client, %{
+  "amount" => "2000",
+  "currency" => "usd",
+  "customer" => customer.id
+})
+
+intent = pi_resp.data
+IO.puts("Created PaymentIntent: #{intent.id} — status: #{intent.status}")
+```
+
+```elixir
+{:ok, retrieved_resp} = LatticeStripe.PaymentIntent.retrieve(client, intent.id)
+retrieved_resp.data
+```
+
+```elixir
+{:ok, list_resp} = LatticeStripe.PaymentIntent.list(client, %{"limit" => "5"})
+rows = Enum.map(list_resp.data.data, &Map.from_struct/1)
+Kino.DataTable.new(rows, name: "Recent PaymentIntents")
+```
+
+```elixir
+# Advanced flow: confirm the PaymentIntent with a test payment method
+{:ok, confirmed_resp} = LatticeStripe.PaymentIntent.confirm(client, intent.id, %{
+  "payment_method" => "pm_card_visa"
+})
+
+confirmed = confirmed_resp.data
+IO.puts("Confirmed: #{confirmed.id} — status: #{confirmed.status}")
+```
+
+```elixir
+# Error handling example — pattern match on {:ok, _} / {:error, %Error{}}
+case LatticeStripe.PaymentIntent.create(client, %{"amount" => "2000", "currency" => "usd"}) do
+  {:ok, resp} -> IO.puts("Created: #{resp.data.id}")
+  {:error, %LatticeStripe.Error{} = err} -> IO.puts("Error: #{err.message} (#{err.type})")
+end
+```
+
+### SetupIntent
+
+SetupIntents save payment methods for future use without charging immediately — useful for subscriptions and off-session payments.
+
+```elixir
+{:ok, si_resp} = LatticeStripe.SetupIntent.create(client, %{
+  "customer" => customer.id,
+  "usage" => "off_session"
+})
+
+setup_intent = si_resp.data
+IO.puts("Created SetupIntent: #{setup_intent.id} — status: #{setup_intent.status}")
+```
+
+```elixir
+{:ok, si_retrieved_resp} = LatticeStripe.SetupIntent.retrieve(client, setup_intent.id)
+si_retrieved_resp.data
+```
+
+### Refund
+
+Refunds reverse a confirmed PaymentIntent. Partial refunds are supported by providing an `amount`.
+
+```elixir
+{:ok, refund_resp} = LatticeStripe.Refund.create(client, %{
+  "payment_intent" => confirmed.id
+})
+
+refund_resp.data
+```
+
+## Billing
+
+> **Prerequisites:** This section uses `client` and `customer` from the Setup and Payments sections above. Run those sections first, or substitute any `cus_...` ID where `customer.id` appears.
+
+Billing covers products, prices, subscriptions, invoices, metering, and portal sessions — the full recurring revenue toolkit.
+
+### Product & Price
+
+Products and Prices are prerequisites for subscriptions. A Product describes what you sell; a Price defines the cost and billing interval.
+
+```elixir
+{:ok, product_resp} = LatticeStripe.Product.create(client, %{"name" => "Explorer Pro Plan"})
+product = product_resp.data
+
+{:ok, price_resp} = LatticeStripe.Price.create(client, %{
+  "product" => product.id,
+  "currency" => "usd",
+  "unit_amount" => "2000",
+  "recurring" => %{"interval" => "month"}
+})
+
+price = price_resp.data
+IO.puts("Product: #{product.id}, Price: #{price.id}")
+```
+
+### Subscription
+
+```elixir
+{:ok, sub_resp} = LatticeStripe.Subscription.create(client, %{
+  "customer" => customer.id,
+  "items" => [%{"price" => price.id}]
+})
+
+sub = sub_resp.data
+IO.puts("Subscription: #{sub.id} — status: #{sub.status}")
+```
+
+```elixir
+{:ok, sub_list_resp} = LatticeStripe.Subscription.list(client, %{"customer" => customer.id})
+rows = Enum.map(sub_list_resp.data.data, &Map.from_struct/1)
+Kino.DataTable.new(rows, name: "Subscriptions")
+```
+
+```elixir
+# Advanced flow: cancel the subscription
+{:ok, cancelled_resp} = LatticeStripe.Subscription.cancel(client, sub.id)
+cancelled = cancelled_resp.data
+IO.puts("Cancelled: #{cancelled.id} — status: #{cancelled.status}")
+```
+
+### Subscription Schedule (Builder)
+
+LatticeStripe v1.2 adds optional changeset-style param builders for complex nested params. Here we use the SubscriptionSchedule builder to create a phased schedule without manually constructing deeply nested maps.
+
+```elixir
+alias LatticeStripe.Builders.SubscriptionSchedule, as: SSBuilder
+
+params =
+  SSBuilder.new()
+  |> SSBuilder.customer(customer.id)
+  |> SSBuilder.start_date(:now)
+  |> SSBuilder.end_behavior(:release)
+  |> SSBuilder.add_phase(
+       SSBuilder.phase_new()
+       |> SSBuilder.phase_items([%{"price" => price.id, "quantity" => 1}])
+       |> SSBuilder.phase_iterations(3)
+       |> SSBuilder.phase_build()
+     )
+  |> SSBuilder.build()
+
+{:ok, schedule_resp} = LatticeStripe.SubscriptionSchedule.create(client, params)
+Kino.Tree.new(schedule_resp.data)
+```
+
+### Metering
+
+Billing.Meter and MeterEvent support usage-based billing — report usage events and let Stripe aggregate them into invoice line items.
+
+```elixir
+{:ok, meter_resp} = LatticeStripe.Billing.Meter.create(client, %{
+  "display_name" => "API Calls",
+  "event_name" => "api_call",
+  "default_aggregation" => %{"formula" => "sum"},
+  "customer_mapping" => %{
+    "event_payload_key" => "stripe_customer_id",
+    "type" => "by_id"
+  },
+  "value_settings" => %{"event_payload_key" => "value"}
+})
+
+meter = meter_resp.data
+IO.puts("Meter: #{meter.id} — event_name: #{meter.event_name}")
+```
+
+```elixir
+{:ok, event_resp} = LatticeStripe.Billing.MeterEvent.create(client, %{
+  "event_name" => "api_call",
+  "payload" => %{
+    "stripe_customer_id" => customer.id,
+    "value" => "1"
+  },
+  "identifier" => "notebook_#{System.unique_integer([:positive])}"
+})
+
+event_resp.data
+```
+
+> **Note:** `MeterEvent.create/3` returns `{:ok, %MeterEvent{}}` as an acknowledgment that the event was accepted for processing — not a confirmation that billing was updated. Monitor the `v1.billing.meter.error_report_triggered` webhook for async failures.
+
+### MeterEventStream (v2)
+
+LatticeStripe v1.2 adds support for Stripe's v2 high-throughput meter event streaming API. This uses a session-token authentication model — different from the standard API key auth.
+
+> **Note:** stripe-mock may not support the v2 `meter-events.stripe.com` endpoint. If the cell below returns an error, switch to a real Stripe test API key or skip this section.
+
+> **Security:** The `authentication_token` in the session is a bearer credential. LatticeStripe masks it in Inspect output automatically. Do not log or cache this value.
+
+```elixir
+# MeterEventStream uses a two-step session-token API:
+# 1. Create a session (returns a token valid for ~15 minutes)
+# 2. Send events using the session token
+
+{:ok, session} = LatticeStripe.Billing.MeterEventStream.create_session(client)
+IO.puts("Session expires at: #{session.expires_at}")
+
+events = [
+  %{
+    "event_name" => "api_call",
+    "payload" => %{"stripe_customer_id" => customer.id, "value" => "1"}
+  }
+]
+
+case LatticeStripe.Billing.MeterEventStream.send_events(client, session, events) do
+  {:ok, %{}} -> IO.puts("Events sent successfully")
+  {:error, :session_expired} -> IO.puts("Session expired — create a new one")
+  {:error, %LatticeStripe.Error{} = err} -> IO.puts("Error: #{err.message}")
+end
+```
+
+### Portal Session
+
+BillingPortal.Session creates a short-lived URL where customers manage their subscriptions, invoices, and payment methods — no custom UI required.
+
+> **Security:** `session.url` is a single-use bearer credential. Do not log or cache it. LatticeStripe's Inspect output masks the URL field automatically.
+
+```elixir
+{:ok, portal_resp} = LatticeStripe.BillingPortal.Session.create(client, %{
+  "customer" => customer.id,
+  "return_url" => "https://example.com/account"
+})
+
+Kino.Tree.new(portal_resp.data)
+```
+
+## Connect
+
+> **Prerequisites:** Run the Setup section first to bind `client`.
+
+Stripe Connect lets you build platforms and marketplaces — your users are service providers or sellers, and you (the platform) manage onboarding, payouts, and fee collection.
+
+> **Note:** stripe-mock generates deterministic but non-real IDs. Connect account IDs from stripe-mock won't be recognized by the real Stripe API. Use a real test API key for end-to-end Connect testing.
+
+### Account
+
+```elixir
+{:ok, account_resp} = LatticeStripe.Account.create(client, %{
+  "type" => "express",
+  "email" => "merchant@example.com"
+})
+
+account = account_resp.data
+IO.puts("Account: #{account.id} — type: #{account.type}")
+```
+
+```elixir
+{:ok, retrieved_account_resp} = LatticeStripe.Account.retrieve(client, account.id)
+retrieved_account_resp.data
+```
+
+### AccountLink
+
+AccountLinks generate short-lived onboarding URLs — send these to connected accounts to complete Stripe's hosted onboarding flow.
+
+```elixir
+{:ok, link_resp} = LatticeStripe.AccountLink.create(client, %{
+  "account" => account.id,
+  "type" => "account_onboarding",
+  "refresh_url" => "https://example.com/reauth",
+  "return_url" => "https://example.com/return"
+})
+
+Kino.Tree.new(link_resp.data)
+```
+
+### Transfer
+
+Transfers move funds from your platform balance to a connected account's balance.
+
+```elixir
+{:ok, transfer_resp} = LatticeStripe.Transfer.create(client, %{
+  "amount" => "1000",
+  "currency" => "usd",
+  "destination" => account.id
+})
+
+transfer = transfer_resp.data
+IO.puts("Transfer: #{transfer.id} — amount: #{transfer.amount}")
+```
+
+## Webhooks
+
+> **Prerequisites:** Run the Setup section first to bind `client`.
+
+Webhooks allow Stripe to notify your application of asynchronous events — payment confirmations, subscription renewals, dispute openings. LatticeStripe provides HMAC-SHA256 signature verification with a tolerance window.
+
+The `Webhook.construct_event/4` function is pure — it does not make any HTTP calls. In a Phoenix app, wire it up via `LatticeStripe.Webhook.Plug` to handle raw body extraction automatically.
+
+```elixir
+# Demonstrate webhook signature verification with test inputs.
+# In production: raw_body comes from the request body before JSON parsing;
+# sig_header comes from the "Stripe-Signature" HTTP header.
+
+raw_body = ~s({"id":"evt_test_001","object":"event","type":"payment_intent.succeeded"})
+secret = "whsec_test_secret_for_notebook"
+
+# Generate a test signature using LatticeStripe's test helper
+sig_header = LatticeStripe.Testing.generate_test_signature(raw_body, secret)
+
+case LatticeStripe.Webhook.construct_event(raw_body, sig_header, secret) do
+  {:ok, %LatticeStripe.Event{} = event} ->
+    IO.puts("Valid event: #{event.id} — type: #{event.type}")
+    event
+
+  {:error, :missing_header} ->
+    IO.puts("Missing Stripe-Signature header")
+
+  {:error, :timestamp_expired} ->
+    IO.puts("Timestamp too old — possible replay attack")
+
+  {:error, :no_matching_signature} ->
+    IO.puts("Invalid signature — wrong secret or tampered payload")
+end
+```
+
+```elixir
+# Example: dispatching on event type
+handle_event = fn event ->
+  case event.type do
+    "payment_intent.succeeded" ->
+      IO.puts("Payment succeeded — fulfill the order")
+
+    "customer.subscription.deleted" ->
+      IO.puts("Subscription cancelled — revoke access")
+
+    "invoice.payment_failed" ->
+      IO.puts("Payment failed — trigger dunning")
+
+    other ->
+      IO.puts("Unhandled event type: #{other}")
+  end
+end
+
+# In production this would be called inside your Webhook.Handler callback
+{:ok, event} = LatticeStripe.Webhook.construct_event(raw_body, sig_header, secret)
+handle_event.(event)
+```
+
+## v1.2 Highlights
+
+This section demonstrates the new capabilities introduced in LatticeStripe v1.2.
+
+> **Prerequisites:** Run Setup, Payments, and Billing sections first to bind `client`, `customer`, and `sub`.
+
+### Batch.run/3 — Concurrent Fan-out
+
+`LatticeStripe.Batch.run/3` executes multiple SDK calls concurrently using `Task.async_stream`. Each task is crash-isolated — a failure in one call does not cancel the others.
+
+```elixir
+{:ok, results} =
+  LatticeStripe.Batch.run(client, [
+    {LatticeStripe.Customer, :retrieve, [customer.id]},
+    {LatticeStripe.Subscription, :list, [%{"customer" => customer.id}]},
+    {LatticeStripe.Invoice, :list, [%{"customer" => customer.id}]}
+  ])
+
+# Each result is independently {:ok, _} or {:error, _} — error isolation guaranteed
+for {label, result} <- Enum.zip(["Customer", "Subscriptions", "Invoices"], results) do
+  case result do
+    {:ok, _data} -> IO.puts("#{label}: ok")
+    {:error, err} -> IO.puts("#{label}: error — #{err.message}")
+  end
+end
+```
+
+### Expand Deserialization
+
+Pass `expand: ["customer"]` to any retrieve or list call to receive a full typed struct instead of a bare string ID. v1.2 decodes expanded objects into the appropriate SDK struct automatically.
+
+```elixir
+# Without expand — the customer field is a string ID
+{:ok, sub_no_expand} = LatticeStripe.Subscription.retrieve(client, sub.id)
+IO.puts("customer (no expand): #{inspect(sub_no_expand.data.customer)}")
+```
+
+```elixir
+# With expand — the customer field is a full %Customer{} struct
+{:ok, sub_expanded} = LatticeStripe.Subscription.retrieve(
+  client,
+  sub.id,
+  expand: ["customer"]
+)
+
+IO.puts("customer (expanded): #{inspect(sub_expanded.data.customer.__struct__)}")
+Kino.Tree.new(sub_expanded.data)
+```
+
+---
+
+*This notebook exercises the complete LatticeStripe v1.2 API surface. For production usage patterns, see the [LatticeStripe guides on HexDocs](https://hexdocs.pm/lattice_stripe).*
