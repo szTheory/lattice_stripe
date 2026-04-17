@@ -44,7 +44,7 @@ defmodule LatticeStripe.Client do
       }
   """
 
-  alias LatticeStripe.{Config, Error, FormEncoder, List, Request, Response}
+  alias LatticeStripe.{Config, Error, FormEncoder, List, MultipartEncoder, Request, Response}
 
   @version Mix.Project.config()[:version]
 
@@ -262,6 +262,137 @@ defmodule LatticeStripe.Client do
     end
   end
 
+  @doc """
+  Sends a multipart/form-data upload request to the Stripe Files API.
+
+  Used internally by `LatticeStripe.File.create/3`. Accepts raw file binary,
+  encodes it as multipart/form-data via `MultipartEncoder`, and sends to
+  `client.files_base_url`.
+
+  Returns `{:ok, %Response{}}` with JSON-decoded file data on success,
+  or `{:error, %Error{}}` on failure. Reuses the standard retry loop and
+  telemetry pipeline.
+
+  ## Parameters
+
+    - `client` - A configured `%Client{}`
+    - `file_binary` - Raw binary file content (e.g., result of `File.read!/1`)
+    - `params` - Map with `"purpose"` (required), optionally `"filename"` (default: `"upload"`) and `"file_link_data"`
+    - `opts` - Per-request overrides (`:api_key`, `:stripe_version`, `:stripe_account`, `:timeout`, `:idempotency_key`, `:max_retries`, `:boundary`)
+
+  """
+  @spec upload(t(), binary(), map(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
+  def upload(%__MODULE__{} = client, file_binary, params, opts \\ []) when is_binary(file_binary) do
+    filename = Map.get(params, "filename", "upload")
+    string_fields = Map.drop(params, ["filename"])
+
+    {body, boundary} =
+      MultipartEncoder.encode(
+        file_binary,
+        filename,
+        string_fields,
+        Keyword.take(opts, [:boundary])
+      )
+
+    url = client.files_base_url <> "/v1/files"
+    idempotency_key = resolve_idempotency_key(:post, opts)
+
+    effective_api_key = Keyword.get(opts, :api_key, client.api_key)
+    effective_api_version = Keyword.get(opts, :stripe_version, client.api_version)
+    effective_stripe_account = Keyword.get(opts, :stripe_account, client.stripe_account)
+    effective_max_retries = Keyword.get(opts, :max_retries, client.max_retries)
+    effective_timeout = resolve_timeout(client, :upload, opts)
+
+    headers =
+      build_headers(:post, effective_api_key, effective_api_version,
+                    effective_stripe_account, idempotency_key)
+      |> replace_content_type("multipart/form-data; boundary=#{boundary}")
+
+    transport_opts = [finch: client.finch, timeout: effective_timeout]
+
+    transport_request = %{
+      method: :post,
+      url: url,
+      headers: headers,
+      body: body,
+      opts: transport_opts
+    }
+
+    upload_req = %Request{method: :post, path: "/v1/files", params: params, opts: opts}
+
+    LatticeStripe.Telemetry.request_span(client, upload_req, idempotency_key, fn ->
+      do_request_with_retries(client, transport_request, :post, idempotency_key, effective_max_retries)
+    end)
+  end
+
+  @doc """
+  Bang variant of `upload/4`. Raises `LatticeStripe.Error` on failure.
+  """
+  @spec upload!(t(), binary(), map(), keyword()) :: Response.t()
+  def upload!(%__MODULE__{} = client, file_binary, params, opts \\ []) do
+    case upload(client, file_binary, params, opts) do
+      {:ok, response} -> response
+      {:error, error} -> raise error
+    end
+  end
+
+  @doc """
+  Downloads binary content from a Stripe URL, skipping JSON decode on success.
+
+  Returns raw binary in `%Response{data: binary}` on 2xx responses. Error responses
+  (4xx/5xx) are still JSON-decoded into `{:error, %Error{}}`.
+
+  Used by `Quote.pdf/3` and any endpoint returning non-JSON binary content.
+
+  ## Parameters
+
+    - `client` - A configured `%Client{}`
+    - `path` - URL path (e.g., `"/v1/quotes/qt_123/pdf"`)
+    - `opts` - Per-request overrides (`:api_key`, `:stripe_version`, `:stripe_account`, `:timeout`, `:max_retries`)
+
+  """
+  @spec download(t(), String.t(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
+  def download(%__MODULE__{} = client, path, opts \\ []) when is_binary(path) do
+    effective_api_key = Keyword.get(opts, :api_key, client.api_key)
+    effective_api_version = Keyword.get(opts, :stripe_version, client.api_version)
+    effective_stripe_account = Keyword.get(opts, :stripe_account, client.stripe_account)
+    effective_max_retries = Keyword.get(opts, :max_retries, client.max_retries)
+    effective_timeout = resolve_timeout(client, :download, opts)
+
+    url = client.base_url <> path
+
+    headers =
+      build_headers(:get, effective_api_key, effective_api_version,
+                    effective_stripe_account, nil)
+
+    transport_opts = [finch: client.finch, timeout: effective_timeout]
+
+    transport_request = %{
+      method: :get,
+      url: url,
+      headers: headers,
+      body: nil,
+      opts: transport_opts
+    }
+
+    download_req = %Request{method: :get, path: path, params: %{}, opts: opts}
+
+    LatticeStripe.Telemetry.request_span(client, download_req, nil, fn ->
+      do_download_with_retries(client, transport_request, :get, nil, effective_max_retries)
+    end)
+  end
+
+  @doc """
+  Bang variant of `download/2`. Raises `LatticeStripe.Error` on failure.
+  """
+  @spec download!(t(), String.t(), keyword()) :: Response.t()
+  def download!(%__MODULE__{} = client, path, opts \\ []) do
+    case download(client, path, opts) do
+      {:ok, response} -> response
+      {:error, error} -> raise error
+    end
+  end
+
   # Resolve the idempotency key for a request.
   # User-provided key takes precedence. Auto-generates for POST only (D-18, D-19).
   defp resolve_idempotency_key(method, opts) do
@@ -404,6 +535,92 @@ defmodule LatticeStripe.Client do
 
       :stop ->
         {{:error, error}, total, context.headers}
+    end
+  end
+
+  # Resolve effective timeout for upload/download operations.
+  # Checks per-request opts first, then operation_timeouts map, then client.timeout.
+  defp resolve_timeout(client, op_type, opts) do
+    case Keyword.fetch(opts, :timeout) do
+      {:ok, t} ->
+        t
+
+      :error ->
+        case client.operation_timeouts do
+          %{} = timeouts -> Map.get(timeouts, op_type, client.timeout)
+          nil -> client.timeout
+        end
+    end
+  end
+
+  # Replace (not append) the content-type header in a headers list.
+  # Removes any existing content-type entry, then prepends the new one.
+  # This prevents duplicate content-type headers when uploading multipart data.
+  defp replace_content_type(headers, new_content_type) do
+    headers
+    |> Enum.reject(fn {k, _v} -> String.downcase(k) == "content-type" end)
+    |> then(&[{"content-type", new_content_type} | &1])
+  end
+
+  # Entry point for download retry loop — mirrors do_request_with_retries/5.
+  defp do_download_with_retries(client, transport_request, method, idempotency_key, max_retries) do
+    do_download_with_retries(
+      client,
+      transport_request,
+      method,
+      idempotency_key,
+      max_retries,
+      _attempt = 1,
+      _total_attempts = 1
+    )
+  end
+
+  defp do_download_with_retries(
+         client,
+         transport_request,
+         method,
+         idempotency_key,
+         max_retries,
+         attempt,
+         total_attempts
+       ) do
+    case do_download(client, transport_request) do
+      {:ok, %Response{} = resp} = success ->
+        {success, total_attempts, resp.headers}
+
+      {:error, %Error{} = error, resp_headers} = _failure ->
+        retry_state = %{
+          method: method,
+          idempotency_key: idempotency_key,
+          max_retries: max_retries,
+          attempt: attempt,
+          total_attempts: total_attempts
+        }
+
+        maybe_retry(client, transport_request, retry_state, error, resp_headers)
+    end
+  end
+
+  # Execute the transport request for binary download.
+  # Returns {:ok, %Response{data: binary}} on 2xx (skips JSON decode).
+  # Returns {:error, error, resp_headers} on non-2xx (JSON-decodes the error body).
+  defp do_download(client, transport_request) do
+    case client.transport.request(transport_request) do
+      {:ok, %{status: status, headers: resp_headers, body: body}} ->
+        request_id = extract_request_id(resp_headers)
+
+        if status in 200..299 do
+          {:ok, %Response{data: body, status: status, headers: resp_headers, request_id: request_id}}
+        else
+          decode_response(client, status, resp_headers, body, %{}, [])
+        end
+
+      {:error, reason} ->
+        {:error,
+         %Error{
+           type: :connection_error,
+           message: inspect(reason)
+         }, []}
     end
   end
 
