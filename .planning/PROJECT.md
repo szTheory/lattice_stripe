@@ -8,36 +8,13 @@ A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe aims 
 
 Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated by v1.0 shipping with a downstream consumer (Accrue) already building on top.
 
-## Current Milestone: v1.2 Production Hardening & DX
+## Shipped Milestone: v1.2 Production Hardening & DX
 
-**Goal:** Make LatticeStripe the SDK that production teams recommend to each other — polish DX, add performance/reliability guidance, and complete deferred feature gaps.
+**Goal:** Make LatticeStripe the SDK that production teams recommend to each other — polish DX, add performance/reliability guidance, and complete deferred feature gaps. **All features shipped.**
 
-**Target features:**
+## Current State (post-v1.2)
 
-*Wave 1 — High-impact:*
-- Expand deserialization (`expand: ["customer"]` returns `%Customer{}`, dot-path support, status atomization audit)
-- Performance guide + Finch pool tuning docs (`guides/performance.md`)
-- Circuit breaker pattern (custom `RetryStrategy` or `:fuse` integration)
-
-*Wave 2 — Focused polish:*
-- Richer error context (fuzzy param suggestions, contextual hints)
-- Request batching / concurrent helpers (`Task.async_stream`-based parallel requests)
-- Timeout tuning per-operation (resource-level defaults)
-- Status field atomization audit (sweep all resources for string status fields)
-- Rate-limit awareness (track `RateLimit-*` headers, expose via telemetry)
-- OpenTelemetry integration guide
-
-*Wave 3 — Feature completion:*
-- BillingPortal.Configuration CRUDL (deferred from v1.1)
-- `meter_event_stream` endpoint (deferred from v1.1)
-- Changeset-style param builders (fluent builders for complex nested params)
-- Stripe API changelog tracking (CI mechanism for field/resource drift detection)
-- LiveBook notebook (interactive SDK exploration)
-- Connection warm-up helper (pool pre-establishment on app start)
-
-## Current State (post-v1.1)
-
-**Shipped:** v1.1.0 live on `hex.pm/packages/lattice_stripe`. 31 phases complete (1-11, 14-31). ~85 plans executed. Phase 31 added `notebooks/stripe_explorer.livemd` — interactive LiveBook notebook covering the complete v1.2 API surface with Kino widgets. 1783 tests / 0 failures. Zero-touch release via release-please.
+**Shipped:** v1.2.0 pending release-please PR. 31 phases complete (1-11, 14-31). 85 plans executed. 108 source files, 21K LOC Elixir. 1783 tests / 0 failures. Zero-touch release via release-please.
 
 **Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
 
@@ -121,31 +98,31 @@ All foundation, payment, webhook, telemetry, testing, docs, CI/CD, Billing, and 
 - ✓ `LatticeStripe.BillingPortal.Session.create/3` with `FlowData` nested struct — v1.1
 - ✓ `guides/customer-portal.md` — v1.1
 
-### Active (v1.2 — Production Hardening & DX)
+### Validated (v1.2 — Production Hardening & DX)
 
-**Expand deserialization (EXPD carry-overs from v1.0)**
-- [ ] Expand-deserialization into typed structs (EXPD-02): `expand: ["customer"]` returns `%Customer{}` instead of string ID
-- [ ] Nested expand dot-paths (EXPD-03): `expand: ["data.customer"]` parser support
-- [ ] Status-field atomization audit (EXPD-05): sweep all resources for string-typed status fields, add `_atom` converters
+**Expand deserialization (Phase 22)**
+- ✓ Expand-deserialization into typed structs (EXPD-02): `expand: ["customer"]` returns `%Customer{}` — v1.2
+- ✓ Nested expand dot-paths (EXPD-03): `expand: ["data.customer"]` parser support — v1.2
+- ✓ Status-field atomization audit (EXPD-05): sweep all resources, `_atom` converters — v1.2
 
-**Performance & reliability**
-- [x] Performance guide + Finch pool tuning (`guides/performance.md`) with production pool sizing, supervision tree examples, warm-up patterns — Phase 25
-- [ ] Circuit breaker pattern — custom `RetryStrategy` example or `:fuse` integration for cascading failure prevention
-- [x] Connection warm-up helper — `LatticeStripe.warm_up/1` pre-establishes Finch connections on app start — Phase 25
-- [x] Timeout tuning per-operation — `operation_timeouts` map in Client with three-tier cascade — Phase 25
-- [x] Rate-limit awareness — track `Stripe-Rate-Limited-Reason` header, expose via telemetry stop metadata as `:rate_limited_reason` — Phase 24
+**Performance & reliability (Phases 24-26)**
+- ✓ Performance guide + Finch pool tuning (`guides/performance.md`) — Phase 25
+- ✓ Circuit breaker pattern — `:fuse` RetryStrategy guide (`guides/circuit-breaker.md`) — Phase 26
+- ✓ Connection warm-up helper — `LatticeStripe.warm_up/1` — Phase 25
+- ✓ Timeout tuning per-operation — `operation_timeouts` map in Client — Phase 25
+- ✓ Rate-limit awareness — `Stripe-Rate-Limited-Reason` via telemetry — Phase 24
 
-**Developer experience**
-- [x] Richer error context — fuzzy param name suggestions in `invalid_request_error` ("did you mean `:payment_method_types`?") via `String.jaro_distance/2` — Phase 24
-- [x] Request batching / concurrent helpers — `LatticeStripe.Batch.run/3` with `Task.async_stream`, crash isolation via `on_timeout: :kill_task` — Phase 27
-- [ ] Changeset-style param builders — optional fluent builders for complex nested params (SubscriptionSchedule phases, BillingPortal flows)
-- [ ] OpenTelemetry integration guide — connect telemetry events to `opentelemetry_api` with worked examples
-- [x] LiveBook notebook — `notebooks/stripe_explorer.livemd` interactive SDK exploration with Kino widgets — Phase 31
-- [ ] Stripe API changelog tracking — CI mechanism to detect when Stripe adds new fields/resources
+**Developer experience (Phases 24, 27, 29-31)**
+- ✓ Richer error context — fuzzy param name suggestions via `String.jaro_distance/2` — Phase 24
+- ✓ Request batching — `LatticeStripe.Batch.run/3` with crash isolation — Phase 27
+- ✓ Changeset-style param builders — `Builders.SubscriptionSchedule` + `Builders.BillingPortal` — Phase 29
+- ✓ OpenTelemetry integration guide — `guides/opentelemetry.md` with Honeycomb/Datadog — Phase 26
+- ✓ LiveBook notebook — `notebooks/stripe_explorer.livemd` with Kino widgets — Phase 31
+- ✓ Stripe API drift detection — `mix lattice_stripe.check_drift` + weekly CI cron — Phase 30
 
-**Feature completion (deferred from v1.1)**
-- [ ] `BillingPortal.Configuration` CRUDL — portal customization (branding, features, business info)
-- [x] `/v2/billing/meter_event_stream` — high-throughput streaming variant via v2 session-token API (`MeterEventStream.create_session/2` + `send_events/4`) — Phase 28
+**Feature completion (Phases 23, 28)**
+- ✓ `BillingPortal.Configuration` CRUDL — portal customization with typed structs — Phase 23
+- ✓ `/v2/billing/meter_event_stream` — session-token API (`MeterEventStream.create_session/2`) — Phase 28
 
 ### Out of Scope
 
@@ -159,10 +136,10 @@ All foundation, payment, webhook, telemetry, testing, docs, CI/CD, Billing, and 
 **Deferred to v1.3+**:
 - Specialist families (Tax, Identity, Treasury, Issuing, Terminal) — not on Accrue's roadmap, large surface area
 
-**No longer deferred** (moved to v1.2 Active):
-- ~~`/v1/billing/meter_event_stream`~~ → v1.2 Active
-- ~~`BillingPortal.Configuration` CRUDL~~ → v1.2 Active
-- ~~Full expand-deserialization story (EXPD-02/03/05)~~ → v1.2 Active
+**No longer deferred** (shipped in v1.2):
+- ~~`/v1/billing/meter_event_stream`~~ → shipped in Phase 28 (v1.2)
+- ~~`BillingPortal.Configuration` CRUDL~~ → shipped in Phase 23 (v1.2)
+- ~~Full expand-deserialization story (EXPD-02/03/05)~~ → shipped in Phase 22 (v1.2)
 
 **No longer out of scope** (shipped):
 - ~~Billing (subscriptions, invoices, products, prices)~~ → shipped in Phases 14-16 (v1.0)

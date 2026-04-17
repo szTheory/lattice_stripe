@@ -1,5 +1,36 @@
 # Milestones
 
+## v1.2 Production Hardening & DX (Shipped: 2026-04-17)
+
+**Phases completed:** 10 phases, 24 plans, 14 tasks
+
+**Key accomplishments:**
+
+- Compile-time ObjectTypes registry with 31 Stripe object strings, 4-clause maybe_deserialize/1 dispatch, and 10 passing unit tests — foundational module for all Phase 22 expand deserialization
+- PaymentIntent (`lib/lattice_stripe/payment_intent.ex`)
+- Payout (`lib/lattice_stripe/payout.ex`)
+- 1. [Rule 1 - Bug] Elixir `if` keyword argument ambiguity in struct literals
+- One-liner:
+- BillingPortal.Configuration resource module with full CRUDL (create/retrieve/update/list/stream!) plus bang variants, typed features dispatch to Plan 01 sub-structs, and 16 passing Mox-based unit tests
+- ObjectTypes expand dispatch for billing_portal.configuration wired into Session.from_map/1 with is_map guard, ExDoc Customer Portal group extended to 12 modules, and stripe-mock integration test added for full CRUDL lifecycle
+- Task 1 — client.ex 3-tuple return:
+- One-liner:
+- One-liner:
+- Config tests (8 new):
+- One-liner:
+- guides/performance.md
+- 1. [Rule 1 - Bug] Fixed :fuse threshold semantics in integration test
+- One-liner:
+- One-liner:
+- One-liner:
+- 1. [Rule 1 - Bug] Fixed invalid defstruct keyword ordering in Phase inner module
+- `LatticeStripe.ObjectTypes.object_map/0`
+- `Mix.Tasks.LatticeStripe.CheckDrift`
+- One-liner:
+- One-liner:
+
+---
+
 ## v1.0 v1.0 — Foundation + Billing + Connect + 1.0 Release (Shipped: 2026-04-13)
 
 **Phases completed:** 14 phases, 47 plans, 61 tasks
