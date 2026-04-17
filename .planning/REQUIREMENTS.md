@@ -36,7 +36,7 @@ Requirements for v1.3 (Production Coverage & Adoption Polish). Each maps to road
 - [ ] **FILE-01**: Developer can upload files via multipart to `files.stripe.com` using `File.create/3`
 - [ ] **FILE-02**: Developer can retrieve and list files with auto-pagination via `stream!/3`
 - [ ] **FILE-03**: Developer can create, retrieve, update, list file links via `FileLink` CRUDL with `stream!/3`
-- [ ] **FILE-04**: `Client.upload/3` handles multipart/form-data encoding with correct boundary headers
+- [x] **FILE-04**: `Client.upload/3` handles multipart/form-data encoding with correct boundary headers
 - [ ] **FILE-05**: `Client.download/3` handles binary responses (skips JSON decode) for file/PDF downloads
 
 ### Quotes & Proposals
@@ -92,7 +92,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-01 | Phase 32 | Pending |
 | FILE-02 | Phase 32 | Pending |
 | FILE-03 | Phase 32 | Pending |
-| FILE-04 | Phase 32 | Pending |
+| FILE-04 | Phase 32 | Complete |
 | FILE-05 | Phase 32 | Pending |
 | DISP-01 | Phase 33 | Pending |
 | DISP-02 | Phase 33 | Pending |
