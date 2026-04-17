@@ -35,13 +35,13 @@ defmodule LatticeStripe.Response do
   the decoded response body — either a plain map (singular resource) or a
   `%LatticeStripe.List{}` (list/search endpoints).
 
-  - `data` - Decoded response body: a plain map or `%LatticeStripe.List{}`
+  - `data` - Decoded response body: a plain map, `%LatticeStripe.List{}`, or raw binary (for download responses)
   - `status` - HTTP status integer (e.g., `200`, `201`)
   - `headers` - List of `{name, value}` string tuples from the response
   - `request_id` - Stripe `Request-Id` header value (useful for support requests)
   """
   @type t :: %__MODULE__{
-          data: map() | LatticeStripe.List.t() | nil,
+          data: binary() | map() | LatticeStripe.List.t() | nil,
           status: non_neg_integer() | nil,
           headers: [{String.t(), String.t()}],
           request_id: String.t() | nil

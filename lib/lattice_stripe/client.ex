@@ -54,6 +54,7 @@ defmodule LatticeStripe.Client do
     :finch,
     :stripe_account,
     base_url: "https://api.stripe.com",
+    files_base_url: "https://files.stripe.com",
     api_version: "2026-03-25.dahlia",
     transport: LatticeStripe.Transport.Finch,
     json_codec: LatticeStripe.Json.Jason,
@@ -75,12 +76,13 @@ defmodule LatticeStripe.Client do
   - `finch` - Name of the Finch pool started in your supervision tree
   - `stripe_account` - Connected account ID for Stripe Connect platforms, or `nil`
   - `base_url` - Stripe API base URL (default: `"https://api.stripe.com"`)
+  - `files_base_url` - Stripe Files API base URL for uploads (default: `"https://files.stripe.com"`)
   - `api_version` - Stripe API version header (default: `"2026-03-25.dahlia"`)
   - `transport` - Transport module implementing `LatticeStripe.Transport`
   - `json_codec` - JSON codec module implementing `LatticeStripe.Json`
   - `retry_strategy` - Retry strategy module implementing `LatticeStripe.RetryStrategy`
   - `timeout` - Default request timeout in milliseconds (default: `30_000`)
-  - `operation_timeouts` - Per-operation timeout overrides in milliseconds (keys: `:list`, `:search`, `:create`, `:retrieve`, `:update`, `:delete`), or `nil` to use `timeout` for all operations
+  - `operation_timeouts` - Per-operation timeout overrides in milliseconds (keys: `:list`, `:search`, `:create`, `:retrieve`, `:update`, `:delete`, `:upload`, `:download`), or `nil` to use `timeout` for all operations
   - `max_retries` - Max retry attempts after initial failure (default: `2`)
   - `telemetry_enabled` - Whether to emit telemetry events (default: `true`)
   - `require_explicit_proration` - When `true`, proration-sensitive operations require explicit `proration_behavior` param (default: `false`)
@@ -90,6 +92,7 @@ defmodule LatticeStripe.Client do
           finch: atom(),
           stripe_account: String.t() | nil,
           base_url: String.t(),
+          files_base_url: String.t(),
           api_version: String.t(),
           transport: module(),
           json_codec: module(),

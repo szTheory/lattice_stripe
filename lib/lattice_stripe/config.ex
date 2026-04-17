@@ -39,6 +39,11 @@ defmodule LatticeStripe.Config do
               default: "https://api.stripe.com",
               doc: "Stripe API base URL. Override for testing with stripe-mock."
             ],
+            files_base_url: [
+              type: :string,
+              default: "https://files.stripe.com",
+              doc: "Stripe Files API base URL. Override for testing with stripe-mock (use same localhost:12111)."
+            ],
             api_version: [
               type: :string,
               default: "2026-03-25.dahlia",
