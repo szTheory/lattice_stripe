@@ -4,6 +4,60 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0](https://github.com/szTheory/lattice_stripe/compare/v1.1.0...v1.2.0) (2026-04-17)
+
+
+### Features
+
+* **22-01:** create ObjectTypes registry module with maybe_deserialize/1 ([5a446b2](https://github.com/szTheory/lattice_stripe/commit/5a446b22c2baf4fa01eb177ecf27a1f1ce3406f9))
+* **22-02:** atomize + expand Charge, Refund, SetupIntent ([f203eae](https://github.com/szTheory/lattice_stripe/commit/f203eaedd25773d33846941de04bd8f868b3a4b5))
+* **22-02:** atomize + expand PaymentIntent, Subscription, SubscriptionSchedule ([346dd55](https://github.com/szTheory/lattice_stripe/commit/346dd55bf14728ebac84514012ec6e86f4c0d90d))
+* **22-03:** atomize + expand Payout, BalanceTransaction, BankAccount ([d5f4d68](https://github.com/szTheory/lattice_stripe/commit/d5f4d68a26a56bdc83c5c0d68a5ceffc255455cc))
+* **22-03:** atomize Checkout.Session + auto-atomize Meter/Capability with deprecation ([3d16642](https://github.com/szTheory/lattice_stripe/commit/3d166427e611182050d3c083455457da4ebde74f))
+* **22-04:** add expand guards to Invoice, InvoiceItem, SubscriptionItem, Card, PaymentMethod, PromotionCode + EXPD-02 dot-path expand test ([071c740](https://github.com/szTheory/lattice_stripe/commit/071c740c8b289528d4a971cbdd6d17690f8bf865))
+* **22-04:** add expand guards to Transfer/TransferReversal + CHANGELOG migration note ([c3c8c84](https://github.com/szTheory/lattice_stripe/commit/c3c8c8457de9576af564ec0b4255dfbc32518180))
+* **23-01:** add 4 Level 2 feature sub-struct modules for BillingPortal.Configuration ([4fa624c](https://github.com/szTheory/lattice_stripe/commit/4fa624cd946cf54649576052ba7a1b0fd927ff53))
+* **23-01:** add Features dispatcher, Configuration fixture, and 5 unit test files ([08701df](https://github.com/szTheory/lattice_stripe/commit/08701dff13de490050077b0845c288d07105eccd))
+* **23-02:** add BillingPortal.Configuration resource module ([a2723d0](https://github.com/szTheory/lattice_stripe/commit/a2723d08471cbc306907bc4032b9c2c545921114))
+* **23-03:** wire Configuration into expand system and ExDoc grouping ([0edc3c3](https://github.com/szTheory/lattice_stripe/commit/0edc3c3f7261269e69e231a47bdf423d51f28723))
+* **24-01:** enrich telemetry stop metadata with rate_limited_reason, escalate 429 to :warning ([431f57e](https://github.com/szTheory/lattice_stripe/commit/431f57ef0a6d4f91f420e4a2d2ff242451518416))
+* **24-01:** thread resp_headers through Client retry loop as 3-tuple ([92baad0](https://github.com/szTheory/lattice_stripe/commit/92baad05aaedbb9664adf4eade20e3faf5fb8992))
+* **24-02:** add fuzzy param suggestion to invalid_request_error ([3e5b693](https://github.com/szTheory/lattice_stripe/commit/3e5b6937e58fc2c117dd7c37dc15927d4292a852))
+* **25-01:** add operation_timeouts to Config schema and Client struct ([3972547](https://github.com/szTheory/lattice_stripe/commit/39725477b3e38af69b8dd25a840559b6a3d794b9))
+* **25-01:** implement classify_operation/1 and three-tier timeout resolution ([288b1a0](https://github.com/szTheory/lattice_stripe/commit/288b1a09641e84f1944326366a081e888337b722))
+* **25-02:** add LatticeStripe.warm_up/1 and warm_up!/1 ([a70a4f8](https://github.com/szTheory/lattice_stripe/commit/a70a4f8b1f06aad099f6572d2059c8d732a2bfc3))
+* **27-01:** implement Batch.run/3 with Task.async_stream fan-out ([55eb2db](https://github.com/szTheory/lattice_stripe/commit/55eb2db292490aa45631ee99a926d1e2d475255b))
+* **28-01:** add MeterEventStream.Session struct with from_map/1 and Inspect masking ([1ac33b3](https://github.com/szTheory/lattice_stripe/commit/1ac33b3e5b2ad45cbbc5b9f12e2d72849c7c2ece))
+* **28-01:** add MeterEventStreamSession fixture and Session unit tests ([36be4aa](https://github.com/szTheory/lattice_stripe/commit/36be4aaf8165bc02efcd952d2b28b32f11312f68))
+* **28-02:** add unit tests, integration skeleton, ExDoc groups, and metering guide v2 section ([f47a1e0](https://github.com/szTheory/lattice_stripe/commit/f47a1e0fad580080be0683d6523080cf70266cb2))
+* **28-02:** implement MeterEventStream with create_session/2 and send_events/4 ([984b1a4](https://github.com/szTheory/lattice_stripe/commit/984b1a417cd1cf20e97cb68611ad1ff119168596))
+* **29-01:** implement SubscriptionSchedule changeset-style param builder ([eeabacb](https://github.com/szTheory/lattice_stripe/commit/eeabacbf2a492bd2ecc61d9b80cd95c6a02a6aad))
+* **29-02:** implement BillingPortal FlowData builder ([89150e3](https://github.com/szTheory/lattice_stripe/commit/89150e3cdad9cc4711e77180d24a50195f36f930))
+* **30-01:** ObjectTypes.object_map/0 accessor, Drift core module, OpenAPI spec fixture ([9e5a76f](https://github.com/szTheory/lattice_stripe/commit/9e5a76fe7457ea1e2f5e65b4827d806cf7166eb3))
+* **30-02:** GitHub Actions weekly drift detection workflow ([92ef010](https://github.com/szTheory/lattice_stripe/commit/92ef010cdaa3a0b04d4084461eb3f1a2aa0050d0))
+* **30-02:** Mix task shell for drift detection ([70e5dde](https://github.com/szTheory/lattice_stripe/commit/70e5dde36899904c4ad3deec7eaf951604cbeb8e))
+* **31-01:** create stripe_explorer.livemd LiveBook notebook ([48e1085](https://github.com/szTheory/lattice_stripe/commit/48e1085d2515f28a5df9e77d3fd0377c3035b88c))
+* **31-02:** complete notebook with WebhookPlug mention and Next Steps section ([005c50a](https://github.com/szTheory/lattice_stripe/commit/005c50a5c45d0c03d9bd57d81ac08a78837c0115))
+
+
+### Bug Fixes
+
+* **22:** add required parentheses to if-expressions in struct literals + update tests for atomized status ([5d8bc31](https://github.com/szTheory/lattice_stripe/commit/5d8bc318c6a10b8325c9949ac83824bdd02770c2))
+* **22:** update deprecated status_atom/1 call in account_test to use apply/3 ([77e0c75](https://github.com/szTheory/lattice_stripe/commit/77e0c75c1481e72017a9768d4afe5ee0ec9cdad9))
+* **22:** WR-01 fix stream!/3 error message referencing wrong function name ([9bc4e74](https://github.com/szTheory/lattice_stripe/commit/9bc4e748fb42d3303cc11bc74e6ed51bda21bac3))
+* **22:** WR-03 add default object value for Billing.Meter ([0384c4e](https://github.com/szTheory/lattice_stripe/commit/0384c4ea9f67cded16fbe7088d573e0fcad7bddd))
+* **24:** revise plans based on checker feedback ([a58d97b](https://github.com/szTheory/lattice_stripe/commit/a58d97b72b88a8e02d6bc018db3829e608364d06))
+* **24:** WR-01 bind parse_type result once in from_response/3 ([f636a27](https://github.com/szTheory/lattice_stripe/commit/f636a2728fb62368d14c4d3eedf6c76ca92db92b))
+* **24:** WR-02 add missing Stripe ID prefixes to id_segment?/1 ([ea35254](https://github.com/szTheory/lattice_stripe/commit/ea35254d25d9a5797a3cd4bb8eee0e83cb33aaf7))
+* **24:** WR-03 document rate_limited_reason nil-on-success invariant in build_stop_metadata ([07153d2](https://github.com/szTheory/lattice_stripe/commit/07153d24b9ddc7b142fb440a6cd4eed9eea1ad25))
+* **29:** WR-01 apply stringify_date to phase-level start_date and end_date in phase_build/1 ([8574eca](https://github.com/szTheory/lattice_stripe/commit/8574eca76176dd8a94786f3043c66b7bff6f8e1a))
+* **30:** WR-01 exit 1 when new_resources non-empty in check_drift task ([bfc731e](https://github.com/szTheory/lattice_stripe/commit/bfc731e56b7b4e05497d8a3f1ffd76b30229ff81))
+* **30:** WR-02 resolve_source_path fallback for cached CI builds in known_fields_for ([34cc82d](https://github.com/szTheory/lattice_stripe/commit/34cc82d1c242b19107064fcdb48d65f8cb1d7c2f))
+* **30:** WR-03 replace throw/catch with with-chain in fetch_spec ([a306d2b](https://github.com/szTheory/lattice_stripe/commit/a306d2be3a03ad7aebd5e2513e5b5a7dcdbd10e1))
+* **31:** CR-01 correct module for generate_test_signature — Webhook not Testing ([3b8270e](https://github.com/szTheory/lattice_stripe/commit/3b8270ea933c3a5bf489fa44d874b8113fb0e09f))
+* **31:** WR-01 document confirmed dependency in Refund cell ([d2345d9](https://github.com/szTheory/lattice_stripe/commit/d2345d91c8677441b7c934aaeb1da17686ddaef7))
+* **31:** WR-02 convert expires_at Unix timestamp to readable DateTime ([f83e712](https://github.com/szTheory/lattice_stripe/commit/f83e712f524ef98da35e3e9501d4a4bc95c403e9))
+
 ## [Unreleased]
 
 ### Changed
