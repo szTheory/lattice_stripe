@@ -358,7 +358,7 @@ IO.puts("Transfer: #{transfer.id} — amount: #{transfer.amount}")
 
 Webhooks allow Stripe to notify your application of asynchronous events — payment confirmations, subscription renewals, dispute openings. LatticeStripe provides HMAC-SHA256 signature verification with a tolerance window.
 
-The `Webhook.construct_event/4` function is pure — it does not make any HTTP calls. In a Phoenix app, wire it up via `LatticeStripe.Webhook.Plug` to handle raw body extraction automatically.
+The `Webhook.construct_event/4` function is pure — it does not make any HTTP calls. In a Phoenix app, wire up `LatticeStripe.WebhookPlug` in your endpoint pipeline to handle raw body extraction and signature verification automatically. See `guides/webhooks.md` for the full Plug setup.
 
 ```elixir
 # Demonstrate webhook signature verification with test inputs.
@@ -459,6 +459,16 @@ IO.puts("customer (expanded): #{inspect(sub_expanded.data.customer.__struct__)}"
 Kino.Tree.new(sub_expanded.data)
 ```
 
----
+## Next Steps
 
-*This notebook exercises the complete LatticeStripe v1.2 API surface. For production usage patterns, see the [LatticeStripe guides on HexDocs](https://hexdocs.pm/lattice_stripe).*
+This notebook covered the core LatticeStripe API surface. For more:
+
+- `guides/getting-started.md` — installation, configuration, and first API call
+- `guides/payments.md` — PaymentIntent lifecycle, error handling, and idempotency
+- `guides/subscriptions.md` — subscription creation, plan changes, and cancellation
+- `guides/metering.md` — usage-based billing with Meter and MeterEvent
+- `guides/connect.md` — Express and Custom accounts, destination charges, and transfers
+- `guides/webhooks.md` — full Plug setup, event dispatching, and replay attack protection
+- `guides/performance.md` — Finch pool tuning, connection warm-up, and Batch.run patterns
+
+> **Note:** stripe-mock resets on restart — all resources created in this session are ephemeral. For production use, see `guides/performance.md` for Finch pool tuning and connection warm-up.
