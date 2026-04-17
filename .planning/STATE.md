@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.3
-milestone_name: — Production Coverage & Adoption Polish
-status: defining_requirements
-stopped_at: Milestone v1.3 started, defining requirements
+milestone_name: Production Coverage & Adoption Polish
+status: roadmap_ready
+stopped_at: Roadmap created — 6 phases (32-37), 29 requirements mapped, ready for phase planning
 last_updated: "2026-04-16"
 last_activity: 2026-04-16
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,18 +21,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16 after v1.3 milestone start)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Defining requirements for v1.3
+**Current focus:** v1.3 roadmap defined — ready to begin Phase 32 (File & FileLink)
 
 ## Current Position
 
 Milestone: v1.3 (Production Coverage & Adoption Polish)
-Phase: Not started (defining requirements)
+Phase: Not started (roadmap complete, ready for phase planning)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-16 — Milestone v1.3 started
+Status: Roadmap ready
+Last activity: 2026-04-16 — Roadmap created (6 phases, 29 requirements mapped)
 
 ```
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (0/0 phases)
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (0/6 phases)
 ```
 
 ## Performance Metrics
@@ -51,31 +51,31 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (0/0
 
 Decisions are logged in PROJECT.md Key Decisions table.
 
-v1.2 roadmap decisions (locked — do not relitigate):
+v1.3 roadmap decisions (locked — do not relitigate):
 
-- [v1.2 R1]: EXPD-01/02/03/04 grouped into Phase 22 — avoid double-touching 84+ modules; atomization sweep and typed dispatch are one coordinated change
-- [v1.2 R2]: PERF-05 + DX-01 grouped into Phase 24 — both modify the error/response path; minimize touchpoints
-- [v1.2 R3]: PERF-01/03/04 grouped into Phase 25 — performance guide documents the helpers it describes; ship together
-- [v1.2 R4]: PERF-02 + DX-04 grouped into Phase 26 — both are documentation-only phases; no code changes
-- [v1.2 R5]: FEAT-02 (meter_event_stream) placed in Phase 28 — most architecturally novel; session-token auth cannot reuse Client.request/2; deferred until simpler phases validate patterns
-- [v1.2 R6]: DX-06 (drift detection) in Phase 30 after Phase 22 — accurate @known_fields baselines must exist before drift comparison is meaningful
-- [v1.2 R7]: DX-05 (LiveBook) in Phase 31 — ships last, exercises complete v1.2 API surface
+- [v1.3 R1]: Phase 32 (File & FileLink) first — introduces `Client.upload/3` and `Client.download/3` transport infrastructure needed by Dispute (evidence uploads) and Quote (PDF download)
+- [v1.3 R2]: Phase 33 (Dispute) second — highest production urgency (chargeback handling), depends on Phase 32 for file upload infrastructure
+- [v1.3 R3]: Phase 34 (CreditNote) third — self-contained, depends only on Invoice (shipped v1.0); no cross-phase dependencies within v1.3
+- [v1.3 R4]: Phase 35 (Mandate + SetupAttempt) fourth — both are read-only retrieval resources, lowest implementation complexity; natural pair, no cross-phase dependencies
+- [v1.3 R5]: Phase 36 (Quote) fifth — most complex v1.3 resource; requires `Client.download/3` from Phase 32 for PDF endpoint
+- [v1.3 R6]: Phase 37 (DX Polish) last — fixture builders need all 6 v1.3 resource structs to exist before they can be written
 
-### Key Pitfalls (from v1.2 research)
+### Key Pitfalls (carried forward from v1.3 research)
 
-- **File multipart upload**: `/v1/files` uses `multipart/form-data` not JSON — new transport pattern needed; cannot reuse standard form encoding
-- **Quote PDF download**: `/v1/quotes/:id/pdf` returns binary PDF, not JSON — needs raw response handling
+- **File multipart upload**: `/v1/files` uses `multipart/form-data` not JSON — new transport pattern needed; `Client.upload/3` cannot reuse standard `Client.request/2` form encoding
+- **Quote PDF download**: `/v1/quotes/:id/pdf` returns binary PDF, not JSON — `Client.download/3` must skip JSON decode and return raw binary
+- **Dispute submit irreversibility**: `submit_evidence/3` is a one-way door — function name and @doc warning must make this explicit; use separate function from `update_evidence/4`
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
 Last session: 2026-04-16
-Stopped at: Milestone v1.3 started, defining requirements
-Resume path: Continue in current session — defining requirements next
+Stopped at: Roadmap created — Phase 32 is next
+Resume path: `/gsd-plan-phase 32`
