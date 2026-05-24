@@ -117,7 +117,10 @@ Plans:
   4. Developer can list and stream credit note line items via `CreditNote.list_line_items/4` and `stream_line_items!/4`
   5. Developer can list preview line items via `CreditNote.list_preview_line_items/3`
   6. Credit note line item responses deserialize into typed `%CreditNote.LineItem{}` structs
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 34-01-PLAN.md — CreditNote parser contracts, object dispatch, Billing ExDoc grouping, and fixtures
+- [ ] 34-02-PLAN.md — CreditNote resource APIs with preview/void/line-item coverage plus unit and integration tests
 
 ### Phase 35: Mandate & SetupAttempt
 **Goal**: Developers can inspect payment authorization mandates and diagnose setup intent failures by examining setup attempt history
@@ -160,7 +163,7 @@ Plans:
 | 22-31 | v1.2 | 24/24 | Complete | 2026-04-17 |
 | 32. File & FileLink | v1.3 | 3/3 | Complete    | 2026-04-17 |
 | 33. Disputes | v1.3 | 2/2 | Complete    | 2026-05-24 |
-| 34. CreditNote | v1.3 | 0/? | Not started | - |
+| 34. CreditNote | v1.3 | 0/2 | Not started | - |
 | 35. Mandate & SetupAttempt | v1.3 | 0/? | Not started | - |
 | 36. Quote | v1.3 | 0/? | Not started | - |
 | 37. DX Polish | v1.3 | 0/? | Not started | - |

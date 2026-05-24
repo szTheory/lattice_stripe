@@ -405,10 +405,13 @@ All claims in this research were verified locally or cited from official Stripe 
 
 ## Open Questions
 
-1. **Should docs land in Phase 34 or wait for Phase 37’s guide sweep?**
-   - What we know: `mix.exs` already publishes guides through `extras`, and D-18 requires module and guide examples for the two common create/preview shapes. [VERIFIED: mix.exs][VERIFIED: .planning/phases/34-creditnote/34-CONTEXT.md]
-   - What's unclear: Whether the planner wants a new `guides/credit_notes.md` now or a narrower moduledoc-only scope with the dedicated guide deferred to Phase 37. [ASSUMED]
-   - Recommendation: Keep at least moduledoc examples in Phase 34, and add a small guide now if it fits without displacing test work. [ASSUMED]
+None. Planning is unblocked. [VERIFIED: checker feedback resolution]
+
+### Resolved docs-scope decision
+
+- Decision: Phase 34 should include a bounded `guides/credit_notes.md` deliverable in addition to moduledoc examples. [VERIFIED: .planning/phases/34-creditnote/34-CONTEXT.md]
+- Reason: D-18 explicitly locks both module and guide examples for the two common create/preview shapes, so deferring the guide to Phase 37 would contradict the current phase context. [VERIFIED: .planning/phases/34-creditnote/34-CONTEXT.md]
+- Scope limit: keep the guide narrow and phase-local: two copy-pasteable create/preview examples, finalized-invoice creation caveat, open-invoice void caveat, and links back to the API docs. Do not expand into broader recipes or cross-phase narrative; Phase 37 still owns the larger consistency sweep. [VERIFIED: checker feedback resolution]
 
 ## Environment Availability
 
