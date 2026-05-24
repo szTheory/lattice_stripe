@@ -403,7 +403,7 @@ Source basis: locked phase examples and Stripe’s `custom_line_item` rules. [VE
 
 All claims in this research were verified locally or cited from official Stripe documentation. No user confirmation is needed before planning. [VERIFIED: codebase grep][CITED: https://docs.stripe.com/api/credit_notes/create?lang=node]
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 None. Planning is unblocked. [VERIFIED: checker feedback resolution]
 
