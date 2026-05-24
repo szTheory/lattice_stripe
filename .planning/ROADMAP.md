@@ -66,7 +66,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details and decisions.
 **Milestone Goal:** Production SaaS developers never need to drop to raw HTTP for common workflows. Onboarding friction minimized.
 
 - [x] **Phase 32: File & FileLink** - Upload and download infrastructure with multipart/binary transport, File and FileLink CRUDL (completed 2026-04-17)
-- [ ] **Phase 33: Disputes** - Full dispute lifecycle including evidence staging, submission, and close verb
+- [x] **Phase 33: Disputes** - Full dispute lifecycle including evidence staging, submission, and close verb (completed 2026-05-24)
 - [ ] **Phase 34: CreditNote** - Invoice credit workflow with preview, void, and line item streaming
 - [ ] **Phase 35: Mandate & SetupAttempt** - Read-only payment authorization tracking resources
 - [ ] **Phase 36: Quote** - Proposal-to-invoice workflow with finalize/accept/cancel verbs and PDF download
@@ -101,10 +101,10 @@ Plans:
   4. Developer can irreversibly submit evidence via `Dispute.submit_evidence/3` — function name and docs make the irreversibility clear
   5. Developer can accept (close) a dispute via explicit `Dispute.close/3` verb
   6. Dispute responses deserialize into typed `%Dispute.Evidence{}` and `%Dispute.EvidenceDetails{}` nested structs with `@known_fields`
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 33-01-PLAN.md — Nested structs (Evidence, EvidenceDetails, PaymentMethodDetails), ObjectTypes registration, ExDoc grouping, test fixtures
-- [ ] 33-02-PLAN.md — Dispute resource module with full API surface and comprehensive tests
+- [x] 33-01-PLAN.md — Nested structs (Evidence, EvidenceDetails, PaymentMethodDetails), ObjectTypes registration, ExDoc grouping, test fixtures
+- [x] 33-02-PLAN.md — Dispute resource module with full API surface and comprehensive tests
 
 ### Phase 34: CreditNote
 **Goal**: Developers can issue full or partial invoice credits, preview credits before creating them, void issued notes, and stream line items
@@ -159,7 +159,7 @@ Plans:
 | 20-21 | v1.1 | 11/11 | Complete | 2026-04-14 |
 | 22-31 | v1.2 | 24/24 | Complete | 2026-04-17 |
 | 32. File & FileLink | v1.3 | 3/3 | Complete    | 2026-04-17 |
-| 33. Disputes | v1.3 | 0/2 | Planning complete | - |
+| 33. Disputes | v1.3 | 2/2 | Complete    | 2026-05-24 |
 | 34. CreditNote | v1.3 | 0/? | Not started | - |
 | 35. Mandate & SetupAttempt | v1.3 | 0/? | Not started | - |
 | 36. Quote | v1.3 | 0/? | Not started | - |

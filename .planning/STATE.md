@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: — Production Coverage & Adoption Polish
-status: executing
-stopped_at: Phase 33 context gathered
-last_updated: "2026-04-17T08:51:08.629Z"
-last_activity: 2026-04-17 -- Phase 33 planning complete
+status: ready_to_plan
+stopped_at: Phase 33 complete (2/2) — ready to plan Phase 34
+last_updated: "2026-05-24T16:45:09.945Z"
+last_activity: 2026-05-24 -- Phase 33 completed; full test suite passing
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 5
+  percent: 33
 ---
 
 # Project State
@@ -21,25 +21,25 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16 after v1.3 milestone start)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 32 — File & FileLink
+**Current focus:** Phase 34 — CreditNote
 
 ## Current Position
 
 Milestone: v1.3 (Production Coverage & Adoption Polish)
-Phase: 33
+Phase: 34
 Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-17 -- Phase 33 planning complete
+Status: Ready to plan
+Last activity: 2026-05-24 -- Phase 33 completed; full test suite passing
 
 ```
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (0/6 phases)
+Progress: [███████░░░░░░░░░░░░░] 33% (2/6 phases)
 ```
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed (v1.3): 0
+- Total plans completed (v1.3): 5
 - Average duration: —
 - Total execution time: —
 
@@ -59,6 +59,8 @@ v1.3 roadmap decisions (locked — do not relitigate):
 - [v1.3 R4]: Phase 35 (Mandate + SetupAttempt) fourth — both are read-only retrieval resources, lowest implementation complexity; natural pair, no cross-phase dependencies
 - [v1.3 R5]: Phase 36 (Quote) fifth — most complex v1.3 resource; requires `Client.download/3` from Phase 32 for PDF endpoint
 - [v1.3 R6]: Phase 37 (DX Polish) last — fixture builders need all 6 v1.3 resource structs to exist before they can be written
+- [2026-05-24 scope-boundary]: LatticeStripe remains a lower-level Stripe SDK. Higher-level billing facades, workflow orchestration, entitlements, dunning, admin/operator product surfaces, and SaaS billing-engine behavior belong in Accrue.
+- [2026-05-24 next-wedge]: Keep optimizing for missing production Stripe workflows before broad docs work; Phase 33 (Disputes) stays the single highest-leverage next milestone.
 - [Phase 32-file-filelink]: Injectable boundary via opts[:boundary] for deterministic test output; random via :crypto.strong_rand_bytes(16) in production
 - [Phase 32-file-filelink]: files_base_url added to Config schema and Client struct with default https://files.stripe.com
 - [Phase 32-file-filelink]: Response @type t data widened to binary() | map() | LatticeStripe.List.t() | nil for download responses
@@ -78,10 +80,17 @@ None.
 
 ### Blockers/Concerns
 
-None.
+- Public adoption truth lags shipped repo truth: `README.md`, `mix.exs`, and `CHANGELOG.md` still present the package as `1.1.0` / "What's new in v1.1" even though planning docs treat v1.2 as shipped and Phase 32 as complete.
+- Full `mix test` passed on 2026-05-24 after Phase 33 landed. Existing suite warnings remain, but there is no known failing test at this point.
+- Avoid scope bleed into Accrue during future milestone research and implementation. See `.planning/threads/lattice-stripe-vs-accrue-scope-boundary.md`.
+
+### Graduation Candidates
+
+- Cross-phase rule: as LatticeStripe nears completeness, new wedges must be screened for SDK-vs-billing-engine fit before planning proceeds.
+- Cross-phase rule: public release/docs truth should be kept aligned with shipped capability closely enough that adopters are never evaluating an outdated package story.
 
 ## Session Continuity
 
-Last session: 2026-04-17T08:24:10.624Z
-Stopped at: Phase 33 context gathered
-Resume path: `/gsd-plan-phase 32`
+Last session: 2026-05-24T16:36:34Z
+Stopped at: Phase 33 complete (2/2) — ready to plan Phase 34
+Resume path: `/gsd-plan-phase 34`

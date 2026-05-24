@@ -28,6 +28,11 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Shipped:** v1.2.0 pending release-please PR. 31 phases complete (1-11, 14-31). 85 plans executed. 108 source files, 21K LOC Elixir. 1783 tests / 0 failures. Zero-touch release via release-please.
 
+**Assessment update (2026-05-24):**
+- Repo truth says v1.2 shipped and Phase 32 (File & FileLink) is complete, but public package truth still lags: `README.md`, `mix.exs`, and `CHANGELOG.md` still present the package as `1.1.0` / "What's new in v1.1".
+- Proof posture should cite current test reality, not only historical milestone summaries: `mix test` currently reports 1824 tests with 1 failure in `test/lattice_stripe/batch_test.exs` (order-sensitive keyword-list assertion).
+- The highest-leverage next wedge remains Phase 33 (Disputes). The largest adjacent risk is public adoption-surface drift, not missing foundation.
+
 **Downstream consumer:** The downstream lib is named **Accrue** — Laravel Cashier / Ruby `pay` analogue for Elixir. Accrue has its own GSD planning in a separate repo. Accrue Phases 3-4 are fully unblocked by LatticeStripe 1.1.
 
 **Release mechanics:** Zero-touch semver via release-please. `feat:` commits auto-bump minor, `fix:` auto-bump patch. Tag + Hex publish automated.
@@ -142,6 +147,7 @@ All foundation, payment, webhook, telemetry, testing, docs, CI/CD, Billing, and 
 - Dialyzer/Dialyxir — explicitly excluded; typespecs are documentation-only, Credo strict handles lint
 - Code generation from OpenAPI spec — v1 was fully handwritten for polish; generation remains a future consideration, not a v1.x goal
 - Higher-level payment abstractions (Cashier/Pay analogue) — **this is Accrue** (separate repo, separate project, consuming LatticeStripe)
+- Higher-level billing-engine behavior — workflow orchestration, entitlement logic, dunning journeys, admin/operator product surfaces, and app-facing billing facades belong in **Accrue**, not LatticeStripe
 - Mobile/frontend SDK — backend only
 - Thin event support (v2 webhook style) — v1 snapshot events ship; v2 thin events deferred to a future minor
 
@@ -210,6 +216,7 @@ All foundation, payment, webhook, telemetry, testing, docs, CI/CD, Billing, and 
 | Integration specs primary | Real boundaries over mocks | ✓ Good — `stripe-mock` caught API shape drift |
 | `from_map/1` + `@known_fields` + `extra` pattern | Survive unknown Stripe fields without crashing | ✓ Good — Phase 14-18 inherited cleanly |
 | Explicit verbs over flag-update | Cancel/resume/reject/deactivate as distinct functions | ✓ Good — no `update(...status: nil)` ambiguity |
+| Keep LatticeStripe Stripe-shaped; leave billing-engine behavior to Accrue | Prevent scope bleed into a second Cashier/Pay analogue as the SDK nears completeness | ✓ Good — future milestones must prefer direct Stripe resource coverage over app-level billing abstractions |
 | Nine-group ExDoc layout (D-19) | Groups ordered: Client, Payments, Billing, Connect, Webhooks, Testing, Errors/Types, Telemetry, Internals | ✓ Good — HexDocs reads cleanly |
 | `@moduledoc false` on internals (D-04) | Public API surface locked at 1.0 via semver contract | ✓ Good — `api_stability.md` published |
 | `Request` kept public (Rule 1 deviation) | `Client.request/2` @spec references `Request.t()` — hiding it breaks docs cross-refs | ✓ Good — caught at `mix docs --warnings-as-errors` time |

@@ -15,6 +15,10 @@ Use this file for four recurring jobs:
 3. prioritize the next milestone by user-value, not by API trivia
 4. decide when additional JTBD mapping has stopped paying for itself
 
+Boundary reminder:
+
+LatticeStripe should become feature-complete enough as a **Stripe SDK**, not as a Phoenix billing engine. When a candidate wedge starts coordinating multiple Stripe primitives into app-owned business workflows, entitlement logic, dunning policy, or operator UX, it is probably Accrue scope rather than LatticeStripe scope.
+
 When updating this file, review in this order:
 
 1. `CHANGELOG.md`
@@ -126,6 +130,11 @@ Why this matters:
 - this is where experienced engineers decide whether a library feels production-ready
 - it reduces integration design churn more than another narrow endpoint wrapper often does
 
+Boundary note:
+
+- recipe work here should stay primitive-first and SDK-shaped
+- if a recipe starts turning into a billing-facade or workflow-orchestration product, point up to Accrue instead of expanding LatticeStripe
+
 ### Gap 2: Disputes are the largest missing operational workflow
 
 Disputes are not edge-case API trivia. They are part of the real operating system of taking
@@ -168,7 +177,7 @@ JTBD-driven ordering:
    This completes the corrective side of invoice-driven billing.
 3. **Quotes**
    This completes the front half of many B2B billing flows.
-4. **DX recipes and guide stitching**
+4. **SDK truth / DX guide stitching**
    This converts broad API coverage into faster successful integrations.
 5. **Mandate and SetupAttempt**
    Useful and real, but lower leverage than the flows above for most SaaS teams.
@@ -185,6 +194,11 @@ For JTBD purposes, LatticeStripe is feature-complete enough when all of these ar
 - a payments-heavy SaaS can handle disputes and evidence upload cleanly
 - each common flow has one clearly recommended path in the docs
 - the remaining gaps are mostly vertical-specific or low-frequency edge cases
+
+And these remain true:
+
+- LatticeStripe still feels like a direct Stripe SDK, not a second Cashier/Pay analogue
+- higher-level billing-engine behavior continues to live in Accrue rather than drifting downward into this repo
 
 That is the real "done enough" threshold.
 
@@ -206,6 +220,10 @@ If a new capability does not either:
 - reduce a common production risk
 
 then it is probably below the line for near-term JTBD prioritization.
+
+Additional scope rule:
+
+If a new capability primarily adds app-owned billing orchestration, entitlement logic, dunning policy, operator UX, or other higher-level business behavior rather than direct Stripe coverage, it is probably above LatticeStripe's scope line and belongs in Accrue.
 
 ## Maintenance Notes
 

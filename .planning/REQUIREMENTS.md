@@ -9,13 +9,13 @@ Requirements for v1.3 (Production Coverage & Adoption Polish). Each maps to road
 
 ### Risk & Disputes
 
-- [ ] **DISP-01**: Developer can retrieve and list disputes with auto-pagination via `stream!/3`
-- [ ] **DISP-02**: Developer can update dispute metadata via `Dispute.update/4`
-- [ ] **DISP-03**: Developer can close (accept) a dispute via explicit `Dispute.close/3` verb
-- [ ] **DISP-04**: Developer can stage evidence without submitting via `Dispute.update_evidence/4` (always `submit: false`)
-- [ ] **DISP-05**: Developer can irreversibly submit evidence via `Dispute.submit_evidence/3` with clear warning
-- [ ] **DISP-06**: Dispute evidence deserializes into typed `Dispute.Evidence` struct with `@known_fields`
-- [ ] **DISP-07**: Dispute evidence details deserializes into typed `Dispute.EvidenceDetails` struct
+- [x] **DISP-01**: Developer can retrieve and list disputes with auto-pagination via `stream!/3`
+- [x] **DISP-02**: Developer can update dispute metadata via `Dispute.update/4`
+- [x] **DISP-03**: Developer can close (accept) a dispute via explicit `Dispute.close/3` verb
+- [x] **DISP-04**: Developer can stage evidence without submitting via `Dispute.update_evidence/4` (always `submit: false`)
+- [x] **DISP-05**: Developer can irreversibly submit evidence via `Dispute.submit_evidence/3` with clear warning
+- [x] **DISP-06**: Dispute evidence deserializes into typed `Dispute.Evidence` struct with `@known_fields`
+- [x] **DISP-07**: Dispute evidence details deserializes into typed `Dispute.EvidenceDetails` struct
 
 ### Invoice Credits
 
@@ -94,13 +94,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-03 | Phase 32 | Complete |
 | FILE-04 | Phase 32 | Complete |
 | FILE-05 | Phase 32 | Complete |
-| DISP-01 | Phase 33 | Pending |
-| DISP-02 | Phase 33 | Pending |
-| DISP-03 | Phase 33 | Pending |
-| DISP-04 | Phase 33 | Pending |
-| DISP-05 | Phase 33 | Pending |
-| DISP-06 | Phase 33 | Pending |
-| DISP-07 | Phase 33 | Pending |
+| DISP-01 | Phase 33 | Complete |
+| DISP-02 | Phase 33 | Complete |
+| DISP-03 | Phase 33 | Complete |
+| DISP-04 | Phase 33 | Complete |
+| DISP-05 | Phase 33 | Complete |
+| DISP-06 | Phase 33 | Complete |
+| DISP-07 | Phase 33 | Complete |
 | CRDN-01 | Phase 34 | Pending |
 | CRDN-02 | Phase 34 | Pending |
 | CRDN-03 | Phase 34 | Pending |
