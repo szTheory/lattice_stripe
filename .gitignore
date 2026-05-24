@@ -24,3 +24,6 @@ lattice_stripe-*.tar
 
 # ElixirLS
 .elixir_ls/
+
+# macOS Finder metadata.
+.DS_Store
