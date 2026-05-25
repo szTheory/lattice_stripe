@@ -49,10 +49,10 @@ Requirements for v1.3 (Production Coverage & Adoption Polish). Each maps to road
 
 ### Developer Experience
 
-- [ ] **DX-01**: Webhooks guide includes copy-paste Phoenix router + handler recipe
-- [ ] **DX-02**: `LatticeStripe.Testing` exposes fixture builders for all v1.3 resource families
-- [ ] **DX-03**: `guides/recipes.md` provides end-to-end patterns for common workflows
-- [ ] **DX-04**: All guides have consistent version refs, cross-links, and current examples
+- [x] **DX-01**: Webhooks guide includes copy-paste Phoenix router + handler recipe
+- [x] **DX-02**: `LatticeStripe.Testing` exposes fixture builders for all v1.3 resource families
+- [x] **DX-03**: `guides/recipes.md` provides end-to-end patterns for common workflows
+- [x] **DX-04**: All guides have consistent version refs, cross-links, and current examples
 
 ## Future Requirements
 
@@ -114,10 +114,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QUOT-03 | Phase 41 | Verified |
 | QUOT-04 | Phase 41 | Verified |
 | QUOT-05 | Phase 41 | Verified |
-| DX-01 | Phase 42 | Pending |
-| DX-02 | Phase 42 | Pending |
-| DX-03 | Phase 42 | Pending |
-| DX-04 | Phase 42 | Pending |
+| DX-01 | Phase 42 | Verified |
+| DX-02 | Phase 42 | Verified |
+| DX-03 | Phase 42 | Verified |
+| DX-04 | Phase 42 | Verified |
 
 **Coverage:**
 - v1.3 requirements: 29 total
