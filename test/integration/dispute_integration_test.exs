@@ -38,6 +38,7 @@ defmodule LatticeStripe.DisputeIntegrationTest do
   end
 
   test "list/3 returns a response with a dispute list", %{client: client} do
+    # This is milestone smoke coverage only; stripe-mock does not preserve dispute state.
     assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{data: disputes}}} =
              Dispute.list(client)
 
