@@ -232,7 +232,10 @@ Plans:
   2. `ROADMAP.md` plan counts, progress rows, and phase states for phases 35-37 reflect actual execution state
   3. `REQUIREMENTS.md` checkboxes and traceability statuses match current audit reality
   4. A rerun of the milestone audit no longer flags planning-truth inconsistencies for v1.3
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 42-01-PLAN.md — Create the missing closed DX verifier from shipped Phase 37 evidence and fresh targeted DX proof
+- [ ] 42-02-PLAN.md — Propagate DX closure truth through roadmap, requirements, state, and milestone audit while preserving Phase 41.1 as `pending-external-verification`
 
 ## Progress
 
