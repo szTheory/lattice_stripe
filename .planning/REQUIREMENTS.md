@@ -19,17 +19,17 @@ Requirements for v1.3 (Production Coverage & Adoption Polish). Each maps to road
 
 ### Invoice Credits
 
-- [ ] **CRDN-01**: Developer can create, retrieve, update, list credit notes with auto-pagination via `stream!/3`
-- [ ] **CRDN-02**: Developer can void a credit note via explicit `CreditNote.void/3` verb
-- [ ] **CRDN-03**: Developer can preview a credit note before creating via `CreditNote.preview/3`
-- [ ] **CRDN-04**: Developer can list and stream credit note line items via `CreditNote.list_line_items/4` and `stream_line_items!/4`
-- [ ] **CRDN-05**: Developer can list preview line items via `CreditNote.list_preview_line_items/3`
-- [ ] **CRDN-06**: Credit note line items deserialize into typed `CreditNote.LineItem` struct
+- [x] **CRDN-01**: Developer can create, retrieve, update, list credit notes with auto-pagination via `stream!/3`
+- [x] **CRDN-02**: Developer can void a credit note via explicit `CreditNote.void/3` verb
+- [x] **CRDN-03**: Developer can preview a credit note before creating via `CreditNote.preview/3`
+- [x] **CRDN-04**: Developer can list and stream credit note line items via `CreditNote.list_line_items/4` and `stream_line_items!/4`
+- [x] **CRDN-05**: Developer can list preview line items via `CreditNote.list_preview_line_items/3`
+- [x] **CRDN-06**: Credit note line items deserialize into typed `CreditNote.LineItem` struct
 
 ### Payment Authorization
 
-- [ ] **AUTH-01**: Developer can retrieve mandate details via `Mandate.retrieve/3`
-- [ ] **AUTH-02**: Developer can list setup attempts filtered by setup_intent via `SetupAttempt.list/3` and `stream!/3`
+- [x] **AUTH-01**: Developer can retrieve mandate details via `Mandate.retrieve/3`
+- [x] **AUTH-02**: Developer can list setup attempts filtered by setup_intent via `SetupAttempt.list/3` and `stream!/3`
 
 ### File Management
 
@@ -101,14 +101,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DISP-05 | Phase 38 | Verified |
 | DISP-06 | Phase 38 | Verified |
 | DISP-07 | Phase 38 | Verified |
-| CRDN-01 | Phase 39 | Pending |
-| CRDN-02 | Phase 39 | Pending |
-| CRDN-03 | Phase 39 | Pending |
-| CRDN-04 | Phase 39 | Pending |
-| CRDN-05 | Phase 39 | Pending |
-| CRDN-06 | Phase 39 | Pending |
-| AUTH-01 | Phase 40 | Pending |
-| AUTH-02 | Phase 40 | Pending |
+| CRDN-01 | Phase 39 | Verified |
+| CRDN-02 | Phase 39 | Verified |
+| CRDN-03 | Phase 39 | Verified |
+| CRDN-04 | Phase 39 | Verified |
+| CRDN-05 | Phase 39 | Verified |
+| CRDN-06 | Phase 39 | Verified |
+| AUTH-01 | Phase 40 | Verified |
+| AUTH-02 | Phase 40 | Verified |
 | QUOT-01 | Phase 41 | Pending |
 | QUOT-02 | Phase 41 | Pending |
 | QUOT-03 | Phase 41 | Pending |

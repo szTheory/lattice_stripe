@@ -4,14 +4,14 @@ milestone: v1.3
 milestone_name: — Production Coverage & Adoption Polish
 status: executing
 stopped_at: Completed 35-02-PLAN.md
-last_updated: "2026-05-25T06:07:13.750Z"
-last_activity: 2026-05-25
+last_updated: "2026-05-25T12:54:40.696Z"
+last_activity: 2026-05-25 -- Phase 40 execution started
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 14
-  completed_plans: 14
-  percent: 100
+  total_phases: 11
+  completed_phases: 8
+  total_plans: 20
+  completed_plans: 18
+  percent: 73
 ---
 
 # Project State
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16 after v1.3 milestone start)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 37 — dx-polish
+**Current focus:** Phase 40 — mandate-setupattempt-integration-closure
 
 ## Current Position
 
 Milestone: v1.3 (Production Coverage & Adoption Polish)
-Phase: 37
-Plan: Not started
-Status: Executing Phase 37
-Last activity: 2026-05-25
+Phase: 40 (mandate-setupattempt-integration-closure) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 40
+Last activity: 2026-05-25 -- Phase 40 execution started
 
 ```
 Progress: [██████████] 100%

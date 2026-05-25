@@ -71,6 +71,11 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 35: Mandate & SetupAttempt** - Read-only payment authorization tracking resources (completed 2026-05-24)
 - [ ] **Phase 36: Quote** - Proposal-to-invoice workflow with finalize/accept/cancel verbs and PDF download
 - [x] **Phase 37: DX Polish** - Phoenix webhook recipe, v1.3 fixture builders, recipes guide, guide consistency sweep (completed 2026-05-25)
+- [x] **Phase 38: Dispute Evidence E2E Verification** - Close File/Dispute verification gaps and add end-to-end evidence workflow coverage (completed 2026-05-25)
+- [x] **Phase 39: Credit Note Verification Closure** - Close CreditNote verification and milestone acceptance evidence (completed 2026-05-25)
+- [ ] **Phase 40: Mandate & SetupAttempt Integration Closure** - Add missing Mandate integration coverage and close auth verification
+- [ ] **Phase 41: Quote Lifecycle E2E Verification** - Close Quote verification gaps and exercise quote lifecycle flows under integration
+- [ ] **Phase 42: Planning Truth Reconciliation** - Align roadmap/requirements/DX verification state with shipped v1.3 work
 
 ## Phase Details
 
@@ -154,6 +159,67 @@ Plans:
   4. All guides have consistent version references, working cross-links, and examples that reflect the current API surface
 **Plans**: TBD
 
+### Phase 38: Dispute Evidence E2E Verification
+**Goal**: Milestone verification is closed for File/FileLink and Dispute work, with end-to-end evidence upload and submission covered under integration tests
+**Depends on**: Phase 37 (all feature implementation complete; this phase closes verification gaps)
+**Requirements**: FILE-01, FILE-02, FILE-03, FILE-04, FILE-05, DISP-01, DISP-02, DISP-03, DISP-04, DISP-05, DISP-06, DISP-07
+**Gap Closure**: Closes audit gaps from `.planning/v1.3-v1.3-MILESTONE-AUDIT.md` for partial Phase 32 verification, missing Phase 33 verification, and missing dispute evidence E2E coverage
+**Success Criteria** (what must be TRUE):
+  1. `32-VERIFICATION.md` and `33-VERIFICATION.md` are present in a closed verifier state accepted by the milestone workflow
+  2. Integration coverage exercises `File.create/3 -> Dispute.update_evidence/4` with uploaded evidence files
+  3. Integration coverage exercises `Dispute.submit_evidence/3` end-to-end
+  4. Audit evidence for FILE and DISP requirements is current and milestone-ready
+**Plans**: TBD
+
+### Phase 39: Credit Note Verification Closure
+**Goal**: CreditNote milestone evidence is complete and accepted by the milestone workflow without reopening feature work
+**Depends on**: Phase 38 (verification closure proceeds after the shared dispute/file gaps are addressed)
+**Requirements**: CRDN-01, CRDN-02, CRDN-03, CRDN-04, CRDN-05, CRDN-06
+**Gap Closure**: Closes audit gaps from `.planning/v1.3-v1.3-MILESTONE-AUDIT.md` for missing `34-VERIFICATION.md`
+**Success Criteria** (what must be TRUE):
+  1. `34-VERIFICATION.md` exists and is in a closed verifier state
+  2. Existing CreditNote tests and summaries are reconciled against milestone acceptance requirements
+  3. Audit evidence for CRDN requirements is current and milestone-ready
+**Plans**: TBD
+
+### Phase 40: Mandate & SetupAttempt Integration Closure
+**Goal**: Payment authorization resources have complete milestone verification, including missing Mandate integration evidence
+**Depends on**: Phase 39
+**Requirements**: AUTH-01, AUTH-02
+**Gap Closure**: Closes audit gaps from `.planning/v1.3-v1.3-MILESTONE-AUDIT.md` for missing `35-VERIFICATION.md` and Mandate integration coverage
+**Success Criteria** (what must be TRUE):
+  1. `35-VERIFICATION.md` exists and is in a closed verifier state
+  2. Mandate integration coverage exists for `AUTH-01`
+  3. Audit evidence for AUTH requirements is current and milestone-ready
+**Plans:** 2 plans
+Plans:
+- [ ] 40-01-PLAN.md — Fresh AUTH runtime proof with new Mandate integration coverage and targeted reruns
+- [ ] 40-02-PLAN.md — Closed Phase 35 verifier artifact and AUTH traceability closure
+
+### Phase 41: Quote Lifecycle E2E Verification
+**Goal**: Quote lifecycle work is fully evidenced under integration, including PDF download and quote-to-invoice follow-through
+**Depends on**: Phase 40
+**Requirements**: QUOT-01, QUOT-02, QUOT-03, QUOT-04, QUOT-05
+**Gap Closure**: Closes audit gaps from `.planning/v1.3-v1.3-MILESTONE-AUDIT.md` for missing `36-VERIFICATION.md`, stale Phase 36 tracking, missing Quote PDF coverage, and partial quote-to-invoice flow evidence
+**Success Criteria** (what must be TRUE):
+  1. `36-VERIFICATION.md` exists and is in a closed verifier state
+  2. Integration coverage exercises `Quote.pdf/3`
+  3. Integration coverage exercises `Quote.accept/3` and `Quote.cancel/3`
+  4. Quote-to-invoice follow-through is exercised end-to-end under `stripe-mock`
+**Plans**: TBD
+
+### Phase 42: Planning Truth Reconciliation
+**Goal**: Planning artifacts accurately reflect shipped v1.3 work and closed verification, so a fresh milestone audit can pass on planning truth as well as code
+**Depends on**: Phase 41
+**Requirements**: DX-01, DX-02, DX-03, DX-04
+**Gap Closure**: Closes audit gaps from `.planning/v1.3-v1.3-MILESTONE-AUDIT.md` for missing `37-VERIFICATION.md`, stale roadmap progress, and stale requirements traceability/status
+**Success Criteria** (what must be TRUE):
+  1. `37-VERIFICATION.md` exists and is in a closed verifier state
+  2. `ROADMAP.md` plan counts, progress rows, and phase states for phases 35-37 reflect actual execution state
+  3. `REQUIREMENTS.md` checkboxes and traceability statuses match current audit reality
+  4. A rerun of the milestone audit no longer flags planning-truth inconsistencies for v1.3
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -167,3 +233,8 @@ Plans:
 | 35. Mandate & SetupAttempt | v1.3 | 2/2 | Complete   | 2026-05-24 |
 | 36. Quote | v1.3 | 0/? | Not started | - |
 | 37. DX Polish | v1.3 | 3/3 | Complete    | 2026-05-25 |
+| 38. Dispute Evidence E2E Verification | v1.3 | 2/2 | Complete   | 2026-05-25 |
+| 39. Credit Note Verification Closure | v1.3 | 2/2 | Complete    | 2026-05-25 |
+| 40. Mandate & SetupAttempt Integration Closure | v1.3 | 0/2 | Not started | - |
+| 41. Quote Lifecycle E2E Verification | v1.3 | 0/? | Not started | - |
+| 42. Planning Truth Reconciliation | v1.3 | 0/? | Not started | - |
