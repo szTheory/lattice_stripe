@@ -76,7 +76,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 40: Mandate & SetupAttempt Integration Closure** - Add missing Mandate integration coverage and close auth verification (completed 2026-05-25)
 - [x] **Phase 41: Quote Lifecycle E2E Verification** - Close Quote verification gaps and exercise quote lifecycle flows under integration (completed 2026-05-25)
 - [ ] **Phase 41.1: Quote Downstream Follow-Through Verification** - Preserve the open external-proof follow-through gap as `pending-external-verification` until sandbox evidence exists
-- [ ] **Phase 42: Planning Truth Reconciliation** - Align roadmap/requirements/DX verification state with shipped v1.3 work (reconciliation in progress)
+- [x] **Phase 42: Planning Truth Reconciliation** - Align roadmap/requirements/DX verification state with shipped v1.3 work (completed 2026-05-25)
 
 ## Phase Details
 
@@ -246,10 +246,10 @@ Plans:
   2. `ROADMAP.md` plan counts, progress rows, and phase states for phases 35-37 reflect actual execution state
   3. `REQUIREMENTS.md` checkboxes and traceability statuses match current audit reality
   4. A rerun of the milestone audit no longer flags planning-truth inconsistencies for v1.3
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 42-01-PLAN.md — Create the missing closed DX verifier from shipped Phase 37 evidence and fresh targeted DX proof
-- [ ] 42-02-PLAN.md — Propagate DX closure truth through roadmap, requirements, state, and milestone audit while preserving Phase 41.1 as `pending-external-verification`
+- [x] 42-02-PLAN.md — Propagate DX closure truth through roadmap, requirements, state, and milestone audit while preserving Phase 41.1 as `pending-external-verification`
 
 ## Progress
 
@@ -269,4 +269,4 @@ Plans:
 | 40. Mandate & SetupAttempt Integration Closure | v1.3 | 2/2 | Complete | 2026-05-25 |
 | 41. Quote Lifecycle E2E Verification | v1.3 | 2/2 | Complete   | 2026-05-25 |
 | 41.1. Quote Downstream Follow-Through Verification | v1.3 | 2/2 | pending-external-verification | - |
-| 42. Planning Truth Reconciliation | v1.3 | 1/2 | In progress | - |
+| 42. Planning Truth Reconciliation | v1.3 | 2/2 | Complete | 2026-05-25 |
