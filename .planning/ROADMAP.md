@@ -69,13 +69,14 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 33: Disputes** - Full dispute lifecycle including evidence staging, submission, and close verb (completed 2026-05-24)
 - [x] **Phase 34: CreditNote** - Invoice credit workflow with preview, void, and line item streaming (completed 2026-05-24)
 - [x] **Phase 35: Mandate & SetupAttempt** - Read-only payment authorization tracking resources (completed 2026-05-24)
-- [ ] **Phase 36: Quote** - Proposal-to-invoice workflow with finalize/accept/cancel verbs and PDF download
+- [x] **Phase 36: Quote** - Proposal-to-invoice workflow with finalize/accept/cancel verbs and PDF download (completed 2026-05-25)
 - [x] **Phase 37: DX Polish** - Phoenix webhook recipe, v1.3 fixture builders, recipes guide, guide consistency sweep (completed 2026-05-25)
 - [x] **Phase 38: Dispute Evidence E2E Verification** - Close File/Dispute verification gaps and add end-to-end evidence workflow coverage (completed 2026-05-25)
 - [x] **Phase 39: Credit Note Verification Closure** - Close CreditNote verification and milestone acceptance evidence (completed 2026-05-25)
-- [ ] **Phase 40: Mandate & SetupAttempt Integration Closure** - Add missing Mandate integration coverage and close auth verification
+- [x] **Phase 40: Mandate & SetupAttempt Integration Closure** - Add missing Mandate integration coverage and close auth verification (completed 2026-05-25)
 - [x] **Phase 41: Quote Lifecycle E2E Verification** - Close Quote verification gaps and exercise quote lifecycle flows under integration (completed 2026-05-25)
-- [ ] **Phase 42: Planning Truth Reconciliation** - Align roadmap/requirements/DX verification state with shipped v1.3 work
+- [ ] **Phase 41.1: Quote Downstream Follow-Through Verification** - Preserve the open external-proof follow-through gap as `pending-external-verification` until sandbox evidence exists
+- [ ] **Phase 42: Planning Truth Reconciliation** - Align roadmap/requirements/DX verification state with shipped v1.3 work (reconciliation in progress)
 
 ## Phase Details
 
@@ -134,7 +135,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Developer can retrieve mandate details via `Mandate.retrieve/3` and receive a typed `%LatticeStripe.Mandate{}` struct
   2. Developer can list setup attempts filtered by setup_intent via `SetupAttempt.list/3` and stream them via `stream!/3`
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+Plans:
+- [x] 35-01-PLAN.md — Create Mandate nested structs, parser contract, and setup-attempt fixture foundation
+- [x] 35-02-PLAN.md — Add Mandate retrieve plus SetupAttempt list/stream APIs and baseline integration proof
 
 ### Phase 36: Quote
 **Goal**: Developers can manage the full proposal-to-invoice workflow — create and iterate on quotes, finalize, accept or cancel, stream line items, and download the PDF
@@ -146,7 +150,10 @@ Plans:
   3. Developer can list and stream quote line items via `Quote.list_line_items/4` and `stream_line_items!/4`
   4. Developer can download a quote PDF as raw binary via `Quote.pdf/3` — response is binary, not a decoded struct
   5. Quote line item responses deserialize into typed `%Quote.LineItem{}` structs
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+Plans:
+- [x] 36-01-PLAN.md — Build Quote typed structs, fixtures, parser baseline, and object registration
+- [x] 36-02-PLAN.md — Add Quote CRUDL, lifecycle verbs, line-item helpers, PDF access, and integration sanity
 
 ### Phase 37: DX Polish
 **Goal**: New developers can copy-paste a working Phoenix webhook handler and reach end-to-end patterns for common workflows; existing guides are consistent and accurate
@@ -157,7 +164,11 @@ Plans:
   2. `LatticeStripe.Testing` exposes fixture builder functions for all v1.3 resource families (File, FileLink, Dispute, CreditNote, Mandate, SetupAttempt, Quote)
   3. `guides/recipes.md` provides end-to-end patterns for the most common workflows introduced in v1.3 (dispute handling, credit issuance, quote-to-invoice)
   4. All guides have consistent version references, working cross-links, and examples that reflect the current API surface
-**Plans**: TBD
+**Plans:** 3/3 plans complete
+Plans:
+- [x] 37-01-PLAN.md — Publish canonical raw fixture builders and explicit typed/webhook wrappers
+- [x] 37-02-PLAN.md — Canonicalize the Phoenix webhook guide and add compact testing/recipes guidance
+- [x] 37-03-PLAN.md — Reconcile public version/docs truth and add narrow docs-truth regression checks
 
 ### Phase 38: Dispute Evidence E2E Verification
 **Goal**: Milestone verification is closed for File/FileLink and Dispute work, with end-to-end evidence upload and submission covered under integration tests
@@ -191,10 +202,10 @@ Plans:
   1. `35-VERIFICATION.md` exists and is in a closed verifier state
   2. Mandate integration coverage exists for `AUTH-01`
   3. Audit evidence for AUTH requirements is current and milestone-ready
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 40-01-PLAN.md — Fresh AUTH runtime proof with new Mandate integration coverage and targeted reruns
-- [ ] 40-02-PLAN.md — Closed Phase 35 verifier artifact and AUTH traceability closure
+- [x] 40-01-PLAN.md — Fresh AUTH runtime proof with new Mandate integration coverage and targeted reruns
+- [x] 40-02-PLAN.md — Closed Phase 35 verifier artifact and AUTH traceability closure
 
 ### Phase 41: Quote Lifecycle E2E Verification
 **Goal**: Quote lifecycle work is fully evidenced under `stripe-mock` integration for the surfaces that `stripe-mock` can truthfully cover, including PDF download and bounded lifecycle route proof
@@ -220,7 +231,10 @@ Plans:
   1. An accepted Quote response exposes one downstream reference in the chosen verification environment
   2. Exactly one downstream Stripe resource is retrieved in the D-06 preference order and asserted only at typed top-level decode depth
   3. Verification language stays explicit about the chosen environment and does not back-port unsupported claims into the `stripe-mock`-bounded Phase 41
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+Plans:
+- [x] 41.1-01-PLAN.md — Author the sandbox probe path and capture the exact external-proof stop condition
+- [x] 41.1-02-PLAN.md — Create the truthful pending-external-verification artifact for the open follow-through gap
 
 ### Phase 42: Planning Truth Reconciliation
 **Goal**: Planning artifacts accurately reflect shipped v1.3 work and closed verification, so a fresh milestone audit can pass on planning truth as well as code
@@ -234,7 +248,7 @@ Plans:
   4. A rerun of the milestone audit no longer flags planning-truth inconsistencies for v1.3
 **Plans:** 2 plans
 Plans:
-- [ ] 42-01-PLAN.md — Create the missing closed DX verifier from shipped Phase 37 evidence and fresh targeted DX proof
+- [x] 42-01-PLAN.md — Create the missing closed DX verifier from shipped Phase 37 evidence and fresh targeted DX proof
 - [ ] 42-02-PLAN.md — Propagate DX closure truth through roadmap, requirements, state, and milestone audit while preserving Phase 41.1 as `pending-external-verification`
 
 ## Progress
@@ -248,11 +262,11 @@ Plans:
 | 33. Disputes | v1.3 | 2/2 | Complete    | 2026-05-24 |
 | 34. CreditNote | v1.3 | 2/2 | Complete    | 2026-05-24 |
 | 35. Mandate & SetupAttempt | v1.3 | 2/2 | Complete   | 2026-05-24 |
-| 36. Quote | v1.3 | 0/? | Not started | - |
+| 36. Quote | v1.3 | 2/2 | Complete | 2026-05-25 |
 | 37. DX Polish | v1.3 | 3/3 | Complete    | 2026-05-25 |
 | 38. Dispute Evidence E2E Verification | v1.3 | 2/2 | Complete   | 2026-05-25 |
 | 39. Credit Note Verification Closure | v1.3 | 2/2 | Complete    | 2026-05-25 |
-| 40. Mandate & SetupAttempt Integration Closure | v1.3 | 0/2 | Not started | - |
+| 40. Mandate & SetupAttempt Integration Closure | v1.3 | 2/2 | Complete | 2026-05-25 |
 | 41. Quote Lifecycle E2E Verification | v1.3 | 2/2 | Complete   | 2026-05-25 |
-| 41.1. Quote Downstream Follow-Through Verification | v1.3 | 0/? | Not started | - |
-| 42. Planning Truth Reconciliation | v1.3 | 0/? | Not started | - |
+| 41.1. Quote Downstream Follow-Through Verification | v1.3 | 2/2 | pending-external-verification | - |
+| 42. Planning Truth Reconciliation | v1.3 | 1/2 | In progress | - |

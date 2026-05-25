@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: — Production Coverage & Adoption Polish
 status: executing
-stopped_at: Completed 41-02-PLAN.md
-last_updated: "2026-05-25T15:03:03.466Z"
-last_activity: 2026-05-25 -- Phase 41.1 execution started
+stopped_at: Completed 42-01-PLAN.md
+last_updated: "2026-05-25T16:20:00Z"
+last_activity: 2026-05-25 -- Phase 42 planning truth reconciliation in progress
 progress:
   total_phases: 12
   completed_phases: 10
-  total_plans: 24
-  completed_plans: 22
-  percent: 83
+  total_plans: 26
+  completed_plans: 25
+  percent: 96
 ---
 
 # Project State
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16 after v1.3 milestone start)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 41.1 — quote-downstream-follow-through-verification
+**Current focus:** Phase 42 — planning-truth-reconciliation
 
 ## Current Position
 
 Milestone: v1.3 (Production Coverage & Adoption Polish)
-Phase: 41.1 (quote-downstream-follow-through-verification) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 41.1
-Last activity: 2026-05-25 -- Phase 41.1 execution started
+Phase: 42 (planning-truth-reconciliation) — EXECUTING
+Plan: 2 of 2
+Status: Reconciling roadmap, requirements, state, and audit truth for Phase 42
+Last activity: 2026-05-25 -- Phase 42 planning truth reconciliation in progress
 
 ```
 Progress: [██████████] 100%
@@ -80,8 +80,8 @@ None.
 
 ### Blockers/Concerns
 
-- Public adoption truth lags shipped repo truth: `README.md`, `mix.exs`, and `CHANGELOG.md` still present the package as `1.1.0` / "What's new in v1.1" even though planning docs treat v1.2 as shipped and Phase 32 as complete.
-- Full `mix test` passed on 2026-05-24 after Phase 33 landed. Existing suite warnings remain, but there is no known failing test at this point.
+- Planning truth is now being reconciled from closed verifier artifacts rather than from summary-only claims; no new SDK/runtime feature work is in scope for Phase 42.
+- The only still-open v1.3 follow-through item is Phase 41.1, which remains explicitly `pending-external-verification` until sandbox proof is produced.
 - Avoid scope bleed into Accrue during future milestone research and implementation. See `.planning/threads/lattice-stripe-vs-accrue-scope-boundary.md`.
 
 ### Graduation Candidates
