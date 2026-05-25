@@ -6,6 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+> `main` is tracking the upcoming `1.3.0` release line. The latest published Hex
+> release remains `1.2.x` until a tagged release is cut.
+
 ### Changed
 
 - **Expand deserialization** — When you pass `expand: ["customer"]` (or any expandable field), the response struct now contains a fully typed struct (e.g., `%Customer{}`) instead of a raw map. Fields that are not expanded remain as string IDs, unchanged. This applies to all resource modules.
@@ -37,11 +40,28 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   Affected modules: PaymentIntent, Subscription, SubscriptionSchedule, Charge, Refund, SetupIntent, Payout, BalanceTransaction, BankAccount, Checkout.Session, Billing.Meter, Account.Capability.
 
 - **Deprecated** `Billing.Meter.status_atom/1` and `Account.Capability.status_atom/1` — status is now automatically atomized in `from_map/1`/`cast/1`. Access `.status` directly on the struct.
+- **Docs/package truth** — README, ExDoc extras, and public guide discovery now align
+  with the current branch story: stable installs target the published `1.2.x` line,
+  while `main` documents the unreleased `1.3.0` surface explicitly.
 
 ### Added
 
-- `LatticeStripe.ObjectTypes` — internal module for Stripe object type dispatch (not part of public API).
+- **v1.3 branch surface** — main now includes File/FileLink upload/download support,
+  Disputes, Credit Notes, Mandates, SetupAttempts, Quotes, public testing fixture
+  builders, a compact recipes guide, and a canonical Phoenix webhook quickstart.
+
+- **Docs: User Flows & JTBD guide** — Added a new conceptual guide aimed at experienced
+  Elixir/Phoenix SaaS integrators. It explains LatticeStripe through real product jobs and
+  end-to-end flow choices, including when to use Checkout vs direct APIs, how subscriptions,
+  invoices, portal sessions, metering, and webhooks fit together, and where current roadmap
+  gaps still exist.
+- Internal object-type dispatch module for expandable Stripe resources (not part of public API).
 - Union type specs (`Customer.t() | String.t() | nil`) on all expandable fields across all resource modules.
+
+### Fixed
+
+- **Getting Started guide version drift** — Updated the install snippet to `{:lattice_stripe, "~> 1.2"}`
+  and aligned the first `PaymentIntent` example output with atomized status values.
 
 ## [1.1.0](https://github.com/szTheory/lattice_stripe/compare/v1.0.0...v1.1.0) (2026-04-14)
 

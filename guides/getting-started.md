@@ -11,11 +11,14 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:lattice_stripe, "~> 0.1"},
+    {:lattice_stripe, "~> 1.2"},
     {:finch, "~> 0.21"}
   ]
 end
 ```
+
+If you specifically need unreleased work from `main`, use a git dependency instead of
+the published Hex release.
 
 Then fetch your dependencies:
 
@@ -121,7 +124,7 @@ Run this and you'll see output like:
 ```
 Created PaymentIntent: pi_3OzqKZ2eZvKYlo2C1FRzQc8s
 Amount: $20.0
-Status: requires_payment_method
+Status: :requires_payment_method
 ```
 
 A few things to note:
@@ -184,6 +187,8 @@ non-bang variants in production code where you need to handle errors gracefully.
 
 Now that you've made your first API call, explore the rest of LatticeStripe:
 
+- **[User Flows & JTBD](user-flows-and-jtbd.md)** — The "how would I actually use this in a SaaS?"
+  guide. Start here if you want the mental model before diving into individual modules.
 - **[Client Configuration](client-configuration.html)** — All client options, per-request
   overrides, multiple clients, Stripe Connect.
 - **[Payments](payments.html)** — Full payment lifecycle: customers, PaymentIntents,
@@ -218,5 +223,6 @@ immediately. This catches typos and misconfiguration at startup, not at request 
 
 ## Next steps
 
+- See [User Flows & JTBD](user-flows-and-jtbd.md) for the high-level SaaS integration map.
 - See [Subscriptions](subscriptions.md) for recurring billing and dunning lifecycles.
 - See [Connect](connect.md) for marketplace and platform use cases.

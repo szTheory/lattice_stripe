@@ -5,11 +5,16 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **What's new in v1.1** — Usage-based billing via Billing Metering (`Meter`, `MeterEvent`, `MeterEventAdjustment`) and self-service Customer Portal sessions (`BillingPortal.Session` with 4 flow types). Building on v1.0's full Billing (Invoices, Subscriptions, Schedules) and Connect (Accounts, Transfers, Payouts, Balance) coverage. See the [v1.1 highlights in CHANGELOG](CHANGELOG.md#110).
+> **Branch status:** `main` is tracking the upcoming `1.3.0` line. The latest
+> published Hex release is `1.2.x`, while this branch already includes the v1.3
+> production-coverage work and DX polish in progress. See [CHANGELOG.md](CHANGELOG.md).
 
 A production-grade, idiomatic Elixir SDK for the Stripe API.
 
 Full documentation available on [HexDocs](https://hexdocs.pm/lattice_stripe).
+
+If you are evaluating how this fits into a real SaaS billing architecture, start with
+[Guide: User Flows & JTBD](guides/user-flows-and-jtbd.md).
 
 ## Installation
 
@@ -18,7 +23,17 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:lattice_stripe, "~> 1.1"}
+    {:lattice_stripe, "~> 1.2"}
+  ]
+end
+```
+
+If you need the unreleased v1.3 surface from `main`, use a git dependency instead:
+
+```elixir
+def deps do
+  [
+    {:lattice_stripe, github: "szTheory/lattice_stripe", branch: "main"}
   ]
 end
 ```
@@ -103,16 +118,29 @@ Full documentation with guides, examples, and API reference is available on
 Guides available:
 
 - [Getting Started](https://hexdocs.pm/lattice_stripe/getting-started.html)
+- [User Flows & JTBD](https://hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html)
+- [Recipes](https://hexdocs.pm/lattice_stripe/recipes.html)
 - [Client Configuration](https://hexdocs.pm/lattice_stripe/client-configuration.html)
 - [Payments](https://hexdocs.pm/lattice_stripe/payments.html)
 - [Checkout](https://hexdocs.pm/lattice_stripe/checkout.html)
+- [Invoices](https://hexdocs.pm/lattice_stripe/invoices.html)
+- [Credit Notes](https://hexdocs.pm/lattice_stripe/credit_notes.html)
+- [Subscriptions](https://hexdocs.pm/lattice_stripe/subscriptions.html)
 - [Metering](https://hexdocs.pm/lattice_stripe/metering.html)
 - [Customer Portal](https://hexdocs.pm/lattice_stripe/customer-portal.html)
 - [Webhooks](https://hexdocs.pm/lattice_stripe/webhooks.html)
-- [Error Handling](https://hexdocs.pm/lattice_stripe/error-handling.html)
+- [Connect](https://hexdocs.pm/lattice_stripe/connect.html)
+- [Connect Accounts](https://hexdocs.pm/lattice_stripe/connect-accounts.html)
+- [Connect Money Movement](https://hexdocs.pm/lattice_stripe/connect-money-movement.html)
 - [Testing](https://hexdocs.pm/lattice_stripe/testing.html)
+- [Error Handling](https://hexdocs.pm/lattice_stripe/error-handling.html)
+- [Performance](https://hexdocs.pm/lattice_stripe/performance.html)
+- [Circuit Breaker](https://hexdocs.pm/lattice_stripe/circuit-breaker.html)
+- [OpenTelemetry](https://hexdocs.pm/lattice_stripe/opentelemetry.html)
 - [Telemetry](https://hexdocs.pm/lattice_stripe/telemetry.html)
+- [API Stability](https://hexdocs.pm/lattice_stripe/api_stability.html)
 - [Extending LatticeStripe](https://hexdocs.pm/lattice_stripe/extending-lattice-stripe.html)
+- [Cheatsheet](https://hexdocs.pm/lattice_stripe/cheatsheet.html)
 
 ## Contributing
 

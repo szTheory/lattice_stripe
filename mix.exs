@@ -1,7 +1,7 @@
 defmodule LatticeStripe.MixProject do
   use Mix.Project
 
-  @version "1.1.0"
+  @version "1.3.0-dev"
   @source_url "https://github.com/szTheory/lattice_stripe"
 
   def project do
@@ -18,7 +18,7 @@ defmodule LatticeStripe.MixProject do
       docs: [
         main: "getting-started",
         source_url: @source_url,
-        source_ref: "v#{@version}",
+        source_ref: docs_source_ref(),
         # logo: "assets/logo.png",  # Add when logo asset is created
         extras: [
           "guides/getting-started.md",
@@ -212,6 +212,10 @@ defmodule LatticeStripe.MixProject do
 
   def cli do
     [preferred_envs: [ci: :test]]
+  end
+
+  defp docs_source_ref do
+    if String.ends_with?(@version, "-dev"), do: "main", else: "v#{@version}"
   end
 
   defp deps do
