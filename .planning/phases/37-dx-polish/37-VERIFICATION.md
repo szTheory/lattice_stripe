@@ -62,6 +62,8 @@ Fresh DX-scoped commands executed during Phase 42 Plan 01:
 | `rg -n 'Webhook\.Plug|CacheBodyReader|raw-body|Phoenix' guides/webhooks.md` | Returned canonical Phoenix quickstart, raw-body invariant, `Webhook.Plug`, and `CacheBodyReader` matches |
 | `rg -n 'dispute|credit|quote' guides/recipes.md` | Returned dispute, credit issuance, and quote workflow matches |
 
+All observed results above were captured in the current 2026-05-25 execution window rather than copied forward from prior summaries.
+
 Repo-wide `mix docs --warnings-as-errors` remains pre-existing unrelated debt and is not a Phase 42 closure gate. This verifier stays intentionally scoped to the targeted DX proof set already defined in `42-RESEARCH.md`.
 
 ### Requirement Coverage
