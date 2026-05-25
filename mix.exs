@@ -40,6 +40,7 @@ defmodule LatticeStripe.MixProject do
           "guides/webhooks.md",
           "guides/error-handling.md",
           "guides/testing.md",
+          "guides/recipes.md",
           "guides/telemetry.md",
           "guides/api_stability.md",
           "guides/extending-lattice-stripe.md",

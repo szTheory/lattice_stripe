@@ -9,6 +9,39 @@ tests validated against Stripe's OpenAPI spec.
 For Stripe's official testing documentation (test card numbers, bank accounts, etc.), see
 [Stripe Testing docs](https://docs.stripe.com/testing).
 
+## Public fixture builders
+
+LatticeStripe now ships canonical raw-map fixtures for the v1.3 resource families under
+`LatticeStripe.Testing.Fixtures.*`.
+
+These modules are the recommended starting point when you want realistic Stripe-shaped
+payloads in downstream application tests:
+
+- `LatticeStripe.Testing.Fixtures.File`
+- `LatticeStripe.Testing.Fixtures.FileLink`
+- `LatticeStripe.Testing.Fixtures.Dispute`
+- `LatticeStripe.Testing.Fixtures.CreditNote`
+- `LatticeStripe.Testing.Fixtures.Mandate`
+- `LatticeStripe.Testing.Fixtures.SetupAttempt`
+- `LatticeStripe.Testing.Fixtures.Quote`
+
+The raw map is the canonical test shape. Build other forms explicitly on top:
+
+- `LatticeStripe.Testing.generate_webhook_event/3` for `%LatticeStripe.Event{}`
+- `LatticeStripe.Testing.generate_webhook_payload/3` for signed raw webhook payloads
+- `LatticeStripe.Testing.quote/1`, `dispute/1`, `credit_note/1`, and friends for typed structs
+
+```elixir
+alias LatticeStripe.Testing
+alias LatticeStripe.Testing.Fixtures
+
+quote_map = Fixtures.Quote.accepted_quote_json()
+quote = Testing.quote(quote_map)
+
+assert quote.id == quote_map["id"]
+assert quote.status == :accepted
+```
+
 ## Mocking with Mox
 
 LatticeStripe uses a `Transport` behaviour for all HTTP calls. In your tests, you can replace
@@ -209,25 +242,30 @@ For testing your webhook business logic without any HTTP layer:
 defmodule MyApp.WebhookHandlerTest do
   use ExUnit.Case, async: true
   alias LatticeStripe.Testing
+  alias LatticeStripe.Testing.Fixtures
 
   test "handles payment_intent.succeeded" do
-    event = Testing.generate_webhook_event("payment_intent.succeeded", %{
+    payment_intent = %{
       "id" => "pi_test123",
       "amount" => 2000,
       "currency" => "usd",
       "status" => "succeeded",
       "metadata" => %{"order_id" => "order_456"}
-    })
+    }
+
+    event = Testing.generate_webhook_event("payment_intent.succeeded", payment_intent)
 
     assert {:ok, :processed} = MyApp.WebhookHandler.handle(event)
   end
 
-  test "ignores unknown event types gracefully" do
-    event = Testing.generate_webhook_event("customer.subscription.created", %{
-      "id" => "sub_test789"
-    })
+  test "handles dispute evidence workflows from canonical fixtures" do
+    event =
+      Testing.generate_webhook_event(
+        "charge.dispute.created",
+        Fixtures.Dispute.dispute_json(%{"metadata" => %{"ticket" => "support_123"}})
+      )
 
-    assert {:ok, :ignored} = MyApp.WebhookHandler.handle(event)
+    assert {:ok, :queued} = MyApp.WebhookHandler.handle(event)
   end
 end
 ```
@@ -241,13 +279,14 @@ defmodule MyApp.WebhookPlugTest do
   use ExUnit.Case, async: true
   use Plug.Test
   alias LatticeStripe.Testing
+  alias LatticeStripe.Testing.Fixtures
 
   @webhook_secret "whsec_test_supersecret"
 
   test "accepts valid signed webhook" do
     {payload, sig_header} = LatticeStripe.Testing.generate_webhook_payload(
-      "payment_intent.succeeded",
-      %{"id" => "pi_test123", "amount" => 2000},
+      "quote.accepted",
+      Fixtures.Quote.accepted_quote_json(),
       secret: @webhook_secret
     )
 
@@ -365,6 +404,17 @@ services:
 Then your integration tests connect to `http://localhost:12111` in CI automatically.
 
 ## Test Helper Patterns
+
+### Canonical fixture flow
+
+Prefer this layering order in application tests:
+
+1. Start with a canonical raw fixture from `LatticeStripe.Testing.Fixtures.*`
+2. Use `generate_webhook_event/3` or `generate_webhook_payload/3` when you need webhook shapes
+3. Use `LatticeStripe.Testing.quote/1`, `dispute/1`, and similar wrappers when your code wants typed structs
+
+That keeps the raw Stripe payload shape as the single source of truth while still
+making event tests and typed-struct tests easy to read.
 
 ### Shared Client Factory
 
