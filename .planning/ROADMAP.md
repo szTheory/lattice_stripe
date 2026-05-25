@@ -67,10 +67,10 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details and decisions.
 
 - [x] **Phase 32: File & FileLink** - Upload and download infrastructure with multipart/binary transport, File and FileLink CRUDL (completed 2026-04-17)
 - [x] **Phase 33: Disputes** - Full dispute lifecycle including evidence staging, submission, and close verb (completed 2026-05-24)
-- [ ] **Phase 34: CreditNote** - Invoice credit workflow with preview, void, and line item streaming
-- [ ] **Phase 35: Mandate & SetupAttempt** - Read-only payment authorization tracking resources
+- [x] **Phase 34: CreditNote** - Invoice credit workflow with preview, void, and line item streaming (completed 2026-05-24)
+- [x] **Phase 35: Mandate & SetupAttempt** - Read-only payment authorization tracking resources (completed 2026-05-24)
 - [ ] **Phase 36: Quote** - Proposal-to-invoice workflow with finalize/accept/cancel verbs and PDF download
-- [ ] **Phase 37: DX Polish** - Phoenix webhook recipe, v1.3 fixture builders, recipes guide, guide consistency sweep
+- [x] **Phase 37: DX Polish** - Phoenix webhook recipe, v1.3 fixture builders, recipes guide, guide consistency sweep (completed 2026-05-25)
 
 ## Phase Details
 
@@ -117,10 +117,10 @@ Plans:
   4. Developer can list and stream credit note line items via `CreditNote.list_line_items/4` and `stream_line_items!/4`
   5. Developer can list preview line items via `CreditNote.list_preview_line_items/3`
   6. Credit note line item responses deserialize into typed `%CreditNote.LineItem{}` structs
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
-- [ ] 34-01-PLAN.md — CreditNote parser contracts, object dispatch, Billing ExDoc grouping, and fixtures
-- [ ] 34-02-PLAN.md — CreditNote resource APIs with preview/void/line-item coverage plus unit and integration tests
+- [x] 34-01-PLAN.md — CreditNote parser contracts, object dispatch, Billing ExDoc grouping, and fixtures
+- [x] 34-02-PLAN.md — CreditNote resource APIs with preview/void/line-item coverage plus unit and integration tests
 
 ### Phase 35: Mandate & SetupAttempt
 **Goal**: Developers can inspect payment authorization mandates and diagnose setup intent failures by examining setup attempt history
@@ -163,7 +163,7 @@ Plans:
 | 22-31 | v1.2 | 24/24 | Complete | 2026-04-17 |
 | 32. File & FileLink | v1.3 | 3/3 | Complete    | 2026-04-17 |
 | 33. Disputes | v1.3 | 2/2 | Complete    | 2026-05-24 |
-| 34. CreditNote | v1.3 | 0/2 | Not started | - |
-| 35. Mandate & SetupAttempt | v1.3 | 0/? | Not started | - |
+| 34. CreditNote | v1.3 | 2/2 | Complete    | 2026-05-24 |
+| 35. Mandate & SetupAttempt | v1.3 | 2/2 | Complete   | 2026-05-24 |
 | 36. Quote | v1.3 | 0/? | Not started | - |
-| 37. DX Polish | v1.3 | 0/? | Not started | - |
+| 37. DX Polish | v1.3 | 3/3 | Complete    | 2026-05-25 |
