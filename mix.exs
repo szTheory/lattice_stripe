@@ -22,12 +22,14 @@ defmodule LatticeStripe.MixProject do
         # logo: "assets/logo.png",  # Add when logo asset is created
         extras: [
           "guides/getting-started.md",
+          "guides/user-flows-and-jtbd.md",
           "guides/client-configuration.md",
           "guides/performance.md",
           "guides/circuit-breaker.md",
           "guides/opentelemetry.md",
           "guides/payments.md",
           "guides/checkout.md",
+          "guides/credit_notes.md",
           "guides/invoices.md",
           "guides/metering.md",
           "guides/subscriptions.md",
@@ -63,8 +65,17 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.PaymentIntent,
             LatticeStripe.Customer,
             LatticeStripe.PaymentMethod,
+            LatticeStripe.Mandate,
+            LatticeStripe.Mandate.CustomerAcceptance,
+            LatticeStripe.Mandate.SingleUse,
+            LatticeStripe.SetupAttempt,
+            LatticeStripe.SetupAttempt.SetupError,
             LatticeStripe.SetupIntent,
-            LatticeStripe.Refund
+            LatticeStripe.Refund,
+            LatticeStripe.Dispute,
+            LatticeStripe.Dispute.Evidence,
+            LatticeStripe.Dispute.EvidenceDetails,
+            LatticeStripe.Dispute.PaymentMethodDetails
           ],
           Checkout: [
             LatticeStripe.Checkout.Session,
@@ -73,6 +84,12 @@ defmodule LatticeStripe.MixProject do
           Billing: [
             LatticeStripe.Invoice,
             LatticeStripe.Invoice.LineItem,
+            LatticeStripe.CreditNote,
+            LatticeStripe.CreditNote.LineItem,
+            LatticeStripe.Quote,
+            LatticeStripe.Quote.LineItem,
+            LatticeStripe.Quote.Computed,
+            LatticeStripe.Quote.StatusTransitions,
             LatticeStripe.Invoice.StatusTransitions,
             LatticeStripe.Invoice.AutomaticTax,
             LatticeStripe.InvoiceItem,
@@ -152,6 +169,14 @@ defmodule LatticeStripe.MixProject do
           ],
           Testing: [
             LatticeStripe.Testing,
+            LatticeStripe.Testing.Fixtures,
+            LatticeStripe.Testing.Fixtures.File,
+            LatticeStripe.Testing.Fixtures.FileLink,
+            LatticeStripe.Testing.Fixtures.Dispute,
+            LatticeStripe.Testing.Fixtures.CreditNote,
+            LatticeStripe.Testing.Fixtures.Mandate,
+            LatticeStripe.Testing.Fixtures.SetupAttempt,
+            LatticeStripe.Testing.Fixtures.Quote,
             LatticeStripe.Testing.TestClock,
             LatticeStripe.Testing.TestClock.Owner,
             LatticeStripe.Testing.TestClock.Error
