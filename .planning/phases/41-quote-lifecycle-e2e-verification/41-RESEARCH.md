@@ -302,12 +302,15 @@ end
 
 All material findings in this research were verified in the current repo or cited from official docs. No `[ASSUMED]` claims remain.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Can Phase 41 satisfy D-05 under the current `stripe-mock` image without broadening scope?**
-   - What we know: The SDK probe reached `Quote.accept/3`, but the returned quote still had `invoice == nil`, `subscription == nil`, and `subscription_schedule == nil` [VERIFIED: SDK probe].
-   - What's unclear: Whether a different accepted-quote setup under `stripe-mock` can expose one downstream reference, or whether this is a hard mock limitation for quotes in the current image [VERIFIED: current probes only].
-   - Recommendation: Make this the first executable gate in Plan 01; if no downstream ref can be produced after the fixture repair, document the reproduced limitation in `36-VERIFICATION.md` and escalate only if the planner concludes D-05 cannot be interpreted within the locked bounded-proof posture [VERIFIED: phase context + probes].
+   - **Resolved answer:** No, not under the current local `stripe-mock` behavior. A fresh repo-local probe using a repaired Product-backed Quote create flow reached `Quote.create/3`, `Quote.update/4`, `Quote.stream!/3`, `Quote.list_line_items/4`, `Quote.stream_line_items!/4`, `Quote.finalize/4`, `Quote.accept/3`, `Quote.cancel/3`, and `Quote.pdf/3`, but `accept/3` still returned `invoice == nil`, `subscription == nil`, and `subscription_schedule == nil` [VERIFIED: 2026-05-25 `mix run -e` probe against local `stripe-mock`].
+   - **Implication:** The current environment can support fresh bounded evidence for QUOT-01 through QUOT-05 except the locked D-05 requirement to retrieve exactly one downstream resource after accept. That downstream hop cannot be completed truthfully under the present `stripe-mock` image because no downstream reference is exposed to retrieve [VERIFIED: probe].
+   - **Planning consequence:** The planner must not silently reduce the acceptance standard. It should either:
+     1. produce a phase-split / escalation recommendation because the roadmap's strict quote-to-invoice follow-through criterion cannot currently be met under `stripe-mock`, or
+     2. introduce an explicit checkpoint that blocks closure until a reproducible environment capable of returning one downstream reference is available.
+   - **Evidence captured:** The same probe also confirmed that `Quote.update/4`, `Quote.stream!/3`, `Quote.stream_line_items!/4`, and `Quote.pdf/3` all work with the repaired setup, so the remaining requirement-coverage gap is planning completeness, not implementation uncertainty [VERIFIED: probe].
 
 ## Environment Availability
 

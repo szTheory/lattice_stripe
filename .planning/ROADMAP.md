@@ -74,7 +74,7 @@ See `.planning/milestones/v1.2-ROADMAP.md` for full phase details and decisions.
 - [x] **Phase 38: Dispute Evidence E2E Verification** - Close File/Dispute verification gaps and add end-to-end evidence workflow coverage (completed 2026-05-25)
 - [x] **Phase 39: Credit Note Verification Closure** - Close CreditNote verification and milestone acceptance evidence (completed 2026-05-25)
 - [ ] **Phase 40: Mandate & SetupAttempt Integration Closure** - Add missing Mandate integration coverage and close auth verification
-- [ ] **Phase 41: Quote Lifecycle E2E Verification** - Close Quote verification gaps and exercise quote lifecycle flows under integration
+- [x] **Phase 41: Quote Lifecycle E2E Verification** - Close Quote verification gaps and exercise quote lifecycle flows under integration (completed 2026-05-25)
 - [ ] **Phase 42: Planning Truth Reconciliation** - Align roadmap/requirements/DX verification state with shipped v1.3 work
 
 ## Phase Details
@@ -197,20 +197,34 @@ Plans:
 - [ ] 40-02-PLAN.md — Closed Phase 35 verifier artifact and AUTH traceability closure
 
 ### Phase 41: Quote Lifecycle E2E Verification
-**Goal**: Quote lifecycle work is fully evidenced under integration, including PDF download and quote-to-invoice follow-through
+**Goal**: Quote lifecycle work is fully evidenced under `stripe-mock` integration for the surfaces that `stripe-mock` can truthfully cover, including PDF download and bounded lifecycle route proof
 **Depends on**: Phase 40
 **Requirements**: QUOT-01, QUOT-02, QUOT-03, QUOT-04, QUOT-05
-**Gap Closure**: Closes audit gaps from `.planning/v1.3-v1.3-MILESTONE-AUDIT.md` for missing `36-VERIFICATION.md`, stale Phase 36 tracking, missing Quote PDF coverage, and partial quote-to-invoice flow evidence
+**Gap Closure**: Closes audit gaps from `.planning/v1.3-v1.3-MILESTONE-AUDIT.md` for missing `36-VERIFICATION.md`, stale Phase 36 tracking, missing Quote PDF coverage, and stale Quote lifecycle runtime evidence that `stripe-mock` can actually provide today
 **Success Criteria** (what must be TRUE):
   1. `36-VERIFICATION.md` exists and is in a closed verifier state
   2. Integration coverage exercises `Quote.pdf/3`
   3. Integration coverage exercises `Quote.accept/3` and `Quote.cancel/3`
-  4. Quote-to-invoice follow-through is exercised end-to-end under `stripe-mock`
+  4. Integration evidence explicitly reproduces and documents the current `stripe-mock` Quote lifecycle boundary, including whether accepted Quote responses expose no downstream reference
+**Plans**: 2 plans
+Plans:
+- [x] 41-01-PLAN.md — Repair stale Quote integration setup, add bounded PDF/lifecycle/downstream runtime proof
+- [x] 41-02-PLAN.md — Create closed `36-VERIFICATION.md` and close QUOT-only traceability rows within the `stripe-mock` boundary
+
+### Phase 41.1: Quote Downstream Follow-Through Verification
+**Goal**: Quote downstream follow-through is evidenced in an environment that actually exposes post-accept downstream references, without overloading the `stripe-mock`-bounded closure phase
+**Depends on**: Phase 41
+**Requirements**: None — follow-up proof phase for the former Phase 41 downstream success criterion
+**Gap Closure**: Owns the displaced quote-to-invoice follow-through requirement after repo-local research showed current `stripe-mock` does not expose `invoice`, `subscription`, or `subscription_schedule` after `Quote.accept/3`
+**Success Criteria** (what must be TRUE):
+  1. An accepted Quote response exposes one downstream reference in the chosen verification environment
+  2. Exactly one downstream Stripe resource is retrieved in the D-06 preference order and asserted only at typed top-level decode depth
+  3. Verification language stays explicit about the chosen environment and does not back-port unsupported claims into the `stripe-mock`-bounded Phase 41
 **Plans**: TBD
 
 ### Phase 42: Planning Truth Reconciliation
 **Goal**: Planning artifacts accurately reflect shipped v1.3 work and closed verification, so a fresh milestone audit can pass on planning truth as well as code
-**Depends on**: Phase 41
+**Depends on**: Phase 41.1
 **Requirements**: DX-01, DX-02, DX-03, DX-04
 **Gap Closure**: Closes audit gaps from `.planning/v1.3-v1.3-MILESTONE-AUDIT.md` for missing `37-VERIFICATION.md`, stale roadmap progress, and stale requirements traceability/status
 **Success Criteria** (what must be TRUE):
@@ -236,5 +250,6 @@ Plans:
 | 38. Dispute Evidence E2E Verification | v1.3 | 2/2 | Complete   | 2026-05-25 |
 | 39. Credit Note Verification Closure | v1.3 | 2/2 | Complete    | 2026-05-25 |
 | 40. Mandate & SetupAttempt Integration Closure | v1.3 | 0/2 | Not started | - |
-| 41. Quote Lifecycle E2E Verification | v1.3 | 0/? | Not started | - |
+| 41. Quote Lifecycle E2E Verification | v1.3 | 2/2 | Complete   | 2026-05-25 |
+| 41.1. Quote Downstream Follow-Through Verification | v1.3 | 0/? | Not started | - |
 | 42. Planning Truth Reconciliation | v1.3 | 0/? | Not started | - |

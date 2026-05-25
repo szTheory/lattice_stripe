@@ -8,7 +8,7 @@
 
 Close the remaining milestone verification gaps for the shipped Quote resource so `QUOT-01` through `QUOT-05` can be accepted as current, credible, and auditable.
 
-This is a verification-closure phase, not a new Quote feature phase. The Quote API, parser contracts, PDF surface, lifecycle verbs, fixtures, unit tests, and a narrow integration suite already exist from Phase 36. Phase 41 should add the missing integration evidence for quote lifecycle closure, create a closed `36-VERIFICATION.md`, and reconcile Quote traceability without broadening into Accrue-owned orchestration, general roadmap cleanup, or fresh Quote API design.
+This is a verification-closure phase, not a new Quote feature phase. The Quote API, parser contracts, PDF surface, lifecycle verbs, fixtures, unit tests, and a narrow integration suite already exist from Phase 36. Phase 41 should add the missing integration evidence for the Quote surfaces that current `stripe-mock` can truthfully cover, create a closed `36-VERIFICATION.md`, and reconcile Quote traceability without broadening into Accrue-owned orchestration, general roadmap cleanup, fresh Quote API design, or non-`stripe-mock` environment work.
 
 </domain>
 
@@ -22,19 +22,19 @@ This is a verification-closure phase, not a new Quote feature phase. The Quote A
   - `Quote.pdf/3`
   - `Quote.accept/3`
   - `Quote.cancel/3`
-  - one narrow quote-to-downstream follow-through hop after acceptance
+  - one bounded quote-to-downstream inspection step after acceptance that records what current `stripe-mock` actually exposes
 - **D-03:** Do **not** treat `stripe-mock` as a real Quote state-machine oracle. Verifier wording must say that the integration evidence proves request routing, request encoding, binary transport, and typed decode sanity under `stripe-mock`, not full real-Stripe lifecycle semantics.
 - **D-04:** Do **not** close Phase 41 with unit-only proof. The audit explicitly calls out missing integration evidence for Quote lifecycle closure, and the verifier should require fresh targeted Quote integration runs.
 
-### Quote-to-invoice follow-through
+### Quote-to-invoice follow-through boundary
 
-- **D-05:** The correct follow-through depth is: `Quote.create/3 -> Quote.finalize/4 -> Quote.accept/3 -> inspect returned downstream reference -> retrieve exactly one linked downstream Stripe resource -> stop`.
-- **D-06:** Prefer downstream follow-through in this order when present in the accepted quote response:
+- **D-05:** Repo-local research on 2026-05-25 showed that the current repaired local `stripe-mock` returns `invoice=nil`, `subscription=nil`, and `subscription_schedule=nil` after `Quote.accept/3`. Phase 41 therefore owns reproducing and documenting that `stripe-mock` boundary truthfully; the exact one-hop downstream retrieve has been moved to follow-up Phase `41.1`.
+- **D-06:** When Phase 41 inspects accepted Quote responses, it should still check downstream references in this order so the later follow-up phase inherits the same preference contract:
   - `invoice`
   - otherwise `subscription`
   - otherwise `subscription_schedule`
-- **D-07:** Follow-through retrieval should assert **typed top-level decode only**. Do not assert invoice payment behavior, subscription activation timing, webhook ordering, or any broader multi-resource business workflow semantics.
-- **D-08:** This is the least-surprise proof for a low-level Stripe SDK: it demonstrates the handoff users actually care about after `accept/3` without drifting into Accrue-owned orchestration or fake end-to-end billing-theater.
+- **D-07:** Phase 41 verifier wording must state whether the downstream reference is absent under current `stripe-mock`; it must not invent a retrieve step that the environment does not expose. The moved follow-up phase should still assert **typed top-level decode only** when a downstream retrieve becomes possible.
+- **D-08:** This preserves least-surprise proof for a low-level Stripe SDK: Phase 41 closes the `stripe-mock`-bounded evidence honestly, while Phase `41.1` owns any environment that can actually demonstrate the handoff users care about after `accept/3`.
 
 ### PDF proof strictness
 
@@ -46,7 +46,7 @@ This is a verification-closure phase, not a new Quote feature phase. The Quote A
 ### Allowed repair scope
 
 - **D-13:** Allow **narrow evidence repairs only**:
-  - Quote integration-test additions or tightening for `pdf/3`, `accept/3`, `cancel/3`, and one downstream follow-through hop
+  - Quote integration-test additions or tightening for `pdf/3`, `accept/3`, `cancel/3`, and bounded downstream-reference inspection under `stripe-mock`
   - small fixture or helper adjustments required to make those proofs executable and truthful
   - tiny support-code or wiring fixes only when they are strictly evidence-enabling for already-shipped Quote behavior
   - `36-VERIFICATION.md` creation plus QUOT-only traceability updates
@@ -71,7 +71,7 @@ This is a verification-closure phase, not a new Quote feature phase. The Quote A
 - Exact test naming and module structure for the new Quote integration coverage, as long as it stays aligned with current `test/integration/` conventions.
 - Exact verifier table layout, wording, and score format, as long as the report is closed, audit-friendly, and explicit about `stripe-mock` limits.
 - Whether the lifecycle proof uses `create -> cancel` or `finalize -> cancel`, as long as the chosen route is truthful and closes the explicit cancel-evidence gap.
-- Whether the follow-through hop retrieves `Invoice`, `Subscription`, or `SubscriptionSchedule`, based on what the accepted Quote response actually exposes under `stripe-mock`.
+- Exact wording for the reproduced nil-reference limitation under current `stripe-mock`, as long as it stays factual and easy for the verifier to cite.
 
 </decisions>
 
@@ -80,7 +80,7 @@ This is a verification-closure phase, not a new Quote feature phase. The Quote A
 
 - The coherent recommendation set for Phase 41 is:
   - hybrid verification posture
-  - one-hop downstream follow-through after accept
+  - reproduced `stripe-mock` downstream-reference boundary after accept
   - expected integration proof for `Quote.pdf/3`
   - narrow evidence repairs only
   - shift routine decisions left to the agent
@@ -123,6 +123,7 @@ This is a verification-closure phase, not a new Quote feature phase. The Quote A
 - `.planning/phases/39-credit-note-verification-closure/39-VERIFICATION.md` — current closure-verifier style
 - `.planning/phases/40-mandate-setupattempt-integration-closure/40-CONTEXT.md` — AUTH closure scope discipline and escalation rules
 - `.planning/phases/35-mandate-setupattempt/35-VERIFICATION.md` — fresh closure-verifier example with targeted unit + integration evidence
+- `.planning/phases/41.1-quote-downstream-follow-through-verification/41.1-CONTEXT.md` — explicit handoff for post-accept downstream-reference proof that no longer belongs inside Phase 41
 
 ### Scope boundary and local research
 - `.planning/threads/lattice-stripe-vs-accrue-scope-boundary.md` — Quote verification must stay at Stripe resource coverage, not billing-engine orchestration
@@ -169,9 +170,10 @@ This is a verification-closure phase, not a new Quote feature phase. The Quote A
 - `stripe-mock` integration in this repo is treated as route/encoding/decode sanity, not as a source of full business-semantic truth.
 - Resource-shaped SDK surfaces should demonstrate one clear next step after a lifecycle verb, not hide orchestration inside convenience helpers.
 - Planning and requirements edits in closure phases should stay scoped to the requirement family being closed.
+- When a verification boundary moves into a follow-up phase, the closure phase should cite that handoff explicitly instead of retaining stale implied scope.
 
 ### Integration Points
-- `test/integration/quote_integration_test.exs` — expand to cover PDF, accept, cancel, and one downstream follow-through hop
+- `test/integration/quote_integration_test.exs` — expand to cover PDF, accept, cancel, and bounded downstream-reference inspection under current `stripe-mock`
 - `.planning/phases/36-quote/36-VERIFICATION.md` — new closed verifier artifact to create
 - `.planning/REQUIREMENTS.md` — update `QUOT-01` through `QUOT-05` rows from pending to verified when proof is current
 - Optional small Quote fixture/support adjustments only if needed to make the new integration evidence truthful and executable
@@ -183,7 +185,8 @@ This is a verification-closure phase, not a new Quote feature phase. The Quote A
 
 - Any broader roadmap/requirements truth reconciliation beyond Quote rows remains deferred to Phase 42.
 - Any real Quote behavior defect discovered during Phase 41 verification should become follow-up work instead of hidden expansion inside this closure phase.
-- Any future desire to validate richer quote lifecycle semantics against real Stripe sandboxes or test mode should be separate from this `stripe-mock`-based closure phase.
+- The exact one-hop downstream retrieve proof now lives in follow-up Phase `41.1`, not this `stripe-mock`-bounded closure phase.
+- Any future desire to validate richer quote lifecycle semantics against real Stripe sandboxes or test mode should still be separate from this `stripe-mock`-based closure phase.
 - Any project-wide GSD/process change to make “shift-left agent discretion” the default across workflows should be captured separately from Phase 41 implementation work.
 
 </deferred>

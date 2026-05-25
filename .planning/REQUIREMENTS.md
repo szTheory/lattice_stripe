@@ -41,11 +41,11 @@ Requirements for v1.3 (Production Coverage & Adoption Polish). Each maps to road
 
 ### Quotes & Proposals
 
-- [ ] **QUOT-01**: Developer can create, retrieve, update, list quotes with auto-pagination via `stream!/3`
-- [ ] **QUOT-02**: Developer can finalize, accept, and cancel quotes via explicit verbs
-- [ ] **QUOT-03**: Developer can list and stream quote line items via `Quote.list_line_items/4` and `stream_line_items!/4`
-- [ ] **QUOT-04**: Developer can download quote PDF as raw binary via `Quote.pdf/3`
-- [ ] **QUOT-05**: Quote line items deserialize into typed `Quote.LineItem` struct
+- [x] **QUOT-01**: Developer can create, retrieve, update, list quotes with auto-pagination via `stream!/3`
+- [x] **QUOT-02**: Developer can finalize, accept, and cancel quotes via explicit verbs
+- [x] **QUOT-03**: Developer can list and stream quote line items via `Quote.list_line_items/4` and `stream_line_items!/4`
+- [x] **QUOT-04**: Developer can download quote PDF as raw binary via `Quote.pdf/3`
+- [x] **QUOT-05**: Quote line items deserialize into typed `Quote.LineItem` struct
 
 ### Developer Experience
 
@@ -109,11 +109,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CRDN-06 | Phase 39 | Verified |
 | AUTH-01 | Phase 40 | Verified |
 | AUTH-02 | Phase 40 | Verified |
-| QUOT-01 | Phase 41 | Pending |
-| QUOT-02 | Phase 41 | Pending |
-| QUOT-03 | Phase 41 | Pending |
-| QUOT-04 | Phase 41 | Pending |
-| QUOT-05 | Phase 41 | Pending |
+| QUOT-01 | Phase 41 | Verified |
+| QUOT-02 | Phase 41 | Verified |
+| QUOT-03 | Phase 41 | Verified |
+| QUOT-04 | Phase 41 | Verified |
+| QUOT-05 | Phase 41 | Verified |
 | DX-01 | Phase 42 | Pending |
 | DX-02 | Phase 42 | Pending |
 | DX-03 | Phase 42 | Pending |
