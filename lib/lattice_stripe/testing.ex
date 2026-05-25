@@ -46,9 +46,61 @@ defmodule LatticeStripe.Testing do
   production releases.
   """
 
-  alias LatticeStripe.{Event, Webhook}
+  alias LatticeStripe.{
+    CreditNote,
+    Dispute,
+    Event,
+    File,
+    FileLink,
+    Mandate,
+    Quote,
+    SetupAttempt,
+    Webhook
+  }
 
   @default_api_version "2026-03-25.dahlia"
+
+  @doc """
+  Converts a canonical File fixture map into `%LatticeStripe.File{}`.
+  """
+  @spec file(map()) :: File.t()
+  def file(raw_map), do: File.from_map(raw_map)
+
+  @doc """
+  Converts a canonical FileLink fixture map into `%LatticeStripe.FileLink{}`.
+  """
+  @spec file_link(map()) :: FileLink.t()
+  def file_link(raw_map), do: FileLink.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Dispute fixture map into `%LatticeStripe.Dispute{}`.
+  """
+  @spec dispute(map()) :: Dispute.t()
+  def dispute(raw_map), do: Dispute.from_map(raw_map)
+
+  @doc """
+  Converts a canonical CreditNote fixture map into `%LatticeStripe.CreditNote{}`.
+  """
+  @spec credit_note(map()) :: CreditNote.t()
+  def credit_note(raw_map), do: CreditNote.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Mandate fixture map into `%LatticeStripe.Mandate{}`.
+  """
+  @spec mandate(map()) :: Mandate.t()
+  def mandate(raw_map), do: Mandate.from_map(raw_map)
+
+  @doc """
+  Converts a canonical SetupAttempt fixture map into `%LatticeStripe.SetupAttempt{}`.
+  """
+  @spec setup_attempt(map()) :: SetupAttempt.t()
+  def setup_attempt(raw_map), do: SetupAttempt.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Quote fixture map into `%LatticeStripe.Quote{}`.
+  """
+  @spec quote(map()) :: Quote.t()
+  def quote(raw_map), do: Quote.from_map(raw_map)
 
   @doc """
   Builds a `%LatticeStripe.Event{}` struct for the given event type and object data.
@@ -69,14 +121,19 @@ defmodule LatticeStripe.Testing do
 
   A `%LatticeStripe.Event{}` struct.
 
+  Canonical raw maps from `LatticeStripe.Testing.Fixtures.*` compose directly
+  with this helper.
+
   ## Example
+
+      file = LatticeStripe.Testing.Fixtures.File.file_json()
 
       event = LatticeStripe.Testing.generate_webhook_event(
         "payment_intent.succeeded",
-        %{"id" => "pi_test_123", "amount" => 2000}
+        file
       )
       assert event.type == "payment_intent.succeeded"
-      assert event.data["object"]["id"] == "pi_test_123"
+      assert event.data["object"]["id"] == file["id"]
   """
   @spec generate_webhook_event(String.t(), map(), keyword()) :: Event.t()
   def generate_webhook_event(type, object_data \\ %{}, opts \\ []) do
@@ -121,11 +178,16 @@ defmodule LatticeStripe.Testing do
 
   `{raw_payload_string, stripe_signature_header_value}`
 
+  Canonical raw maps from `LatticeStripe.Testing.Fixtures.*` compose directly
+  with this helper.
+
   ## Example
+
+      dispute = LatticeStripe.Testing.Fixtures.Dispute.dispute_json()
 
       {payload, sig_header} = LatticeStripe.Testing.generate_webhook_payload(
         "payment_intent.succeeded",
-        %{"id" => "pi_test_123", "status" => "succeeded"},
+        dispute,
         secret: "whsec_test"
       )
 

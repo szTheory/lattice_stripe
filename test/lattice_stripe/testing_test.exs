@@ -1,7 +1,18 @@
 defmodule LatticeStripe.TestingTest do
   use ExUnit.Case, async: true
 
-  alias LatticeStripe.{Event, Testing, Webhook}
+  alias LatticeStripe.{
+    CreditNote,
+    Dispute,
+    Event,
+    File,
+    FileLink,
+    Mandate,
+    Quote,
+    SetupAttempt,
+    Testing,
+    Webhook
+  }
 
   alias LatticeStripe.Testing.Fixtures
 
@@ -85,6 +96,23 @@ defmodule LatticeStripe.TestingTest do
         )
 
       assert sig_header =~ "t=#{fixed_ts}"
+    end
+  end
+
+  describe "typed wrappers" do
+    test "return typed structs from canonical fixture maps" do
+      assert %File{} = Testing.file(Fixtures.File.file_json())
+      assert %FileLink{} = Testing.file_link(Fixtures.FileLink.file_link_json())
+      assert %Dispute{} = Testing.dispute(Fixtures.Dispute.dispute_json())
+      assert %CreditNote{} = Testing.credit_note(Fixtures.CreditNote.credit_note_json())
+      assert %Mandate{} = Testing.mandate(Fixtures.Mandate.mandate_json())
+      assert %SetupAttempt{} = Testing.setup_attempt(Fixtures.SetupAttempt.setup_attempt_json())
+      assert %Quote{} = Testing.quote(Fixtures.Quote.quote_json())
+    end
+
+    test "keep wrapper shapes explicit instead of option-driven" do
+      refute function_exported?(Testing, :generate_webhook_event, 4)
+      refute function_exported?(Testing, :generate_webhook_payload, 4)
     end
   end
 end
