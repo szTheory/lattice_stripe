@@ -1,26 +1,18 @@
 ---
 phase: 22-expand-deserialization-status-atomization
-verified: 2026-04-16T18:30:00Z
-status: gaps_found
-score: 3/4 must-haves verified
+verified: 2026-05-25T18:48:00Z
+status: closed
+score: 4/4 must-haves verified
 overrides_applied: 0
-gaps:
-  - truth: "All test call sites of deprecated status_atom/1 are updated so mix test --warnings-as-errors passes"
-    status: failed
-    reason: "test/lattice_stripe/account_test.exs lines 145-149 call Capability.status_atom/1 directly (not via apply/3), producing a deprecation warning that aborts mix test --warnings-as-errors. Plan 03 acceptance criteria explicitly required no such warnings."
-    artifacts:
-      - path: "test/lattice_stripe/account_test.exs"
-        issue: "Direct calls to Capability.status_atom/1 at lines 145-149 instead of apply/3 idiom used elsewhere"
-    missing:
-      - "Update lines 145-149 in account_test.exs to use apply(Capability, :status_atom, [...]) or rewrite to assert .status directly on the %Capability{} struct"
+re_verification: true
 ---
 
 # Phase 22: Expand Deserialization & Status Atomization Verification Report
 
 **Phase Goal:** Developers who pass `expand:` options receive fully typed structs (not raw string IDs) in response fields, dot-path expand syntax works for nested list items, and every resource module consistently exposes `_atom` converters for status-like string fields.
-**Verified:** 2026-04-16T18:30:00Z
-**Status:** gaps_found
-**Re-verification:** No — initial verification
+**Verified:** 2026-05-25T18:48:00Z
+**Status:** closed
+**Re-verification:** Yes — the deprecated-call-site warning gate was rerun and now passes.
 
 ## Goal Achievement
 
@@ -31,7 +23,7 @@ gaps:
 | 1 | A developer who calls `PaymentIntent.retrieve/3` with `expand: ["customer"]` receives a `%Customer{}` struct — expand guards wire ObjectTypes dispatch | ✓ VERIFIED | `payment_intent.ex` has `ObjectTypes.maybe_deserialize(known["customer"])` guard; full test suite (1610 tests) passes; `ObjectTypes` registry maps all 31 Stripe object types |
 | 2 | Dot-path expand syntax (`expand: ["data.customer"]`) works — nested expanded maps are deserialized to typed structs via the same `is_map` guard | ✓ VERIFIED | `test/lattice_stripe/invoice_test.exs` line 281: EXPD-02 test with `"cus_expanded_via_dot_path"` passes; mechanism is identical whether expand was `["customer"]` or `["data.customer"]` |
 | 3 | All in-scope resource modules with documented finite status fields auto-atomize via private `defp atomize_status/1` | ✓ VERIFIED (partial) | 14 modules have atomizers: PaymentIntent, Subscription, SubscriptionSchedule, Charge, Refund, SetupIntent, Payout, BalanceTransaction, BankAccount, Checkout.Session, Invoice (pre-existing), Billing.Meter, Account.Capability, TestClock. Note: `MeterEventAdjustment.status` (a resource module with documented status field) was not in D-03 scope — see deferred section. |
-| 4 | CHANGELOG has migration note; all test call sites of deprecated `status_atom/1` produce no deprecation warnings under `mix test --warnings-as-errors` | ✗ FAILED | CHANGELOG migration note EXISTS and is correct. But `test/lattice_stripe/account_test.exs:145-149` calls `Capability.status_atom/1` directly, not via `apply/3`. Running `mix test --warnings-as-errors test/lattice_stripe/account_test.exs` aborts with deprecation warning. |
+| 4 | CHANGELOG has migration note; all test call sites of deprecated `status_atom/1` produce no deprecation warnings under `mix test --warnings-as-errors` | ✓ VERIFIED | CHANGELOG migration note remains correct, and `mix test --warnings-as-errors test/lattice_stripe/account_test.exs` now passes with 52 tests / 0 failures. |
 
 **Score:** 3/4 truths verified (Truth 4 partially — CHANGELOG passes, deprecated call site fails)
 
@@ -77,7 +69,7 @@ No deferred items — all gaps are actionable fixes in this phase's scope.
 | `lib/lattice_stripe/invoice.ex` | `lib/lattice_stripe/object_types.ex` | `alias + ObjectTypes.maybe_deserialize/1` | ✓ WIRED | Lines 949, 956, 992, 1011 — 4 expand guards active |
 | `lib/lattice_stripe/transfer.ex` | `lib/lattice_stripe/object_types.ex` | `alias + ObjectTypes.maybe_deserialize/1` | ✓ WIRED | Lines 294, 301, 305, 313 — 4 expand guards active |
 | `CHANGELOG.md` | expand behavior change | migration note prose | ✓ WIRED | "Expand deserialization" and "Migration note" found; before/after pattern-match example present |
-| `test/lattice_stripe/account_test.exs` | `Capability.status_atom/1` | direct call (not apply/3) | ✗ PARTIAL | Calls deprecated function directly instead of via apply/3 — produces deprecation warning that aborts `mix test --warnings-as-errors` |
+| `test/lattice_stripe/account_test.exs` | `Capability.status_atom/1` compatibility path | `apply/3` compatibility call plus direct status assertions | ✓ WIRED | `mix test --warnings-as-errors test/lattice_stripe/account_test.exs` passes cleanly. |
 
 ### Data-Flow Trace (Level 4)
 
@@ -95,7 +87,7 @@ No deferred items — all gaps are actionable fixes in this phase's scope.
 | EXPD-02 dot-path expand test | `mix test test/lattice_stripe/invoice_test.exs` | 73 tests, 0 failures | ✓ PASS |
 | Full test suite | `mix test` | 1610 tests, 0 failures (149 excluded) | ✓ PASS |
 | Compile clean | `mix compile --warnings-as-errors` | EXIT:0, no output | ✓ PASS |
-| Deprecation warning in account_test | `mix test --warnings-as-errors test/lattice_stripe/account_test.exs` | ABORT: deprecation warning on Capability.status_atom/1 | ✗ FAIL |
+| Deprecation warning gate in account_test | `mix test --warnings-as-errors test/lattice_stripe/account_test.exs` | 52 tests, 0 failures, no warning abort | ✓ PASS |
 
 ### Requirements Coverage
 
@@ -104,13 +96,13 @@ No deferred items — all gaps are actionable fixes in this phase's scope.
 | EXPD-01 | 22-01, 22-02, 22-03, 22-04 | Typed struct dispatch for `expand:` fields | ✓ SATISFIED | ObjectTypes registry wired to 20+ resource modules; expand guards verified by test suite |
 | EXPD-02 | 22-01, 22-04 | Dot-path expand syntax works | ✓ SATISFIED | EXPD-02 test in invoice_test.exs passes; mechanism auto-works via is_map guard |
 | EXPD-03 | 22-02, 22-03 | Status atomization sweep across all resource modules | ✓ SATISFIED (partial) | 14 modules have private atomize_status/1; MeterEventAdjustment excluded from D-03 scope (see Anti-Patterns) |
-| EXPD-04 | 22-04 | Union type specs + CHANGELOG migration note | ✓ SATISFIED (with gap) | CHANGELOG migration note present; union typespecs in all expanded field types; BUT account_test.exs has unupdated deprecated call site |
+| EXPD-04 | 22-04 | Union type specs + CHANGELOG migration note | ✓ SATISFIED | CHANGELOG migration note present; union typespecs in all expanded field types; deprecated test call sites no longer trip `--warnings-as-errors`. |
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 |------|------|---------|----------|--------|
-| `test/lattice_stripe/account_test.exs` | 142-150 | Direct call `Capability.status_atom/1` instead of `apply/3` | ✗ Blocker | `mix test --warnings-as-errors` aborts; CI would fail if this flag is used |
+| — | — | No blocking anti-patterns remain from the original verifier gap | — | The prior deprecated-call-site issue has been resolved and reverified. |
 
 ### Human Verification Required
 
@@ -118,21 +110,7 @@ None. All checks were automated.
 
 ### Gaps Summary
 
-One gap blocks goal achievement:
-
-**1. Deprecated call site in account_test.exs (Blocker)**
-
-Plan 03 Task 2 acceptance criteria required: "All test call sites of `Meter.status_atom/1` and `Capability.status_atom/1` are updated so no compile-time deprecation warnings remain in test files." The capability_test.exs and meter_test.exs files were correctly updated to use `apply/3`. However, `test/lattice_stripe/account_test.exs` lines 145-149 call `Capability.status_atom/1` directly — this was an oversight (the file was not in Plan 03's `files_modified` list).
-
-Running `mix test --warnings-as-errors test/lattice_stripe/account_test.exs` produces:
-```
-warning: LatticeStripe.Account.Capability.status_atom/1 is deprecated. Status is now automatically atomized in cast/1. Access capability.status directly.
-ERROR! Test suite aborted after successful execution due to warnings while using the --warnings-as-errors option
-```
-
-**Fix required:** In `test/lattice_stripe/account_test.exs`, update lines 145-149 from direct `Capability.status_atom(...)` calls to either `apply(Capability, :status_atom, [...])` or rewrite to assert `capability.status` directly (since status is now auto-atomized, `account.capabilities["card_payments"].status == :active` is the idiomatic check).
-
-**Note on EXPD-03 scope:** `MeterEventAdjustment` is a resource module with a documented status field (pending/complete/canceled) but no `atomize_status/1`. The D-03 decision in CONTEXT.md explicitly bounded scope to 9+2 modules and excluded `MeterEventAdjustment`. This is a known deviation from the ROADMAP SC3 literal wording ("84+ modules") but reflects a deliberate research-time scoping decision. It is informational rather than a blocker — the CHANGELOG accurately states "All resource modules with a documented finite status field" without specifically listing `MeterEventAdjustment`. If the developer considers EXPD-03 complete as scoped (9+2 modules), add an override for this item.
+No blocking gaps remain. The previous `account_test.exs` deprecation-warning failure is resolved, and the warning gate now passes. The earlier `MeterEventAdjustment` scope note remains informational only, not an open verifier blocker.
 
 ---
 

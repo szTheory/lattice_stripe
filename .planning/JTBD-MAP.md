@@ -96,10 +96,12 @@ When updating this file, review in this order:
 | BillingPortal configuration strategy | Important | Strong | Thin | Shipped but under-documented |
 | Complete end-to-end SaaS recipes | Important | Partial | Thin | Partially covered |
 | File and FileLink workflows | Important dependency | Strong | Thin | Shipped but under-documented |
-| Disputes and evidence lifecycle | High leverage | Planned | Missing | Not shipped |
-| Credit-note workflows | High leverage | Planned | Missing | Not shipped |
-| Mandate and SetupAttempt diagnostics | Medium | Planned | Missing | Not shipped |
-| Quote-to-invoice workflow | High leverage for B2B | Planned | Missing | Not shipped |
+| Disputes and evidence lifecycle | High leverage | Strong | Partial | Shipped but under-documented |
+| Credit-note workflows | High leverage | Strong | Partial | Shipped but under-documented |
+| Mandate and SetupAttempt diagnostics | Medium | Strong | Thin | Shipped but under-documented |
+| Quote-to-invoice workflow | High leverage for B2B | Strong | Partial | Shipped but under-documented |
+| Public package/docs/version truth | Foundational | Partial | Partial | Shipped surface exists but public truth lags |
+| Thin-event webhook support | Important platform wedge | Missing | Missing | Not shipped |
 
 ## Current Best-Fit User Stories
 
@@ -135,52 +137,75 @@ Boundary note:
 - recipe work here should stay primitive-first and SDK-shaped
 - if a recipe starts turning into a billing-facade or workflow-orchestration product, point up to Accrue instead of expanding LatticeStripe
 
-### Gap 2: Disputes are the largest missing operational workflow
+### Gap 2: Public release truth and guide coverage lag the shipped surface
 
-Disputes are not edge-case API trivia. They are part of the real operating system of taking
-payments at scale.
+The repo now ships more than the public installer/docs story makes obvious.
+
+What is happening:
+
+- README, CHANGELOG, install snippets, and the cheatsheet still describe `1.3`
+  as unreleased or show pre-1.0 setup
+- the code/test/tag surface already includes File/FileLink, Dispute, CreditNote,
+  Mandate, SetupAttempt, Quote, recipes, and webhook guidance
+- a serious adopter can underestimate the library because the public story still
+  reflects an older line
 
 Why it should stay high priority:
 
-- the repo already shipped File/FileLink, which is the hard dependency for evidence workflows
-- disputes are painful enough that good SDK ergonomics have outsized value
-- this closes an obvious "drop to raw HTTP" gap
+- this is the fastest path from "strong repo" to "obviously adoptable OSS library"
+- it reduces evaluation friction for new Phoenix SaaS teams more than another
+  narrow Stripe family
+- it is the cleanest precursor to deciding whether a new code wedge is still needed
 
-### Gap 3: Credit notes and quotes complete the B2B billing story
+### Gap 3: End-to-end recipes and operator guidance are still behind the API surface
 
-Subscriptions and invoices are already strong. Credit notes and quotes are the natural next
-steps for teams selling to finance-driven customers.
+The codebase is broader than the current "how would I ship this in a SaaS?" guidance.
 
-Why they matter:
+What is still missing:
 
-- credit notes close the "fix the bill after issuance" loop
-- quotes close the "proposal to invoice" loop
-- together they move the library closer to "full SaaS billing toolkit" territory
+- one complete flow from Checkout signup to webhook provisioning to portal self-service
+- one complete flow from metering to invoice review to customer communication
+- one complete Connect recipe for a realistic platform
+- one complete enterprise flow built around invoices, quotes, and later credits
+- clearer public guidance around Product/Price catalog strategy and BillingPortal configuration strategy
 
-### Gap 4: Catalog and portal-configuration guidance is thinner than it should be
+Why this matters:
 
-The primitives exist, but the narrative advice is still light around:
+- this is where experienced engineers decide whether a library feels production-ready
+- it reduces integration design churn more than another narrow endpoint wrapper often does
 
-- how to structure Product and Price for common SaaS pricing models
-- when to rely on BillingPortal configuration vs app-owned subscription controls
+Boundary note:
 
-This is a docs gap more than a code gap.
+- recipe work here should stay primitive-first and SDK-shaped
+- if a recipe starts turning into a billing-facade or workflow-orchestration product, point up to Accrue instead of expanding LatticeStripe
+
+### Gap 4: Thin-event webhook support is the biggest remaining code wedge
+
+The current webhook surface is strong for snapshot-style events, but the project’s own
+research already treats thin events as part of modern Stripe reality.
+
+Why it matters:
+
+- Stripe’s webhook story is increasingly two-track: snapshot events and thin events
+- this fits the library’s existing strengths in webhook verification, event retrieval,
+  testing helpers, and operator-facing guidance
+- it strengthens the SDK without drifting into billing-engine behavior
 
 ## Recommended Priority Order
 
 Assuming the current roadmap and code surface stay roughly aligned, this is the recommended
 JTBD-driven ordering:
 
-1. **Disputes**
-   This closes the most painful missing real-world payment workflow after File/FileLink.
-2. **Credit notes**
-   This completes the corrective side of invoice-driven billing.
-3. **Quotes**
-   This completes the front half of many B2B billing flows.
-4. **SDK truth / DX guide stitching**
-   This converts broad API coverage into faster successful integrations.
-5. **Mandate and SetupAttempt**
-   Useful and real, but lower leverage than the flows above for most SaaS teams.
+1. **Public truth + guide completion**
+   This converts shipped breadth into faster, lower-friction adoption.
+2. **Thin-event webhook support**
+   This is the strongest remaining platform wedge that still fits LatticeStripe cleanly.
+3. **Tax**
+   This is the broadest remaining mainstream SaaS billing family after webhook modernization.
+4. **Quote external proof closure**
+   Worth closing honestly, but too narrow to drive a full milestone by itself.
+5. **Specialist breadth families**
+   Identity, Financial Connections, Terminal, Issuing, or Treasury only if real adopter pull appears.
 
 ## What "Feature-Complete Enough" Looks Like
 
