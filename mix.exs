@@ -1,7 +1,7 @@
 defmodule LatticeStripe.MixProject do
   use Mix.Project
 
-  @version "1.3.0-dev"
+  @version "1.3.0"
   @source_url "https://github.com/szTheory/lattice_stripe"
 
   def project do
@@ -23,6 +23,10 @@ defmodule LatticeStripe.MixProject do
         extras: [
           "guides/getting-started.md",
           "guides/user-flows-and-jtbd.md",
+          "guides/checkout-signup-and-portal.md",
+          "guides/connect-platform-flow.md",
+          "guides/metering-runtime-and-reconciliation.md",
+          "guides/quote-to-billing-operator.md",
           "guides/client-configuration.md",
           "guides/performance.md",
           "guides/circuit-breaker.md",
@@ -48,8 +52,47 @@ defmodule LatticeStripe.MixProject do
           "CHANGELOG.md"
         ],
         groups_for_extras: [
-          Guides: Path.wildcard("guides/*.{md,cheatmd}"),
-          Changelog: ["CHANGELOG.md"]
+          {"Start Here",
+           [
+             "guides/getting-started.md",
+             "guides/user-flows-and-jtbd.md",
+             "guides/recipes.md"
+           ]},
+          {"Flagship Recipes",
+           [
+             "guides/checkout-signup-and-portal.md",
+             "guides/connect-platform-flow.md",
+             "guides/metering-runtime-and-reconciliation.md",
+             "guides/quote-to-billing-operator.md"
+           ]},
+          {"Canonical Guides",
+           [
+             "guides/payments.md",
+             "guides/checkout.md",
+             "guides/invoices.md",
+             "guides/credit_notes.md",
+             "guides/subscriptions.md",
+             "guides/customer-portal.md",
+             "guides/metering.md",
+             "guides/connect.md",
+             "guides/connect-accounts.md",
+             "guides/connect-money-movement.md"
+           ]},
+          {"Operations & DX",
+           [
+             "guides/client-configuration.md",
+             "guides/webhooks.md",
+             "guides/error-handling.md",
+             "guides/testing.md",
+             "guides/performance.md",
+             "guides/circuit-breaker.md",
+             "guides/opentelemetry.md",
+             "guides/telemetry.md",
+             "guides/api_stability.md",
+             "guides/extending-lattice-stripe.md",
+             "guides/cheatsheet.cheatmd"
+           ]},
+          {"Changelog", ["CHANGELOG.md"]}
         ],
         groups_for_modules: [
           "Client & Configuration": [

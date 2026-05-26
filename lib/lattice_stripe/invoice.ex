@@ -54,7 +54,19 @@ defmodule LatticeStripe.Invoice do
   object reference and available parameters.
   """
 
-  alias LatticeStripe.{Billing, Client, Error, List, ObjectTypes, Request, Resource, Response, Telemetry}
+  alias LatticeStripe.{
+    Billing,
+    Client,
+    Error,
+    List,
+    ObjectTypes,
+    Quote,
+    Request,
+    Resource,
+    Response,
+    Telemetry
+  }
+
   alias LatticeStripe.Invoice.{AutomaticTax, LineItem, StatusTransitions}
 
   # Known top-level fields from the Stripe Invoice object.
@@ -233,7 +245,7 @@ defmodule LatticeStripe.Invoice do
           period_start: integer() | nil,
           post_payment_credit_notes_amount: integer() | nil,
           pre_payment_credit_notes_amount: integer() | nil,
-          quote: String.t() | nil,
+          quote: Quote.t() | String.t() | nil,
           receipt_number: String.t() | nil,
           rendering: map() | nil,
           rendering_options: map() | nil,
@@ -945,16 +957,18 @@ defmodule LatticeStripe.Invoice do
       automatic_tax: AutomaticTax.from_map(known["automatic_tax"]),
       billing_reason: atomize_billing_reason(known["billing_reason"]),
       charge:
-        (if is_map(known["charge"]),
-           do: ObjectTypes.maybe_deserialize(known["charge"]),
-           else: known["charge"]),
+        if(is_map(known["charge"]),
+          do: ObjectTypes.maybe_deserialize(known["charge"]),
+          else: known["charge"]
+        ),
       collection_method: atomize_collection_method(known["collection_method"]),
       created: known["created"],
       currency: known["currency"],
       customer:
-        (if is_map(known["customer"]),
-           do: ObjectTypes.maybe_deserialize(known["customer"]),
-           else: known["customer"]),
+        if(is_map(known["customer"]),
+          do: ObjectTypes.maybe_deserialize(known["customer"]),
+          else: known["customer"]
+        ),
       customer_address: known["customer_address"],
       customer_email: known["customer_email"],
       customer_name: known["customer_name"],
@@ -988,15 +1002,20 @@ defmodule LatticeStripe.Invoice do
       paid: known["paid"],
       paid_out_of_band: known["paid_out_of_band"],
       payment_intent:
-        (if is_map(known["payment_intent"]),
-           do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
-           else: known["payment_intent"]),
+        if(is_map(known["payment_intent"]),
+          do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
+          else: known["payment_intent"]
+        ),
       payment_settings: known["payment_settings"],
       period_end: known["period_end"],
       period_start: known["period_start"],
       post_payment_credit_notes_amount: known["post_payment_credit_notes_amount"],
       pre_payment_credit_notes_amount: known["pre_payment_credit_notes_amount"],
-      quote: known["quote"],
+      quote:
+        if(is_map(known["quote"]),
+          do: ObjectTypes.maybe_deserialize(known["quote"]),
+          else: known["quote"]
+        ),
       receipt_number: known["receipt_number"],
       rendering: known["rendering"],
       rendering_options: known["rendering_options"],
@@ -1007,9 +1026,10 @@ defmodule LatticeStripe.Invoice do
       status: atomize_status(known["status"]),
       status_transitions: StatusTransitions.from_map(known["status_transitions"]),
       subscription:
-        (if is_map(known["subscription"]),
-           do: ObjectTypes.maybe_deserialize(known["subscription"]),
-           else: known["subscription"]),
+        if(is_map(known["subscription"]),
+          do: ObjectTypes.maybe_deserialize(known["subscription"]),
+          else: known["subscription"]
+        ),
       subscription_details: known["subscription_details"],
       subscription_proration_date: known["subscription_proration_date"],
       subtotal: known["subtotal"],

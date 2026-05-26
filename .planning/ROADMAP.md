@@ -6,7 +6,7 @@
 - ✅ **v1.1 — Accrue unblockers (metering + portal)** — Phases 20-21 (shipped 2026-04-14) — [brief](v1.1-accrue-context.md)
 - ✅ **v1.2 — Production Hardening & DX** — Phases 22-31 (shipped 2026-04-17) — [archive](milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 — Production Coverage & Adoption Polish** — Phases 32-42 plus Phase 41.1 follow-through (shipped 2026-05-25 with accepted external-proof gap) — [archive](milestones/v1.3-ROADMAP.md)
-- 🚧 **v1.4 — Adoption Closure** — Phases 43-46 (active)
+- 🚧 **v1.4 — Adoption Closure** — Phases 43-46 (active, close-ready)
 
 ## Current Milestone: v1.4 Adoption Closure
 
@@ -58,26 +58,26 @@ This phase improves findability and orientation so adopters can move from onboar
 
 Plans:
 
-- [ ] 45-01-PLAN.md — Checkout signup plus portal follow-through flagship recipe
-- [ ] 45-02-PLAN.md — Metering runtime plus reconciliation flagship recipe
+- [x] 45-01-PLAN.md — Checkout signup plus portal follow-through flagship recipe
+- [x] 45-02-PLAN.md — Metering runtime plus reconciliation flagship recipe
 
 **Details:**
 These recipes should feel concrete and operator-useful while staying firmly inside the SDK boundary rather than turning into application workflow abstractions.
 
 ### Phase 46: Flagship Recipes II & Planning Truth Closure
 
-**Goal**: Publish the remaining flagship guides and reconcile planning truth around the milestone close posture.
+**Goal**: Publish the remaining flagship guides and reconcile planning truth so v1.4 is close-ready without erasing the explicit Phase `41.1` external-proof boundary.
 **Depends on**: Phase 45
 **Plans**: 2 plans
 
 Plans:
 
-- [ ] 46-01-PLAN.md — Connect platform flow and quote-to-billing operator guidance
-- [ ] 46-02-PLAN.md — Reconcile roadmap, requirements, and state truth while preserving the explicit Phase `41.1` external-proof boundary
+- [x] 46-01-PLAN.md — Connect platform flow and quote-to-billing operator guidance
+- [x] 46-02-PLAN.md — Reconcile roadmap, requirements, and state truth while preserving the explicit Phase `41.1` external-proof boundary
 
 **Details:**
-This phase finishes the flagship recipe set and ensures the milestone artifacts tell the truth about what v1.4 closes versus what remains an accepted external-only follow-through item.
+This phase finishes the flagship recipe set and leaves v1.4 close-ready: the shipped `1.3.x` evaluator story is now public and coherent, while Phase `41.1` remains a separate accepted `pending-external-verification` external-proof follow-through item.
 
 ## Next Step
 
-Run `$gsd-plan-phase 44` to start execution.
+Run `$gsd-verify-work 46` to verify the close-ready posture and keep Phase `41.1` explicit as the only remaining external-proof follow-through item.

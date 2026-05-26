@@ -348,5 +348,8 @@ the [Webhooks guide](webhooks.html).
 ## See also
 
 - [Connect](connect.md) — conceptual overview of Standard/Express/Custom
+- [Connect Platform Flow](connect-platform-flow.md) — recommended Express onboarding
+  plus destination-charge workflow
 - [Connect Accounts](connect-accounts.md) — account lifecycle, onboarding, capabilities
 - [Error Handling](error-handling.md) — Connect-specific error patterns and retries
+- [Webhooks](webhooks.md) — authoritative payout and transfer follow-through

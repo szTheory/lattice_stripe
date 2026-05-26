@@ -258,6 +258,13 @@ error.
 The `session.url` is only valid for 24 hours. Don't cache it. If a customer clicks a
 stale link, redirect them through your checkout flow again to create a fresh session.
 
+## Read next
+
+- [Checkout Signup and Portal Follow-Through](checkout-signup-and-portal.md) — the
+  recommended hosted recurring-billing spine from signup through portal follow-through
+- [Subscriptions](subscriptions.md)
+- [Webhooks](webhooks.md)
+
 **Use webhooks to confirm payment completion — don't rely on the redirect.**
 Customers can close their browser before being redirected to `success_url`, or the
 redirect URL can fail. The only reliable way to know a payment succeeded is the

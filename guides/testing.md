@@ -527,3 +527,11 @@ Never use real API keys in tests.
 
 For metering-specific integration test guidance and the nightly batch flush
 anti-pattern, see [metering.md](metering.md#what-not-to-do-nightly-batch-flush).
+
+## See also
+
+- [Checkout Signup and Portal Follow-Through](checkout-signup-and-portal.md)
+- [Metering Runtime and Reconciliation](metering-runtime-and-reconciliation.md)
+- [Webhooks](webhooks.md) — signed payload helpers and end-to-end handler verification
+- [Error Handling](error-handling.md) — asserting `%LatticeStripe.Error{}` shapes and request IDs
+- [Metering](metering.md) — usage-reporting hot path and reconciliation follow-through

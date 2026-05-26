@@ -224,9 +224,11 @@ Key Connect events to handle:
 
 See the [Webhooks guide](webhooks.html) for signature verification and handler setup.
 
-
 ## See also
 
+- [Connect Platform Flow](connect-platform-flow.md) — recommended Express onboarding
+  plus destination-charge workflow
 - [Connect](connect.md) — conceptual overview of Standard/Express/Custom
 - [Connect Money Movement](connect-money-movement.md) — Transfers, Payouts, Balance
 - [Webhooks](webhooks.md) — handling `account.updated` and capability events
+- [Error Handling](error-handling.md) — request-level failures while onboarding or updating accounts

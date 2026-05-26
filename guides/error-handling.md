@@ -331,8 +331,11 @@ safe retries possible.
 
 ## See also
 
+- [Checkout Signup and Portal Follow-Through](checkout-signup-and-portal.md)
+- [Metering Runtime and Reconciliation](metering-runtime-and-reconciliation.md)
 - [Webhooks](webhooks.md) — asynchronous failure handling for billing and Connect
 - [Invoices](invoices.md) — dunning patterns for `invoice.payment_failed`
 - [Connect](connect.md) — Connect-specific error codes and account-state recovery
 - [metering.md](metering.md#reconciliation-via-webhooks) — async billing error codes
   (`meter_event_customer_not_found`, `archived_meter`, etc.) that surface via webhook
+- [Testing](testing.md) — fixture builders, webhook payload helpers, and error-path assertions

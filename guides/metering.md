@@ -801,3 +801,6 @@ session.authentication_token
   reference and the full error type taxonomy
 - [testing.md](testing.md) — Mox transport mocks for unit-testing usage
   reporters and `stripe-mock` for integration tests
+- [metering-runtime-and-reconciliation.md](metering-runtime-and-reconciliation.md) —
+  runtime-first operator guidance for event ingestion, reconciliation, and correction
+- [recipes.md](recipes.md) — compact job-to-primitive bridge before the deeper metering guide

@@ -6,8 +6,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-> `main` is tracking the upcoming `1.3.0` release line. The latest published Hex
-> release remains `1.2.x` until a tagged release is cut.
+- No unreleased changes yet.
+
+## [1.3.0](https://github.com/szTheory/lattice_stripe/compare/v1.2...v1.3) (2026-05-25)
 
 ### Changed
 
@@ -40,13 +41,12 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   Affected modules: PaymentIntent, Subscription, SubscriptionSchedule, Charge, Refund, SetupIntent, Payout, BalanceTransaction, BankAccount, Checkout.Session, Billing.Meter, Account.Capability.
 
 - **Deprecated** `Billing.Meter.status_atom/1` and `Account.Capability.status_atom/1` — status is now automatically atomized in `from_map/1`/`cast/1`. Access `.status` directly on the struct.
-- **Docs/package truth** — README, ExDoc extras, and public guide discovery now align
-  with the current branch story: stable installs target the published `1.2.x` line,
-  while `main` documents the unreleased `1.3.0` surface explicitly.
+- **Docs/package truth** — README, ExDoc extras, and public guide discovery align
+  with the shipped `1.3.x` surface instead of presenting the line as unreleased.
 
 ### Added
 
-- **v1.3 branch surface** — main now includes File/FileLink upload/download support,
+- **v1.3 surface** — adds File/FileLink upload/download support,
   Disputes, Credit Notes, Mandates, SetupAttempts, Quotes, public testing fixture
   builders, a compact recipes guide, and a canonical Phoenix webhook quickstart.
 
@@ -60,7 +60,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
-- **Getting Started guide version drift** — Updated the install snippet to `{:lattice_stripe, "~> 1.2"}`
+- **Getting Started guide version drift** — Updated the install snippet to `{:lattice_stripe, "~> 1.3"}`
   and aligned the first `PaymentIntent` example output with atomized status values.
 
 ## [1.1.0](https://github.com/szTheory/lattice_stripe/compare/v1.0.0...v1.1.0) (2026-04-14)

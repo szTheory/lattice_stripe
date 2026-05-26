@@ -263,7 +263,7 @@ event_resp.data
 
 LatticeStripe v1.2 adds support for Stripe's v2 high-throughput meter event streaming API. This uses a session-token authentication model — different from the standard API key auth.
 
-> **Note:** stripe-mock may not support the v2 `meter-events.stripe.com` endpoint. If the cell below returns an error, switch to a real Stripe test API key or skip this section.
+> **Note:** stripe-mock does not currently complete the v2 `MeterEventStream` happy path. In repo CI this call is expected to fail with Stripe error code `invalid_v2_key`; use a real Stripe test API key if you want to exercise the successful session-token flow interactively.
 
 > **Security:** The `authentication_token` in the session is a bearer credential. LatticeStripe masks it in Inspect output automatically. Do not log or cache this value.
 

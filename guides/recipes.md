@@ -5,6 +5,29 @@ and the deeper resource guides. It stays library-scoped on purpose: the goal is 
 show which LatticeStripe calls usually matter, where the webhook confirmation point
 lives, and which guide to read next.
 
+Use it when you already know the job you are trying to ship but still want the canonical
+guide for the deeper API and runtime truth:
+
+- recurring billing and self-serve changes:
+  [Checkout Signup and Portal Follow-Through](checkout-signup-and-portal.md),
+  [Subscriptions](subscriptions.md), [Customer Portal](customer-portal.md),
+  [Webhooks](webhooks.md)
+- usage-based billing and reconciliation:
+  [Metering Runtime and Reconciliation](metering-runtime-and-reconciliation.md),
+  [Metering](metering.md), [Webhooks](webhooks.md), [Testing](testing.md)
+- platform onboarding and money movement:
+  [Connect Platform Flow](connect-platform-flow.md), [Connect](connect.md),
+  [Connect Accounts](connect-accounts.md), [Connect Money Movement](connect-money-movement.md)
+- quote-driven billing follow-through:
+  [Quote to Billing Operator Flow](quote-to-billing-operator.md), [Invoices](invoices.md),
+  [Subscriptions](subscriptions.md), [Webhooks](webhooks.md)
+- support and failure handling:
+  [Error Handling](error-handling.md), [Testing](testing.md)
+
+The flagship recipe guides stay intentionally secondary to the canonical guides: use them
+for the recommended operator path, then drop into the canonical surface guides for deeper
+API detail and constraints.
+
 ## Dispute handling and evidence submission
 
 ### Job to be done
@@ -36,6 +59,7 @@ change with the dispute lifecycle.
 
 ### Read next
 
+- [Credit Notes](credit_notes.md)
 - [Webhooks](webhooks.md)
 - [Testing](testing.md)
 
@@ -85,6 +109,7 @@ authoritative for customer communication, entitlement rollback, or finance workf
 ### Read next
 
 - [Credit Notes](credit_notes.md)
+- [Invoices](invoices.md)
 - [Webhooks](webhooks.md)
 
 ## Quote-to-invoice flow
@@ -126,5 +151,57 @@ the exact product workflow.
 
 ### Read next
 
+- [Quote to Billing Operator Flow](quote-to-billing-operator.md)
+- [Invoices](invoices.md)
 - [Webhooks](webhooks.md)
 - [User Flows & JTBD](user-flows-and-jtbd.md)
+
+## Connect platform onboarding and destination charges
+
+### Job to be done
+
+You are building a marketplace or platform that needs the shortest truthful path from
+seller onboarding to charging on behalf of one connected account.
+
+### Key calls
+
+```elixir
+{:ok, account} =
+  LatticeStripe.Account.create(client, %{
+    "type" => "express",
+    "country" => "US",
+    "email" => "seller@example.test"
+  })
+
+{:ok, link} =
+  LatticeStripe.AccountLink.create(client, %{
+    "account" => account.id,
+    "type" => "account_onboarding",
+    "refresh_url" => "https://example.com/connect/refresh",
+    "return_url" => "https://example.com/connect/return"
+  })
+
+{:ok, payment_intent} =
+  LatticeStripe.PaymentIntent.create(client, %{
+    "amount" => 5_000,
+    "currency" => "usd",
+    "application_fee_amount" => 500,
+    "transfer_data" => %{"destination" => account.id},
+    "on_behalf_of" => account.id,
+    "transfer_group" => "ORDER_42"
+  })
+```
+
+### Webhook confirmation point
+
+Treat the onboarding redirect and destination-charge response as Stripe accepting the
+request now, not as durable platform truth. Use `account.updated`, `charge.*`,
+`application_fee.*`, `transfer.*`, and `payout.*` events to confirm what became true.
+
+### Read next
+
+- [Connect Platform Flow](connect-platform-flow.md)
+- [Connect](connect.md)
+- [Connect Accounts](connect-accounts.md)
+- [Connect Money Movement](connect-money-movement.md)
+- [Webhooks](webhooks.md)

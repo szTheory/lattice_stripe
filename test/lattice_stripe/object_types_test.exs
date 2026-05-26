@@ -20,7 +20,13 @@ defmodule LatticeStripe.ObjectTypesTest do
     end
 
     test "dispatches payment_intent map to PaymentIntent.from_map/1" do
-      map = %{"object" => "payment_intent", "id" => "pi_123", "amount" => 2000, "currency" => "usd"}
+      map = %{
+        "object" => "payment_intent",
+        "id" => "pi_123",
+        "amount" => 2000,
+        "currency" => "usd"
+      }
+
       result = ObjectTypes.maybe_deserialize(map)
       assert %LatticeStripe.PaymentIntent{id: "pi_123"} = result
     end
@@ -29,6 +35,79 @@ defmodule LatticeStripe.ObjectTypesTest do
       map = %{"object" => "invoice", "id" => "in_123", "status" => "open"}
       result = ObjectTypes.maybe_deserialize(map)
       assert %LatticeStripe.Invoice{id: "in_123"} = result
+    end
+
+    test "dispatches expanded invoice quote back-reference to Quote.from_map/1" do
+      invoice =
+        ObjectTypes.maybe_deserialize(%{
+          "object" => "invoice",
+          "id" => "in_123",
+          "quote" => %{
+            "object" => "quote",
+            "id" => "qt_123",
+            "status" => "open"
+          }
+        })
+
+      assert %LatticeStripe.Invoice{quote: %LatticeStripe.Quote{id: "qt_123"}} = invoice
+    end
+
+    test "dispatches mandate map to Mandate.from_map/1" do
+      map = %{
+        "object" => "mandate",
+        "id" => "mandate_123",
+        "status" => "active",
+        "type" => "single_use"
+      }
+
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.Mandate{id: "mandate_123"} = result
+    end
+
+    test "dispatches credit_note map to CreditNote.from_map/1" do
+      map = %{"object" => "credit_note", "id" => "cn_123", "status" => "issued"}
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.CreditNote{id: "cn_123"} = result
+    end
+
+    test "dispatches credit_note_line_item map to CreditNote.LineItem.from_map/1" do
+      map = %{
+        "object" => "credit_note_line_item",
+        "id" => "cnli_123",
+        "type" => "invoice_line_item"
+      }
+
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.CreditNote.LineItem{id: "cnli_123"} = result
+    end
+
+    test "dispatches quote map to Quote.from_map/1" do
+      map = %{"object" => "quote", "id" => "qt_123", "status" => "draft"}
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.Quote{id: "qt_123"} = result
+    end
+
+    test "dispatches quote_line_item map to Quote.LineItem.from_map/1" do
+      map = %{
+        "object" => "quote_line_item",
+        "id" => "qli_123",
+        "description" => "Quoted item"
+      }
+
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.Quote.LineItem{id: "qli_123"} = result
+    end
+
+    test "dispatches setup_attempt map to SetupAttempt.from_map/1" do
+      map = %{
+        "object" => "setup_attempt",
+        "id" => "setatt_123",
+        "status" => "succeeded",
+        "usage" => "off_session"
+      }
+
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.SetupAttempt{id: "setatt_123"} = result
     end
 
     test "dispatches checkout.session map to Checkout.Session.from_map/1" do

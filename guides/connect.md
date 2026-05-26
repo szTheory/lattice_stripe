@@ -136,6 +136,8 @@ helper.
 
 ## Where to go next
 
+- [Connect Platform Flow](connect-platform-flow.md) — recommended Express onboarding
+  plus destination-charge default for most platforms
 - [Connect Accounts](connect-accounts.md) — create accounts, run the
   onboarding link flow, handle capabilities, reject accounts
 - [Connect Money Movement](connect-money-movement.md) — Transfers,
@@ -143,3 +145,5 @@ helper.
 - [Webhooks](webhooks.md) — `account.updated`,
   `account.application.authorized`, `transfer.*`, `payout.*` event
   handling
+- [Error Handling](error-handling.md) — Connect-specific request failures,
+  retries, and support diagnostics

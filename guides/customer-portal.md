@@ -274,7 +274,10 @@ redirect carries no payload. Wire your state to webhook events. See
 
 ## See also
 
+- [Checkout Signup and Portal Follow-Through](checkout-signup-and-portal.md) — the
+  recommended hosted recurring-billing recipe that leads into portal follow-through
 - [`LatticeStripe.BillingPortal.Session`](`LatticeStripe.BillingPortal.Session`) — API reference, options, and security note
 - [Subscriptions](subscriptions.html) — `customer.subscription.*` lifecycle events and proration control
 - [Webhooks](webhooks.html) — receiving portal state-change events
+- [Error Handling](error-handling.html) — support-facing request and retry diagnostics
 - [Checkout](checkout.html) — Stripe-hosted payment flow (complement to the portal)

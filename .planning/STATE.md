@@ -2,37 +2,37 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: — Adoption Closure
-status: ready_to_verify
-stopped_at: Phase 45 complete (2/2) — ready to verify Phase 45
-last_updated: "2026-05-26T13:50:41Z"
-last_activity: 2026-05-26 -- Phase 45 execution completed
+status: close_ready
+stopped_at: Phase 46 complete (2/2) — v1.4 close-ready, ready to verify Phase 46
+last_updated: "2026-05-26T15:02:00Z"
+last_activity: 2026-05-26 -- Phase 46 execution completed; v1.4 is close-ready
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
-  percent: 75
+  completed_phases: 4
+  total_plans: 8
+  completed_plans: 8
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-26 after v1.4 milestone definition)
+See: .planning/PROJECT.md (updated 2026-05-26 after Phase 46 truth closure)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 45 verification
+**Current focus:** v1.4 close-ready posture with Phase `41.1` preserved as `pending-external-verification`
 
 ## Current Position
 
 Milestone: v1.4 (Adoption Closure)
-Phase: 45 (flagship-recipes-i) — COMPLETE
+Phase: 46 (flagship-recipes-ii-planning-truth-closure) — COMPLETE
 Plan: 2 of 2 complete
-Status: Ready to verify Phase 45
-Last activity: 2026-05-26 -- Phase 45 execution completed
+Status: v1.4 close-ready; Phase `41.1` remains pending-external-verification
+Last activity: 2026-05-26 -- Phase 46 execution completed; v1.4 is close-ready
 
 ```
-Progress: [████████--] 75%
+Progress: [██████████] 100%
 ```
 
 ## Performance Metrics
@@ -62,21 +62,18 @@ Progress: [████████--] 75%
 
 ### Pending Todos
 
-- Phase 44: tighten guide discovery and cross-links for already-shipped high-leverage surfaces.
-- Phase 46: publish Connect and quote-to-billing operator guidance while preserving the explicit Phase `41.1` external-proof boundary in planning truth.
+- Verify Phase 46 and preserve the explicit Phase `41.1` boundary during any milestone-close workflow.
+- Decide whether Phase `41.1` should be re-run with valid sandbox credentials or retired as an accepted external-only follow-through.
 
 ### Blockers/Concerns
 
 - A dirty worktree already exists outside the new milestone docs; execution work should avoid trampling unrelated local changes.
 - Phase 41.1 remains explicitly `pending-external-verification` until sandbox proof is produced or the follow-through is retired.
 - Avoid scope bleed into Accrue during future milestone research and implementation.
-- Public repo truth still lags shipped capability in at least one high-visibility place, so adopters can underestimate the library if install/docs drift persists.
-- Current docs-truth coverage is narrower than the adopter story now requires: README and recipes are guarded, but first-run onboarding and cheatsheet drift can still slip.
-- The current "done enough" posture is still best described as roughly 85% / "strong, meaningful wedges remain", not "stop now", because adoption truth and flagship guidance still materially affect evaluator confidence.
 - Phase 41.1 is real but too narrow to justify the milestone headline; v1.4 should preserve that truth without letting it dominate scope.
 
 ## Session Continuity
 
-Last session: 2026-05-26T13:50:41Z
-Stopped at: Phase 45 complete (2/2) — ready to verify Phase 45
-Resume path: `/gsd-verify-work 45`
+Last session: 2026-05-26T15:02:00Z
+Stopped at: Phase 46 complete (2/2) — v1.4 close-ready, ready to verify Phase 46
+Resume path: `/gsd-verify-work 46`

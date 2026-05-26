@@ -11,14 +11,14 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:lattice_stripe, "~> 1.2"},
+    {:lattice_stripe, "~> 1.3"},
     {:finch, "~> 0.21"}
   ]
 end
 ```
 
-If you specifically need unreleased work from `main`, use a git dependency instead of
-the published Hex release.
+The `1.3.x` line is the current published Hex surface. If you specifically need
+unreleased work from `main`, use a git dependency instead of the published release.
 
 Then fetch your dependencies:
 
@@ -183,19 +183,31 @@ intent = LatticeStripe.PaymentIntent.create!(client, %{
 Use the `!` variants in scripts and places where you want to fail loudly. Use the
 non-bang variants in production code where you need to handle errors gracefully.
 
-## Next Steps
+## Read Next After First Success
 
-Now that you've made your first API call, explore the rest of LatticeStripe:
+You have a working client and a successful first call. Pick the next guide by the job
+you are trying to ship:
 
-- **[User Flows & JTBD](user-flows-and-jtbd.md)** — The "how would I actually use this in a SaaS?"
-  guide. Start here if you want the mental model before diving into individual modules.
-- **[Client Configuration](client-configuration.html)** — All client options, per-request
-  overrides, multiple clients, Stripe Connect.
-- **[Payments](payments.html)** — Full payment lifecycle: customers, PaymentIntents,
-  confirmation, capture, refunds, idempotency.
-- **[Checkout](checkout.html)** — Stripe's hosted payment page. Payment, subscription, and
-  setup modes.
-- **[Webhooks](webhooks.html)** — Signature verification, Phoenix Plug setup, event handling.
+- **I need the bigger SaaS map**:
+  [User Flows & JTBD](user-flows-and-jtbd.md) for route-by-intent guidance across billing,
+  metering, Connect, and support flows.
+- **I am moving from one payment to recurring billing**:
+  [Subscriptions](subscriptions.md) for lifecycle control and
+  [Customer Portal](customer-portal.md) for self-serve plan or payment-method changes.
+- **I need hosted payments or hosted subscription signup**:
+  [Checkout](checkout.md) for Stripe-hosted payment, setup, and subscription flows.
+- **I need async truth before I provision or fulfill**:
+  [Webhooks](webhooks.md) because API responses tell you what Stripe accepted now, while
+  webhooks confirm what became true.
+- **I need usage-based billing**:
+  [Metering](metering.md) for meter definitions, hot-path event reporting, and reconciliation.
+- **I run a marketplace or platform**:
+  [Connect](connect.md) for the high-level model, then
+  [Connect Accounts](connect-accounts.md) and
+  [Connect Money Movement](connect-money-movement.md).
+- **I am hardening support and local confidence**:
+  [Testing](testing.md), [Error Handling](error-handling.md), and
+  [Client Configuration](client-configuration.html).
 
 ## Common Pitfalls
 
@@ -220,9 +232,3 @@ Finch). Just create the struct and pass it around. It's safe to share across pro
 **Validation errors raise, not return `{:error, ...}`.**
 If you pass invalid options to `Client.new!`, it raises `NimbleOptions.ValidationError`
 immediately. This catches typos and misconfiguration at startup, not at request time.
-
-## Next steps
-
-- See [User Flows & JTBD](user-flows-and-jtbd.md) for the high-level SaaS integration map.
-- See [Subscriptions](subscriptions.md) for recurring billing and dunning lifecycles.
-- See [Connect](connect.md) for marketplace and platform use cases.

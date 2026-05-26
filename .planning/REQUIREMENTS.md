@@ -25,12 +25,12 @@
 
 - [ ] **RECIPE-01**: A developer can follow a flagship recipe for Checkout signup plus portal follow-through using shipped LatticeStripe primitives.
 - [ ] **RECIPE-02**: A developer can follow a flagship recipe for metering runtime plus reconciliation using shipped LatticeStripe primitives.
-- [ ] **RECIPE-03**: A developer can follow a flagship recipe for a Connect platform flow using shipped LatticeStripe primitives.
-- [ ] **RECIPE-04**: Quote-to-billing operator guidance explains the shipped flow honestly and preserves the explicit Phase `41.1` external-proof boundary.
+- [x] **RECIPE-03**: A developer can follow a flagship recipe for a Connect platform flow using shipped LatticeStripe primitives.
+- [x] **RECIPE-04**: Quote-to-billing operator guidance explains the shipped flow honestly and preserves the explicit Phase `41.1` external-proof boundary.
 
 ### Planning Truth
 
-- [ ] **PLAN-01**: Roadmap, requirements, and state artifacts reflect v1.4 as an adoption-closure milestone and preserve the accepted Phase `41.1` follow-through truthfully.
+- [x] **PLAN-01**: Roadmap, requirements, and state artifacts reflect v1.4 as an adoption-closure milestone and preserve the accepted Phase `41.1` follow-through truthfully.
 
 ## v2+ Requirements
 
@@ -62,9 +62,9 @@ Deferred until the adoption-closure work is complete and re-evaluated.
 | GUIDE-02 | Phase 44 | Pending |
 | RECIPE-01 | Phase 45 | Pending |
 | RECIPE-02 | Phase 45 | Pending |
-| RECIPE-03 | Phase 46 | Pending |
-| RECIPE-04 | Phase 46 | Pending |
-| PLAN-01 | Phase 46 | Pending |
+| RECIPE-03 | Phase 46 | Complete |
+| RECIPE-04 | Phase 46 | Complete |
+| PLAN-01 | Phase 46 | Complete |
 
 **Coverage:**
 - v1.4 requirements: 11 total
@@ -73,4 +73,4 @@ Deferred until the adoption-closure work is complete and re-evaluated.
 
 ---
 *Requirements defined: 2026-05-26*
-*Last updated: 2026-05-26 after initial definition*
+*Last updated: 2026-05-26 after Phase 46 truth closure*

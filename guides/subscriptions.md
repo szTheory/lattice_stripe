@@ -385,6 +385,12 @@ return value — set it when you receive `customer.subscription.updated` with
 `status: "active"`. The SDK call might succeed while the first payment is
 still pending; the webhook is the authoritative signal.
 
+> #### See also {: .tip}
+>
+> - [Customer Portal](customer-portal.html) — self-serve plan changes and payment-method recovery.
+> - [Webhooks](webhooks.html) — signature verification and event-handler setup.
+> - [Error Handling](error-handling.html) — synchronous request failures versus async billing truth.
+
 ## Telemetry
 
 No new telemetry events were added for Subscriptions — subscription state
@@ -416,3 +422,11 @@ Similarly, `%LatticeStripe.SubscriptionItem{}` masks `metadata` and
 
 For reporting metered usage events against a subscription with
 `usage_type: "metered"`, see [metering.md](metering.md#reporting-usage-the-hot-path).
+
+## See also
+
+- [Checkout Signup and Portal Follow-Through](checkout-signup-and-portal.md) — hosted
+  signup plus webhook-confirmed provisioning and portal follow-through
+- [Customer Portal](customer-portal.md)
+- [Webhooks](webhooks.md)
+- [Error Handling](error-handling.md)

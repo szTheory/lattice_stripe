@@ -20,13 +20,15 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Close posture:**
 
-- v1.3 is archived and v1.4 is now the active milestone.
+- v1.3 is archived and v1.4 is now close-ready after the flagship guides and planning-truth reconciliation landed.
 - One accepted follow-through remains outside the milestone headline: Phase `41.1` is still `pending-external-verification` for real-sandbox Quote downstream proof.
-- v1.4 starts from a fresh requirements pass rather than extending the archived v1.3 planning files in place.
+- The remaining open item is an external proof boundary, not missing shipped SDK capability.
 
 ## Current Milestone: v1.4 Adoption Closure
 
 **Goal:** Make the shipped `1.3.x` surface obvious, trustworthy, and easier to evaluate for serious Elixir and Phoenix SaaS teams.
+
+**Status:** Close-ready after Phase 46 landed; verification should preserve the explicit Phase `41.1` boundary rather than flattening it into a false full-close claim.
 
 **Target features:**
 
@@ -99,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-26 after v1.4 milestone definition*
+*Last updated: 2026-05-26 after Phase 46 truth closure*
