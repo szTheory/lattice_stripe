@@ -108,7 +108,7 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 
 - Customers, PaymentIntents, SetupIntents, PaymentMethods, Refunds, Checkout Sessions (payment / subscription / setup modes)
 - Charge list/search/update/capture for support, audit, and Connect reconciliation — [Charge API](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html) (PI-first; no `create`)
-- Structured, pattern-matchable errors: `:card_error`, `:auth_error`, `:rate_limit_error`, `:server_error`, and more
+- Structured, pattern-matchable errors: `:card_error`, `:authentication_error`, `:rate_limit_error`, `:api_error`, and more — [Guide: Error Handling](guides/error-handling.md)
 - Auto-pagination — stream through large result sets lazily with Elixir Streams
 - [Guide: Payments](guides/payments.md)
 
