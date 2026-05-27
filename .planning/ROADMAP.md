@@ -39,7 +39,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 47-02-PLAN.md — Parse: `Webhook.parse_event_notification/4` + bang variant + 4-atom verify error set (THIN-01)
+- [x] 47-02-PLAN.md — Parse: `Webhook.parse_event_notification/4` + bang variant + 4-atom verify error set (THIN-01)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -69,7 +69,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 47. Thin-Event SDK Surface & Webhook Reconciliation | 2/5 | In Progress|  |
+| 47. Thin-Event SDK Surface & Webhook Reconciliation | 3/5 | In Progress|  |
 | 48. Thin-Event Adoption Surface — Guide & Integration Verification | 0/? | Not started | - |
 
 ## Next Step
