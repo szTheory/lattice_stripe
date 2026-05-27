@@ -214,3 +214,11 @@ primary quickstart.
 - [Customer Portal](customer-portal.md)
 - [Subscriptions](subscriptions.md)
 - [Error Handling](error-handling.md)
+
+## Thin events (`/v2/events`)
+
+Stripe also delivers **thin events** to `/v2/event-destinations` endpoints.
+A thin event payload carries only `{id, type, related_object}` — your app
+fetches authoritative state after verification. See
+[Webhooks: Thin Events](webhooks-thin-events.md) for the canonical Phoenix
+pattern, fetch-after-verify idempotency, and rate-limit guidance.

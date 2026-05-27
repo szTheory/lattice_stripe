@@ -39,7 +39,7 @@ Use the docs in this order:
 - **I run a marketplace or platform**:
   [Connect](guides/connect.md), [Connect Accounts](guides/connect-accounts.md), [Connect Money Movement](guides/connect-money-movement.md)
 - **I am hardening ops and support paths**:
-  [Error Handling](guides/error-handling.md), [Testing](guides/testing.md), [Webhooks](guides/webhooks.md)
+  [Error Handling](guides/error-handling.md), [Testing](guides/testing.md), [Webhooks](guides/webhooks.md), [Webhooks: Thin Events](guides/webhooks-thin-events.md)
 
 ## Installation
 
@@ -123,7 +123,7 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 - Automatic retry with exponential backoff, respecting Stripe's `Stripe-Should-Retry` header
 - Automatic idempotency-key generation and safe replay
 - Telemetry events for every request, compatible with any monitoring stack
-- Phoenix-ready `Webhook.Plug` with raw-body capture and signature verification
+- Phoenix-ready `Webhook.Plug` snapshot path + thin-event (`/v2/events`) helpers for fetch-after-verify integration
 - [Guide: Extending LatticeStripe](guides/extending-lattice-stripe.md)
 
 ## Compatibility
