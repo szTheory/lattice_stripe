@@ -14,17 +14,17 @@
 ### Docs Verification
 
 - [x] **VERIFY-01**: Docs-truth regression checks fail when first-run onboarding install/version snippets drift from the shipped package line.
-- [ ] **VERIFY-02**: Docs-truth coverage extends beyond README to the main onboarding and discovery surfaces adopters actually hit first.
+- [x] **VERIFY-02**: Docs-truth coverage extends beyond README to the main onboarding and discovery surfaces adopters actually hit first.
 
 ### Guide Discovery
 
-- [ ] **GUIDE-01**: Developers can find canonical guides for already-shipped high-leverage surfaces from the main docs entry points.
-- [ ] **GUIDE-02**: Cross-links between recipes, resource guides, and onboarding docs make the shipped surface easier to navigate without guesswork.
+- [x] **GUIDE-01**: Developers can find canonical guides for already-shipped high-leverage surfaces from the main docs entry points.
+- [x] **GUIDE-02**: Cross-links between recipes, resource guides, and onboarding docs make the shipped surface easier to navigate without guesswork.
 
 ### Flagship Recipes
 
-- [ ] **RECIPE-01**: A developer can follow a flagship recipe for Checkout signup plus portal follow-through using shipped LatticeStripe primitives.
-- [ ] **RECIPE-02**: A developer can follow a flagship recipe for metering runtime plus reconciliation using shipped LatticeStripe primitives.
+- [x] **RECIPE-01**: A developer can follow a flagship recipe for Checkout signup plus portal follow-through using shipped LatticeStripe primitives.
+- [x] **RECIPE-02**: A developer can follow a flagship recipe for metering runtime plus reconciliation using shipped LatticeStripe primitives.
 - [x] **RECIPE-03**: A developer can follow a flagship recipe for a Connect platform flow using shipped LatticeStripe primitives.
 - [x] **RECIPE-04**: Quote-to-billing operator guidance explains the shipped flow honestly and preserves the explicit Phase `41.1` external-proof boundary.
 
@@ -57,11 +57,11 @@ Deferred until the adoption-closure work is complete and re-evaluated.
 | TRUTH-01 | Phase 43 | Complete |
 | TRUTH-02 | Phase 43 | Complete |
 | VERIFY-01 | Phase 43 | Complete |
-| VERIFY-02 | Phase 44 | Pending |
-| GUIDE-01 | Phase 44 | Pending |
-| GUIDE-02 | Phase 44 | Pending |
-| RECIPE-01 | Phase 45 | Pending |
-| RECIPE-02 | Phase 45 | Pending |
+| VERIFY-02 | Phase 44 | Complete |
+| GUIDE-01 | Phase 44 | Complete |
+| GUIDE-02 | Phase 44 | Complete |
+| RECIPE-01 | Phase 45 | Complete |
+| RECIPE-02 | Phase 45 | Complete |
 | RECIPE-03 | Phase 46 | Complete |
 | RECIPE-04 | Phase 46 | Complete |
 | PLAN-01 | Phase 46 | Complete |
@@ -73,4 +73,4 @@ Deferred until the adoption-closure work is complete and re-evaluated.
 
 ---
 *Requirements defined: 2026-05-26*
-*Last updated: 2026-05-26 after Phase 46 truth closure*
+*Last updated: 2026-05-27 after v1.4 milestone audit closure*
