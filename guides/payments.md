@@ -91,10 +91,10 @@ case LatticeStripe.PaymentIntent.confirm(client, intent.id, %{
 }) do
   {:ok, confirmed} ->
     case confirmed.status do
-      "succeeded" ->
+      :succeeded ->
         IO.puts("Payment succeeded!")
 
-      "requires_action" ->
+      :requires_action ->
         IO.puts("3D Secure required — redirect to: #{confirmed.next_action["redirect_to_url"]["url"]}")
 
       other ->
@@ -106,6 +106,8 @@ case LatticeStripe.PaymentIntent.confirm(client, intent.id, %{
     IO.puts("Decline code: #{err.decline_code}")
 end
 ```
+
+> **Status values:** LatticeStripe atomizes known PaymentIntent statuses on `%PaymentIntent{}` (e.g. `:succeeded`, `:requires_action`). Stripe's API reference, Dashboard, webhooks, and search queries use the wire string names below.
 
 The PaymentIntent status machine:
 - `requires_payment_method` → attach a payment method
@@ -194,7 +196,7 @@ loading everything into memory at once:
 # Process all succeeded PaymentIntents in the last 30 days
 client
 |> LatticeStripe.PaymentIntent.stream!(%{"created" => %{"gte" => thirty_days_ago}})
-|> Stream.filter(fn intent -> intent.status == "succeeded" end)
+|> Stream.filter(fn intent -> intent.status == :succeeded end)
 |> Stream.map(fn intent -> intent.amount end)
 |> Enum.sum()
 |> then(fn total -> IO.puts("Total revenue: $#{total / 100}") end)
@@ -205,19 +207,91 @@ items. This is memory-efficient for exporting large datasets.
 
 ### Search
 
-Use `search/2` for full-text search across PaymentIntents:
+Use `search/3` for full-text search across PaymentIntents:
 
 ```elixir
-{:ok, resp} = LatticeStripe.PaymentIntent.search(client, %{
-  "query" => "metadata['order_id']:'ord_456'"
-})
+{:ok, resp} =
+  LatticeStripe.PaymentIntent.search(client, "metadata['order_id']:'ord_456'")
 
 results = resp.data.data
-```
 
 > **Note:** Stripe's Search API has eventual consistency. Newly created objects may not
 > appear in search results immediately. For real-time lookups, use `list/3` with filters or
 > `retrieve/3` by ID. See [Stripe Search docs](https://docs.stripe.com/search).
+
+## Charge reconciliation
+
+When a PaymentIntent succeeds, Stripe creates a **Charge** — the settled payment result
+record. New integrations should use `LatticeStripe.PaymentIntent` to accept payments;
+use `LatticeStripe.Charge` to read and reconcile those result records after the fact.
+There is no `Charge.create/3` — charges are created as a side effect of PaymentIntent
+confirmation.
+
+| Goal | Function | Notes |
+|------|----------|-------|
+| Fetch one charge by id | `retrieve/3` | Expand `balance_transaction` for fee details |
+| Filter charges | `list/3` | Real-time; use filters for fresh lookups |
+| Auto-paginate large sets | `stream!/3` | Lazy pagination over `list/3` |
+| Full-text lookup | `search/3` | Query string syntax; **eventually consistent** |
+| Post-hoc metadata | `update/4` | Metadata/description only — not payment state |
+| Capture uncaptured legacy charge | `capture/4` | **Legacy direct charges only** — see [Capturing a PaymentIntent](#capturing-a-paymentintent-manual-capture) for PI flows |
+
+### Retrieve a charge
+
+```elixir
+{:ok, charge} =
+  LatticeStripe.Charge.retrieve(client, "ch_3OoLqrJ...",
+    expand: ["balance_transaction"]
+  )
+```
+
+### List and stream charges
+
+```elixir
+{:ok, resp} = LatticeStripe.Charge.list(client, %{"customer" => customer.id, "limit" => 10})
+
+client
+|> LatticeStripe.Charge.stream!()
+|> Stream.take(100)
+|> Enum.each(&process_charge/1)
+```
+
+### Search charges
+
+```elixir
+{:ok, resp} =
+  LatticeStripe.Charge.search(client, "status:'succeeded' AND customer:'cus_123'")
+```
+
+> **Note:** Like PaymentIntent search, Charge search is eventually consistent. Do not use
+> `search/3` to confirm a payment that just succeeded — use `retrieve/3` or follow the
+> PaymentIntent state instead.
+
+### Update metadata on a settled charge
+
+```elixir
+{:ok, charge} =
+  LatticeStripe.Charge.update(client, "ch_3OoLqrJ...", %{
+    "metadata" => %{"support_ticket" => "TKT-789"},
+    "description" => "Order #456 — support update"
+  })
+```
+
+### Capture a legacy direct charge
+
+For uncaptured **legacy direct charges** (not PaymentIntent-initiated), use `capture/4`:
+
+```elixir
+{:ok, charge} = LatticeStripe.Charge.capture(client, "ch_3OoLqrJ...")
+```
+
+For PaymentIntent manual capture, use [`PaymentIntent.capture/4`](#capturing-a-paymentintent-manual-capture) instead.
+
+Connect platforms reconciling application fees should walk `balance_transaction.fee_details` —
+see [Connect Money Movement](connect-money-movement.md) for the full fee walkthrough.
+
+**Operator guides:** [Production Checklist](production-checklist.md) §Support and audit lookups;
+[Event Debugging](event-debugging.md) §`charge.*` events.
 
 ## Refunding a Payment
 
