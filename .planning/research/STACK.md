@@ -1,862 +1,102 @@
-# Technology Stack
-
-**Project:** LatticeStripe (Elixir Stripe SDK)
-**Researched:** 2026-03-31 (v1.0); updated 2026-04-13 (v1.1 addendum); updated 2026-04-16 (v1.2 addendum); updated 2026-04-16 (v1.3 addendum)
-**Overall Confidence:** HIGH
-
----
-
-## v1.3 Addendum — Production Coverage & Adoption Polish
-
-> This section was added at the start of the v1.3 milestone. It answers stack questions for the
-> six new resource families (Dispute, CreditNote, Mandate, SetupAttempt, File/FileLink, Quote)
-> and DX polish. The existing v1.2, v1.1, and v1.0 stack content follows unchanged below.
-
-### Verdict: One new optional runtime dependency (multipart), zero new hard dependencies
-
-The shipped `deps/0` block gains one entry: `{:multipart, "~> 0.4", optional: true}`.
-Everything else — Dispute, CreditNote, Mandate, SetupAttempt, FileLink, Quote (JSON responses),
-test fixture builders, and Phoenix recipe — is pure-Elixir with no new Hex deps.
-
----
-
-### Feature-by-Feature Stack Analysis
-
-#### 1. File Upload — multipart/form-data to files.stripe.com
-
-**Requires: `{:multipart, "~> 0.4", optional: true}`**
-
-Stripe's `/v1/files` endpoint uses two non-standard properties:
-1. The base URL is `https://files.stripe.com/v1/files`, NOT `https://api.stripe.com/v1/files`.
-   This is the same pattern already established by `meter-events.stripe.com` in v1.2.
-2. The request body must be `multipart/form-data`, NOT `application/x-www-form-urlencoded`
-   (which `FormEncoder` produces for all other resources).
-
-Finch does NOT build multipart bodies natively — `Finch.build/4` accepts a pre-encoded binary
-or iodata as the body. The `multipart` library fills this gap: it constructs the RFC 7578
-`multipart/form-data` stream, calculates content length, and generates the `Content-Type` header
-with boundary. Finch then receives `body_binary(mp)` as the body.
-
-**Why `multipart` specifically:**
-- Transport-agnostic (only dep is `:mime ~> 1.2 or ~> 2.0` for MIME type lookup)
-- v0.6.0 released January 2026 — actively maintained
-- Explicitly designed for Finch integration (documented in its README)
-- 1.7M all-time downloads — community-validated
-- RFC 2046 + RFC 7578 compliant
-
-**Integration pattern with existing Transport behaviour:**
-
-```elixir
-# Inside LatticeStripe.File.create/3 (simplified)
-mp =
-  Multipart.new()
-  |> Multipart.add_part(Part.text_field(purpose, "purpose"))
-  |> Multipart.add_part(Part.file_field(file_binary, "file", filename, content_type))
-
-body = Multipart.body_binary(mp)
-content_type_header = Multipart.content_type(mp, "multipart/form-data")
-content_length = Multipart.content_length(mp)
-
-headers = [
-  {"content-type", content_type_header},
-  {"content-length", to_string(content_length)}
-  | base_headers
-]
-# url = "https://files.stripe.com/v1/files" (not api.stripe.com)
-transport.request(%{method: :post, url: upload_url, headers: headers, body: body, opts: opts})
-```
-
-The `body` key in `Transport.request_map()` is already typed as `binary() | nil`, so no
-transport contract change is needed. The upload URL is a separate config key
-(`upload_base_url`, defaulting to `"https://files.stripe.com"`) alongside the existing
-`base_url` — same pattern used for `meter-events.stripe.com`.
-
-**stripe-mock compatibility:** stripe-mock parses multipart form bodies and validates them
-against the OpenAPI spec. File upload integration tests run against stripe-mock via the
-existing Docker setup — confirmed via stripe-mock issue #35 (support added in v0.14.0+).
-stripe-mock returns a fixture `File` object; the file binary itself is not validated, only
-field presence.
-
-**Why NOT to roll multipart encoding by hand:** RFC 7578 boundary encoding is subtle — handling
-filenames with special characters, proper CRLF, binary content without corruption. `multipart`
-is 14 well-tested modules. The ratio of implementation effort to library footprint makes
-rolling your own indefensible.
-
-**Why NOT to use Req for uploads only:** Req supports `form_multipart:` as a built-in step
-and is built on Finch. But introducing Req as a one-off dep for multipart encoding only
-imports ~15 deps (Req's full battery) for a feature that `multipart` handles in 3 deps
-(multipart + mime + your existing Finch). Inconsistent request pipeline is also a footgun.
-
-**Confidence: HIGH** — multipart v0.6.0 confirmed on hex.pm (January 2026); transport-agnostic
-confirmed from mix.exs inspection; Finch integration pattern confirmed from library README;
-stripe-mock multipart support confirmed via GitHub issue history.
-
----
-
-#### 2. Quote PDF Download — binary response, no JSON parsing
-
-**No new dependencies.** Finch already handles binary responses natively.
-
-The `GET /v1/quotes/:id/pdf` endpoint returns a raw PDF binary (content-type:
-`application/pdf`), not a JSON body. This is similar conceptually to the binary download
-case already handled by Finch's `stream/5`, though for Quote PDF the response is small
-enough that the standard `Finch.request/3` (used in `Transport.Finch`) collects the full
-body into a binary in one shot.
-
-The existing transport contract already types `body` as `binary()` in the response map —
-the transport returns raw bytes regardless of content-type. The change is purely in
-`LatticeStripe.Quote`:
-
-1. `pdf/2` function sends `GET /v1/quotes/:id/pdf` with `Accept: application/pdf` header.
-2. After the transport returns `{:ok, %{status: 200, body: binary}}`, skip JSON decoding
-   entirely and return `{:ok, binary}` directly.
-3. No JSON decode path is attempted — the response body is the PDF bytes.
-
-This is a caller-side contract deviation (returns `binary()` instead of a struct), documented
-explicitly in the `@spec` and `@doc`. Consistent with how the existing codebase handles
-non-struct responses (e.g., `LatticeStripe.Response` wraps the raw body).
-
-**Stripe API confirmed:** `GET /v1/quotes/:id/pdf` is in the Stripe OpenAPI spec, present in
-stripe-mock. The mock returns a fixture binary (not a real PDF, but the content-type header
-and response shape are exercised).
-
-**Confidence: HIGH** — Finch binary response confirmed via hexdocs.pm/finch (the `{:data, data}`
-callback in `stream/5` receives raw binary chunks; `Finch.request/3` collects them as a binary);
-no library needed.
-
----
-
-#### 3. Dispute, CreditNote, Mandate, SetupAttempt — No new dependencies
-
-All four resource families are standard JSON CRUDL families on `api.stripe.com`. They use
-the existing `Transport.Finch` → `FormEncoder` → `Jason` → typed `from_map/1` pipeline
-without modification.
-
-| Resource | API path | Operations | Notes |
-|----------|----------|------------|-------|
-| Dispute | `/v1/disputes` | retrieve, update, list, close | `evidence` is a large nested map |
-| CreditNote | `/v1/credit_notes` | create, retrieve, update, void, list, preview | Nested `lines` array |
-| Mandate | `/v1/mandates/:id` | retrieve only | Read-only; nested `payment_method_details` |
-| SetupAttempt | `/v1/setup_attempts` | list only | Read-only; reference from SetupIntent |
-
-None of these require multipart encoding, binary responses, different base URLs, or special
-auth patterns. No new dependencies.
-
-**Confidence: HIGH** — all four resource paths present in Stripe API reference and OpenAPI
-spec on `api.stripe.com`; standard CRUDL patterns.
-
----
-
-#### 4. FileLink — No new dependencies
-
-`FileLink` operations (`create`, `retrieve`, `update`, `list`) all use `api.stripe.com`
-with standard JSON encoding — NOT `files.stripe.com`. FileLink is a metadata record that
-points to an uploaded `File`; only `File.create` uses the upload URL and multipart encoding.
-
-No new dependencies.
-
-**Confidence: HIGH** — Stripe API reference confirms FileLink endpoints are on api.stripe.com.
-
----
-
-#### 5. Test Fixture Builders for Consumers (DX Polish)
-
-**No new Hex dependency. Use the existing hand-rolled factory pattern.**
-
-The question is whether to add `ex_machina ~> 2.8` for factory-style test data generation
-in `LatticeStripe.Testing`.
-
-**ExMachina analysis:**
-- v2.8.0 (June 2024) — actively maintained by BEAM Community
-- Works without Ecto using `use ExMachina` (no `ExMachina.Ecto`)
-- Provides `build/2`, `build_pair/2`, `build_list/3` with attribute overrides
-- Only meaningful additions over plain functions: `sequence/2` for auto-incrementing
-  fields, and the `build/2` merge API
-
-**Verdict: Do NOT add ExMachina.** The `LatticeStripe.Testing` module already ships
-hand-rolled fixture helpers using plain Elixir functions (established in Phase 10). The
-existing pattern is:
-
-```elixir
-# test/support/fixtures/customer_fixtures.ex
-defmodule LatticeStripe.Testing do
-  def customer_fixture(attrs \\ %{}) do
-    %LatticeStripe.Customer{
-      id: attrs[:id] || "cus_test#{System.unique_integer([:positive])}",
-      email: attrs[:email] || "test@example.com",
-      # ...
-    }
-  end
-end
-```
-
-This is exactly what Ecto's own documentation recommends as the standard approach for
-test factories without a factory library. Adding ExMachina to satisfy `sequence/2` is
-not worth the dependency for a library that already has the pattern established.
-
-**What to actually ship for v1.3 DX polish:**
-- Extend the existing `LatticeStripe.Testing` module with `dispute_fixture/1`,
-  `credit_note_fixture/1`, `mandate_fixture/1`, `setup_attempt_fixture/1`,
-  `file_fixture/1`, `file_link_fixture/1`, `quote_fixture/1` helpers
-- Follow the existing `customer_fixture/1` / `invoice_fixture/1` conventions in the
-  codebase (established in Phase 10, Phase 16)
-- No external library needed
-
-**If consumers want ExMachina for their own apps:** Document in the testing guide that
-`ex_machina ~> 2.8` is the ecosystem standard for factory-based test data and users can
-define their own factories wrapping LatticeStripe.Testing helpers. LatticeStripe does not
-need to take an ExMachina dependency itself.
-
-**Confidence: HIGH** — ExMachina v2.8.0 confirmed on hex.pm (June 2024); existing pattern
-analysis based on codebase inspection of test/support/; Ecto factory docs confirm plain-
-function approach is idiomatic.
-
----
-
-#### 6. Phoenix Webhook Recipe (DX Polish)
-
-**No new dependencies.** This is documentation + a guide file.
-
-The existing `LatticeStripe.Webhook.Plug` (Phase 7) and `guides/webhooks.md` cover the
-mechanics. The v1.3 DX polish item is a Phoenix-specific recipe showing:
-- Router integration (`forward "/stripe/webhooks", LatticeStripe.Webhook.Plug, ...`)
-- Raw body caching in Phoenix's endpoint (`Plug.Parsers` with raw body passthrough)
-- `handle_event/2` callback in a Phoenix context module
-- Recommended supervision tree for webhook processing (Task.Supervisor pattern)
-
-This is a `guides/phoenix-webhooks.md` addition only. No deps change.
-
-**Confidence: HIGH** — pattern is established Phoenix + Plug integration, no new tech.
-
----
-
-### mix.exs Changes for v1.3
-
-**One new optional runtime entry:**
-
-```elixir
-{:multipart, "~> 0.4", optional: true},
-```
-
-Place it alongside the Plug optional dep in the runtime block:
-
-```elixir
-defp deps do
-  [
-    # Runtime dependencies
-    {:finch, "~> 0.21"},
-    {:jason, "~> 1.4"},
-    {:telemetry, "~> 1.0"},
-    {:nimble_options, "~> 1.0"},
-    {:plug_crypto, "~> 2.0"},
-    {:plug, "~> 1.16", optional: true},
-    {:multipart, "~> 0.4", optional: true},   # <-- new for v1.3 File uploads
-
-    # Dev/test dependencies
-    {:mox, "~> 1.2", only: :test},
-    {:ex_doc, "~> 0.34", only: [:dev, :test], runtime: false},
-    {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-    {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-    {:fuse, "~> 2.5", only: [:dev, :test]},
-    {:opentelemetry_exporter, "~> 1.8", only: [:dev, :test]},
-    {:opentelemetry, "~> 1.5", only: [:dev, :test]},
-    {:opentelemetry_api, "~> 1.4", only: [:dev, :test]}
-  ]
-end
-```
-
-The `optional: true` marker means users who never call `LatticeStripe.File.create/3`
-do not need `multipart` in their own `deps/0`. Users who do call it must add
-`{:multipart, "~> 0.4"}` to their app's `mix.exs`. Document this in the File module
-`@moduledoc`.
-
-**What NOT to add for v1.3:**
-- `{:ex_machina, ...}` — existing hand-rolled fixture pattern is sufficient; ExMachina
-  is a user-side choice for their test suites, not an SDK dep
-- Any new dev-only dep — all six resources test fine against existing stripe-mock Docker
-- `{:mime, ...}` — transitively provided by `multipart`; do not declare separately
-
----
-
-### Version Verification Summary (April 2026)
-
-| Package | Confirmed Version | Source |
-|---------|------------------|--------|
-| `multipart` | 0.6.0 | hex.pm/packages/multipart (January 2026) |
-| `ex_machina` | 2.8.0 | hex.pm/packages/ex_machina (June 2024) — NOT added |
-
----
-
-## v1.2 Addendum — Production Hardening & DX Features
-
-> This section was added at the start of the v1.2 milestone. It answers stack questions for the nine new
-> feature areas. The existing v1.1 addendum and original v1.0 stack content follow unchanged below.
-
-### Verdict: Two optional new dependencies, zero hard new dependencies
-
-The v1.0/v1.1 `deps/0` block ships unchanged to users. Two optional additions:
-`:fuse` for circuit breaking (optional, user-declared), `opentelemetry_api` as a dev-only
-guide dep (not a runtime dep for LatticeStripe itself). All other v1.2 features are
-pure-Elixir patterns, CI tooling additions, or `.livemd` notebook files with no new Hex deps.
-
----
-
-### Feature-by-Feature Stack Analysis
-
-#### 1. Expand Deserialization (EXPD-02/03/05)
-
-**No new dependencies.** The existing `from_map/1` + `@known_fields` + `extra` pattern in
-every resource module is the right mechanism. Expanding typed structs is a pure-Elixir dispatch
-problem: inspect the value at an expanded field key — if it's a map with an `"object"` key,
-route to the matching `from_map/1` implementation; if it's a string ID, leave as-is.
-
-Implementation path: add a `LatticeStripe.Deserializer` internal module (hidden with
-`@moduledoc false`) that maps `"object"` string values to module names. The dot-path support
-for `expand: ["data.customer"]` is string splitting + recursive descent — no library needed.
-
-Status field atomization audit (EXPD-05) is similarly pure-Elixir: add `status_atom/1`
-helpers to each resource struct, following the existing `Account.Capability` pattern.
-
-**Confidence: HIGH** — pattern verified in v1.0/v1.1 codebase.
-
-#### 2. Circuit Breaker Pattern
-
-**Recommended: `:fuse ~> 2.5` as an OPTIONAL dependency (not required, user-declared).**
-
-`:fuse` (v2.5.0 on Hex.pm, April 2026) is the canonical Erlang circuit breaker library. It is
-an OTP application — a supervised GenServer process tree — with a minimal five-function API:
-`ask/2`, `install/2`, `melt/1`, `reset/1`, `run/3`. It integrates cleanly with Elixir via
-direct Erlang interop.
-
-LatticeStripe should NOT add `:fuse` as a hard runtime dependency because:
-1. Most users do not need circuit breaking at the SDK level — they handle it at the
-   application or infrastructure layer (e.g., load balancer circuit breaking, Kubernetes
-   readiness probes).
-2. `:fuse` starts OTP processes that would appear in every LatticeStripe user's supervision
-   tree without their knowledge.
-3. It creates an application coupling (`:fuse` must be in `:extra_applications` or started
-   before LatticeStripe).
-
-**Recommended approach:** Ship a `LatticeStripe.RetryStrategy.CircuitBreaker` module that
-is documented as requiring the user to add `{:fuse, "~> 2.5"}` to their own `deps/0`. The
-module wraps the `RetryStrategy` behaviour with fuse semantics. Document clearly in the
-performance guide.
-
-**Alternatives considered:**
-- `breaker` (hex.pm/packages/breaker) — less maintained, fewer downloads than fuse.
-- Custom GenServer state machine — re-inventing the wheel, fuse is battle-tested.
-- `req_fuse` (v0.3.2) — wraps fuse for Req, not applicable (LatticeStripe doesn't use Req),
-  and licensed CC-BY-NC-ND which is non-commercial only.
-- Application-level only (leave to users entirely) — valid, but documenting the integration
-  pattern saves every user from reinventing it.
-
-**Confidence: HIGH** — fuse v2.5.0 confirmed on hex.pm, OTP 26+ compatible.
-
-#### 3. Rate-Limit Header Tracking
-
-**No new dependencies.** Stripe returns `RateLimit-Limit`, `RateLimit-Remaining`, and
-`RateLimit-Reset` headers on every response. The existing `Response` struct and telemetry
-pipeline already capture response headers. Extension is: parse these headers in
-`LatticeStripe.Client` after every successful response, attach them to the telemetry
-`[:lattice_stripe, :request, :stop]` event metadata, and optionally expose them on
-`LatticeStripe.Response.t()` as a `rate_limit` field.
-
-Pure-Elixir string parsing — `Integer.parse/1` on header values. No library needed.
-
-**Confidence: HIGH.**
-
-#### 4. OpenTelemetry Integration
-
-**No new runtime dependency for LatticeStripe itself.**
-
-The correct integration path: LatticeStripe already emits `[:lattice_stripe, :request, :*]`
-telemetry events. Users attach an OpenTelemetry handler to those events using
-`opentelemetry_telemetry` (the bridge library, v1.1.2, maintained by the OTel org).
-
-LatticeStripe's role is to write a guide (`guides/opentelemetry.md`) showing:
-1. Add `{:opentelemetry_api, "~> 1.5"}` and `{:opentelemetry_telemetry, "~> 1.1"}` to the
-   user's `deps/0`.
-2. Attach telemetry handlers that create OTel spans from LatticeStripe events.
-3. Example instrumentation code.
-
-Do NOT add `opentelemetry_api` to LatticeStripe's own `mix.exs`. Adding an OTel dep would
-force every LatticeStripe user to carry the OTel stack even if they are not using it.
-LatticeStripe's telemetry events are the correct abstraction boundary.
-
-**For the guide itself:** Add `opentelemetry_api ~> 1.5` and `opentelemetry_telemetry ~> 1.1`
-only as `only: :dev` deps in LatticeStripe's `mix.exs` so the guide examples can be
-validated in CI. Do not declare them as `:optional` — they are not a user-facing optional
-feature of the SDK, they are guide examples that happen to need the lib to compile.
-
-| Package | Version | Role |
-|---------|---------|------|
-| `opentelemetry_api` | ~> 1.5 | User's dep — OTel API (traces/metrics/logs) |
-| `opentelemetry_telemetry` | ~> 1.1 | User's dep — bridge from `:telemetry` events to OTel spans |
-| `opentelemetry` | ~> 1.5 | User's dep — OTel SDK (needed at runtime; `opentelemetry_api` is API-only) |
-
-LatticeStripe only needs `opentelemetry_api ~> 1.5` in `only: :dev` for guide doctests.
-
-**Confidence: HIGH** — opentelemetry_api v1.5.0 confirmed on hex.pm (October 2025),
-opentelemetry_telemetry v1.1.2 confirmed on hex.pm.
-
-#### 5. LiveBook Notebook
-
-**No new Hex dependency.** LiveBook notebooks are `.livemd` files — plain Markdown with Elixir
-code cells. Ship a `notebooks/stripe_explorer.livemd` file in the repo. Users run it with
-their locally installed Livebook (v0.19.6, hex.pm/packages/livebook).
-
-The notebook installs LatticeStripe from Hex inside Livebook's Mix environment using the
-standard `Mix.install` pattern:
-
-```elixir
-Mix.install([{:lattice_stripe, "~> 1.2"}])
-```
-
-No `kino` dependency needed for a basic exploration notebook. Kino (v0.19.0) is useful for
-interactive widgets (input fields for API keys, data tables for response inspection) — add
-`{:kino, "~> 0.19"}` inside the `Mix.install` in the notebook itself if wanted. This is
-a user-side dependency inside the `.livemd`, not a Hex dep of LatticeStripe.
-
-The `.livemd` file is committed to the repo under `notebooks/` and linked from the README
-with a "Run in Livebook" badge. No changes to `mix.exs` whatsoever.
-
-**Confidence: HIGH** — Livebook v0.19.6 confirmed on hex.pm (March 2026), kino v0.19.0 confirmed.
-
-#### 6. Stripe API Changelog / Drift Detection in CI
-
-**No new Hex dependency.** This is a CI tooling addition using existing tools.
-
-**Recommended approach:** Add a GitHub Actions workflow (`drift-check.yml`) on a weekly cron
-schedule that:
-1. Downloads the latest `stripe/openapi` spec (`/latest/spec3.json` from
-   `raw.githubusercontent.com/stripe/openapi`) — the repo has 2,236+ releases, updated with
-   every Stripe API version.
-2. Runs a mix task (`mix lattice_stripe.drift_check`) that compares known resource fields
-   against the spec and reports new/removed fields.
-3. Opens a GitHub issue (via `gh issue create`) if drift is detected.
-
-The mix task is pure Elixir + Jason (already a dep) for JSON parsing. No additional library.
-
-**Alternative: `oasdiff` GitHub Action** — `oasdiff/oasdiff-action` detects breaking changes
-between two OpenAPI specs. Useful if the goal is strict breaking-change alerting, but
-overkill for field drift detection since Stripe's API is additive (breaking changes extremely
-rare). The mix task approach gives more control over what counts as "drift worth alerting."
-
-**Confidence: MEDIUM** — approach validated by `stripe/openapi` repo structure (verified
-April 2026, updated daily, raw file access confirmed). Mix task implementation is standard
-Elixir + Jason.
-
-#### 7. `meter_event_stream` Endpoint (v2 API)
-
-**No new dependencies.** Finch's existing `stream/5` function handles this.
-
-**Key finding:** The `/v2/billing/meter_event_stream` endpoint is NOT a streaming protocol
-(not SSE, not HTTP/2 push). It is a standard HTTPS POST that accepts batches of up to 100
-meter events per request at high concurrency. The "stream" in the name refers to the
-high-throughput usage pattern, not a wire protocol. Authentication uses a short-lived session
-token (15-minute expiry) obtained from `POST /v2/billing/meter_event_session`.
-
-The URL is `https://meter-events.stripe.com/v2/billing/meter_event_stream` — a different
-hostname from `api.stripe.com`. This means LatticeStripe needs a second Finch pool or
-accepts the existing Finch instance can open connections to a second host (Finch handles
-multi-host automatically per pool configuration).
-
-Implementation: `LatticeStripe.Billing.MeterEventStream` module with:
-- `create_session/2` — POST to `/v2/billing/meter_event_session`, returns token + expiry
-- `send_events/3` — POST to `/v2/billing/meter_event_stream` with Bearer token auth
-- Token renewal handled by caller (no GenServer process in LatticeStripe — caller manages
-  token lifecycle per the SDK's "processes only when needed" philosophy)
-
-`Finch.stream/5` is not needed here — this is request/response, not streaming. Standard
-`Finch.request/3` suffices.
-
-**Confidence: HIGH** — endpoint protocol confirmed via Stripe API reference (standard POST,
-session token auth, `meter-events.stripe.com` hostname). Finch multi-host support confirmed.
-
-#### 8. Changeset-Style Param Builders
-
-**No new dependencies.** This is a pure-Elixir DSL pattern.
-
-The ecosystem search found no purpose-built "builder" library for this use case. The right
-approach is a hand-rolled `LatticeStripe.Params` module (or per-resource builder modules)
-using Elixir's pipe operator as the composition mechanism:
-
-```elixir
-LatticeStripe.Params.SubscriptionSchedule.new()
-|> LatticeStripe.Params.SubscriptionSchedule.add_phase(items: [...], iterations: 3)
-|> LatticeStripe.Params.SubscriptionSchedule.set_end_behavior(:release)
-|> LatticeStripe.Params.SubscriptionSchedule.build()
-```
-
-Each builder function returns a map that is passed directly to the resource CRUDL functions.
-NimbleOptions (already a dep) validates the final built map before sending to Stripe.
-
-Ecto.Changeset would add Ecto as a dependency — rejected. Ecto is a database library. No database.
-
-**Confidence: HIGH** — pattern is idiomatic Elixir, no library needed.
-
-#### 9. Connection Warm-Up / Pool Pre-Establishment
-
-**No new dependencies.** Finch (already a dep) handles this natively.
-
-Finch's `Finch.stream/5` and `Finch.request/3` lazily establish connections. Pool
-pre-establishment is done by sending a real request at application startup. The recommended
-pattern is an `Application.start/2` callback or a simple `Task.start/1` in the user's
-supervision tree that calls a lightweight endpoint (e.g., `LatticeStripe.Health.ping/1` —
-a new zero-cost public function that hits `GET /v1/account` with a short timeout).
-
-Finch 0.21 does not expose an explicit "pre-connect" API — connection establishment is
-triggered by the first request. A warm-up helper is a thin wrapper around the existing
-transport, not a new capability.
-
-**Confidence: HIGH** — confirmed via Finch documentation (lazy connection model, no explicit
-warm-up API).
-
----
-
-### mix.exs Changes for v1.2
-
-**Runtime deps block: unchanged.** Do not add any new entries to the shipped dependencies.
-
-**Optional dev additions** (only if OpenTelemetry guide examples require compilation in CI):
-
-```elixir
-# Add only: :dev entries — NOT optional runtime deps
-{:opentelemetry_api, "~> 1.5", only: :dev, runtime: false},
-```
-
-**What NOT to add:**
-- `{:fuse, "~> 2.5"}` — document as user-declared optional; do not add to LatticeStripe deps
-- `{:opentelemetry_api, "~> 1.5"}` as a runtime dep — breaks lean-library philosophy
-- `{:kino, "~> 0.19"}` — lives inside `.livemd` Mix.install block, not mix.exs
-- Any changeset/builder library — pure-Elixir pattern, no dep needed
-
----
-
-### Version Verification Summary (April 2026)
-
-| Package | Confirmed Version | Source |
-|---------|------------------|--------|
-| `:fuse` | 2.5.0 | hex.pm/packages/fuse |
-| `opentelemetry_api` | 1.5.0 | hex.pm/packages/opentelemetry_api |
-| `opentelemetry_telemetry` | 1.1.2 | hex.pm/packages/opentelemetry_telemetry |
-| `livebook` | 0.19.6 | hex.pm/packages/livebook |
-| `kino` | 0.19.0 | hex.pm/packages/kino |
-
----
-
-## v1.1 Addendum — Billing.Meter, Billing.MeterEvent + MeterEventAdjustment, BillingPortal.Session
-
-> This section was added at the start of the v1.1 milestone. It answers the specific
-> stack questions for the three new resource modules. The original v1.0 stack content
-> follows unchanged below.
-
-### Verdict: No new dependencies required for v1.1
-
-`mix.exs` is complete as-is. Every infrastructure need for the three new modules is
-already met by the v1.0 stack.
-
-### Stripe API Version Compatibility (2026-03-25.dahlia)
-
-Verified directly by parsing `stripe/openapi` `spec3.json` (raw JSON, not a web page).
-All four endpoint families are present with no beta, restricted, or preview flags:
-
-| Endpoint | OpenAPI path | HTTP methods | Beta/restricted |
-|----------|--------------|-------------|-----------------|
-| Billing.Meter list/create | `/v1/billing/meters` | GET, POST | none |
-| Billing.Meter retrieve/update | `/v1/billing/meters/{id}` | GET, POST | none |
-| Billing.Meter deactivate | `/v1/billing/meters/{id}/deactivate` | POST | none |
-| Billing.Meter reactivate | `/v1/billing/meters/{id}/reactivate` | POST | none |
-| Billing.MeterEvent create | `/v1/billing/meter_events` | POST | none |
-| Billing.MeterEventAdjustment create | `/v1/billing/meter_event_adjustments` | POST | none |
-| BillingPortal.Session create | `/v1/billing_portal/sessions` | POST | none |
-
-`x-stripeVersion`, `x-stability`, `x-restricted`, and `x-beta` fields are all absent on
-every path. **No `stripe_version` bump required.** `2026-03-25.dahlia` is fully compatible.
-
-Background: Stripe deprecated legacy usage-records (`UsageRecord`) in `2025-03-31.basil`.
-`Billing.Meter` + `MeterEvent` are now the canonical, non-deprecated metered billing
-primitives in every API version from `2025-03-31.basil` onward. `2026-03-25.dahlia` is
-well past that boundary. (HIGH confidence — confirmed from Stripe OpenAPI spec + changelog)
-
-### stripe-mock Docker Coverage
-
-**All four v1 endpoint families are covered by `stripe/stripe-mock:latest`.**
-
-stripe-mock is auto-generated from the same `stripe/openapi` spec3.json that was
-verified above. Because all paths are present without beta/restricted flags, they are
-in the mock. No custom fixtures or overrides needed.
-
-One important behavioral constraint (applies equally to all v1.0 integration tests):
-stripe-mock is stateless. It validates request shapes and returns fixture responses.
-Cross-request state (e.g., deactivating a meter then querying its status) is not
-simulated. Integration tests should assert on response shape and HTTP 200/201 codes,
-not multi-step state transitions.
-
-**Endpoint outside v1.1 scope (for clarity):** The high-throughput streaming variant
-lives at `/v2/billing/meter-event-stream` (v2 API, different auth model using ephemeral
-15-minute session tokens). This is NOT what `Billing.MeterEvent.create/3` uses. v1.1
-uses the standard `/v1/billing/meter_events` endpoint with the normal `Stripe-Key`
-header — same as every other v1.0 resource. The v2 streaming path is deferred to v1.2+
-per locked decision D3.
-
-### No New Dependencies
-
-| Infrastructure need | Already satisfied by |
-|--------------------|----------------------|
-| HTTP requests to Stripe | Finch `~> 0.21` |
-| JSON encode/decode | Jason `~> 1.4` |
-| Struct hydration (`from_map/1` pattern) | no dep — pure Elixir pattern |
-| Idempotency key threading (`identifier:` opt) | existing client plumbing |
-| `stripe_account:` header (Connect compat) | existing client plumbing |
-| Telemetry events | `:telemetry ~> 1.0` |
-| Option validation for `create/3` opts | NimbleOptions `~> 1.0` |
-| Unit test mocking | Mox `~> 1.2` |
-| Integration tests | stripe-mock Docker |
-
-### mix.exs: No Changes to deps/0
-
-Do not touch `deps/0`. The current block is correct for v1.1.
-
-### mix.exs: groups_for_modules requires two additions
-
-This is a docs-config change, not a dependency change. It belongs in Phase 20-06
-and Phase 21-04 respectively. Recommended approach (mirrors the `Checkout` group
-pattern — separate namespace, separate group):
-
-```elixir
-# Add after the existing Billing group:
-"Billing Metering": [
-  LatticeStripe.Billing.Meter,
-  LatticeStripe.Billing.Meter.DefaultAggregation,
-  LatticeStripe.Billing.Meter.CustomerMapping,
-  LatticeStripe.Billing.Meter.ValueSettings,
-  LatticeStripe.Billing.Meter.StatusTransitions,
-  LatticeStripe.Billing.MeterEvent,
-  LatticeStripe.Billing.MeterEventAdjustment
-],
-"Customer Portal": [
-  LatticeStripe.BillingPortal.Session,
-  LatticeStripe.BillingPortal.Session.FlowData
-],
-```
-
-Rationale for separate groups over appending to "Billing": `Billing.Meter*` is a
-distinct sub-namespace with its own guide; `BillingPortal` mirrors `Checkout` in
-structure (create-only session, namespace-based). New groups keep the HexDocs sidebar
-navigable as the module count grows.
-
-Also add new guide paths to `extras:` in the docs config:
-- `"guides/metering.md"` (Phase 20-06)
-- `"guides/customer-portal.md"` (Phase 21-04)
-
-### Optional: StreamData for property testing
-
-Not required for v1.1. Mentioned because `MeterEvent.create/3` is the hot path in
-Accrue and idempotency correctness matters.
-
-[StreamData](https://hex.pm/packages/stream_data) `~> 1.1` is the Elixir ecosystem
-standard for property-based tests (ExUnit-integrated, `use ExUnitProperties`).
-
-Why NOT to add it in v1.1:
-1. stripe-mock is stateless — server-side `identifier` deduplication cannot be exercised
-   against it. The real idempotency guarantee lives in Stripe's infrastructure.
-2. `identifier:` in `MeterEvent.create/3` is a passthrough string opt — encoding path
-   is identical to every other string opt already tested in v1.0.
-3. Adds CI overhead for a minor release with limited return.
-
-If property tests are added in a future milestone, the right targets are broader:
-`FormEncoder` with arbitrary nested maps, pagination cursor parsing, timestamp
-boundary values across all resources. Add StreamData then, not now.
-
----
-
-## Platform Target
-
-| Requirement | Value | Rationale |
-|-------------|-------|-----------|
-| Elixir | >= 1.15 | ~2.5 year coverage; 1.15 introduced compile-time improvements and better warnings. Covers OTP 24-26 minimum. PROJECT.md specifies 1.15+. |
-| Erlang/OTP | >= 26 | Aligns with Elixir 1.15 upper bound and 1.19 lower bound. OTP 26 is mature and widely deployed. |
-| Elixir upper tested | 1.19.x | Current stable (1.19.5). Test CI matrix against 1.15 through 1.19. |
-| OTP upper tested | 28 | Latest stable supported by Elixir 1.19. |
-
-**Confidence: HIGH** -- Verified against official Elixir compatibility table at hexdocs.pm/elixir/compatibility-and-deprecations.html.
+# Stack Research
+
+**Domain:** Stripe Tax API SDK surface (Elixir)
+**Researched:** 2026-05-27
+**Confidence:** HIGH
 
 ## Recommended Stack
 
-### Core Runtime Dependencies
+### Core Technologies
 
-These ship to users. Minimize aggressively.
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| Elixir | >= 1.15 | Runtime | Project constraint; existing codebase standard |
+| Finch | ~> 0.21 | HTTP transport | Already the default transport; Tax endpoints use same `/v1/tax/*` REST surface |
+| Jason | ~> 1.4 | JSON codec | Existing wire-format encoding/decoding for nested Tax params |
+| :telemetry | ~> 1.0 | Instrumentation | Tax calls emit through existing request pipeline events |
+| Existing `LatticeStripe.Request` / `Resource` / `Client` | (shipped) | Request pipeline | Tax resources follow identical CRUDL + verb patterns as CreditNote, Mandate, Billing.Meter |
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Finch | ~> 0.21 | Default HTTP transport | Mint-based, built-in connection pooling, async-friendly, the modern Elixir HTTP primitive. Used by Req, Swoosh, and most production Elixir apps. Lighter than Req for an SDK (no redirect/retry/decompression overhead -- LatticeStripe owns those behaviors). | HIGH |
-| Jason | ~> 1.4 | JSON encoding/decoding | Undisputed Elixir ecosystem standard. Blazing fast pure-Elixir implementation. Every Phoenix app already has it. | HIGH |
-| :telemetry | ~> 1.0 | Instrumentation events | Erlang ecosystem standard for metrics/tracing. Emitting telemetry events lets users plug in any monitoring stack (Prometheus, DataDog, OpenTelemetry) without LatticeStripe knowing about it. | HIGH |
-| Plug | ~> 1.16 | Webhook endpoint plug | Only needed for the webhook verification Plug. Use `plug` not `plug_cowboy` -- LatticeStripe provides a Plug, users bring their own server. Broad version range because Plug's core API is stable. | HIGH |
-| Plug Crypto | ~> 2.0 | HMAC signature verification | Provides `Plug.Crypto.secure_compare/2` for timing-safe comparison in webhook signature verification. Pulled in transitively by Plug but worth noting explicitly. | HIGH |
+### Supporting Libraries
 
-### Optional Runtime Dependencies
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| NimbleOptions | ~> 1.0 (optional) | Per-request opts validation | Only if new Tax-specific client options emerge; not required for resource modules |
+| Mox | ~> 1.2 (dev) | Transport mocking | Unit/integration tests for Tax calculation → transaction chain |
+| stripe-mock (Docker) | latest (CI) | Integration test server | Tax endpoints may have partial coverage; Mox-at-Transport remains primary proof path |
 
-| Technology | Version | Purpose | When Needed | Confidence |
-|------------|---------|---------|-------------|------------|
-| NimbleOptions | ~> 1.0 | Option schema validation | For validating client config and per-request options with clear error messages. Dashbit-maintained, tiny, used by Finch/Broadway/etc. Declare as optional dep -- recommended but not required. | MEDIUM |
+### Development Tools
 
-**NimbleOptions rationale:** Provides schema-based validation with auto-generated docs for options. Alternative is hand-rolled validation with Keyword/Map checks -- works fine but NimbleOptions gives better error messages for free. Recommend including it as a hard dependency given its tiny footprint and ecosystem ubiquity.
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| ExUnit | Test framework | Chained integration specs matching v1.5 thin-event pattern |
+| ExDoc | Documentation | Tax moduledocs + optional `guides/tax.md` recipe |
+| Credo | Linting | No new deps |
 
-### Dev/Test Dependencies
+## Installation
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| ExUnit | (stdlib) | Test framework | Ships with Elixir. No external test framework needed. | HIGH |
-| Mox | ~> 1.2 | Behaviour-based test mocks | Dashbit-maintained, idiomatic Elixir pattern for mocking behaviours (Transport, RetryStrategy). Concurrent-safe with `async: true`. | HIGH |
-| ExDoc | ~> 0.34 | Documentation generation | Official Elixir documentation tool. Generates beautiful HTML docs for HexDocs. Version floor of 0.34 covers through current 0.40.x. | HIGH |
-| Credo | ~> 1.7 | Static analysis / linting | Code consistency tool. Not Dialyzer -- lighter, faster, focuses on style and common mistakes. PROJECT.md explicitly excludes Dialyzer. | HIGH |
-| MixAudit | ~> 2.1 | Security vulnerability scanning | Scans deps for known CVEs. Cheap insurance for CI. | MEDIUM |
-| stripe-mock | latest (Docker) | Integration test server | Official Stripe mock HTTP server powered by OpenAPI spec. Run in CI via Docker (`stripe/stripe-mock:latest`). Not a Hex dep -- a test infrastructure service. | HIGH |
-
-### CI/CD Tooling (Not Hex Dependencies)
-
-| Tool | Purpose | Why |
-|------|---------|-----|
-| GitHub Actions | CI/CD | Free for open source, excellent Elixir ecosystem support, matrix builds. |
-| stripe-mock Docker image | Integration testing | `docker run -p 12111-12112:12111-12112 stripe/stripe-mock:latest`. Official, auto-updated from Stripe OpenAPI spec. |
-| Release Please | Automated releases | Conventional Commits to automated changelog + version bump + GitHub Release. |
-| Hex.pm publishing | Package distribution | `mix hex.publish` in CI on release tag. |
-
-## mix.exs Dependencies Block
+No new Hex dependencies required for v1.6 Tax. The milestone adds modules under `lib/lattice_stripe/tax/` and extends `ObjectTypes` registry entries.
 
 ```elixir
-defp deps do
-  [
-    # Runtime
-    {:finch, "~> 0.21"},
-    {:jason, "~> 1.4"},
-    {:telemetry, "~> 1.0"},
-    {:plug, "~> 1.16"},
-    {:plug_crypto, "~> 2.0"},
-    {:nimble_options, "~> 1.0"},
-
-    # Dev/Test
-    {:mox, "~> 1.2", only: :test},
-    {:ex_doc, "~> 0.34", only: :dev, runtime: false},
-    {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-    {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false}
-  ]
-end
+# mix.exs — no changes expected beyond version bump at release time
+# Existing deps cover all Tax API transport needs
 ```
 
 ## Alternatives Considered
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| HTTP Client | Finch | **Req** | Req is built on Finch and adds retry, redirect, decompression. But LatticeStripe needs to own retry logic (Stripe-Should-Retry header, idempotency semantics). Req's batteries would conflict with SDK-specific behavior. Finch gives the right level of control. |
-| HTTP Client | Finch | **HTTPoison/Hackney** | Legacy. Hackney has known memory issues under load. Finch (Mint-based) is the modern replacement endorsed by the community. |
-| HTTP Client | Finch | **Tesla** | Tesla is a middleware HTTP client -- good pattern for general apps but overkill for an SDK that controls its own pipeline. Adds unnecessary abstraction layer. |
-| JSON | Jason | **Poison** | Slower, less maintained. Jason is the uncontested standard since ~2019. |
-| JSON | Jason | **JSON (stdlib)** | Elixir 1.18+ includes a JSON module in stdlib. Too new to target as minimum -- we support 1.15+. Jason remains the right choice until the stdlib JSON module is available across all supported versions. Could offer as a configurable codec via behaviour in future. |
-| Mocking | Mox | **Mimic** | Mimic patches modules at runtime (like RSpec mocks). Mox enforces behaviour contracts -- aligns with LatticeStripe's architecture of Transport/RetryStrategy behaviours. |
-| Linting | Credo | **Dialyzer/Dialyxir** | Explicitly excluded per PROJECT.md. Dialyzer is slow, produces confusing false positives, and typespecs are documentation-only in this project. |
-| Docs | ExDoc | (no real alternative) | ExDoc is the official, only serious option for Elixir documentation. |
-| Options validation | NimbleOptions | **Hand-rolled** | NimbleOptions is 200 lines of code, battle-tested, and gives auto-generated docs. Not worth hand-rolling. |
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| Reuse existing Resource/Request pipeline | New Tax-specific HTTP client | Never — would break SDK consistency |
+| `LatticeStripe.Tax.*` namespace | Flat top-level modules (`LatticeStripe.TaxCalculation`) | Never — Billing.Meter precedent favors nested namespace for Stripe object families |
+| Mox-at-Transport integration tests | stripe-mock-only Tax tests | stripe-mock Tax coverage is incomplete; Mox proves request shapes and response deserialization |
+| Customer-nested + top-level TaxId paths | Top-level only | Only if discuss-phase decides Customer nesting is out of scope — Stripe exposes both |
 
-## Architecture-Relevant Stack Decisions
+## What NOT to Add
 
-### Transport Behaviour (NOT a dependency choice)
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| Tax filing/returns orchestration | Accrue scope; multi-jurisdiction filing strategy is downstream | SDK primitives: Calculation, Transaction, Settings, Registration |
+| New JSON codec | Unnecessary dep | Jason via existing pipeline |
+| Tax-specific Finch pool | Over-engineering | Existing client `:finch` option |
+| Codegen from OpenAPI | Project uses handwritten surfaces | Handwritten modules matching CreditNote/Mandate patterns |
+| AutomaticTax builder abstraction | Invoice.AutomaticTax is a nested struct only; don't conflate with Tax API family | Separate `Tax.Calculation` module for standalone Tax API |
 
-LatticeStripe defines a `LatticeStripe.Transport` behaviour. Finch is the default adapter. Users can implement the behaviour to use Req, Tesla, HTTPoison, or anything else. This means:
+## Stack Patterns by Variant
 
-- Finch is a **default** dependency, not a hard coupling
-- The behaviour contract is: `request(method, url, headers, body, opts) :: {:ok, response} | {:error, reason}`
-- Tests mock the Transport behaviour via Mox
+**If implementing Tax Calculation:**
+- Use `POST /v1/tax/calculations` with string-key params (Stripe wire format)
+- Support `expand` for line_items inline
+- Calculations expire after 90 days — document in moduledoc, don't add expiry logic
 
-### JSON Codec Behaviour (future-proofing)
+**If implementing Tax Transaction:**
+- Verbs use non-standard paths: `create_from_calculation`, `create_reversal` (like CreditNote `preview`, Dispute `close`)
+- `reference` param must be unique across all transactions — document in moduledoc
 
-Define a `LatticeStripe.JSON` behaviour with `encode/1` and `decode/1`. Default implementation wraps Jason. When Elixir stdlib JSON matures across the ecosystem, users can swap without LatticeStripe changes.
+**If implementing Tax Settings:**
+- Singleton resource: `GET/POST /v1/tax/settings` (no ID in path)
+- Follow Configuration singleton pattern if one exists, otherwise first singleton in codebase
 
-### Why NOT Req for an SDK
+**If implementing TaxId:**
+- Dual path surface: `/v1/tax_ids` and `/v1/customers/:id/tax_ids`
+- Recommend `LatticeStripe.TaxId` with optional `customer_id` param routing paths
 
-This deserves emphasis. Req is excellent for application-level HTTP but wrong for an SDK because:
+## Version Compatibility
 
-1. **Retry ownership**: Stripe has specific retry semantics (Stripe-Should-Retry header, idempotency key replay). Req's built-in retry would fight with SDK retry logic.
-2. **Error mapping**: LatticeStripe needs to parse Stripe error responses into structured types. Req's error handling is generic.
-3. **Connection pooling**: Finch lets LatticeStripe configure a dedicated pool for `api.stripe.com` with SDK-appropriate settings (size, timeouts).
-4. **Dependency weight**: Req brings in Finch anyway, plus ~15 additional deps. An SDK should be lean.
-
-## Elixir CI Test Matrix
-
-```yaml
-# Recommended GitHub Actions matrix
-strategy:
-  matrix:
-    include:
-      - elixir: "1.15"
-        otp: "26"
-      - elixir: "1.17"
-        otp: "27"
-      - elixir: "1.19"
-        otp: "28"
-```
-
-Three combinations covering the floor, middle, and ceiling of supported versions. More than three adds CI time without proportional value.
-
-## What NOT to Use
-
-| Technology | Why Not |
-|------------|---------|
-| **Dialyzer/Dialyxir** | Explicitly excluded. Slow, janky DX, false positives. Typespecs are for documentation. |
-| **HTTPoison** | Legacy Hackney wrapper. Memory issues. Community has moved to Finch/Req. |
-| **Poison** | Superseded by Jason years ago. No reason to use it. |
-| **Tesla** | Middleware abstraction unnecessary for an SDK that owns its entire request pipeline. |
-| **Req** | Too high-level. Retry/error/redirect logic conflicts with SDK-specific Stripe semantics. |
-| **ExVCR / Bypass** | ExVCR records real HTTP and replays cassettes -- brittle, hard to maintain. Bypass is a local HTTP server -- stripe-mock is better because it validates against Stripe's actual OpenAPI spec. Use Mox for unit tests, stripe-mock for integration tests. |
-| **Ecto** | No database. This is an HTTP client library. |
-| **GenServer for state** | Per PROJECT.md philosophy: "processes only when truly needed." Client config is a struct passed explicitly, not process state. Finch handles connection pool processes. |
-| **`/v2/billing/meter-event-stream`** | v2 high-throughput streaming endpoint — different auth model (ephemeral 15-minute session tokens), different semantics. Deferred to v1.2+ per locked decision D3. v1.1 uses `/v1/billing/meter_events` with standard `Stripe-Key` auth. |
-| **`req_fuse`** | Circuit breaker wrapper for Req — wrong HTTP client. Also CC-BY-NC-ND licensed (non-commercial only). |
-| **`breaker`** | Less maintained Elixir circuit breaker alternative to `:fuse`. Fewer downloads, less community validation. |
-| **ExMachina** | External factory library not needed for LatticeStripe.Testing's fixture helpers. The existing hand-rolled `*_fixture/1` pattern is idiomatic, dep-free, and already established in the codebase. Users can add ExMachina to their own apps for integration with LatticeStripe types. |
-| **Req for file uploads** | Using Req only for multipart encoding would introduce ~15 transitive deps for a task the 3-dep `multipart` library handles. Inconsistent request pipeline (Finch everywhere except File) is a maintenance footgun. |
+| Package A | Compatible With | Notes |
+|-----------|-----------------|-------|
+| LatticeStripe 1.3.x+ | Stripe API 2024-11-20.acacia+ | Tax endpoints stable under `/v1/tax/*`; pin matches existing client default |
+| Tax Calculations | Tax Transactions | Calculation ID required for `create_from_calculation`; 90-day expiry window |
+| Tax Settings | Tax Calculations | Default tax_code in settings affects calculations without explicit tax_code |
 
 ## Sources
 
-- [Finch on Hex.pm](https://hex.pm/packages/finch) -- v0.21.0 confirmed
-- [Finch Documentation](https://hexdocs.pm/finch/Finch.html) -- pool configuration, stream/5 function, HTTP/2 streaming support confirmed; binary `{:data, data}` callback confirmed
-- [multipart on Hex.pm](https://hex.pm/packages/multipart) -- v0.6.0 confirmed (January 2026), 1.7M downloads
-- [multipart GitHub](https://github.com/breakroom/multipart) -- transport-agnostic confirmed (only dep: `:mime`); Finch integration pattern in README
-- [multipart HexDocs](https://hexdocs.pm/multipart/Multipart.html) -- `body_binary/1`, `body_stream/1`, `content_type/2`, `content_length/1` API confirmed
-- [Stripe File Upload Guide](https://docs.stripe.com/file-upload) -- `files.stripe.com` base URL confirmed; multipart/form-data required; `file` + `purpose` fields required
-- [Stripe Files API Reference](https://docs.stripe.com/api/files/create) -- endpoint shape confirmed
-- [Stripe Quotes PDF Reference](https://docs.stripe.com/api/quotes/pdf) -- `GET /v1/quotes/:id/pdf` confirmed in OpenAPI spec; binary response
-- [stripe-mock GitHub issue #35](https://github.com/stripe/stripe-mock/issues/35) -- multipart upload support added in stripe-mock v0.14.0+
-- [ExMachina on Hex.pm](https://hex.pm/packages/ex_machina) -- v2.8.0 confirmed (June 2024); works without Ecto
-- [ExMachina HexDocs](https://hexdocs.pm/ex_machina/readme.html) -- `build/2` API confirmed, Ecto-free usage confirmed
-- [Ecto test factories guide](https://hexdocs.pm/ecto/test-factories.html) -- plain-function factory pattern recommended as idiomatic approach
-- [Jason on Hex.pm](https://hex.pm/packages/jason) -- v1.4.4 confirmed
-- [Telemetry on Hex.pm](https://hex.pm/packages/telemetry) -- v1.4.1 confirmed
-- [Plug on Hex.pm](https://hex.pm/packages/plug) -- v1.19.1 confirmed
-- [Plug.Crypto Documentation](https://hexdocs.pm/plug_crypto/) -- v2.1.1, HMAC verification
-- [NimbleOptions on Hex.pm](https://hex.pm/packages/nimble_options) -- v1.1.1 confirmed
-- [Mox on GitHub](https://github.com/dashbitco/mox) -- v1.2.0 confirmed
-- [ExDoc on Hex.pm](https://hex.pm/packages/ex_doc) -- v0.40.1 confirmed
-- [Credo on Hex.pm](https://hex.pm/packages/credo) -- v1.7.17 confirmed
-- [MixAudit on Hex.pm](https://hex.pm/packages/mix_audit) -- v2.1.5 confirmed
-- [stripe-mock on GitHub](https://github.com/stripe/stripe-mock) -- Docker image available; auto-generated from Stripe OpenAPI spec
-- [stripe/openapi spec3.json](https://github.com/stripe/openapi) -- direct JSON parse confirmed all four v1.1 endpoint paths present, no beta/restricted flags (verified 2026-04-13); 2,236+ releases, updated April 16 2026
-- [Stripe Billing Meters API Reference](https://docs.stripe.com/api/billing/meter) -- endpoint shape, fields, deactivate/reactivate verbs confirmed
-- [Stripe Meter Events API Reference](https://docs.stripe.com/api/billing/meter-event) -- POST /v1/billing/meter_events confirmed
-- [Stripe Customer Portal Sessions API Reference](https://docs.stripe.com/api/customer_portal/sessions) -- create-only confirmed
-- [Stripe Changelog: deprecate legacy usage-based billing](https://docs.stripe.com/changelog/basil/2025-03-31/deprecate-legacy-usage-based-billing) -- meters canonical post-2025-03-31.basil; 2026-03-25.dahlia is stable territory
-- [Stripe v2 Meter Event Stream API Reference](https://docs.stripe.com/api/v2/billing-meter-stream) -- confirmed standard HTTPS POST (not SSE/HTTP/2 push), session token auth, meter-events.stripe.com hostname
-- [Stripe v2 Meter Event Stream changelog](https://docs.stripe.com/changelog/acacia/2024-09-30/usage-based-billing-v2-meter-events-api) -- high-throughput up to 10k events/sec, 100 events per request, 15-minute session tokens
-- [fuse on Hex.pm](https://hex.pm/packages/fuse) -- v2.5.0 confirmed, Erlang circuit breaker, OTP application
-- [opentelemetry_api on Hex.pm](https://hex.pm/packages/opentelemetry_api) -- v1.5.0 confirmed (October 2025)
-- [opentelemetry_telemetry on Hex.pm](https://hex.pm/packages/opentelemetry_telemetry) -- v1.1.2 confirmed, telemetry-to-OTel bridge
-- [Livebook on Hex.pm](https://hex.pm/packages/livebook) -- v0.19.6 confirmed (March 2026)
-- [kino on Hex.pm](https://hex.pm/packages/kino) -- v0.19.0 confirmed, Livebook interactive widgets
-- [req_fuse on Hex.pm](https://hex.pm/packages/req_fuse) -- v0.3.2, CC-BY-NC-UD (non-commercial), Req-only integration, rejected
-- [oasdiff GitHub Action](https://github.com/oasdiff/oasdiff-action) -- OpenAPI breaking change detection, alternative to custom mix task
-- [Elixir Compatibility Table](https://hexdocs.pm/elixir/compatibility-and-deprecations.html) -- version matrix verified
-- [Req on Hex.pm](https://hex.pm/packages/req) -- v0.5.17, confirmed Finch-based
-- [Elixir Library Guidelines](https://hexdocs.pm/elixir/library-guidelines.html) -- official best practices
-- [Elixir v1.19 Release](https://elixir-lang.org/blog/2025/10/16/elixir-v1-19-0-released/) -- current stable series
+- [Stripe Tax Calculations API](https://docs.stripe.com/api/tax/calculations) — create, retrieve, line_items list
+- [Stripe Tax Transactions API](https://docs.stripe.com/api/tax/transactions) — create_from_calculation, create_reversal, retrieve, line_items
+- [Stripe Tax Settings API](https://docs.stripe.com/api/tax/settings) — singleton retrieve/update
+- [Stripe Tax Registrations API](https://docs.stripe.com/api/tax/registrations) — CRUDL
+- [Stripe Tax IDs API](https://docs.stripe.com/api/customer_tax_ids) — customer-nested and top-level paths
+- [Standalone Tax API guide](https://docs.stripe.com/tax/standalone-tax-api) — calculate → record flow
+- Existing codebase: `lib/lattice_stripe/credit_note.ex`, `lib/lattice_stripe/billing/meter.ex`, `lib/lattice_stripe/object_types.ex`
+
+---
+*Stack research for: LatticeStripe v1.6 Tax*
+*Researched: 2026-05-27*
