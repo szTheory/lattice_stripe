@@ -27,6 +27,19 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   — never set `tolerance: 0` in production; it removes replay-attack protection.
   The canonical webhook guide (Phase 48) will document this restriction.
 
+#### Added
+
+- **GUIDE-03 + VERIFY-03 — Thin-event adoption surface published.** New canonical
+  Phoenix thin-event guide `guides/webhooks-thin-events.md` documents
+  `parse_event_notification/4` + `fetch_event/3` + `fetch_related_object/3` with
+  fetch-after-verify idempotency keyed on `event.id`, the verification-vs-payload-shape
+  failure boundary, the Stripe 100 req/s rate-limit ceiling, and Connect routing via
+  `event.context`. Integration coverage in `test/lattice_stripe/webhook/thin_event_test.exs`
+  proves the chained generate → parse → fetch flows under happy-path, malformed-payload,
+  and `tolerance: 0` boundary conditions. Docs-truth regression in `docs_truth_test.exs`
+  locks the new guide content and closes Phase 47 WR-04 by extending the
+  `Webhook.Plug` `@moduledoc` `tolerance: 0` mention.
+
 ## [1.3.0](https://github.com/szTheory/lattice_stripe/compare/v1.2...v1.3) (2026-05-25)
 
 ### Changed
