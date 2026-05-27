@@ -1,5 +1,25 @@
 # Milestones
 
+## v1.8 Adopter Truth & Doc Routing Polish (Shipped: 2026-05-27)
+
+**Phases completed:** 3 phases (56–58), 10 plans
+
+**Key accomplishments:**
+
+- getting-started release-status prose + docs_truth prose SSOT locks (TRUTH-01/02, Phase 56)
+- payments.md atom status, stream filter, search/3 fixes + VERIFY-04 locks (GUIDE-01..03, Phase 57)
+- PI-first Charge reconciliation section in payments.md (ROUTE-01, Phase 57)
+- operator guide update/capture routing spines (ROUTE-02, Phase 57)
+- planning truth close — JTBD-MAP refresh, MILESTONES/RETROSPECTIVE, tax proof commit (ROUTE-03, PLAN-01/02, PROOF-01, Phase 58)
+
+**Audit:** PASSED — see [v1.8-MILESTONE-AUDIT.md](milestones/v1.8-MILESTONE-AUDIT.md)
+**Known deferred at close:** CI-01 paths-ignore (guide-only PRs skip docs_truth)
+
+**Git range:** `ff8dd13` → `{close_sha}` (fill at close)
+**Timeline:** 2026-05-27 (single-day milestone)
+
+---
+
 ## v1.7 Polish & Operator (Shipped: 2026-05-27)
 
 **Phases completed:** 4 phases (52–55), 17 plans
