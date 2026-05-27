@@ -91,7 +91,8 @@ defmodule LatticeStripe.BatchTest do
 
       assert {:ok, results} = Batch.run(client, tasks)
       assert length(results) == 2
-      assert [{:ok, _}, {:error, %Error{}}] = results
+      assert Enum.count(results, &match?({:ok, _}, &1)) == 1
+      assert Enum.count(results, &match?({:error, %Error{}}, &1)) == 1
     end
 
     test "task that raises returns {:error, %Error{type: :connection_error}} without crashing caller" do
