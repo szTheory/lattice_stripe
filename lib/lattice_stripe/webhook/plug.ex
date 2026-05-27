@@ -114,6 +114,8 @@ if Code.ensure_loaded?(Plug) do
       processes requests matching this path; other paths pass through. Non-POST
       requests to this path return `405 Method Not Allowed`.
     - `:tolerance` — Maximum age of the webhook timestamp in seconds (default: 300).
+      Set `0` to disable the staleness check (testing only — see the inline comment
+      on `LatticeStripe.Webhook.check_tolerance/2` and the v1.5 CHANGELOG WEBFIX-01 entry).
     """
 
     @behaviour Plug
