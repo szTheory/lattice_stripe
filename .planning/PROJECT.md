@@ -33,8 +33,13 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Outstanding follow-through (not milestone-blocking):**
 
-- Phase `41.1` remains `pending-external-verification` for real-sandbox Quote downstream proof — an accepted external-proof boundary carried forward from v1.3, planned to ride along with v1.7 polish milestone.
-- `mix.exs` still pinned at `@version "1.3.0"` — v1.7 capstone includes version bump + `mix hex.publish` (previously noted as out-of-band; assessment upgraded to stop-milestone work).
+- Phase `41.1` is `accepted-external-verification` for real-sandbox Quote downstream proof — retired in Phase 55 (see 41.1-VERIFICATION.md retirement section); full planning sweep in Phase 55-03.
+
+## v1.x Status (post–1.7.0)
+
+The library is **done for v1.x scope** — intended mainstream SaaS Stripe coverage is shipped and documented. Identity, Treasury, Issuing, Terminal, Financial Connections, Climate, Sigma, and Reporting remain deferred unless adopter pull justifies a future milestone.
+
+**Forward posture:** Maintenance mode — bugfixes, Stripe API drift, adopter-driven narrow additions. No planned new resource-family breadth in v1.x absent fresh adopter pull.
 
 ## Current Milestone: v1.7 — Polish & Operator
 

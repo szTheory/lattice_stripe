@@ -23,6 +23,7 @@ defmodule LatticeStripe.MixProject do
         extras: [
           "guides/getting-started.md",
           "guides/user-flows-and-jtbd.md",
+          "guides/scope.md",
           "guides/checkout-signup-and-portal.md",
           "guides/connect-platform-flow.md",
           "guides/metering-runtime-and-reconciliation.md",
@@ -60,6 +61,7 @@ defmodule LatticeStripe.MixProject do
            [
              "guides/getting-started.md",
              "guides/user-flows-and-jtbd.md",
+             "guides/scope.md",
              "guides/recipes.md"
            ]},
           {"Flagship Recipes",

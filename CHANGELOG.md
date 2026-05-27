@@ -16,6 +16,8 @@ _No unreleased changes._
 
 This release publishes **1.7.0** to Hex — the first package since **1.1.0**, bundling v1.4 adoption closure, v1.5 thin-event webhooks, v1.6 Tax, and v1.7 Charge expansion plus operator playbooks. Adopters on `~> 1.1` resolve to **1.7.0**.
 
+v1.x scope and maintenance posture: see README and [User Flows & JTBD](guides/user-flows-and-jtbd.md).
+
 **Upgrading from 1.1.x or 1.3.x:** Update your `mix.exs` dependency to `{:lattice_stripe, "~> 1.7"}`. Review the milestone sections below for additive surfaces (Tax, thin events, Charge list/search/update/capture) and the WEBFIX-01 migration under **1.5.0** if you use `tolerance: 0` in tests.
 
 ### Added
