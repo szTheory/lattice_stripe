@@ -29,7 +29,7 @@
 **Milestone Goal:** Close v1.7 audit doc-routing debt — truthful release-status prose, copy-paste-correct payments guide examples, Charge reconciliation discovery, and planning-truth cosmetics — without new API breadth.
 
 - [x] **Phase 56: Release Truth & Getting Started** — Fix getting-started release-status prose; extend docs_truth to lock prose (not just install pin). (TRUTH-01, TRUTH-02) (completed 2026-05-27)
-- [ ] **Phase 57: Payments Guide & Charge Routing** — Correct payments.md API examples; route Charge list/search/update/capture; extend operator guides; docs_truth canonical guide locks. (GUIDE-01..03, ROUTE-01, ROUTE-02, VERIFY-04)
+- [x] **Phase 57: Payments Guide & Charge Routing** — Correct payments.md API examples; route Charge list/search/update/capture; extend operator guides; docs_truth canonical guide locks. (GUIDE-01..03, ROUTE-01, ROUTE-02, VERIFY-04) (completed 2026-05-27)
 - [ ] **Phase 58: Milestone Closure & Planning Truth** — MILESTONES.md / RETROSPECTIVE cosmetics; JTBD-MAP post-fix refresh; optional tax proof hygiene; milestone close. (PLAN-01, PLAN-02, ROUTE-03, PROOF-01)
 
 ## Phase Details
@@ -63,7 +63,7 @@
 6. `docs_truth_test.exs` grep-regresses payments.md status-atom and search-arity patterns.
 7. `mix test test/lattice_stripe/docs_truth_test.exs` passes.
 
-**Plans:** 3 plans in 3 waves (57-01 VERIFY-04 locks → 57-02 guide fixes + Charge section → 57-03 operator routing)
+**Plans:** 3/3 plans complete
 
 ### Phase 58: Milestone Closure & Planning Truth
 
@@ -85,7 +85,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 56. Release Truth & Getting Started | v1.8 | 2/2 | Complete    | 2026-05-27 |
-| 57. Payments Guide & Charge Routing | v1.8 | 0/3 | Ready to execute | — |
+| 57. Payments Guide & Charge Routing | v1.8 | 3/3 | Complete    | 2026-05-27 |
 | 58. Milestone Closure & Planning Truth | v1.8 | 0/? | Pending | — |
 
 ## Next Step

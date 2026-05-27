@@ -16,6 +16,8 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Phase 56 complete (2026-05-27):** getting-started release-status prose aligned to Hex 1.7.x; docs_truth SSOT locks for prose drift (TRUTH-01, TRUTH-02).
 
+**Phase 57 complete (2026-05-27):** payments.md atom status/search/3 examples, Charge reconciliation section, operator guide routing, docs_truth VERIFY-04 locks (GUIDE-01..03, ROUTE-01, ROUTE-02, VERIFY-04).
+
 **What shipped in v1.7:**
 
 - **Charge surface expansion** — `LatticeStripe.Charge` list/search/update/capture parity with PI-first moduledoc, Mox wire tests, stripe-mock integration smokes, and docs-truth four-surface triangulation (CHRG-01..05).
@@ -126,12 +128,12 @@ See `.planning/threads/v1-8-next-milestone-assessment.md` for wedge analysis and
 - ✓ Release truth: 1.7.0 version, CHANGELOG v1.4–v1.7, lockstep `~> 1.7` install contract, Hex publish (REL-01..04) — Phase 54, v1.7
 - ✓ Phase 41.1 retired + v1.x stop signal (CLOSE-01, CLOSE-02) — Phase 55, v1.7
 - ✓ Release-status prose truth in getting-started + docs_truth prose regression locks (TRUTH-01, TRUTH-02) — Phase 56, v1.8
+- ✓ Canonical payments guide API examples (GUIDE-01..03) — Phase 57, v1.8
+- ✓ Charge reconciliation doc routing in payments + operator guides (ROUTE-01, ROUTE-02) — Phase 57, v1.8
+- ✓ docs_truth locks canonical payments guide API patterns (VERIFY-04) — Phase 57, v1.8
 
 ### Active
 
-- [ ] Canonical payments guide API examples corrected (GUIDE-01..03)
-- [ ] Charge reconciliation doc routing in payments + operator guides (ROUTE-01, ROUTE-02)
-- [ ] docs_truth locks canonical guide API examples (VERIFY-04)
 - [ ] Planning artifact cosmetic fixes (PLAN-01, PLAN-02)
 - [ ] JTBD-MAP reflects post-v1.8 doc routing (ROUTE-03)
 - [ ] Optional: commit or drop untracked tax proof files (PROOF-01)

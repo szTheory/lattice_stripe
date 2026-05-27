@@ -15,19 +15,19 @@ Requirements for this milestone. Each maps to roadmap phases 56–58.
 
 ### Canonical Guide Correctness
 
-- [ ] **GUIDE-01**: Adopter copying PaymentIntent `confirm/3` status handling from `guides/payments.md` matches on atom statuses (`:succeeded`, `:requires_action`, etc.).
-- [ ] **GUIDE-02**: Adopter copying `PaymentIntent.stream!/2` filter examples uses atom status (`:succeeded`).
-- [ ] **GUIDE-03**: Adopter copying `PaymentIntent.search/3` examples uses the correct arity (`search(client, query_string, opts \\ [])`).
+- [x] **GUIDE-01**: Adopter copying PaymentIntent `confirm/3` status handling from `guides/payments.md` matches on atom statuses (`:succeeded`, `:requires_action`, etc.).
+- [x] **GUIDE-02**: Adopter copying `PaymentIntent.stream!/2` filter examples uses atom status (`:succeeded`).
+- [x] **GUIDE-03**: Adopter copying `PaymentIntent.search/3` examples uses the correct arity (`search(client, query_string, opts \\ [])`).
 
 ### Doc Routing
 
-- [ ] **ROUTE-01**: Adopter following `guides/payments.md` discovers Charge list/search/update/capture for reconciliation workflows (PI-first narrative preserved).
-- [ ] **ROUTE-02**: Adopter following operator guides (`production-checklist.md`, `event-debugging.md`) finds Charge update/capture guidance alongside list/search.
+- [x] **ROUTE-01**: Adopter following `guides/payments.md` discovers Charge list/search/update/capture for reconciliation workflows (PI-first narrative preserved).
+- [x] **ROUTE-02**: Adopter following operator guides (`production-checklist.md`, `event-debugging.md`) finds Charge update/capture guidance alongside list/search.
 - [ ] **ROUTE-03**: `.planning/JTBD-MAP.md` charge-reconciliation route reflects post-v1.8 doc routing (no false "payments guide gap" after fixes land).
 
 ### Verification
 
-- [ ] **VERIFY-04**: `docs_truth_test.exs` grep-regresses canonical guide API example patterns in `guides/payments.md` (status atoms, search arity).
+- [x] **VERIFY-04**: `docs_truth_test.exs` grep-regresses canonical guide API example patterns in `guides/payments.md` (status atoms, search arity).
 
 ### Planning Truth
 
@@ -71,12 +71,12 @@ Deferred beyond v1.8. Tracked but not in current roadmap.
 |-------------|-------|--------|
 | TRUTH-01 | Phase 56 | Complete |
 | TRUTH-02 | Phase 56 | Complete |
-| GUIDE-01 | Phase 57 | Pending |
-| GUIDE-02 | Phase 57 | Pending |
-| GUIDE-03 | Phase 57 | Pending |
-| ROUTE-01 | Phase 57 | Pending |
-| ROUTE-02 | Phase 57 | Pending |
-| VERIFY-04 | Phase 57 | Pending |
+| GUIDE-01 | Phase 57 | Complete |
+| GUIDE-02 | Phase 57 | Complete |
+| GUIDE-03 | Phase 57 | Complete |
+| ROUTE-01 | Phase 57 | Complete |
+| ROUTE-02 | Phase 57 | Complete |
+| VERIFY-04 | Phase 57 | Complete |
 | ROUTE-03 | Phase 58 | Pending |
 | PLAN-01 | Phase 58 | Pending |
 | PLAN-02 | Phase 58 | Pending |
