@@ -123,16 +123,7 @@ LatticeStripe is already a good fit today for these integrator stories:
 
 ## Biggest Gaps
 
-### Gap 1: Doc-routing polish (post-v1.7 audit tech debt)
-
-Code and install pins are aligned at 1.7.0. Remaining adopter-facing gaps are doc routing, not API surface:
-
-- **`guides/getting-started.md` lines 20–21** — prose claims `1.3.x` is current published Hex surface; install snippet correctly says `~> 1.7`. Not locked by docs_truth (README refute only).
-- **Charge reconciliation discovery** — `guides/payments.md` does not route list/search/update/capture; operator guides document list/search only (CHRG-03/04/05 from v1.7 audit).
-- **`guides/payments.md` canonical guide bugs** — L89–101 match status as strings but SDK returns atoms; L197 stream filter uses `"succeeded"`; L208–213 documents wrong `search/3` arity (map arg vs query string). Not locked by docs_truth body checks.
-- **Cosmetic planning drift** — MILESTONES.md v1.7 header and RETROSPECTIVE historical bullets reference pre-publish state.
-
-**Planned:** v1.8 Adopter Truth & Doc Routing Polish (~2–3 phases).
+Doc-routing polish closed in v1.8 (Phases 56–58).
 
 ### Gap 2: Narrative docs still thin for several shipped surfaces
 
@@ -147,6 +138,11 @@ Product/Price catalog strategy, BillingPortal configuration, disputes/files evid
 - ~~Production operator guides~~ — production-checklist + event-debugging shipped (v1.7)
 - ~~Public release truth / Hex publish~~ — 1.7.0 on Hex, lockstep `~> 1.7` install contract (v1.7)
 - ~~v1.x stop signal~~ — README, scope.md, planning artifacts (v1.7)
+- ~~getting-started release-status prose drift~~ — fixed Phase 56 (TRUTH-01/02)
+- ~~payments.md API example bugs~~ — atom statuses, search/3 fixed Phase 57 (GUIDE-01..03)
+- ~~Charge reconciliation discovery gap~~ — `payments.md#charge-reconciliation` Phase 57 (ROUTE-01)
+- ~~operator guide update/capture routing~~ — Phase 57 (ROUTE-02)
+- ~~cosmetic planning drift~~ — MILESTONES/RETROSPECTIVE/JTBD refresh Phase 58 (PLAN-01/02, ROUTE-03)
 
 ## Recommended Priority Order
 
