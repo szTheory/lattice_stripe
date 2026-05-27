@@ -27,7 +27,13 @@
   4. An adopter can call `Webhook.fetch_related_object/2` and receive `{:ok, resource}` where `resource` is the typed underlying object (e.g. `%Customer{}`, `%Invoice{}`) dispatched through the existing `ObjectTypes` registry — no new dispatch table introduced — with expand semantics from v1.2 reused.
   5. `Webhook.check_tolerance/2` `tolerance: 0` behavior agrees between `lib/lattice_stripe/webhook.ex:84` (docstring) and the code path at `:268-273`, the chosen semantics are documented inline in the source, and a CHANGELOG entry records the reconciliation.
   6. `LatticeStripe.Testing` exposes thin-event payload builders that produce wire-format payloads + matching `Stripe-Signature` headers parseable by `Webhook.parse_event_notification/3`, while existing snapshot helpers continue to work unchanged.
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 47-01-PLAN.md — Types: `EventNotification` + `RelatedObject` modules, `Event.related_object` extension, `ObjectTypes.fetch_module/1`, canonical fixture (THIN-04)
+- [ ] 47-02-PLAN.md — Parse: `Webhook.parse_event_notification/4` + bang variant + 4-atom verify error set (THIN-01)
+- [ ] 47-03-PLAN.md — WEBFIX-01 four-surface reconciliation: code clause + Plug schema + test rewrite + CHANGELOG + docs-truth regression (WEBFIX-01)
+- [ ] 47-04-PLAN.md — Fetchers: `Webhook.fetch_event/3` (v2 path `/v2/core/events/{id}`) + `Webhook.fetch_related_object/3` (D-05 typed-error gate) + Mox tests (THIN-02, THIN-03)
+- [ ] 47-05-PLAN.md — Testing helpers: `Testing.generate_thin_event_payload/3` + `Testing.event_notification/1` + roundtrip proof (TESTING-01)
 
 ### Phase 48: Thin-Event Adoption Surface — Guide & Integration Verification
 **Goal**: Adopters can follow one canonical Phoenix guide from receiving a thin-event delivery through verified, fetch-after-verify, idempotent handling — backed by integration coverage that proves the helpers behave under happy-path, malformed-payload, and `tolerance: 0` boundary conditions and a docs-truth regression suite that keeps the guide honest.
@@ -49,9 +55,9 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 47. Thin-Event SDK Surface & Webhook Reconciliation | 0/? | Not started | - |
+| 47. Thin-Event SDK Surface & Webhook Reconciliation | 0/5 | Not started | - |
 | 48. Thin-Event Adoption Surface — Guide & Integration Verification | 0/? | Not started | - |
 
 ## Next Step
 
-Run `/gsd:plan-phase 47` to decompose Phase 47 into plans.
+Run `/gsd:execute-phase 47` to begin executing Phase 47 (5 plans across 3 waves).
