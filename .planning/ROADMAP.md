@@ -12,7 +12,7 @@
 ## Phases
 
 - [x] **Phase 47: Thin-Event SDK Surface & Webhook Reconciliation** — Net-new thin-event helpers, `Event` struct extension, signed-payload testing helpers, and `tolerance: 0` bug reconciliation. (completed 2026-05-27)
-- [ ] **Phase 48: Thin-Event Adoption Surface — Guide & Integration Verification** — Canonical Phoenix thin-event guide plus integration coverage and docs-truth regression for the new helpers.
+- [x] **Phase 48: Thin-Event Adoption Surface — Guide & Integration Verification** — Canonical Phoenix thin-event guide plus integration coverage and docs-truth regression for the new helpers. (completed 2026-05-27)
 
 ## Phase Details
 
@@ -74,7 +74,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 48-06-PLAN.md — CHANGELOG.md `### [1.5.0]` bullet appending GUIDE-03 + VERIFY-03 + WR-04 closure narrative
+- [x] 48-06-PLAN.md — CHANGELOG.md `### [1.5.0]` bullet appending GUIDE-03 + VERIFY-03 + WR-04 closure narrative
 
 ## Outstanding Follow-Through
 
@@ -85,7 +85,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 47. Thin-Event SDK Surface & Webhook Reconciliation | 5/5 | Complete    | 2026-05-27 |
-| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 5/6 | In Progress|  |
+| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 6/6 | Complete   | 2026-05-27 |
 
 ## Next Step
 
