@@ -146,13 +146,13 @@ Product/Price catalog strategy, BillingPortal configuration, disputes/files evid
 
 ## Recommended Priority Order
 
-Post-v1.7 assessment (2026-05-27):
+Post-v1.8 close (2026-05-27):
 
-1. **v1.8 Adopter Truth & Doc Routing Polish** — getting-started prose, Charge doc routing, payments.md API example fixes, docs_truth prose lock, planning cosmetic fixes
-2. **Maintenance mode** — bugfixes, Stripe API drift, adopter-driven narrow additions only
+1. **Maintenance mode** — Stripe API drift, adopter-pull narrow adds (TAX-01/02), bugfixes
+2. **Gap 2: Narrative docs still thin** — Product/Price, BillingPortal, disputes/files, mandate diagnostics (adopter pull only)
 3. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
 4. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only
-5. **Long-tail narrative docs** — Product/Price catalog, disputes deep playbooks — opportunistic, not milestone-grade
+5. **Long-tail narrative docs** — opportunistic, not milestone-grade
 
 ## What "Feature-Complete Enough" Looks Like
 
@@ -206,3 +206,5 @@ When the user asks for an update in the future, answer in this order:
 3. which important gaps remain
 4. whether the priority order changed
 5. whether the "feature-complete enough" threshold moved materially
+
+- Refresh this file at **milestone close** (not only milestone start); verify against `CHANGELOG.md`, `docs_truth_test.exs`, and shipped guides.
