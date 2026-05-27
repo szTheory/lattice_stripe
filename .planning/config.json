@@ -52,8 +52,12 @@
       "adopter_lens_default": true,
       "stop_milestone_includes_release_truth": true,
       "jtbd_refresh_at_milestone_close": true,
-      "docs_truth_prose_surfaces": ["guides/getting-started.md"],
-      "docs_truth_canonical_guides": ["guides/payments.md"],
+      "docs_truth_prose_surfaces": [
+        "guides/getting-started.md"
+      ],
+      "docs_truth_canonical_guides": [
+        "guides/payments.md"
+      ],
       "verify_untracked_proof_files": true
     }
   },
