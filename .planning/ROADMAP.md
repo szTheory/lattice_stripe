@@ -27,7 +27,7 @@
 **Milestone Goal:** Close remaining v1.x scope gaps — expand Charge surface, ship operator guides, reconcile release truth, retire Phase 41.1 — then call the library done for v1.x scope.
 
 - [x] **Phase 52: Charge Surface Expansion** — Expand retrieve-only Charge module to list/search/update/capture parity with sibling resources; integration tests + docs-truth four-surface triangulation. (completed 2026-05-27)
-- [ ] **Phase 53: Operator Guides** — Ship `guides/production-checklist.md` and `guides/event-debugging.md`; wire into ExDoc Operations & DX and README discovery ladder.
+- [x] **Phase 53: Operator Guides** — Ship `guides/production-checklist.md` and `guides/event-debugging.md`; wire into ExDoc Operations & DX and README discovery ladder. (completed 2026-05-27)
 - [ ] **Phase 54: Release Truth Capstone** — Bump to 1.7.0, CHANGELOG v1.4–1.7, lockstep `~> 1.7` docs-truth flip, Hex publish.
 - [ ] **Phase 55: Milestone Closure & v1.x Stop Signal** — Retire Phase 41.1 as `accepted-external-verification`; publish "done for v1.x scope" in planning and public docs.
 
@@ -100,7 +100,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 52. Charge Surface Expansion | v1.7 | 3/3 | Complete    | 2026-05-27 |
-| 53. Operator Guides | v1.7 | 0/TBD | Not started | — |
+| 53. Operator Guides | v1.7 | 4/4 | Complete    | 2026-05-27 |
 | 54. Release Truth Capstone | v1.7 | 0/TBD | Not started | — |
 | 55. Milestone Closure & v1.x Stop Signal | v1.7 | 0/TBD | Not started | — |
 

@@ -17,8 +17,8 @@ Requirements for the Polish & Operator milestone. Each maps to roadmap phases 52
 
 ### Operator Guides
 
-- [ ] **OPS-01**: Production checklist guide (`guides/production-checklist.md`) wired into ExDoc Operations & DX and README discovery ladder
-- [ ] **OPS-02**: Event debugging playbook (`guides/event-debugging.md`) wired into ExDoc Operations & DX and README discovery ladder
+- [x] **OPS-01**: Production checklist guide (`guides/production-checklist.md`) wired into ExDoc Operations & DX and README discovery ladder
+- [x] **OPS-02**: Event debugging playbook (`guides/event-debugging.md`) wired into ExDoc Operations & DX and README discovery ladder
 
 ### Release Truth
 
@@ -68,8 +68,8 @@ Explicitly excluded for v1.7. Documented to prevent scope creep.
 | CHRG-03 | Phase 52 | Complete |
 | CHRG-04 | Phase 52 | Complete |
 | CHRG-05 | Phase 52 | Complete |
-| OPS-01 | Phase 53 | Pending |
-| OPS-02 | Phase 53 | Pending |
+| OPS-01 | Phase 53 | Complete |
+| OPS-02 | Phase 53 | Complete |
 | REL-01 | Phase 54 | Pending |
 | REL-02 | Phase 54 | Pending |
 | REL-03 | Phase 54 | Pending |
