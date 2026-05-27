@@ -295,66 +295,52 @@ defmodule LatticeStripe.ChargeTest do
   end
 
   # ---------------------------------------------------------------------------
-  # Module surface — D-06: retrieve-only
+  # Module surface
   # ---------------------------------------------------------------------------
 
-  describe "module surface (D-06 retrieve-only)" do
-    test "does NOT export create/2" do
-      refute function_exported?(LatticeStripe.Charge, :create, 2)
-      refute function_exported?(LatticeStripe.Charge, :create, 3)
-      refute function_exported?(LatticeStripe.Charge, :create!, 2)
-      refute function_exported?(LatticeStripe.Charge, :create!, 3)
+  describe "module surface" do
+    test "exports expanded Charge surface (retrieve, list, search, update, capture)" do
+      assert function_exported?(Charge, :retrieve, 2)
+      assert function_exported?(Charge, :retrieve, 3)
+      assert function_exported?(Charge, :retrieve!, 2)
+      assert function_exported?(Charge, :retrieve!, 3)
+      assert function_exported?(Charge, :list, 2)
+      assert function_exported?(Charge, :list, 3)
+      assert function_exported?(Charge, :list!, 2)
+      assert function_exported?(Charge, :list!, 3)
+      assert function_exported?(Charge, :stream!, 1)
+      assert function_exported?(Charge, :stream!, 2)
+      assert function_exported?(Charge, :stream!, 3)
+      assert function_exported?(Charge, :search, 2)
+      assert function_exported?(Charge, :search, 3)
+      assert function_exported?(Charge, :search!, 2)
+      assert function_exported?(Charge, :search!, 3)
+      assert function_exported?(Charge, :search_stream!, 2)
+      assert function_exported?(Charge, :search_stream!, 3)
+      assert function_exported?(Charge, :update, 3)
+      assert function_exported?(Charge, :update, 4)
+      assert function_exported?(Charge, :update!, 3)
+      assert function_exported?(Charge, :update!, 4)
+      assert function_exported?(Charge, :capture, 3)
+      assert function_exported?(Charge, :capture, 4)
+      assert function_exported?(Charge, :capture!, 3)
+      assert function_exported?(Charge, :capture!, 4)
+      assert function_exported?(Charge, :from_map, 1)
     end
 
-    test "does NOT export update/3" do
-      refute function_exported?(LatticeStripe.Charge, :update, 3)
-      refute function_exported?(LatticeStripe.Charge, :update, 4)
-      refute function_exported?(LatticeStripe.Charge, :update!, 3)
-      refute function_exported?(LatticeStripe.Charge, :update!, 4)
-    end
-
-    test "does NOT export capture/3" do
-      refute function_exported?(LatticeStripe.Charge, :capture, 2)
-      refute function_exported?(LatticeStripe.Charge, :capture, 3)
-      refute function_exported?(LatticeStripe.Charge, :capture, 4)
-      refute function_exported?(LatticeStripe.Charge, :capture!, 2)
-      refute function_exported?(LatticeStripe.Charge, :capture!, 3)
-      refute function_exported?(LatticeStripe.Charge, :capture!, 4)
-    end
-
-    test "does NOT export cancel/3" do
-      refute function_exported?(LatticeStripe.Charge, :cancel, 2)
-      refute function_exported?(LatticeStripe.Charge, :cancel, 3)
-      refute function_exported?(LatticeStripe.Charge, :cancel, 4)
-    end
-
-    test "does NOT export list/2" do
-      refute function_exported?(LatticeStripe.Charge, :list, 1)
-      refute function_exported?(LatticeStripe.Charge, :list, 2)
-      refute function_exported?(LatticeStripe.Charge, :list, 3)
-      refute function_exported?(LatticeStripe.Charge, :list!, 1)
-      refute function_exported?(LatticeStripe.Charge, :list!, 2)
-      refute function_exported?(LatticeStripe.Charge, :list!, 3)
-    end
-
-    test "does NOT export stream!/2" do
-      refute function_exported?(LatticeStripe.Charge, :stream!, 1)
-      refute function_exported?(LatticeStripe.Charge, :stream!, 2)
-      refute function_exported?(LatticeStripe.Charge, :stream!, 3)
-    end
-
-    test "does NOT export search/2" do
-      refute function_exported?(LatticeStripe.Charge, :search, 1)
-      refute function_exported?(LatticeStripe.Charge, :search, 2)
-      refute function_exported?(LatticeStripe.Charge, :search, 3)
-    end
-
-    test "DOES export retrieve/2, retrieve/3, retrieve!/2, retrieve!/3, from_map/1" do
-      assert function_exported?(LatticeStripe.Charge, :retrieve, 2)
-      assert function_exported?(LatticeStripe.Charge, :retrieve, 3)
-      assert function_exported?(LatticeStripe.Charge, :retrieve!, 2)
-      assert function_exported?(LatticeStripe.Charge, :retrieve!, 3)
-      assert function_exported?(LatticeStripe.Charge, :from_map, 1)
+    test "does not export create or cancel (D-06 payment initiation omitted)" do
+      refute function_exported?(Charge, :create, 2)
+      refute function_exported?(Charge, :create, 3)
+      refute function_exported?(Charge, :create, 4)
+      refute function_exported?(Charge, :create!, 2)
+      refute function_exported?(Charge, :create!, 3)
+      refute function_exported?(Charge, :create!, 4)
+      refute function_exported?(Charge, :cancel, 2)
+      refute function_exported?(Charge, :cancel, 3)
+      refute function_exported?(Charge, :cancel, 4)
+      refute function_exported?(Charge, :cancel!, 2)
+      refute function_exported?(Charge, :cancel!, 3)
+      refute function_exported?(Charge, :cancel!, 4)
     end
   end
 end
