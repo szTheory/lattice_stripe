@@ -78,7 +78,7 @@
   4. Package `lattice_stripe` version `1.7.0` is published to Hex.pm.
   5. README HexDocs index reflects v1.4–v1.7 shipped surface (thin events, tax, charge, operator guides).
 
-**Plans**: TBD
+**Plans**: 4 plans (54-01 version+CHANGELOG, 54-02 lockstep docs+README, 54-03 docs_truth SSOT, 54-04 Hex publish)
 
 ### Phase 55: Milestone Closure & v1.x Stop Signal
 
@@ -101,7 +101,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 52. Charge Surface Expansion | v1.7 | 3/3 | Complete    | 2026-05-27 |
 | 53. Operator Guides | v1.7 | 4/4 | Complete    | 2026-05-27 |
-| 54. Release Truth Capstone | v1.7 | 0/TBD | Not started | — |
+| 54. Release Truth Capstone | v1.7 | 0/4 | Planned | — |
 | 55. Milestone Closure & v1.x Stop Signal | v1.7 | 0/TBD | Not started | — |
 
 ## Next Step
