@@ -80,7 +80,7 @@ Release Please uses these commit messages to automate version bumps and changelo
 
 5. PRs are squash-merged to keep a clean linear history on `main`.
 
-**Note:** Docs-only PRs (changes only to `.md`, `.planning/`, or `guides/` files) may require maintainer bypass of CI status checks since CI is skipped for documentation-only changes.
+**Note:** Changes to guides, `README.md`, or other `.md` files (outside `.planning/`) run the full CI suite, including `test/lattice_stripe/docs_truth_test.exs`. Planning-only edits under `.planning/` still skip CI.
 
 ## Code Style
 
