@@ -25,7 +25,7 @@ Requirements for the Polish & Operator milestone. Each maps to roadmap phases 52
 - [x] **REL-01**: `mix.exs` `@version` bumped to `1.7.0`
 - [x] **REL-02**: CHANGELOG entries for v1.4 through v1.7 summarizing shipped milestones
 - [x] **REL-03**: Lockstep `~> 1.7` docs-truth flip across README, getting-started, cheatsheet, and guide install anchors
-- [ ] **REL-04**: Package published to Hex.pm at `1.7.0` (stop-milestone capstone)
+- [x] **REL-04**: Package published to Hex.pm at `1.7.0` (stop-milestone capstone)
 
 ### Milestone Closure
 
@@ -73,7 +73,7 @@ Explicitly excluded for v1.7. Documented to prevent scope creep.
 | REL-01 | Phase 54 | Complete |
 | REL-02 | Phase 54 | Complete |
 | REL-03 | Phase 54 | Complete |
-| REL-04 | Phase 54 | Pending |
+| REL-04 | Phase 54 | Complete |
 | CLOSE-01 | Phase 55 | Complete |
 | CLOSE-02 | Phase 55 | Complete |
 
@@ -85,4 +85,4 @@ Explicitly excluded for v1.7. Documented to prevent scope creep.
 
 ---
 *Requirements defined: 2026-05-27*
-*Last updated: 2026-05-27 after milestone v1.7 roadmap creation*
+*Last updated: 2026-05-27 after REL-04 CI publish at 1.7.0*

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Polish & Operator
-status: executing
-stopped_at: Phase 55 context gathered
-last_updated: "2026-05-27T19:40:50.856Z"
-last_activity: 2026-05-27 -- Phase 55 planning complete
+status: close_ready
+stopped_at: Phase 55 complete
+last_updated: "2026-05-27T20:00:00Z"
+last_activity: 2026-05-27 -- Phase 55 gap closure complete; REL-04 via CI publish
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 17
-  completed_plans: 15
-  percent: 75
+  completed_plans: 17
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-27 — milestone v1.7 started)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 55 — milestone-closure-v1-x-stop-signal
+**Current focus:** Milestone v1.7 close-ready — Phase 55 complete including gap closure
 
 ## Current Position
 
-Phase: 55 (milestone-closure-v1-x-stop-signal) — EXECUTING (2/4 plans)
-Plan: Phase 55 complete except REL-04
-Status: Ready to execute
-Last activity: 2026-05-27 -- Phase 55 planning complete
+Phase: 55 (milestone-closure-v1-x-stop-signal) — COMPLETE (6/6 plans including gap closure)
+Status: close_ready
+Last activity: 2026-05-27 -- REL-04 satisfied via Publish Hex Recovery CI workflow
 
-**Done estimate:** ~88-90% for intended v1.x SDK scope → ~92-95% after v1.7 ships
+**Next step:** `/gsd-audit-milestone v1.7` then `/gsd-complete-milestone v1.7`
 
 ## Performance Metrics
 
@@ -46,20 +45,18 @@ Last activity: 2026-05-27 -- Phase 55 planning complete
 ### Decisions (from v1.7 assessment)
 
 - **v1.7 confirmed** as single highest-leverage next milestone and planned v1.x stop signal.
-- **Hex release prep folded into v1.7 capstone** — out-of-band publish creates adopter truth lag; top friction is install `~> 1.3` vs code shipping v1.5/v1.6.
+- **Hex publish via CI** — release-please + gate-ci-green + Publish Hex Recovery; no local `mix hex.publish`.
 - **Phase 41.1: retire** as `accepted-external-verification` — do not block v1.7 on sandbox creds.
-- **JTBD-MAP refreshed** — thin events, tax, flagship recipes marked shipped; remaining gaps: Charge, operator guides, release truth.
+- **JTBD-MAP refreshed** — thin events, tax, flagship recipes marked shipped.
 
 ### Pending Todos
 
-- Execute Phase 52: Charge surface expansion
-- Execute Phase 53: Operator guides
-- Execute Phase 54: Release truth capstone (1.7.0 + Hex publish)
-- Finish Phase 55: Mark REL/CLOSE requirements after REL-04; run `/gsd-audit-milestone v1.7`
+- `/gsd-audit-milestone v1.7`
+- `/gsd-complete-milestone v1.7`
 
 ### Blockers/Concerns
 
-- **Hex/version drift** is the top adopter friction — evaluators see `~> 1.3` while repo ships Tax + thin events.
+- None — REL-04 closed; Hex shows `1.7.0` (2026-05-27).
 
 ## Deferred Items
 
@@ -71,12 +68,11 @@ Items acknowledged and deferred at milestone close on 2026-05-27:
 
 ## Session Continuity
 
-Last session: 2026-05-27T19:15:14.471Z
-Stopped at: Phase 55 context gathered
-Resume path: `.planning/phases/55-milestone-closure-v1-x-stop-signal/55-CONTEXT.md` → `/gsd-plan-phase 55`
+Last session: 2026-05-27T20:00:00Z
+Stopped at: Phase 55 complete
+Resume path: `/gsd-audit-milestone v1.7`
 
 ## Operator Next Steps
 
-- Finish Phase 54 REL-04 (Hex 1.7.0 publish) if not done
-- `/gsd-plan-phase 55` — plan milestone closure and v1.x stop signal
-- Assessment thread: `.planning/threads/v1-7-next-milestone-assessment.md`
+1. `/gsd-audit-milestone v1.7`
+2. `/gsd-complete-milestone v1.7`

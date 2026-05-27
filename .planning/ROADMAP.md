@@ -28,8 +28,8 @@
 
 - [x] **Phase 52: Charge Surface Expansion** — Expand retrieve-only Charge module to list/search/update/capture parity with sibling resources; integration tests + docs-truth four-surface triangulation. (completed 2026-05-27)
 - [x] **Phase 53: Operator Guides** — Ship `guides/production-checklist.md` and `guides/event-debugging.md`; wire into ExDoc Operations & DX and README discovery ladder. (completed 2026-05-27)
-- [ ] **Phase 54: Release Truth Capstone** — Bump to 1.7.0, CHANGELOG v1.4–1.7, lockstep `~> 1.7` docs-truth flip, Hex publish. **Blocker:** REL-04 — Hex still shows `1.1.0` (complete 54-04).
-- [x] **Phase 55: Milestone Closure & v1.x Stop Signal** — 41.1 retired + v1.x stop signal shipped; close_ready blocked on REL-04 (2/4 plans complete). (completed 2026-05-27)
+- [x] **Phase 54: Release Truth Capstone** — Bump to 1.7.0, CHANGELOG v1.4–1.7, lockstep `~> 1.7` docs-truth flip, Hex publish at 1.7.0 via CI. (completed 2026-05-27)
+- [x] **Phase 55: Milestone Closure & v1.x Stop Signal** — 41.1 retired + v1.x stop signal + gap closure; close_ready. (completed 2026-05-27)
 
 ## Phase Details
 
@@ -101,9 +101,11 @@
 |-------|-----------|----------------|--------|-----------|
 | 52. Charge Surface Expansion | v1.7 | 3/3 | Complete    | 2026-05-27 |
 | 53. Operator Guides | v1.7 | 4/4 | Complete    | 2026-05-27 |
-| 54. Release Truth Capstone | v1.7 | 3/4 | In Progress|  |
-| 55. Milestone Closure & v1.x Stop Signal | v1.7 | 4/4 | Complete   | 2026-05-27 |
+| 54. Release Truth Capstone | v1.7 | 4/4 | Complete    | 2026-05-27 |
+| 55. Milestone Closure & v1.x Stop Signal | v1.7 | 6/6 | Complete   | 2026-05-27 |
 
 ## Next Step
 
-**Maintainer:** Push `main` + `v1.7.0` tag, wait for CI green, then dispatch **Publish Hex Recovery** (`tag=v1.7.0`, `release_version=1.7.0`) — verify `mix hex.info lattice_stripe 1.7.0`. Future releases: merge Release Please PR → automated publish via [`release.yml`](.github/workflows/release.yml). Then `/gsd-audit-milestone v1.7` → `/gsd-complete-milestone v1.7`.
+**Milestone close-ready.** Run `/gsd-audit-milestone v1.7` then `/gsd-complete-milestone v1.7`.
+
+Future Hex releases: merge Release Please PR on `main` → automated publish via [`release.yml`](.github/workflows/release.yml). Recovery: [`publish-hex.yml`](.github/workflows/publish-hex.yml).
