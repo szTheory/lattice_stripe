@@ -9,16 +9,16 @@ Requirements for the Tax milestone. Each maps to roadmap phases 49–51.
 
 ### Tax Calculation
 
-- [ ] **CALC-01**: Developer can create a tax calculation with customer details and line items
-- [ ] **CALC-02**: Developer can retrieve a tax calculation by ID
-- [ ] **CALC-03**: Developer can list line items for a tax calculation (paginated)
+- [x] **CALC-01**: Developer can create a tax calculation with customer details and line items
+- [x] **CALC-02**: Developer can retrieve a tax calculation by ID
+- [x] **CALC-03**: Developer can list line items for a tax calculation (paginated)
 
 ### Tax Transaction
 
-- [ ] **TXN-01**: Developer can create a tax transaction from a calculation
-- [ ] **TXN-02**: Developer can create a tax transaction reversal
-- [ ] **TXN-03**: Developer can retrieve a tax transaction by ID
-- [ ] **TXN-04**: Developer can list line items for a tax transaction (paginated)
+- [x] **TXN-01**: Developer can create a tax transaction from a calculation
+- [x] **TXN-02**: Developer can create a tax transaction reversal
+- [x] **TXN-03**: Developer can retrieve a tax transaction by ID
+- [x] **TXN-04**: Developer can list line items for a tax transaction (paginated)
 
 ### Tax Configuration
 
@@ -38,7 +38,7 @@ Requirements for the Tax milestone. Each maps to roadmap phases 49–51.
 
 - [ ] **DX-01**: All five Tax object types registered in ObjectTypes for expand deserialization
 - [ ] **DX-02**: `LatticeStripe.Testing` fixtures for Calculation, Transaction, and TaxId
-- [ ] **DX-03**: Integration spec proving calculation → transaction chain (Mox-at-Transport)
+- [x] **DX-03**: Integration spec proving calculation → transaction chain (Mox-at-Transport)
 - [ ] **DX-04**: Canonical `guides/tax.md` recipe for standalone Tax API flow
 - [ ] **DX-05**: Docs-truth grep extension for Tax moduledocs
 
@@ -68,14 +68,14 @@ Explicitly excluded for v1.6. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CALC-01 | Phase 49 | Pending |
-| CALC-02 | Phase 49 | Pending |
-| CALC-03 | Phase 49 | Pending |
-| TXN-01 | Phase 49 | Pending |
-| TXN-02 | Phase 49 | Pending |
-| TXN-03 | Phase 49 | Pending |
-| TXN-04 | Phase 49 | Pending |
-| DX-03 | Phase 49 | Pending |
+| CALC-01 | Phase 49 | Complete |
+| CALC-02 | Phase 49 | Complete |
+| CALC-03 | Phase 49 | Complete |
+| TXN-01 | Phase 49 | Complete |
+| TXN-02 | Phase 49 | Complete |
+| TXN-03 | Phase 49 | Complete |
+| TXN-04 | Phase 49 | Complete |
+| DX-03 | Phase 49 | Complete |
 | CONF-01 | Phase 50 | Pending |
 | CONF-02 | Phase 50 | Pending |
 | CONF-03 | Phase 50 | Pending |
@@ -90,6 +90,7 @@ Explicitly excluded for v1.6. Documented to prevent scope creep.
 | DX-05 | Phase 51 | Pending |
 
 **Coverage:**
+
 - v1.6 requirements: 20 total
 - Mapped to phases: 20
 - Unmapped: 0 ✓

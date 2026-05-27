@@ -12,7 +12,7 @@
 
 ## Phases
 
-- [ ] **Phase 49: Tax Calculation & Transaction Core** — Standalone Tax flow primitives: calculate tax, record transactions, reverse when needed, with integration proof of the calc→txn chain.
+- [x] **Phase 49: Tax Calculation & Transaction Core** — Standalone Tax flow primitives: calculate tax, record transactions, reverse when needed, with integration proof of the calc→txn chain. (completed 2026-05-27)
 - [ ] **Phase 50: Tax Settings & Registration** — Account-level tax configuration: singleton settings and jurisdiction registration CRUDL.
 - [ ] **Phase 51: TaxId, Testing & Adoption Surface** — Complete the Tax family with dual-path TaxId, Testing fixtures, canonical guide, and docs-truth regression.
 
@@ -34,9 +34,10 @@
   7. Integration tests under `test/lattice_stripe/tax/` prove the calc→txn chain via Mox-at-Transport (create calculation → create_from_calculation → retrieve transaction).
 
 **Plans**: 3 plans (2 waves)
-- [ ] 49-01-PLAN.md — Tax.Calculation + shared nested structs + ObjectTypes + unit tests (CALC-01..03)
-- [ ] 49-02-PLAN.md — Tax.Transaction verbs + moduledocs + ObjectTypes + unit tests (TXN-01..04, DX-03 moduledoc)
-- [ ] 49-03-PLAN.md — Mox chained integration spec calc→txn→reversal (DX-03)
+
+- [x] 49-01-PLAN.md — Tax.Calculation + shared nested structs + ObjectTypes + unit tests (CALC-01..03)
+- [x] 49-02-PLAN.md — Tax.Transaction verbs + moduledocs + ObjectTypes + unit tests (TXN-01..04, DX-03 moduledoc)
+- [x] 49-03-PLAN.md — Mox chained integration spec calc→txn→reversal (DX-03)
 
 ### Phase 50: Tax Settings & Registration
 
@@ -78,7 +79,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 49. Tax Calculation & Transaction Core | 0/3 | Planned | — |
+| 49. Tax Calculation & Transaction Core | 3/3 | Complete    | 2026-05-27 |
 | 50. Tax Settings & Registration | 0/? | Not started | — |
 | 51. TaxId, Testing & Adoption Surface | 0/? | Not started | — |
 
