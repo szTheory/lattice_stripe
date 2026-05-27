@@ -10,13 +10,14 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
-**Latest shipped milestone:** v1.7 Polish & Operator (archived 2026-05-27)
+**Latest shipped milestone:** v1.8 Adopter Truth & Doc Routing Polish (archived 2026-05-27)
 
-**Active milestone:** v1.8 Adopter Truth & Doc Routing Polish (started 2026-05-27)
+**What shipped in v1.8:**
 
-**Phase 56 complete (2026-05-27):** getting-started release-status prose aligned to Hex 1.7.x; docs_truth SSOT locks for prose drift (TRUTH-01, TRUTH-02).
-
-**Phase 57 complete (2026-05-27):** payments.md atom status/search/3 examples, Charge reconciliation section, operator guide routing, docs_truth VERIFY-04 locks (GUIDE-01..03, ROUTE-01, ROUTE-02, VERIFY-04).
+- **Release truth** — getting-started release-status prose aligned to Hex 1.7.x; docs_truth SSOT locks for prose drift (TRUTH-01, TRUTH-02, Phase 56).
+- **Payments guide correctness** — `guides/payments.md` atom status, stream filter, and `search/3` arity fixes with VERIFY-04 regression locks (GUIDE-01..03, Phase 57).
+- **Charge reconciliation routing** — PI-first Charge section in payments.md plus operator guide update/capture spines (ROUTE-01, ROUTE-02, Phase 57).
+- **Planning truth close** — JTBD-MAP post-v1.8 refresh, MILESTONES/RETROSPECTIVE cosmetics, tax proof commit, milestone audit (ROUTE-03, PLAN-01/02, PROOF-01, Phase 58).
 
 **What shipped in v1.7:**
 
@@ -52,18 +53,15 @@ The library is **done for v1.x scope** — intended mainstream SaaS Stripe cover
 
 **Forward posture:** Maintenance mode — bugfixes, Stripe API drift, adopter-driven narrow additions. No planned new resource-family breadth in v1.x absent fresh adopter pull.
 
-## Current Milestone: v1.8 Adopter Truth & Doc Routing Polish
+## Maintenance Mode (post–v1.8)
 
-**Goal:** Close remaining v1.7 audit doc-routing debt so first-run adopters see truthful release status, copy-paste-correct canonical guide examples, and discover shipped Charge reconciliation workflows — without new API breadth.
+**Latest shipped milestone:** v1.8 Adopter Truth & Doc Routing Polish (archived 2026-05-27)
 
-**Target features:**
-- getting-started release-status prose aligned to Hex 1.7.0 + docs_truth prose lock
-- `guides/payments.md` API example fixes (status atoms, `search/3` arity) + Charge routing
-- operator guide Charge update/capture routing
-- docs_truth regression extended to canonical guide body examples
-- MILESTONES.md / RETROSPECTIVE cosmetic fixes; optional untracked tax proof commit
+**Forward posture:** Maintenance mode — Stripe API drift, adopter-driven narrow additions, bugfixes. No planned new resource-family breadth absent fresh adopter pull.
 
-See `.planning/threads/v1-8-next-milestone-assessment.md` for wedge analysis and repo-truth findings.
+**Do not rewrite:** v1.x stop signal (already at Hex 1.7.0); no Hex 1.8.0 bump (doc-only milestone).
+
+See `.planning/milestones/v1.8-MILESTONE-AUDIT.md` for close-time audit evidence.
 
 ## Context
 
@@ -138,7 +136,7 @@ See `.planning/threads/v1-8-next-milestone-assessment.md` for wedge analysis and
 
 ### Active
 
-- None — v1.8 requirements complete pending milestone audit (Plans 58-04/58-05)
+- None — maintenance mode (post–v1.8)
 
 ### Out of Scope
 
@@ -197,4 +195,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after milestone v1.8 started*
+*Last updated: 2026-05-27 after milestone v1.8 close*
