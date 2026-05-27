@@ -76,8 +76,15 @@ defmodule LatticeStripe.Webhook do
   webhook reference, event catalog, and delivery guarantees.
   """
 
+  alias LatticeStripe.Client
+  alias LatticeStripe.Error
   alias LatticeStripe.Event
   alias LatticeStripe.EventNotification
+  alias LatticeStripe.EventNotification.RelatedObject
+  alias LatticeStripe.ObjectTypes
+  alias LatticeStripe.Request
+  alias LatticeStripe.Resource
+  alias LatticeStripe.Response
   alias LatticeStripe.Webhook.SignatureVerificationError
 
   @type secret :: String.t() | [String.t(), ...]
@@ -249,6 +256,243 @@ defmodule LatticeStripe.Webhook do
     case parse_event_notification(payload, sig_header, secret, opts) do
       {:ok, notif} -> notif
       {:error, reason} -> raise SignatureVerificationError, reason: reason
+    end
+  end
+
+  @doc """
+  Retrieves the full v2 `Event.t()` for a thin-event notification.
+
+  Issues `GET /v2/core/events/{id}` and decodes the response via
+  `LatticeStripe.Event.from_map/1`. Adopters call this after
+  `parse_event_notification/4` returns an `%EventNotification{}` and they need
+  the authoritative event state (e.g., for snapshot-style v2 events that have
+  no `related_object`).
+
+  Accepts either a `%LatticeStripe.EventNotification{}` (the `id` is extracted)
+  or a bare `String.t()` event ID. The `%Client{}` is passed explicitly per
+  Phase 47 D-04 — the notification struct stays pure serializable data with no
+  embedded credential material, safe for ETS / logs / distributed Erlang.
+
+  ## Snapshot vs thin-event Event retrieval
+
+  For snapshot/v1 event IDs (returned by `construct_event/4` on the legacy
+  `/v1/webhooks` path), use `LatticeStripe.Event.retrieve/3` instead — it hits
+  `/v1/events/{id}` which differs from the v2 endpoint and returns a different
+  payload shape (no `related_object`, integer `created`).
+
+  ## `created` wire-format note
+
+  On a `%Event{}` fetched via `fetch_event/3` from `/v2/core/events/{id}`, the
+  `created` field arrives as an **ISO 8601 string** (e.g.,
+  `"2026-03-09T13:00:28.435Z"`) — Stripe's wire format for v2 events. Snapshot
+  v1 events delivered through `construct_event/4` (and retrieved via
+  `Event.retrieve/3`) carry an integer Unix timestamp instead. The
+  `Event.@type t() :created` typespec is currently `integer() | nil`; this
+  asymmetry is documented and will be widened in a future patch (see Phase 47
+  Open Question 2). The runtime behavior is correct either way — `Event.from_map/1`
+  is infallible-deserialize and Dialyzer is not in use.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `notification_or_id` - An `%EventNotification{}` (whose `id` is extracted)
+    OR a bare event-ID string (e.g., `"evt_test_..."`)
+  - `opts` - Per-request overrides: `:api_version`, `:idempotency_key`, etc.
+    (forwarded to `Client.request/2`)
+
+  ## Returns
+
+  - `{:ok, %Event{}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on HTTP failure
+  - `{:error, :no_event_id}` when called with `%EventNotification{id: nil}`
+    (defensive — does NOT issue an HTTP request)
+
+  ## Examples
+
+      # From a parsed notification:
+      {:ok, notif} = Webhook.parse_event_notification(payload, sig_header, secret)
+      {:ok, %Event{} = event} = Webhook.fetch_event(client, notif)
+
+      # From a bare ID:
+      {:ok, %Event{}} = Webhook.fetch_event(client, "evt_test_65UIRNU7G1XbhCfOim416TgmEI4ASQ3jHxXt8RFwXoeVwO")
+  """
+  @spec fetch_event(Client.t(), EventNotification.t() | String.t(), keyword()) ::
+          {:ok, Event.t()} | {:error, Error.t() | :no_event_id}
+  # Defensive clause for malformed notifications (Phase 47 D-07 `:no_event_id`).
+  # Returns the typed error WITHOUT issuing an HTTP request.
+  def fetch_event(%Client{} = _client, %EventNotification{id: nil}, _opts),
+    do: {:error, :no_event_id}
+
+  # Notification → extract id → delegate to bare-id clause.
+  def fetch_event(%Client{} = client, %EventNotification{id: id}, opts) when is_binary(id),
+    do: fetch_event(client, id, opts)
+
+  # Bare-id clause: actual HTTP path.
+  # Path is `/v2/core/events/#{id}` per RESEARCH Finding 3 — NOT `/v1/events/`
+  # (which is what `Event.retrieve/3` calls for snapshot v1 events).
+  def fetch_event(%Client{} = client, id, opts) when is_binary(id) do
+    %Request{method: :get, path: "/v2/core/events/#{id}", params: %{}, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&Event.from_map/1)
+  end
+
+  # 2-arity convenience: default opts to [].
+  @spec fetch_event(Client.t(), EventNotification.t() | String.t()) ::
+          {:ok, Event.t()} | {:error, Error.t() | :no_event_id}
+  def fetch_event(%Client{} = client, notification_or_id),
+    do: fetch_event(client, notification_or_id, [])
+
+  @doc """
+  Like `fetch_event/3` but raises on failure.
+
+  Returns `%Event{}` on success. Raises `LatticeStripe.Error` on HTTP failure
+  or on `{:error, :no_event_id}` (the typed atom is collapsed into a
+  `%LatticeStripe.Error{type: :invalid_request_error}` for consistent
+  exception semantics).
+  """
+  @spec fetch_event!(Client.t(), EventNotification.t() | String.t(), keyword()) :: Event.t()
+  def fetch_event!(%Client{} = client, notification_or_id, opts \\ []) do
+    case fetch_event(client, notification_or_id, opts) do
+      {:ok, %Event{} = event} ->
+        event
+
+      {:error, %Error{} = err} ->
+        raise err
+
+      {:error, :no_event_id} ->
+        raise %Error{
+          type: :invalid_request_error,
+          message: "EventNotification id is nil"
+        }
+    end
+  end
+
+  @doc """
+  Retrieves the typed underlying resource referenced by a thin-event notification's
+  `related_object`.
+
+  Looks up the LatticeStripe module for `notification.related_object.type` via
+  `LatticeStripe.ObjectTypes.fetch_module/1` **before** issuing any HTTP request
+  (Phase 47 D-05 fail-fast contract). On a known type, issues a GET against the
+  `notification.related_object.url` (Stripe ships the path verbatim) and decodes
+  the response through `ObjectTypes.maybe_deserialize/1`.
+
+  ## Typed-error contract (Phase 47 D-05 + D-07)
+
+  - `{:error, {:unknown_object_type, type}}` — `related_object.type` is not in
+    `LatticeStripe.ObjectTypes.@object_map`. Stripe shipped a new resource type;
+    opening a PR to add the module to the dispatch table resolves this. No HTTP
+    request is issued in this case.
+  - `{:error, :no_related_object}` — `notification.related_object == nil`
+    (snapshot-style v2 events). Adopters should call `fetch_event/3` to retrieve
+    the full `%Event{}` instead.
+  - `{:error, %LatticeStripe.Error{}}` — standard HTTP failure (4xx/5xx,
+    connection error, etc.).
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct (passed explicitly per D-04 —
+    the notification carries no embedded credential material)
+  - `notification` - An `%EventNotification{}` returned by
+    `parse_event_notification/4`
+  - `opts` - Per-request overrides:
+    - `:expand` - list of paths to expand inline; reuses v1.2 expand machinery
+      via `Client.request/2`
+    - `:api_version` - per-request Stripe API version override
+    - `:idempotency_key` - per-request idempotency key
+
+  ## Returns
+
+  - `{:ok, struct()}` - typed resource decoded via `ObjectTypes.maybe_deserialize/1`
+  - `{:error, %LatticeStripe.Error{} | {:unknown_object_type, String.t()} | :no_related_object}`
+
+  ## Example
+
+      case Webhook.parse_event_notification(payload, sig_header, secret) do
+        {:ok, %EventNotification{
+           related_object: %RelatedObject{type: "customer"}
+         } = notif} ->
+          {:ok, %LatticeStripe.Customer{} = customer} =
+            Webhook.fetch_related_object(client, notif)
+
+          handle_customer_event(customer)
+
+        {:ok, %EventNotification{related_object: nil} = notif} ->
+          # No related object — fetch the full event instead.
+          {:ok, %Event{}} = Webhook.fetch_event(client, notif)
+
+        {:error, reason} ->
+          Logger.error("verify failed: \#{inspect(reason)}")
+      end
+  """
+  @spec fetch_related_object(Client.t(), EventNotification.t(), keyword()) ::
+          {:ok, struct() | map()}
+          | {:error, Error.t() | {:unknown_object_type, String.t()} | :no_related_object}
+  # D-07: nil-related-object case returns typed error WITHOUT calling
+  # ObjectTypes.fetch_module/1 or Client.request/2.
+  def fetch_related_object(%Client{} = _client, %EventNotification{related_object: nil}, _opts),
+    do: {:error, :no_related_object}
+
+  # D-05: typed-error gate BEFORE any HTTP request. Unknown types short-circuit
+  # to {:error, {:unknown_object_type, type}} — Mox expectation count = 0.
+  def fetch_related_object(
+        %Client{} = client,
+        %EventNotification{related_object: %RelatedObject{type: type, url: url}},
+        opts
+      ) do
+    case ObjectTypes.fetch_module(type) do
+      {:ok, _module} ->
+        %Request{method: :get, path: url, params: %{}, opts: opts}
+        |> then(&Client.request(client, &1))
+        |> case do
+          {:ok, %Response{data: raw}} -> {:ok, ObjectTypes.maybe_deserialize(raw)}
+          {:error, %Error{}} = error -> error
+        end
+
+      :error ->
+        {:error, {:unknown_object_type, type}}
+    end
+  end
+
+  # 2-arity convenience: default opts to [].
+  @spec fetch_related_object(Client.t(), EventNotification.t()) ::
+          {:ok, struct() | map()}
+          | {:error, Error.t() | {:unknown_object_type, String.t()} | :no_related_object}
+  def fetch_related_object(%Client{} = client, %EventNotification{} = notif),
+    do: fetch_related_object(client, notif, [])
+
+  @doc """
+  Like `fetch_related_object/3` but raises on failure.
+
+  Collapses all error paths into `LatticeStripe.Error` for consistent exception
+  semantics:
+
+  - `{:error, %Error{}}` → raises the Error verbatim
+  - `{:error, {:unknown_object_type, type}}` → raises
+    `%Error{type: :invalid_request_error, message: "Unknown Stripe object type: \#{type}"}`
+  - `{:error, :no_related_object}` → raises
+    `%Error{type: :invalid_request_error, message: "EventNotification has no related_object"}`
+  """
+  @spec fetch_related_object!(Client.t(), EventNotification.t(), keyword()) :: struct() | map()
+  def fetch_related_object!(%Client{} = client, %EventNotification{} = notif, opts \\ []) do
+    case fetch_related_object(client, notif, opts) do
+      {:ok, obj} ->
+        obj
+
+      {:error, %Error{} = err} ->
+        raise err
+
+      {:error, {:unknown_object_type, type}} ->
+        raise %Error{
+          type: :invalid_request_error,
+          message: "Unknown Stripe object type: #{type}"
+        }
+
+      {:error, :no_related_object} ->
+        raise %Error{
+          type: :invalid_request_error,
+          message: "EventNotification has no related_object"
+        }
     end
   end
 
