@@ -131,12 +131,14 @@ See `.planning/threads/v1-8-next-milestone-assessment.md` for wedge analysis and
 - ✓ Canonical payments guide API examples (GUIDE-01..03) — Phase 57, v1.8
 - ✓ Charge reconciliation doc routing in payments + operator guides (ROUTE-01, ROUTE-02) — Phase 57, v1.8
 - ✓ docs_truth locks canonical payments guide API patterns (VERIFY-04) — Phase 57, v1.8
+- ✓ MILESTONES v1.7 audit footnote + v1.8 draft section (PLAN-01) — Phase 58, v1.8
+- ✓ RETROSPECTIVE v1.8 entry + process lessons (PLAN-02) — Phase 58, v1.8
+- ✓ JTBD-MAP post-v1.8 refresh (ROUTE-03) — Phase 58, v1.8
+- ✓ Tax proof files tracked in CI (PROOF-01) — Phase 58, v1.8
 
 ### Active
 
-- [ ] Planning artifact cosmetic fixes (PLAN-01, PLAN-02)
-- [x] JTBD-MAP reflects post-v1.8 doc routing (ROUTE-03)
-- [x] Optional: commit or drop untracked tax proof files (PROOF-01) — completed 58-03
+- None — v1.8 requirements complete pending milestone audit (Plans 58-04/58-05)
 
 ### Out of Scope
 

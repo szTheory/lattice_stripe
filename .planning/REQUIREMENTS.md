@@ -31,8 +31,8 @@ Requirements for this milestone. Each maps to roadmap phases 56–58.
 
 ### Planning Truth
 
-- [ ] **PLAN-01**: `.planning/MILESTONES.md` v1.7 section prose reflects published 1.7.0 state (no pre-publish wording).
-- [ ] **PLAN-02**: `.planning/RETROSPECTIVE.md` historical bullets accurate post-1.7.0 Hex publish.
+- [x] **PLAN-01**: `.planning/MILESTONES.md` v1.7 section prose reflects published 1.7.0 state (no pre-publish wording).
+- [x] **PLAN-02**: `.planning/RETROSPECTIVE.md` historical bullets accurate post-1.7.0 Hex publish.
 
 ### Proof Hygiene (optional)
 
@@ -78,8 +78,8 @@ Deferred beyond v1.8. Tracked but not in current roadmap.
 | ROUTE-02 | Phase 57 | Complete |
 | VERIFY-04 | Phase 57 | Complete |
 | ROUTE-03 | Phase 58 | Complete |
-| PLAN-01 | Phase 58 | Pending |
-| PLAN-02 | Phase 58 | Pending |
+| PLAN-01 | Phase 58 | Complete |
+| PLAN-02 | Phase 58 | Complete |
 | PROOF-01 | Phase 58 | Complete |
 
 **Coverage:**
