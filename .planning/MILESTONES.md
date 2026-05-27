@@ -14,7 +14,7 @@
 - Published `lattice_stripe` **1.7.0** to Hex.pm via Publish Hex Recovery CI workflow (REL-04).
 - Retired Phase `41.1` as `accepted-external-verification` and published the v1.x stop signal in README, `guides/scope.md`, PROJECT.md, CHANGELOG, and ExDoc (CLOSE-01, CLOSE-02).
 
-**Audit:** PASSED — 13/13 requirements satisfied, 0 critical integration gaps, 4/5 E2E adopter flows verified. Tech debt: non-blocking doc-routing gaps (getting-started stale prose, operator guides omit update/capture examples, missing 54-VERIFICATION.md). See [milestones/v1.7-MILESTONE-AUDIT.md](milestones/v1.7-MILESTONE-AUDIT.md).
+**Audit:** PASSED — 13/13 requirements, 0 critical gaps, 4/5 E2E flows. **Tech debt at close:** missing `54-VERIFICATION.md`; doc-routing gaps (getting-started prose, payments/operator Charge routing). **Resolved in v1.8** (Phases 56–57). See [v1.7-MILESTONE-AUDIT.md](milestones/v1.7-MILESTONE-AUDIT.md).
 
 **Known deferred items at close:** 1 (260402-wte webhook plug research — substantively complete; see STATE.md Deferred Items)
 
