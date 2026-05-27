@@ -63,7 +63,7 @@
 6. `docs_truth_test.exs` grep-regresses payments.md status-atom and search-arity patterns.
 7. `mix test test/lattice_stripe/docs_truth_test.exs` passes.
 
-**Plans:** TBD
+**Plans:** 3 plans in 3 waves (57-01 VERIFY-04 locks → 57-02 guide fixes + Charge section → 57-03 operator routing)
 
 ### Phase 58: Milestone Closure & Planning Truth
 
@@ -85,7 +85,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 56. Release Truth & Getting Started | v1.8 | 2/2 | Complete    | 2026-05-27 |
-| 57. Payments Guide & Charge Routing | v1.8 | 0/? | Pending | — |
+| 57. Payments Guide & Charge Routing | v1.8 | 0/3 | Ready to execute | — |
 | 58. Milestone Closure & Planning Truth | v1.8 | 0/? | Pending | — |
 
 ## Next Step
