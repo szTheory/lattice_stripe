@@ -76,8 +76,12 @@ defmodule LatticeStripe.Webhook do
   webhook reference, event catalog, and delivery guarantees.
   """
 
+  alias LatticeStripe.Client
+  alias LatticeStripe.Error
   alias LatticeStripe.Event
   alias LatticeStripe.EventNotification
+  alias LatticeStripe.Request
+  alias LatticeStripe.Resource
   alias LatticeStripe.Webhook.SignatureVerificationError
 
   @type secret :: String.t() | [String.t(), ...]
@@ -249,6 +253,114 @@ defmodule LatticeStripe.Webhook do
     case parse_event_notification(payload, sig_header, secret, opts) do
       {:ok, notif} -> notif
       {:error, reason} -> raise SignatureVerificationError, reason: reason
+    end
+  end
+
+  @doc """
+  Retrieves the full v2 `Event.t()` for a thin-event notification.
+
+  Issues `GET /v2/core/events/{id}` and decodes the response via
+  `LatticeStripe.Event.from_map/1`. Adopters call this after
+  `parse_event_notification/4` returns an `%EventNotification{}` and they need
+  the authoritative event state (e.g., for snapshot-style v2 events that have
+  no `related_object`).
+
+  Accepts either a `%LatticeStripe.EventNotification{}` (the `id` is extracted)
+  or a bare `String.t()` event ID. The `%Client{}` is passed explicitly per
+  Phase 47 D-04 — the notification struct stays pure serializable data with no
+  embedded credential material, safe for ETS / logs / distributed Erlang.
+
+  ## Snapshot vs thin-event Event retrieval
+
+  For snapshot/v1 event IDs (returned by `construct_event/4` on the legacy
+  `/v1/webhooks` path), use `LatticeStripe.Event.retrieve/3` instead — it hits
+  `/v1/events/{id}` which differs from the v2 endpoint and returns a different
+  payload shape (no `related_object`, integer `created`).
+
+  ## `created` wire-format note
+
+  On a `%Event{}` fetched via `fetch_event/3` from `/v2/core/events/{id}`, the
+  `created` field arrives as an **ISO 8601 string** (e.g.,
+  `"2026-03-09T13:00:28.435Z"`) — Stripe's wire format for v2 events. Snapshot
+  v1 events delivered through `construct_event/4` (and retrieved via
+  `Event.retrieve/3`) carry an integer Unix timestamp instead. The
+  `Event.@type t() :created` typespec is currently `integer() | nil`; this
+  asymmetry is documented and will be widened in a future patch (see Phase 47
+  Open Question 2). The runtime behavior is correct either way — `Event.from_map/1`
+  is infallible-deserialize and Dialyzer is not in use.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `notification_or_id` - An `%EventNotification{}` (whose `id` is extracted)
+    OR a bare event-ID string (e.g., `"evt_test_..."`)
+  - `opts` - Per-request overrides: `:api_version`, `:idempotency_key`, etc.
+    (forwarded to `Client.request/2`)
+
+  ## Returns
+
+  - `{:ok, %Event{}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on HTTP failure
+  - `{:error, :no_event_id}` when called with `%EventNotification{id: nil}`
+    (defensive — does NOT issue an HTTP request)
+
+  ## Examples
+
+      # From a parsed notification:
+      {:ok, notif} = Webhook.parse_event_notification(payload, sig_header, secret)
+      {:ok, %Event{} = event} = Webhook.fetch_event(client, notif)
+
+      # From a bare ID:
+      {:ok, %Event{}} = Webhook.fetch_event(client, "evt_test_65UIRNU7G1XbhCfOim416TgmEI4ASQ3jHxXt8RFwXoeVwO")
+  """
+  @spec fetch_event(Client.t(), EventNotification.t() | String.t(), keyword()) ::
+          {:ok, Event.t()} | {:error, Error.t() | :no_event_id}
+  # Defensive clause for malformed notifications (Phase 47 D-07 `:no_event_id`).
+  # Returns the typed error WITHOUT issuing an HTTP request.
+  def fetch_event(%Client{} = _client, %EventNotification{id: nil}, _opts),
+    do: {:error, :no_event_id}
+
+  # Notification → extract id → delegate to bare-id clause.
+  def fetch_event(%Client{} = client, %EventNotification{id: id}, opts) when is_binary(id),
+    do: fetch_event(client, id, opts)
+
+  # Bare-id clause: actual HTTP path.
+  # Path is `/v2/core/events/#{id}` per RESEARCH Finding 3 — NOT `/v1/events/`
+  # (which is what `Event.retrieve/3` calls for snapshot v1 events).
+  def fetch_event(%Client{} = client, id, opts) when is_binary(id) do
+    %Request{method: :get, path: "/v2/core/events/#{id}", params: %{}, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&Event.from_map/1)
+  end
+
+  # 2-arity convenience: default opts to [].
+  @spec fetch_event(Client.t(), EventNotification.t() | String.t()) ::
+          {:ok, Event.t()} | {:error, Error.t() | :no_event_id}
+  def fetch_event(%Client{} = client, notification_or_id),
+    do: fetch_event(client, notification_or_id, [])
+
+  @doc """
+  Like `fetch_event/3` but raises on failure.
+
+  Returns `%Event{}` on success. Raises `LatticeStripe.Error` on HTTP failure
+  or on `{:error, :no_event_id}` (the typed atom is collapsed into a
+  `%LatticeStripe.Error{type: :invalid_request_error}` for consistent
+  exception semantics).
+  """
+  @spec fetch_event!(Client.t(), EventNotification.t() | String.t(), keyword()) :: Event.t()
+  def fetch_event!(%Client{} = client, notification_or_id, opts \\ []) do
+    case fetch_event(client, notification_or_id, opts) do
+      {:ok, %Event{} = event} ->
+        event
+
+      {:error, %Error{} = err} ->
+        raise err
+
+      {:error, :no_event_id} ->
+        raise %Error{
+          type: :invalid_request_error,
+          message: "EventNotification id is nil"
+        }
     end
   end
 
