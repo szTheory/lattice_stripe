@@ -85,7 +85,7 @@ When updating this file, review in this order:
 | Flow | Product value | Code coverage | Narrative doc coverage | Status |
 | --- | --- | --- | --- | --- |
 | One-time payments | Core | Strong | Strong | Shipped; payments.md examples fixed (Phase 57) + docs_truth locked |
-| Hosted checkout | Core | Strong | Partial | Shipped; checkout.md status-string bug at L206 (same class as pre-v1.8 payments.md); docs_truth not locked |
+| Hosted checkout | Core | Strong | Strong | Shipped; checkout.md examples fixed (Phase 59) + docs_truth locked |
 | Subscription signup and lifecycle | Core | Strong | Strong | Shipped and documented |
 | Customer self-service portal sessions | Core | Strong | Good | Shipped and documented |
 | Usage-based billing primitives | Core | Strong | Good | Shipped and documented |
@@ -104,7 +104,7 @@ When updating this file, review in this order:
 | Thin-event webhook support | Important platform wedge | Strong | Strong | Shipped and documented (v1.5) |
 | Charge audit and reconciliation | Important for support/ops | Strong | Good/Strong | Shipped; `#charge-reconciliation` in payments.md + operator cross-links (Phase 57) |
 | Production operator guides | Foundational for prod readiness | Strong | Good/Strong | Shipped; update/capture routed in production-checklist + event-debugging (Phase 57) |
-| Public package/docs/version truth | Foundational | Strong | Strong | Hex 1.7.0 + lockstep `~> 1.7`; getting-started prose SSOT locked (Phase 56) |
+| Public package/docs/version truth | Foundational | Strong | Strong | Hex 1.7.0 + lockstep `~> 1.7`; getting-started prose SSOT locked (Phase 56); README error taxonomy locked (Phase 59) |
 
 ## Current Best-Fit User Stories
 
@@ -123,14 +123,7 @@ LatticeStripe is already a good fit today for these integrator stories:
 
 ## Biggest Gaps
 
-Doc-routing polish closed in v1.8 for getting-started and payments.md (Phases 56–57). Post-v1.8 assessment found checkout.md + README + CI-01 still open.
-
-### Gap 3: CI & doc honesty (post-v1.8 assessment)
-
-- **checkout.md** — `payment_status == "paid"` string compare at line 206; SDK atomizes to `:paid`; no status-values callout; not in docs_truth.
-- **README error taxonomy** — lists `:auth_error`/`:server_error`; actual types `:authentication_error`/`:api_error`.
-- **CI-01** — `paths-ignore` on `guides/**` and `**.md` skips docs_truth on guide-only PRs.
-- **Recommended milestone:** v1.9 CI & Doc Honesty (~2 phases, doc-only, no Hex bump).
+v1.9 closed the doc/CI honesty wedge (checkout guide, README error taxonomy, docs_truth locks, CI-01 paths-ignore). Doc-routing polish for getting-started and payments.md shipped in v1.8 (Phases 56–57).
 
 ### Gap 2: Narrative docs still thin for several shipped surfaces
 
@@ -150,17 +143,19 @@ Product/Price catalog strategy, BillingPortal configuration, disputes/files evid
 - ~~Charge reconciliation discovery gap~~ — `payments.md#charge-reconciliation` Phase 57 (ROUTE-01)
 - ~~operator guide update/capture routing~~ — Phase 57 (ROUTE-02)
 - ~~cosmetic planning drift~~ — MILESTONES/RETROSPECTIVE/JTBD refresh Phase 58 (PLAN-01/02, ROUTE-03)
+- ~~Phase 59: checkout.md atom stream filter + status-values callout + docs_truth describe locks~~
+- ~~Phase 59: README canonical error atoms + docs_truth describe lock~~
+- ~~Phase 60: CI-01 paths-ignore narrowed — guide/md PRs run full CI including docs_truth~~
 
 ## Recommended Priority Order
 
-Post-v1.8 assessment (2026-05-27):
+Post-v1.9 close (2026-05-27):
 
-1. **v1.9 CI & Doc Honesty** — checkout.md atom fixes, README error taxonomy, docs_truth extension, CI-01 (with approval) ← recommended
-2. **Maintenance mode** — Stripe API drift, adopter-pull narrow adds (TAX-01/02), bugfixes
-3. **Gap 2: Narrative docs still thin** — Product/Price, BillingPortal, disputes/files, mandate diagnostics (adopter pull only)
-4. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
-5. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only
-6. **Long-tail narrative docs** — opportunistic, not milestone-grade
+1. **Maintenance mode** — Stripe API drift, adopter-pull narrow adds (TAX-01/02), bugfixes
+2. **Gap 2: Narrative docs still thin** — Product/Price, BillingPortal, disputes/files, mandate diagnostics (adopter pull only)
+3. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
+4. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only
+5. **Long-tail narrative docs** — opportunistic, not milestone-grade
 
 ## What "Feature-Complete Enough" Looks Like
 
