@@ -84,7 +84,7 @@ When updating this file, review in this order:
 
 | Flow | Product value | Code coverage | Narrative doc coverage | Status |
 | --- | --- | --- | --- | --- |
-| One-time payments | Core | Strong | Strong | Shipped and documented |
+| One-time payments | Core | Strong | Partial | Shipped; **payments.md has API example bugs** (status atoms, search arity) — fix in v1.8 |
 | Hosted checkout | Core | Strong | Strong | Shipped and documented |
 | Subscription signup and lifecycle | Core | Strong | Strong | Shipped and documented |
 | Customer self-service portal sessions | Core | Strong | Good | Shipped and documented |
@@ -102,9 +102,9 @@ When updating this file, review in this order:
 | Quote-to-invoice workflow | High leverage for B2B | Strong | Good | Shipped (flagship guide + code) |
 | Tax (Calculation, Transaction, Settings, Registration, TaxId) | Core for tax-region SaaS | Strong | Strong | Shipped and documented (v1.6) |
 | Thin-event webhook support | Important platform wedge | Strong | Strong | Shipped and documented (v1.5) |
-| Charge audit and reconciliation | Important for support/ops | Partial | Good | Retrieve-only; list/search/update/capture planned v1.7 |
-| Production operator guides | Foundational for prod readiness | Partial | Missing | Checklist + event debugging planned v1.7 |
-| Public package/docs/version truth | Foundational | Strong | Partial | Code ships v1.5/v1.6; Hex/install still at 1.3 — v1.7 capstone |
+| Charge audit and reconciliation | Important for support/ops | Strong | Partial | Shipped (v1.7); list/search/update/capture in code; payments guide routing gap |
+| Production operator guides | Foundational for prod readiness | Strong | Good | Shipped (v1.7): production-checklist + event-debugging; Charge update/capture not in operator route |
+| Public package/docs/version truth | Foundational | Strong | Partial | Hex 1.7.0 + lockstep `~> 1.7` on seven install surfaces; getting-started prose drift (lines 20–21) |
 
 ## Current Best-Fit User Stories
 
@@ -119,30 +119,22 @@ LatticeStripe is already a good fit today for these integrator stories:
 - "I need explicit Tax API coverage for custom checkout flows and tax-region compliance."
 - "I need modern thin-event webhooks with fetch-after-verify, not just snapshot payloads."
 
+- "I need Charge list/search/update/capture for support, reconciliation, and legacy migration workflows."
+
 ## Biggest Gaps
 
-### Gap 1: Charge surface is the last mainstream code wedge
+### Gap 1: Doc-routing polish (post-v1.7 audit tech debt)
 
-`LatticeStripe.Charge` is retrieve-only by design (Phase 18 D-06). PI-first payment flows do not need it, but support, reconciliation, audit, and legacy migration workflows expect `list`, `search`, `update`, and `capture`.
+Code and install pins are aligned at 1.7.0. Remaining adopter-facing gaps are doc routing, not API surface:
 
-**Planned:** v1.7 adds full Charge surface per sibling resource patterns.
+- **`guides/getting-started.md` lines 20–21** — prose claims `1.3.x` is current published Hex surface; install snippet correctly says `~> 1.7`. Not locked by docs_truth (README refute only).
+- **Charge reconciliation discovery** — `guides/payments.md` does not route list/search/update/capture; operator guides document list/search only (CHRG-03/04/05 from v1.7 audit).
+- **`guides/payments.md` canonical guide bugs** — L89–101 match status as strings but SDK returns atoms; L197 stream filter uses `"succeeded"`; L208–213 documents wrong `search/3` arity (map arg vs query string). Not locked by docs_truth body checks.
+- **Cosmetic planning drift** — MILESTONES.md v1.7 header and RETROSPECTIVE historical bullets reference pre-publish state.
 
-### Gap 2: Production operator spine is incomplete
+**Planned:** v1.8 Adopter Truth & Doc Routing Polish (~2–3 phases).
 
-Strong fragments exist (webhooks, errors, testing, metering ops) but evaluators expect:
-
-- `guides/production-checklist.md` — pre-launch readiness (keys, webhooks, idempotency, rate limits, Connect context)
-- `guides/event-debugging.md` — snapshot vs thin, verify failures, replay, `request_id`, fetch-after-verify races
-
-**Planned:** v1.7 operator guides milestone work.
-
-### Gap 3: Public release truth lags shipped code by two milestones
-
-`mix.exs` is `@version "1.3.0"` while the repo ships v1.5 thin events and v1.6 Tax. README/getting-started lock `~> 1.3` by docs-truth design. Evaluators underestimate the library or install the wrong version line.
-
-**Planned:** v1.7 capstone — bump to 1.7.0, CHANGELOG, lockstep docs-truth flip, Hex publish. Release truth is stop-milestone work, not out-of-band housekeeping.
-
-### Gap 4: Narrative docs still thin for several shipped surfaces
+### Gap 2: Narrative docs still thin for several shipped surfaces
 
 Product/Price catalog strategy, BillingPortal configuration, disputes/files evidence, and mandate diagnostics remain recipe- or fixture-level only. These are polish, not milestone-blocking — defer unless adopter pull surfaces.
 
@@ -151,17 +143,20 @@ Product/Price catalog strategy, BillingPortal configuration, disputes/files evid
 - ~~End-to-end flagship recipes~~ — four guides shipped (v1.4)
 - ~~Thin-event webhook support~~ — shipped (v1.5)
 - ~~Tax resource family~~ — shipped (v1.6)
-- ~~Public truth + guide completion (v1.4 scope)~~ — largely done; Hex/version drift is the remaining slice (Gap 3)
+- ~~Charge list/search/update/capture~~ — shipped (v1.7)
+- ~~Production operator guides~~ — production-checklist + event-debugging shipped (v1.7)
+- ~~Public release truth / Hex publish~~ — 1.7.0 on Hex, lockstep `~> 1.7` install contract (v1.7)
+- ~~v1.x stop signal~~ — README, scope.md, planning artifacts (v1.7)
 
 ## Recommended Priority Order
 
-Post-v1.6 assessment (2026-05-27):
+Post-v1.7 assessment (2026-05-27):
 
-1. **v1.7 Polish & Operator** — Charge surface, operator guides, Hex/release capstone, Phase 41.1 disposition
-2. **Stop** — call library "done for v1.x scope"
-3. **Maintenance mode** — bugfixes, Stripe API drift, adopter-driven narrow additions only
-4. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
-5. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only
+1. **v1.8 Adopter Truth & Doc Routing Polish** — getting-started prose, Charge doc routing, payments.md API example fixes, docs_truth prose lock, planning cosmetic fixes
+2. **Maintenance mode** — bugfixes, Stripe API drift, adopter-driven narrow additions only
+3. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
+4. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only
+5. **Long-tail narrative docs** — Product/Price catalog, disputes deep playbooks — opportunistic, not milestone-grade
 
 ## What "Feature-Complete Enough" Looks Like
 

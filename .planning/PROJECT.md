@@ -12,7 +12,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Latest shipped milestone:** v1.7 Polish & Operator (archived 2026-05-27)
 
-**Active milestone:** None — v1.x scope complete; planning next milestone.
+**Active milestone:** v1.8 Adopter Truth & Doc Routing Polish (started 2026-05-27)
 
 **What shipped in v1.7:**
 
@@ -48,14 +48,18 @@ The library is **done for v1.x scope** — intended mainstream SaaS Stripe cover
 
 **Forward posture:** Maintenance mode — bugfixes, Stripe API drift, adopter-driven narrow additions. No planned new resource-family breadth in v1.x absent fresh adopter pull.
 
-## Next Milestone Goals
+## Current Milestone: v1.8 Adopter Truth & Doc Routing Polish
 
-No active milestone defined. Run `/gsd-new-milestone` to assess whether v2.0, specialist Stripe families (Identity, Treasury, Issuing, Terminal), or maintenance-only posture is the right next step.
+**Goal:** Close remaining v1.7 audit doc-routing debt so first-run adopters see truthful release status, copy-paste-correct canonical guide examples, and discover shipped Charge reconciliation workflows — without new API breadth.
 
-Candidate directions (not committed):
-- Specialist Stripe families if adopter pull materializes (SPEC-01, SPEC-02)
-- Tax extensions (TAX-01 Tax Code lookup, TAX-02 Transaction list if Stripe adds it)
-- Post-close doc-routing polish from v1.7 audit tech debt
+**Target features:**
+- getting-started release-status prose aligned to Hex 1.7.0 + docs_truth prose lock
+- `guides/payments.md` API example fixes (status atoms, `search/3` arity) + Charge routing
+- operator guide Charge update/capture routing
+- docs_truth regression extended to canonical guide body examples
+- MILESTONES.md / RETROSPECTIVE cosmetic fixes; optional untracked tax proof commit
+
+See `.planning/threads/v1-8-next-milestone-assessment.md` for wedge analysis and repo-truth findings.
 
 ## Context
 
@@ -122,7 +126,13 @@ Candidate directions (not committed):
 
 ### Active
 
-(None — run `/gsd-new-milestone` to define next milestone requirements.)
+- [ ] Release-status prose truth in getting-started (TRUTH-01, TRUTH-02)
+- [ ] Canonical payments guide API examples corrected (GUIDE-01..03)
+- [ ] Charge reconciliation doc routing in payments + operator guides (ROUTE-01, ROUTE-02)
+- [ ] docs_truth locks canonical guide API examples (VERIFY-04)
+- [ ] Planning artifact cosmetic fixes (PLAN-01, PLAN-02)
+- [ ] JTBD-MAP reflects post-v1.8 doc routing (ROUTE-03)
+- [ ] Optional: commit or drop untracked tax proof files (PROOF-01)
 
 ### Out of Scope
 
@@ -158,6 +168,10 @@ Candidate directions (not committed):
 | Hex publish is stop-milestone capstone, not out-of-band | Out-of-band publish creates adopter truth lag (install `~> 1.3` while code ships v1.5/v1.6); fold release prep into v1.7 | ✓ Good (v1.7 REL-04) |
 | v1.7 as planned v1.x stop signal | Polish + operator guides + release truth close remaining scope gaps honestly before declaring maintenance mode | ✓ Good (v1.7) |
 | Retire Phase 41.1 as accepted external boundary | Real-sandbox proof valuable but should not block honest close; append-only retirement preserves audit trail | ✓ Good (v1.7 CLOSE-01) |
+| Post-v1.7: no new code breadth; doc-routing polish is highest leverage | lib/ scan confirms Charge, operator guides, Hex 1.7.0 shipped; remaining gaps are getting-started prose, Charge doc routing, JTBD-MAP lag — not missing API families | ✓ Assessment (2026-05-27) |
+| Refresh JTBD-MAP at milestone close, not just milestone start | v1.7 shipped but JTBD-MAP still described pre-v1.7 gaps until post-v1.7 assessment — causes wrong scope on `/gsd-new-milestone` | ✓ Assessment (2026-05-27) |
+| docs_truth must cover canonical guide API examples | payments.md survived with string-vs-atom status bugs and wrong search arity because docs_truth locks cross-links/install pins but not canonical guide body examples | ✓ Assessment (2026-05-27 refresh) |
+| CI paths-ignore on guides bypasses docs_truth | Guide-only PRs skip unit CI; highest-risk edit surface has weakest automated gate — fix requires explicit workflow approval | Pending approval |
 
 ## Evolution
 
@@ -177,4 +191,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after v1.7 milestone*
+*Last updated: 2026-05-27 after milestone v1.8 started*
