@@ -1,42 +1,79 @@
 defmodule LatticeStripe.Charge do
   @moduledoc """
-  Retrieve-only access to Stripe Charge objects.
+  Stripe Charge objects — the result record of a payment attempt.
 
-  Stripe's modern API is PaymentIntent-first; use `LatticeStripe.PaymentIntent.create/3`
-  to accept payments. This module exposes retrieve-only access for reading settled
-  fee details during Connect platform fee reconciliation.
+  When a `LatticeStripe.PaymentIntent` is confirmed, Stripe creates a Charge that
+  captures the settled payment outcome. New integrations should start with
+  `LatticeStripe.PaymentIntent` for accepting payments; this module is for reading
+  and reconciling those result records after the fact.
 
-  Only three public functions exist — `retrieve/3`, `retrieve!/3`, and `from_map/1`.
-  By design there is **no** `create`, `update`, `capture`, `cancel`, `list`, `stream!`,
-  or `search` — Charges are created as a side effect of PaymentIntent confirmation and
-  are never directly manipulated through this SDK. See Phase 18 decision D-06 for the
-  full rationale.
+  ## When to use this module
+
+  - **Connect platform fee reconciliation** — walk `balance_transaction.fee_details`
+    after a destination charge settles to reconcile application fees.
+  - **Support and audit workflows** — `list/3`, `stream!/3`, and `search/3` to find
+    charges by customer, date, or Stripe search query.
+  - **Post-hoc metadata** — `update/4` to attach or correct `metadata` and
+    `description` on an existing charge without re-running payment flows.
+
+  ## When not to use this module
+
+  - **Accept a payment** → `LatticeStripe.PaymentIntent.create/3`
+  - **Capture a PI-initiated charge** → `LatticeStripe.PaymentIntent.capture/4`
+  - **Cancel a payment** → `LatticeStripe.PaymentIntent.cancel/4`
+  - **Refund a charge** → `LatticeStripe.Refund.create/3`
 
   ## Usage
 
       client = LatticeStripe.Client.new!(api_key: "sk_live_...", finch: MyApp.Finch)
 
-      # Retrieve a settled charge by id
-      {:ok, charge} = LatticeStripe.Charge.retrieve(client, "ch_3OoLqrJ...")
-
-      # Expand the balance_transaction to read fee_details inline
+      # Retrieve a settled charge by id (expand balance_transaction for fee_details)
       {:ok, charge} =
         LatticeStripe.Charge.retrieve(client, "ch_3OoLqrJ...",
           expand: ["balance_transaction"]
         )
+
+      # List charges with filters
+      {:ok, resp} = LatticeStripe.Charge.list(client, %{"limit" => "20", "customer" => "cus_123"})
+
+      # Stream all charges lazily (auto-pagination)
+      client
+      |> LatticeStripe.Charge.stream!()
+      |> Stream.take(100)
+      |> Enum.each(&process_charge/1)
+
+      # Search charges (eventual consistency — new charges may lag)
+      {:ok, resp} = LatticeStripe.Charge.search(client, "status:'succeeded' AND currency:'usd'")
+
+      # Update metadata and description on an existing charge
+      {:ok, charge} =
+        LatticeStripe.Charge.update(client, "ch_3OoLqrJ...", %{
+          "metadata" => %{"order_id" => "ord_456"},
+          "description" => "Order #456"
+        })
+
+      # Capture an uncaptured legacy direct charge (not PI-initiated)
+      {:ok, charge} = LatticeStripe.Charge.capture(client, "ch_3OoLqrJ...")
+
+  ## Connect platform fee reconciliation
+
+  After a destination charge settles, platforms walk
+  `PaymentIntent.latest_charge -> Charge.balance_transaction -> fee_details` to
+  reconcile the application fee Stripe transferred into their platform balance.
+  The typed `%Charge{}` return gives IDE-friendly completion and typespec coverage
+  for that flow without forcing users to drop into `LatticeStripe.Client.request/2`.
 
       # Walk fee_details to find the application_fee entry (Connect platform fee)
       application_fees =
         charge.balance_transaction["fee_details"]
         |> Enum.filter(fn fd -> fd["type"] == "application_fee" end)
 
-  ## Connect platform fee reconciliation
+  ## SDK surface (intentionally omitted)
 
-  This module's reason to exist: after a destination charge settles, platforms walk
-  `PaymentIntent.latest_charge -> Charge.balance_transaction -> fee_details` to
-  reconcile the application fee Stripe transferred into their platform balance.
-  The typed `%Charge{}` return gives IDE-friendly completion and typespec coverage
-  for that flow without forcing users to drop into `LatticeStripe.Client.request/2`.
+  There is no `create/3` or `cancel/3` — this module does not initiate payments.
+  Charges are created as a side effect of PaymentIntent confirmation (or legacy
+  direct-charge flows outside this SDK). See Phase 18 decision D-06 for the
+  payment-initiation rationale.
 
   ## Security and Inspect
 
