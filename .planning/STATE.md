@@ -1,34 +1,35 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.4
-milestone_name: Adoption Closure
-status: Awaiting next milestone
-stopped_at: Phase 46 complete (2/2) — v1.4 close-ready, ready to verify Phase 46
-last_updated: "2026-05-27T06:48:43.864Z"
-last_activity: 2026-05-27 — Milestone v1.4 completed and archived
+milestone: v1.5
+milestone_name: Thin-Event Webhooks
+status: planning
+last_updated: "2026-05-27T07:34:30.819Z"
+last_activity: 2026-05-27
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-27 after v1.4 Adoption Closure milestone)
+See: .planning/PROJECT.md (updated 2026-05-27 after v1.5 next-milestone assessment)
+See also: .planning/threads/v1-5-next-milestone-assessment.md (full assessment + wedge dossier)
+         .planning/threads/thin-event-webhook-evaluation.md (locked-in v1.5 shape)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Planning next milestone (v1.4 shipped 2026-05-27)
+**Current focus:** Awaiting `/gsd:new-milestone` kickoff for v1.5 Thin-Event Webhooks.
 
 ## Current Position
 
-Phase: Milestone v1.4 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-05-27 — Milestone v1.4 completed and archived
+Status: Defining requirements
+Last activity: 2026-05-27 — Milestone v1.5 started
 
 ## Performance Metrics
 
@@ -47,19 +48,27 @@ Last activity: 2026-05-27 — Milestone v1.4 completed and archived
 
 ### Pending Todos
 
-- Decide whether Phase `41.1` should be re-run with valid sandbox credentials or retired as an accepted external-only follow-through.
+- Decide whether Phase `41.1` should be re-run with valid sandbox credentials or retired as an accepted external-only follow-through. (Planned to ride along with v1.7 polish milestone.)
+- v1.5 must reconcile `Webhook.check_tolerance/2` `tolerance: 0` semantics — docstring (`lib/lattice_stripe/webhook.ex:84`) and code path (`lib/lattice_stripe/webhook.ex:268-273`) disagree.
+- v1.7 must fill `Charge` surface gap — only `retrieve/3` and `from_map/1` exist today; `list/3`, `search/3`, `capture/4`, `update/4` are missing.
 
 ### Blockers/Concerns
 
 - Phase 41.1 remains explicitly `pending-external-verification` until sandbox proof is produced or the follow-through is retired.
-- Avoid scope bleed into Accrue during future milestone research and implementation.
+- Avoid scope bleed into Accrue during future milestone research and implementation. For v1.6 Tax specifically, negotiate scope in discuss-phase to keep filing orchestration in Accrue (Calculation/Transaction primitives = SDK; multi-jurisdiction filing strategy = Accrue).
 
 ## Session Continuity
 
-Last session: 2026-05-27 — Milestone v1.4 completed and archived
-Stopped at: v1.4 shipped; awaiting next milestone definition
-Resume path: `/gsd:new-milestone`
+Last session: 2026-05-27 — v1.5 next-milestone assessment recorded
+Stopped at: Assessment complete with v1.5 Thin-Event Webhooks selected
+Resume path: `/gsd:new-milestone` (v1.5 = Thin-Event Webhooks)
 
 ## Operator Next Steps
 
-- Start the next milestone with /gsd:new-milestone
+- Start v1.5 with `/gsd:new-milestone v1.5 Thin-Event Webhooks`
+- Then `/gsd:discuss-phase` for the first phase (use the wedge dossier in
+  `.planning/threads/v1-5-next-milestone-assessment.md` and the locked-in
+  shape in `.planning/threads/thin-event-webhook-evaluation.md` as inputs)
+
+- Reconcile `Webhook.check_tolerance/2 tolerance: 0` semantics inside v1.5
+  scope
