@@ -35,6 +35,9 @@ defmodule LatticeStripe.DocsTruthTest do
     assert "guides/metering.md" in groups["Canonical Guides"]
     assert "guides/connect.md" in groups["Canonical Guides"]
     assert "guides/webhooks.md" in groups["Operations & DX"]
+    # D-03 sub-decision 3C — new v1.5 trust rail extension to Operations & DX
+    assert "guides/webhooks-thin-events.md" in extras
+    assert "guides/webhooks-thin-events.md" in groups["Operations & DX"]
     assert "guides/testing.md" in groups["Operations & DX"]
     assert "guides/error-handling.md" in groups["Operations & DX"]
   end
@@ -182,6 +185,82 @@ defmodule LatticeStripe.DocsTruthTest do
 
     assert changelog =~ "WEBFIX-01"
     assert changelog =~ ~r/##\s*\[?1\.5/
+  end
+
+  test "webhooks-thin-events guide locks the thin-event adopter contract" do
+    guide = File.read!("guides/webhooks-thin-events.md")
+
+    # Function names — the helper surface the guide teaches
+    assert guide =~ "parse_event_notification"
+    assert guide =~ "fetch_event"
+    assert guide =~ "fetch_related_object"
+
+    # Verify-error atoms — locks the verification-vs-payload-shape failure boundary
+    assert guide =~ ":no_matching_signature"
+    assert guide =~ ":timestamp_expired"
+    # Typed-error footguns specific to thin-event helpers
+    assert guide =~ ":no_related_object"
+    assert guide =~ ":unknown_object_type"
+
+    # Rate-limit phrasing — both substrings required (REQUIREMENTS.md GUIDE-03)
+    assert guide =~ "100 req/s"
+    assert guide =~ "90/s"
+
+    # Idempotency anchor (GUIDE-03)
+    assert guide =~ "event.id"
+
+    # Connect routing anchor (GUIDE-03)
+    assert guide =~ "event.context"
+
+    # Canonical truth anchor (Phase 44 D-14)
+    assert guide =~ "Webhooks confirm"
+
+    # Canonical surface name
+    assert guide =~ "/v2/events"
+
+    # Verification-vs-payload-shape failure boundary phrasing (GUIDE-03)
+    assert guide =~ "verification"
+    assert guide =~ "payload shape"
+  end
+
+  test "webhooks-thin-events guide is the v1.5 install-line canary" do
+    # B2 canary architecture (CONTEXT.md D-03 sub-decision 3B): this guide
+    # is the ONLY 1.5-only doc until release prep flips README/getting-started/
+    # cheatsheet. Existing tests at lines 54, 61, 165 still assert `~> 1.3`
+    # for the other docs — when v1.5 is released and someone does the cross-
+    # cutting lockstep flip, those tests fail first, naturally enforcing the
+    # rule without coupling the install-line refresh to Phase 48.
+    guide = File.read!("guides/webhooks-thin-events.md")
+    assert guide =~ "{:lattice_stripe, \"~> 1.5\"}"
+  end
+
+  test "webhooks-thin-events guide is cross-linked from README/JTBD/webhooks.md" do
+    # D-03 sub-decision 3D cross-link graph: the new v1.5 guide must be
+    # reachable from README hardening-ops route, JTBD Start Here Runtime
+    # route + Job 7 Read next, AND linked back from the parent webhooks.md
+    # guide. Forward edges from the new guide (webhooks.md / testing.md /
+    # error-handling.md) are locked here in lockstep. Drift in any of these
+    # surfaces fails CI and is the canonical signal that a discovery wire
+    # snapped silently.
+
+    # Forward links FROM the new guide
+    thin = File.read!("guides/webhooks-thin-events.md")
+    assert thin =~ "webhooks.md"
+    assert thin =~ "testing.md"
+    assert thin =~ "error-handling.md"
+
+    # Reverse link from parent webhook guide
+    webhooks = File.read!("guides/webhooks.md")
+    assert webhooks =~ "webhooks-thin-events.md"
+    assert webhooks =~ "thin event"  # locks the new "Thin events (/v2/events)" closing section in webhooks.md
+
+    # README discovery route
+    readme = File.read!("README.md")
+    assert readme =~ "webhooks-thin-events.md"
+
+    # JTBD discovery ladder (Start Here Runtime route + Job 7 Read next)
+    jtbd = File.read!("guides/user-flows-and-jtbd.md")
+    assert jtbd =~ "webhooks-thin-events.md"
   end
 
   test "Webhook.Plug @moduledoc documents tolerance: 0 testing-only semantics" do
