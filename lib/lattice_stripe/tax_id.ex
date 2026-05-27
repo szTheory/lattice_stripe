@@ -107,7 +107,7 @@ defmodule LatticeStripe.TaxId do
   @spec create(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def create(%Client{} = client, customer_id, params, opts)
       when is_binary(customer_id) and is_map(params) and is_list(opts) do
-    params = Map.drop(params, ["customer"])
+    params = Map.drop(params, ["customer", :customer])
 
     %Request{
       method: :post,

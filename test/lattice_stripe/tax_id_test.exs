@@ -5,6 +5,7 @@ defmodule LatticeStripe.TaxIdTest do
   import LatticeStripe.TestHelpers
 
   alias LatticeStripe.{List, Response, TaxId}
+  alias LatticeStripe.TaxId.Verification
 
   setup :verify_on_exit!
 
@@ -69,6 +70,24 @@ defmodule LatticeStripe.TaxIdTest do
                  "type" => "eu_vat",
                  "value" => "DE123456789",
                  "customer" => "cus_should_be_stripped"
+               })
+    end
+
+    test "strips atom-key customer from body" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert req.url =~ "/v1/customers/cus_test123/tax_ids"
+        refute req.body =~ "customer="
+        ok_response(tax_id_json())
+      end)
+
+      assert {:ok, %TaxId{id: "txi_test123"}} =
+               TaxId.create(client, "cus_test123", %{
+                 "type" => "eu_vat",
+                 "value" => "DE123456789",
+                 customer: "cus_should_be_stripped"
                })
     end
   end
@@ -160,6 +179,36 @@ defmodule LatticeStripe.TaxIdTest do
 
       assert {:ok, %TaxId{id: "txi_test123", deleted: true}} =
                TaxId.delete(client, "cus_test123", "txi_test123")
+    end
+  end
+
+  describe "inspect" do
+    test "TaxId redacts value and nested verification PII" do
+      tax_id = %TaxId{
+        id: "txi_test123",
+        type: "eu_vat",
+        value: "DE123456789",
+        verification: %Verification{
+          status: :verified,
+          verified_name: "Acme GmbH",
+          verified_address: "Berlin, DE"
+        }
+      }
+
+      output = inspect(tax_id)
+
+      refute output =~ "DE123456789"
+      refute output =~ "Acme GmbH"
+      refute output =~ "Berlin, DE"
+      assert output =~ "[REDACTED]"
+      assert output =~ "status: :verified"
+    end
+
+    test "nil PII fields do not print [REDACTED]" do
+      tax_id = %TaxId{value: nil, verification: %Verification{verified_name: nil}}
+
+      output = inspect(tax_id)
+      refute output =~ "[REDACTED]"
     end
   end
 end
