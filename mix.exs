@@ -208,7 +208,9 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Webhook.Plug,
             LatticeStripe.Webhook.Handler,
             LatticeStripe.Webhook.SignatureVerificationError,
-            LatticeStripe.Event
+            LatticeStripe.Event,
+            LatticeStripe.EventNotification,
+            LatticeStripe.EventNotification.RelatedObject
           ],
           Telemetry: [
             LatticeStripe.Telemetry
