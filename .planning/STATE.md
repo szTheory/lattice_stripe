@@ -4,8 +4,8 @@ milestone: v1.9
 milestone_name: CI & Doc Honesty
 status: executing
 stopped_at: Phase 60 context gathered
-last_updated: "2026-05-27T22:39:07.290Z"
-last_activity: 2026-05-27 -- Phase 60 planning complete
+last_updated: "2026-05-27T22:40:46.079Z"
+last_activity: 2026-05-27 -- Phase 60 execution started
 progress:
   total_phases: 2
   completed_phases: 1
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-27 — milestone v1.9 started)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 59 — Checkout Guide README Truth
+**Current focus:** Phase 60 — ci-gate-milestone-close
 
 ## Current Position
 
-Phase: 60
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-27 -- Phase 60 planning complete
+Phase: 60 (ci-gate-milestone-close) — EXECUTING
+Plan: 01 complete — 02 next
+Status: Executing Phase 60
+Last activity: 2026-05-27 -- Phase 60 execution started
 
 ## Performance Metrics
 
@@ -46,18 +46,17 @@ Last activity: 2026-05-27 -- Phase 60 planning complete
 - **Done estimate ~92–94%** — remaining delta is doc/CI honesty, not foundational API gaps.
 - **checkout.md atom bug confirmed** — line 206 uses `"paid"` string vs SDK atom `:paid`.
 - **README error taxonomy drift** — lists `:auth_error`/`:server_error`; actual types are `:authentication_error`/`:api_error`.
-- **CI-01 still open** — paths-ignore on guides/** skips docs_truth on guide-only PRs; requires explicit workflow approval.
+- **CI-01 resolved** — paths-ignore narrowed to `.planning/**` only (Phase 60 Plan 1, 2026-05-27).
 - **JTBD-MAP hosted checkout rating overstated** — downgrade to Partial until checkout locked.
 - **No Hex bump** — v1.9 is doc-only like v1.8.
 
 ### Pending Todos
 
 - Define v1.9 requirements and roadmap
-- Await explicit approval before CI workflow edit (CI-01)
 
 ### Blockers/Concerns
 
-- CI-01 fix requires explicit approval before workflow edit
+- None — CI-01 shipped in Phase 60 Plan 1 (2026-05-27; maintainer approval per 60-CONTEXT.md D-01).
 
 ## Session Continuity
 
