@@ -78,7 +78,7 @@
 4. Untracked tax proof files are committed or dropped with documented rationale.
 5. Milestone audit checklist complete; STATE.md and PROJECT.md updated for close or next maintenance posture.
 
-**Plans:** TBD
+**Plans:** 1/5 plans complete
 
 ## Progress
 
@@ -86,12 +86,10 @@
 |-------|-----------|----------------|--------|-----------|
 | 56. Release Truth & Getting Started | v1.8 | 2/2 | Complete    | 2026-05-27 |
 | 57. Payments Guide & Charge Routing | v1.8 | 3/3 | Complete    | 2026-05-27 |
-| 58. Milestone Closure & Planning Truth | v1.8 | 0/? | Pending | — |
+| 58. Milestone Closure & Planning Truth | v1.8 | 1/5 | In Progress | — |
 
 ## Next Step
 
-**Phase 56: Release Truth & Getting Started** — fix getting-started release-status prose and docs_truth prose lock.
+**Phase 58 Plan 02** — MILESTONES.md cosmetic fixes (PLAN-01).
 
-`/gsd-discuss-phase 56` — gather context and clarify approach
-
-`/gsd-plan-phase 56` — skip discussion, plan directly
+`/gsd-execute-phase 58` — continue Phase 58 execution

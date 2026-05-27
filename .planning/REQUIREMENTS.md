@@ -23,7 +23,7 @@ Requirements for this milestone. Each maps to roadmap phases 56–58.
 
 - [x] **ROUTE-01**: Adopter following `guides/payments.md` discovers Charge list/search/update/capture for reconciliation workflows (PI-first narrative preserved).
 - [x] **ROUTE-02**: Adopter following operator guides (`production-checklist.md`, `event-debugging.md`) finds Charge update/capture guidance alongside list/search.
-- [ ] **ROUTE-03**: `.planning/JTBD-MAP.md` charge-reconciliation route reflects post-v1.8 doc routing (no false "payments guide gap" after fixes land).
+- [x] **ROUTE-03**: `.planning/JTBD-MAP.md` charge-reconciliation route reflects post-v1.8 doc routing (no false "payments guide gap" after fixes land).
 
 ### Verification
 
@@ -77,7 +77,7 @@ Deferred beyond v1.8. Tracked but not in current roadmap.
 | ROUTE-01 | Phase 57 | Complete |
 | ROUTE-02 | Phase 57 | Complete |
 | VERIFY-04 | Phase 57 | Complete |
-| ROUTE-03 | Phase 58 | Pending |
+| ROUTE-03 | Phase 58 | Complete |
 | PLAN-01 | Phase 58 | Pending |
 | PLAN-02 | Phase 58 | Pending |
 | PROOF-01 | Phase 58 | Pending |
