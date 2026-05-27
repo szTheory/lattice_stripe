@@ -41,6 +41,7 @@ defmodule LatticeStripe.ObjectTypes do
     "tax.settings" => LatticeStripe.Tax.Settings,
     "tax.transaction" => LatticeStripe.Tax.Transaction,
     "tax.transaction_line_item" => LatticeStripe.Tax.Transaction.LineItem,
+    "tax_id" => LatticeStripe.TaxId,
     "transfer" => LatticeStripe.Transfer,
     "transfer_reversal" => LatticeStripe.TransferReversal,
     "billing.meter" => LatticeStripe.Billing.Meter,

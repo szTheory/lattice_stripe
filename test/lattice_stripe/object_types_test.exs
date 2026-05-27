@@ -116,6 +116,12 @@ defmodule LatticeStripe.ObjectTypesTest do
       assert %LatticeStripe.Tax.Registration{id: "taxreg_123", status: :active} = result
     end
 
+    test "dispatches tax_id map to TaxId.from_map/1" do
+      map = %{"object" => "tax_id", "id" => "txi_123", "type" => "eu_vat"}
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.TaxId{id: "txi_123"} = result
+    end
+
     test "dispatches quote map to Quote.from_map/1" do
       map = %{"object" => "quote", "id" => "qt_123", "status" => "draft"}
       result = ObjectTypes.maybe_deserialize(map)
@@ -193,6 +199,14 @@ defmodule LatticeStripe.ObjectTypesTest do
 
     test "returns :error for an empty string" do
       assert ObjectTypes.fetch_module("") == :error
+    end
+
+    test "resolves all five Tax family object types" do
+      assert ObjectTypes.fetch_module("tax.calculation") == {:ok, LatticeStripe.Tax.Calculation}
+      assert ObjectTypes.fetch_module("tax.transaction") == {:ok, LatticeStripe.Tax.Transaction}
+      assert ObjectTypes.fetch_module("tax.settings") == {:ok, LatticeStripe.Tax.Settings}
+      assert ObjectTypes.fetch_module("tax.registration") == {:ok, LatticeStripe.Tax.Registration}
+      assert ObjectTypes.fetch_module("tax_id") == {:ok, LatticeStripe.TaxId}
     end
   end
 end
