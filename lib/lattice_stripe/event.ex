@@ -38,14 +38,17 @@ defmodule LatticeStripe.Event do
   """
 
   alias LatticeStripe.{Client, Error, List, Request, Resource, Response}
+  alias LatticeStripe.EventNotification.RelatedObject
 
   # Known top-level fields from the Stripe Event object.
   # Used to build the struct and separate known from extra (unknown) fields.
   # String sigil (no `a`) matches Jason's default string-key output.
   # Includes `context` — newer Stripe field (added in the 2022-11-15+ API era).
+  # Includes `related_object` — populated on v2-fetched events (`/v2/core/events/{id}`),
+  # `nil` on snapshot v1 events (Phase 47 D-02 / THIN-04).
   @known_fields ~w[
     id object account api_version context created data livemode
-    pending_webhooks request type
+    pending_webhooks request type related_object
   ]
 
   defstruct [
@@ -57,6 +60,7 @@ defmodule LatticeStripe.Event do
     :data,
     :livemode,
     :pending_webhooks,
+    :related_object,
     :request,
     :type,
     object: "event",
@@ -82,6 +86,10 @@ defmodule LatticeStripe.Event do
   - `pending_webhooks` - Number of webhook endpoints yet to receive this event
   - `request` - Original request that triggered the event (raw map), or `nil`
   - `account` - Connected account ID for Connect events, or `nil`
+  - `related_object` - `%LatticeStripe.EventNotification.RelatedObject{}` reference,
+    populated on events fetched from `/v2/core/events/{id}` (via
+    `LatticeStripe.Webhook.fetch_event/3`). `nil` on snapshot v1 events delivered
+    through `LatticeStripe.Webhook.construct_event/4`.
   - `extra` - Any unknown fields from the Stripe response
   """
   @type t :: %__MODULE__{
@@ -94,6 +102,7 @@ defmodule LatticeStripe.Event do
           data: map() | nil,
           livemode: boolean() | nil,
           pending_webhooks: integer() | nil,
+          related_object: RelatedObject.t() | nil,
           request: map() | nil,
           type: String.t() | nil,
           extra: map()
@@ -222,6 +231,7 @@ defmodule LatticeStripe.Event do
       data: map["data"],
       livemode: map["livemode"],
       pending_webhooks: map["pending_webhooks"],
+      related_object: RelatedObject.from_map(map["related_object"]),
       request: map["request"],
       type: map["type"],
       extra: Map.drop(map, @known_fields)

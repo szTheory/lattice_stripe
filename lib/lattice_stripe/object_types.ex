@@ -48,6 +48,17 @@ defmodule LatticeStripe.ObjectTypes do
   @doc false
   def object_map, do: @object_map
 
+  @doc """
+  Looks up the LatticeStripe module for a Stripe object type string.
+
+  Returns `{:ok, module}` for known types and `:error` for unknown types.
+  Used by `LatticeStripe.Webhook.fetch_related_object/3` to gate HTTP requests
+  behind dispatch-table membership (fail fast on unknown types — see Phase 47 D-05).
+  """
+  @spec fetch_module(String.t() | nil) :: {:ok, module()} | :error
+  def fetch_module(nil), do: :error
+  def fetch_module(type) when is_binary(type), do: Map.fetch(@object_map, type)
+
   @spec maybe_deserialize(map() | String.t() | nil) :: struct() | map() | String.t() | nil
   def maybe_deserialize(nil), do: nil
   def maybe_deserialize(val) when is_binary(val), do: val
