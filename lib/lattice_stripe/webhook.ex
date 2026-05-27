@@ -80,8 +80,11 @@ defmodule LatticeStripe.Webhook do
   alias LatticeStripe.Error
   alias LatticeStripe.Event
   alias LatticeStripe.EventNotification
+  alias LatticeStripe.EventNotification.RelatedObject
+  alias LatticeStripe.ObjectTypes
   alias LatticeStripe.Request
   alias LatticeStripe.Resource
+  alias LatticeStripe.Response
   alias LatticeStripe.Webhook.SignatureVerificationError
 
   @type secret :: String.t() | [String.t(), ...]
@@ -360,6 +363,135 @@ defmodule LatticeStripe.Webhook do
         raise %Error{
           type: :invalid_request_error,
           message: "EventNotification id is nil"
+        }
+    end
+  end
+
+  @doc """
+  Retrieves the typed underlying resource referenced by a thin-event notification's
+  `related_object`.
+
+  Looks up the LatticeStripe module for `notification.related_object.type` via
+  `LatticeStripe.ObjectTypes.fetch_module/1` **before** issuing any HTTP request
+  (Phase 47 D-05 fail-fast contract). On a known type, issues a GET against the
+  `notification.related_object.url` (Stripe ships the path verbatim) and decodes
+  the response through `ObjectTypes.maybe_deserialize/1`.
+
+  ## Typed-error contract (Phase 47 D-05 + D-07)
+
+  - `{:error, {:unknown_object_type, type}}` — `related_object.type` is not in
+    `LatticeStripe.ObjectTypes.@object_map`. Stripe shipped a new resource type;
+    opening a PR to add the module to the dispatch table resolves this. No HTTP
+    request is issued in this case.
+  - `{:error, :no_related_object}` — `notification.related_object == nil`
+    (snapshot-style v2 events). Adopters should call `fetch_event/3` to retrieve
+    the full `%Event{}` instead.
+  - `{:error, %LatticeStripe.Error{}}` — standard HTTP failure (4xx/5xx,
+    connection error, etc.).
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct (passed explicitly per D-04 —
+    the notification carries no embedded credential material)
+  - `notification` - An `%EventNotification{}` returned by
+    `parse_event_notification/4`
+  - `opts` - Per-request overrides:
+    - `:expand` - list of paths to expand inline; reuses v1.2 expand machinery
+      via `Client.request/2`
+    - `:api_version` - per-request Stripe API version override
+    - `:idempotency_key` - per-request idempotency key
+
+  ## Returns
+
+  - `{:ok, struct()}` - typed resource decoded via `ObjectTypes.maybe_deserialize/1`
+  - `{:error, %LatticeStripe.Error{} | {:unknown_object_type, String.t()} | :no_related_object}`
+
+  ## Example
+
+      case Webhook.parse_event_notification(payload, sig_header, secret) do
+        {:ok, %EventNotification{
+           related_object: %RelatedObject{type: "customer"}
+         } = notif} ->
+          {:ok, %LatticeStripe.Customer{} = customer} =
+            Webhook.fetch_related_object(client, notif)
+
+          handle_customer_event(customer)
+
+        {:ok, %EventNotification{related_object: nil} = notif} ->
+          # No related object — fetch the full event instead.
+          {:ok, %Event{}} = Webhook.fetch_event(client, notif)
+
+        {:error, reason} ->
+          Logger.error("verify failed: \#{inspect(reason)}")
+      end
+  """
+  @spec fetch_related_object(Client.t(), EventNotification.t(), keyword()) ::
+          {:ok, struct() | map()}
+          | {:error, Error.t() | {:unknown_object_type, String.t()} | :no_related_object}
+  # D-07: nil-related-object case returns typed error WITHOUT calling
+  # ObjectTypes.fetch_module/1 or Client.request/2.
+  def fetch_related_object(%Client{} = _client, %EventNotification{related_object: nil}, _opts),
+    do: {:error, :no_related_object}
+
+  # D-05: typed-error gate BEFORE any HTTP request. Unknown types short-circuit
+  # to {:error, {:unknown_object_type, type}} — Mox expectation count = 0.
+  def fetch_related_object(
+        %Client{} = client,
+        %EventNotification{related_object: %RelatedObject{type: type, url: url}},
+        opts
+      ) do
+    case ObjectTypes.fetch_module(type) do
+      {:ok, _module} ->
+        %Request{method: :get, path: url, params: %{}, opts: opts}
+        |> then(&Client.request(client, &1))
+        |> case do
+          {:ok, %Response{data: raw}} -> {:ok, ObjectTypes.maybe_deserialize(raw)}
+          {:error, %Error{}} = error -> error
+        end
+
+      :error ->
+        {:error, {:unknown_object_type, type}}
+    end
+  end
+
+  # 2-arity convenience: default opts to [].
+  @spec fetch_related_object(Client.t(), EventNotification.t()) ::
+          {:ok, struct() | map()}
+          | {:error, Error.t() | {:unknown_object_type, String.t()} | :no_related_object}
+  def fetch_related_object(%Client{} = client, %EventNotification{} = notif),
+    do: fetch_related_object(client, notif, [])
+
+  @doc """
+  Like `fetch_related_object/3` but raises on failure.
+
+  Collapses all error paths into `LatticeStripe.Error` for consistent exception
+  semantics:
+
+  - `{:error, %Error{}}` → raises the Error verbatim
+  - `{:error, {:unknown_object_type, type}}` → raises
+    `%Error{type: :invalid_request_error, message: "Unknown Stripe object type: \#{type}"}`
+  - `{:error, :no_related_object}` → raises
+    `%Error{type: :invalid_request_error, message: "EventNotification has no related_object"}`
+  """
+  @spec fetch_related_object!(Client.t(), EventNotification.t(), keyword()) :: struct() | map()
+  def fetch_related_object!(%Client{} = client, %EventNotification{} = notif, opts \\ []) do
+    case fetch_related_object(client, notif, opts) do
+      {:ok, obj} ->
+        obj
+
+      {:error, %Error{} = err} ->
+        raise err
+
+      {:error, {:unknown_object_type, type}} ->
+        raise %Error{
+          type: :invalid_request_error,
+          message: "Unknown Stripe object type: #{type}"
+        }
+
+      {:error, :no_related_object} ->
+        raise %Error{
+          type: :invalid_request_error,
+          message: "EventNotification has no related_object"
         }
     end
   end
