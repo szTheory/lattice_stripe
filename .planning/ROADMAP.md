@@ -58,19 +58,17 @@
 5. Milestone audit checklist complete; STATE.md and PROJECT.md updated for close or maintenance posture.
 6. No Hex version bump (doc-only milestone).
 
-**Plans:** 0 plans
+**Plans:** 0/2 plans (60-01 CI-01, 60-02 JTBD-01 + milestone close)
 
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 59. Checkout Guide & README Truth | v1.9 | 2/2 | Complete    | 2026-05-27 |
-| 60. CI Gate & Milestone Close | v1.9 | 0/? | Pending | — |
+| 60. CI Gate & Milestone Close | v1.9 | 0/2 | Planned | — |
 
 ## Next Step
 
-**Phase 59: Checkout Guide & README Truth** — Fix checkout.md atom status bug + callout; fix README error taxonomy; extend docs_truth locks.
+**Phase 60: CI Gate & Milestone Close** — Execute Plan 60-01 (CI paths-ignore) then 60-02 (JTBD-MAP + v1.9 close).
 
-`/gsd-discuss-phase 59` — gather context and clarify approach
-
-Also: `/gsd-plan-phase 59` — skip discussion, plan directly
+`/gsd-execute-phase 60`
