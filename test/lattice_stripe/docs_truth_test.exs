@@ -172,13 +172,16 @@ defmodule LatticeStripe.DocsTruthTest do
   test "readme release block and hexdocs clusters reflect v1.7 surface" do
     readme = File.read!("README.md")
 
-    assert readme =~ "1.7"
+    assert readme =~ current_release_line()
     assert readme =~ "hexdocs.pm/lattice_stripe/tax.html"
     assert readme =~ "LatticeStripe.Charge.html"
     assert readme =~ "webhooks-thin-events.md"
     assert readme =~ "production-checklist.md"
     assert readme =~ "event-debugging.md"
-    refute readme =~ "1.3.x` line is the current published"
+
+    for claim <- @stale_release_status_claims do
+      refute readme =~ claim, "stale release claim #{inspect(claim)} in README"
+    end
   end
 
   test "jtbd and recipes stay task-first routing layers into canonical guides" do
