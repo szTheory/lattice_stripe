@@ -10,6 +10,8 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
+**Active milestone:** v1.6 Tax — Phase 49 (Tax Calculation & Transaction Core) complete 2026-05-27. Next: Phase 50 (Settings & Registration).
+
 **Latest shipped milestone:** v1.5 Thin-Event Webhooks (archived 2026-05-27)
 
 **What shipped in v1.5:**
@@ -86,6 +88,7 @@ After v1.7, expect to publicly call the library "done for v1.x scope" absent fre
 
 ### Validated
 
+- ✓ Tax Calculation & Transaction core (CALC-01..03, TXN-01..04, DX-03) — Phase 49, v1.6
 - ✓ Production-grade transport, retry, pagination, telemetry foundation — v1.0
 - ✓ Payments, Checkout, SetupIntents, Refunds, webhooks — v1.0
 - ✓ Billing core (Invoice, Subscription, SubscriptionSchedule, SubscriptionItem) — v1.0
@@ -154,4 +157,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 — Milestone v1.6 kickoff*
+*Last updated: 2026-05-27 — Phase 49 Tax Calculation & Transaction Core complete*
