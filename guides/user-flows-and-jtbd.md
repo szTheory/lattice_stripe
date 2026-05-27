@@ -91,7 +91,7 @@ Use this guide as a routing layer, not as the final source of API truth.
   [Quote to Billing Operator Flow](quote-to-billing-operator.md), [Invoices](invoices.md),
   [Subscriptions](subscriptions.md), [Webhooks](webhooks.md)
 - **Runtime truth, support, and debugging**:
-  [Webhooks](webhooks.md), [Error Handling](error-handling.md), [Testing](testing.md)
+  [Webhooks](webhooks.md), [Error Handling](error-handling.md), [Testing](testing.md), [Webhooks: Thin Events](webhooks-thin-events.md)
 
 ## The Jobs This Library Already Serves Well
 
@@ -336,6 +336,7 @@ Read next:
 - [Circuit Breaker](circuit-breaker.md)
 - [Performance](performance.md)
 - [Webhooks](webhooks.md)
+- [Webhooks: Thin Events](webhooks-thin-events.md)
 
 ## Which Path Should You Choose?
 
