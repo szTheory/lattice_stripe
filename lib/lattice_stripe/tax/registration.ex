@@ -141,7 +141,7 @@ defmodule LatticeStripe.Tax.Registration do
   @doc "Like `update/4` but raises on failure."
   @spec update!(Client.t(), String.t(), map(), keyword()) :: t()
   def update!(%Client{} = client, id, params, opts \\ [])
-             when is_binary(id) and is_map(params) do
+      when is_binary(id) and is_map(params) do
     update(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 

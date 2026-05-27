@@ -197,9 +197,10 @@ defmodule LatticeStripe.BalanceTransaction do
       net: known["net"],
       reporting_category: known["reporting_category"],
       source:
-        (if is_map(known["source"]),
-           do: ObjectTypes.maybe_deserialize(known["source"]),
-           else: known["source"]),
+        if(is_map(known["source"]),
+          do: ObjectTypes.maybe_deserialize(known["source"]),
+          else: known["source"]
+        ),
       status: atomize_status(known["status"]),
       type: atomize_type(known["type"]),
       extra: extra
@@ -211,28 +212,28 @@ defmodule LatticeStripe.BalanceTransaction do
   # ---------------------------------------------------------------------------
 
   defp atomize_status("available"), do: :available
-  defp atomize_status("pending"),   do: :pending
-  defp atomize_status(other),       do: other
+  defp atomize_status("pending"), do: :pending
+  defp atomize_status(other), do: other
 
-  defp atomize_type("charge"),                         do: :charge
-  defp atomize_type("refund"),                         do: :refund
-  defp atomize_type("adjustment"),                     do: :adjustment
-  defp atomize_type("application_fee"),                do: :application_fee
-  defp atomize_type("application_fee_refund"),         do: :application_fee_refund
-  defp atomize_type("transfer"),                       do: :transfer
-  defp atomize_type("payment"),                        do: :payment
-  defp atomize_type("payment_refund"),                 do: :payment_refund
-  defp atomize_type("payout"),                         do: :payout
-  defp atomize_type("payout_cancel"),                  do: :payout_cancel
-  defp atomize_type("payout_failure"),                 do: :payout_failure
-  defp atomize_type("stripe_fee"),                     do: :stripe_fee
-  defp atomize_type("network_cost"),                   do: :network_cost
-  defp atomize_type("issuing_authorization_hold"),     do: :issuing_authorization_hold
-  defp atomize_type("issuing_authorization_release"),  do: :issuing_authorization_release
-  defp atomize_type("issuing_dispute"),                do: :issuing_dispute
-  defp atomize_type("issuing_transaction"),            do: :issuing_transaction
-  defp atomize_type("topup"),                          do: :topup
-  defp atomize_type("topup_reversal"),                 do: :topup_reversal
-  defp atomize_type("connect_collection_transfer"),    do: :connect_collection_transfer
-  defp atomize_type(other),                            do: other
+  defp atomize_type("charge"), do: :charge
+  defp atomize_type("refund"), do: :refund
+  defp atomize_type("adjustment"), do: :adjustment
+  defp atomize_type("application_fee"), do: :application_fee
+  defp atomize_type("application_fee_refund"), do: :application_fee_refund
+  defp atomize_type("transfer"), do: :transfer
+  defp atomize_type("payment"), do: :payment
+  defp atomize_type("payment_refund"), do: :payment_refund
+  defp atomize_type("payout"), do: :payout
+  defp atomize_type("payout_cancel"), do: :payout_cancel
+  defp atomize_type("payout_failure"), do: :payout_failure
+  defp atomize_type("stripe_fee"), do: :stripe_fee
+  defp atomize_type("network_cost"), do: :network_cost
+  defp atomize_type("issuing_authorization_hold"), do: :issuing_authorization_hold
+  defp atomize_type("issuing_authorization_release"), do: :issuing_authorization_release
+  defp atomize_type("issuing_dispute"), do: :issuing_dispute
+  defp atomize_type("issuing_transaction"), do: :issuing_transaction
+  defp atomize_type("topup"), do: :topup
+  defp atomize_type("topup_reversal"), do: :topup_reversal
+  defp atomize_type("connect_collection_transfer"), do: :connect_collection_transfer
+  defp atomize_type(other), do: other
 end

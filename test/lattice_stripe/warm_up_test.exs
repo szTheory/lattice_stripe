@@ -13,6 +13,7 @@ defmodule LatticeStripe.WarmUpTest do
       transport: LatticeStripe.MockTransport,
       telemetry_enabled: false
     ]
+
     Client.new!(Keyword.merge(defaults, overrides))
   end
 

@@ -60,7 +60,11 @@ defmodule LatticeStripe.Builders.BillingPortal do
   @spec subscription_cancel(String.t(), keyword()) :: map()
   def subscription_cancel(subscription_id, opts \\ []) when is_binary(subscription_id) do
     sub_cancel = %{"subscription" => subscription_id}
-    sub_cancel = if opts[:retention], do: Map.put(sub_cancel, "retention", opts[:retention]), else: sub_cancel
+
+    sub_cancel =
+      if opts[:retention],
+        do: Map.put(sub_cancel, "retention", opts[:retention]),
+        else: sub_cancel
 
     base = %{"type" => "subscription_cancel", "subscription_cancel" => sub_cancel}
     maybe_after_completion(base, opts)
@@ -126,9 +130,17 @@ defmodule LatticeStripe.Builders.BillingPortal do
   def subscription_update_confirm(subscription_id, items, opts \\ [])
       when is_binary(subscription_id) and is_list(items) and items != [] do
     sub_confirm = %{"subscription" => subscription_id, "items" => items}
-    sub_confirm = if opts[:discounts], do: Map.put(sub_confirm, "discounts", opts[:discounts]), else: sub_confirm
 
-    base = %{"type" => "subscription_update_confirm", "subscription_update_confirm" => sub_confirm}
+    sub_confirm =
+      if opts[:discounts],
+        do: Map.put(sub_confirm, "discounts", opts[:discounts]),
+        else: sub_confirm
+
+    base = %{
+      "type" => "subscription_update_confirm",
+      "subscription_update_confirm" => sub_confirm
+    }
+
     maybe_after_completion(base, opts)
   end
 

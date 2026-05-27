@@ -29,12 +29,12 @@ defmodule LatticeStripe.Builders.SubscriptionScheduleTest do
         |> SSBuilder.start_date("now")
         |> SSBuilder.end_behavior(:release)
         |> SSBuilder.add_phase(
-             SSBuilder.phase_new()
-             |> SSBuilder.phase_items([%{"price" => "price_abc", "quantity" => 1}])
-             |> SSBuilder.phase_iterations(12)
-             |> SSBuilder.phase_proration_behavior(:create_prorations)
-             |> SSBuilder.phase_build()
-           )
+          SSBuilder.phase_new()
+          |> SSBuilder.phase_items([%{"price" => "price_abc", "quantity" => 1}])
+          |> SSBuilder.phase_iterations(12)
+          |> SSBuilder.phase_proration_behavior(:create_prorations)
+          |> SSBuilder.phase_build()
+        )
         |> SSBuilder.build()
 
       assert params["customer"] == "cus_123"
@@ -172,7 +172,8 @@ defmodule LatticeStripe.Builders.SubscriptionScheduleTest do
 
   describe "add_phase/2" do
     test "add_phase/2 accepts phase_build/1 output (plain map)" do
-      built_phase = SSBuilder.phase_new() |> SSBuilder.phase_iterations(1) |> SSBuilder.phase_build()
+      built_phase =
+        SSBuilder.phase_new() |> SSBuilder.phase_iterations(1) |> SSBuilder.phase_build()
 
       params =
         SSBuilder.new()

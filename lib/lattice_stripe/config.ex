@@ -42,7 +42,8 @@ defmodule LatticeStripe.Config do
             files_base_url: [
               type: :string,
               default: "https://files.stripe.com",
-              doc: "Stripe Files API base URL. Override for testing with stripe-mock (use same localhost:12111)."
+              doc:
+                "Stripe Files API base URL. Override for testing with stripe-mock (use same localhost:12111)."
             ],
             api_version: [
               type: :string,

@@ -458,7 +458,8 @@ defmodule LatticeStripe.PaymentIntentTest do
       pi = PaymentIntent.from_map(payment_intent_json())
       inspected = inspect(pi)
       assert inspected =~ "usd"
-      assert inspected =~ "requires_payment_method"  # atom :requires_payment_method renders as requires_payment_method
+      # atom :requires_payment_method renders as requires_payment_method
+      assert inspected =~ "requires_payment_method"
     end
 
     test "inspect output does NOT contain client_secret" do

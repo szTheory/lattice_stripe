@@ -94,8 +94,11 @@ defmodule LatticeStripe.Batch do
 
   defp validate_tasks(tasks) when is_list(tasks) do
     case Enum.find(tasks, &(not valid_mfa?(&1))) do
-      nil -> :ok
-      bad -> {:error, %Error{type: :invalid_request_error, message: "invalid task: #{inspect(bad)}"}}
+      nil ->
+        :ok
+
+      bad ->
+        {:error, %Error{type: :invalid_request_error, message: "invalid task: #{inspect(bad)}"}}
     end
   end
 

@@ -86,6 +86,7 @@ defmodule LatticeStripe.DisputeTest do
         assert String.ends_with?(req.url, "/v1/disputes/dp_test1234567890abc")
         assert req.body =~ "submit=false"
         assert req.body =~ "evidence[product_description]=Widget"
+
         ok_response(
           dispute_json(%{
             "evidence" => dispute_evidence_json(%{"product_description" => "Widget"})

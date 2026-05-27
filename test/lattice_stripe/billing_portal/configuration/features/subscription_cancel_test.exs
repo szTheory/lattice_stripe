@@ -45,6 +45,7 @@ defmodule LatticeStripe.BillingPortal.Configuration.Features.SubscriptionCancelT
       }
 
       result = SubscriptionCancel.from_map(map)
+
       assert result.cancellation_reason == %{
                "enabled" => true,
                "options" => ["customer_service", "low_quality", "missing_features"]

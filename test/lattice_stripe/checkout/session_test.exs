@@ -673,7 +673,11 @@ defmodule LatticeStripe.Checkout.SessionTest do
       session =
         Session.from_map(%{
           "id" => "cs_abc",
-          "customer" => %{"id" => "cus_abc", "object" => "customer", "email" => "test@example.com"}
+          "customer" => %{
+            "id" => "cus_abc",
+            "object" => "customer",
+            "email" => "test@example.com"
+          }
         })
 
       assert %LatticeStripe.Customer{id: "cus_abc"} = session.customer

@@ -109,7 +109,9 @@ defmodule LatticeStripe.SubscriptionTest do
     end
 
     test "atomizes collection_method to atom" do
-      sub = Subscription.from_map(Fixtures.basic(%{"collection_method" => "charge_automatically"}))
+      sub =
+        Subscription.from_map(Fixtures.basic(%{"collection_method" => "charge_automatically"}))
+
       assert sub.collection_method == :charge_automatically
     end
 

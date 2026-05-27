@@ -97,7 +97,10 @@ defmodule LatticeStripe.Tax.RegistrationTest do
       registration = Registration.from_map(basic())
 
       assert registration.status == :active
-      assert registration.country_options == %{"us" => %{"type" => "state_sales_tax", "state" => "CA"}}
+
+      assert registration.country_options == %{
+               "us" => %{"type" => "state_sales_tax", "state" => "CA"}
+             }
     end
   end
 end

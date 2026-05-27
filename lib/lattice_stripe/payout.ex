@@ -88,7 +88,16 @@ defmodule LatticeStripe.Payout do
   - [Reverse a payout](https://docs.stripe.com/api/payouts/reverse)
   """
 
-  alias LatticeStripe.{Client, Error, List, ObjectTypes, Payout.TraceId, Request, Resource, Response}
+  alias LatticeStripe.{
+    Client,
+    Error,
+    List,
+    ObjectTypes,
+    Payout.TraceId,
+    Request,
+    Resource,
+    Response
+  }
 
   # Known top-level fields from the Stripe Payout object (string sigil — matches
   # Jason's default string-key output).
@@ -403,20 +412,23 @@ defmodule LatticeStripe.Payout do
       arrival_date: known["arrival_date"],
       automatic: known["automatic"],
       balance_transaction:
-        (if is_map(known["balance_transaction"]),
-           do: ObjectTypes.maybe_deserialize(known["balance_transaction"]),
-           else: known["balance_transaction"]),
+        if(is_map(known["balance_transaction"]),
+          do: ObjectTypes.maybe_deserialize(known["balance_transaction"]),
+          else: known["balance_transaction"]
+        ),
       created: known["created"],
       currency: known["currency"],
       description: known["description"],
       destination:
-        (if is_map(known["destination"]),
-           do: ObjectTypes.maybe_deserialize(known["destination"]),
-           else: known["destination"]),
+        if(is_map(known["destination"]),
+          do: ObjectTypes.maybe_deserialize(known["destination"]),
+          else: known["destination"]
+        ),
       failure_balance_transaction:
-        (if is_map(known["failure_balance_transaction"]),
-           do: ObjectTypes.maybe_deserialize(known["failure_balance_transaction"]),
-           else: known["failure_balance_transaction"]),
+        if(is_map(known["failure_balance_transaction"]),
+          do: ObjectTypes.maybe_deserialize(known["failure_balance_transaction"]),
+          else: known["failure_balance_transaction"]
+        ),
       failure_code: known["failure_code"],
       failure_message: known["failure_message"],
       livemode: known["livemode"],
@@ -438,18 +450,18 @@ defmodule LatticeStripe.Payout do
   # Private: atomization helpers
   # ---------------------------------------------------------------------------
 
-  defp atomize_status("paid"),       do: :paid
-  defp atomize_status("pending"),    do: :pending
+  defp atomize_status("paid"), do: :paid
+  defp atomize_status("pending"), do: :pending
   defp atomize_status("in_transit"), do: :in_transit
-  defp atomize_status("canceled"),   do: :canceled
-  defp atomize_status("failed"),     do: :failed
-  defp atomize_status(other),        do: other
+  defp atomize_status("canceled"), do: :canceled
+  defp atomize_status("failed"), do: :failed
+  defp atomize_status(other), do: other
 
   defp atomize_type("bank_account"), do: :bank_account
-  defp atomize_type("card"),         do: :card
-  defp atomize_type(other),          do: other
+  defp atomize_type("card"), do: :card
+  defp atomize_type(other), do: other
 
   defp atomize_method("standard"), do: :standard
-  defp atomize_method("instant"),  do: :instant
-  defp atomize_method(other),      do: other
+  defp atomize_method("instant"), do: :instant
+  defp atomize_method(other), do: other
 end

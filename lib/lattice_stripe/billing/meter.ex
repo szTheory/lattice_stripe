@@ -275,9 +275,9 @@ defmodule LatticeStripe.Billing.Meter do
   # Private: atomization helpers
   # ---------------------------------------------------------------------------
 
-  defp atomize_status("active"),   do: :active
+  defp atomize_status("active"), do: :active
   defp atomize_status("inactive"), do: :inactive
-  defp atomize_status(other),      do: other
+  defp atomize_status(other), do: other
 
   @deprecated "Status is now automatically atomized in from_map/1. Access meter.status directly."
   @spec status_atom(t() | String.t() | nil) :: atom()

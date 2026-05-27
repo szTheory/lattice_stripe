@@ -616,18 +616,20 @@ defmodule LatticeStripe.Checkout.Session do
       custom_fields: known["custom_fields"],
       custom_text: known["custom_text"],
       customer:
-        (if is_map(known["customer"]),
-           do: ObjectTypes.maybe_deserialize(known["customer"]),
-           else: known["customer"]),
+        if(is_map(known["customer"]),
+          do: ObjectTypes.maybe_deserialize(known["customer"]),
+          else: known["customer"]
+        ),
       customer_creation: known["customer_creation"],
       customer_details: known["customer_details"],
       customer_email: known["customer_email"],
       discounts: known["discounts"],
       expires_at: known["expires_at"],
       invoice:
-        (if is_map(known["invoice"]),
-           do: ObjectTypes.maybe_deserialize(known["invoice"]),
-           else: known["invoice"]),
+        if(is_map(known["invoice"]),
+          do: ObjectTypes.maybe_deserialize(known["invoice"]),
+          else: known["invoice"]
+        ),
       invoice_creation: known["invoice_creation"],
       line_items: known["line_items"],
       livemode: known["livemode"],
@@ -635,9 +637,10 @@ defmodule LatticeStripe.Checkout.Session do
       metadata: known["metadata"],
       mode: atomize_mode(known["mode"]),
       payment_intent:
-        (if is_map(known["payment_intent"]),
-           do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
-           else: known["payment_intent"]),
+        if(is_map(known["payment_intent"]),
+          do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
+          else: known["payment_intent"]
+        ),
       payment_link: known["payment_link"],
       payment_method_collection: known["payment_method_collection"],
       payment_method_configuration_details: known["payment_method_configuration_details"],
@@ -649,9 +652,10 @@ defmodule LatticeStripe.Checkout.Session do
       redirect_on_completion: known["redirect_on_completion"],
       return_url: known["return_url"],
       setup_intent:
-        (if is_map(known["setup_intent"]),
-           do: ObjectTypes.maybe_deserialize(known["setup_intent"]),
-           else: known["setup_intent"]),
+        if(is_map(known["setup_intent"]),
+          do: ObjectTypes.maybe_deserialize(known["setup_intent"]),
+          else: known["setup_intent"]
+        ),
       shipping_address_collection: known["shipping_address_collection"],
       shipping_cost: known["shipping_cost"],
       shipping_details: known["shipping_details"],
@@ -659,9 +663,10 @@ defmodule LatticeStripe.Checkout.Session do
       status: atomize_status(known["status"]),
       submit_type: known["submit_type"],
       subscription:
-        (if is_map(known["subscription"]),
-           do: ObjectTypes.maybe_deserialize(known["subscription"]),
-           else: known["subscription"]),
+        if(is_map(known["subscription"]),
+          do: ObjectTypes.maybe_deserialize(known["subscription"]),
+          else: known["subscription"]
+        ),
       success_url: known["success_url"],
       tax_id_collection: known["tax_id_collection"],
       total_details: known["total_details"],
@@ -675,20 +680,20 @@ defmodule LatticeStripe.Checkout.Session do
   # Private: atomization helpers
   # ---------------------------------------------------------------------------
 
-  defp atomize_status("open"),     do: :open
+  defp atomize_status("open"), do: :open
   defp atomize_status("complete"), do: :complete
-  defp atomize_status("expired"),  do: :expired
-  defp atomize_status(other),      do: other
+  defp atomize_status("expired"), do: :expired
+  defp atomize_status(other), do: other
 
-  defp atomize_mode("payment"),      do: :payment
-  defp atomize_mode("setup"),        do: :setup
+  defp atomize_mode("payment"), do: :payment
+  defp atomize_mode("setup"), do: :setup
   defp atomize_mode("subscription"), do: :subscription
-  defp atomize_mode(other),          do: other
+  defp atomize_mode(other), do: other
 
-  defp atomize_payment_status("paid"),                do: :paid
-  defp atomize_payment_status("unpaid"),              do: :unpaid
+  defp atomize_payment_status("paid"), do: :paid
+  defp atomize_payment_status("unpaid"), do: :unpaid
   defp atomize_payment_status("no_payment_required"), do: :no_payment_required
-  defp atomize_payment_status(other),                 do: other
+  defp atomize_payment_status(other), do: other
 end
 
 defimpl Inspect, for: LatticeStripe.Checkout.Session do

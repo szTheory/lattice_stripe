@@ -109,9 +109,10 @@ defmodule LatticeStripe.BankAccount do
       country: known["country"],
       currency: known["currency"],
       customer:
-        (if is_map(known["customer"]),
-           do: ObjectTypes.maybe_deserialize(known["customer"]),
-           else: known["customer"]),
+        if(is_map(known["customer"]),
+          do: ObjectTypes.maybe_deserialize(known["customer"]),
+          else: known["customer"]
+        ),
       default_for_currency: known["default_for_currency"],
       fingerprint: known["fingerprint"],
       last4: known["last4"],
@@ -126,12 +127,12 @@ defmodule LatticeStripe.BankAccount do
   # Private: atomization helpers
   # ---------------------------------------------------------------------------
 
-  defp atomize_status("new"),                 do: :new
-  defp atomize_status("validated"),           do: :validated
-  defp atomize_status("verified"),            do: :verified
+  defp atomize_status("new"), do: :new
+  defp atomize_status("validated"), do: :validated
+  defp atomize_status("verified"), do: :verified
   defp atomize_status("verification_failed"), do: :verification_failed
-  defp atomize_status("errored"),             do: :errored
-  defp atomize_status(other),                 do: other
+  defp atomize_status("errored"), do: :errored
+  defp atomize_status(other), do: other
 
   @doc "Alias for `cast/1`. Provided for callers that prefer the `from_map` naming."
   @spec from_map(map() | nil) :: t() | nil

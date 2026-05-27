@@ -34,9 +34,7 @@ defmodule LatticeStripe.Billing.MeterEventStreamTest do
 
     test "handles overrides in fixture" do
       session =
-        Session.from_map(
-          Metering.MeterEventStreamSession.basic(%{"livemode" => true})
-        )
+        Session.from_map(Metering.MeterEventStreamSession.basic(%{"livemode" => true}))
 
       assert session.livemode == true
       assert session.id == "mes_123"
@@ -73,10 +71,16 @@ defmodule LatticeStripe.Billing.MeterEventStreamTest do
   describe "create_session/2" do
     test "returns Session struct on 200", %{client: client} do
       expect(LatticeStripe.MockTransport, :request, fn %{
-                                                         url: "https://api.stripe.com/v2/billing/meter_event_session",
+                                                         url:
+                                                           "https://api.stripe.com/v2/billing/meter_event_session",
                                                          method: :post
                                                        } ->
-        {:ok, %{status: 200, headers: [], body: Jason.encode!(Metering.MeterEventStreamSession.basic())}}
+        {:ok,
+         %{
+           status: 200,
+           headers: [],
+           body: Jason.encode!(Metering.MeterEventStreamSession.basic())
+         }}
       end)
 
       assert {:ok, %Session{authentication_token: "tok_test_abc", expires_at: 1_712_346_578}} =
@@ -87,7 +91,13 @@ defmodule LatticeStripe.Billing.MeterEventStreamTest do
       expect(LatticeStripe.MockTransport, :request, fn %{headers: headers} = req ->
         assert req.url == "https://api.stripe.com/v2/billing/meter_event_session"
         assert {"authorization", "Bearer sk_test_123"} in headers
-        {:ok, %{status: 200, headers: [], body: Jason.encode!(Metering.MeterEventStreamSession.basic())}}
+
+        {:ok,
+         %{
+           status: 200,
+           headers: [],
+           body: Jason.encode!(Metering.MeterEventStreamSession.basic())
+         }}
       end)
 
       assert {:ok, %Session{}} = MeterEventStream.create_session(client)
@@ -96,7 +106,13 @@ defmodule LatticeStripe.Billing.MeterEventStreamTest do
     test "sends Content-Type application/json", %{client: client} do
       expect(LatticeStripe.MockTransport, :request, fn %{headers: headers} ->
         assert {"content-type", "application/json"} in headers
-        {:ok, %{status: 200, headers: [], body: Jason.encode!(Metering.MeterEventStreamSession.basic())}}
+
+        {:ok,
+         %{
+           status: 200,
+           headers: [],
+           body: Jason.encode!(Metering.MeterEventStreamSession.basic())
+         }}
       end)
 
       assert {:ok, %Session{}} = MeterEventStream.create_session(client)
@@ -105,7 +121,13 @@ defmodule LatticeStripe.Billing.MeterEventStreamTest do
     test "sends empty JSON body", %{client: client} do
       expect(LatticeStripe.MockTransport, :request, fn %{body: body} ->
         assert body == "{}"
-        {:ok, %{status: 200, headers: [], body: Jason.encode!(Metering.MeterEventStreamSession.basic())}}
+
+        {:ok,
+         %{
+           status: 200,
+           headers: [],
+           body: Jason.encode!(Metering.MeterEventStreamSession.basic())
+         }}
       end)
 
       assert {:ok, %Session{}} = MeterEventStream.create_session(client)
@@ -124,7 +146,8 @@ defmodule LatticeStripe.Billing.MeterEventStreamTest do
          }}
       end)
 
-      assert {:error, %Error{type: :invalid_request_error}} = MeterEventStream.create_session(client)
+      assert {:error, %Error{type: :invalid_request_error}} =
+               MeterEventStream.create_session(client)
     end
 
     test "returns connection error on transport failure", %{client: client} do
@@ -149,12 +172,18 @@ defmodule LatticeStripe.Billing.MeterEventStreamTest do
     end
 
     defp sample_events do
-      [%{"event_name" => "api_call", "payload" => %{"stripe_customer_id" => "cus_123", "value" => "1"}}]
+      [
+        %{
+          "event_name" => "api_call",
+          "payload" => %{"stripe_customer_id" => "cus_123", "value" => "1"}
+        }
+      ]
     end
 
     test "returns {:ok, %{}} on successful send", %{client: client} do
       expect(LatticeStripe.MockTransport, :request, fn %{
-                                                         url: "https://meter-events.stripe.com/v2/billing/meter_event_stream",
+                                                         url:
+                                                           "https://meter-events.stripe.com/v2/billing/meter_event_stream",
                                                          method: :post
                                                        } ->
         {:ok, %{status: 200, headers: [], body: "{}"}}

@@ -204,7 +204,13 @@ defmodule LatticeStripe.EventNotificationTest do
     end
 
     test "hides extra when empty" do
-      obj = RelatedObject.from_map(%{"id" => "cus_123", "type" => "customer", "url" => "/v1/customers/cus_123"})
+      obj =
+        RelatedObject.from_map(%{
+          "id" => "cus_123",
+          "type" => "customer",
+          "url" => "/v1/customers/cus_123"
+        })
+
       inspected = inspect(obj)
       refute inspected =~ "extra:"
     end

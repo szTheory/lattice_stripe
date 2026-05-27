@@ -392,9 +392,10 @@ defmodule LatticeStripe.SubscriptionSchedule do
       created: known["created"],
       current_phase: CurrentPhase.from_map(known["current_phase"]),
       customer:
-        (if is_map(known["customer"]),
+        if(is_map(known["customer"]),
           do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]),
+          else: known["customer"]
+        ),
       customer_account: known["customer_account"],
       default_settings: Phase.from_map(known["default_settings"]),
       end_behavior: atomize_end_behavior(known["end_behavior"]),
@@ -405,9 +406,10 @@ defmodule LatticeStripe.SubscriptionSchedule do
       released_subscription: known["released_subscription"],
       status: atomize_status(known["status"]),
       subscription:
-        (if is_map(known["subscription"]),
+        if(is_map(known["subscription"]),
           do: ObjectTypes.maybe_deserialize(known["subscription"]),
-          else: known["subscription"]),
+          else: known["subscription"]
+        ),
       test_clock: known["test_clock"],
       extra: extra
     }
@@ -418,15 +420,15 @@ defmodule LatticeStripe.SubscriptionSchedule do
   # ---------------------------------------------------------------------------
 
   defp atomize_status("not_started"), do: :not_started
-  defp atomize_status("active"),      do: :active
-  defp atomize_status("completed"),   do: :completed
-  defp atomize_status("released"),    do: :released
-  defp atomize_status("canceled"),    do: :canceled
-  defp atomize_status(other),         do: other
+  defp atomize_status("active"), do: :active
+  defp atomize_status("completed"), do: :completed
+  defp atomize_status("released"), do: :released
+  defp atomize_status("canceled"), do: :canceled
+  defp atomize_status(other), do: other
 
   defp atomize_end_behavior("release"), do: :release
-  defp atomize_end_behavior("cancel"),  do: :cancel
-  defp atomize_end_behavior(other),     do: other
+  defp atomize_end_behavior("cancel"), do: :cancel
+  defp atomize_end_behavior(other), do: other
 
   defp decode_phases(nil), do: nil
   defp decode_phases(phases) when is_list(phases), do: Enum.map(phases, &Phase.from_map/1)

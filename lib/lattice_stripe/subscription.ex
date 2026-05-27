@@ -471,14 +471,16 @@ defmodule LatticeStripe.Subscription do
       current_period_end: known["current_period_end"],
       current_period_start: known["current_period_start"],
       customer:
-        (if is_map(known["customer"]),
+        if(is_map(known["customer"]),
           do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]),
+          else: known["customer"]
+        ),
       days_until_due: known["days_until_due"],
       default_payment_method:
-        (if is_map(known["default_payment_method"]),
+        if(is_map(known["default_payment_method"]),
           do: ObjectTypes.maybe_deserialize(known["default_payment_method"]),
-          else: known["default_payment_method"]),
+          else: known["default_payment_method"]
+        ),
       default_source: known["default_source"],
       default_tax_rates: known["default_tax_rates"],
       description: known["description"],
@@ -488,9 +490,10 @@ defmodule LatticeStripe.Subscription do
       invoice_settings: known["invoice_settings"],
       items: decode_items(known["items"]),
       latest_invoice:
-        (if is_map(known["latest_invoice"]),
+        if(is_map(known["latest_invoice"]),
           do: ObjectTypes.maybe_deserialize(known["latest_invoice"]),
-          else: known["latest_invoice"]),
+          else: known["latest_invoice"]
+        ),
       livemode: known["livemode"],
       metadata: known["metadata"],
       next_pending_invoice_item_interval: known["next_pending_invoice_item_interval"],
@@ -499,16 +502,18 @@ defmodule LatticeStripe.Subscription do
       payment_settings: known["payment_settings"],
       pending_invoice_item_interval: known["pending_invoice_item_interval"],
       pending_setup_intent:
-        (if is_map(known["pending_setup_intent"]),
+        if(is_map(known["pending_setup_intent"]),
           do: ObjectTypes.maybe_deserialize(known["pending_setup_intent"]),
-          else: known["pending_setup_intent"]),
+          else: known["pending_setup_intent"]
+        ),
       pending_update: known["pending_update"],
       plan: known["plan"],
       quantity: known["quantity"],
       schedule:
-        (if is_map(known["schedule"]),
+        if(is_map(known["schedule"]),
           do: ObjectTypes.maybe_deserialize(known["schedule"]),
-          else: known["schedule"]),
+          else: known["schedule"]
+        ),
       start_date: known["start_date"],
       status: atomize_status(known["status"]),
       test_clock: known["test_clock"],
@@ -524,19 +529,19 @@ defmodule LatticeStripe.Subscription do
   # Private: atomization helpers
   # ---------------------------------------------------------------------------
 
-  defp atomize_status("incomplete"),         do: :incomplete
+  defp atomize_status("incomplete"), do: :incomplete
   defp atomize_status("incomplete_expired"), do: :incomplete_expired
-  defp atomize_status("trialing"),           do: :trialing
-  defp atomize_status("active"),             do: :active
-  defp atomize_status("past_due"),           do: :past_due
-  defp atomize_status("canceled"),           do: :canceled
-  defp atomize_status("unpaid"),             do: :unpaid
-  defp atomize_status("paused"),             do: :paused
-  defp atomize_status(other),                do: other
+  defp atomize_status("trialing"), do: :trialing
+  defp atomize_status("active"), do: :active
+  defp atomize_status("past_due"), do: :past_due
+  defp atomize_status("canceled"), do: :canceled
+  defp atomize_status("unpaid"), do: :unpaid
+  defp atomize_status("paused"), do: :paused
+  defp atomize_status(other), do: other
 
   defp atomize_collection_method("charge_automatically"), do: :charge_automatically
-  defp atomize_collection_method("send_invoice"),         do: :send_invoice
-  defp atomize_collection_method(other),                  do: other
+  defp atomize_collection_method("send_invoice"), do: :send_invoice
+  defp atomize_collection_method(other), do: other
 
   # Decode items field. Stripe returns `{"object" => "list", "data" => [...]}`.
   # Decode each element via SubscriptionItem.from_map/1 so `id` is preserved

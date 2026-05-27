@@ -21,7 +21,11 @@ defmodule LatticeStripe.Builders.BillingPortalTest do
     end
 
     test "subscription_cancel/2 with after_completion option includes after_completion key" do
-      after_completion = %{"type" => "redirect", "redirect" => %{"return_url" => "https://example.com"}}
+      after_completion = %{
+        "type" => "redirect",
+        "redirect" => %{"return_url" => "https://example.com"}
+      }
+
       flow = BPBuilder.subscription_cancel("sub_abc", after_completion: after_completion)
       assert flow["after_completion"] == after_completion
     end
@@ -69,8 +73,17 @@ defmodule LatticeStripe.Builders.BillingPortalTest do
 
     test "subscription_update_confirm/3 with after_completion option includes after_completion key" do
       items = [%{"id" => "si_abc"}]
-      after_completion = %{"type" => "redirect", "redirect" => %{"return_url" => "https://example.com"}}
-      flow = BPBuilder.subscription_update_confirm("sub_abc", items, after_completion: after_completion)
+
+      after_completion = %{
+        "type" => "redirect",
+        "redirect" => %{"return_url" => "https://example.com"}
+      }
+
+      flow =
+        BPBuilder.subscription_update_confirm("sub_abc", items,
+          after_completion: after_completion
+        )
+
       assert flow["after_completion"] == after_completion
     end
 

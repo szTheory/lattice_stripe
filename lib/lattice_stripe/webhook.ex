@@ -252,7 +252,8 @@ defmodule LatticeStripe.Webhook do
   """
   @spec parse_event_notification!(String.t(), String.t() | nil, secret(), keyword()) ::
           EventNotification.t()
-  def parse_event_notification!(payload, sig_header, secret, opts \\ []) when is_binary(payload) do
+  def parse_event_notification!(payload, sig_header, secret, opts \\ [])
+      when is_binary(payload) do
     case parse_event_notification(payload, sig_header, secret, opts) do
       {:ok, notif} -> notif
       {:error, reason} -> raise SignatureVerificationError, reason: reason

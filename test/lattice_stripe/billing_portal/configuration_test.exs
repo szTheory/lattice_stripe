@@ -126,7 +126,10 @@ defmodule LatticeStripe.BillingPortal.ConfigurationTest do
         )
       end)
 
-      assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{data: [%Configuration{id: "bpc_123"}]}}} =
+      assert {:ok,
+              %LatticeStripe.Response{
+                data: %LatticeStripe.List{data: [%Configuration{id: "bpc_123"}]}
+              }} =
                Configuration.list(client)
     end
 

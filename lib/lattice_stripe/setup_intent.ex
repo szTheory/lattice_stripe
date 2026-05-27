@@ -482,9 +482,10 @@ defmodule LatticeStripe.SetupIntent do
       client_secret: known["client_secret"],
       created: known["created"],
       customer:
-        (if is_map(known["customer"]),
+        if(is_map(known["customer"]),
           do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]),
+          else: known["customer"]
+        ),
       customer_account: known["customer_account"],
       description: known["description"],
       excluded_payment_method_types: known["excluded_payment_method_types"],
@@ -497,9 +498,10 @@ defmodule LatticeStripe.SetupIntent do
       next_action: known["next_action"],
       on_behalf_of: known["on_behalf_of"],
       payment_method:
-        (if is_map(known["payment_method"]),
+        if(is_map(known["payment_method"]),
           do: ObjectTypes.maybe_deserialize(known["payment_method"]),
-          else: known["payment_method"]),
+          else: known["payment_method"]
+        ),
       payment_method_configuration_details: known["payment_method_configuration_details"],
       payment_method_options: known["payment_method_options"],
       payment_method_types: known["payment_method_types"],
@@ -515,16 +517,16 @@ defmodule LatticeStripe.SetupIntent do
   # ---------------------------------------------------------------------------
 
   defp atomize_status("requires_payment_method"), do: :requires_payment_method
-  defp atomize_status("requires_confirmation"),   do: :requires_confirmation
-  defp atomize_status("requires_action"),         do: :requires_action
-  defp atomize_status("processing"),              do: :processing
-  defp atomize_status("canceled"),                do: :canceled
-  defp atomize_status("succeeded"),               do: :succeeded
-  defp atomize_status(other),                     do: other
+  defp atomize_status("requires_confirmation"), do: :requires_confirmation
+  defp atomize_status("requires_action"), do: :requires_action
+  defp atomize_status("processing"), do: :processing
+  defp atomize_status("canceled"), do: :canceled
+  defp atomize_status("succeeded"), do: :succeeded
+  defp atomize_status(other), do: other
 
   defp atomize_usage("off_session"), do: :off_session
-  defp atomize_usage("on_session"),  do: :on_session
-  defp atomize_usage(other),         do: other
+  defp atomize_usage("on_session"), do: :on_session
+  defp atomize_usage(other), do: other
 end
 
 defimpl Inspect, for: LatticeStripe.SetupIntent do

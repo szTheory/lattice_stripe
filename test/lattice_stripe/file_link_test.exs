@@ -88,6 +88,7 @@ defmodule LatticeStripe.FileLinkTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert String.contains?(req.url, "/v1/file_links")
+
         ok_response(%{
           "object" => "list",
           "data" => [Fixtures.FileLink.basic()],

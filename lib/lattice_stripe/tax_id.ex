@@ -181,7 +181,8 @@ defmodule LatticeStripe.TaxId do
   - `list(client, customer_id, params, opts)` — GET `/v1/customers/:customer_id/tax_ids`
   """
   @spec list(Client.t(), map(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
-  @spec list(Client.t(), String.t(), map(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
+  @spec list(Client.t(), String.t(), map(), keyword()) ::
+          {:ok, Response.t()} | {:error, Error.t()}
   def list(%Client{} = client, customer_id, params, opts)
       when is_binary(customer_id) and is_map(params) and is_list(opts) do
     %Request{

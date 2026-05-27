@@ -55,7 +55,9 @@ defmodule LatticeStripe.Drift do
       # New resources: object types in spec not in registry
       registered_types = Map.keys(object_map) |> MapSet.new()
       spec_types_set = Map.keys(schemas) |> MapSet.new()
-      new_resources = MapSet.difference(spec_types_set, registered_types) |> MapSet.to_list() |> Enum.sort()
+
+      new_resources =
+        MapSet.difference(spec_types_set, registered_types) |> MapSet.to_list() |> Enum.sort()
 
       result = %{
         drift_count: length(modules_with_drift),
@@ -83,7 +85,12 @@ defmodule LatticeStripe.Drift do
 
     module_sections =
       modules
-      |> Enum.map(fn %{module: mod, object_type: object_type, additions: additions, removals: removals} = entry ->
+      |> Enum.map(fn %{
+                       module: mod,
+                       object_type: object_type,
+                       additions: additions,
+                       removals: removals
+                     } = entry ->
         spec_types = Map.get(entry, :spec_types, %{})
 
         additions_lines =
@@ -115,7 +122,12 @@ defmodule LatticeStripe.Drift do
         ""
       end
 
-    parts = Enum.reject([header <> Enum.join(module_sections, "\n\n"), new_resources_section], &(&1 == ""))
+    parts =
+      Enum.reject(
+        [header <> Enum.join(module_sections, "\n\n"), new_resources_section],
+        &(&1 == "")
+      )
+
     Enum.join(parts, "\n")
   end
 

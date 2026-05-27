@@ -59,15 +59,20 @@ defmodule LatticeStripe.TelemetryTest do
   end
 
   defp rate_limited_response(reason) do
-    body = Jason.encode!(%{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}})
-    {:ok, %{
-      status: 429,
-      headers: [
-        {"stripe-rate-limited-reason", reason},
-        {"request-id", "req_rl_test"}
-      ],
-      body: body
-    }}
+    body =
+      Jason.encode!(%{
+        "error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}
+      })
+
+    {:ok,
+     %{
+       status: 429,
+       headers: [
+         {"stripe-rate-limited-reason", reason},
+         {"request-id", "req_rl_test"}
+       ],
+       body: body
+     }}
   end
 
   defp get_request(path \\ "/v1/customers/cus_123") do
@@ -1095,9 +1100,10 @@ defmodule LatticeStripe.TelemetryTest do
         rate_limited_response("too_many_requests")
       end)
 
-      log = capture_log(fn ->
-        Client.request(client, get_request())
-      end)
+      log =
+        capture_log(fn ->
+          Client.request(client, get_request())
+        end)
 
       assert log =~ "[warning]"
       assert log =~ "(rate_limited: too_many_requests)"

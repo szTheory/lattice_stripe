@@ -512,42 +512,48 @@ defmodule LatticeStripe.Charge do
       application_fee: known["application_fee"],
       application_fee_amount: known["application_fee_amount"],
       balance_transaction:
-        (if is_map(known["balance_transaction"]),
+        if(is_map(known["balance_transaction"]),
           do: ObjectTypes.maybe_deserialize(known["balance_transaction"]),
-          else: known["balance_transaction"]),
+          else: known["balance_transaction"]
+        ),
       billing_details: known["billing_details"],
       captured: known["captured"],
       created: known["created"],
       currency: known["currency"],
       customer:
-        (if is_map(known["customer"]),
+        if(is_map(known["customer"]),
           do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]),
+          else: known["customer"]
+        ),
       description: known["description"],
       destination:
-        (if is_map(known["destination"]),
+        if(is_map(known["destination"]),
           do: ObjectTypes.maybe_deserialize(known["destination"]),
-          else: known["destination"]),
+          else: known["destination"]
+        ),
       failure_code: known["failure_code"],
       failure_message: known["failure_message"],
       fraud_details: known["fraud_details"],
       invoice:
-        (if is_map(known["invoice"]),
+        if(is_map(known["invoice"]),
           do: ObjectTypes.maybe_deserialize(known["invoice"]),
-          else: known["invoice"]),
+          else: known["invoice"]
+        ),
       livemode: known["livemode"],
       metadata: known["metadata"],
       on_behalf_of: known["on_behalf_of"],
       outcome: known["outcome"],
       paid: known["paid"],
       payment_intent:
-        (if is_map(known["payment_intent"]),
+        if(is_map(known["payment_intent"]),
           do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
-          else: known["payment_intent"]),
+          else: known["payment_intent"]
+        ),
       payment_method:
-        (if is_map(known["payment_method"]),
+        if(is_map(known["payment_method"]),
           do: ObjectTypes.maybe_deserialize(known["payment_method"]),
-          else: known["payment_method"]),
+          else: known["payment_method"]
+        ),
       payment_method_details: known["payment_method_details"],
       receipt_email: known["receipt_email"],
       receipt_number: known["receipt_number"],
@@ -556,9 +562,10 @@ defmodule LatticeStripe.Charge do
       refunds: known["refunds"],
       review: known["review"],
       source_transfer:
-        (if is_map(known["source_transfer"]),
+        if(is_map(known["source_transfer"]),
           do: ObjectTypes.maybe_deserialize(known["source_transfer"]),
-          else: known["source_transfer"]),
+          else: known["source_transfer"]
+        ),
       statement_descriptor: known["statement_descriptor"],
       statement_descriptor_suffix: known["statement_descriptor_suffix"],
       status: atomize_status(known["status"]),
@@ -573,9 +580,9 @@ defmodule LatticeStripe.Charge do
   # ---------------------------------------------------------------------------
 
   defp atomize_status("succeeded"), do: :succeeded
-  defp atomize_status("pending"),   do: :pending
-  defp atomize_status("failed"),    do: :failed
-  defp atomize_status(other),       do: other
+  defp atomize_status("pending"), do: :pending
+  defp atomize_status("failed"), do: :failed
+  defp atomize_status(other), do: other
 end
 
 defimpl Inspect, for: LatticeStripe.Charge do

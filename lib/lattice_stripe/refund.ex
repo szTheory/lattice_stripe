@@ -375,9 +375,10 @@ defmodule LatticeStripe.Refund do
       amount: known["amount"],
       balance_transaction: known["balance_transaction"],
       charge:
-        (if is_map(known["charge"]),
+        if(is_map(known["charge"]),
           do: ObjectTypes.maybe_deserialize(known["charge"]),
-          else: known["charge"]),
+          else: known["charge"]
+        ),
       created: known["created"],
       currency: known["currency"],
       destination_details: known["destination_details"],
@@ -387,9 +388,10 @@ defmodule LatticeStripe.Refund do
       metadata: known["metadata"],
       next_action: known["next_action"],
       payment_intent:
-        (if is_map(known["payment_intent"]),
+        if(is_map(known["payment_intent"]),
           do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
-          else: known["payment_intent"]),
+          else: known["payment_intent"]
+        ),
       reason: known["reason"],
       receipt_number: known["receipt_number"],
       source_transfer_reversal: known["source_transfer_reversal"],
@@ -403,12 +405,12 @@ defmodule LatticeStripe.Refund do
   # Private: atomization helpers
   # ---------------------------------------------------------------------------
 
-  defp atomize_status("pending"),         do: :pending
+  defp atomize_status("pending"), do: :pending
   defp atomize_status("requires_action"), do: :requires_action
-  defp atomize_status("succeeded"),       do: :succeeded
-  defp atomize_status("failed"),          do: :failed
-  defp atomize_status("canceled"),        do: :canceled
-  defp atomize_status(other),             do: other
+  defp atomize_status("succeeded"), do: :succeeded
+  defp atomize_status("failed"), do: :failed
+  defp atomize_status("canceled"), do: :canceled
+  defp atomize_status(other), do: other
 end
 
 defimpl Inspect, for: LatticeStripe.Refund do

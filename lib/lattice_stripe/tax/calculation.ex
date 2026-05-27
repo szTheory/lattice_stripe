@@ -196,6 +196,9 @@ defmodule LatticeStripe.Tax.Calculation do
   defp parse_line_items(other), do: other
 
   defp parse_tax_breakdown(nil), do: nil
-  defp parse_tax_breakdown(items) when is_list(items), do: Enum.map(items, &TaxBreakdown.from_map/1)
+
+  defp parse_tax_breakdown(items) when is_list(items),
+    do: Enum.map(items, &TaxBreakdown.from_map/1)
+
   defp parse_tax_breakdown(other), do: other
 end

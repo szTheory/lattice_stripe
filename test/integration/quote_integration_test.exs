@@ -76,7 +76,9 @@ defmodule LatticeStripe.QuoteIntegrationTest do
     assert [%Quote{} | _] = Quote.stream!(client, %{"limit" => "5"}) |> Enum.take(1)
   end
 
-  test "finalize/pdf/accept records the current downstream boundary exactly once", %{client: client} do
+  test "finalize/pdf/accept records the current downstream boundary exactly once", %{
+    client: client
+  } do
     quote = create_quote!(client, %{"customer_email" => "quote-lifecycle@example.com"})
 
     {:ok, finalized} = Quote.finalize(client, quote.id, %{})
@@ -107,7 +109,9 @@ defmodule LatticeStripe.QuoteIntegrationTest do
     assert canceled.id == quote.id
   end
 
-  test "list_line_items/4 and stream_line_items!/4 return typed line item lists", %{client: client} do
+  test "list_line_items/4 and stream_line_items!/4 return typed line item lists", %{
+    client: client
+  } do
     quote = create_quote!(client, %{"customer_email" => "quote-lines@example.com"})
 
     {:ok, resp} = Quote.list_line_items(client, quote.id)
@@ -143,8 +147,12 @@ defmodule LatticeStripe.QuoteIntegrationTest do
 
   defp downstream_reference(quote) do
     cond do
-      is_binary(quote.invoice) -> {:invoice, quote.invoice}
-      is_binary(quote.subscription) -> {:subscription, quote.subscription}
+      is_binary(quote.invoice) ->
+        {:invoice, quote.invoice}
+
+      is_binary(quote.subscription) ->
+        {:subscription, quote.subscription}
+
       is_binary(quote.subscription_schedule) ->
         {:subscription_schedule, quote.subscription_schedule}
 

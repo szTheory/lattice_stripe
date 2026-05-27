@@ -99,6 +99,7 @@ defmodule LatticeStripe.FileTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert String.contains?(req.url, "/v1/files")
+
         ok_response(%{
           "object" => "list",
           "data" => [Fixtures.File.basic()],

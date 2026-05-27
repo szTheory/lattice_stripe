@@ -246,8 +246,11 @@ defmodule LatticeStripe.Billing.MeterEventStream do
 
   defp decode_error(client, status, body) do
     case client.json_codec.decode(body) do
-      {:ok, decoded} -> {:error, Error.from_response(status, decoded, nil)}
-      {:error, _} -> {:error, %Error{type: :api_error, status: status, message: "Non-JSON response"}}
+      {:ok, decoded} ->
+        {:error, Error.from_response(status, decoded, nil)}
+
+      {:error, _} ->
+        {:error, %Error{type: :api_error, status: status, message: "Non-JSON response"}}
     end
   end
 

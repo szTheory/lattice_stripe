@@ -141,12 +141,16 @@ defmodule LatticeStripe.Billing.MeterTest do
 
   describe "Meter.from_map/1 auto-atomizes status" do
     test "from_map/1 auto-atomizes status to :active" do
-      result = Meter.from_map(%{"id" => "mtr_123", "status" => "active", "object" => "billing.meter"})
+      result =
+        Meter.from_map(%{"id" => "mtr_123", "status" => "active", "object" => "billing.meter"})
+
       assert result.status == :active
     end
 
     test "from_map/1 auto-atomizes status to :inactive" do
-      result = Meter.from_map(%{"id" => "mtr_123", "status" => "inactive", "object" => "billing.meter"})
+      result =
+        Meter.from_map(%{"id" => "mtr_123", "status" => "inactive", "object" => "billing.meter"})
+
       assert result.status == :inactive
     end
 
@@ -167,12 +171,16 @@ defmodule LatticeStripe.Billing.MeterTest do
 
   describe "Meter.status_atom/1 (deprecated — backward compat)" do
     test "still returns :active from struct (via apply to suppress deprecation warning)" do
-      meter = Meter.from_map(%{"id" => "mtr_123", "status" => "active", "object" => "billing.meter"})
+      meter =
+        Meter.from_map(%{"id" => "mtr_123", "status" => "active", "object" => "billing.meter"})
+
       assert apply(Meter, :status_atom, [meter]) == :active
     end
 
     test "still returns :inactive from struct (via apply)" do
-      meter = Meter.from_map(%{"id" => "mtr_123", "status" => "inactive", "object" => "billing.meter"})
+      meter =
+        Meter.from_map(%{"id" => "mtr_123", "status" => "inactive", "object" => "billing.meter"})
+
       assert apply(Meter, :status_atom, [meter]) == :inactive
     end
 

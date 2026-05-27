@@ -180,6 +180,7 @@ defmodule LatticeStripe.Client do
   def request(%__MODULE__{} = client, %Request{} = req) do
     effective_api_key = Keyword.get(req.opts, :api_key, client.api_key)
     effective_api_version = Keyword.get(req.opts, :stripe_version, client.api_version)
+
     effective_timeout =
       case Keyword.fetch(req.opts, :timeout) do
         {:ok, t} ->
@@ -195,6 +196,7 @@ defmodule LatticeStripe.Client do
               client.timeout
           end
       end
+
     effective_stripe_account = Keyword.get(req.opts, :stripe_account, client.stripe_account)
     effective_max_retries = Keyword.get(req.opts, :max_retries, client.max_retries)
     expand = Keyword.get(req.opts, :expand, [])
@@ -282,7 +284,8 @@ defmodule LatticeStripe.Client do
 
   """
   @spec upload(t(), binary(), map(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
-  def upload(%__MODULE__{} = client, file_binary, params, opts \\ []) when is_binary(file_binary) do
+  def upload(%__MODULE__{} = client, file_binary, params, opts \\ [])
+      when is_binary(file_binary) do
     filename = Map.get(params, "filename", "upload")
     string_fields = Map.drop(params, ["filename"])
 
@@ -304,8 +307,13 @@ defmodule LatticeStripe.Client do
     effective_timeout = resolve_timeout(client, :upload, opts)
 
     headers =
-      build_headers(:post, effective_api_key, effective_api_version,
-                    effective_stripe_account, idempotency_key)
+      build_headers(
+        :post,
+        effective_api_key,
+        effective_api_version,
+        effective_stripe_account,
+        idempotency_key
+      )
       |> replace_content_type("multipart/form-data; boundary=#{boundary}")
 
     transport_opts = [finch: client.finch, timeout: effective_timeout]
@@ -321,7 +329,13 @@ defmodule LatticeStripe.Client do
     upload_req = %Request{method: :post, path: "/v1/files", params: params, opts: opts}
 
     LatticeStripe.Telemetry.request_span(client, upload_req, idempotency_key, fn ->
-      do_request_with_retries(client, transport_request, :post, idempotency_key, effective_max_retries)
+      do_request_with_retries(
+        client,
+        transport_request,
+        :post,
+        idempotency_key,
+        effective_max_retries
+      )
     end)
   end
 
@@ -362,8 +376,7 @@ defmodule LatticeStripe.Client do
     url = client.base_url <> path
 
     headers =
-      build_headers(:get, effective_api_key, effective_api_version,
-                    effective_stripe_account, nil)
+      build_headers(:get, effective_api_key, effective_api_version, effective_stripe_account, nil)
 
     transport_opts = [finch: client.finch, timeout: effective_timeout]
 
@@ -610,7 +623,8 @@ defmodule LatticeStripe.Client do
         request_id = extract_request_id(resp_headers)
 
         if status in 200..299 do
-          {:ok, %Response{data: body, status: status, headers: resp_headers, request_id: request_id}}
+          {:ok,
+           %Response{data: body, status: status, headers: resp_headers, request_id: request_id}}
         else
           decode_response(client, status, resp_headers, body, %{}, [])
         end

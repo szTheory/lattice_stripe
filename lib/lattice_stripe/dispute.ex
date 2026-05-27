@@ -22,7 +22,17 @@ defmodule LatticeStripe.Dispute do
   """
 
   alias LatticeStripe.Dispute.{Evidence, EvidenceDetails, PaymentMethodDetails}
-  alias LatticeStripe.{BalanceTransaction, Client, Error, List, ObjectTypes, Request, Resource, Response}
+
+  alias LatticeStripe.{
+    BalanceTransaction,
+    Client,
+    Error,
+    List,
+    ObjectTypes,
+    Request,
+    Resource,
+    Response
+  }
 
   @known_fields ~w[
     id object amount balance_transactions charge created currency

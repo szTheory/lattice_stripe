@@ -41,9 +41,13 @@ defmodule LatticeStripe.Billing.MeterEventStreamIntegrationTest do
     ]
 
     assert {:ok, _} =
-             MeterEventStream.send_events(client, %Session{
-               authentication_token: token,
-               expires_at: System.system_time(:second) + 900
-             }, events)
+             MeterEventStream.send_events(
+               client,
+               %Session{
+                 authentication_token: token,
+                 expires_at: System.system_time(:second) + 900
+               },
+               events
+             )
   end
 end

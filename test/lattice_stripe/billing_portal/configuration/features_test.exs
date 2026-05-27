@@ -2,12 +2,14 @@ defmodule LatticeStripe.BillingPortal.Configuration.FeaturesTest do
   use ExUnit.Case, async: true
 
   alias LatticeStripe.BillingPortal.Configuration.Features
+
   alias LatticeStripe.BillingPortal.Configuration.Features.{
     CustomerUpdate,
     PaymentMethodUpdate,
     SubscriptionCancel,
     SubscriptionUpdate
   }
+
   alias LatticeStripe.Test.Fixtures.BillingPortal
 
   describe "from_map/1" do

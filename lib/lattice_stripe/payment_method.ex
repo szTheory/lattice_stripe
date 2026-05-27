@@ -525,9 +525,10 @@ defmodule LatticeStripe.PaymentMethod do
       created: map["created"],
       livemode: map["livemode"],
       customer:
-        (if is_map(map["customer"]),
-           do: ObjectTypes.maybe_deserialize(map["customer"]),
-           else: map["customer"]),
+        if(is_map(map["customer"]),
+          do: ObjectTypes.maybe_deserialize(map["customer"]),
+          else: map["customer"]
+        ),
       metadata: map["metadata"],
       allow_redisplay: map["allow_redisplay"],
       billing_details: map["billing_details"],

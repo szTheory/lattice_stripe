@@ -131,11 +131,12 @@ defmodule LatticeStripe.Error do
         %__MODULE__{
           type: parsed_type,
           code: Map.get(error_map, "code"),
-          message: maybe_enrich_message(
-            parsed_type,
-            Map.get(error_map, "message"),
-            Map.get(error_map, "param")
-          ),
+          message:
+            maybe_enrich_message(
+              parsed_type,
+              Map.get(error_map, "message"),
+              Map.get(error_map, "param")
+            ),
           param: Map.get(error_map, "param"),
           decline_code: Map.get(error_map, "decline_code"),
           charge: Map.get(error_map, "charge"),
@@ -256,15 +257,13 @@ defmodule LatticeStripe.Error do
 
   # Build global param candidate list from all resource module struct keys at compile time.
   # Struct keys mirror @known_fields in every resource module.
-  @all_resource_known_fields (
-    Enum.flat_map(@all_resource_modules, fn mod ->
-      mod.__struct__()
-      |> Map.keys()
-      |> Enum.reject(&(&1 == :__struct__))
-      |> Enum.map(&Atom.to_string/1)
-    end)
-    |> Enum.uniq()
-  )
+  @all_resource_known_fields Enum.flat_map(@all_resource_modules, fn mod ->
+                               mod.__struct__()
+                               |> Map.keys()
+                               |> Enum.reject(&(&1 == :__struct__))
+                               |> Enum.map(&Atom.to_string/1)
+                             end)
+                             |> Enum.uniq()
 
   # Collect all field names across all resource modules for fuzzy matching.
   defp all_known_fields, do: @all_resource_known_fields

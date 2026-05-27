@@ -85,7 +85,16 @@ defmodule LatticeStripe.Transfer do
   See the [Stripe Transfer API](https://docs.stripe.com/api/transfers).
   """
 
-  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response, TransferReversal}
+  alias LatticeStripe.{
+    Client,
+    Error,
+    List,
+    ObjectTypes,
+    Request,
+    Resource,
+    Response,
+    TransferReversal
+  }
 
   # Known top-level fields from the Stripe Transfer object.
   # String sigil (no `a`) matches Jason's default string-key output.
@@ -290,28 +299,32 @@ defmodule LatticeStripe.Transfer do
       amount: map["amount"],
       amount_reversed: map["amount_reversed"],
       balance_transaction:
-        (if is_map(map["balance_transaction"]),
-           do: ObjectTypes.maybe_deserialize(map["balance_transaction"]),
-           else: map["balance_transaction"]),
+        if(is_map(map["balance_transaction"]),
+          do: ObjectTypes.maybe_deserialize(map["balance_transaction"]),
+          else: map["balance_transaction"]
+        ),
       created: map["created"],
       currency: map["currency"],
       description: map["description"],
       destination:
-        (if is_map(map["destination"]),
-           do: ObjectTypes.maybe_deserialize(map["destination"]),
-           else: map["destination"]),
+        if(is_map(map["destination"]),
+          do: ObjectTypes.maybe_deserialize(map["destination"]),
+          else: map["destination"]
+        ),
       destination_payment:
-        (if is_map(map["destination_payment"]),
-           do: ObjectTypes.maybe_deserialize(map["destination_payment"]),
-           else: map["destination_payment"]),
+        if(is_map(map["destination_payment"]),
+          do: ObjectTypes.maybe_deserialize(map["destination_payment"]),
+          else: map["destination_payment"]
+        ),
       livemode: map["livemode"],
       metadata: map["metadata"],
       reversals: reversal_structs,
       reversed: map["reversed"],
       source_transaction:
-        (if is_map(map["source_transaction"]),
-           do: ObjectTypes.maybe_deserialize(map["source_transaction"]),
-           else: map["source_transaction"]),
+        if(is_map(map["source_transaction"]),
+          do: ObjectTypes.maybe_deserialize(map["source_transaction"]),
+          else: map["source_transaction"]
+        ),
       source_type: map["source_type"],
       transfer_group: map["transfer_group"],
       extra: extra

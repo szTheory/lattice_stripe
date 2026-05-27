@@ -76,7 +76,12 @@ defmodule LatticeStripe.OpenTelemetryIntegrationTest do
       Tracer.end_span()
     end
 
-    def handle_event([:lattice_stripe, :webhook, :verify, :start], _measurements, metadata, _config) do
+    def handle_event(
+          [:lattice_stripe, :webhook, :verify, :start],
+          _measurements,
+          metadata,
+          _config
+        ) do
       Tracer.start_span("stripe.webhook.verify", %{kind: :server})
 
       if path = metadata[:path] do
@@ -84,7 +89,12 @@ defmodule LatticeStripe.OpenTelemetryIntegrationTest do
       end
     end
 
-    def handle_event([:lattice_stripe, :webhook, :verify, :stop], _measurements, metadata, _config) do
+    def handle_event(
+          [:lattice_stripe, :webhook, :verify, :stop],
+          _measurements,
+          metadata,
+          _config
+        ) do
       case metadata.result do
         :ok ->
           Tracer.set_status(:ok, "")

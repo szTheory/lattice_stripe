@@ -308,7 +308,10 @@ defmodule LatticeStripe.Telemetry do
         start_meta,
         fn ->
           {result, attempts, resp_headers} = fun.()
-          stop_meta = build_stop_metadata(result, idempotency_key, attempts, resp_headers, start_meta)
+
+          stop_meta =
+            build_stop_metadata(result, idempotency_key, attempts, resp_headers, start_meta)
+
           {result, stop_meta}
         end
       )
@@ -477,7 +480,13 @@ defmodule LatticeStripe.Telemetry do
 
   # Build stop metadata for a successful response.
   # Merges all start_meta fields so stop event has full context (RESEARCH Pitfall 2).
-  defp build_stop_metadata({:ok, %Response{} = resp}, _idempotency_key, attempts, resp_headers, start_meta) do
+  defp build_stop_metadata(
+         {:ok, %Response{} = resp},
+         _idempotency_key,
+         attempts,
+         resp_headers,
+         start_meta
+       ) do
     Map.merge(start_meta, %{
       status: :ok,
       http_status: resp.status,
@@ -509,7 +518,13 @@ defmodule LatticeStripe.Telemetry do
   end
 
   # Build stop metadata for an API error (has HTTP status, error type, request_id).
-  defp build_stop_metadata({:error, %Error{} = error}, idempotency_key, attempts, resp_headers, start_meta) do
+  defp build_stop_metadata(
+         {:error, %Error{} = error},
+         idempotency_key,
+         attempts,
+         resp_headers,
+         start_meta
+       ) do
     Map.merge(start_meta, %{
       status: :error,
       http_status: error.status,

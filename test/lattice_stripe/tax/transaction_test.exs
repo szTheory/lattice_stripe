@@ -117,5 +117,4 @@ defmodule LatticeStripe.Tax.TransactionTest do
                Transaction.list_line_items(client, "tax_1test123")
     end
   end
-
 end

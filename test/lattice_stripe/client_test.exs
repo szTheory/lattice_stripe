@@ -1264,7 +1264,12 @@ defmodule LatticeStripe.ClientTest do
         assert is_binary(req.body)
         assert req.body =~ "dispute_evidence"
         assert req.body =~ "binary-content"
-        ok_response(%{"id" => "file_test123", "object" => "file", "purpose" => "dispute_evidence"})
+
+        ok_response(%{
+          "id" => "file_test123",
+          "object" => "file",
+          "purpose" => "dispute_evidence"
+        })
       end)
 
       assert {:ok, %Response{data: %{"object" => "file", "id" => "file_test123"}}} =
@@ -1408,8 +1413,7 @@ defmodule LatticeStripe.ClientTest do
          %{
            status: 500,
            headers: [{"request-id", "req_err"}],
-           body:
-             Jason.encode!(%{"error" => %{"type" => "api_error", "message" => "Internal"}})
+           body: Jason.encode!(%{"error" => %{"type" => "api_error", "message" => "Internal"}})
          }}
       end)
 

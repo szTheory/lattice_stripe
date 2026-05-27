@@ -51,12 +51,12 @@ defmodule LatticeStripe.Account.Capability do
   # Private: atomization helpers
   # ---------------------------------------------------------------------------
 
-  defp atomize_status("active"),      do: :active
-  defp atomize_status("inactive"),    do: :inactive
-  defp atomize_status("pending"),     do: :pending
+  defp atomize_status("active"), do: :active
+  defp atomize_status("inactive"), do: :inactive
+  defp atomize_status("pending"), do: :pending
   defp atomize_status("unrequested"), do: :unrequested
-  defp atomize_status("disabled"),    do: :disabled
-  defp atomize_status(other),         do: other
+  defp atomize_status("disabled"), do: :disabled
+  defp atomize_status(other), do: other
 
   @deprecated "Status is now automatically atomized in cast/1. Access capability.status directly."
   @spec status_atom(t() | String.t() | nil) :: atom()
