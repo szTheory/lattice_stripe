@@ -11,7 +11,7 @@
 
 ## Phases
 
-- [ ] **Phase 47: Thin-Event SDK Surface & Webhook Reconciliation** — Net-new thin-event helpers, `Event` struct extension, signed-payload testing helpers, and `tolerance: 0` bug reconciliation.
+- [x] **Phase 47: Thin-Event SDK Surface & Webhook Reconciliation** — Net-new thin-event helpers, `Event` struct extension, signed-payload testing helpers, and `tolerance: 0` bug reconciliation. (completed 2026-05-27)
 - [ ] **Phase 48: Thin-Event Adoption Surface — Guide & Integration Verification** — Canonical Phoenix thin-event guide plus integration coverage and docs-truth regression for the new helpers.
 
 ## Phase Details
@@ -43,8 +43,8 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 47-04-PLAN.md — Fetchers: `Webhook.fetch_event/3` (v2 path `/v2/core/events/{id}`) + `Webhook.fetch_related_object/3` (D-05 typed-error gate) + Mox tests (THIN-02, THIN-03)
-- [ ] 47-05-PLAN.md — Testing helpers: `Testing.generate_thin_event_payload/3` + `Testing.event_notification/1` + roundtrip proof (TESTING-01)
+- [x] 47-04-PLAN.md — Fetchers: `Webhook.fetch_event/3` (v2 path `/v2/core/events/{id}`) + `Webhook.fetch_related_object/3` (D-05 typed-error gate) + Mox tests (THIN-02, THIN-03)
+- [x] 47-05-PLAN.md — Testing helpers: `Testing.generate_thin_event_payload/3` + `Testing.event_notification/1` + roundtrip proof (TESTING-01)
 
 ### Phase 48: Thin-Event Adoption Surface — Guide & Integration Verification
 
@@ -69,7 +69,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 47. Thin-Event SDK Surface & Webhook Reconciliation | 3/5 | In Progress|  |
+| 47. Thin-Event SDK Surface & Webhook Reconciliation | 5/5 | Complete   | 2026-05-27 |
 | 48. Thin-Event Adoption Surface — Guide & Integration Verification | 0/? | Not started | - |
 
 ## Next Step
