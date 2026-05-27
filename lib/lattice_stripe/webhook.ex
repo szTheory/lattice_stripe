@@ -81,7 +81,9 @@ defmodule LatticeStripe.Webhook do
   - `sig_header` - The value of the `Stripe-Signature` header (e.g., `"t=1234,v1=abc..."`)
   - `secret` - Your webhook signing secret (string or list of strings for rotation)
   - `opts` - Options:
-    - `:tolerance` - max age in seconds (default: 300). Set `0` to disable staleness check.
+    - `:tolerance` - max age in seconds (default: 300). Set `0` to disable the
+      staleness check (testing only — see WEBFIX-01 CHANGELOG entry and the
+      inline comment on `check_tolerance/2` for the decision context).
 
   ## Returns
 
@@ -264,13 +266,14 @@ defmodule LatticeStripe.Webhook do
   end
 
   # Checks that the webhook timestamp is within the tolerance window.
-  # tolerance: 0 means any non-current timestamp will fail.
-  defp check_tolerance(_timestamp, 0) do
-    # tolerance: 0 means any age is expired — we always compare against current time
-    # We must still check: if timestamp == now it's fine, otherwise expired.
-    # But since this is called per-second, we skip the 0 case with a special path.
-    {:error, :timestamp_expired}
-  end
+  # Reconciled per WEBFIX-01 (CHANGELOG v1.5): `tolerance: 0` now disables the
+  # staleness check entirely, matching the docstring at `:tolerance` and every
+  # canonical Stripe SDK — stripe-node's `if (tolerance > 0 && ...)` gate and
+  # stripe-go's `IgnoreTolerance` flag. Use this in tests (with `:timestamp`
+  # overrides via `generate_test_signature/3`); never in production traffic —
+  # the canonical Phoenix guide will state this explicitly.
+  # Inline comment is load-bearing for the four-surface regression contract.
+  defp check_tolerance(_timestamp, 0), do: :ok
 
   defp check_tolerance(timestamp, tolerance) when is_integer(tolerance) do
     now = System.system_time(:second)
