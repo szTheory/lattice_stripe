@@ -41,7 +41,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 **Goal:** Close the remaining v1.x scope gaps — expand the thin `Charge` surface, ship production operator guides, reconcile release truth, retire Phase 41.1 — then call the library done for v1.x scope.
 
 **Target features:**
-- Fill `Charge` surface gap (`list/3`, `search/3`, `capture/4`, `update/4` — only `retrieve/3` and `from_map/1` exist today)
+- ~~Fill `Charge` surface gap~~ — **done in Phase 52** (`list/3`, `search/3`, `update/4`, `capture/4` + PI-first `@moduledoc`, Mox wire tests, docs-truth lock, stripe-mock integration smokes)
 - Ship `guides/production-checklist.md` and `guides/event-debugging.md`
 - **Hex release capstone** — bump `@version` to 1.7.0, CHANGELOG v1.4–1.7, lockstep `~> 1.7` docs-truth flip, Hex publish
 - Retire Phase `41.1` as `accepted-external-verification` (recommended disposition)
@@ -162,4 +162,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 — milestone v1.7 started*
+*Last updated: 2026-05-27 after Phase 52 (Charge surface expansion)*
