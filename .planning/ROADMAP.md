@@ -101,7 +101,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 52. Charge Surface Expansion | v1.7 | 3/3 | Complete    | 2026-05-27 |
 | 53. Operator Guides | v1.7 | 4/4 | Complete    | 2026-05-27 |
-| 54. Release Truth Capstone | v1.7 | 0/4 | Planned | — |
+| 54. Release Truth Capstone | v1.7 | 3/4 | In Progress|  |
 | 55. Milestone Closure & v1.x Stop Signal | v1.7 | 0/TBD | Not started | — |
 
 ## Next Step
