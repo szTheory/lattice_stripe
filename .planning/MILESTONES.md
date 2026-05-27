@@ -12,10 +12,11 @@
 - operator guide update/capture routing spines (ROUTE-02, Phase 57)
 - planning truth close — JTBD-MAP refresh, MILESTONES/RETROSPECTIVE, tax proof commit (ROUTE-03, PLAN-01/02, PROOF-01, Phase 58)
 
-**Audit:** PASSED — see [v1.8-MILESTONE-AUDIT.md](milestones/v1.8-MILESTONE-AUDIT.md)
+**Audit:** PASSED — 12/12 requirements, 3/3 phases verified. See [v1.8-MILESTONE-AUDIT.md](milestones/v1.8-MILESTONE-AUDIT.md).
 **Known deferred at close:** CI-01 paths-ignore (guide-only PRs skip docs_truth)
 
-**Git range:** `ff8dd13` → `{close_sha}` (fill at close)
+**Git range:** `ff8dd13` → `082ec7991e8baa9d70c17534b1098435b7cfc708`
+**Source diff:** 115 files, +7948/-6279 lines
 **Timeline:** 2026-05-27 (single-day milestone)
 
 ---

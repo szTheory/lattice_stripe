@@ -33,7 +33,7 @@
 ### Cost Observations
 
 - Phases 56–57: 5 plans, single-day; Phase 58: 5 plans, planning + hygiene only
-- Git range: `ff8dd13` → `{close_sha}` (fill at close)
+- Git range: `ff8dd13` → `082ec7991e8baa9d70c17534b1098435b7cfc708`
 
 ---
 
