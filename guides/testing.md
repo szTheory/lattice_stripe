@@ -575,3 +575,4 @@ anti-pattern, see [metering.md](metering.md#what-not-to-do-nightly-batch-flush).
 - [Webhooks](webhooks.md) — signed payload helpers and end-to-end handler verification
 - [Error Handling](error-handling.md) — asserting `%LatticeStripe.Error{}` shapes and request IDs
 - [Metering](metering.md) — usage-reporting hot path and reconciliation follow-through
+- [Event Debugging](event-debugging.md) — production webhook symptom spine after tests pass locally

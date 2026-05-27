@@ -93,7 +93,7 @@ Use this guide as a routing layer, not as the final source of API truth.
   [Quote to Billing Operator Flow](quote-to-billing-operator.md), [Invoices](invoices.md),
   [Subscriptions](subscriptions.md), [Webhooks](webhooks.md)
 - **Runtime truth, support, and debugging**:
-  [Webhooks](webhooks.md), [Error Handling](error-handling.md), [Testing](testing.md), [Webhooks: Thin Events](webhooks-thin-events.md)
+  [Production Checklist](production-checklist.md), [Event Debugging](event-debugging.md), [Webhooks](webhooks.md), [Error Handling](error-handling.md), [Testing](testing.md), [Webhooks: Thin Events](webhooks-thin-events.md)
 
 ## The Jobs This Library Already Serves Well
 
@@ -333,6 +333,8 @@ safe enough to trust.
 
 Read next:
 
+- [Production Checklist](production-checklist.md)
+- [Event Debugging](event-debugging.md)
 - [Testing](testing.md)
 - [Telemetry](telemetry.md)
 - [OpenTelemetry](opentelemetry.md)

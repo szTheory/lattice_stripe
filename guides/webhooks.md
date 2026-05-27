@@ -222,3 +222,7 @@ A thin event payload carries only `{id, type, related_object}` — your app
 fetches authoritative state after verification. See
 [Webhooks: Thin Events](webhooks-thin-events.md) for the canonical Phoenix
 pattern, fetch-after-verify idempotency, and rate-limit guidance.
+
+When webhooks fail in production after setup, use
+[Event Debugging](event-debugging.md) for the symptom spine — signature failures,
+duplicate deliveries, and fetch-after-verify races.

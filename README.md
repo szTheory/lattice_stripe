@@ -26,7 +26,7 @@ Use the docs in this order:
 - **[User Flows & JTBD](guides/user-flows-and-jtbd.md)** for "which Stripe path fits my SaaS?"
 - **Canonical guides** for the surface you will actually ship
 - **[Recipes](guides/recipes.md)** for compact job-to-primitive bridges
-- **[Webhooks](guides/webhooks.md)**, **[Testing](guides/testing.md)**, and **[Error Handling](guides/error-handling.md)** for runtime truth and support posture
+- **[Webhooks](guides/webhooks.md)**, **[Production Checklist](guides/production-checklist.md)**, **[Event Debugging](guides/event-debugging.md)**, **[Testing](guides/testing.md)**, and **[Error Handling](guides/error-handling.md)** for runtime truth and support posture
 
 ## Choose Your Route
 
@@ -41,7 +41,7 @@ Use the docs in this order:
 - **I run a marketplace or platform**:
   [Connect](guides/connect.md), [Connect Accounts](guides/connect-accounts.md), [Connect Money Movement](guides/connect-money-movement.md)
 - **I am hardening ops and support paths**:
-  [Error Handling](guides/error-handling.md), [Testing](guides/testing.md), [Webhooks](guides/webhooks.md), [Webhooks: Thin Events](guides/webhooks-thin-events.md)
+  [Production Checklist](guides/production-checklist.md), [Error Handling](guides/error-handling.md), [Testing](guides/testing.md), [Webhooks](guides/webhooks.md), [Webhooks: Thin Events](guides/webhooks-thin-events.md), [Event Debugging](guides/event-debugging.md)
 
 ## Installation
 
@@ -109,6 +109,7 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 - Files and FileLinks — upload files to Stripe, manage shareable file links, and download binary content
 - Disputes — retrieve/list, update metadata, stage evidence safely, submit evidence, and close disputes
 - Mandates and SetupAttempts — inspect payment authorization state and SetupIntent failure history
+- Operator playbooks: [Production Checklist](guides/production-checklist.md) · [Event Debugging](guides/event-debugging.md)
 - [Guide: Recipes](guides/recipes.md) · [Guide: Webhooks](guides/webhooks.md) · [Guide: Testing](guides/testing.md)
 
 ### Connect
@@ -154,7 +155,7 @@ Canonical guide clusters:
 - **Connect**:
   [Connect](https://hexdocs.pm/lattice_stripe/connect.html), [Connect Accounts](https://hexdocs.pm/lattice_stripe/connect-accounts.html), [Connect Money Movement](https://hexdocs.pm/lattice_stripe/connect-money-movement.html)
 - **Operations and DX**:
-  [Webhooks](https://hexdocs.pm/lattice_stripe/webhooks.html), [Testing](https://hexdocs.pm/lattice_stripe/testing.html), [Error Handling](https://hexdocs.pm/lattice_stripe/error-handling.html), [Client Configuration](https://hexdocs.pm/lattice_stripe/client-configuration.html), [Performance](https://hexdocs.pm/lattice_stripe/performance.html), [Circuit Breaker](https://hexdocs.pm/lattice_stripe/circuit-breaker.html), [OpenTelemetry](https://hexdocs.pm/lattice_stripe/opentelemetry.html), [Telemetry](https://hexdocs.pm/lattice_stripe/telemetry.html), [API Stability](https://hexdocs.pm/lattice_stripe/api_stability.html), [Extending LatticeStripe](https://hexdocs.pm/lattice_stripe/extending-lattice-stripe.html), [Cheatsheet](https://hexdocs.pm/lattice_stripe/cheatsheet.html)
+  [Webhooks](https://hexdocs.pm/lattice_stripe/webhooks.html), [Webhooks: Thin Events](https://hexdocs.pm/lattice_stripe/webhooks-thin-events.html), [Production Checklist](https://hexdocs.pm/lattice_stripe/production-checklist.html), [Event Debugging](https://hexdocs.pm/lattice_stripe/event-debugging.html), [Testing](https://hexdocs.pm/lattice_stripe/testing.html), [Error Handling](https://hexdocs.pm/lattice_stripe/error-handling.html), [Client Configuration](https://hexdocs.pm/lattice_stripe/client-configuration.html), [Performance](https://hexdocs.pm/lattice_stripe/performance.html), [Circuit Breaker](https://hexdocs.pm/lattice_stripe/circuit-breaker.html), [OpenTelemetry](https://hexdocs.pm/lattice_stripe/opentelemetry.html), [Telemetry](https://hexdocs.pm/lattice_stripe/telemetry.html), [API Stability](https://hexdocs.pm/lattice_stripe/api_stability.html), [Extending LatticeStripe](https://hexdocs.pm/lattice_stripe/extending-lattice-stripe.html), [Cheatsheet](https://hexdocs.pm/lattice_stripe/cheatsheet.html)
 
 ## Contributing
 

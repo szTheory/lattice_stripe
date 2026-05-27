@@ -339,3 +339,5 @@ safe retries possible.
 - [metering.md](metering.md#reconciliation-via-webhooks) — async billing error codes
   (`meter_event_customer_not_found`, `archived_meter`, etc.) that surface via webhook
 - [Testing](testing.md) — fixture builders, webhook payload helpers, and error-path assertions
+- [Production Checklist](production-checklist.md) — pre-launch operator gate for keys, webhooks, and observability
+- [Event Debugging](event-debugging.md) — post-incident webhook diagnosis and replay semantics

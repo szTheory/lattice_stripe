@@ -197,3 +197,4 @@ plus `Mox` at the `LatticeStripe.Transport` behaviour boundary. See LatticeStrip
 - [Webhooks](webhooks.md) — snapshot webhooks, raw-body invariant, `Webhook.Plug` quickstart
 - [Testing](testing.md) — `generate_thin_event_payload/3`, `generate_webhook_payload/3`, fixture builders
 - [Error Handling](error-handling.md) — `LatticeStripe.Error`, retry strategy, circuit breaker
+- [Event Debugging](event-debugging.md) — production diagnosis for thin vs snapshot wrong-entry-point failures
