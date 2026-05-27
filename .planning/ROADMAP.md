@@ -11,64 +11,26 @@
 - ✅ **v1.6 — Tax** — Phases 49-51 (shipped 2026-05-27) — [archive](milestones/v1.6-ROADMAP.md)
 - ✅ **v1.7 — Polish & Operator** — Phases 52-55 (shipped 2026-05-27, v1.x stop signal) — [archive](milestones/v1.7-ROADMAP.md)
 - ✅ **v1.8 — Adopter Truth & Doc Routing Polish** — Phases 56-58 (shipped 2026-05-27) — [archive](milestones/v1.8-ROADMAP.md)
-- 🚧 **v1.9 — CI & Doc Honesty** — Phases 59-60 (in progress)
+- ✅ **v1.9 — CI & Doc Honesty** — Phases 59-60 (shipped 2026-05-27) — [archive](milestones/v1.9-ROADMAP.md)
 
 ## Current Status
 
-**Active milestone:** v1.9 CI & Doc Honesty — doc-only; no Hex bump; closes checkout/README truth gaps and CI-01.
+**Active posture:** Maintenance mode — Stripe API drift, adopter-pull narrow adds (TAX-01/02), bugfixes. No pending v1.9 phases.
 
-## Phases
+## Forward Work (maintenance only)
 
-### v1.9 CI & Doc Honesty
+- Stripe API version drift and breaking upstream changes
+- Adopter-pull narrow additions (TAX-01/TAX-02, specialist families only with documented pull)
+- Gap 2 narrative docs (Product/Price, BillingPortal, disputes) — opportunistic, not milestone-grade
+- PLAN-01 hygiene: backfill `54-VERIFICATION.md` when convenient (third carry)
 
-**Milestone Goal:** Close remaining adopter-truth gaps in checkout/README docs and make CI actually enforce docs_truth on guide-only changes — without new API breadth or Hex bump.
-
-- [x] **Phase 59: Checkout Guide & README Truth** — Fix checkout.md atom status bug + callout; fix README error taxonomy; extend docs_truth locks. (CHECKOUT-01..03, README-01..02, VERIFY-05) (completed 2026-05-27)
-- [ ] **Phase 60: CI Gate & Milestone Close** — Narrow CI paths-ignore so docs_truth runs on guide/md PRs; JTBD-MAP upgrade; optional 54-VERIFICATION backfill; milestone audit. (CI-01, JTBD-01, PLAN-01)
-
-## Phase Details
-
-### Phase 59: Checkout Guide & README Truth
-
-**Goal:** Canonical checkout guide and README high-visibility claims are copy-paste correct with docs_truth regression locks.
-**Depends on:** Nothing (first v1.9 phase)
-**Requirements:** CHECKOUT-01, CHECKOUT-02, CHECKOUT-03, README-01, README-02, VERIFY-05
-**Success Criteria** (what must be TRUE):
-
-1. `guides/checkout.md` `Stream.filter` example uses `s.payment_status == :paid` (not `"paid"`).
-2. `guides/checkout.md` includes status-values callout for atomized `payment_status` on `%Session{}`.
-3. `README.md` error list uses `:authentication_error` and `:api_error` (matches `lib/lattice_stripe/error.ex`).
-4. `docs_truth_test.exs` includes describe/grep blocks for checkout.md atom patterns and README error taxonomy.
-5. Stale patterns (`"paid"` filter, `:auth_error`, `:server_error`) fail docs_truth if reintroduced.
-6. `mix test test/lattice_stripe/docs_truth_test.exs` passes.
-
-**Plans:** 2/2 plans complete
-
-### Phase 60: CI Gate & Milestone Close
-
-**Goal:** CI no longer bypasses docs_truth on guide-only PRs; planning artifacts reflect post-v1.9 reality; milestone ready to close.
-**Depends on:** Phase 59 (doc fixes and docs_truth locks landed first)
-**Requirements:** CI-01, JTBD-01, PLAN-01 (optional)
-**Success Criteria** (what must be TRUE):
-
-1. `.github/workflows/ci.yml` `paths-ignore` narrowed so changes under `guides/**` or root `*.md` still trigger docs_truth (or full test suite).
-2. Guide-only PR workflow change documented in commit message; explicit approval gate satisfied before merge.
-3. `.planning/JTBD-MAP.md` hosted checkout narrative coverage upgraded to Strong (checkout examples locked).
-4. Optional: `.planning/phases/54-release-truth-capstone/54-VERIFICATION.md` backfilled from Phase 54 close evidence.
-5. Milestone audit checklist complete; STATE.md and PROJECT.md updated for close or maintenance posture.
-6. No Hex version bump (doc-only milestone).
-
-**Plans:** 0/2 plans (60-01 CI-01, 60-02 JTBD-01 + milestone close)
-
-## Progress
+## Progress (v1.9 — archived)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 59. Checkout Guide & README Truth | v1.9 | 2/2 | Complete    | 2026-05-27 |
-| 60. CI Gate & Milestone Close | v1.9 | 0/2 | Planned | — |
+| 59. Checkout Guide & README Truth | v1.9 | 2/2 | Complete | 2026-05-27 |
+| 60. CI Gate & Milestone Close | v1.9 | 2/2 | Complete | 2026-05-27 |
 
 ## Next Step
 
-**Phase 60: CI Gate & Milestone Close** — Execute Plan 60-01 (CI paths-ignore) then 60-02 (JTBD-MAP + v1.9 close).
-
-`/gsd-execute-phase 60`
+Maintenance mode — no active milestone phases. See `.planning/JTBD-MAP.md` Recommended Priority Order.

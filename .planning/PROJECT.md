@@ -10,11 +10,13 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
-**Active milestone:** v1.9 CI & Doc Honesty — Phase 59 complete (2026-05-27); Phase 60 (CI gate + milestone close) next.
+**Active milestone:** Maintenance mode (v1.9 shipped 2026-05-27).
 
-**Phase 59 shipped:** checkout guide atom-correct stream filter + status-values callout; README canonical error atoms; docs_truth grep locks for both surfaces.
+**Latest shipped milestone:** v1.9 CI & Doc Honesty — checkout/README docs_truth locks; CI-01 paths-ignore fix; JTBD-MAP post-v1.9 truth.
 
-**Latest archived milestone:** v1.8 Adopter Truth & Doc Routing Polish (archived 2026-05-27)
+**Done estimate:** ~94–96% for intended v1.x scope (doc/CI honesty wedge closed).
+
+**Latest archived milestone:** v1.9 CI & Doc Honesty (archived 2026-05-27)
 
 **What shipped in v1.8:**
 
@@ -57,27 +59,15 @@ The library is **done for v1.x scope** — intended mainstream SaaS Stripe cover
 
 **Forward posture:** Maintenance mode — bugfixes, Stripe API drift, adopter-driven narrow additions. No planned new resource-family breadth in v1.x absent fresh adopter pull.
 
-## Current Milestone: v1.9 CI & Doc Honesty
+## Maintenance Mode (post–v1.9)
 
-**Goal:** Close remaining adopter-truth gaps in checkout/README docs and make CI actually enforce docs_truth on guide-only changes — doc-only milestone, no Hex bump, no new API breadth.
-
-**Target features:**
-- Fix `guides/checkout.md` atom status bug (`"paid"` → `:paid`) + status-values callout (mirror Phase 57 payments pattern)
-- Fix `README.md` error taxonomy drift (`:auth_error`/`:server_error` → `:authentication_error`/`:api_error`)
-- Extend `docs_truth_test.exs` locks to checkout.md + README error grep
-- CI-01: adjust `paths-ignore` so guide-only PRs still run docs_truth (requires explicit workflow approval)
-- JTBD-MAP: downgrade hosted checkout from "Strong" to "Partial" until locked
-- Optional admin: backfill `54-VERIFICATION.md` from v1.7 Phase 54
-
-## Maintenance Mode (post–v1.8)
-
-**Latest shipped milestone:** v1.8 Adopter Truth & Doc Routing Polish (archived 2026-05-27)
+**Latest shipped milestone:** v1.9 CI & Doc Honesty (archived 2026-05-27)
 
 **Forward posture:** Maintenance mode — Stripe API drift, adopter-driven narrow additions, bugfixes. No planned new resource-family breadth absent fresh adopter pull.
 
 **Do not rewrite:** v1.x stop signal (already at Hex 1.7.0); no Hex 1.8.0 or 1.9.0 bump (doc-only milestones).
 
-See `.planning/milestones/v1.8-MILESTONE-AUDIT.md` for close-time audit evidence.
+See `.planning/milestones/v1.9-MILESTONE-AUDIT.md` for close-time audit evidence.
 
 ## Context
 

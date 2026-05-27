@@ -1,74 +1,54 @@
 # Requirements: LatticeStripe
 
 **Defined:** 2026-05-27
-**Milestone:** v1.9 CI & Doc Honesty
+**Milestone:** Maintenance mode (v1.9 shipped 2026-05-27)
 **Core Value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
 
-## v1.9 Requirements
+## v1.9 Requirements (shipped)
 
-Requirements for this milestone. Each maps to roadmap phases 59–60.
+All required v1.9 requirements complete. Archive: [milestones/v1.9-REQUIREMENTS.md](milestones/v1.9-REQUIREMENTS.md).
 
 ### Checkout Guide Truth
 
 - [x] **CHECKOUT-01**: Adopter copying Checkout Session `stream!/2` filter examples uses atom `payment_status` (`:paid`, not wire string `"paid"`).
-- [x] **CHECKOUT-02**: `guides/checkout.md` includes a status-values callout explaining atomized `payment_status` on `%Session{}` (mirror `guides/payments.md` PaymentIntent pattern).
-- [x] **CHECKOUT-03**: `docs_truth_test.exs` grep-regresses canonical guide API example patterns in `guides/checkout.md` (atom status filters, stale string patterns).
+- [x] **CHECKOUT-02**: `guides/checkout.md` includes a status-values callout explaining atomized `payment_status` on `%Session{}`.
+- [x] **CHECKOUT-03**: `docs_truth_test.exs` grep-regresses canonical guide API example patterns in `guides/checkout.md`.
 
 ### README Truth
 
-- [x] **README-01**: README error taxonomy lists `:authentication_error` and `:api_error` (matching `LatticeStripe.Error` atoms), not stale `:auth_error`/`:server_error`.
-- [x] **README-02**: `docs_truth_test.exs` grep-regresses README error atom list (fail on stale taxonomy).
+- [x] **README-01**: README error taxonomy lists `:authentication_error` and `:api_error`.
+- [x] **README-02**: `docs_truth_test.exs` grep-regresses README error atom list.
 
 ### CI Honesty
 
-- [ ] **CI-01**: Guide-only and markdown-only PRs still run `docs_truth_test.exs` — narrow `.github/workflows/ci.yml` `paths-ignore` so docs_truth is not bypassed on highest-risk edit surface.
+- [x] **CI-01**: Guide-only and markdown-only PRs run `docs_truth_test.exs` — paths-ignore narrowed to `.planning/**` only.
 
 ### Verification Extension
 
-- [x] **VERIFY-05**: `docs_truth_test.exs` canonical-guides coverage explicitly includes `guides/checkout.md` content locks (status atoms) alongside existing payments.md locks.
+- [x] **VERIFY-05**: `docs_truth_test.exs` includes `guides/checkout.md` content locks.
 
 ### Planning Truth
 
-- [ ] **JTBD-01**: `.planning/JTBD-MAP.md` hosted checkout row reflects locked checkout examples (narrative coverage upgraded to Strong when CHECKOUT-01..03 ship).
-- [ ] **PLAN-01** (optional): Backfill missing `54-VERIFICATION.md` from v1.7 Phase 54 with close-time evidence.
+- [x] **JTBD-01**: `.planning/JTBD-MAP.md` hosted checkout narrative coverage Strong with Phase 59 evidence.
+- [ ] **PLAN-01** (optional, deferred): Backfill `54-VERIFICATION.md` — third carry; not blocking maintenance.
 
 ## Future Requirements (deferred)
 
-Tracked from prior milestones — not in v1.9 roadmap:
-
 - **TAX-01/TAX-02**: TaxCode surface, Tax.Transaction list — adopter pull only
-- Specialist Stripe families (Identity, Treasury, Issuing, etc.) — v2.0 or adopter pull
-- Gap 2 narrative docs (Product/Price, BillingPortal config, disputes deep playbooks) — diminishing returns
+- Specialist Stripe families — v2.0 or adopter pull
+- Gap 2 narrative docs — diminishing returns
 
-## Out of Scope
-
-| Feature | Reason |
-|---------|--------|
-| New Stripe resource families | v1.x stop signal holds |
-| Hex version bump | v1.9 is doc-only like v1.8 |
-| New flagship recipes | Diminishing returns; checkout fix only |
-| payments.md output comment polish | Lower priority; wire-string comments in `# Status:` lines are non-blocking |
-
-## Traceability
+## Traceability (v1.9)
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHECKOUT-01 | Phase 59 | Complete |
-| CHECKOUT-02 | Phase 59 | Complete |
-| CHECKOUT-03 | Phase 59 | Complete |
-| README-01 | Phase 59 | Complete |
-| README-02 | Phase 59 | Complete |
-| VERIFY-05 | Phase 59 | Complete |
-| CI-01 | Phase 60 | Pending |
-| JTBD-01 | Phase 60 | Pending |
-| PLAN-01 | Phase 60 | Pending (optional) |
-
-**Coverage:**
-
-- v1.9 requirements: 9 total (8 required + 1 optional)
-- Mapped to phases: 9
-- Unmapped: 0 ✓
+| CHECKOUT-01..03 | 59 | Complete |
+| README-01..02 | 59 | Complete |
+| VERIFY-05 | 59 | Complete |
+| CI-01 | 60 | Complete |
+| JTBD-01 | 60 | Complete |
+| PLAN-01 | 60 | Deferred (third carry) |
 
 ---
 *Requirements defined: 2026-05-27*
-*Last updated: 2026-05-27 after v1.9 milestone scoping*
+*Last updated: 2026-05-27 after v1.9 milestone close*

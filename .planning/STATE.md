@@ -2,70 +2,62 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: CI & Doc Honesty
-status: executing
-stopped_at: Phase 60 context gathered
-last_updated: "2026-05-27T22:40:46.079Z"
-last_activity: 2026-05-27 -- Phase 60 execution started
+status: maintenance
+stopped_at: Phase 60 complete — v1.9 shipped
+last_updated: "2026-05-27T22:45:00Z"
+last_activity: 2026-05-27 -- Phase 60 complete; v1.9 milestone closed
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 2
-  percent: 50
+  completed_plans: 4
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-27 — milestone v1.9 started)
+See: .planning/PROJECT.md (updated 2026-05-27 — v1.9 shipped, maintenance mode)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 60 — ci-gate-milestone-close
+**Current focus:** Maintenance mode — Stripe API drift, adopter-pull narrow adds, bugfixes
 
 ## Current Position
 
-Phase: 60 (ci-gate-milestone-close) — EXECUTING
-Plan: 01 complete — 02 next
-Status: Executing Phase 60
-Last activity: 2026-05-27 -- Phase 60 execution started
+Phase: 60 complete
+Plan: 4/4 plans complete (v1.9)
+Status: maintenance
+Last activity: 2026-05-27 -- v1.9 milestone closed
 
 ## Performance Metrics
 
-**Velocity (v1.8):**
+**Velocity (v1.9):**
 
-- Total phases: 3 (56–58)
-- Total plans completed: 12
+- Total phases: 2 (59–60)
+- Total plans completed: 4
 - Timeline: single-day (2026-05-27)
 
 ## Accumulated Context
 
-### Decisions (from post-v1.8 assessment, carried into v1.9)
+### Decisions
 
 - **v1.x stop signal holds** — no new Stripe resource families without documented adopter pull.
-- **Done estimate ~92–94%** — remaining delta is doc/CI honesty, not foundational API gaps.
-- **checkout.md atom bug confirmed** — line 206 uses `"paid"` string vs SDK atom `:paid`.
-- **README error taxonomy drift** — lists `:auth_error`/`:server_error`; actual types are `:authentication_error`/`:api_error`.
-- **CI-01 resolved** — paths-ignore narrowed to `.planning/**` only (Phase 60 Plan 1, 2026-05-27).
-- **JTBD-MAP hosted checkout rating overstated** — downgrade to Partial until checkout locked.
-- **No Hex bump** — v1.9 is doc-only like v1.8.
-
-### Pending Todos
-
-- Define v1.9 requirements and roadmap
+- **Done estimate ~94–96%** — doc/CI honesty wedge closed in v1.9.
+- **CI-01 resolved** — paths-ignore `.planning/**` only (Phase 60).
+- **No Hex bump** — v1.9 doc-only like v1.8.
+- **PLAN-01 deferred** — `54-VERIFICATION.md` third carry.
 
 ### Blockers/Concerns
 
-- None — CI-01 shipped in Phase 60 Plan 1 (2026-05-27; maintainer approval per 60-CONTEXT.md D-01).
+- None
 
 ## Session Continuity
 
-Last session: 2026-05-27T22:29:58.073Z
-Stopped at: Phase 60 context gathered
-Resume file: .planning/phases/60-ci-gate-milestone-close/60-CONTEXT.md
-Assessment thread: `.planning/threads/v1-9-next-milestone-assessment.md`
+Resume file: `.planning/phases/60-ci-gate-milestone-close/60-CONTEXT.md`
+Milestone audit: `.planning/milestones/v1.9-MILESTONE-AUDIT.md`
 
 ## Operator Next Steps
 
-- Complete requirements + roadmap for v1.9
-- `/gsd-discuss-phase 59` or `/gsd-plan-phase 59` after roadmap approved
+- Maintenance mode — see `.planning/JTBD-MAP.md` Recommended Priority Order
+- Optional: `/gsd-plan-phase` for PLAN-01 hygiene when convenient

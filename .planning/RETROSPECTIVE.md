@@ -2,6 +2,36 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.9 — CI & Doc Honesty
+
+**Shipped:** 2026-05-27
+**Phases:** 2 (59–60) | **Plans:** 4
+
+### What Was Built
+
+- checkout guide atom-correct examples + docs_truth locks (Phase 59)
+- README error taxonomy alignment + docs_truth lock (Phase 59)
+- CI paths-ignore narrowed so guide/md PRs run docs_truth (Phase 60)
+- JTBD-MAP Strong upgrade for hosted checkout; Gap 3 removed; maintenance-first priority (Phase 60)
+
+### What Worked
+
+- **Sibling-guide audit pattern** — payments.md fixed in v1.8; checkout.md same bug class caught in assessment
+- **docs_truth as CI gate** — narrowing paths-ignore makes copy-paste guide edits enforceable on every PR
+- **Doc-only milestone velocity** — 4 plans, single-day; no Hex bump
+
+### What Was Inefficient
+
+- **payments fixed → checkout missed until assessment** — fixing one canonical guide without auditing sibling checkout.md allowed the same status-string bug class to persist until v1.9 scoping
+
+### Key Lessons
+
+1. When fixing a canonical guide, audit **sibling guides** in the same JTBD flow (payments ↔ checkout)
+2. CI paths-ignore is a trust boundary — if docs_truth is skipped, prose locks are advisory only
+3. JTBD narrative ratings must track **docs_truth evidence**, not ship date alone
+
+---
+
 ## Milestone: v1.8 — Adopter Truth & Doc Routing Polish
 
 **Shipped:** 2026-05-27

@@ -1,5 +1,23 @@
 # Milestones
 
+## v1.9 CI & Doc Honesty (Shipped: 2026-05-27)
+
+**Phases completed:** 2 phases (59–60), 4 plans
+
+**Key accomplishments:**
+
+- checkout.md atom stream filter + status-values callout + docs_truth locks (Phase 59)
+- README canonical error atoms + docs_truth describe lock (Phase 59)
+- CI-01 paths-ignore narrowed — guide/md PRs run full CI including docs_truth (Phase 60)
+- JTBD-MAP post-v1.9 refresh; milestone audit and maintenance posture (Phase 60)
+
+**Audit:** PASSED — 8/8 required requirements, 2/2 phases verified. See [v1.9-MILESTONE-AUDIT.md](milestones/v1.9-MILESTONE-AUDIT.md).
+**Known deferred at close:** PLAN-01 — `54-VERIFICATION.md` third carry
+
+**Timeline:** 2026-05-27 (single-day milestone)
+
+---
+
 ## v1.8 Adopter Truth & Doc Routing Polish (Shipped: 2026-05-27)
 
 **Phases completed:** 3 phases (56–58), 10 plans
