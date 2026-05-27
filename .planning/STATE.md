@@ -68,9 +68,9 @@ Items acknowledged and deferred at milestone close on 2026-05-27:
 ## Session Continuity
 
 Last session: 2026-05-27T16:30:43.839Z
-Stopped at: Phase 51 context gathered
-Resume path: `.planning/phases/51-taxid-testing-adoption-surface/51-CONTEXT.md`
+Stopped at: Phase 51 planned
+Resume path: `.planning/phases/51-taxid-testing-adoption-surface/51-01-PLAN.md`
 
 ## Operator Next Steps
 
-- Run `/gsd-plan-phase 51` to create execution plans for TaxId, Testing & Adoption Surface
+- Run `/gsd-execute-phase 51` to implement TaxId, Testing fixtures, tax guide, and docs-truth
