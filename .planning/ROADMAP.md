@@ -29,7 +29,7 @@
 - [x] **Phase 52: Charge Surface Expansion** — Expand retrieve-only Charge module to list/search/update/capture parity with sibling resources; integration tests + docs-truth four-surface triangulation. (completed 2026-05-27)
 - [x] **Phase 53: Operator Guides** — Ship `guides/production-checklist.md` and `guides/event-debugging.md`; wire into ExDoc Operations & DX and README discovery ladder. (completed 2026-05-27)
 - [ ] **Phase 54: Release Truth Capstone** — Bump to 1.7.0, CHANGELOG v1.4–1.7, lockstep `~> 1.7` docs-truth flip, Hex publish. **Blocker:** REL-04 — Hex still shows `1.1.0` (complete 54-04).
-- [x] **Phase 55: Milestone Closure & v1.x Stop Signal** — Retire Phase 41.1 as `accepted-external-verification`; publish v1.x stop signal (in progress on planning close-ready — blocked on REL-04).
+- [x] **Phase 55: Milestone Closure & v1.x Stop Signal** — 41.1 retired + v1.x stop signal shipped; close_ready blocked on REL-04 (2/4 plans complete). (completed 2026-05-27)
 
 ## Phase Details
 
@@ -102,7 +102,7 @@
 | 52. Charge Surface Expansion | v1.7 | 3/3 | Complete    | 2026-05-27 |
 | 53. Operator Guides | v1.7 | 4/4 | Complete    | 2026-05-27 |
 | 54. Release Truth Capstone | v1.7 | 3/4 | In Progress|  |
-| 55. Milestone Closure & v1.x Stop Signal | v1.7 | 2/4 | In Progress | 2026-05-27 |
+| 55. Milestone Closure & v1.x Stop Signal | v1.7 | 4/4 | Complete   | 2026-05-27 |
 
 ## Next Step
 
