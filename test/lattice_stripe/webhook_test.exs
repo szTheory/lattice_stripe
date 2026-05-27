@@ -1,7 +1,11 @@
 defmodule LatticeStripe.WebhookTest do
   use ExUnit.Case, async: true
 
-  alias LatticeStripe.{Event, Webhook}
+  import LatticeStripe.Test.Fixtures.EventNotification,
+    only: [event_notification_map: 0, event_notification_map_no_related_object: 0]
+
+  alias LatticeStripe.{Event, EventNotification, Webhook}
+  alias LatticeStripe.EventNotification.RelatedObject
   alias LatticeStripe.Webhook.SignatureVerificationError
 
   @secret "whsec_test_secret"
@@ -287,6 +291,122 @@ defmodule LatticeStripe.WebhookTest do
       ts = System.system_time(:second) - 50
       header = Webhook.generate_test_signature(@payload, @secret, timestamp: ts)
       assert {:ok, ^ts} = Webhook.verify_signature(@payload, header, @secret, tolerance: 300)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # parse_event_notification/4 (THIN-01)
+  # ---------------------------------------------------------------------------
+
+  describe "parse_event_notification/4" do
+    setup do
+      payload = Jason.encode!(event_notification_map())
+      sig_header = Webhook.generate_test_signature(payload, @secret)
+      {:ok, payload: payload, sig_header: sig_header}
+    end
+
+    test "happy path returns {:ok, %EventNotification{}}", %{
+      payload: payload,
+      sig_header: sig_header
+    } do
+      assert {:ok, %EventNotification{} = notif} =
+               Webhook.parse_event_notification(payload, sig_header, @secret)
+
+      # Wire-format regression locks (per RESEARCH Findings 1 & 2):
+      # - object is "v2.core.event" (NOT "v2.core.event_notification")
+      # - created is an ISO 8601 string (NOT a Unix integer)
+      assert notif.id == "evt_test_65UIRNU7G1XbhCfOim416TgmEI4ASQ3jHxXt8RFwXoeVwO"
+      assert notif.object == "v2.core.event"
+      assert notif.type == "v2.core.account.updated"
+      assert notif.created == "2026-03-09T13:00:28.435Z"
+      assert notif.livemode == false
+
+      assert match?(
+               %RelatedObject{id: "acct_1T93Q4Pmpb34Vto6", type: "v2.core.account"},
+               notif.related_object
+             )
+    end
+
+    test "happy path with no related_object yields nil related_object" do
+      payload = Jason.encode!(event_notification_map_no_related_object())
+      sig_header = Webhook.generate_test_signature(payload, @secret)
+
+      assert {:ok, %EventNotification{related_object: nil}} =
+               Webhook.parse_event_notification(payload, sig_header, @secret)
+    end
+
+    test "returns {:error, :missing_header} when sig_header is nil", %{payload: payload} do
+      assert {:error, :missing_header} =
+               Webhook.parse_event_notification(payload, nil, @secret)
+    end
+
+    test "returns {:error, :invalid_header} when sig_header is malformed", %{payload: payload} do
+      assert {:error, :invalid_header} =
+               Webhook.parse_event_notification(
+                 payload,
+                 "not-a-real-signature-header",
+                 @secret
+               )
+    end
+
+    test "returns {:error, :no_matching_signature} when secret does not match", %{
+      payload: payload,
+      sig_header: sig_header
+    } do
+      assert {:error, :no_matching_signature} =
+               Webhook.parse_event_notification(payload, sig_header, "whsec_wrong")
+    end
+
+    test "returns {:error, :timestamp_expired} with default tolerance on an ancient timestamp",
+         %{payload: payload} do
+      # NB: this uses default tolerance: 300; plan 47-03 (WEBFIX-01) handles
+      # the tolerance: 0 disables-staleness-check case separately.
+      old_ts = System.system_time(:second) - 86_400
+      old_header = Webhook.generate_test_signature(payload, @secret, timestamp: old_ts)
+
+      assert {:error, :timestamp_expired} =
+               Webhook.parse_event_notification(payload, old_header, @secret)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # parse_event_notification!/4 (THIN-01 bang variant)
+  # ---------------------------------------------------------------------------
+
+  describe "parse_event_notification!/4" do
+    setup do
+      payload = Jason.encode!(event_notification_map())
+      sig_header = Webhook.generate_test_signature(payload, @secret)
+      {:ok, payload: payload, sig_header: sig_header}
+    end
+
+    test "returns notification struct on happy path", %{
+      payload: payload,
+      sig_header: sig_header
+    } do
+      assert %EventNotification{} =
+               Webhook.parse_event_notification!(payload, sig_header, @secret)
+    end
+
+    test "raises SignatureVerificationError on signature mismatch", %{
+      payload: payload,
+      sig_header: sig_header
+    } do
+      assert_raise SignatureVerificationError, fn ->
+        Webhook.parse_event_notification!(payload, sig_header, "whsec_wrong")
+      end
+    end
+
+    test "raised exception's :reason field is :no_matching_signature", %{
+      payload: payload,
+      sig_header: sig_header
+    } do
+      e =
+        assert_raise SignatureVerificationError, fn ->
+          Webhook.parse_event_notification!(payload, sig_header, "whsec_wrong")
+        end
+
+      assert e.reason == :no_matching_signature
     end
   end
 end
