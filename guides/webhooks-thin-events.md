@@ -62,6 +62,8 @@ defmodule MyAppWeb.StripeThinEventController do
       {:error, :invalid_header}        -> send_resp(conn, 400, "invalid header")
       {:error, :no_matching_signature} -> send_resp(conn, 400, "bad signature")
       {:error, :timestamp_expired}     -> send_resp(conn, 400, "stale")
+      # fetch_related_object/3 or fetch_event/3 returned an error
+      {:error, _reason}                -> send_resp(conn, 500, "")
     end
   end
 
@@ -75,16 +77,24 @@ defmodule MyAppWeb.StripeThinEventController do
   defp dispatch_typed(client, %EventNotification{
          related_object: %RelatedObject{type: "customer"}
        } = notif) do
-    {:ok, %LatticeStripe.Customer{} = customer} =
-      Webhook.fetch_related_object(client, notif)
-    MyApp.Workers.SyncCustomer.enqueue(customer)
-    :ok
+    case Webhook.fetch_related_object(client, notif) do
+      {:ok, %LatticeStripe.Customer{} = customer} ->
+        MyApp.Workers.SyncCustomer.enqueue(customer)
+        :ok
+      {:error, reason} ->
+        # Log and propagate — Stripe will retry on non-2xx response
+        {:error, reason}
+    end
   end
 
   defp dispatch_typed(client, %EventNotification{related_object: nil} = notif) do
-    {:ok, %LatticeStripe.Event{} = event} = Webhook.fetch_event(client, notif)
-    MyApp.Workers.LogSnapshotEvent.enqueue(event)
-    :ok
+    case Webhook.fetch_event(client, notif) do
+      {:ok, %LatticeStripe.Event{} = event} ->
+        MyApp.Workers.LogSnapshotEvent.enqueue(event)
+        :ok
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   defp dispatch_typed(_client, _notif), do: :ok
