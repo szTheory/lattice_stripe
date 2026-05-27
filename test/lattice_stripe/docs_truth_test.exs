@@ -18,6 +18,14 @@ defmodule LatticeStripe.DocsTruthTest do
     "1.3.x line is the current published"
   ]
 
+  @stale_payments_api_patterns [
+    "\"succeeded\" ->",
+    "\"requires_action\" ->",
+    "intent.status == \"succeeded\"",
+    "Use `search/2`",
+    "PaymentIntent.search(client, %{"
+  ]
+
   defp expected_install_snippet do
     [major, minor | _] = String.split(LatticeStripe.MixProject.project()[:version], ".")
     "{:lattice_stripe, \"~> #{major}.#{minor}\"}"
@@ -124,6 +132,39 @@ defmodule LatticeStripe.DocsTruthTest do
       assert getting_started =~ "webhooks.md"
       assert getting_started =~ "testing.md"
       assert getting_started =~ "error-handling.md"
+    end
+  end
+
+  describe "guides/payments.md" do
+    test "canonical API examples use atom statuses and search/3" do
+      payments = File.read!("guides/payments.md")
+
+      assert payments =~ ":succeeded ->"
+      assert payments =~ ":requires_action ->"
+      assert payments =~ "intent.status == :succeeded"
+      assert payments =~ "search/3"
+      assert payments =~ "PaymentIntent.search(client, \""
+
+      for pattern <- @stale_payments_api_patterns do
+        refute payments =~ pattern,
+               "stale API pattern #{inspect(pattern)} in payments.md"
+      end
+    end
+
+    test "routes Charge reconciliation after PaymentIntent flows" do
+      payments = File.read!("guides/payments.md")
+
+      assert payments =~ "## Charge reconciliation"
+      assert payments =~ "LatticeStripe.Charge.list"
+      assert payments =~ "LatticeStripe.Charge.search"
+      assert payments =~ "LatticeStripe.Charge.update"
+      assert payments =~ "LatticeStripe.Charge.capture"
+      assert payments =~ "list/3"
+      assert payments =~ "search/3"
+
+      {creating_idx, _} = :binary.match(payments, "## Creating a PaymentIntent")
+      {charge_idx, _} = :binary.match(payments, "## Charge reconciliation")
+      assert creating_idx < charge_idx
     end
   end
 
