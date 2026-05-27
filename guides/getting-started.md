@@ -17,8 +17,7 @@ defp deps do
 end
 ```
 
-The `1.3.x` line is the current published Hex surface. If you specifically need
-unreleased work from `main`, use a git dependency instead of the published release.
+> **Release status:** **`1.7.x`** ships as the current published line on Hex (capstone release **1.7.0**).
 
 Then fetch your dependencies:
 
