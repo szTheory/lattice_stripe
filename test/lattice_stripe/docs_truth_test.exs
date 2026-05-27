@@ -26,6 +26,15 @@ defmodule LatticeStripe.DocsTruthTest do
     "PaymentIntent.search(client, %{"
   ]
 
+  @stale_checkout_api_patterns [
+    ~s/payment_status == "paid"/
+  ]
+
+  @stale_readme_error_atoms [
+    ":auth_error",
+    ":server_error"
+  ]
+
   defp expected_install_snippet do
     [major, minor | _] = String.split(LatticeStripe.MixProject.project()[:version], ".")
     "{:lattice_stripe, \"~> #{major}.#{minor}\"}"
@@ -165,6 +174,37 @@ defmodule LatticeStripe.DocsTruthTest do
       {creating_idx, _} = :binary.match(payments, "## Creating a PaymentIntent")
       {charge_idx, _} = :binary.match(payments, "## Charge reconciliation")
       assert creating_idx < charge_idx
+    end
+  end
+
+  describe "guides/checkout.md" do
+    test "canonical API examples use atom statuses" do
+      checkout = File.read!("guides/checkout.md")
+
+      assert checkout =~ "Status values:"
+      assert checkout =~ "%LatticeStripe.Checkout.Session{}"
+      assert checkout =~ "payment_status == :paid"
+      assert checkout =~ ":paid"
+
+      for pattern <- @stale_checkout_api_patterns do
+        refute checkout =~ pattern,
+               "stale API pattern #{inspect(pattern)} in checkout.md"
+      end
+    end
+  end
+
+  describe "README.md" do
+    test "error taxonomy matches Error module atoms" do
+      readme = File.read!("README.md")
+
+      assert readme =~ ":authentication_error"
+      assert readme =~ ":api_error"
+      assert readme =~ ":card_error"
+
+      for atom <- @stale_readme_error_atoms do
+        refute readme =~ atom,
+               "stale error atom #{inspect(atom)} in README.md"
+      end
     end
   end
 
