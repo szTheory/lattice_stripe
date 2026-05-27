@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Polish & Operator
 status: executing
-stopped_at: Awaiting REL-04 Hex publish (maintainer HEX_API_KEY)
-last_updated: "2026-05-27T20:35:00.000Z"
-last_activity: 2026-05-27 -- REL-01–03 and CLOSE-01/02 marked; publish blocked on Hex auth
+stopped_at: Phase 55 context gathered
+last_updated: "2026-05-27T19:40:50.856Z"
+last_activity: 2026-05-27 -- Phase 55 planning complete
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 15
-  completed_plans: 11
-  percent: 73
+  total_plans: 17
+  completed_plans: 15
+  percent: 75
 ---
 
 # Project State
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-05-27 — milestone v1.7 started)
 
 Phase: 55 (milestone-closure-v1-x-stop-signal) — EXECUTING (2/4 plans)
 Plan: Phase 55 complete except REL-04
-Status: Publish `1.7.0` to Hex (local key: "not authorized for this action")
-Last activity: 2026-05-27 -- v1.7.0 tag created; manifest synced; tests green
+Status: Ready to execute
+Last activity: 2026-05-27 -- Phase 55 planning complete
 
 **Done estimate:** ~88-90% for intended v1.x SDK scope → ~92-95% after v1.7 ships
 
