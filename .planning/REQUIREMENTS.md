@@ -36,7 +36,7 @@ Requirements for this milestone. Each maps to roadmap phases 56–58.
 
 ### Proof Hygiene (optional)
 
-- [ ] **PROOF-01**: Untracked tax proof files (`test/integration/tax_id_integration_test.exs`, `test/lattice_stripe/tax/adoption_contract_test.exs`) are committed on branch or explicitly dropped with rationale.
+- [x] **PROOF-01**: Untracked tax proof files (`test/integration/tax_id_integration_test.exs`, `test/lattice_stripe/tax/adoption_contract_test.exs`) are committed on branch or explicitly dropped with rationale.
 
 ## Future Requirements
 
@@ -80,7 +80,7 @@ Deferred beyond v1.8. Tracked but not in current roadmap.
 | ROUTE-03 | Phase 58 | Complete |
 | PLAN-01 | Phase 58 | Pending |
 | PLAN-02 | Phase 58 | Pending |
-| PROOF-01 | Phase 58 | Pending |
+| PROOF-01 | Phase 58 | Complete |
 
 **Coverage:**
 

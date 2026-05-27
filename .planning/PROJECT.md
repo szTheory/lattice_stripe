@@ -136,7 +136,7 @@ See `.planning/threads/v1-8-next-milestone-assessment.md` for wedge analysis and
 
 - [ ] Planning artifact cosmetic fixes (PLAN-01, PLAN-02)
 - [x] JTBD-MAP reflects post-v1.8 doc routing (ROUTE-03)
-- [ ] Optional: commit or drop untracked tax proof files (PROOF-01)
+- [x] Optional: commit or drop untracked tax proof files (PROOF-01) — completed 58-03
 
 ### Out of Scope
 
