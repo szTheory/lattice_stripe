@@ -873,7 +873,7 @@ The D-03 sub-decisions 3A/3B/3C/3D/3E are themselves the validation layer for GU
 | Full suite command | `mix test --warnings-as-errors` |
 | CI command | `mix ci` (existing alias) |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 None. Every D-01..D-04 sub-decision is fully locked in CONTEXT.md; every load-bearing fact in this research is either verified against source/registry or cited from official Stripe docs. The two minor flags worth surfacing to the planner are NOT open questions but corrections:
 
