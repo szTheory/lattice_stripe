@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Tax
-status: defining_requirements
-stopped_at: Milestone v1.6 roadmap created — ready for Phase 49
+status: ready
+stopped_at: Milestone v1.6 initialized — roadmap approved
 last_updated: "2026-05-27T00:00:00.000Z"
-last_activity: 2026-05-27 — Milestone v1.6 roadmap created (3 phases, 20 requirements)
+last_activity: 2026-05-27 — Milestone v1.6 roadmap approved (3 phases, 20 requirements)
 progress:
   total_phases: 3
   completed_phases: 0
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-05-27 — Milestone v1.6 kickoff)
 
 Phase: 49 — Tax Calculation & Transaction Core (not started)
 Plan: —
-Status: Ready for discuss/plan
-Last activity: 2026-05-27 — Milestone v1.6 roadmap created
+Status: Ready for discuss/plan (roadmap approved)
+Last activity: 2026-05-27 — Milestone v1.6 roadmap approved
 
 ## Performance Metrics
 
@@ -50,7 +50,7 @@ Last activity: 2026-05-27 — Milestone v1.6 roadmap created
 - Decide whether Phase `41.1` should be re-run with valid sandbox credentials or retired as an accepted external-only follow-through. (Planned to ride along with v1.7 polish milestone.)
 - v1.7 must fill `Charge` surface gap — only `retrieve/3` and `from_map/1` exist today; `list/3`, `search/3`, `capture/4`, `update/4` are missing.
 - `mix.exs` `@version "1.3.0"` bump + `mix hex.publish` to ship v1.5 line to Hex (out-of-band from milestone planning state).
-- Negotiate `TaxId` placement (Customer-scoped vs top-level resource) in discuss-phase before implementation.
+- ~~Negotiate `TaxId` placement~~ — **decided:** top-level `LatticeStripe.TaxId` with arity-based dual-path routing (sanity check 2026-05-27).
 
 ### Blockers/Concerns
 
@@ -68,7 +68,7 @@ Items acknowledged and deferred at milestone close on 2026-05-27:
 ## Session Continuity
 
 Last session: 2026-05-27
-Stopped at: Milestone v1.6 kickoff — defining requirements
+Stopped at: Milestone v1.6 initialized — roadmap approved
 Resume path: `/gsd-discuss-phase 49` or `/gsd-plan-phase 49`
 
 ## Operator Next Steps
