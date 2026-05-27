@@ -33,3 +33,27 @@ defmodule LatticeStripe.TaxId.Verification do
   defp atomize_status(nil), do: nil
   defp atomize_status(other), do: other
 end
+
+defimpl Inspect, for: LatticeStripe.TaxId.Verification do
+  import Inspect.Algebra
+
+  @redacted [:verified_address, :verified_name]
+
+  def inspect(struct, opts) do
+    redacted =
+      Enum.reduce(@redacted, struct, fn field, acc ->
+        case Map.get(acc, field) do
+          nil -> acc
+          _ -> Map.put(acc, field, "[REDACTED]")
+        end
+      end)
+
+    pairs =
+      Map.from_struct(redacted)
+      |> Enum.reject(fn {k, v} -> k == :extra and v == %{} end)
+      |> Enum.map(fn {k, v} -> concat([Atom.to_string(k), ": ", to_doc(v, opts)]) end)
+      |> Enum.intersperse(", ")
+
+    concat(["#LatticeStripe.TaxId.Verification<" | pairs] ++ [">"])
+  end
+end
