@@ -5,6 +5,7 @@ defmodule LatticeStripe.TestingTest do
     CreditNote,
     Dispute,
     Event,
+    EventNotification,
     File,
     FileLink,
     Mandate,
@@ -14,7 +15,9 @@ defmodule LatticeStripe.TestingTest do
     Webhook
   }
 
+  alias LatticeStripe.EventNotification.RelatedObject
   alias LatticeStripe.Testing.Fixtures
+  import LatticeStripe.Test.Fixtures.EventNotification, only: [event_notification_map: 0]
 
   describe "public fixture builders" do
     test "expose canonical raw-map builders for each v1.3 family" do
@@ -97,6 +100,145 @@ defmodule LatticeStripe.TestingTest do
 
       assert sig_header =~ "t=#{fixed_ts}"
     end
+
+    test "still produces 'object' => 'event' (NOT 'v2.core.event') — D-06 backwards-compat" do
+      # Backwards-compat regression: D-06 explicitly requires the snapshot helper to
+      # remain unchanged. A future contributor adding a :shape opt overload that
+      # retargets behavior to thin-event shape would break this assertion.
+      {payload, _sig} =
+        Testing.generate_webhook_payload("customer.created", %{"id" => "cus_1"},
+          secret: "whsec_test"
+        )
+
+      decoded = Jason.decode!(payload)
+      assert decoded["object"] == "event"
+      refute decoded["object"] == "v2.core.event"
+    end
+  end
+
+  describe "generate_thin_event_payload/3" do
+    test "produces a payload that round-trips through Webhook.parse_event_notification/4" do
+      # The load-bearing end-to-end assertion for Phase 47: this proves plans 01
+      # (EventNotification types), 02 (parse_event_notification/4 decode + verify),
+      # and 05 (Testing helper signed-payload builder) are mutually consistent.
+      secret = "whsec_test_roundtrip"
+
+      {payload, sig_header} =
+        Testing.generate_thin_event_payload(
+          "v2.core.account.updated",
+          %{
+            "id" => "acct_test_123",
+            "type" => "v2.core.account",
+            "url" => "/v2/core/accounts/acct_test_123"
+          },
+          secret: secret
+        )
+
+      assert {:ok, %EventNotification{} = notif} =
+               Webhook.parse_event_notification(payload, sig_header, secret)
+
+      assert notif.type == "v2.core.account.updated"
+      assert notif.object == "v2.core.event"
+      assert notif.livemode == false
+
+      assert match?(
+               %RelatedObject{
+                 id: "acct_test_123",
+                 type: "v2.core.account",
+                 url: "/v2/core/accounts/acct_test_123"
+               },
+               notif.related_object
+             )
+    end
+
+    test "accepts nil for related_object_data (snapshot-style v2 events)" do
+      # D-06: nil related_object_data must produce a notification with
+      # related_object: nil. Adopters dispatch these to fetch_event/3.
+      secret = "whsec_test_nil"
+
+      {payload, sig_header} =
+        Testing.generate_thin_event_payload("v2.core.event.something", nil, secret: secret)
+
+      assert {:ok, %EventNotification{} = notif} =
+               Webhook.parse_event_notification(payload, sig_header, secret)
+
+      assert notif.related_object == nil
+    end
+
+    test "encodes created as ISO 8601 string from the :timestamp opt" do
+      # RESEARCH Finding 2: wire `created` is an ISO 8601 string derived from the
+      # same Unix-seconds timestamp used for HMAC signing. Lock the encoding.
+      secret = "whsec_test_ts"
+      fixed_ts = 1_741_524_028
+      expected_iso = DateTime.from_unix!(fixed_ts) |> DateTime.to_iso8601()
+
+      {payload, sig_header} =
+        Testing.generate_thin_event_payload("v2.core.account.updated", nil,
+          secret: secret,
+          timestamp: fixed_ts
+        )
+
+      decoded = Jason.decode!(payload)
+      assert decoded["created"] == expected_iso
+      # Signature embeds the same Unix-seconds timestamp (verify both ends agree).
+      assert sig_header =~ "t=#{fixed_ts}"
+    end
+
+    test "uses 'v2.core.event' as object field (NOT 'v2.core.event_notification')" do
+      # RESEARCH Finding 1: wire object value is "v2.core.event" — same string on
+      # both notifications and fully-fetched events. Regression-lock the wire value.
+      {payload, _sig} =
+        Testing.generate_thin_event_payload(
+          "v2.core.account.updated",
+          %{"id" => "acct_test_1", "type" => "v2.core.account", "url" => "/v2/x"},
+          secret: "whsec_test"
+        )
+
+      decoded = Jason.decode!(payload)
+      assert decoded["object"] == "v2.core.event"
+      refute decoded["object"] == "v2.core.event_notification"
+    end
+
+    test "raises KeyError if :secret opt is missing" do
+      # Keyword.pop!/2 raises KeyError on a missing required key — same contract
+      # as generate_webhook_payload/3 (which uses the same Keyword.pop!).
+      assert_raise KeyError, fn ->
+        Testing.generate_thin_event_payload("v2.core.account.updated", nil, [])
+      end
+    end
+
+    test "with :id, :context, :livemode opts overrides defaults" do
+      secret = "whsec_test_opts"
+
+      {payload, sig_header} =
+        Testing.generate_thin_event_payload("v2.core.account.updated", nil,
+          secret: secret,
+          id: "evt_test_custom_id",
+          context: "ctx_abc",
+          livemode: true
+        )
+
+      assert {:ok, %EventNotification{} = notif} =
+               Webhook.parse_event_notification(payload, sig_header, secret)
+
+      assert notif.id == "evt_test_custom_id"
+      assert notif.context == "ctx_abc"
+      assert notif.livemode == true
+    end
+  end
+
+  describe "event_notification/1" do
+    test "builds %EventNotification{} from a raw map (no signing, no HTTP)" do
+      notif = Testing.event_notification(event_notification_map())
+
+      assert match?(
+               %EventNotification{
+                 id: "evt_test_65UIRNU7G1XbhCfOim416TgmEI4ASQ3jHxXt8RFwXoeVwO",
+                 type: "v2.core.account.updated"
+               },
+               notif
+             )
+    end
   end
 
   describe "typed wrappers" do
@@ -113,6 +255,9 @@ defmodule LatticeStripe.TestingTest do
     test "keep wrapper shapes explicit instead of option-driven" do
       refute function_exported?(Testing, :generate_webhook_event, 4)
       refute function_exported?(Testing, :generate_webhook_payload, 4)
+      # D-06: snapshot and thin-event paths stay separate — no :shape opt overload
+      # that would push the thin helper to a higher arity.
+      refute function_exported?(Testing, :generate_thin_event_payload, 4)
     end
   end
 end
