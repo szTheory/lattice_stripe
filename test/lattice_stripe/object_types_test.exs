@@ -81,6 +81,41 @@ defmodule LatticeStripe.ObjectTypesTest do
       assert %LatticeStripe.CreditNote.LineItem{id: "cnli_123"} = result
     end
 
+    test "dispatches tax.calculation map to Tax.Calculation.from_map/1" do
+      map = %{"object" => "tax.calculation", "id" => "taxcalc_x", "currency" => "usd"}
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.Tax.Calculation{id: "taxcalc_x"} = result
+    end
+
+    test "dispatches tax.transaction map to Tax.Transaction.from_map/1" do
+      map = %{"object" => "tax.transaction", "id" => "tax_x", "type" => "transaction"}
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.Tax.Transaction{id: "tax_x"} = result
+    end
+
+    test "dispatches tax.settings map to Tax.Settings.from_map/1" do
+      map = %{
+        "object" => "tax.settings",
+        "status" => "active",
+        "defaults" => %{"tax_behavior" => "exclusive"}
+      }
+
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.Tax.Settings{status: :active} = result
+    end
+
+    test "dispatches tax.registration map to Tax.Registration.from_map/1" do
+      map = %{
+        "object" => "tax.registration",
+        "id" => "taxreg_123",
+        "country" => "US",
+        "status" => "active"
+      }
+
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.Tax.Registration{id: "taxreg_123", status: :active} = result
+    end
+
     test "dispatches quote map to Quote.from_map/1" do
       map = %{"object" => "quote", "id" => "qt_123", "status" => "draft"}
       result = ObjectTypes.maybe_deserialize(map)
