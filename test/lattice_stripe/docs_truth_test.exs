@@ -35,6 +35,9 @@ defmodule LatticeStripe.DocsTruthTest do
     assert "guides/metering.md" in groups["Canonical Guides"]
     assert "guides/connect.md" in groups["Canonical Guides"]
     assert "guides/webhooks.md" in groups["Operations & DX"]
+    # D-03 sub-decision 3C — new v1.5 trust rail extension to Operations & DX
+    assert "guides/webhooks-thin-events.md" in extras
+    assert "guides/webhooks-thin-events.md" in groups["Operations & DX"]
     assert "guides/testing.md" in groups["Operations & DX"]
     assert "guides/error-handling.md" in groups["Operations & DX"]
   end
