@@ -48,14 +48,13 @@ defmodule MyAppWeb.StripeThinEventController do
   alias LatticeStripe.{EventNotification, Webhook}
   alias LatticeStripe.EventNotification.RelatedObject
 
-  @secret System.fetch_env!("STRIPE_THIN_EVENT_SECRET")
-
   def receive(conn, _params) do
+    secret = Application.fetch_env!(:my_app, :stripe_thin_event_secret)
     raw_body = conn.private[:raw_body] || ""
     sig_header = conn |> get_req_header("stripe-signature") |> List.first()
 
     with {:ok, %EventNotification{} = notif} <-
-           Webhook.parse_event_notification(raw_body, sig_header, @secret),
+           Webhook.parse_event_notification(raw_body, sig_header, secret),
          :ok <- dispatch(MyApp.Stripe.client(), notif) do
       send_resp(conn, 200, "")
     else
