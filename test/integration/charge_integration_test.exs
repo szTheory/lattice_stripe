@@ -2,8 +2,8 @@ defmodule LatticeStripe.ChargeIntegrationTest do
   @moduledoc """
   Integration tests for `LatticeStripe.Charge` against stripe-mock.
 
-  Focused on the Phase 18 retrieve-with-expand path used by the reconciliation
-  guide: `Charge.retrieve(client, id, expand: ["balance_transaction"])`.
+  Shape-first smokes for retrieve, list, search, update, and capture — stripe-mock
+  proves request routing and typed decoding, not persistent charge lifecycle semantics.
   """
 
   use ExUnit.Case, async: false
@@ -55,5 +55,32 @@ defmodule LatticeStripe.ChargeIntegrationTest do
     refute inspected =~ "payment_method_details:"
     refute inspected =~ "billing_details:"
     refute inspected =~ "receipt_email:"
+  end
+
+  test "list/3 returns a response with a charge list", %{client: client} do
+    # stripe-mock is stateless — tests prove routing + typed decode only.
+    assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{data: charges}}} =
+             Charge.list(client)
+
+    assert is_list(charges)
+  end
+
+  test "search/3 returns typed results", %{client: client} do
+    assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{data: charges}}} =
+             Charge.search(client, "status:'succeeded'")
+
+    assert is_list(charges)
+  end
+
+  test "update/4 returns a typed charge struct", %{client: client} do
+    assert {:ok, %Charge{id: id}} =
+             Charge.update(client, "ch_test", %{"metadata" => %{"phase_52" => "true"}})
+
+    assert is_binary(id)
+  end
+
+  test "capture/4 returns a typed charge struct", %{client: client} do
+    assert {:ok, %Charge{id: id}} = Charge.capture(client, "ch_test")
+    assert is_binary(id)
   end
 end
