@@ -84,7 +84,7 @@ When updating this file, review in this order:
 
 | Flow | Product value | Code coverage | Narrative doc coverage | Status |
 | --- | --- | --- | --- | --- |
-| One-time payments | Core | Strong | Partial | Shipped; **payments.md has API example bugs** (status atoms, search arity) — fix in v1.8 |
+| One-time payments | Core | Strong | Strong | Shipped; payments.md examples fixed (Phase 57) + docs_truth locked |
 | Hosted checkout | Core | Strong | Strong | Shipped and documented |
 | Subscription signup and lifecycle | Core | Strong | Strong | Shipped and documented |
 | Customer self-service portal sessions | Core | Strong | Good | Shipped and documented |
@@ -102,9 +102,9 @@ When updating this file, review in this order:
 | Quote-to-invoice workflow | High leverage for B2B | Strong | Good | Shipped (flagship guide + code) |
 | Tax (Calculation, Transaction, Settings, Registration, TaxId) | Core for tax-region SaaS | Strong | Strong | Shipped and documented (v1.6) |
 | Thin-event webhook support | Important platform wedge | Strong | Strong | Shipped and documented (v1.5) |
-| Charge audit and reconciliation | Important for support/ops | Strong | Partial | Shipped (v1.7); list/search/update/capture in code; payments guide routing gap |
-| Production operator guides | Foundational for prod readiness | Strong | Good | Shipped (v1.7): production-checklist + event-debugging; Charge update/capture not in operator route |
-| Public package/docs/version truth | Foundational | Strong | Partial | Hex 1.7.0 + lockstep `~> 1.7` on seven install surfaces; getting-started prose drift (lines 20–21) |
+| Charge audit and reconciliation | Important for support/ops | Strong | Good/Strong | Shipped; `#charge-reconciliation` in payments.md + operator cross-links (Phase 57) |
+| Production operator guides | Foundational for prod readiness | Strong | Good/Strong | Shipped; update/capture routed in production-checklist + event-debugging (Phase 57) |
+| Public package/docs/version truth | Foundational | Strong | Strong | Hex 1.7.0 + lockstep `~> 1.7`; getting-started prose SSOT locked (Phase 56) |
 
 ## Current Best-Fit User Stories
 
