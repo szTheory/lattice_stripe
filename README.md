@@ -12,6 +12,8 @@
 > - **1.6** — Tax: [`guides/tax.md`](guides/tax.md)
 > - **1.7** — Charge list/search/update/capture (PI-first; no create) plus operator playbooks: [`guides/production-checklist.md`](guides/production-checklist.md), [`guides/event-debugging.md`](guides/event-debugging.md)
 >
+> **v1.x scope:** LatticeStripe is **feature-complete for its intended scope** — mainstream SaaS payments, billing, usage metering, Connect, tax calculation, webhooks, and operator diagnostics. Further **1.x** work is **maintenance and adoption-driven**: bugfixes, Stripe API drift, and narrow additions when real adopters need them. See [User Flows & JTBD](guides/user-flows-and-jtbd.md) for fit and [API Stability](guides/api_stability.md) for the semver contract.
+>
 > See [CHANGELOG.md](CHANGELOG.md#170).
 
 A production-grade, idiomatic Elixir SDK for the Stripe API.
@@ -21,6 +23,17 @@ Full documentation available on [HexDocs](https://hexdocs.pm/lattice_stripe).
 If you are evaluating how this fits into a real SaaS billing architecture, start with
 [Guide: User Flows & JTBD](guides/user-flows-and-jtbd.md).
 
+## v1.x scope
+
+As of **1.7.0**, LatticeStripe is **feature-complete for its intended v1.x scope**: mainstream SaaS integrations — payments, billing, Connect, tax on custom flows, webhooks (including thin events), and production operator guides.
+
+**Not in v1.x scope** (maintenance mode; additions only on adopter pull):
+
+- **Specialist Stripe families:** Identity; Treasury; Issuing; Terminal; Financial Connections; Climate; Sigma; Reporting
+- **Tax narrow follow-ups:** Tax Code lookup (`/v1/tax_codes`); Tax Transaction list (if Stripe adds the endpoint)
+
+See [Scope](guides/scope.md) for boundaries, escape hatches, and how to request coverage.
+
 ## Docs Ladder
 
 Use the docs in this order:
@@ -28,6 +41,7 @@ Use the docs in this order:
 - **README** for the repo-level surface map and route-by-intent overview
 - **[Getting Started](guides/getting-started.md)** for first success with a live client and API call
 - **[User Flows & JTBD](guides/user-flows-and-jtbd.md)** for "which Stripe path fits my SaaS?"
+- **[Scope](guides/scope.md)** for v1.x boundaries and deferred families
 - **Canonical guides** for the surface you will actually ship
 - **[Recipes](guides/recipes.md)** for compact job-to-primitive bridges
 - **[Webhooks](guides/webhooks.md)**, **[Production Checklist](guides/production-checklist.md)**, **[Event Debugging](guides/event-debugging.md)**, **[Testing](guides/testing.md)**, and **[Error Handling](guides/error-handling.md)** for runtime truth and support posture
