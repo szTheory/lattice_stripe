@@ -2,49 +2,45 @@
 
 ## What This Is
 
-A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe aims to be the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. **Shipped v1.0.0 to Hex.pm on 2026-04-13** with full Payments + Billing + Connect coverage. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
+A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. **Shipped v1.0.0 to Hex.pm on 2026-04-13** with full Payments + Billing + Connect coverage; four milestones later, the shipped 1.3.x surface is broad, documented, and discoverable. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
 
 ## Core Value
 
-Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated by shipped milestones and a downstream consumer (Accrue) already building on top.
+Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated by four shipped milestones and a downstream consumer (Accrue) already building on top.
 
 ## Current State
 
-**Latest shipped milestone:** v1.3 Production Coverage & Adoption Polish (archived 2026-05-25)
+**Latest shipped milestone:** v1.4 Adoption Closure (archived 2026-05-27)
 
-**What shipped:**
+**What shipped in v1.4:**
 
-- File upload/download transport plus `File` and `FileLink`
-- Disputes, CreditNotes, Mandates, SetupAttempts, and Quotes
-- DX follow-through, verifier closure, and planning-truth reconciliation
+- Public package/version/install truth aligned across README, CHANGELOG, Getting Started, cheatsheet, mix.exs, and HexDocs extras
+- Docs-truth regression coverage extended from README-only to all main onboarding/discovery surfaces (`test/lattice_stripe/docs_truth_test.exs` now 7 tests, 0 failures)
+- Discovery ladder (README → JTBD → recipes → canonical guides), layered ExDoc grouping (`Start Here`, `Canonical Guides`, `Operations & DX`, `Flagship Recipes`)
+- Four flagship recipe guides published: `checkout-signup-and-portal`, `metering-runtime-and-reconciliation`, `connect-platform-flow`, `quote-to-billing-operator`
+- Support-truth follow-through links across nine canonical guides (webhooks/testing/error-handling/subscriptions/portal/metering/connect cluster)
+- Planning truth reconciled: PROJECT.md, ROADMAP.md, REQUIREMENTS.md, STATE.md all reflect close-ready posture
 
-**Close posture:**
+**Outstanding follow-through (not milestone-blocking):**
 
-- v1.3 is archived and v1.4 is now close-ready after the flagship guides and planning-truth reconciliation landed.
-- One accepted follow-through remains outside the milestone headline: Phase `41.1` is still `pending-external-verification` for real-sandbox Quote downstream proof.
-- The remaining open item is an external proof boundary, not missing shipped SDK capability.
+- Phase `41.1` remains `pending-external-verification` for real-sandbox Quote downstream proof — an accepted external-proof boundary carried forward from v1.3, not missing SDK capability.
 
-## Current Milestone: v1.4 Adoption Closure
+## Next Milestone Goals
 
-**Goal:** Make the shipped `1.3.x` surface obvious, trustworthy, and easier to evaluate for serious Elixir and Phoenix SaaS teams.
+The next milestone has not yet been defined. The strongest known wedges from accumulated decision history:
 
-**Status:** Close-ready after Phase 46 landed; verification should preserve the explicit Phase `41.1` boundary rather than flattening it into a false full-close claim.
+- **Thin-event webhook support and guidance** — leading post-adoption code wedge (deferred from v1.4 as `ADV-01`).
+- **Tax resource-family coverage** — next serious breadth candidate (deferred from v1.4 as `TAX-01`).
 
-**Target features:**
-
-- Public package/version/install truth agrees across README, CHANGELOG, Getting Started, cheatsheet, and HexDocs-facing guides.
-- Docs-truth regression coverage fails on first-run onboarding drift instead of only README drift.
-- Guide discovery is tighter for already-shipped high-leverage surfaces.
-- Three to four flagship recipe/operator guides cover the most important already-shipped SaaS flows without turning LatticeStripe into a billing workflow package.
-- Planning truth preserves the narrow Phase `41.1` external Quote proof boundary instead of flattening it into a false full-close story.
-
-**Why now:** The library is already broad for its intended SDK scope; adopter trust, support truth, and first-run clarity now unlock more value than another narrow Stripe resource family.
+Run `/gsd:new-milestone` to surface and prioritize these or other wedges through fresh research.
 
 ## Context
 
 **Ecosystem gap:** At project start, the Elixir ecosystem lacked a modern, maintained Stripe SDK. `stripity_stripe` was outdated, with known issues around nested encoding and stale API coverage. LatticeStripe fills that gap with a production-minded Elixir-first surface.
 
 **Target users:** Elixir developers building SaaS products who need Stripe integrations that are correct, documented, and unsurprising. Early adopter signal remains strong: Accrue already consumes LatticeStripe as a downstream billing layer.
+
+**Codebase scale (post-v1.4):** ~5 v1.4 commits over 2 days, layered over 4 prior milestones. Documentation, regression contract, and discovery surfaces are now first-class artifacts alongside SDK code.
 
 **Design philosophy:**
 
@@ -59,6 +55,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 - Integration specs first, with real request-pipeline proof where feasible
 - Shift-left verification by default when a flow can be executed truthfully in CI
 - Unit tests for pure logic and Mox for behaviour contracts
+- Docs-truth assertions are first-class regression coverage, not editorial cleanup
 
 ## Constraints
 
@@ -68,20 +65,49 @@ Elixir developers can integrate Stripe payments into their applications with con
 - **HTTP**: Finch default transport behind a behaviour boundary
 - **JSON**: Jason
 
+## Requirements
+
+### Validated
+
+- ✓ Production-grade transport, retry, pagination, telemetry foundation — v1.0
+- ✓ Payments, Checkout, SetupIntents, Refunds, webhooks — v1.0
+- ✓ Billing core (Invoice, Subscription, SubscriptionSchedule, SubscriptionItem) — v1.0
+- ✓ Connect core (Accounts, AccountLinks, money movement) — v1.0
+- ✓ Accrue unblockers (Meter, MeterEvent, BillingPortal.Session) — v1.1
+- ✓ Production hardening (Configuration CRUDL, per-op timeouts, warm-up, circuit breaker, OpenTelemetry guides, batching, drift detection, LiveBook) — v1.2
+- ✓ Production coverage (File/FileLink, Disputes, CreditNote, Mandate, SetupAttempt, Quote) — v1.3
+- ✓ Public truth aligned across README, CHANGELOG, Getting Started, cheatsheet, mix.exs, HexDocs (TRUTH-01, TRUTH-02) — v1.4
+- ✓ Docs-truth regression coverage extended beyond README (VERIFY-01, VERIFY-02) — v1.4
+- ✓ Guide discovery ladder and layered ExDoc grouping (GUIDE-01, GUIDE-02) — v1.4
+- ✓ Flagship recipes: Checkout+Portal, Metering runtime, Connect platform, Quote-to-billing (RECIPE-01..04) — v1.4
+- ✓ Planning truth reflects close-ready posture while preserving Phase 41.1 external-proof boundary (PLAN-01) — v1.4
+
+### Active
+
+(None — to be defined by next `/gsd:new-milestone` run.)
+
+### Out of Scope
+
+- Billing-engine abstractions, entitlement logic, dunning workflows — belong downstream in Accrue or application code
+- Resolving Phase 41.1 as a milestone-blocking requirement — real-sandbox proof remains valuable as carried follow-through, not as a release gate
+
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Handwritten v1 surface | Polish and Elixir ergonomics mattered more than breadth-first codegen | Good |
-| Integration-first proof posture | Real boundaries catch drift earlier than mock-only tests | Good |
-| Explicit verbs over magical updates | Clearer SDK semantics for irreversible actions | Good |
-| Shift-left verification default | Docs/example flows should become executable proof where feasible | Good |
-| Keep LatticeStripe lower-level than Accrue | Billing-engine abstractions belong downstream, not in the SDK | Good |
-| Prioritize adoption closure before new breadth | Public truth and guide clarity now unlock more user value than another narrow Stripe family | Good |
-| Treat public docs/support truth as a milestone-grade surface | For a near-done SDK, first-run trust and flagship guidance now change adoption more than another small API family | Good |
-| Keep recipe/operator guidance primitive-first | Recipes should stitch shipped primitives together without becoming an app workflow product or Accrue substitute | Good |
-| Treat the library as near-done for scope | Remaining leverage is mostly adopter truth, thin-event evolution, and selected breadth, not missing foundation | Good |
-| Treat first-run docs truth as verifier-worthy surface, not editorial cleanup | A green narrow docs test can still hide adopter-facing drift in install/onboarding guides | Good |
+| Handwritten v1 surface | Polish and Elixir ergonomics mattered more than breadth-first codegen | ✓ Good |
+| Integration-first proof posture | Real boundaries catch drift earlier than mock-only tests | ✓ Good |
+| Explicit verbs over magical updates | Clearer SDK semantics for irreversible actions | ✓ Good |
+| Shift-left verification default | Docs/example flows should become executable proof where feasible | ✓ Good |
+| Keep LatticeStripe lower-level than Accrue | Billing-engine abstractions belong downstream, not in the SDK | ✓ Good |
+| Prioritize adoption closure before new breadth | Public truth and guide clarity unlock more value than another narrow Stripe family | ✓ Good (v1.4 confirmed) |
+| Treat public docs/support truth as milestone-grade | First-run trust and flagship guidance change adoption more than another small API family | ✓ Good (v1.4 confirmed) |
+| Keep recipe/operator guidance primitive-first | Recipes should stitch shipped primitives together without becoming an app workflow product | ✓ Good (v1.4 confirmed) |
+| Treat the library as near-done for scope | Remaining leverage is adopter truth + selected wedges, not missing foundation | ✓ Good |
+| Docs-truth as verifier-worthy regression surface | A green narrow docs test can still hide adopter-facing drift; v1.4 found `~> 1.2` drift while older assertions stayed green | ✓ Good (validated by Phase 43 find) |
+| Preserve Phase 41.1 as `pending-external-verification` boundary | Real-sandbox proof is valuable but should not flatten into a false close; honesty over headline | ✓ Good (carried through v1.4) |
+| Layered ExDoc grouping (Start Here / Canonical / Operations / Flagship) | Flat extras list buried high-leverage guides; role-based grouping surfaces the right surface for the right reader | ✓ Good (v1.4) |
+| Webhook-confirmed truth posture in flagship guides | Accepted-now-vs-confirmed-by-webhook framing avoids overclaiming synchronous authority for async billing flows | ✓ Good (v1.4) |
 
 ## Evolution
 
@@ -101,4 +127,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-26 after Phase 46 truth closure*
+*Last updated: 2026-05-27 after v1.4 Adoption Closure milestone*

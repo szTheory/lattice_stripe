@@ -1,20 +1,16 @@
 ---
-status: testing
+status: complete
 phase: 46-flagship-recipes-ii-planning-truth-closure
 source:
   - 46-01-SUMMARY.md
   - 46-02-SUMMARY.md
 started: 2026-05-27T02:04:00Z
-updated: 2026-05-27T02:04:30Z
+updated: 2026-05-27T02:08:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: Connect flagship guide is published with required anchors
-expected: |
-  guides/connect-platform-flow.md exists and covers the Express onboarding -> destination charges -> webhook-owned reconciliation spine with AccountLink/LoginLink bearer callouts, application_fee_amount / transfer_group / Transfer vs Payout disambiguation, and a "Read next" routing block.
-awaiting: user response
+[testing complete]
 
 ## Tests
 

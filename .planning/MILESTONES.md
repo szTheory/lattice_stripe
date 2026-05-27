@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.4 Adoption Closure (Shipped: 2026-05-27)
+
+**Phases completed:** 4 phases, 8 plans, 18 tasks
+
+**Key accomplishments:**
+
+- Aligned the highest-visibility public docs surfaces to the shipped `1.3.x` package line so README, HexDocs Getting Started, cheatsheet, and changelog now tell one consistent onboarding story.
+- Expanded docs-truth regression coverage from README-only checks to the real onboarding entry points, including ExDoc publication metadata and the Getting Started install contract.
+- Reframed the public docs entry points as a deliberate discovery ladder so README, Getting Started, JTBD, recipes, and ExDoc now steer evaluators into the right shipped guide surfaces instead of a flat list.
+- Connected the canonical guide graph with support-truth follow-through links and extended the docs-truth regression suite so discovery and ExDoc-role drift now fail fast.
+- Published the hosted recurring-billing flagship guide and wired it into the public docs graph so evaluators can follow one honest path from Checkout signup through portal follow-through.
+- Published the runtime-first metering flagship guide and connected it to the canonical trust rails so adopters can learn the live usage-billing path without false synchronous guarantees.
+- Published the Connect and Quote flagship workflow guides and wired them into the docs graph so evaluators can follow two high-leverage shipped paths without false authority claims.
+- Reconciled the active planning artifacts so v1.4 now reads as close-ready everywhere while still naming Phase 41.1 as the only accepted pending-external-verification follow-through.
+
+---
+
 ## v1.3 Production Coverage & Adoption Polish (Shipped: 2026-05-25)
 
 **Phases completed:** 12 phases, 26 plans, 53 tasks
