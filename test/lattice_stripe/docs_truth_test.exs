@@ -42,6 +42,8 @@ defmodule LatticeStripe.DocsTruthTest do
     assert Map.has_key?(groups, "Operations & DX")
     assert "guides/getting-started.md" in groups["Start Here"]
     assert "guides/user-flows-and-jtbd.md" in groups["Start Here"]
+    assert "guides/scope.md" in extras
+    assert "guides/scope.md" in groups["Start Here"]
     assert "guides/recipes.md" in groups["Start Here"]
     assert "guides/checkout-signup-and-portal.md" in groups["Flagship Recipes"]
     assert "guides/connect-platform-flow.md" in groups["Flagship Recipes"]
@@ -94,6 +96,32 @@ defmodule LatticeStripe.DocsTruthTest do
     assert readme =~ "guides/error-handling.md"
     assert readme =~ "https://hexdocs.pm/lattice_stripe/recipes.html"
     refute readme =~ "What's new in v1.1"
+  end
+
+  describe "v1.x stop signal and scope boundaries" do
+    test "readme publishes stop signal and deferred scope anchors" do
+      readme = File.read!("README.md")
+
+      assert readme =~ "feature-complete for its intended scope"
+      assert readme =~ "maintenance and adoption-driven"
+      assert readme =~ "guides/user-flows-and-jtbd.md"
+      assert readme =~ "guides/api_stability.md"
+      assert readme =~ "## v1.x scope"
+      assert readme =~ "Identity"
+      assert readme =~ "Reporting"
+
+      refute readme =~ ~r/complete Stripe SDK/i
+      refute readme =~ ~r/all endpoints/i
+    end
+
+    test "guides/scope.md is the canonical deferred-scope contract" do
+      scope = File.read!("guides/scope.md")
+
+      assert scope =~ "Identity"
+      assert scope =~ "Reporting" or scope =~ "Sigma"
+      assert scope =~ "adopter pull" or scope =~ "maintenance mode"
+      assert scope =~ "Client.request"
+    end
   end
 
   test "readme release block and hexdocs clusters reflect v1.7 surface" do
@@ -379,7 +407,8 @@ defmodule LatticeStripe.DocsTruthTest do
     # Reverse link from parent webhook guide
     webhooks = File.read!("guides/webhooks.md")
     assert webhooks =~ "webhooks-thin-events.md"
-    assert webhooks =~ "thin event"  # locks the new "Thin events (/v2/events)" closing section in webhooks.md
+    # locks the new "Thin events (/v2/events)" closing section in webhooks.md
+    assert webhooks =~ "thin event"
 
     # README discovery route
     readme = File.read!("README.md")
