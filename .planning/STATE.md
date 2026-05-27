@@ -4,8 +4,8 @@ milestone: v1.7
 milestone_name: Polish & Operator
 status: executing
 stopped_at: Milestone v1.7 initialized — requirements and roadmap defined
-last_updated: "2026-05-27T17:37:05.008Z"
-last_activity: 2026-05-27 -- Phase 52 planning complete
+last_updated: "2026-05-27T17:41:53.709Z"
+last_activity: 2026-05-27 -- Phase 52 execution started
 progress:
   total_phases: 4
   completed_phases: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-27 — milestone v1.7 started)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** v1.7 — Polish & Operator (Charge + operator guides + Hex capstone + Phase 41.1 retire)
+**Current focus:** Phase 52 — charge-surface-expansion
 
 ## Current Position
 
-Phase: 52 — Charge Surface Expansion (context gathered)
-Plan: —
-Status: Ready to execute
-Last activity: 2026-05-27 -- Phase 52 planning complete
+Phase: 52 (charge-surface-expansion) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 52
+Last activity: 2026-05-27 -- Phase 52 execution started
 
 **Done estimate:** ~88-90% for intended v1.x SDK scope → ~92-95% after v1.7 ships
 
