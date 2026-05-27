@@ -117,6 +117,10 @@ jobs:
       - name: Run tests
         run: mix test
 
+      - name: Tax adoption contract (Phase 51 UAT gate)
+        if: matrix.elixir == '1.19' && matrix.otp == '28'
+        run: mix test test/lattice_stripe/tax/adoption_contract_test.exs --warnings-as-errors
+
   integration:
     name: Integration Tests
     runs-on: ubuntu-latest
