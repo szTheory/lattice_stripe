@@ -208,4 +208,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 — Phase 59 complete; Phase 60 CI gate next*
+*Last updated: 2026-05-27 — v1.9 shipped; maintenance mode*
