@@ -1,6 +1,6 @@
 # Thin-Event Webhook Evaluation
 
-Updated: 2026-05-25
+Updated: 2026-05-27 (v1.5 assessment pass added concrete API surface + reference SDK)
 
 ## Why this thread exists
 
@@ -57,3 +57,56 @@ Treat thin-event support as a focused webhook-platform milestone with these slic
 - Adoption closure stays first because public truth and first-run trust still lag shipped surface.
 - Thin-event support is the first post-adoption code wedge.
 - Tax remains the next serious breadth candidate after thin events unless fresh adopter evidence changes the order.
+
+## v1.5 assessment additions (2026-05-27)
+
+Concrete shape locked in by the v1.5 next-milestone assessment (see
+`v1-5-next-milestone-assessment.md`). Selected as the v1.5 milestone pick.
+
+### Reference SDK
+
+- **stripe-node v49+** exposes `parseEventNotification` which returns
+  `Stripe.V2.EventNotification` carrying `relatedObject` plus
+  `fetchRelatedObject()` and `fetchEvent()` methods. This is the cleanest
+  cross-SDK pattern to mirror in Elixir.
+- stripe-python and stripe-go leave fetch-after-verify as separate client
+  calls with no thin-event helper — lower DX but simpler. LatticeStripe should
+  ship explicit helpers because Elixir-idiomatic ergonomics is part of the
+  project's DNA per `prompts/`.
+
+### Concrete API surface to ship
+
+- `Webhook.parse_event_notification/3` — parallel to `construct_event/3` but
+  returns a thin-event notification struct.
+- `Webhook.fetch_event/2` — typed `Event.t()` retrieval.
+- `Webhook.fetch_related_object/2` — returns the underlying typed resource via
+  the existing `ObjectTypes` dispatch (reuses v1.2 expand machinery).
+- Extend the `Event` struct to surface `context` and `related_object` cleanly
+  (`context` already exists; `related_object` is new for the thin-event shape).
+- Extend `Testing` helpers to emit thin-event payload shapes alongside snapshot
+  payloads.
+
+### Reconciliations / bug fixes required
+
+- **`Webhook.check_tolerance/2` `tolerance: 0` semantics.** Docstring at
+  `lib/lattice_stripe/webhook.ex:84` says "Set 0 to disable staleness check"
+  but the code path at `lib/lattice_stripe/webhook.ex:268-273` always returns
+  `{:error, :timestamp_expired}` for the `0` clause. Fix as part of v1.5 since
+  thin-event work touches webhook semantics anyway.
+- `construct_event/4` raises on malformed JSON via `Jason.decode!` — document
+  the verification-vs-payload-shape failure boundary explicitly in the new
+  guide.
+
+### Rate-limit guidance to include in `guides/webhooks-thin-events.md`
+
+- Keep webhook delivery under ~90 events/sec to stay safely below Stripe's
+  100 req/sec ceiling, since fetch-after-verify doubles the call rate.
+- Show idempotency via app-side dedup keyed on `event.id`, not on the fetched
+  resource state (the resource can change between webhook send and fetch).
+- Show Connect/context-aware routing using the `event.context` field.
+
+### Estimated effort
+
+Medium — 1 phase with 3-5 plans. Net-new helpers, extended Testing module,
+one canonical Phoenix guide, integration test coverage, plus the
+`tolerance: 0` reconciliation bundled in.
