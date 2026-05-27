@@ -46,7 +46,7 @@
 3. `docs_truth_test.exs` includes grep blocks that fail if release-status prose regresses to stale version claims.
 4. `mix test test/lattice_stripe/docs_truth_test.exs` passes.
 
-**Plans:** TBD
+**Plans:** 2 plans (2 waves)
 
 ### Phase 57: Payments Guide & Charge Routing
 
