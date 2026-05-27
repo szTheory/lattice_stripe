@@ -1,6 +1,23 @@
 defmodule LatticeStripe.DocsTruthTest do
   use ExUnit.Case, async: true
 
+  @install_surfaces [
+    "README.md",
+    "guides/getting-started.md",
+    "guides/cheatsheet.cheatmd",
+    "guides/webhooks-thin-events.md",
+    "guides/production-checklist.md",
+    "guides/event-debugging.md",
+    "guides/opentelemetry.md"
+  ]
+
+  @stale_install_pins ["1.1", "1.2", "1.3", "1.5"]
+
+  defp expected_install_snippet do
+    [major, minor | _] = String.split(LatticeStripe.MixProject.project()[:version], ".")
+    "{:lattice_stripe, \"~> #{major}.#{minor}\"}"
+  end
+
   defp docs_config do
     LatticeStripe.MixProject.project()[:docs]
   end
@@ -48,7 +65,22 @@ defmodule LatticeStripe.DocsTruthTest do
     assert "guides/error-handling.md" in groups["Operations & DX"]
   end
 
-  test "readme routes evaluators into the guide ladder and published 1.3 line" do
+  test "public install line matches mix.exs and all install surfaces" do
+    snippet = expected_install_snippet()
+
+    for path <- @install_surfaces do
+      assert File.read!(path) =~ snippet, "expected #{snippet} in #{path}"
+    end
+  end
+
+  test "no stale lattice_stripe install pins on public surfaces" do
+    for path <- @install_surfaces, pin <- @stale_install_pins do
+      refute File.read!(path) =~ "{:lattice_stripe, \"~> #{pin}\"}",
+             "stale pin ~> #{pin} in #{path}"
+    end
+  end
+
+  test "readme routes evaluators into the guide ladder" do
     readme = File.read!("README.md")
 
     assert readme =~ "guides/user-flows-and-jtbd.md"
@@ -61,14 +93,24 @@ defmodule LatticeStripe.DocsTruthTest do
     assert readme =~ "guides/testing.md"
     assert readme =~ "guides/error-handling.md"
     assert readme =~ "https://hexdocs.pm/lattice_stripe/recipes.html"
-    assert readme =~ "{:lattice_stripe, \"~> 1.3\"}"
     refute readme =~ "What's new in v1.1"
+  end
+
+  test "readme release block and hexdocs clusters reflect v1.7 surface" do
+    readme = File.read!("README.md")
+
+    assert readme =~ "1.7"
+    assert readme =~ "hexdocs.pm/lattice_stripe/tax.html"
+    assert readme =~ "LatticeStripe.Charge.html"
+    assert readme =~ "webhooks-thin-events.md"
+    assert readme =~ "production-checklist.md"
+    assert readme =~ "event-debugging.md"
+    refute readme =~ "1.3.x` line is the current published"
   end
 
   test "getting started branches from first success into high-leverage guides" do
     getting_started = File.read!("guides/getting-started.md")
 
-    assert getting_started =~ "{:lattice_stripe, \"~> 1.3\"}"
     refute getting_started =~ "{:lattice_stripe, \"~> 1.2\"}"
     assert getting_started =~ "user-flows-and-jtbd.md"
     assert getting_started =~ "subscriptions.md"
@@ -263,17 +305,12 @@ defmodule LatticeStripe.DocsTruthTest do
     assert errors =~ "metering-runtime-and-reconciliation.md"
   end
 
-  test "cheatsheet keeps the published 1.3 install truth" do
-    cheatsheet = File.read!("guides/cheatsheet.cheatmd")
-
-    assert cheatsheet =~ "{:lattice_stripe, \"~> 1.3\"}"
-  end
-
-  test "changelog records the shipped 1.3 release truth" do
+  test "changelog records the shipped 1.7 release truth" do
     changelog = File.read!("CHANGELOG.md")
 
-    assert changelog =~ "## [1.3.0]"
-    assert changelog =~ "shipped `1.3.x` surface"
+    assert changelog =~ "## [1.7.0]"
+    assert changelog =~ "included in 1.7.0"
+    assert changelog =~ "last version published"
   end
 
   test "CHANGELOG.md documents WEBFIX-01 reconciliation under v1.5" do
@@ -322,17 +359,6 @@ defmodule LatticeStripe.DocsTruthTest do
     # Verification-vs-payload-shape failure boundary phrasing (GUIDE-03)
     assert guide =~ "verification"
     assert guide =~ "payload shape"
-  end
-
-  test "webhooks-thin-events guide is the v1.5 install-line canary" do
-    # B2 canary architecture (CONTEXT.md D-03 sub-decision 3B): this guide
-    # is the ONLY 1.5-only doc until release prep flips README/getting-started/
-    # cheatsheet. Existing tests at lines 54, 61, 165 still assert `~> 1.3`
-    # for the other docs — when v1.5 is released and someone does the cross-
-    # cutting lockstep flip, those tests fail first, naturally enforcing the
-    # rule without coupling the install-line refresh to Phase 48.
-    guide = File.read!("guides/webhooks-thin-events.md")
-    assert guide =~ "{:lattice_stripe, \"~> 1.5\"}"
   end
 
   test "webhooks-thin-events guide is cross-linked from README/JTBD/webhooks.md" do
@@ -395,14 +421,6 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ "result record"
     assert guide =~ "webhooks-thin-events.md"
     assert guide =~ "webhooks.md"
-  end
-
-  test "operator guides are the v1.7 install-line canary" do
-    checklist = File.read!("guides/production-checklist.md")
-    debugging = File.read!("guides/event-debugging.md")
-
-    assert checklist =~ "{:lattice_stripe, \"~> 1.7\"}"
-    assert debugging =~ "{:lattice_stripe, \"~> 1.7\"}"
   end
 
   test "operator guides are cross-linked from README/JTBD/sibling guides" do
