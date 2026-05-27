@@ -53,12 +53,16 @@
       "stop_milestone_includes_release_truth": true,
       "jtbd_refresh_at_milestone_close": true,
       "docs_truth_prose_surfaces": [
-        "guides/getting-started.md"
+        "guides/getting-started.md",
+        "README.md"
       ],
       "docs_truth_canonical_guides": [
-        "guides/payments.md"
+        "guides/payments.md",
+        "guides/checkout.md"
       ],
-      "verify_untracked_proof_files": true
+      "verify_untracked_proof_files": true,
+      "parallel_subagent_research": true,
+      "assessment_output_thread": ".planning/threads/v1-{N}-next-milestone-assessment.md"
     }
   },
   "hooks": {

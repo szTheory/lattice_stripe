@@ -53,13 +53,25 @@ The library is **done for v1.x scope** — intended mainstream SaaS Stripe cover
 
 **Forward posture:** Maintenance mode — bugfixes, Stripe API drift, adopter-driven narrow additions. No planned new resource-family breadth in v1.x absent fresh adopter pull.
 
+## Current Milestone: v1.9 CI & Doc Honesty
+
+**Goal:** Close remaining adopter-truth gaps in checkout/README docs and make CI actually enforce docs_truth on guide-only changes — doc-only milestone, no Hex bump, no new API breadth.
+
+**Target features:**
+- Fix `guides/checkout.md` atom status bug (`"paid"` → `:paid`) + status-values callout (mirror Phase 57 payments pattern)
+- Fix `README.md` error taxonomy drift (`:auth_error`/`:server_error` → `:authentication_error`/`:api_error`)
+- Extend `docs_truth_test.exs` locks to checkout.md + README error grep
+- CI-01: adjust `paths-ignore` so guide-only PRs still run docs_truth (requires explicit workflow approval)
+- JTBD-MAP: downgrade hosted checkout from "Strong" to "Partial" until locked
+- Optional admin: backfill `54-VERIFICATION.md` from v1.7 Phase 54
+
 ## Maintenance Mode (post–v1.8)
 
 **Latest shipped milestone:** v1.8 Adopter Truth & Doc Routing Polish (archived 2026-05-27)
 
 **Forward posture:** Maintenance mode — Stripe API drift, adopter-driven narrow additions, bugfixes. No planned new resource-family breadth absent fresh adopter pull.
 
-**Do not rewrite:** v1.x stop signal (already at Hex 1.7.0); no Hex 1.8.0 bump (doc-only milestone).
+**Do not rewrite:** v1.x stop signal (already at Hex 1.7.0); no Hex 1.8.0 or 1.9.0 bump (doc-only milestones).
 
 See `.planning/milestones/v1.8-MILESTONE-AUDIT.md` for close-time audit evidence.
 
@@ -136,7 +148,11 @@ See `.planning/milestones/v1.8-MILESTONE-AUDIT.md` for close-time audit evidence
 
 ### Active
 
-- None — maintenance mode (post–v1.8)
+- CI-01: Guide-only PRs run docs_truth (CI gate)
+- CHECKOUT-01..03: checkout.md atom status + docs_truth locks
+- README-01..02: README error taxonomy + docs_truth lock
+- JTBD-01: Hosted checkout rating honesty in JTBD-MAP
+- PLAN-01 (optional): Backfill 54-VERIFICATION.md
 
 ### Out of Scope
 
@@ -176,6 +192,7 @@ See `.planning/milestones/v1.8-MILESTONE-AUDIT.md` for close-time audit evidence
 | Refresh JTBD-MAP at milestone close, not just milestone start | v1.7 shipped but JTBD-MAP still described pre-v1.7 gaps until post-v1.7 assessment — causes wrong scope on `/gsd-new-milestone` | ✓ Assessment (2026-05-27) |
 | docs_truth must cover canonical guide API examples | payments.md survived with string-vs-atom status bugs and wrong search arity because docs_truth locks cross-links/install pins but not canonical guide body examples | ✓ Assessment (2026-05-27 refresh) |
 | CI paths-ignore on guides bypasses docs_truth | Guide-only PRs skip unit CI; highest-risk edit surface has weakest automated gate — fix requires explicit workflow approval | Pending approval |
+| Post-v1.8 assessment: checkout.md + README + CI-01 are highest remaining adopter-truth gaps | lib/ + guides scan after v1.8 close found checkout.md L206 status-string bug (same class as pre-v1.8 payments.md), README error taxonomy drift, CI-01 still bypasses docs_truth on guide-only PRs; JTBD-MAP hosted checkout rating was overstated | ✓ Assessment (2026-05-27); v1.9 recommended |
 
 ## Evolution
 
@@ -195,4 +212,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after milestone v1.8 close*
+*Last updated: 2026-05-27 — milestone v1.9 CI & Doc Honesty started*
