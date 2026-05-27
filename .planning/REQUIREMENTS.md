@@ -10,8 +10,8 @@ Requirements for this milestone. Each maps to roadmap phases 56–58.
 
 ### Release Truth
 
-- [ ] **TRUTH-01**: Adopter reading `guides/getting-started.md` sees release-status prose that matches Hex 1.7.0 as the current published surface (no stale `1.3.x` claim).
-- [ ] **TRUTH-02**: `docs_truth_test.exs` grep-regresses release-status prose in getting-started (not only the `~> 1.7` install pin).
+- [x] **TRUTH-01**: Adopter reading `guides/getting-started.md` sees release-status prose that matches Hex 1.7.0 as the current published surface (no stale `1.3.x` claim).
+- [x] **TRUTH-02**: `docs_truth_test.exs` grep-regresses release-status prose in getting-started (not only the `~> 1.7` install pin).
 
 ### Canonical Guide Correctness
 
@@ -69,8 +69,8 @@ Deferred beyond v1.8. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TRUTH-01 | Phase 56 | Pending |
-| TRUTH-02 | Phase 56 | Pending |
+| TRUTH-01 | Phase 56 | Complete |
+| TRUTH-02 | Phase 56 | Complete |
 | GUIDE-01 | Phase 57 | Pending |
 | GUIDE-02 | Phase 57 | Pending |
 | GUIDE-03 | Phase 57 | Pending |
@@ -83,6 +83,7 @@ Deferred beyond v1.8. Tracked but not in current roadmap.
 | PROOF-01 | Phase 58 | Pending |
 
 **Coverage:**
+
 - v1.8 requirements: 12 total
 - Mapped to phases: 12
 - Unmapped: 0 ✓

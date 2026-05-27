@@ -14,6 +14,8 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Active milestone:** v1.8 Adopter Truth & Doc Routing Polish (started 2026-05-27)
 
+**Phase 56 complete (2026-05-27):** getting-started release-status prose aligned to Hex 1.7.x; docs_truth SSOT locks for prose drift (TRUTH-01, TRUTH-02).
+
 **What shipped in v1.7:**
 
 - **Charge surface expansion** — `LatticeStripe.Charge` list/search/update/capture parity with PI-first moduledoc, Mox wire tests, stripe-mock integration smokes, and docs-truth four-surface triangulation (CHRG-01..05).
@@ -123,10 +125,10 @@ See `.planning/threads/v1-8-next-milestone-assessment.md` for wedge analysis and
 - ✓ Operator guides: production checklist + event debugging (OPS-01, OPS-02) — Phase 53, v1.7
 - ✓ Release truth: 1.7.0 version, CHANGELOG v1.4–v1.7, lockstep `~> 1.7` install contract, Hex publish (REL-01..04) — Phase 54, v1.7
 - ✓ Phase 41.1 retired + v1.x stop signal (CLOSE-01, CLOSE-02) — Phase 55, v1.7
+- ✓ Release-status prose truth in getting-started + docs_truth prose regression locks (TRUTH-01, TRUTH-02) — Phase 56, v1.8
 
 ### Active
 
-- [ ] Release-status prose truth in getting-started (TRUTH-01, TRUTH-02)
 - [ ] Canonical payments guide API examples corrected (GUIDE-01..03)
 - [ ] Charge reconciliation doc routing in payments + operator guides (ROUTE-01, ROUTE-02)
 - [ ] docs_truth locks canonical guide API examples (VERIFY-04)
