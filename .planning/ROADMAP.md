@@ -74,7 +74,12 @@ Plans:
   5. The guide is wired into ExDoc layered grouping and the JTBD discovery ladder.
   6. Docs-truth grep blocks lock Tax moduledoc examples and guide content against drift.
 
-**Plans**: TBD (via `/gsd-plan-phase 51`)
+**Plans**: 4 plans (4 waves)
+
+- [ ] 51-01-PLAN.md — TaxId dual-path API + nested structs + ObjectTypes + unit tests (TAXID-01..04)
+- [ ] 51-02-PLAN.md — Testing fixtures promotion + five-type expand proof (DX-01, DX-02)
+- [ ] 51-03-PLAN.md — guides/tax.md + discovery wiring + moduledoc guide links (DX-04)
+- [ ] 51-04-PLAN.md — docs_truth_test.exs Tax blocks (DX-05)
 
 ## Outstanding Follow-Through
 
