@@ -14,7 +14,7 @@
 
 - [x] **Phase 49: Tax Calculation & Transaction Core** — Standalone Tax flow primitives: calculate tax, record transactions, reverse when needed, with integration proof of the calc→txn chain. (completed 2026-05-27)
 - [x] **Phase 50: Tax Settings & Registration** — Account-level tax configuration: singleton settings and jurisdiction registration CRUDL. (completed 2026-05-27)
-- [ ] **Phase 51: TaxId, Testing & Adoption Surface** — Complete the Tax family with dual-path TaxId, Testing fixtures, canonical guide, and docs-truth regression.
+- [x] **Phase 51: TaxId, Testing & Adoption Surface** — Complete the Tax family with dual-path TaxId, Testing fixtures, canonical guide, and docs-truth regression. (completed 2026-05-27)
 
 ## Phase Details
 
@@ -77,9 +77,9 @@ Plans:
 **Plans**: 4 plans (4 waves)
 
 - [x] 51-01-PLAN.md — TaxId dual-path API + nested structs + ObjectTypes + unit tests (TAXID-01..04)
-- [ ] 51-02-PLAN.md — Testing fixtures promotion + five-type expand proof (DX-01, DX-02)
-- [ ] 51-03-PLAN.md — guides/tax.md + discovery wiring + moduledoc guide links (DX-04)
-- [ ] 51-04-PLAN.md — docs_truth_test.exs Tax blocks (DX-05)
+- [x] 51-02-PLAN.md — Testing fixtures promotion + five-type expand proof (DX-01, DX-02)
+- [x] 51-03-PLAN.md — guides/tax.md + discovery wiring + moduledoc guide links (DX-04)
+- [x] 51-04-PLAN.md — docs_truth_test.exs Tax blocks (DX-05)
 
 ## Outstanding Follow-Through
 
@@ -91,7 +91,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 49. Tax Calculation & Transaction Core | 3/3 | Complete    | 2026-05-27 |
 | 50. Tax Settings & Registration | 2/2 | Complete    | 2026-05-27 |
-| 51. TaxId, Testing & Adoption Surface | 1/4 | In Progress|  |
+| 51. TaxId, Testing & Adoption Surface | 4/4 | Complete    | 2026-05-27 |
 
 ## Next Milestone
 

@@ -29,18 +29,18 @@ Requirements for the Tax milestone. Each maps to roadmap phases 49–51.
 
 ### Tax ID
 
-- [ ] **TAXID-01**: Developer can create a tax ID via top-level path
-- [ ] **TAXID-02**: Developer can create a tax ID via customer-nested path
-- [ ] **TAXID-03**: Developer can retrieve, list, and delete tax IDs (both paths)
-- [ ] **TAXID-04**: Tax ID structs deserialize via ObjectTypes registry
+- [x] **TAXID-01**: Developer can create a tax ID via top-level path
+- [x] **TAXID-02**: Developer can create a tax ID via customer-nested path
+- [x] **TAXID-03**: Developer can retrieve, list, and delete tax IDs (both paths)
+- [x] **TAXID-04**: Tax ID structs deserialize via ObjectTypes registry
 
 ### Platform & DX
 
-- [ ] **DX-01**: All five Tax object types registered in ObjectTypes for expand deserialization
-- [ ] **DX-02**: `LatticeStripe.Testing` fixtures for Calculation, Transaction, and TaxId
+- [x] **DX-01**: All five Tax object types registered in ObjectTypes for expand deserialization
+- [x] **DX-02**: `LatticeStripe.Testing` fixtures for Calculation, Transaction, and TaxId
 - [x] **DX-03**: Integration spec proving calculation → transaction chain (Mox-at-Transport)
-- [ ] **DX-04**: Canonical `guides/tax.md` recipe for standalone Tax API flow
-- [ ] **DX-05**: Docs-truth grep extension for Tax moduledocs
+- [x] **DX-04**: Canonical `guides/tax.md` recipe for standalone Tax API flow
+- [x] **DX-05**: Docs-truth grep extension for Tax moduledocs
 
 ## Future Requirements
 
@@ -80,14 +80,14 @@ Explicitly excluded for v1.6. Documented to prevent scope creep.
 | CONF-02 | Phase 50 | Complete |
 | CONF-03 | Phase 50 | Complete |
 | CONF-04 | Phase 50 | Complete |
-| TAXID-01 | Phase 51 | Pending |
-| TAXID-02 | Phase 51 | Pending |
-| TAXID-03 | Phase 51 | Pending |
-| TAXID-04 | Phase 51 | Pending |
-| DX-01 | Phase 51 | Pending |
-| DX-02 | Phase 51 | Pending |
-| DX-04 | Phase 51 | Pending |
-| DX-05 | Phase 51 | Pending |
+| TAXID-01 | Phase 51 | Complete |
+| TAXID-02 | Phase 51 | Complete |
+| TAXID-03 | Phase 51 | Complete |
+| TAXID-04 | Phase 51 | Complete |
+| DX-01 | Phase 51 | Complete |
+| DX-02 | Phase 51 | Complete |
+| DX-04 | Phase 51 | Complete |
+| DX-05 | Phase 51 | Complete |
 
 **Coverage:**
 
