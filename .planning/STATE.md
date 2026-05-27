@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: Tax
 status: defining_requirements
-stopped_at: Milestone v1.6 kickoff — defining requirements
+stopped_at: Milestone v1.6 roadmap created — ready for Phase 49
 last_updated: "2026-05-27T00:00:00.000Z"
-last_activity: 2026-05-27 — Milestone v1.6 started
+last_activity: 2026-05-27 — Milestone v1.6 roadmap created (3 phases, 20 requirements)
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-27 — Milestone v1.6 kickoff)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Defining requirements for v1.6 Tax milestone
+**Current focus:** Phase 49 — Tax Calculation & Transaction Core
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 49 — Tax Calculation & Transaction Core (not started)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-27 — Milestone v1.6 started
+Status: Ready for discuss/plan
+Last activity: 2026-05-27 — Milestone v1.6 roadmap created
 
 ## Performance Metrics
 
@@ -69,9 +69,9 @@ Items acknowledged and deferred at milestone close on 2026-05-27:
 
 Last session: 2026-05-27
 Stopped at: Milestone v1.6 kickoff — defining requirements
-Resume path: Research decision → requirements → roadmap
+Resume path: `/gsd-discuss-phase 49` or `/gsd-plan-phase 49`
 
 ## Operator Next Steps
 
-- Answer research decision (Research first vs Skip)
-- Define v1.6 requirements and create roadmap (Phases 49+)
+- Run `/gsd-discuss-phase 49` to negotiate scope (especially TaxId placement and Accrue boundary)
+- Run `/gsd-plan-phase 49` to create execution plans for Tax Calculation & Transaction Core

@@ -1,0 +1,99 @@
+# Requirements: LatticeStripe
+
+**Defined:** 2026-05-27
+**Core Value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
+
+## v1.6 Requirements
+
+Requirements for the Tax milestone. Each maps to roadmap phases 49–51.
+
+### Tax Calculation
+
+- [ ] **CALC-01**: Developer can create a tax calculation with customer details and line items
+- [ ] **CALC-02**: Developer can retrieve a tax calculation by ID
+- [ ] **CALC-03**: Developer can list line items for a tax calculation (paginated)
+
+### Tax Transaction
+
+- [ ] **TXN-01**: Developer can create a tax transaction from a calculation
+- [ ] **TXN-02**: Developer can create a tax transaction reversal
+- [ ] **TXN-03**: Developer can retrieve a tax transaction by ID
+- [ ] **TXN-04**: Developer can list line items for a tax transaction (paginated)
+
+### Tax Configuration
+
+- [ ] **CONF-01**: Developer can retrieve account tax settings (singleton)
+- [ ] **CONF-02**: Developer can update account tax settings
+- [ ] **CONF-03**: Developer can create, retrieve, update, and list tax registrations
+- [ ] **CONF-04**: Developer can manage tax registrations for specific jurisdictions
+
+### Tax ID
+
+- [ ] **TAXID-01**: Developer can create a tax ID via top-level path
+- [ ] **TAXID-02**: Developer can create a tax ID via customer-nested path
+- [ ] **TAXID-03**: Developer can retrieve, list, and delete tax IDs (both paths)
+- [ ] **TAXID-04**: Tax ID structs deserialize via ObjectTypes registry
+
+### Platform & DX
+
+- [ ] **DX-01**: All five Tax object types registered in ObjectTypes for expand deserialization
+- [ ] **DX-02**: `LatticeStripe.Testing` fixtures for Calculation, Transaction, and TaxId
+- [ ] **DX-03**: Integration spec proving calculation → transaction chain (Mox-at-Transport)
+- [ ] **DX-04**: Canonical `guides/tax.md` recipe for standalone Tax API flow
+- [ ] **DX-05**: Docs-truth grep extension for Tax moduledocs
+
+## Future Requirements
+
+Deferred to v1.7 or later.
+
+### Tax Extensions
+
+- **TAX-01**: Tax Code lookup resource (`/v1/tax_codes`)
+- **TAX-02**: Tax Transaction list endpoint (if Stripe adds it)
+
+## Out of Scope
+
+Explicitly excluded for v1.6. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Tax filing/returns automation | Multi-jurisdiction filing orchestration belongs in Accrue, not SDK |
+| Tax rate caching layer | Stripe owns rate data; caching creates stale-rate liability |
+| AutomaticTax ↔ Tax API bridging | Different APIs — `Invoice.AutomaticTax` stays separate |
+| Tax registration workflow wizard | Dashboard/onboarding UX, not SDK primitive |
+| Custom tax engine fallback | Violates Stripe-shaped contract; use Calculation API |
+| Tax Reporting API | Filing/returns — Accrue scope |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CALC-01 | Phase 49 | Pending |
+| CALC-02 | Phase 49 | Pending |
+| CALC-03 | Phase 49 | Pending |
+| TXN-01 | Phase 49 | Pending |
+| TXN-02 | Phase 49 | Pending |
+| TXN-03 | Phase 49 | Pending |
+| TXN-04 | Phase 49 | Pending |
+| DX-03 | Phase 49 | Pending |
+| CONF-01 | Phase 50 | Pending |
+| CONF-02 | Phase 50 | Pending |
+| CONF-03 | Phase 50 | Pending |
+| CONF-04 | Phase 50 | Pending |
+| TAXID-01 | Phase 51 | Pending |
+| TAXID-02 | Phase 51 | Pending |
+| TAXID-03 | Phase 51 | Pending |
+| TAXID-04 | Phase 51 | Pending |
+| DX-01 | Phase 51 | Pending |
+| DX-02 | Phase 51 | Pending |
+| DX-04 | Phase 51 | Pending |
+| DX-05 | Phase 51 | Pending |
+
+**Coverage:**
+- v1.6 requirements: 20 total
+- Mapped to phases: 20
+- Unmapped: 0 ✓
+
+---
+*Requirements defined: 2026-05-27*
+*Last updated: 2026-05-27 after milestone v1.6 roadmap creation*
