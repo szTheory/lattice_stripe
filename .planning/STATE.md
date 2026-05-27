@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.6
 milestone_name: — Tax
-status: executing
-stopped_at: Phase 50 context gathered
-last_updated: "2026-05-27T16:17:55.957Z"
+status: Context gathered — ready for plan-phase
+stopped_at: Phase 51 context gathered
+last_updated: "2026-05-27T16:30:43.842Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 3
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-27 — Milestone v1.6 kickoff)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 50 — Tax Settings & Registration
+**Current focus:** Phase 51 — TaxId, Testing & Adoption Surface
 
 ## Current Position
 
 Phase: 51
 Plan: Not started
-Status: Executing Phase 50
+Status: Context gathered — ready for plan-phase
 Last activity: 2026-05-27
 
 ## Performance Metrics
@@ -55,7 +55,7 @@ Last activity: 2026-05-27
 ### Blockers/Concerns
 
 - Phase 41.1 remains explicitly `pending-external-verification` until sandbox proof is produced or the follow-through is retired.
-- Avoid scope bleed into Accrue during v1.6 Tax research and implementation. Negotiate scope in discuss-phase to keep filing orchestration in Accrue (Calculation/Transaction primitives = SDK; multi-jurisdiction filing strategy = Accrue).
+- ~~Avoid scope bleed into Accrue during v1.6 Tax research and implementation~~ — **addressed in Phase 51 CONTEXT D-02:** guide Accrue fence once; SDK primitives only.
 
 ## Deferred Items
 
@@ -67,11 +67,10 @@ Items acknowledged and deferred at milestone close on 2026-05-27:
 
 ## Session Continuity
 
-Last session: 2026-05-27T16:08:45.974Z
-Stopped at: Phase 50 context gathered
-Resume path: `/gsd-discuss-phase 49` or `/gsd-plan-phase 49`
+Last session: 2026-05-27T16:30:43.839Z
+Stopped at: Phase 51 context gathered
+Resume path: `.planning/phases/51-taxid-testing-adoption-surface/51-CONTEXT.md`
 
 ## Operator Next Steps
 
-- Run `/gsd-discuss-phase 49` to negotiate scope (especially TaxId placement and Accrue boundary)
-- Run `/gsd-plan-phase 49` to create execution plans for Tax Calculation & Transaction Core
+- Run `/gsd-plan-phase 51` to create execution plans for TaxId, Testing & Adoption Surface
