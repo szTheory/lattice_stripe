@@ -2,6 +2,41 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.8 — Adopter Truth & Doc Routing Polish
+
+**Shipped:** 2026-05-27
+**Phases:** 3 (56–58) | **Plans:** 10
+
+### What Was Built
+
+- getting-started 1.7.x release-status blockquote + docs_truth SSOT prose locks (Phase 56)
+- payments.md copy-paste fixes + Charge reconciliation section + operator routing (Phase 57)
+- JTBD-MAP full post-v1.8 refresh; MILESTONES/RETROSPECTIVE cosmetics; tax proof commit (Phase 58)
+
+### What Worked
+
+- **describe-per-guide docs_truth pattern** — Phase 56 getting-started describe → Phase 57 payments + operator describes; each guide contract isolated
+- **JTBD refresh at milestone close** — PROJECT.md Key Decision validated; prevents v1.7-style stale map driving redundant milestones
+- **Post-stop milestone = doc polish only** — no new modules; highest leverage after v1.x stop signal
+
+### What Was Inefficient
+
+- **Untracked proof files discovered at assessment** — `adoption_contract_test.exs` + `tax_id_integration_test.exs` existed locally while CI referenced adoption gate; commit deferred to Phase 58 PROOF-01
+- **JTBD-MAP lagged two phases** — Gap 1 block contradicted shipped guides through Phase 57; reinforces close-time refresh ritual
+
+### Key Lessons
+
+1. Planning maps must refresh at **close**, not only milestone start
+2. CI steps must reference **tracked** files — adoption contract on fresh clone breaks without PROOF-01
+3. Doc-only post-stop milestones still need audit-before-archive (v1.7 pattern)
+
+### Cost Observations
+
+- Phases 56–57: 5 plans, single-day; Phase 58: 5 plans, planning + hygiene only
+- Git range: `ff8dd13` → `{close_sha}` (fill at close)
+
+---
+
 ## Milestone: v1.7 — Polish & Operator
 
 **Shipped:** 2026-05-27
@@ -203,6 +238,7 @@
 | v1.3 | 12 | 26 | Coverage breadth: File/FileLink, Disputes, CreditNote, Mandate, SetupAttempt, Quote + DX follow-through. Phase 41.1 follow-through accepted as `pending-external-verification` |
 | v1.4 | 4 | 8 | Adoption Closure: docs/truth/discovery, four flagship recipes, planning-truth reconciliation. First non-code milestone — verification artifact discipline lagged because of it |
 | v1.5 | 2 | 11 | Thin-Event Webhooks: net-new `parse_event_notification`/`fetch_event`/`fetch_related_object` surface, `tolerance: 0` four-surface reconciliation (WEBFIX-01), canonical Phoenix guide, integration + docs-truth coverage. Fastest milestone by wall-clock (~6 hours single-day). Source-truth verification rule codified |
+| v1.8 | 3 | 10 | Adopter truth & doc routing polish: describe-per-guide docs_truth, Charge reconciliation routing, planning-truth close at milestone end |
 
 ### Top Lessons (Verified Across Milestones)
 
