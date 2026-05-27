@@ -10,7 +10,11 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
-**Latest shipped milestone:** v1.8 Adopter Truth & Doc Routing Polish (archived 2026-05-27)
+**Active milestone:** v1.9 CI & Doc Honesty — Phase 59 complete (2026-05-27); Phase 60 (CI gate + milestone close) next.
+
+**Phase 59 shipped:** checkout guide atom-correct stream filter + status-values callout; README canonical error atoms; docs_truth grep locks for both surfaces.
+
+**Latest archived milestone:** v1.8 Adopter Truth & Doc Routing Polish (archived 2026-05-27)
 
 **What shipped in v1.8:**
 
@@ -145,12 +149,14 @@ See `.planning/milestones/v1.8-MILESTONE-AUDIT.md` for close-time audit evidence
 - ✓ RETROSPECTIVE v1.8 entry + process lessons (PLAN-02) — Phase 58, v1.8
 - ✓ JTBD-MAP post-v1.8 refresh (ROUTE-03) — Phase 58, v1.8
 - ✓ Tax proof files tracked in CI (PROOF-01) — Phase 58, v1.8
+- ✓ Checkout guide atom status + status-values callout (CHECKOUT-01, CHECKOUT-02) — Phase 59, v1.9
+- ✓ Checkout guide docs_truth regression locks (CHECKOUT-03) — Phase 59, v1.9
+- ✓ README error taxonomy canonical atoms + docs_truth lock (README-01, README-02) — Phase 59, v1.9
+- ✓ docs_truth checkout.md content locks alongside payments (VERIFY-05) — Phase 59, v1.9
 
 ### Active
 
 - CI-01: Guide-only PRs run docs_truth (CI gate)
-- CHECKOUT-01..03: checkout.md atom status + docs_truth locks
-- README-01..02: README error taxonomy + docs_truth lock
 - JTBD-01: Hosted checkout rating honesty in JTBD-MAP
 - PLAN-01 (optional): Backfill 54-VERIFICATION.md
 
@@ -212,4 +218,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 — milestone v1.9 CI & Doc Honesty started*
+*Last updated: 2026-05-27 — Phase 59 complete; Phase 60 CI gate next*

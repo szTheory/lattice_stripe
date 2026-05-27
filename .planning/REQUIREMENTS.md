@@ -10,14 +10,14 @@ Requirements for this milestone. Each maps to roadmap phases 59–60.
 
 ### Checkout Guide Truth
 
-- [ ] **CHECKOUT-01**: Adopter copying Checkout Session `stream!/2` filter examples uses atom `payment_status` (`:paid`, not wire string `"paid"`).
-- [ ] **CHECKOUT-02**: `guides/checkout.md` includes a status-values callout explaining atomized `payment_status` on `%Session{}` (mirror `guides/payments.md` PaymentIntent pattern).
-- [ ] **CHECKOUT-03**: `docs_truth_test.exs` grep-regresses canonical guide API example patterns in `guides/checkout.md` (atom status filters, stale string patterns).
+- [x] **CHECKOUT-01**: Adopter copying Checkout Session `stream!/2` filter examples uses atom `payment_status` (`:paid`, not wire string `"paid"`).
+- [x] **CHECKOUT-02**: `guides/checkout.md` includes a status-values callout explaining atomized `payment_status` on `%Session{}` (mirror `guides/payments.md` PaymentIntent pattern).
+- [x] **CHECKOUT-03**: `docs_truth_test.exs` grep-regresses canonical guide API example patterns in `guides/checkout.md` (atom status filters, stale string patterns).
 
 ### README Truth
 
-- [ ] **README-01**: README error taxonomy lists `:authentication_error` and `:api_error` (matching `LatticeStripe.Error` atoms), not stale `:auth_error`/`:server_error`.
-- [ ] **README-02**: `docs_truth_test.exs` grep-regresses README error atom list (fail on stale taxonomy).
+- [x] **README-01**: README error taxonomy lists `:authentication_error` and `:api_error` (matching `LatticeStripe.Error` atoms), not stale `:auth_error`/`:server_error`.
+- [x] **README-02**: `docs_truth_test.exs` grep-regresses README error atom list (fail on stale taxonomy).
 
 ### CI Honesty
 
@@ -25,7 +25,7 @@ Requirements for this milestone. Each maps to roadmap phases 59–60.
 
 ### Verification Extension
 
-- [ ] **VERIFY-05**: `docs_truth_test.exs` canonical-guides coverage explicitly includes `guides/checkout.md` content locks (status atoms) alongside existing payments.md locks.
+- [x] **VERIFY-05**: `docs_truth_test.exs` canonical-guides coverage explicitly includes `guides/checkout.md` content locks (status atoms) alongside existing payments.md locks.
 
 ### Planning Truth
 
@@ -53,17 +53,18 @@ Tracked from prior milestones — not in v1.9 roadmap:
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHECKOUT-01 | Phase 59 | Pending |
-| CHECKOUT-02 | Phase 59 | Pending |
-| CHECKOUT-03 | Phase 59 | Pending |
-| README-01 | Phase 59 | Pending |
-| README-02 | Phase 59 | Pending |
-| VERIFY-05 | Phase 59 | Pending |
+| CHECKOUT-01 | Phase 59 | Complete |
+| CHECKOUT-02 | Phase 59 | Complete |
+| CHECKOUT-03 | Phase 59 | Complete |
+| README-01 | Phase 59 | Complete |
+| README-02 | Phase 59 | Complete |
+| VERIFY-05 | Phase 59 | Complete |
 | CI-01 | Phase 60 | Pending |
 | JTBD-01 | Phase 60 | Pending |
 | PLAN-01 | Phase 60 | Pending (optional) |
 
 **Coverage:**
+
 - v1.9 requirements: 9 total (8 required + 1 optional)
 - Mapped to phases: 9
 - Unmapped: 0 ✓

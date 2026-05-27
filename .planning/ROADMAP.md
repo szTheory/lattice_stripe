@@ -23,7 +23,7 @@
 
 **Milestone Goal:** Close remaining adopter-truth gaps in checkout/README docs and make CI actually enforce docs_truth on guide-only changes — without new API breadth or Hex bump.
 
-- [ ] **Phase 59: Checkout Guide & README Truth** — Fix checkout.md atom status bug + callout; fix README error taxonomy; extend docs_truth locks. (CHECKOUT-01..03, README-01..02, VERIFY-05)
+- [x] **Phase 59: Checkout Guide & README Truth** — Fix checkout.md atom status bug + callout; fix README error taxonomy; extend docs_truth locks. (CHECKOUT-01..03, README-01..02, VERIFY-05) (completed 2026-05-27)
 - [ ] **Phase 60: CI Gate & Milestone Close** — Narrow CI paths-ignore so docs_truth runs on guide/md PRs; JTBD-MAP upgrade; optional 54-VERIFICATION backfill; milestone audit. (CI-01, JTBD-01, PLAN-01)
 
 ## Phase Details
@@ -42,7 +42,7 @@
 5. Stale patterns (`"paid"` filter, `:auth_error`, `:server_error`) fail docs_truth if reintroduced.
 6. `mix test test/lattice_stripe/docs_truth_test.exs` passes.
 
-**Plans:** 0 plans
+**Plans:** 2/2 plans complete
 
 ### Phase 60: CI Gate & Milestone Close
 
@@ -64,7 +64,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 59. Checkout Guide & README Truth | v1.9 | 0/? | Pending | — |
+| 59. Checkout Guide & README Truth | v1.9 | 2/2 | Complete    | 2026-05-27 |
 | 60. CI Gate & Milestone Close | v1.9 | 0/? | Pending | — |
 
 ## Next Step
