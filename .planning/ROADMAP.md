@@ -53,7 +53,11 @@
   5. ObjectTypes registry entries for `tax.settings` and `tax.registration` enable expand deserialization.
   6. Moduledocs clarify that Registration.create does not register with tax authorities — it tells Stripe where the business collects tax.
 
-**Plans**: TBD (via `/gsd-plan-phase 50`)
+**Plans**: 2 plans (2 waves)
+
+Plans:
+- [ ] 50-01-PLAN.md — Tax.Settings singleton + nested structs + `tax.settings` ObjectTypes + settings tests (CONF-01, CONF-02)
+- [ ] 50-02-PLAN.md — Tax.Registration CRUDL + moduledocs + `tax.registration` ObjectTypes + registration tests (CONF-03, CONF-04)
 
 ### Phase 51: TaxId, Testing & Adoption Surface
 
