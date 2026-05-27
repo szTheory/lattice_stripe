@@ -6,6 +6,7 @@ defmodule LatticeStripe.EventTest do
   import LatticeStripe.Test.Fixtures.Event, only: [event_map: 0, event_map: 1]
 
   alias LatticeStripe.{Error, Event, List, Response}
+  alias LatticeStripe.EventNotification.RelatedObject
 
   setup :verify_on_exit!
 
@@ -70,6 +71,27 @@ defmodule LatticeStripe.EventTest do
     test "extra is empty map when no unknown fields" do
       event = Event.from_map(event_map())
       assert event.extra == %{}
+    end
+
+    test "decodes related_object map to %RelatedObject{} struct on v2-fetched events" do
+      map =
+        event_map(%{
+          "related_object" => %{
+            "id" => "cus_1",
+            "type" => "customer",
+            "url" => "/v1/customers/cus_1"
+          }
+        })
+
+      event = Event.from_map(map)
+
+      assert %RelatedObject{id: "cus_1", type: "customer", url: "/v1/customers/cus_1"} =
+               event.related_object
+    end
+
+    test "related_object is nil on snapshot v1 events (backwards-compat)" do
+      event = Event.from_map(event_map())
+      assert event.related_object == nil
     end
   end
 

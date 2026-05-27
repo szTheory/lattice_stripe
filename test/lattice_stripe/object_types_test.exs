@@ -136,4 +136,28 @@ defmodule LatticeStripe.ObjectTypesTest do
       assert ObjectTypes.maybe_deserialize(%{}) == %{}
     end
   end
+
+  describe "fetch_module/1" do
+    test "returns {:ok, LatticeStripe.Customer} for 'customer'" do
+      assert ObjectTypes.fetch_module("customer") == {:ok, LatticeStripe.Customer}
+    end
+
+    test "returns {:ok, LatticeStripe.Invoice} for 'invoice'" do
+      assert ObjectTypes.fetch_module("invoice") == {:ok, LatticeStripe.Invoice}
+    end
+
+    test "returns :error for unknown v2-namespaced type 'v2.core.account'" do
+      # This is the v2-namespaced type which is intentionally NOT in @object_map
+      # and will trigger the typed-error gate in fetch_related_object/3 (Phase 47 D-05).
+      assert ObjectTypes.fetch_module("v2.core.account") == :error
+    end
+
+    test "returns :error for nil" do
+      assert ObjectTypes.fetch_module(nil) == :error
+    end
+
+    test "returns :error for an empty string" do
+      assert ObjectTypes.fetch_module("") == :error
+    end
+  end
 end
