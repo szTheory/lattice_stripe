@@ -1,11 +1,10 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.9
-milestone_name: CI & Doc Honesty
+milestone_name: — archived)
 status: maintenance
-stopped_at: Phase 60 complete — v1.9 shipped
-last_updated: "2026-05-27T22:45:00Z"
-last_activity: 2026-05-27 -- Phase 60 complete; v1.9 milestone closed
+last_updated: "2026-05-27T22:43:25.850Z"
+last_activity: 2026-05-27
 progress:
   total_phases: 2
   completed_phases: 2
@@ -25,17 +24,17 @@ See: .planning/PROJECT.md (updated 2026-05-27 — v1.9 shipped, maintenance mode
 
 ## Current Position
 
-Phase: 60 complete
-Plan: 4/4 plans complete (v1.9)
+Phase: 60
+Plan: Not started
 Status: maintenance
-Last activity: 2026-05-27 -- v1.9 milestone closed
+Last activity: 2026-05-27
 
 ## Performance Metrics
 
 **Velocity (v1.9):**
 
 - Total phases: 2 (59–60)
-- Total plans completed: 4
+- Total plans completed: 6
 - Timeline: single-day (2026-05-27)
 
 ## Accumulated Context

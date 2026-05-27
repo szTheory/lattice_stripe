@@ -29,7 +29,7 @@
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 59. Checkout Guide & README Truth | v1.9 | 2/2 | Complete | 2026-05-27 |
-| 60. CI Gate & Milestone Close | v1.9 | 2/2 | Complete | 2026-05-27 |
+| 60. CI Gate & Milestone Close | v1.9 | 2/2 | Complete    | 2026-05-27 |
 
 ## Next Step
 
