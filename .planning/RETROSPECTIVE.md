@@ -2,22 +2,45 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
-## Milestone: v1.7 — Polish & Operator (partial — pending REL-04)
+## Milestone: v1.7 — Polish & Operator
 
-**In progress:** 2026-05-27
-**Phases:** 52–55 (partial)
+**Shipped:** 2026-05-27
+**Phases:** 4 (52–55) | **Plans:** 17
 
-### What Was Built (so far)
+### What Was Built
 
-- **Charge surface expansion** — list/search/update/capture on `LatticeStripe.Charge` with PI-first moduledoc and docs-truth locks (Phase 52).
-- **Operator guides** — `guides/production-checklist.md` and `guides/event-debugging.md` wired into ExDoc and README (Phase 53).
-- **v1.x stop signal** — `guides/scope.md`, README blockquote + `## v1.x scope`, PROJECT.md v1.x Status (Phase 55).
-- **Phase 41.1 retirement** — `41.1-VERIFICATION.md` restored and `accepted-external-verification` (Phase 55).
+- **Charge surface expansion** — `LatticeStripe.Charge` list/search/update/capture with PI-first moduledoc, Mox wire tests, stripe-mock integration smokes, and docs-truth four-surface triangulation.
+- **Operator guides** — `guides/production-checklist.md` and `guides/event-debugging.md` wired into ExDoc Operations & DX, README hardening route, and JTBD operator route.
+- **Release truth capstone** — `@version` 1.7.0, CHANGELOG v1.4–v1.7, lockstep `~> 1.7` install contract, SSOT docs-truth migration, Hex publish at 1.7.0.
+- **v1.x stop signal** — Phase `41.1` retired as `accepted-external-verification`; library declared done for v1.x scope in README, `guides/scope.md`, PROJECT.md, CHANGELOG, and ExDoc.
 
-### Outstanding at partial close
+### What Worked
 
-- **REL-04** — Hex publish at `1.7.0` (repo `@version` is 1.7.0; Hex latest remains 1.1.0).
-- **Milestone audit** — `/gsd-audit-milestone v1.7` after REL-04 passes.
+- **Four-phase vertical slice with honest stop signal.** Charge (52) → operator guides (53) → release truth (54) → milestone closure (55) kept each phase independently shippable while building toward the v1.x capstone.
+- **Hex publish as stop-milestone capstone.** Folding REL-04 into Phase 54–55 eliminated the adopter truth lag that plagued v1.5/v1.6 closes (code shipped but Hex lagged).
+- **Phase 55 gap-closure plans.** Extra plans (55-05, 55-06) for REL-04 reconciliation and close_ready state prevented shipping a milestone with stale planning artifacts.
+
+### What Was Inefficient
+
+- **Partial close artifacts before REL-04 landed.** MILESTONES.md and RETROSPECTIVE.md were written with "pending REL-04" before Hex publish completed — required cleanup at final close.
+- **Phase 54 missing VERIFICATION.md.** Release truth was verified via Phase 55 batch verification and live Hex checks, but the formal artifact gap persisted through audit.
+
+### Patterns Established
+
+- **SSOT install contract in docs_truth_test.** Migrated from per-version canaries to a single install contract enforced across seven public surfaces — reusable for future release milestones.
+- **Operator guide trilogy:** resource surface → operator playbooks → release truth → stop signal — template for future polish milestones.
+
+### Key Lessons
+
+1. **Stop milestones need release truth as a hard gate.** v1.7's REL-04 requirement prevented the "code shipped, Hex lagging" pattern from repeating.
+2. **Retire external-proof phases explicitly.** Phase 41.1 `accepted-external-verification` disposition closed an honest boundary without false completeness claims.
+3. **Audit before complete-milestone.** Running `/gsd-audit-milestone` first surfaced doc-routing tech debt without blocking close.
+
+### Cost Observations
+
+- **Timeline:** Single-day milestone (2026-05-27).
+- **Source diff:** 138 files, +7527/-538 lines.
+- **Notable:** Fourth consecutive single-day milestone (v1.4–v1.7) — pre-locked scope and established execution patterns sustain velocity.
 
 ---
 

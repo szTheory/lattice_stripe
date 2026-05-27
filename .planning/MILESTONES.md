@@ -1,19 +1,26 @@
 # Milestones
 
-## v1.7 Polish & Operator (In progress — close-ready pending REL-04)
+## v1.7 Polish & Operator (Shipped: 2026-05-27)
 
-**Phases:** 52–55 (Charge, Operator guides, Release truth, Milestone closure)
+**Phases completed:** 4 phases (52–55), 17 plans
 
-**Stop signal:** As of **1.7.0** in repo, LatticeStripe is **feature-complete for its intended v1.x scope** — mainstream SaaS payments, billing, Connect, tax, webhooks, and operator diagnostics. Further **1.x** work is **maintenance and adoption-driven**.
+**Stop signal:** As of **1.7.0** on Hex.pm, LatticeStripe is **feature-complete for its intended v1.x scope** — mainstream SaaS payments, billing, Connect, tax, webhooks, and operator diagnostics. Further **1.x** work is **maintenance and adoption-driven**.
 
-**Key accomplishments (partial close 2026-05-27):**
+**Key accomplishments:**
 
-- Charge list/search/update/capture surface (Phase 52)
-- `guides/production-checklist.md` and `guides/event-debugging.md` (Phase 53)
-- `guides/scope.md` + README v1.x stop signal (Phase 55)
-- Phase 41.1 retired as `accepted-external-verification` (Phase 55)
+- Expanded `LatticeStripe.Charge` from retrieve-only to list/search/update/capture parity with PI-first moduledoc, Mox wire tests, stripe-mock integration smokes, and docs-truth regression lock (CHRG-01..05).
+- Shipped operator playbooks — `guides/production-checklist.md` and `guides/event-debugging.md` — wired into ExDoc Operations & DX, README hardening route, and JTBD operator route (OPS-01, OPS-02).
+- Reconciled release truth — `@version` 1.7.0, CHANGELOG v1.4–v1.7, lockstep `~> 1.7` install contract across seven public surfaces, SSOT docs-truth migration (REL-01..03).
+- Published `lattice_stripe` **1.7.0** to Hex.pm via Publish Hex Recovery CI workflow (REL-04).
+- Retired Phase `41.1` as `accepted-external-verification` and published the v1.x stop signal in README, `guides/scope.md`, PROJECT.md, CHANGELOG, and ExDoc (CLOSE-01, CLOSE-02).
 
-**Outstanding:** REL-04 Hex publish at `1.7.0` — `mix hex.info` still shows `1.1.0` as latest (complete Phase 54-04 before audit-milestone).
+**Audit:** PASSED — 13/13 requirements satisfied, 0 critical integration gaps, 4/5 E2E adopter flows verified. Tech debt: non-blocking doc-routing gaps (getting-started stale prose, operator guides omit update/capture examples, missing 54-VERIFICATION.md). See [milestones/v1.7-MILESTONE-AUDIT.md](milestones/v1.7-MILESTONE-AUDIT.md).
+
+**Known deferred items at close:** 1 (260402-wte webhook plug research — substantively complete; see STATE.md Deferred Items)
+
+**Git range:** `5baf5c6` → `ff8dd13`
+**Source diff:** 138 files, +7527/-538 lines
+**Timeline:** 2026-05-27 (single-day milestone)
 
 ---
 
@@ -33,7 +40,7 @@
 
 **Audit:** PASSED (retroactive 2026-05-27) — 20/20 requirements satisfied, 0 critical integration gaps, full standalone Tax adopter flow wired. Tech debt: non-blocking WR-01/02/IN-01 from Phase 51 review (WR-01/02 patched post-audit in `ee305c8`, `11ca590`). Nyquist partial (phases 49–50 `nyquist_compliant: false` despite green verification). See [milestones/v1.6-MILESTONE-AUDIT.md](milestones/v1.6-MILESTONE-AUDIT.md).
 
-**Outstanding follow-through (resolved at v1.7 close):** Phase 41.1 retired as `accepted-external-verification` in Phase 55. Hex publish at `1.7.0` remains pending REL-04 (see v1.7 section).
+**Outstanding follow-through (resolved at v1.7 close):** Phase 41.1 retired as `accepted-external-verification` in Phase 55. Hex publish at `1.7.0` shipped in v1.7 (REL-04).
 
 **Known deferred items at close:** 1 (260402-wte webhook plug research — substantively complete; see STATE.md Deferred Items)
 

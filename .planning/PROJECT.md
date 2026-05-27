@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. **Shipped v1.0.0 to Hex.pm on 2026-04-13** with full Payments + Billing + Connect coverage; four milestones later, the shipped 1.3.x surface is broad, documented, and discoverable. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
+A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. **Shipped v1.7.0 to Hex.pm on 2026-05-27** — feature-complete for intended v1.x scope covering Payments, Billing, Connect, Tax, thin-event webhooks, Charge reconciliation, and operator diagnostics. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
 
 ## Core Value
 
@@ -10,9 +10,16 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
-**Active milestone:** v1.7 — Polish & Operator (started 2026-05-27)
+**Latest shipped milestone:** v1.7 Polish & Operator (archived 2026-05-27)
 
-**Latest shipped milestone:** v1.6 Tax (archived 2026-05-27)
+**Active milestone:** None — v1.x scope complete; planning next milestone.
+
+**What shipped in v1.7:**
+
+- **Charge surface expansion** — `LatticeStripe.Charge` list/search/update/capture parity with PI-first moduledoc, Mox wire tests, stripe-mock integration smokes, and docs-truth four-surface triangulation (CHRG-01..05).
+- **Operator guides** — `guides/production-checklist.md` and `guides/event-debugging.md` wired into ExDoc Operations & DX, README hardening route, and JTBD operator route (OPS-01, OPS-02).
+- **Release truth capstone** — `@version` 1.7.0, CHANGELOG v1.4–v1.7, lockstep `~> 1.7` install contract, SSOT docs-truth migration, Hex publish at 1.7.0 (REL-01..04).
+- **v1.x stop signal** — Phase `41.1` retired as `accepted-external-verification`; library called "done for v1.x scope" in README, `guides/scope.md`, and planning artifacts (CLOSE-01, CLOSE-02).
 
 **What shipped in v1.6:**
 
@@ -33,7 +40,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Outstanding follow-through (not milestone-blocking):**
 
-- Phase `41.1` is `accepted-external-verification` for real-sandbox Quote downstream proof — retired in Phase 55 (see 41.1-VERIFICATION.md retirement section); full planning sweep in Phase 55-03.
+- None — Phase `41.1` retired as `accepted-external-verification` in v1.7 (Phase 55).
 
 ## v1.x Status (post–1.7.0)
 
@@ -41,18 +48,14 @@ The library is **done for v1.x scope** — intended mainstream SaaS Stripe cover
 
 **Forward posture:** Maintenance mode — bugfixes, Stripe API drift, adopter-driven narrow additions. No planned new resource-family breadth in v1.x absent fresh adopter pull.
 
-## Current Milestone: v1.7 — Polish & Operator
+## Next Milestone Goals
 
-**Goal:** Close the remaining v1.x scope gaps — expand the thin `Charge` surface, ship production operator guides, reconcile release truth, retire Phase 41.1 — then call the library done for v1.x scope.
+No active milestone defined. Run `/gsd-new-milestone` to assess whether v2.0, specialist Stripe families (Identity, Treasury, Issuing, Terminal), or maintenance-only posture is the right next step.
 
-**Target features:**
-- ~~Fill `Charge` surface gap~~ — **done in Phase 52** (`list/3`, `search/3`, `update/4`, `capture/4` + PI-first `@moduledoc`, Mox wire tests, docs-truth lock, stripe-mock integration smokes)
-- Ship `guides/production-checklist.md` and `guides/event-debugging.md`
-- **Hex release capstone** — bump `@version` to 1.7.0, CHANGELOG v1.4–1.7, lockstep `~> 1.7` docs-truth flip, Hex publish
-- Retire Phase `41.1` as `accepted-external-verification` (recommended disposition)
-- Publish v1.x stop signal after v1.7 ships
-
-After v1.7, expect to publicly call the library "done for v1.x scope" absent fresh adopter pull. Identity / Treasury / Issuing / Terminal / Financial Connections / Climate / Sigma / Reporting stay deferred per JTBD doctrine.
+Candidate directions (not committed):
+- Specialist Stripe families if adopter pull materializes (SPEC-01, SPEC-02)
+- Tax extensions (TAX-01 Tax Code lookup, TAX-02 Transaction list if Stripe adds it)
+- Post-close doc-routing polish from v1.7 audit tech debt
 
 ## Context
 
@@ -60,7 +63,7 @@ After v1.7, expect to publicly call the library "done for v1.x scope" absent fre
 
 **Target users:** Elixir developers building SaaS products who need Stripe integrations that are correct, documented, and unsurprising. Early adopter signal remains strong: Accrue already consumes LatticeStripe as a downstream billing layer.
 
-**Codebase scale (post-v1.6):** v1.6 added ~6,988 lines across 83 files in a single-day milestone (2026-05-27) on top of six prior milestones. The Tax resource family (Calculation, Transaction, Settings, Registration, TaxId) is now a first-class SDK surface with canonical `guides/tax.md`, public Testing fixtures, and docs-truth regression locks. The docs-truth contract continues to grow with each adoption milestone.
+**Codebase scale (post-v1.7):** v1.7 added ~7,527 lines across 138 files in a single-day milestone (2026-05-27) on top of seven prior milestones. Charge reconciliation, operator guides, and release truth are now first-class surfaces with docs-truth regression locks. The library is publicly declared done for v1.x scope at Hex 1.7.0.
 
 **Design philosophy:**
 
@@ -112,15 +115,20 @@ After v1.7, expect to publicly call the library "done for v1.x scope" absent fre
 - ✓ Tax Settings & Registration (CONF-01..04) — Phase 50, v1.6
 - ✓ TaxId dual-path CRUDL (TAXID-01..04) — Phase 51, v1.6
 - ✓ Tax ObjectTypes, Testing fixtures, canonical guide, docs-truth (DX-01, DX-02, DX-04, DX-05) — Phase 51, v1.6
+- ✓ Charge list/search/update/capture surface (CHRG-01..05) — Phase 52, v1.7
+- ✓ Operator guides: production checklist + event debugging (OPS-01, OPS-02) — Phase 53, v1.7
+- ✓ Release truth: 1.7.0 version, CHANGELOG v1.4–v1.7, lockstep `~> 1.7` install contract, Hex publish (REL-01..04) — Phase 54, v1.7
+- ✓ Phase 41.1 retired + v1.x stop signal (CLOSE-01, CLOSE-02) — Phase 55, v1.7
 
 ### Active
 
-(v1.7 requirements — see `.planning/REQUIREMENTS.md`. Phases 52–55.)
+(None — run `/gsd-new-milestone` to define next milestone requirements.)
 
 ### Out of Scope
 
 - Billing-engine abstractions, entitlement logic, dunning workflows — belong downstream in Accrue or application code
-- Resolving Phase 41.1 as a milestone-blocking requirement — real-sandbox proof remains valuable as carried follow-through, not as a release gate
+- Resolving Phase 41.1 as a milestone-blocking requirement — retired as `accepted-external-verification` in v1.7
+- New Stripe resource families in v1.x — v1.7 is the planned stop signal; Identity, Treasury, Issuing, Terminal, Financial Connections, Climate, Sigma, and Reporting deferred unless adopter pull justifies a future milestone
 
 ## Key Decisions
 
@@ -147,7 +155,9 @@ After v1.7, expect to publicly call the library "done for v1.x scope" absent fre
 | Top-level `TaxId` with arity-based dual-path routing | Single module covers `/v1/tax_ids` and `/v1/customers/:id/tax_ids` via guard-disambiguated arity — avoids duplicating Customer-scoped vs top-level modules | ✓ Good (v1.6) |
 | Singleton resource pattern for `Tax.Settings` | First singleton in codebase (`GET/POST /v1/tax/settings`, no resource ID) — establishes pattern for future Stripe singletons | ✓ Good (v1.6) |
 | SDK primitives only for Tax; Accrue owns filing | Phase 51 guide fences filing orchestration to Accrue once; prevents scope bleed into multi-jurisdiction filing automation | ✓ Good (v1.6) |
-| Hex publish is stop-milestone capstone, not out-of-band | Out-of-band publish creates adopter truth lag (install `~> 1.3` while code ships v1.5/v1.6); fold release prep into v1.7 | Pending (v1.7) |
+| Hex publish is stop-milestone capstone, not out-of-band | Out-of-band publish creates adopter truth lag (install `~> 1.3` while code ships v1.5/v1.6); fold release prep into v1.7 | ✓ Good (v1.7 REL-04) |
+| v1.7 as planned v1.x stop signal | Polish + operator guides + release truth close remaining scope gaps honestly before declaring maintenance mode | ✓ Good (v1.7) |
+| Retire Phase 41.1 as accepted external boundary | Real-sandbox proof valuable but should not block honest close; append-only retirement preserves audit trail | ✓ Good (v1.7 CLOSE-01) |
 
 ## Evolution
 
@@ -167,4 +177,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after Phase 52 (Charge surface expansion)*
+*Last updated: 2026-05-27 after v1.7 milestone*
