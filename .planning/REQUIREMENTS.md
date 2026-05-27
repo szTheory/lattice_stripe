@@ -22,10 +22,10 @@ Requirements for the Tax milestone. Each maps to roadmap phases 49–51.
 
 ### Tax Configuration
 
-- [ ] **CONF-01**: Developer can retrieve account tax settings (singleton)
-- [ ] **CONF-02**: Developer can update account tax settings
-- [ ] **CONF-03**: Developer can create, retrieve, update, and list tax registrations
-- [ ] **CONF-04**: Developer can manage tax registrations for specific jurisdictions
+- [x] **CONF-01**: Developer can retrieve account tax settings (singleton)
+- [x] **CONF-02**: Developer can update account tax settings
+- [x] **CONF-03**: Developer can create, retrieve, update, and list tax registrations
+- [x] **CONF-04**: Developer can manage tax registrations for specific jurisdictions
 
 ### Tax ID
 
@@ -76,10 +76,10 @@ Explicitly excluded for v1.6. Documented to prevent scope creep.
 | TXN-03 | Phase 49 | Complete |
 | TXN-04 | Phase 49 | Complete |
 | DX-03 | Phase 49 | Complete |
-| CONF-01 | Phase 50 | Pending |
-| CONF-02 | Phase 50 | Pending |
-| CONF-03 | Phase 50 | Pending |
-| CONF-04 | Phase 50 | Pending |
+| CONF-01 | Phase 50 | Complete |
+| CONF-02 | Phase 50 | Complete |
+| CONF-03 | Phase 50 | Complete |
+| CONF-04 | Phase 50 | Complete |
 | TAXID-01 | Phase 51 | Pending |
 | TAXID-02 | Phase 51 | Pending |
 | TAXID-03 | Phase 51 | Pending |

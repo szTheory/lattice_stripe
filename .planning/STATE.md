@@ -4,14 +4,14 @@ milestone: v1.6
 milestone_name: — Tax
 status: executing
 stopped_at: Phase 50 context gathered
-last_updated: "2026-05-27T16:13:50.102Z"
-last_activity: 2026-05-27 -- Phase 50 planning complete
+last_updated: "2026-05-27T16:17:55.957Z"
+last_activity: 2026-05-27
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 3
-  percent: 33
+  completed_plans: 5
+  percent: 67
 ---
 
 # Project State
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-27 — Milestone v1.6 kickoff)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 49 — Tax Calculation & Transaction Core
+**Current focus:** Phase 50 — Tax Settings & Registration
 
 ## Current Position
 
-Phase: 50
+Phase: 51
 Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-27 -- Phase 50 planning complete
+Status: Executing Phase 50
+Last activity: 2026-05-27
 
 ## Performance Metrics
 
 **Velocity (v1.5):**
 
 - Total phases archived: 2 (47, 48)
-- Total plans completed: 14
+- Total plans completed: 16
 - Source diff: 21 files, +2343/-23 lines
 - Total execution time: ~6 hours single-day (2026-05-27 03:34 → 09:14)
 
