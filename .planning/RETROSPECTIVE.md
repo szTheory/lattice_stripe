@@ -2,6 +2,49 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.6 — Tax
+
+**Shipped:** 2026-05-27
+**Phases:** 3 (49, 50, 51) | **Plans:** 9
+
+### What Was Built
+
+- **Tax Calculation & Transaction core** — `Tax.Calculation` and `Tax.Transaction` with nested structs, explicit verbs, moduledocs on 90-day expiry and `Invoice.AutomaticTax` boundary, and chained Mox-at-Transport integration spec (`calculation_transaction_test.exs`).
+- **Tax Settings singleton + Registration CRUDL** — first singleton resource pattern (`Tax.Settings` on `/v1/tax/settings`) plus jurisdiction registration management with authority disclaimer moduledocs.
+- **TaxId dual-path surface** — guard-disambiguated `LatticeStripe.TaxId` covering top-level and customer-nested Stripe paths, PII-redacted `Inspect`, `tax_id` ObjectTypes dispatch.
+- **Adoption surface** — public Testing fixtures for all five Tax object types, `guides/tax.md` (351 lines), ExDoc + JTBD discovery wiring, docs-truth grep locks on Tax moduledocs and guide content.
+
+### What Worked
+
+- **Three-phase vertical slice decomposition.** Calculation/Transaction core (49) → Settings/Registration (50) → TaxId + adoption (51) kept each phase independently shippable while building toward a complete Tax family.
+- **Singleton pattern landed cleanly in Phase 50.** `Tax.Settings` established the first singleton resource pattern without polluting the CRUDL conventions used elsewhere.
+- **Guard-based arity routing for TaxId.** Single top-level module with dual-path routing avoided duplicating Customer-scoped vs top-level modules — decision locked in Phase 51 discuss.
+- **Accrue fence in the canonical guide.** `guides/tax.md` documents SDK primitives only; filing orchestration stays downstream — scope discipline held through three phases.
+
+### What Was Inefficient
+
+- **No formal milestone audit at close.** Unlike v1.5 (`passed` audit), v1.6 closed without `v1.6-MILESTONE-AUDIT.md`. All 20/20 requirements were checked off, but retroactive `/gsd-audit-milestone` would still add integration-gap confidence.
+- **`mix.exs` version still pinned at 1.3.0.** Tax code is merged and tested; Hex publish remains out-of-band — same posture as v1.5 close.
+
+### Patterns Established
+
+- **Singleton resources:** `Tax.Settings` pattern (`retrieve/2`, `update/3`, no ID param) is the template for future Stripe singletons.
+- **Dual-path arity routing:** Guard-disambiguated function heads for resources with multiple Stripe URL shapes (TaxId top-level vs customer-nested).
+- **Tax family adoption trilogy:** resource modules → Testing fixtures + ObjectTypes proof → canonical guide + docs-truth — reusable for future Stripe families.
+
+### Key Lessons
+
+1. **Largest remaining Stripe family shipped in one day.** v1.6 matched v1.5's single-day velocity (83 files, +6988 lines) because phases were pre-scoped in the milestone roadmap and discuss-phase locked TaxId placement early.
+2. **Scope fence once in the guide, not in every moduledoc.** Accrue boundary is stated in `guides/tax.md`; moduledocs link to the guide rather than repeating the fence — keeps module docs focused on API semantics.
+3. **Integration spec after resource modules, not during.** Phase 49 plan 03 chained Mox spec landed after Calculation + Transaction modules were stable — correct ordering for calc→txn proof.
+
+### Cost Observations
+
+- **Timeline:** Single-day milestone (2026-05-27).
+- **Notable:** Third consecutive single-day milestone (v1.4, v1.5, v1.6) — adoption-closure and wedge milestones benefit from pre-locked scope and established execution patterns.
+
+---
+
 ## Milestone: v1.5 — Thin-Event Webhooks
 
 **Shipped:** 2026-05-27

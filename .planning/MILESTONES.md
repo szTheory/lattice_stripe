@@ -1,5 +1,31 @@
 # Milestones
 
+## v1.6 Tax (Shipped: 2026-05-27)
+
+**Phases completed:** 3 phases (49, 50, 51), 9 plans
+
+**Key accomplishments:**
+
+- Shipped `Tax.Calculation` with nested `CustomerDetails`, `ShippingCost`, `ShipFromDetails`, `TaxBreakdown`, and paginated line items — `create/3`, `retrieve/3`, `list_line_items/4` on `/v1/tax/calculations` (CALC-01..03).
+- Shipped `Tax.Transaction` with `create_from_calculation/3`, `create_reversal/3`, `retrieve/3`, and `list_line_items/4` — moduledocs document 90-day calculation expiry, globally unique `reference`, and `Invoice.AutomaticTax` scope boundary (TXN-01..04).
+- Added chained Mox-at-Transport integration spec `calculation_transaction_test.exs` proving calculate → record → retrieve → reverse (DX-03).
+- Shipped `Tax.Settings` as the codebase's first singleton resource (`retrieve/2`, `update/3` on `/v1/tax/settings`) plus `Tax.Registration` CRUDL with jurisdiction `country_options` and authority disclaimer moduledocs (CONF-01..04).
+- Shipped `LatticeStripe.TaxId` with guard-disambiguated dual-path CRUDL (top-level `/v1/tax_ids` and customer-nested `/v1/customers/:id/tax_ids`), nested `Verification`/`Owner` structs, PII-redacted `Inspect`, and `tax_id` ObjectTypes dispatch (TAXID-01..04).
+- Promoted Tax wire fixtures to public `LatticeStripe.Testing` helpers with expand-through-parent proof for all five Tax object types; published `guides/tax.md` (351 lines) wired into ExDoc Canonical Guides and the JTBD discovery ladder (DX-01, DX-02, DX-04).
+- Extended docs-truth regression with Tax guide ExDoc locks, content anchors, cross-link graph, and five-module moduledoc greps (DX-05).
+
+**Audit:** Not run — no `v1.6-MILESTONE-AUDIT.md` present at close. Recommend `/gsd-audit-milestone` retroactively if formal gap analysis is needed; all 20/20 v1.6 requirements checked off in REQUIREMENTS traceability.
+
+**Outstanding follow-through:** Phase 41.1 remains `pending-external-verification` — slated for v1.7 polish milestone. `mix.exs` still pinned at `@version "1.3.0"` — Hex publish out-of-band when ready.
+
+**Known deferred items at close:** 1 (260402-wte webhook plug research — substantively complete; see STATE.md Deferred Items)
+
+**Git range:** `edef019` → `c0d4e43`
+**Source diff:** 83 files, +6988/-73 lines
+**Timeline:** 2026-05-27 (single-day milestone)
+
+---
+
 ## v1.5 Thin-Event Webhooks (Shipped: 2026-05-27)
 
 **Phases completed:** 2 phases (47, 48), 11 plans

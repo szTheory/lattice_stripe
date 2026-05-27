@@ -1,43 +1,43 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
-milestone_name: — Tax
-status: executing
-stopped_at: Phase 51 planned
-last_updated: "2026-05-27T16:52:13.310Z"
-last_activity: 2026-05-27
+milestone: —
+milestone_name: —
+status: Awaiting next milestone
+stopped_at: Milestone v1.6 archived
+last_updated: "2026-05-27T17:10:00.000Z"
+last_activity: 2026-05-27 — Milestone v1.6 Tax shipped and archived
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-27 — Milestone v1.6 kickoff)
+See: .planning/PROJECT.md (updated 2026-05-27 — Milestone v1.6 complete)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 51 — taxid-testing-adoption-surface
+**Current focus:** Planning next milestone (v1.7 — Polish & Operator)
 
 ## Current Position
 
-Phase: 51
-Plan: Not started
-Status: Executing Phase 51
-Last activity: 2026-05-27
+Phase: —
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-05-27 — Milestone v1.6 Tax shipped and archived
 
 ## Performance Metrics
 
-**Velocity (v1.5):**
+**Velocity (v1.6):**
 
-- Total phases archived: 2 (47, 48)
-- Total plans completed: 20
-- Source diff: 21 files, +2343/-23 lines
-- Total execution time: ~6 hours single-day (2026-05-27 03:34 → 09:14)
+- Total phases: 3 (49, 50, 51)
+- Total plans completed: 9
+- Source diff: 83 files, +6988/-73 lines
+- Timeline: single-day (2026-05-27)
 
 ## Accumulated Context
 
@@ -67,10 +67,10 @@ Items acknowledged and deferred at milestone close on 2026-05-27:
 
 ## Session Continuity
 
-Last session: 2026-05-27T16:30:43.839Z
-Stopped at: Phase 51 planned
-Resume path: `.planning/phases/51-taxid-testing-adoption-surface/51-01-PLAN.md`
+Last session: 2026-05-27
+Stopped at: Milestone v1.6 archived
+Resume path: Run `/gsd-new-milestone` to start v1.7
 
 ## Operator Next Steps
 
-- Run `/gsd-execute-phase 51` to implement TaxId, Testing fixtures, tax guide, and docs-truth
+- Run `/gsd-new-milestone` to define v1.7 requirements and roadmap

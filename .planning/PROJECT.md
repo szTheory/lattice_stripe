@@ -10,9 +10,16 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
-**Active milestone:** v1.6 Tax — Phase 50 (Tax Settings & Registration) complete 2026-05-27. Next: Phase 51 (TaxId, Testing & Adoption Surface).
+**Active milestone:** None — planning v1.7 Polish & Operator next.
 
-**Latest shipped milestone:** v1.5 Thin-Event Webhooks (archived 2026-05-27)
+**Latest shipped milestone:** v1.6 Tax (archived 2026-05-27)
+
+**What shipped in v1.6:**
+
+- **Tax Calculation & Transaction core** — `Tax.Calculation` and `Tax.Transaction` with nested structs, explicit verbs (`create_from_calculation/3`, `create_reversal/3`), moduledocs on 90-day expiry and `Invoice.AutomaticTax` boundary, and chained Mox-at-Transport integration spec proving calc→txn→reversal.
+- **Tax Settings & Registration** — `Tax.Settings` singleton (`retrieve/2`, `update/3` on `/v1/tax/settings`) and `Tax.Registration` CRUDL with jurisdiction `country_options` and authority disclaimer moduledocs — first singleton resource pattern in the codebase.
+- **TaxId dual-path surface** — top-level `LatticeStripe.TaxId` with guard-disambiguated routing for `/v1/tax_ids` and `/v1/customers/:id/tax_ids`, nested `Verification`/`Owner` structs, PII-redacted `Inspect`.
+- **Adoption surface** — public `LatticeStripe.Testing` Tax fixtures, expand-through-parent proof for all five Tax object types, canonical `guides/tax.md` (351 lines) in ExDoc Canonical Guides + JTBD ladder, docs-truth grep locks on Tax moduledocs and guide content.
 
 **What shipped in v1.5:**
 
@@ -29,27 +36,15 @@ Elixir developers can integrate Stripe payments into their applications with con
 - Phase `41.1` remains `pending-external-verification` for real-sandbox Quote downstream proof — an accepted external-proof boundary carried forward from v1.3, planned to ride along with v1.7 polish milestone.
 - `mix.exs` still pinned at `@version "1.3.0"` — v1.5 is shipped in the planning sense (code merged, docs/tests green). The `@version` bump + `mix hex.publish` happens out-of-band when ready to cut the Hex release.
 
-## Current Milestone: v1.6 Tax
+## Next Milestone: v1.7 — Polish & Operator
 
-**Goal:** Ship the Tax resource family as the broadest remaining mainstream Stripe family — SDK primitives only, with filing orchestration staying downstream in Accrue.
+**Goal:** Close the remaining v1.x scope gaps — thin `Charge` surface, Phase 41.1 follow-through, production operator guides — then call the library done for v1.x scope.
 
-**Target features:**
-- `Tax.Calculation` — calculate tax for a transaction without persisting
-- `Tax.Transaction` — create, retrieve, and list tax transactions from calculations
-- `Tax.Settings` — account-level tax configuration
-- `Tax.Registration` — tax registration management
-- `TaxId` — customer tax ID management (nested under `Customer` vs top-level — to decide in discuss-phase)
-
-**Key context:**
-
-- Largest of the planned remaining milestones (2-3 phases expected). Scope discipline must be negotiated in discuss-phase to prevent filing-strategy bleed into the SDK.
-- Phase numbering continues from Phase 48 — v1.6 phases start at Phase 49.
-- `Customer.tax_id` nested surface is a sub-decision worth its own discussion (Customer-scoped vs top-level `TaxId` resource).
-- After v1.6 ships, only v1.7 (Polish & Operator) remains before the planned stop signal.
-
-## Subsequent Milestones
-
-1. **v1.7 — Polish & Operator** (small, ~1 phase) — fill the unusually thin `Charge` surface (`list/3`, `search/3`, `capture/4`, `update/4`), close Phase `41.1` honestly (re-run with valid sandbox creds or retire as accepted external-only follow-through), ship `guides/production-checklist.md` and `guides/event-debugging.md`. Planned stop signal for v1.x scope.
+**Target work:**
+- Fill `Charge` surface gap (`list/3`, `search/3`, `capture/4`, `update/4` — only `retrieve/3` and `from_map/1` exist today)
+- Close Phase `41.1` honestly (re-run with valid sandbox creds or retire as accepted external-only follow-through)
+- Ship `guides/production-checklist.md` and `guides/event-debugging.md`
+- Planned stop signal for v1.x scope after v1.7 ships
 
 After v1.7, expect to publicly call the library "done for v1.x scope" absent fresh adopter pull. Identity / Treasury / Issuing / Terminal / Financial Connections / Climate / Sigma / Reporting stay deferred per JTBD doctrine.
 
@@ -59,7 +54,7 @@ After v1.7, expect to publicly call the library "done for v1.x scope" absent fre
 
 **Target users:** Elixir developers building SaaS products who need Stripe integrations that are correct, documented, and unsurprising. Early adopter signal remains strong: Accrue already consumes LatticeStripe as a downstream billing layer.
 
-**Codebase scale (post-v1.5):** v1.5 added ~2,343 lines across 21 source files in a single-day milestone (2026-05-27, ~6 hours of focused work) on top of five prior milestones. Thin-event surface, fetch-after-verify helpers, and the canonical webhooks-thin-events guide are now first-class artifacts; the docs-truth contract has grown to 12 grep-locked tests across guide content, install canary, ExDoc placement, cross-link graph, and Plug moduledoc surfaces.
+**Codebase scale (post-v1.6):** v1.6 added ~6,988 lines across 83 files in a single-day milestone (2026-05-27) on top of six prior milestones. The Tax resource family (Calculation, Transaction, Settings, Registration, TaxId) is now a first-class SDK surface with canonical `guides/tax.md`, public Testing fixtures, and docs-truth regression locks. The docs-truth contract continues to grow with each adoption milestone.
 
 **Design philosophy:**
 
@@ -107,10 +102,14 @@ After v1.7, expect to publicly call the library "done for v1.x scope" absent fre
 - ✓ `LatticeStripe.Testing` thin-event payload + notification helpers, snapshot helpers backwards-compatible (TESTING-01) — v1.5
 - ✓ Canonical Phoenix thin-event guide wired into ExDoc + discovery ladder (GUIDE-03) — v1.5
 - ✓ Integration coverage for thin-event happy-path, fetch-after-verify, malformed-payload, and `tolerance: 0` boundaries + docs-truth regression extension (VERIFY-03) — v1.5
+- ✓ Tax Calculation & Transaction core (CALC-01..03, TXN-01..04, DX-03) — Phase 49, v1.6
+- ✓ Tax Settings & Registration (CONF-01..04) — Phase 50, v1.6
+- ✓ TaxId dual-path CRUDL (TAXID-01..04) — Phase 51, v1.6
+- ✓ Tax ObjectTypes, Testing fixtures, canonical guide, docs-truth (DX-01, DX-02, DX-04, DX-05) — Phase 51, v1.6
 
 ### Active
 
-(v1.6 Tax requirements — to be defined in REQUIREMENTS.md by this milestone's roadmapper run.)
+(v1.7 requirements — to be defined by `/gsd-new-milestone`.)
 
 ### Out of Scope
 
@@ -139,6 +138,9 @@ After v1.7, expect to publicly call the library "done for v1.x scope" absent fre
 | Reuse existing dispatch tables for new resource families instead of growing new ones | `Webhook.fetch_related_object/2,3` typed-dispatches via the existing `ObjectTypes` registry. Resisting "new dispatch table" temptation kept v1.5 narrow and made the surface immediately benefit from `ObjectTypes` typed deserialization | ✓ Good (v1.5) |
 | Treat docstring/code drift as bug, not as docstring-fix opportunity | WEBFIX-01 chose to fix the code clause to match the docstring (matching every canonical Stripe SDK and the more useful semantics) instead of the easier path of changing the docstring. CHANGELOG + docs-truth grep regression locks the decision against future "fix it to be stricter" drift | ✓ Good (v1.5 WEBFIX-01) |
 | Four-surface triangulation for security-adjacent bug fixes | WEBFIX-01 reconciled `tolerance: 0` across (1) source docstring, (2) source code clause, (3) `Webhook.Plug` NimbleOptions schema, (4) tests + CHANGELOG + docs-truth grep — the four surfaces an adopter touches to reach the behavior. Single-surface fixes leave drift seams | ✓ Good (v1.5 pattern, reusable for Charge surface work in v1.7) |
+| Top-level `TaxId` with arity-based dual-path routing | Single module covers `/v1/tax_ids` and `/v1/customers/:id/tax_ids` via guard-disambiguated arity — avoids duplicating Customer-scoped vs top-level modules | ✓ Good (v1.6) |
+| Singleton resource pattern for `Tax.Settings` | First singleton in codebase (`GET/POST /v1/tax/settings`, no resource ID) — establishes pattern for future Stripe singletons | ✓ Good (v1.6) |
+| SDK primitives only for Tax; Accrue owns filing | Phase 51 guide fences filing orchestration to Accrue once; prevents scope bleed into multi-jurisdiction filing automation | ✓ Good (v1.6) |
 
 ## Evolution
 
@@ -158,4 +160,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 — Phase 49 Tax Calculation & Transaction Core complete*
+*Last updated: 2026-05-27 after v1.6 milestone*
