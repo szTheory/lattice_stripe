@@ -6,7 +6,26 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-- No unreleased changes yet.
+### [1.5.0] — Thin-Event SDK Surface & Webhook Reconciliation
+
+> Pre-release notes for the upcoming v1.5 line. The mix.exs version bump
+> happens at release time outside this entry's scope.
+
+#### Fixed
+
+- **WEBFIX-01 — `Webhook.check_tolerance/2` `tolerance: 0` semantics reconciled.**
+  Before this release, `tolerance: 0` returned `{:error, :timestamp_expired}`
+  on every call — directly contradicting the `verify_signature/4` docstring
+  which has always documented `0` as "disable staleness check". The code clause
+  has been corrected to match the docstring (and every canonical Stripe SDK:
+  stripe-node's `if (tolerance > 0 && ...)` gate, stripe-go's `IgnoreTolerance`
+  flag, stripe-ruby's `if tolerance && ...` guard).
+- **WEBFIX-01 — `Webhook.Plug` NimbleOptions `:tolerance` schema relaxed.**
+  Changed from `:pos_integer` to `:non_neg_integer` so the documented
+  "Set 0 to disable" lever is reachable through the public Plug surface.
+  Negative tolerances are still rejected at `init/1` time. **Testing only**
+  — never set `tolerance: 0` in production; it removes replay-attack protection.
+  The canonical webhook guide (Phase 48) will document this restriction.
 
 ## [1.3.0](https://github.com/szTheory/lattice_stripe/compare/v1.2...v1.3) (2026-05-25)
 
