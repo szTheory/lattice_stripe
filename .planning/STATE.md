@@ -22,14 +22,14 @@ See also: .planning/threads/v1-5-next-milestone-assessment.md (full assessment +
          .planning/threads/thin-event-webhook-evaluation.md (locked-in v1.5 shape)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Awaiting `/gsd:new-milestone` kickoff for v1.5 Thin-Event Webhooks.
+**Current focus:** v1.5 Thin-Event Webhooks roadmap defined (Phases 47-48). Ready to plan Phase 47.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 47 — Thin-Event SDK Surface & Webhook Reconciliation (not yet planned)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-05-27 — Milestone v1.5 started
+Status: Roadmap defined, awaiting `/gsd:plan-phase 47`
+Last activity: 2026-05-27 — v1.5 roadmap created (Phases 47-48 mapped to 8 REQ-IDs)
 
 ## Performance Metrics
 
@@ -49,7 +49,7 @@ Last activity: 2026-05-27 — Milestone v1.5 started
 ### Pending Todos
 
 - Decide whether Phase `41.1` should be re-run with valid sandbox credentials or retired as an accepted external-only follow-through. (Planned to ride along with v1.7 polish milestone.)
-- v1.5 must reconcile `Webhook.check_tolerance/2` `tolerance: 0` semantics — docstring (`lib/lattice_stripe/webhook.ex:84`) and code path (`lib/lattice_stripe/webhook.ex:268-273`) disagree.
+- v1.5 must reconcile `Webhook.check_tolerance/2` `tolerance: 0` semantics — docstring (`lib/lattice_stripe/webhook.ex:84`) and code path (`lib/lattice_stripe/webhook.ex:268-273`) disagree. (Now mapped to Phase 47 / WEBFIX-01.)
 - v1.7 must fill `Charge` surface gap — only `retrieve/3` and `from_map/1` exist today; `list/3`, `search/3`, `capture/4`, `update/4` are missing.
 
 ### Blockers/Concerns
@@ -59,16 +59,12 @@ Last activity: 2026-05-27 — Milestone v1.5 started
 
 ## Session Continuity
 
-Last session: 2026-05-27 — v1.5 next-milestone assessment recorded
-Stopped at: Assessment complete with v1.5 Thin-Event Webhooks selected
-Resume path: `/gsd:new-milestone` (v1.5 = Thin-Event Webhooks)
+Last session: 2026-05-27 — v1.5 roadmap created (Phases 47-48)
+Stopped at: ROADMAP.md and REQUIREMENTS.md traceability written; ready to plan Phase 47
+Resume path: `/gsd:plan-phase 47`
 
 ## Operator Next Steps
 
-- Start v1.5 with `/gsd:new-milestone v1.5 Thin-Event Webhooks`
-- Then `/gsd:discuss-phase` for the first phase (use the wedge dossier in
-  `.planning/threads/v1-5-next-milestone-assessment.md` and the locked-in
-  shape in `.planning/threads/thin-event-webhook-evaluation.md` as inputs)
-
-- Reconcile `Webhook.check_tolerance/2 tolerance: 0` semantics inside v1.5
-  scope
+- Run `/gsd:plan-phase 47` to decompose Phase 47 (Thin-Event SDK Surface & Webhook Reconciliation) into plans. The wedge dossier in `.planning/threads/v1-5-next-milestone-assessment.md` and the locked-in shape in `.planning/threads/thin-event-webhook-evaluation.md` are the primary inputs.
+- After Phase 47 ships, `/gsd:plan-phase 48` decomposes the adoption surface (guide + integration verification + docs-truth regression).
+- WEBFIX-01 (`tolerance: 0` reconciliation) is scoped inside Phase 47 — do not defer.

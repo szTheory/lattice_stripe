@@ -60,15 +60,15 @@ Excluded from v1.5 with explicit reasoning:
 
 ## Traceability
 
-(Populated by `gsd-roadmapper` when phases are created — maps each REQ-ID to the phase that delivers it.)
+Maps each REQ-ID to the phase that delivers it. All 8 v1.5 requirements mapped to exactly one phase (100% coverage).
 
 | REQ-ID | Phase |
 |--------|-------|
-| THIN-01 | (pending roadmap) |
-| THIN-02 | (pending roadmap) |
-| THIN-03 | (pending roadmap) |
-| THIN-04 | (pending roadmap) |
-| WEBFIX-01 | (pending roadmap) |
-| TESTING-01 | (pending roadmap) |
-| GUIDE-03 | (pending roadmap) |
-| VERIFY-03 | (pending roadmap) |
+| THIN-01 | Phase 47 |
+| THIN-02 | Phase 47 |
+| THIN-03 | Phase 47 |
+| THIN-04 | Phase 47 |
+| WEBFIX-01 | Phase 47 |
+| TESTING-01 | Phase 47 |
+| GUIDE-03 | Phase 48 |
+| VERIFY-03 | Phase 48 |
