@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.6
-milestone_name: Tax
-status: ready
-stopped_at: Milestone v1.6 initialized — roadmap approved
-last_updated: "2026-05-27T00:00:00.000Z"
-last_activity: 2026-05-27 — Milestone v1.6 roadmap approved (3 phases, 20 requirements)
+milestone_name: — Tax
+status: Ready for discuss/plan (roadmap approved)
+stopped_at: Phase 49 context gathered
+last_updated: "2026-05-27T15:44:09.764Z"
+last_activity: 2026-05-27 — Milestone v1.6 roadmap approved
 progress:
   total_phases: 3
   completed_phases: 0
@@ -67,8 +67,8 @@ Items acknowledged and deferred at milestone close on 2026-05-27:
 
 ## Session Continuity
 
-Last session: 2026-05-27
-Stopped at: Milestone v1.6 initialized — roadmap approved
+Last session: 2026-05-27T15:44:09.762Z
+Stopped at: Phase 49 context gathered
 Resume path: `/gsd-discuss-phase 49` or `/gsd-plan-phase 49`
 
 ## Operator Next Steps
