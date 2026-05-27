@@ -622,22 +622,25 @@ Source: [Stripe Event Destinations docs](https://docs.stripe.com/event-destinati
 
 **If this table is empty:** Most claims in this research are [VERIFIED: stripe-node source] / [VERIFIED: stripe-go source] / [VERIFIED: Stripe v2 API docs] / [CITED: lib/lattice_stripe/...]. Only three soft assumptions remain, all rated low-risk.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **`Stripe-Request-Trigger` header — include or defer?**
    - What we know: stripe-node sends it on `fetchEvent`/`fetchRelatedObject` ([VERIFIED: stripe-node source]). It signals to Stripe-side that the request was triggered by a webhook delivery.
    - What's unclear: Whether Stripe acts on the header (analytics? rate-limit isolation? nothing?). Not documented in Stripe's public API reference.
    - Recommendation: **Defer.** Phase 47 ships without it. Add as a follow-up if Stripe support confirms it has runtime effect, OR if a future adopter asks. Phase 48 guide can mention "set this header yourself if you want stripe-node parity" without us baking it in.
+   - RESOLVED: Defer to Phase 48 (no Phase 47 plan touches the `Stripe-Request-Trigger` header — Pitfall 7 deferral honored by 47-04 task 1; adding it requires `:additional_headers` opt plumbing which is out of v1.5 scope).
 
 2. **`Event.created` type when fetched from `/v2/core/events/{id}` — coerce or accept asymmetry?**
    - What we know: v1 events have `created: integer()`, v2 events have `created: String.t()` (ISO 8601).
    - What's unclear: Whether to (a) loosen `Event.@type created` to `integer() | String.t() | nil` (accept asymmetry), or (b) auto-parse ISO → Unix integer on decode (force parity at the cost of round-trip).
    - Recommendation: **Accept asymmetry.** Loosening the type matches Stripe's wire reality; auto-parse would hide a real distinction. Document on `Event.t()` that v2-fetched events have string `created`. The discuss-phase didn't anticipate this; flag to user via Phase 47 plan-check if it's important to surface.
+   - RESOLVED: Accept the asymmetry. `Event.@type t created :: integer() | nil` stays as-is; `EventNotification.@type t created :: String.t() | nil` (ISO 8601) per 47-01. The wire-format distinction is documented inline in both type docstrings, and 47-04 task 1 documents the v2-fetched `Event.created` string form in the `fetch_event/3` `@doc` block per RESEARCH Pitfall 2. Dialyzer is not in use per CLAUDE.md so the runtime behavior is correct via infallible `from_map/1`.
 
 3. **`fetch_event/3` — accept `EventNotification.t() | String.t()` or just one shape?**
    - What we know: CONTEXT D-04 says "accepts `EventNotification.t()` or a bare `String.t()` id."
    - What's unclear: Whether `String.t()` form is genuinely useful in v1.5 (you'd already have a parsed notification at the point you call this) vs. just YAGNI overhead.
    - Recommendation: **Ship both shapes per D-04.** The string form is two extra lines via pattern match and gives operators an "I have an event ID but no payload, fetch it" escape hatch. Implementation: dispatch via two function clauses, one for `%EventNotification{id: id}` (extract id) and one for `String.t()`.
+   - RESOLVED: Accept both `%EventNotification{}` and bare `String.t()` id per CONTEXT D-04. Implemented in 47-04 task 1 as a three-clause `fetch_event/3` (the third clause `%EventNotification{id: nil}` returns the defensive `{:error, :no_event_id}` typed atom from D-07).
 
 ## Environment Availability
 

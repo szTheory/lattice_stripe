@@ -2,8 +2,8 @@
 phase: 47
 slug: thin-event-sdk-surface-webhook-reconciliation
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-05-27
 ---
 
@@ -100,11 +100,11 @@ created: 2026-05-27
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references (9 items above)
-- [ ] No watch-mode flags
-- [ ] Feedback latency < ~5s (quick) / ~30s (full)
-- [ ] `nyquist_compliant: true` set in frontmatter after planner closes the per-task verify map
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies — 47-01..47-05 each include `<automated>` verify blocks (mix compile / mix test); Wave 0 file scaffolding is created in 47-01 task 3 (fixture) and the new test files are created in 47-02/47-04/47-05 as part of those plans.
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify — every task across 47-01..47-05 runs either `mix compile --warnings-as-errors` or `mix test ...` at task completion.
+- [x] Wave 0 covers all MISSING references (9 items above) — fixture file in 47-01; `event_notification_test.exs` in 47-01; `webhook/fetch_test.exs` in 47-04; `parse_event_notification/4` describe block + tolerance:0 test rewrite in 47-02/47-03; Plug schema + negative-tolerance cases in 47-03; testing helpers + cases in 47-05; object_types extension in 47-01; event_test extension in 47-01; docs_truth CHANGELOG regression in 47-03.
+- [x] No watch-mode flags — all verify commands are one-shot (`mix test ...`, `mix compile --warnings-as-errors`); no `--listen-on-stdin`, `--stale`, or watcher invocations.
+- [x] Feedback latency < ~5s (quick) / ~30s (full) — quick run is the 7-file mix test command above (~5s); full suite is `mix test` (~30s).
+- [x] `nyquist_compliant: true` set in frontmatter after planner closes the per-task verify map — set above; per-task verify map is fully populated across all 5 plans.
 
-**Approval:** pending
+**Approval:** approved 2026-05-27
