@@ -13,9 +13,19 @@ defmodule LatticeStripe.DocsTruthTest do
 
   @stale_install_pins ["1.1", "1.2", "1.3", "1.5"]
 
+  @stale_release_status_claims [
+    "1.3.x` line is the current published",
+    "1.3.x line is the current published"
+  ]
+
   defp expected_install_snippet do
     [major, minor | _] = String.split(LatticeStripe.MixProject.project()[:version], ".")
     "{:lattice_stripe, \"~> #{major}.#{minor}\"}"
+  end
+
+  defp current_release_line do
+    [major, minor | _] = String.split(LatticeStripe.MixProject.project()[:version], ".")
+    "#{major}.#{minor}.x"
   end
 
   defp docs_config do
