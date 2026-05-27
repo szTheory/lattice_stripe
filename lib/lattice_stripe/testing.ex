@@ -50,6 +50,7 @@ defmodule LatticeStripe.Testing do
     CreditNote,
     Dispute,
     Event,
+    EventNotification,
     File,
     FileLink,
     Mandate,
@@ -101,6 +102,28 @@ defmodule LatticeStripe.Testing do
   """
   @spec quote(map()) :: Quote.t()
   def quote(raw_map), do: Quote.from_map(raw_map)
+
+  @doc """
+  Converts a canonical thin-event notification fixture map into
+  `%LatticeStripe.EventNotification{}`.
+
+  Direct typed-builder parallel to `dispute/1`, `customer/1`, etc. — use this when
+  your test needs a typed `%EventNotification{}` value without going through
+  signature verification.
+
+  ## Example
+
+      import LatticeStripe.Test.Fixtures.EventNotification
+
+      notif = LatticeStripe.Testing.event_notification(event_notification_map())
+      assert notif.type == "v2.core.account.updated"
+
+  When you need a signed wire-format payload (for example to exercise a Phoenix
+  controller calling `Webhook.parse_event_notification/4`), use
+  `generate_thin_event_payload/3` instead.
+  """
+  @spec event_notification(map()) :: EventNotification.t()
+  def event_notification(raw_map), do: EventNotification.from_map(raw_map)
 
   @doc """
   Builds a `%LatticeStripe.Event{}` struct for the given event type and object data.
@@ -213,6 +236,94 @@ defmodule LatticeStripe.Testing do
       "pending_webhooks" => 1,
       "request" => %{"id" => nil, "idempotency_key" => nil},
       "data" => %{"object" => object_data}
+    }
+
+    payload = Jason.encode!(raw_map)
+    sig_header = Webhook.generate_test_signature(payload, secret, timestamp: timestamp)
+    {payload, sig_header}
+  end
+
+  @doc """
+  Generates a signed **thin-event** webhook payload pair for Plug-level testing.
+
+  Thin-event counterpart to `generate_webhook_payload/3` — produces a wire-format
+  `/v2/events` notification payload (`object: "v2.core.event"`, ISO 8601 `created`,
+  no `data` or `pending_webhooks` keys) and a matching `Stripe-Signature` header.
+  Returns `{payload_string, signature_header_value}` that round-trips through
+  `LatticeStripe.Webhook.parse_event_notification/4` without modification.
+
+  Use `generate_webhook_payload/3` for snapshot v1 webhooks (`construct_event/4`)
+  and this helper for thin-event v2 webhooks (`parse_event_notification/4`).
+  Calling the wrong helper produces a structurally-valid payload that decodes to
+  a mostly-`nil` struct — keep snapshot and thin-event test paths obviously
+  distinct in your test suite.
+
+  ## Parameters
+
+  - `type` - Stripe thin-event type string, e.g. `"v2.core.account.updated"`
+  - `related_object_data` - The `related_object` map (`%{"id" => ..., "type" => ...,
+    "url" => ...}`) or `nil` for snapshot-style v2 events (default: `nil`)
+  - `opts` - Options:
+    - `:secret` - Webhook signing secret (required; raises `KeyError` if absent)
+    - `:timestamp` - Unix-seconds timestamp integer used both to sign the payload
+      and to derive the ISO 8601 `created` field (default: current system time)
+    - `:id` - Event ID string (default: `"evt_test_" <> random_hex(16)`)
+    - `:context` - Free-form `context` string (default: `nil`)
+    - `:livemode` - boolean (default: `false`)
+
+  ## Returns
+
+  `{raw_payload_string, stripe_signature_header_value}` — the same shape as
+  `generate_webhook_payload/3`.
+
+  ## Example
+
+      {payload, sig_header} =
+        LatticeStripe.Testing.generate_thin_event_payload(
+          "v2.core.account.updated",
+          %{
+            "id" => "acct_test_123",
+            "type" => "v2.core.account",
+            "url" => "/v2/core/accounts/acct_test_123"
+          },
+          secret: "whsec_test"
+        )
+
+      {:ok, notif} =
+        LatticeStripe.Webhook.parse_event_notification(payload, sig_header, "whsec_test")
+
+      assert notif.type == "v2.core.account.updated"
+      assert notif.related_object.id == "acct_test_123"
+
+  Pass `nil` for `related_object_data` to produce a snapshot-style v2 event (the
+  notification will have `related_object: nil`; adopters dispatch these to
+  `Webhook.fetch_event/3` rather than `fetch_related_object/3`).
+  """
+  @spec generate_thin_event_payload(String.t(), map() | nil, keyword()) ::
+          {String.t(), String.t()}
+  def generate_thin_event_payload(type, related_object_data \\ nil, opts) do
+    {secret, opts} = Keyword.pop!(opts, :secret)
+    {timestamp, notif_opts} = Keyword.pop(opts, :timestamp, System.system_time(:second))
+
+    id = Keyword.get(notif_opts, :id, "evt_test_" <> random_hex(16))
+    context = Keyword.get(notif_opts, :context)
+    livemode = Keyword.get(notif_opts, :livemode, false)
+
+    # ISO 8601 string per Stripe wire format (RESEARCH Finding 2). The same Unix-seconds
+    # timestamp signs the payload and is encoded as an ISO 8601 string in `created`.
+    created_iso = DateTime.from_unix!(timestamp) |> DateTime.to_iso8601()
+
+    raw_map = %{
+      "id" => id,
+      # Thin-event wire value per Stripe v2 events spec (RESEARCH Finding 1).
+      # Do NOT change to the v2.core.event-notification namespace — `Webhook`
+      # routing + EventNotification.from_map both expect this exact string.
+      "object" => "v2.core.event",
+      "type" => type,
+      "created" => created_iso,
+      "context" => context,
+      "livemode" => livemode,
+      "related_object" => related_object_data
     }
 
     payload = Jason.encode!(raw_map)
