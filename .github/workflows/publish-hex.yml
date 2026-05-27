@@ -1,80 +1,74 @@
-# Release Please opens/updates a Release PR from conventional commits on main.
-# When that PR is merged, Release Please creates the GitHub Release + v* tag,
-# gate-ci-green verifies CI passed on the release SHA, then publish-hex publishes
-# to Hex with HEX_API_KEY.
+# Manual recovery: publish an already-tagged (or pinned SHA) revision to Hex when
+# automation did not run or needs a one-off retry. Default path is Release Please
+# (`.github/workflows/release.yml`) on merge of the Release PR.
+#
+# Bootstrap path for 1.7.0: push main + v1.7.0 tag, then dispatch with tag=v1.7.0,
+# release_version=1.7.0 after CI is green on that SHA.
 #
 # Requires repository secret: HEX_API_KEY (Actions secrets).
-# RELEASE_PLEASE_TOKEN: optional fine-grained PAT for Release Please PRs.
 
-name: Release
+name: Publish Hex Recovery
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Git tag or commit SHA to publish from (e.g. v1.7.0).'
+        required: true
+        type: string
+      release_version:
+        description: 'Expected @version string in mix.exs at that ref (e.g. 1.7.0).'
+        required: true
+        type: string
+      dry_run:
+        description: 'Run mix hex.publish --dry-run instead of publishing.'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+  contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: publish-hex-${{ github.event.inputs.tag }}
   cancel-in-progress: false
 
 jobs:
-  release-please:
-    name: Release Please
+  gate-ci-green:
+    name: Verify CI is green on release ref
     runs-on: ubuntu-latest
     outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
-      version: ${{ steps.release.outputs.version }}
-      sha: ${{ steps.release.outputs.sha }}
+      checkout_ref: ${{ steps.validate.outputs.checkout_ref }}
+      sha: ${{ steps.validate.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run Release Please
-        id: release
-        uses: googleapis/release-please-action@v4
-        with:
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
+      - name: Validate ref and resolve SHA
+        id: validate
+        run: |
+          set -euo pipefail
+          ref="${{ github.event.inputs.tag }}"
 
-  gate-ci-green:
-    name: Verify CI is green on release SHA
-    runs-on: ubuntu-latest
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    steps:
-      - name: Resolve tagged SHA
-        id: resolve-sha
+          if [[ "$ref" =~ ^[0-9a-f]{40}$ ]]; then
+            git cat-file -e "${ref}^{commit}"
+            echo "checkout_ref=$ref" >> "$GITHUB_OUTPUT"
+            echo "sha=$ref" >> "$GITHUB_OUTPUT"
+          elif git show-ref --verify --quiet "refs/tags/$ref"; then
+            sha="$(git rev-list -n 1 "$ref")"
+            echo "checkout_ref=$ref" >> "$GITHUB_OUTPUT"
+            echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag must be a 40-character commit SHA or an existing git tag" >&2
+            exit 1
+          fi
+
+      - name: Verify CI is green on release SHA
         uses: actions/github-script@v7
         with:
           script: |
-            const tag = '${{ needs.release-please.outputs.tag_name }}';
-            const shaFromRelease = '${{ needs.release-please.outputs.sha }}';
-
-            if (shaFromRelease) {
-              core.setOutput('sha', shaFromRelease);
-              return;
-            }
-
-            const commit = await github.rest.repos.getCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: `tags/${tag}`
-            });
-            core.setOutput('sha', commit.data.sha);
-
-      - name: Verify CI is green on tagged SHA
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const sha = '${{ steps.resolve-sha.outputs.sha }}';
+            const sha = '${{ steps.validate.outputs.sha }}';
             const { data } = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -86,7 +80,7 @@ jobs:
             if (data.total_count === 0) {
               core.setFailed(
                 `Delivery blocked: no ci.yml runs found for SHA ${sha}. ` +
-                'Push the release commit and let CI complete before publishing.'
+                'Push the tagged commit and let CI complete before publishing.'
               );
               return;
             }
@@ -102,19 +96,16 @@ jobs:
 
             core.info(`ci.yml succeeded on release SHA ${sha}`);
 
-  publish-hex:
+  publish:
     name: Publish to Hex.pm
     runs-on: ubuntu-latest
-    needs: [release-please, gate-ci-green]
-    if: ${{ needs.release-please.outputs.release_created == 'true' }}
-    permissions:
-      contents: read
+    needs: gate-ci-green
     env:
-      RELEASE_VERSION: ${{ needs.release-please.outputs.version }}
+      RELEASE_VERSION: ${{ github.event.inputs.release_version }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.release-please.outputs.tag_name }}
+          ref: ${{ needs.gate-ci-green.outputs.checkout_ref }}
 
       - uses: erlef/setup-beam@v1
         with:
@@ -134,14 +125,14 @@ jobs:
           mix local.hex --force
           mix local.rebar --force
 
+      - name: Verify release version in mix.exs
+        run: grep -n "@version \"${RELEASE_VERSION}\"" mix.exs
+
       - name: Fetch library deps
         run: mix deps.get
 
       - name: Compile (warnings as errors)
         run: mix compile --warnings-as-errors
-
-      - name: Verify release version in mix.exs
-        run: grep -n "@version \"${RELEASE_VERSION}\"" mix.exs
 
       - name: Run library tests
         env:
@@ -155,6 +146,7 @@ jobs:
 
       - name: Skip if version already on Hex
         id: idempotency
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
           if mix hex.info lattice_stripe "${RELEASE_VERSION}" 2>/dev/null | grep -q "Released:"; then
             echo "Version ${RELEASE_VERSION} of lattice_stripe already on Hex — skipping publish."
@@ -162,18 +154,19 @@ jobs:
           fi
 
       - name: Dry run Hex publish
-        if: steps.idempotency.outputs.skip != 'true'
+        if: github.event.inputs.dry_run == 'true' || steps.idempotency.outputs.skip != 'true'
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
         run: mix hex.publish --dry-run --yes
 
       - name: Publish to Hex
-        if: steps.idempotency.outputs.skip != 'true'
+        if: github.event.inputs.dry_run != 'true' && steps.idempotency.outputs.skip != 'true'
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
         run: mix hex.publish --yes
 
       - name: Verify version on Hex.pm
+        if: github.event.inputs.dry_run != 'true'
         run: |
           set -euo pipefail
           for i in $(seq 1 36); do

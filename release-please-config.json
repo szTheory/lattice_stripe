@@ -10,6 +10,9 @@
     {"type": "chore", "section": "Miscellaneous", "hidden": true}
   ],
   "packages": {
-    ".": {}
+    ".": {
+      "changelog-path": "CHANGELOG.md",
+      "include-v-in-tag": true
+    }
   }
 }

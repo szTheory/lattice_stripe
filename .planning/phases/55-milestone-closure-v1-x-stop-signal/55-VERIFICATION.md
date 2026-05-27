@@ -64,6 +64,7 @@ $ mix test test/lattice_stripe/docs_truth_test.exs --warnings-as-errors
 
 ## Next Steps
 
-1. Complete Phase 54 plan 54-04 (`mix hex.publish` at 1.7.0).
-2. Re-run Phase 55-03 Task 1–4 (mark requirements `[x]`, set STATE `close_ready`).
-3. `/gsd-audit-milestone v1.7` then `/gsd-complete-milestone v1.7`.
+1. Push `main` + `v1.7.0` tag; wait for CI green on release SHA.
+2. Dispatch **Publish Hex Recovery** (`.github/workflows/publish-hex.yml`) with `tag=v1.7.0`, `release_version=1.7.0`.
+3. Re-run Phase 55 gap closure (55-05 REL-04 gate, then 55-06 close_ready reconciliation).
+4. `/gsd-audit-milestone v1.7` then `/gsd-complete-milestone v1.7`.

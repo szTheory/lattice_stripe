@@ -106,4 +106,4 @@
 
 ## Next Step
 
-**Maintainer:** `git push origin v1.7.0` then `HEX_API_KEY=<publish-capable> mix hex.publish --yes` — verify `mix hex.info lattice_stripe 1.7.0`. Then `/gsd-audit-milestone v1.7` → `/gsd-complete-milestone v1.7`.
+**Maintainer:** Push `main` + `v1.7.0` tag, wait for CI green, then dispatch **Publish Hex Recovery** (`tag=v1.7.0`, `release_version=1.7.0`) — verify `mix hex.info lattice_stripe 1.7.0`. Future releases: merge Release Please PR → automated publish via [`release.yml`](.github/workflows/release.yml). Then `/gsd-audit-milestone v1.7` → `/gsd-complete-milestone v1.7`.
