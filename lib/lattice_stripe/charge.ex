@@ -59,7 +59,7 @@ defmodule LatticeStripe.Charge do
   full object reference.
   """
 
-  alias LatticeStripe.{Client, Error, ObjectTypes, Request, Resource}
+  alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   # Known top-level fields from the Stripe Charge object.
   # Used to build the struct and separate known from extra (unknown) fields.
@@ -232,6 +232,218 @@ defmodule LatticeStripe.Charge do
 
   def retrieve!(%Client{} = client, id, opts) when is_binary(id) do
     client |> retrieve(id, opts) |> Resource.unwrap_bang!()
+  end
+
+  # ---------------------------------------------------------------------------
+  # Public API: list, search, update, capture
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Lists Charges with optional filters.
+
+  Sends `GET /v1/charges` and returns `{:ok, %Response{data: %List{}}}` with
+  typed `%Charge{}` items.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `params` - Filter params (e.g., `%{"limit" => "10", "customer" => "cus_123"}`)
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Response{data: %List{data: [%Charge{}, ...]}}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+
+  ## Example
+
+      {:ok, resp} = LatticeStripe.Charge.list(client, %{"limit" => "20"})
+      Enum.each(resp.data.data, &IO.inspect/1)
+  """
+  @spec list(Client.t(), map(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
+  def list(%Client{} = client, params \\ %{}, opts \\ []) do
+    %Request{method: :get, path: "/v1/charges", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_list(&from_map/1)
+  end
+
+  @doc """
+  Like `list/3` but raises `LatticeStripe.Error` on failure.
+  """
+  @spec list!(Client.t(), map(), keyword()) :: Response.t()
+  def list!(%Client{} = client, params \\ %{}, opts \\ []) do
+    list(client, params, opts) |> Resource.unwrap_bang!()
+  end
+
+  @doc """
+  Returns a lazy stream of all Charges matching the given params (auto-pagination).
+
+  Emits individual `%Charge{}` structs, fetching additional pages as needed.
+  Raises `LatticeStripe.Error` if any page fetch fails.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `params` - Filter params (e.g., `%{"limit" => "100"}`)
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  An `Enumerable.t()` of `%Charge{}` structs.
+
+  ## Example
+
+      client
+      |> LatticeStripe.Charge.stream!()
+      |> Stream.take(500)
+      |> Enum.to_list()
+  """
+  @spec stream!(Client.t(), map(), keyword()) :: Enumerable.t()
+  def stream!(%Client{} = client, params \\ %{}, opts \\ []) do
+    req = %Request{method: :get, path: "/v1/charges", params: params, opts: opts}
+    List.stream!(client, req) |> Stream.map(&from_map/1)
+  end
+
+  @doc """
+  Searches Charges using Stripe's search query language.
+
+  Sends `GET /v1/charges/search` with the query string and returns typed results.
+  Note: search results have eventual consistency — newly created Charges may not
+  appear immediately.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `query` - Stripe search query string (e.g., `"status:'succeeded' AND currency:'usd'"`)
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Response{data: %List{data: [%Charge{}, ...]}}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+
+  ## Example
+
+      {:ok, resp} = LatticeStripe.Charge.search(client, "status:'succeeded'")
+  """
+  @spec search(Client.t(), String.t(), keyword()) :: {:ok, Response.t()} | {:error, Error.t()}
+  def search(%Client{} = client, query, opts \\ []) when is_binary(query) do
+    %Request{
+      method: :get,
+      path: "/v1/charges/search",
+      params: %{"query" => query},
+      opts: opts
+    }
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_list(&from_map/1)
+  end
+
+  @doc """
+  Like `search/3` but raises `LatticeStripe.Error` on failure.
+  """
+  @spec search!(Client.t(), String.t(), keyword()) :: Response.t()
+  def search!(%Client{} = client, query, opts \\ []) when is_binary(query) do
+    search(client, query, opts) |> Resource.unwrap_bang!()
+  end
+
+  @doc """
+  Returns a lazy stream of all Charges matching the search query (auto-pagination).
+
+  Emits individual `%Charge{}` structs, fetching additional search pages as needed.
+  Raises `LatticeStripe.Error` if any page fetch fails.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `query` - Stripe search query string
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  An `Enumerable.t()` of `%Charge{}` structs.
+  """
+  @spec search_stream!(Client.t(), String.t(), keyword()) :: Enumerable.t()
+  def search_stream!(%Client{} = client, query, opts \\ []) when is_binary(query) do
+    req = %Request{
+      method: :get,
+      path: "/v1/charges/search",
+      params: %{"query" => query},
+      opts: opts
+    }
+
+    List.stream!(client, req) |> Stream.map(&from_map/1)
+  end
+
+  @doc """
+  Updates a Charge by ID.
+
+  Sends `POST /v1/charges/:id` with the given params and returns `{:ok, %Charge{}}`.
+  Note: the Stripe API only supports updating the `metadata` and `description`
+  fields on a Charge.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `id` - The Charge ID string
+  - `params` - Map of fields to update (only `"metadata"` and `"description"` are accepted by Stripe)
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Charge{}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec update(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def update(%Client{} = client, id, params, opts \\ []) when is_binary(id) do
+    %Request{method: :post, path: "/v1/charges/#{id}", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc """
+  Like `update/4` but raises `LatticeStripe.Error` on failure.
+  """
+  @spec update!(Client.t(), String.t(), map(), keyword()) :: t()
+  def update!(%Client{} = client, id, params, opts \\ []) when is_binary(id) do
+    update(client, id, params, opts) |> Resource.unwrap_bang!()
+  end
+
+  @doc """
+  Captures an uncaptured Charge.
+
+  Sends `POST /v1/charges/:id/capture` with optional params and returns
+  `{:ok, %Charge{}}`. Only applicable to Charges created via legacy direct-charge
+  flows that were not yet captured.
+
+  For charges created by PaymentIntent confirmation, use
+  `LatticeStripe.PaymentIntent.capture/4` instead — capturing a PI-initiated charge
+  through this function is not the supported path.
+
+  ## Parameters
+
+  - `client` - A `%LatticeStripe.Client{}` struct
+  - `id` - The Charge ID string
+  - `params` - Optional capture params (e.g., `%{"amount" => 1500}`)
+  - `opts` - Per-request overrides
+
+  ## Returns
+
+  - `{:ok, %Charge{}}` on success
+  - `{:error, %LatticeStripe.Error{}}` on failure
+  """
+  @spec capture(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def capture(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
+    %Request{method: :post, path: "/v1/charges/#{id}/capture", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc """
+  Like `capture/4` but raises `LatticeStripe.Error` on failure.
+  """
+  @spec capture!(Client.t(), String.t(), map(), keyword()) :: t()
+  def capture!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id) do
+    capture(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
   # ---------------------------------------------------------------------------
