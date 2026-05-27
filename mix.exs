@@ -36,6 +36,7 @@ defmodule LatticeStripe.MixProject do
           "guides/credit_notes.md",
           "guides/invoices.md",
           "guides/metering.md",
+          "guides/tax.md",
           "guides/subscriptions.md",
           "guides/connect.md",
           "guides/connect-accounts.md",
@@ -75,6 +76,7 @@ defmodule LatticeStripe.MixProject do
              "guides/subscriptions.md",
              "guides/customer-portal.md",
              "guides/metering.md",
+             "guides/tax.md",
              "guides/connect.md",
              "guides/connect-accounts.md",
              "guides/connect-money-movement.md"

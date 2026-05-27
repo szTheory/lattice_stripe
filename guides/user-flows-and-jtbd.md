@@ -84,6 +84,8 @@ Use this guide as a routing layer, not as the final source of API truth.
 - **Usage-based billing and reconciliation**:
   [Metering Runtime and Reconciliation](metering-runtime-and-reconciliation.md),
   [Metering](metering.md), [Webhooks](webhooks.md), [Testing](testing.md)
+- **Custom payment flows with standalone Stripe Tax (not only Checkout/Invoices)**:
+  [Tax](tax.md), [Payments](payments.md), [Testing](testing.md)
 - **Marketplace or platform work**:
   [Connect Platform Flow](connect-platform-flow.md), [Connect](connect.md),
   [Connect Accounts](connect-accounts.md), [Connect Money Movement](connect-money-movement.md)
@@ -125,6 +127,7 @@ Read next:
 - [Payments](payments.md)
 - [Checkout](checkout.md)
 - [Webhooks](webhooks.md)
+- [Tax](tax.md) when you calculate tax on a custom cart before charging (standalone `Tax.Calculation` API)
 
 ### Job 2: "Start and run recurring billing"
 

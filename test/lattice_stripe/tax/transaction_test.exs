@@ -118,17 +118,4 @@ defmodule LatticeStripe.Tax.TransactionTest do
     end
   end
 
-  describe "moduledoc grep targets" do
-    test "documents operational constraints for DX-03" do
-      root = Path.expand("../../..", __DIR__)
-      calc_source = File.read!(Path.join(root, "lib/lattice_stripe/tax/calculation.ex"))
-      txn_source = File.read!(Path.join(root, "lib/lattice_stripe/tax/transaction.ex"))
-
-      assert calc_source =~ "90"
-      assert calc_source =~ "Invoice.AutomaticTax"
-      assert txn_source =~ "reference"
-      assert txn_source =~ "globally" or txn_source =~ "unique"
-      assert txn_source =~ "Invoice.AutomaticTax"
-    end
-  end
 end

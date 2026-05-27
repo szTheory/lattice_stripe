@@ -59,7 +59,7 @@ defmodule LatticeStripe.Tax.Registration do
   `%LatticeStripe.List{}` is not `Enumerable`. For many jurisdictions, use
   `stream!/3`, which auto-paginates and yields `%Registration{}` structs.
 
-  A canonical tax guide ships in v1.6 Phase 51.
+  See [Standalone Tax API](guides/tax.md) for the canonical calculate → record → reverse workflow.
 
   See [Stripe Tax Registrations](https://docs.stripe.com/api/tax/registrations).
   """

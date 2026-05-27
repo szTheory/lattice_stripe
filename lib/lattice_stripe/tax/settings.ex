@@ -38,7 +38,7 @@ defmodule LatticeStripe.Tax.Settings do
   API — you can only change values. Check `status` and `status_details` for
   whether Tax is active in your jurisdictions.
 
-  A canonical tax guide ships in v1.6 Phase 51.
+  See [Standalone Tax API](guides/tax.md) for the canonical calculate → record → reverse workflow.
 
   See [Stripe Tax Settings](https://docs.stripe.com/api/tax/settings).
   """

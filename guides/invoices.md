@@ -7,6 +7,8 @@ pitfalls.
 For the Stripe object reference, see the
 [Stripe Invoice API](https://docs.stripe.com/api/invoices).
 
+For tax on custom payment flows outside Invoice `automatic_tax`, see [Tax](tax.md).
+
 ## The Invoice Workflow
 
 The canonical workflow for manually managed invoices follows four steps:

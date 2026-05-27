@@ -327,5 +327,6 @@ search for real-time workflows — use `retrieve/3` or `list/3` with filters ins
 
 - [Checkout](checkout.md) — Stripe-hosted payment pages for the same flows
 - [Subscriptions](subscriptions.md) — recurring billing on top of the payment primitives
+- [Tax](tax.md) — standalone `Tax.Calculation` → `Tax.Transaction` flow when you own the cart and tax logic
 - [Error Handling](error-handling.md) — card errors, retries, and idempotency
 - [Webhooks](webhooks.md) — confirm payment completion via `payment_intent.succeeded`

@@ -8,6 +8,8 @@ pattern-matchable through typed structs.
 See the [Stripe Subscriptions API](https://docs.stripe.com/api/subscriptions)
 for the full object reference.
 
+For standalone tax on custom carts (not Subscription `automatic_tax`), see [Tax](tax.md).
+
 ## Creating a subscription
 
 A subscription needs a customer and at least one item pointing at a recurring

@@ -33,6 +33,8 @@ defmodule LatticeStripe.DocsTruthTest do
     assert "guides/subscriptions.md" in groups["Canonical Guides"]
     assert "guides/customer-portal.md" in groups["Canonical Guides"]
     assert "guides/metering.md" in groups["Canonical Guides"]
+    assert "guides/tax.md" in extras
+    assert "guides/tax.md" in groups["Canonical Guides"]
     assert "guides/connect.md" in groups["Canonical Guides"]
     assert "guides/webhooks.md" in groups["Operations & DX"]
     # D-03 sub-decision 3C — new v1.5 trust rail extension to Operations & DX
@@ -49,6 +51,7 @@ defmodule LatticeStripe.DocsTruthTest do
     assert readme =~ "guides/subscriptions.md"
     assert readme =~ "guides/customer-portal.md"
     assert readme =~ "guides/metering.md"
+    assert readme =~ "guides/tax.md"
     assert readme =~ "guides/connect.md"
     assert readme =~ "guides/webhooks.md"
     assert readme =~ "guides/testing.md"
@@ -88,6 +91,7 @@ defmodule LatticeStripe.DocsTruthTest do
     assert jtbd =~ "quote-to-billing-operator.md"
     assert jtbd =~ "webhooks.md"
     assert jtbd =~ "testing.md"
+    assert jtbd =~ "tax.md"
 
     assert recipes =~ "canonical"
     assert recipes =~ "checkout-signup-and-portal.md"
@@ -100,6 +104,82 @@ defmodule LatticeStripe.DocsTruthTest do
     assert recipes =~ "webhooks.md"
     assert recipes =~ "testing.md"
     assert recipes =~ "error-handling.md"
+    assert recipes =~ "tax.md"
+  end
+
+  test "tax guide locks ExDoc placement, content anchors, cross-links, and moduledocs" do
+    root = Path.expand("../..", __DIR__)
+    tax_guide = File.read!("guides/tax.md")
+    docs = docs_config()
+    groups = docs[:groups_for_extras] |> Map.new()
+
+    assert "guides/tax.md" in docs[:extras]
+    assert "guides/tax.md" in groups["Canonical Guides"]
+
+    assert tax_guide =~ "Calculation.create"
+    assert tax_guide =~ "create_from_calculation"
+    assert tax_guide =~ "create_reversal"
+    assert tax_guide =~ "Invoice.AutomaticTax"
+    assert tax_guide =~ "out of SDK scope"
+    assert tax_guide =~ "90"
+    assert tax_guide =~ "expires_at" or tax_guide =~ "days"
+    assert tax_guide =~ "reference"
+    assert tax_guide =~ "globally" or tax_guide =~ "unique"
+    assert tax_guide =~ "country_options"
+    assert tax_guide =~ "Tax.Settings"
+    assert tax_guide =~ "Tax.Registration"
+
+    assert tax_guide =~ "testing.md"
+    assert tax_guide =~ "error-handling.md"
+    assert tax_guide =~ "payments.md"
+
+    jtbd = File.read!("guides/user-flows-and-jtbd.md")
+    recipes = File.read!("guides/recipes.md")
+    payments = File.read!("guides/payments.md")
+    assert jtbd =~ "tax.md"
+    assert recipes =~ "tax.md"
+    assert payments =~ "tax.md"
+
+    calc = File.read!(Path.join(root, "lib/lattice_stripe/tax/calculation.ex"))
+    txn = File.read!(Path.join(root, "lib/lattice_stripe/tax/transaction.ex"))
+    settings = File.read!(Path.join(root, "lib/lattice_stripe/tax/settings.ex"))
+    registration = File.read!(Path.join(root, "lib/lattice_stripe/tax/registration.ex"))
+    tax_id = File.read!(Path.join(root, "lib/lattice_stripe/tax_id.ex"))
+
+    for source <- [calc, txn, settings, registration, tax_id] do
+      assert source =~ "guides/tax.md"
+    end
+
+    assert calc =~ "90"
+    assert calc =~ "days" or calc =~ "expires_at"
+    assert calc =~ "Invoice.AutomaticTax"
+    assert calc =~ "out of SDK scope"
+    assert calc =~ "LatticeStripe.Tax.Transaction"
+
+    assert txn =~ "reference"
+    assert txn =~ "globally" or txn =~ "unique"
+    assert txn =~ "create_from_calculation"
+    assert txn =~ "create_reversal"
+    assert txn =~ "Invoice.AutomaticTax"
+    assert txn =~ "LatticeStripe.Tax.Calculation"
+
+    assert settings =~ "singleton"
+    assert settings =~ "tax_code"
+    assert settings =~ "LatticeStripe.Tax.Calculation"
+    assert settings =~ "Invoice.AutomaticTax"
+    assert settings =~ "stripe_account"
+
+    assert registration =~ "tax authorities"
+    assert registration =~ "country_options"
+    assert registration =~ "LatticeStripe.Tax.Settings"
+    assert registration =~ "LatticeStripe.Tax.Calculation"
+    assert registration =~ "Invoice.AutomaticTax"
+    assert registration =~ "out of SDK scope"
+    assert registration =~ "stream!"
+
+    assert tax_id =~ "/v1/tax_ids"
+    assert tax_id =~ "customers"
+    assert tax_id =~ "Invoice.AutomaticTax"
   end
 
   test "flagship guides are published and cross-linked through the docs graph" do

@@ -42,6 +42,8 @@ defmodule LatticeStripe.Tax.Transaction do
           "reference" => "\#{reference}-rev"
         })
 
+  See [Standalone Tax API](guides/tax.md) for the canonical calculate → record → reverse workflow.
+
   See [Stripe Tax Transactions](https://docs.stripe.com/api/tax/transactions).
   """
 

@@ -23,6 +23,8 @@ guide for the deeper API and runtime truth:
   [Subscriptions](subscriptions.md), [Webhooks](webhooks.md)
 - support and failure handling:
   [Error Handling](error-handling.md), [Testing](testing.md)
+- standalone Stripe Tax on custom payment flows:
+  [Tax](tax.md), [Payments](payments.md), [Testing](testing.md)
 
 The flagship recipe guides stay intentionally secondary to the canonical guides: use them
 for the recommended operator path, then drop into the canonical surface guides for deeper

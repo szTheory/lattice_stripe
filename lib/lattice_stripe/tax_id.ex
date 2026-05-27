@@ -38,7 +38,7 @@ defmodule LatticeStripe.TaxId do
   `LatticeStripe.Invoice.AutomaticTax` when Stripe calculates tax on an invoice
   from the customer's address and tax settings — not this module.
 
-  A canonical tax guide ships in v1.6 Phase 51.
+  See [Standalone Tax API](guides/tax.md) for the canonical calculate → record → reverse workflow.
 
   ## Operations not supported by the Stripe API
 

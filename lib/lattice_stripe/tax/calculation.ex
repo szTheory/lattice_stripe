@@ -42,7 +42,7 @@ defmodule LatticeStripe.Tax.Calculation do
           ]
         })
 
-  A canonical tax guide ships in v1.6 Phase 51.
+  See [Standalone Tax API](guides/tax.md) for the canonical calculate → record → reverse workflow.
 
   See [Stripe Tax Calculations](https://docs.stripe.com/api/tax/calculations).
   """

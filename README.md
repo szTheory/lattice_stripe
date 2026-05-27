@@ -36,6 +36,8 @@ Use the docs in this order:
   [User Flows & JTBD](guides/user-flows-and-jtbd.md), [Subscriptions](guides/subscriptions.md), [Customer Portal](guides/customer-portal.md), [Webhooks](guides/webhooks.md)
 - **I need usage-based billing and reconciliation**:
   [Metering](guides/metering.md), [Webhooks](guides/webhooks.md), [Testing](guides/testing.md)
+- **I calculate tax on custom payment flows (not only Checkout/Invoices)**:
+  [Tax](guides/tax.md), [Payments](guides/payments.md), [Testing](guides/testing.md)
 - **I run a marketplace or platform**:
   [Connect](guides/connect.md), [Connect Accounts](guides/connect-accounts.md), [Connect Money Movement](guides/connect-money-movement.md)
 - **I am hardening ops and support paths**:
@@ -100,7 +102,7 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 - Subscription Schedules for phased billing with proration guards
 - Billing Metering — usage-based billing with `Meter`, `MeterEvent`, and `MeterEventAdjustment`; two-layer idempotency and pre-flight value guards
 - Customer Portal — `BillingPortal.Session` for self-service portal URLs with 4 flow types (subscription_cancel, subscription_update, subscription_update_confirm, payment_method_update) and Inspect masking
-- [Guide: Subscriptions](guides/subscriptions.md) · [Guide: Credit Notes](guides/credit_notes.md) · [Guide: Metering](guides/metering.md) · [Guide: Customer Portal](guides/customer-portal.md)
+- [Guide: Subscriptions](guides/subscriptions.md) · [Guide: Credit Notes](guides/credit_notes.md) · [Guide: Metering](guides/metering.md) · [Guide: Tax](guides/tax.md) · [Guide: Customer Portal](guides/customer-portal.md)
 
 ### Operations and diagnostics
 
