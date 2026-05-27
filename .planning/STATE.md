@@ -1,34 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: Thin-Event Webhooks
-status: shipped
-stopped_at: Milestone v1.5 archived
-last_updated: "2026-05-27T13:35:00.000Z"
-last_activity: 2026-05-27 — Milestone v1.5 completed and archived
+milestone: v1.6
+milestone_name: Tax
+status: defining_requirements
+stopped_at: Milestone v1.6 kickoff — defining requirements
+last_updated: "2026-05-27T00:00:00.000Z"
+last_activity: 2026-05-27 — Milestone v1.6 started
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-27 after v1.5 milestone)
+See: .planning/PROJECT.md (updated 2026-05-27 — Milestone v1.6 kickoff)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Planning v1.6 Tax milestone
+**Current focus:** Defining requirements for v1.6 Tax milestone
 
 ## Current Position
 
-Phase: Milestone v1.5 complete
+Phase: Not started (defining requirements)
 Plan: —
-Status: Awaiting v1.6 milestone kickoff
-Last activity: 2026-05-27 — Milestone v1.5 completed and archived
+Status: Defining requirements
+Last activity: 2026-05-27 — Milestone v1.6 started
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Last activity: 2026-05-27 — Milestone v1.5 completed and archived
 - Decide whether Phase `41.1` should be re-run with valid sandbox credentials or retired as an accepted external-only follow-through. (Planned to ride along with v1.7 polish milestone.)
 - v1.7 must fill `Charge` surface gap — only `retrieve/3` and `from_map/1` exist today; `list/3`, `search/3`, `capture/4`, `update/4` are missing.
 - `mix.exs` `@version "1.3.0"` bump + `mix hex.publish` to ship v1.5 line to Hex (out-of-band from milestone planning state).
+- Negotiate `TaxId` placement (Customer-scoped vs top-level resource) in discuss-phase before implementation.
 
 ### Blockers/Concerns
 
@@ -66,10 +67,11 @@ Items acknowledged and deferred at milestone close on 2026-05-27:
 
 ## Session Continuity
 
-Last session: 2026-05-27T13:35:00.000Z
-Stopped at: Milestone v1.5 archived
-Resume path: `/gsd:new-milestone` (v1.6 Tax kickoff)
+Last session: 2026-05-27
+Stopped at: Milestone v1.6 kickoff — defining requirements
+Resume path: Research decision → requirements → roadmap
 
 ## Operator Next Steps
 
-- Start the next milestone with `/gsd:new-milestone` — v1.6 Tax (`Tax.Calculation`, `Tax.Transaction`, `Tax.Settings`, `Tax.Registration`, `TaxId`).
+- Answer research decision (Research first vs Skip)
+- Define v1.6 requirements and create roadmap (Phases 49+)

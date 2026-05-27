@@ -1,5 +1,25 @@
 {
-  "model_profile": "balanced",
+  "model_profile": "inherit",
+  "runtime": "cursor",
+  "resolve_model_ids": "omit",
+  "models": {
+    "planning": "inherit",
+    "discuss": "inherit",
+    "research": "haiku",
+    "execution": "sonnet",
+    "verification": "sonnet"
+  },
+  "model_profile_overrides": {
+    "cursor": {
+      "haiku": "composer-2.5-fast",
+      "sonnet": "composer-2.5-fast",
+      "opus": "inherit"
+    }
+  },
+  "model_overrides": {
+    "gsd-debugger": "inherit",
+    "gsd-planner": "inherit"
+  },
   "commit_docs": true,
   "parallelization": true,
   "search_gitignored": false,

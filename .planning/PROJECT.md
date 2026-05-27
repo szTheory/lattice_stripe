@@ -29,7 +29,14 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current Milestone: v1.6 Tax
 
-**Goal:** Ship the Tax resource family — `Tax.Calculation`, `Tax.Transaction`, `Tax.Settings`, `Tax.Registration`, `TaxId` nested under `Customer` — as the broadest remaining mainstream Stripe family. SDK scope only: Calculation + Transaction primitives belong in LatticeStripe; multi-jurisdiction filing orchestration stays downstream in Accrue.
+**Goal:** Ship the Tax resource family as the broadest remaining mainstream Stripe family — SDK primitives only, with filing orchestration staying downstream in Accrue.
+
+**Target features:**
+- `Tax.Calculation` — calculate tax for a transaction without persisting
+- `Tax.Transaction` — create, retrieve, and list tax transactions from calculations
+- `Tax.Settings` — account-level tax configuration
+- `Tax.Registration` — tax registration management
+- `TaxId` — customer tax ID management (nested under `Customer` vs top-level — to decide in discuss-phase)
 
 **Key context:**
 
@@ -147,4 +154,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after v1.5 milestone*
+*Last updated: 2026-05-27 — Milestone v1.6 kickoff*
