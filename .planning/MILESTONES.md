@@ -14,7 +14,7 @@
 - Promoted Tax wire fixtures to public `LatticeStripe.Testing` helpers with expand-through-parent proof for all five Tax object types; published `guides/tax.md` (351 lines) wired into ExDoc Canonical Guides and the JTBD discovery ladder (DX-01, DX-02, DX-04).
 - Extended docs-truth regression with Tax guide ExDoc locks, content anchors, cross-link graph, and five-module moduledoc greps (DX-05).
 
-**Audit:** Not run — no `v1.6-MILESTONE-AUDIT.md` present at close. Recommend `/gsd-audit-milestone` retroactively if formal gap analysis is needed; all 20/20 v1.6 requirements checked off in REQUIREMENTS traceability.
+**Audit:** PASSED (retroactive 2026-05-27) — 20/20 requirements satisfied, 0 critical integration gaps, full standalone Tax adopter flow wired. Tech debt: non-blocking WR-01/02/IN-01 from Phase 51 review (WR-01/02 patched post-audit in `ee305c8`, `11ca590`). Nyquist partial (phases 49–50 `nyquist_compliant: false` despite green verification). See [milestones/v1.6-MILESTONE-AUDIT.md](milestones/v1.6-MILESTONE-AUDIT.md).
 
 **Outstanding follow-through:** Phase 41.1 remains `pending-external-verification` — slated for v1.7 polish milestone. `mix.exs` still pinned at `@version "1.3.0"` — Hex publish out-of-band when ready.
 

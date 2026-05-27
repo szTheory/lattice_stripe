@@ -23,7 +23,7 @@
 
 ### What Was Inefficient
 
-- **No formal milestone audit at close.** Unlike v1.5 (`passed` audit), v1.6 closed without `v1.6-MILESTONE-AUDIT.md`. All 20/20 requirements were checked off, but retroactive `/gsd-audit-milestone` would still add integration-gap confidence.
+- **Milestone audit ran after archive close.** `v1.6-MILESTONE-AUDIT.md` landed retroactively (passed, 20/20 requirements, 0 critical gaps). Close order should run `/gsd-audit-milestone` before `/gsd-complete-milestone` to keep MILESTONES.md and RETROSPECTIVE accurate on first commit.
 - **`mix.exs` version still pinned at 1.3.0.** Tax code is merged and tested; Hex publish remains out-of-band — same posture as v1.5 close.
 
 ### Patterns Established
