@@ -42,6 +42,7 @@ defmodule LatticeStripe.MixProject do
           "guides/connect-money-movement.md",
           "guides/customer-portal.md",
           "guides/webhooks.md",
+          "guides/webhooks-thin-events.md",
           "guides/error-handling.md",
           "guides/testing.md",
           "guides/recipes.md",
@@ -82,6 +83,7 @@ defmodule LatticeStripe.MixProject do
            [
              "guides/client-configuration.md",
              "guides/webhooks.md",
+             "guides/webhooks-thin-events.md",
              "guides/error-handling.md",
              "guides/testing.md",
              "guides/performance.md",
