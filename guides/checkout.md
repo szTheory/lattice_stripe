@@ -184,6 +184,8 @@ items inline (rather than making a separate request):
 # session.line_items is now populated
 ```
 
+For filtering sessions by payment or lifecycle status, see [Auto-Pagination with Streams](#auto-pagination-with-streams) below.
+
 ## Listing Sessions
 
 ```elixir
@@ -200,10 +202,24 @@ IO.puts("Found #{length(sessions)} sessions")
 
 For processing large numbers of sessions:
 
+> **Status values:** LatticeStripe atomizes known Checkout Session `status` and `payment_status` on `%LatticeStripe.Checkout.Session{}` (e.g. `:paid`, `:complete`, `:open`). Stripe's API reference, Dashboard, list filters, and webhook raw maps (`event.data["object"]`) use the wire string names below.
+>
+> Session lifecycle (`status`):
+> - `open` — session is active and accepting payment
+> - `complete` — checkout finished (does not imply payment succeeded)
+> - `expired` — session timed out or was expired via API
+>
+> Payment status (`payment_status`):
+> - `paid` — payment succeeded
+> - `unpaid` — payment not yet collected
+> - `no_payment_required` — no payment was required for this session
+>
+> Before fulfilling an order, verify `payment_status == :paid`. A session with `status == :complete` alone is insufficient — async payment methods may still be processing.
+
 ```elixir
 client
 |> LatticeStripe.Checkout.Session.stream!(%{"created" => %{"gte" => thirty_days_ago}})
-|> Stream.filter(fn s -> s.payment_status == "paid" end)
+|> Stream.filter(fn s -> s.payment_status == :paid and s.status == :complete end)
 |> Enum.each(&send_receipt/1)
 ```
 
