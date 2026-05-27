@@ -1,93 +1,24 @@
 # Requirements: LatticeStripe
 
-**Defined:** 2026-05-27
-**Milestone:** v1.8 Adopter Truth & Doc Routing Polish
+**Status:** Maintenance mode (post–v1.8)
 **Core Value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
 
-## v1.8 Requirements
+## Active Requirements
 
-Requirements for this milestone. Each maps to roadmap phases 56–58.
+None — v1.8 shipped 2026-05-27. No active milestone.
 
-### Release Truth
+## Archived Milestones
 
-- [x] **TRUTH-01**: Adopter reading `guides/getting-started.md` sees release-status prose that matches Hex 1.7.0 as the current published surface (no stale `1.3.x` claim).
-- [x] **TRUTH-02**: `docs_truth_test.exs` grep-regresses release-status prose in getting-started (not only the `~> 1.7` install pin).
+- [v1.8 Adopter Truth & Doc Routing Polish](milestones/v1.8-REQUIREMENTS.md) — 12/12 requirements, shipped 2026-05-27
+- [v1.7 Polish & Operator](milestones/v1.7-REQUIREMENTS.md) — shipped 2026-05-27
 
-### Canonical Guide Correctness
+## Future Requirements (adopter-pull)
 
-- [x] **GUIDE-01**: Adopter copying PaymentIntent `confirm/3` status handling from `guides/payments.md` matches on atom statuses (`:succeeded`, `:requires_action`, etc.).
-- [x] **GUIDE-02**: Adopter copying `PaymentIntent.stream!/2` filter examples uses atom status (`:succeeded`).
-- [x] **GUIDE-03**: Adopter copying `PaymentIntent.search/3` examples uses the correct arity (`search(client, query_string, opts \\ [])`).
+Tracked in `.planning/PROJECT.md` Out of Scope / Key Decisions and `.planning/MILESTONES.md` deferred items:
 
-### Doc Routing
-
-- [x] **ROUTE-01**: Adopter following `guides/payments.md` discovers Charge list/search/update/capture for reconciliation workflows (PI-first narrative preserved).
-- [x] **ROUTE-02**: Adopter following operator guides (`production-checklist.md`, `event-debugging.md`) finds Charge update/capture guidance alongside list/search.
-- [x] **ROUTE-03**: `.planning/JTBD-MAP.md` charge-reconciliation route reflects post-v1.8 doc routing (no false "payments guide gap" after fixes land).
-
-### Verification
-
-- [x] **VERIFY-04**: `docs_truth_test.exs` grep-regresses canonical guide API example patterns in `guides/payments.md` (status atoms, search arity).
-
-### Planning Truth
-
-- [x] **PLAN-01**: `.planning/MILESTONES.md` v1.7 section prose reflects published 1.7.0 state (no pre-publish wording).
-- [x] **PLAN-02**: `.planning/RETROSPECTIVE.md` historical bullets accurate post-1.7.0 Hex publish.
-
-### Proof Hygiene (optional)
-
-- [x] **PROOF-01**: Untracked tax proof files (`test/integration/tax_id_integration_test.exs`, `test/lattice_stripe/tax/adoption_contract_test.exs`) are committed on branch or explicitly dropped with rationale.
-
-## Future Requirements
-
-Deferred beyond v1.8. Tracked but not in current roadmap.
-
-### CI Honesty
-
-- **CI-01**: Guide-only PRs run `docs_truth_test.exs` (narrow `.github/workflows/ci.yml` paths-ignore) — awaiting explicit approval per STATE.md.
-
-### Tax Narrow
-
-- **TAX-01**: `TaxCode` resource surface — adopter pull only.
-- **TAX-02**: `Tax.Transaction` list endpoint — adopter pull only.
-
-### Specialist Stripe Families
-
-- Identity, Treasury, Issuing, Terminal, Financial Connections, Climate, Sigma, Reporting — only with documented adopter pull (likely v2.0).
-
-## Out of Scope
-
-| Feature | Reason |
-|---------|--------|
-| New Stripe resource modules | v1.x stop signal; maintenance mode after v1.8 |
-| New flagship recipes | Diminishing returns; doc-routing polish only |
-| CI paths-ignore change | Requires explicit workflow approval; tracked as CI-01 future |
-| Hex version bump to 1.8.0 | Doc-only milestone unless release policy changes |
-| Charge API code changes | Surface shipped in v1.7; this milestone is docs/routing only |
-
-## Traceability
-
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| TRUTH-01 | Phase 56 | Complete |
-| TRUTH-02 | Phase 56 | Complete |
-| GUIDE-01 | Phase 57 | Complete |
-| GUIDE-02 | Phase 57 | Complete |
-| GUIDE-03 | Phase 57 | Complete |
-| ROUTE-01 | Phase 57 | Complete |
-| ROUTE-02 | Phase 57 | Complete |
-| VERIFY-04 | Phase 57 | Complete |
-| ROUTE-03 | Phase 58 | Complete |
-| PLAN-01 | Phase 58 | Complete |
-| PLAN-02 | Phase 58 | Complete |
-| PROOF-01 | Phase 58 | Complete |
-
-**Coverage:**
-
-- v1.8 requirements: 12 total
-- Mapped to phases: 12
-- Unmapped: 0 ✓
+- **CI-01**: Guide-only PRs run `docs_truth_test.exs` — awaiting explicit workflow approval
+- **TAX-01/TAX-02**: TaxCode surface, Tax.Transaction list — adopter pull only
+- Specialist Stripe families (Identity, Treasury, Issuing, etc.) — likely v2.0 unless adopter pull justifies
 
 ---
-*Requirements defined: 2026-05-27*
-*Last updated: 2026-05-27 after milestone v1.8 roadmap creation*
+*Last updated: 2026-05-27 after v1.8 milestone close*
