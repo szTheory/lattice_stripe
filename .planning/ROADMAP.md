@@ -33,7 +33,10 @@
   6. Moduledocs on Calculation and Transaction document the 90-day calculation expiry, globally unique `reference` requirement, and scope boundary with `Invoice.AutomaticTax`.
   7. Integration tests under `test/lattice_stripe/tax/` prove the calc→txn chain via Mox-at-Transport (create calculation → create_from_calculation → retrieve transaction).
 
-**Plans**: TBD (via `/gsd-plan-phase 49`)
+**Plans**: 3 plans (2 waves)
+- [ ] 49-01-PLAN.md — Tax.Calculation + shared nested structs + ObjectTypes + unit tests (CALC-01..03)
+- [ ] 49-02-PLAN.md — Tax.Transaction verbs + moduledocs + ObjectTypes + unit tests (TXN-01..04, DX-03 moduledoc)
+- [ ] 49-03-PLAN.md — Mox chained integration spec calc→txn→reversal (DX-03)
 
 ### Phase 50: Tax Settings & Registration
 
@@ -75,7 +78,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 49. Tax Calculation & Transaction Core | 0/? | Not started | — |
+| 49. Tax Calculation & Transaction Core | 0/3 | Planned | — |
 | 50. Tax Settings & Registration | 0/? | Not started | — |
 | 51. TaxId, Testing & Adoption Surface | 0/? | Not started | — |
 
