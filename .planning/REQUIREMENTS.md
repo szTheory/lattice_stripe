@@ -10,6 +10,7 @@ created: 2026-05-27
 **Goal:** Ship first-class thin-event (`/v2/events`) webhook handling — verify, resolve authoritative state, document the fetch-after-verify pattern, and reconcile the `tolerance: 0` webhook bug — so LatticeStripe adopters can consume modern Stripe webhook deliveries idiomatically in Phoenix.
 
 **References:**
+
 - `.planning/threads/v1-5-next-milestone-assessment.md` — full assessment + wedge dossier
 - `.planning/threads/thin-event-webhook-evaluation.md` — locked-in v1.5 shape, API surface, reference SDK
 
@@ -17,21 +18,21 @@ created: 2026-05-27
 
 ### Thin-Event Helpers (THIN-*)
 
-- [ ] **THIN-01**: `Webhook.parse_event_notification/3` verifies a thin-event payload's HMAC signature using the existing secret + tolerance machinery and returns a typed notification struct exposing `id`, `type`, `created`, `context`, and a `related_object` reference (`%{id: String.t(), type: String.t()}` minimum). Returns `{:ok, notification}` or `{:error, reason}` with the same reason atoms used by `construct_event/3`.
+- [x] **THIN-01**: `Webhook.parse_event_notification/3` verifies a thin-event payload's HMAC signature using the existing secret + tolerance machinery and returns a typed notification struct exposing `id`, `type`, `created`, `context`, and a `related_object` reference (`%{id: String.t(), type: String.t()}` minimum). Returns `{:ok, notification}` or `{:error, reason}` with the same reason atoms used by `construct_event/3`.
 
-- [ ] **THIN-02**: `Webhook.fetch_event/2` retrieves the full `Event.t()` for a thin-event notification. Accepts the notification struct (or its `id`), honors per-request opts (`:client`, `:api_version`, `:idempotency_key`), and returns `{:ok, Event.t()} | {:error, reason}`. Typed deserialization via existing `Event` from-map machinery.
+- [x] **THIN-02**: `Webhook.fetch_event/2` retrieves the full `Event.t()` for a thin-event notification. Accepts the notification struct (or its `id`), honors per-request opts (`:client`, `:api_version`, `:idempotency_key`), and returns `{:ok, Event.t()} | {:error, reason}`. Typed deserialization via existing `Event` from-map machinery.
 
-- [ ] **THIN-03**: `Webhook.fetch_related_object/2` retrieves the underlying typed resource referenced by a thin-event notification (e.g. `Customer.t()`, `Invoice.t()`) via the existing `ObjectTypes` dispatch — no new dispatch table. Returns `{:ok, resource}` or `{:error, reason}`. Reuses v1.2 expand machinery for any inline expansions.
+- [x] **THIN-03**: `Webhook.fetch_related_object/2` retrieves the underlying typed resource referenced by a thin-event notification (e.g. `Customer.t()`, `Invoice.t()`) via the existing `ObjectTypes` dispatch — no new dispatch table. Returns `{:ok, resource}` or `{:error, reason}`. Reuses v1.2 expand machinery for any inline expansions.
 
-- [ ] **THIN-04**: `Event` struct surfaces `context` and `related_object` cleanly so adopters can pattern-match thin-event payloads without re-parsing maps. `context` already exists and must stay backwards-compatible; `related_object` is net-new and may be `nil` on snapshot events.
+- [x] **THIN-04**: `Event` struct surfaces `context` and `related_object` cleanly so adopters can pattern-match thin-event payloads without re-parsing maps. `context` already exists and must stay backwards-compatible; `related_object` is net-new and may be `nil` on snapshot events.
 
 ### Webhook Bug Reconciliation (WEBFIX-*)
 
-- [ ] **WEBFIX-01**: `Webhook.check_tolerance/2` `tolerance: 0` semantics aligned. Docstring (`lib/lattice_stripe/webhook.ex:84`) and code path (`lib/lattice_stripe/webhook.ex:268-273`) currently disagree — either docstring updated to reflect that `0` rejects, or code path updated to disable the staleness check when `tolerance == 0`. Decision documented inline in the source. CHANGELOG entry included.
+- [x] **WEBFIX-01**: `Webhook.check_tolerance/2` `tolerance: 0` semantics aligned. Docstring (`lib/lattice_stripe/webhook.ex:84`) and code path (`lib/lattice_stripe/webhook.ex:268-273`) currently disagree — either docstring updated to reflect that `0` rejects, or code path updated to disable the staleness check when `tolerance == 0`. Decision documented inline in the source. CHANGELOG entry included.
 
 ### Testing Helpers (TESTING-*)
 
-- [ ] **TESTING-01**: `LatticeStripe.Testing` emits thin-event payload shapes with signature generation matching `Webhook.parse_event_notification/3`. Existing snapshot helpers remain working unchanged. Test helpers expose at minimum: build a thin-event payload, sign it with a provided secret, produce the matching `Stripe-Signature` header.
+- [x] **TESTING-01**: `LatticeStripe.Testing` emits thin-event payload shapes with signature generation matching `Webhook.parse_event_notification/3`. Existing snapshot helpers remain working unchanged. Test helpers expose at minimum: build a thin-event payload, sign it with a provided secret, produce the matching `Stripe-Signature` header.
 
 ### Documentation (GUIDE-*)
 
