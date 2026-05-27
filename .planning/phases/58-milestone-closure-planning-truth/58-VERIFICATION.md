@@ -2,7 +2,7 @@
 phase: 58-milestone-closure-planning-truth
 status: passed
 verified: 2026-05-27
-score: 11/11
+score: 13/13
 requirements:
   ROUTE-03: satisfied
   PLAN-01: satisfied
@@ -14,7 +14,7 @@ requirements:
 
 **Goal:** Planning artifacts and JTBD map reflect post-v1.8 reality; tax proof files tracked; milestone audit gate ready.
 
-**Result:** Phase goal achieved. All eleven validation tasks green; four Phase 58 requirements satisfied; upstream Phase 56/57 verification evidence aggregated for v1.8 milestone audit.
+**Result:** Phase goal achieved. All thirteen validation tasks green (including Plan 58-05 posture flip); four Phase 58 requirements satisfied; v1.8 milestone audit passed; maintenance posture active.
 
 ---
 
@@ -23,11 +23,12 @@ requirements:
 | Category | Verified | Total |
 |----------|----------|-------|
 | Per-task validation (58-VALIDATION map) | 11 | 11 |
+| Plan 58-05 close gates (maintenance + archives) | 2 | 2 |
 | Requirements (ROUTE-03, PLAN-01, PLAN-02, PROOF-01) | 4 | 4 |
 | ROADMAP Phase 58 success criteria | 5 | 5 |
 | Automated test gates | 2 | 2 |
 
-**Overall:** 11/11 validation tasks · 4/4 requirements · docs_truth 24/0 · adoption contract 8/0
+**Overall:** 13/13 validation tasks · 4/4 requirements · docs_truth 24/0 · adoption contract 8/0 · milestone audit passed · maintenance posture active
 
 ---
 
@@ -121,8 +122,8 @@ $ rg '## Charge reconciliation' guides/payments.md
 | 58-03-02 | PROOF-01 | ✅ | tax_id_integration_test.exs tracked (integration via CI job) |
 | 58-03-03 | PROOF-01 | ✅ | git ls-files — 3 paths tracked |
 | 58-04-01 | SC #5 (audit half) | ✅ | This file + v1.8-MILESTONE-AUDIT.md (Plan 58-04 Task 3) |
-| 58-05-01 | SC #5 (close) | ⬜ | Deferred to Plan 58-05 — STATE maintenance posture |
-| 58-05-02 | SC #5 (close) | ⬜ | Deferred to Plan 58-05 — milestone archive files |
+| 58-05-01 | SC #5 (close) | ✅ | `rg -n "status: maintenance" .planning/STATE.md` → match; PROJECT Maintenance Mode section |
+| 58-05-02 | SC #5 (close) | ✅ | `v1.8-ROADMAP.md` + `v1.8-REQUIREMENTS.md` exist; no `{close_sha}` placeholder |
 
 ---
 
@@ -134,7 +135,7 @@ $ rg '## Charge reconciliation' guides/payments.md
 | 2 | MILESTONES.md v1.7 section uses post-publish wording | ✅ | v1.7 audit footnote with **Resolved in v1.8** pointer (58-02) |
 | 3 | RETROSPECTIVE.md historical bullets accurate for 1.7.0 Hex publish | ✅ | v1.8 append + preserved v1.7 archaeology (58-02) |
 | 4 | Tax proof files committed or dropped with rationale | ✅ | PROOF-01 — three paths tracked; 58-03 SUMMARY |
-| 5 | Milestone audit checklist complete; STATE/PROJECT updated | ⚠ Partial | Audit half complete in 58-04; posture flip deferred to 58-05 |
+| 5 | Milestone audit checklist complete; STATE/PROJECT updated | ✅ | v1.8-MILESTONE-AUDIT passed; STATE/PROJECT/ROADMAP maintenance posture (58-05) |
 
 ---
 
@@ -159,10 +160,28 @@ None blocking phase verification or milestone audit aggregation.
 
 ---
 
-## Phase Goal Assessment
+### Plan 58-05 — Maintenance posture (post-audit close)
 
-**Passed.** JTBD-MAP, MILESTONES, and RETROSPECTIVE reflect post-v1.8 shipped reality. Tax proof files are git-tracked with CI gate. Phase 58 verification artifact exists for milestone audit — Phase 58 is not an unverified phase.
+```text
+$ rg -n "status: maintenance" .planning/STATE.md
+5:status: maintenance
+
+$ test -f .planning/milestones/v1.8-ROADMAP.md && test -f .planning/milestones/v1.8-REQUIREMENTS.md && echo PASS
+PASS
+
+$ ! rg -n "close_sha" .planning/MILESTONES.md .planning/RETROSPECTIVE.md && echo PASS
+PASS
+
+$ rg -n "Maintenance Mode \(post–v1.8\)" .planning/PROJECT.md
+56:## Maintenance Mode (post–v1.8)
+```
 
 ---
 
-*Verified: 2026-05-27*
+## Phase Goal Assessment
+
+**Passed.** JTBD-MAP, MILESTONES, and RETROSPECTIVE reflect post-v1.8 shipped reality. Tax proof files are git-tracked with CI gate. v1.8 milestone audit passed (12/12). Maintenance posture active in STATE/PROJECT/ROADMAP. Phase 58 is not an unverified phase.
+
+---
+
+*Verified: 2026-05-27 (updated post–58-05 close)*

@@ -47,7 +47,7 @@ Full phase details: [milestones/v1.8-ROADMAP.md](milestones/v1.8-ROADMAP.md)
 |-------|-----------|----------------|--------|-----------|
 | 56. Release Truth & Getting Started | v1.8 | 2/2 | Complete | 2026-05-27 |
 | 57. Payments Guide & Charge Routing | v1.8 | 3/3 | Complete | 2026-05-27 |
-| 58. Milestone Closure & Planning Truth | v1.8 | 5/5 | Complete | 2026-05-27 |
+| 58. Milestone Closure & Planning Truth | v1.8 | 5/5 | Complete    | 2026-05-27 |
 
 ## Next Step
 
