@@ -47,6 +47,29 @@ defmodule LatticeStripe.Webhook do
 
       Webhook.verify_signature(payload, header, [old_secret, new_secret])
 
+  ## Snapshot events vs thin events: when to use which
+
+  Stripe ships **two** webhook payload shapes and LatticeStripe exposes a distinct
+  entry point for each:
+
+  - **Snapshot events** (the classic v1 webhook path — `object: "event"`, full event
+    `data` embedded, Unix-integer `created`). Use `construct_event/4` and pattern-match
+    `LatticeStripe.Event.t()`. This is what `/v1/webhook_endpoints` delivers and what
+    every adopter using `LatticeStripe.Webhook.Plug` receives today.
+
+  - **Thin events** (the v2 event-destinations path — `object: "v2.core.event"`, no
+    embedded `data`, ISO 8601 string `created`, `related_object` reference to the
+    underlying resource). Use `parse_event_notification/4` and pattern-match
+    `LatticeStripe.EventNotification.t()`. The notification carries only metadata +
+    a `related_object` pointer; adopters fetch the full `%Event{}` via
+    `fetch_event/3` and the underlying resource via `fetch_related_object/3`
+    (both shipped in this same v1.5 milestone).
+
+  Calling the wrong entry point on a payload will silently produce a mostly-nil
+  struct (the JSON keys don't overlap between the two wire shapes). Route based on
+  which webhook endpoint Stripe is calling — `parse_event_notification/4` is for
+  `/v2/event-destinations` traffic, `construct_event/4` is for everything else.
+
   ## Stripe API Reference
 
   See the [Stripe Webhooks documentation](https://docs.stripe.com/webhooks) for the full
@@ -54,6 +77,7 @@ defmodule LatticeStripe.Webhook do
   """
 
   alias LatticeStripe.Event
+  alias LatticeStripe.EventNotification
   alias LatticeStripe.Webhook.SignatureVerificationError
 
   @type secret :: String.t() | [String.t(), ...]
@@ -121,6 +145,109 @@ defmodule LatticeStripe.Webhook do
   def construct_event!(payload, sig_header, secret, opts \\ []) when is_binary(payload) do
     case construct_event(payload, sig_header, secret, opts) do
       {:ok, event} -> event
+      {:error, reason} -> raise SignatureVerificationError, reason: reason
+    end
+  end
+
+  @doc """
+  Verifies a Stripe thin-event signature and decodes the payload into an `%EventNotification{}`.
+
+  This is the thin-event (`/v2/events`) counterpart to `construct_event/4`. It uses
+  the **same** HMAC-SHA256 verification primitive (`verify_signature/4`) — same wire
+  format for `Stripe-Signature`, same tolerance machinery, same error atoms — but
+  decodes the verified payload into `LatticeStripe.EventNotification.t()` instead of
+  `LatticeStripe.Event.t()`.
+
+  Thin events are delivered by Stripe `/v2/event-destinations` endpoints. The
+  notification carries only metadata + a `related_object` reference; adopters fetch
+  the full event with `fetch_event/3` and the underlying typed resource with
+  `fetch_related_object/3`.
+
+  For snapshot/v1 webhook payloads (`object: "event"`, full `data` embedded), use
+  `construct_event/4` instead. See the module docstring "Snapshot events vs thin
+  events: when to use which" for routing guidance.
+
+  ## Parameters
+
+  - `payload` - The raw, unmodified request body string
+  - `sig_header` - The value of the `Stripe-Signature` header (e.g., `"t=1234,v1=abc..."`)
+  - `secret` - Your webhook signing secret (string or list of strings for rotation)
+  - `opts` - Options:
+    - `:tolerance` - max age in seconds (default: 300). Set `0` to disable the
+      staleness check (testing only — see WEBFIX-01 CHANGELOG entry).
+
+  ## Returns
+
+  - `{:ok, %EventNotification{}}` on success — typed struct exposing `id`, `type`,
+    `created`, `context`, `livemode`, and `related_object`.
+  - `{:error, :missing_header}` — no `Stripe-Signature` header was provided
+  - `{:error, :invalid_header}` — header is present but malformed
+  - `{:error, :no_matching_signature}` — HMAC doesn't match any provided secret
+  - `{:error, :timestamp_expired}` — timestamp older than tolerance
+
+  Identical 4-atom error set as `construct_event/4` (the verify boundary is shared).
+
+  ## Example
+
+      case LatticeStripe.Webhook.parse_event_notification(payload, sig_header, secret) do
+        {:ok, %LatticeStripe.EventNotification{
+           type: "v2.core.account.updated",
+           related_object: %LatticeStripe.EventNotification.RelatedObject{
+             type: "v2.core.account",
+             id: account_id
+           }} = notif} ->
+          handle_account_update(notif, account_id)
+
+        {:ok, %LatticeStripe.EventNotification{related_object: nil} = notif} ->
+          # Snapshot-style v2 event (no related object) — fetch full event for context
+          {:ok, %LatticeStripe.Event{} = event} =
+            LatticeStripe.Webhook.fetch_event(client, notif)
+
+          handle_full_event(event)
+
+        {:error, :timestamp_expired} ->
+          Logger.warning("Stripe webhook expired; check clock skew")
+
+        {:error, reason} ->
+          Logger.error("Stripe webhook verification failed: \#{inspect(reason)}")
+      end
+  """
+  @spec parse_event_notification(String.t(), String.t() | nil, secret(), keyword()) ::
+          {:ok, EventNotification.t()} | {:error, verify_error()}
+  def parse_event_notification(payload, sig_header, secret, opts \\ []) when is_binary(payload) do
+    LatticeStripe.Telemetry.webhook_verify_span([], fn ->
+      case verify_signature(payload, sig_header, secret, opts) do
+        {:ok, _timestamp} ->
+          notification =
+            payload
+            |> Jason.decode!()
+            |> EventNotification.from_map()
+
+          {:ok, notification}
+
+        {:error, _reason} = error ->
+          error
+      end
+    end)
+  end
+
+  @doc """
+  Like `parse_event_notification/4` but raises `SignatureVerificationError` on failure.
+
+  Parity with `construct_event!/4`: returns the typed notification struct on success,
+  raises `LatticeStripe.Webhook.SignatureVerificationError` (carrying the `:reason`
+  atom from the 4-atom verify error set) on any verify failure.
+
+  ## Returns
+
+  - `%EventNotification{}` on success
+  - Raises `LatticeStripe.Webhook.SignatureVerificationError` on failure
+  """
+  @spec parse_event_notification!(String.t(), String.t() | nil, secret(), keyword()) ::
+          EventNotification.t()
+  def parse_event_notification!(payload, sig_header, secret, opts \\ []) when is_binary(payload) do
+    case parse_event_notification(payload, sig_header, secret, opts) do
+      {:ok, notif} -> notif
       {:error, reason} -> raise SignatureVerificationError, reason: reason
     end
   end
