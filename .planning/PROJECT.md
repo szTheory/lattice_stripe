@@ -10,7 +10,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
-**Active milestone:** None — planning v1.7 Polish & Operator next.
+**Active milestone:** v1.7 — Polish & Operator (started 2026-05-27)
 
 **Latest shipped milestone:** v1.6 Tax (archived 2026-05-27)
 
@@ -34,17 +34,18 @@ Elixir developers can integrate Stripe payments into their applications with con
 **Outstanding follow-through (not milestone-blocking):**
 
 - Phase `41.1` remains `pending-external-verification` for real-sandbox Quote downstream proof — an accepted external-proof boundary carried forward from v1.3, planned to ride along with v1.7 polish milestone.
-- `mix.exs` still pinned at `@version "1.3.0"` — v1.5 is shipped in the planning sense (code merged, docs/tests green). The `@version` bump + `mix hex.publish` happens out-of-band when ready to cut the Hex release.
+- `mix.exs` still pinned at `@version "1.3.0"` — v1.7 capstone includes version bump + `mix hex.publish` (previously noted as out-of-band; assessment upgraded to stop-milestone work).
 
-## Next Milestone: v1.7 — Polish & Operator
+## Current Milestone: v1.7 — Polish & Operator
 
-**Goal:** Close the remaining v1.x scope gaps — thin `Charge` surface, Phase 41.1 follow-through, production operator guides — then call the library done for v1.x scope.
+**Goal:** Close the remaining v1.x scope gaps — expand the thin `Charge` surface, ship production operator guides, reconcile release truth, retire Phase 41.1 — then call the library done for v1.x scope.
 
-**Target work:**
+**Target features:**
 - Fill `Charge` surface gap (`list/3`, `search/3`, `capture/4`, `update/4` — only `retrieve/3` and `from_map/1` exist today)
-- Close Phase `41.1` honestly (re-run with valid sandbox creds or retire as accepted external-only follow-through)
 - Ship `guides/production-checklist.md` and `guides/event-debugging.md`
-- Planned stop signal for v1.x scope after v1.7 ships
+- **Hex release capstone** — bump `@version` to 1.7.0, CHANGELOG v1.4–1.7, lockstep `~> 1.7` docs-truth flip, Hex publish
+- Retire Phase `41.1` as `accepted-external-verification` (recommended disposition)
+- Publish v1.x stop signal after v1.7 ships
 
 After v1.7, expect to publicly call the library "done for v1.x scope" absent fresh adopter pull. Identity / Treasury / Issuing / Terminal / Financial Connections / Climate / Sigma / Reporting stay deferred per JTBD doctrine.
 
@@ -109,7 +110,7 @@ After v1.7, expect to publicly call the library "done for v1.x scope" absent fre
 
 ### Active
 
-(v1.7 requirements — to be defined by `/gsd-new-milestone`.)
+(v1.7 requirements — see `.planning/REQUIREMENTS.md`. Phases 52–55.)
 
 ### Out of Scope
 
@@ -141,6 +142,7 @@ After v1.7, expect to publicly call the library "done for v1.x scope" absent fre
 | Top-level `TaxId` with arity-based dual-path routing | Single module covers `/v1/tax_ids` and `/v1/customers/:id/tax_ids` via guard-disambiguated arity — avoids duplicating Customer-scoped vs top-level modules | ✓ Good (v1.6) |
 | Singleton resource pattern for `Tax.Settings` | First singleton in codebase (`GET/POST /v1/tax/settings`, no resource ID) — establishes pattern for future Stripe singletons | ✓ Good (v1.6) |
 | SDK primitives only for Tax; Accrue owns filing | Phase 51 guide fences filing orchestration to Accrue once; prevents scope bleed into multi-jurisdiction filing automation | ✓ Good (v1.6) |
+| Hex publish is stop-milestone capstone, not out-of-band | Out-of-band publish creates adopter truth lag (install `~> 1.3` while code ships v1.5/v1.6); fold release prep into v1.7 | Pending (v1.7) |
 
 ## Evolution
 
@@ -160,4 +162,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 after v1.6 milestone*
+*Last updated: 2026-05-27 — milestone v1.7 started*

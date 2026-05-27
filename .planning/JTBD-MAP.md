@@ -94,14 +94,17 @@ When updating this file, review in this order:
 | Reliability, telemetry, testing | Core | Strong | Strong | Shipped and documented |
 | Product and Price catalog design | Foundational | Strong | Thin | Shipped but under-documented |
 | BillingPortal configuration strategy | Important | Strong | Thin | Shipped but under-documented |
-| Complete end-to-end SaaS recipes | Important | Partial | Thin | Partially covered |
+| Complete end-to-end SaaS recipes | Important | Strong | Strong | Shipped (4 flagship guides, v1.4) |
 | File and FileLink workflows | Important dependency | Strong | Thin | Shipped but under-documented |
 | Disputes and evidence lifecycle | High leverage | Strong | Partial | Shipped but under-documented |
 | Credit-note workflows | High leverage | Strong | Partial | Shipped but under-documented |
 | Mandate and SetupAttempt diagnostics | Medium | Strong | Thin | Shipped but under-documented |
-| Quote-to-invoice workflow | High leverage for B2B | Strong | Partial | Shipped but under-documented |
-| Public package/docs/version truth | Foundational | Partial | Partial | Shipped surface exists but public truth lags |
-| Thin-event webhook support | Important platform wedge | Missing | Missing | Not shipped |
+| Quote-to-invoice workflow | High leverage for B2B | Strong | Good | Shipped (flagship guide + code) |
+| Tax (Calculation, Transaction, Settings, Registration, TaxId) | Core for tax-region SaaS | Strong | Strong | Shipped and documented (v1.6) |
+| Thin-event webhook support | Important platform wedge | Strong | Strong | Shipped and documented (v1.5) |
+| Charge audit and reconciliation | Important for support/ops | Partial | Good | Retrieve-only; list/search/update/capture planned v1.7 |
+| Production operator guides | Foundational for prod readiness | Partial | Missing | Checklist + event debugging planned v1.7 |
+| Public package/docs/version truth | Foundational | Strong | Partial | Code ships v1.5/v1.6; Hex/install still at 1.3 — v1.7 capstone |
 
 ## Current Best-Fit User Stories
 
@@ -113,99 +116,52 @@ LatticeStripe is already a good fit today for these integrator stories:
 - "I need usage-based billing with idempotent event reporting and reconciliation awareness."
 - "I run a platform and need Connect account onboarding plus money movement."
 - "I care about webhooks, retries, telemetry, and testing as first-class concerns."
+- "I need explicit Tax API coverage for custom checkout flows and tax-region compliance."
+- "I need modern thin-event webhooks with fetch-after-verify, not just snapshot payloads."
 
 ## Biggest Gaps
 
-### Gap 1: End-to-end recipes are behind the API surface
+### Gap 1: Charge surface is the last mainstream code wedge
 
-The codebase is broader than the current "how would I ship this in a SaaS?" guidance.
+`LatticeStripe.Charge` is retrieve-only by design (Phase 18 D-06). PI-first payment flows do not need it, but support, reconciliation, audit, and legacy migration workflows expect `list`, `search`, `update`, and `capture`.
 
-What is missing:
+**Planned:** v1.7 adds full Charge surface per sibling resource patterns.
 
-- one complete flow from Checkout signup to webhook provisioning to portal self-service
-- one complete flow from metering to invoice review to customer communication
-- one complete Connect recipe for a realistic platform
-- one complete enterprise flow built around invoices, quotes, and later credits
+### Gap 2: Production operator spine is incomplete
 
-Why this matters:
+Strong fragments exist (webhooks, errors, testing, metering ops) but evaluators expect:
 
-- this is where experienced engineers decide whether a library feels production-ready
-- it reduces integration design churn more than another narrow endpoint wrapper often does
+- `guides/production-checklist.md` — pre-launch readiness (keys, webhooks, idempotency, rate limits, Connect context)
+- `guides/event-debugging.md` — snapshot vs thin, verify failures, replay, `request_id`, fetch-after-verify races
 
-Boundary note:
+**Planned:** v1.7 operator guides milestone work.
 
-- recipe work here should stay primitive-first and SDK-shaped
-- if a recipe starts turning into a billing-facade or workflow-orchestration product, point up to Accrue instead of expanding LatticeStripe
+### Gap 3: Public release truth lags shipped code by two milestones
 
-### Gap 2: Public release truth and guide coverage lag the shipped surface
+`mix.exs` is `@version "1.3.0"` while the repo ships v1.5 thin events and v1.6 Tax. README/getting-started lock `~> 1.3` by docs-truth design. Evaluators underestimate the library or install the wrong version line.
 
-The repo now ships more than the public installer/docs story makes obvious.
+**Planned:** v1.7 capstone — bump to 1.7.0, CHANGELOG, lockstep docs-truth flip, Hex publish. Release truth is stop-milestone work, not out-of-band housekeeping.
 
-What is happening:
+### Gap 4: Narrative docs still thin for several shipped surfaces
 
-- README, CHANGELOG, install snippets, and the cheatsheet still describe `1.3`
-  as unreleased or show pre-1.0 setup
-- the code/test/tag surface already includes File/FileLink, Dispute, CreditNote,
-  Mandate, SetupAttempt, Quote, recipes, and webhook guidance
-- a serious adopter can underestimate the library because the public story still
-  reflects an older line
+Product/Price catalog strategy, BillingPortal configuration, disputes/files evidence, and mandate diagnostics remain recipe- or fixture-level only. These are polish, not milestone-blocking — defer unless adopter pull surfaces.
 
-Why it should stay high priority:
+### Resolved gaps (do not re-prioritize)
 
-- this is the fastest path from "strong repo" to "obviously adoptable OSS library"
-- it reduces evaluation friction for new Phoenix SaaS teams more than another
-  narrow Stripe family
-- it is the cleanest precursor to deciding whether a new code wedge is still needed
-
-### Gap 3: End-to-end recipes and operator guidance are still behind the API surface
-
-The codebase is broader than the current "how would I ship this in a SaaS?" guidance.
-
-What is still missing:
-
-- one complete flow from Checkout signup to webhook provisioning to portal self-service
-- one complete flow from metering to invoice review to customer communication
-- one complete Connect recipe for a realistic platform
-- one complete enterprise flow built around invoices, quotes, and later credits
-- clearer public guidance around Product/Price catalog strategy and BillingPortal configuration strategy
-
-Why this matters:
-
-- this is where experienced engineers decide whether a library feels production-ready
-- it reduces integration design churn more than another narrow endpoint wrapper often does
-
-Boundary note:
-
-- recipe work here should stay primitive-first and SDK-shaped
-- if a recipe starts turning into a billing-facade or workflow-orchestration product, point up to Accrue instead of expanding LatticeStripe
-
-### Gap 4: Thin-event webhook support is the biggest remaining code wedge
-
-The current webhook surface is strong for snapshot-style events, but the project’s own
-research already treats thin events as part of modern Stripe reality.
-
-Why it matters:
-
-- Stripe’s webhook story is increasingly two-track: snapshot events and thin events
-- this fits the library’s existing strengths in webhook verification, event retrieval,
-  testing helpers, and operator-facing guidance
-- it strengthens the SDK without drifting into billing-engine behavior
+- ~~End-to-end flagship recipes~~ — four guides shipped (v1.4)
+- ~~Thin-event webhook support~~ — shipped (v1.5)
+- ~~Tax resource family~~ — shipped (v1.6)
+- ~~Public truth + guide completion (v1.4 scope)~~ — largely done; Hex/version drift is the remaining slice (Gap 3)
 
 ## Recommended Priority Order
 
-Assuming the current roadmap and code surface stay roughly aligned, this is the recommended
-JTBD-driven ordering:
+Post-v1.6 assessment (2026-05-27):
 
-1. **Public truth + guide completion**
-   This converts shipped breadth into faster, lower-friction adoption.
-2. **Thin-event webhook support**
-   This is the strongest remaining platform wedge that still fits LatticeStripe cleanly.
-3. **Tax**
-   This is the broadest remaining mainstream SaaS billing family after webhook modernization.
-4. **Quote external proof closure**
-   Worth closing honestly, but too narrow to drive a full milestone by itself.
-5. **Specialist breadth families**
-   Identity, Financial Connections, Terminal, Issuing, or Treasury only if real adopter pull appears.
+1. **v1.7 Polish & Operator** — Charge surface, operator guides, Hex/release capstone, Phase 41.1 disposition
+2. **Stop** — call library "done for v1.x scope"
+3. **Maintenance mode** — bugfixes, Stripe API drift, adopter-driven narrow additions only
+4. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
+5. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only
 
 ## What "Feature-Complete Enough" Looks Like
 

@@ -1,0 +1,88 @@
+# Requirements: LatticeStripe
+
+**Defined:** 2026-05-27
+**Core Value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
+
+## v1.7 Requirements
+
+Requirements for the Polish & Operator milestone. Each maps to roadmap phases 52–55.
+
+### Charge Surface
+
+- [ ] **CHRG-01**: Developer can list charges with pagination (`list/3`, `list!/3`, `stream!/3`)
+- [ ] **CHRG-02**: Developer can search charges via Stripe search API (`search/3`, `search!/3`, `search_stream!/3`)
+- [ ] **CHRG-03**: Developer can update charge metadata and description (`update/4`, `update!/4`)
+- [ ] **CHRG-04**: Developer can capture an uncaptured charge (`capture/4`, `capture!/4`)
+- [ ] **CHRG-05**: Charge integration tests and docs-truth regression lock the expanded surface (four-surface triangulation: moduledoc + code + tests + docs-truth)
+
+### Operator Guides
+
+- [ ] **OPS-01**: Production checklist guide (`guides/production-checklist.md`) wired into ExDoc Operations & DX and README discovery ladder
+- [ ] **OPS-02**: Event debugging playbook (`guides/event-debugging.md`) wired into ExDoc Operations & DX and README discovery ladder
+
+### Release Truth
+
+- [ ] **REL-01**: `mix.exs` `@version` bumped to `1.7.0`
+- [ ] **REL-02**: CHANGELOG entries for v1.4 through v1.7 summarizing shipped milestones
+- [ ] **REL-03**: Lockstep `~> 1.7` docs-truth flip across README, getting-started, cheatsheet, and guide install anchors
+- [ ] **REL-04**: Package published to Hex.pm at `1.7.0` (stop-milestone capstone)
+
+### Milestone Closure
+
+- [ ] **CLOSE-01**: Phase `41.1` retired as `accepted-external-verification` in planning artifacts (ROADMAP, STATE, MILESTONES, Phase 41.1 directory)
+- [ ] **CLOSE-02**: v1.x stop signal published — library called "done for v1.x scope" in PROJECT, README, and planning truth
+
+## Future Requirements
+
+Deferred beyond v1.7. Tracked but not in current roadmap.
+
+### Tax Extensions
+
+- **TAX-01**: Tax Code lookup resource (`/v1/tax_codes`)
+- **TAX-02**: Tax Transaction list endpoint (if Stripe adds it)
+
+### Specialist Stripe Families
+
+- **SPEC-01**: Identity verification surface
+- **SPEC-02**: Treasury / Issuing / Terminal / Financial Connections / Climate / Sigma / Reporting
+
+## Out of Scope
+
+Explicitly excluded for v1.7. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Charge `create`/`cancel` | PI-first design — Charges are side effects of PaymentIntent confirmation (Phase 18 D-06 rationale preserved; v1.7 expands read/mutate, not create) |
+| New Stripe resource families | v1.7 is the planned v1.x stop signal — no new breadth |
+| Billing-engine abstractions | Belongs downstream in Accrue or application code |
+| Additional flagship recipes | Diminishing returns after v1.4 quartet + tax + thin events |
+| Phase 41.1 real-sandbox re-run | Recommended disposition is retire as accepted external boundary; optional re-run only if sandbox creds become available |
+| LiveBook event inspector | Adopter pull only; not v1.7 scope |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| CHRG-01 | Phase 52 | Pending |
+| CHRG-02 | Phase 52 | Pending |
+| CHRG-03 | Phase 52 | Pending |
+| CHRG-04 | Phase 52 | Pending |
+| CHRG-05 | Phase 52 | Pending |
+| OPS-01 | Phase 53 | Pending |
+| OPS-02 | Phase 53 | Pending |
+| REL-01 | Phase 54 | Pending |
+| REL-02 | Phase 54 | Pending |
+| REL-03 | Phase 54 | Pending |
+| REL-04 | Phase 54 | Pending |
+| CLOSE-01 | Phase 55 | Pending |
+| CLOSE-02 | Phase 55 | Pending |
+
+**Coverage:**
+
+- v1.7 requirements: 13 total
+- Mapped to phases: 13
+- Unmapped: 0 ✓
+
+---
+*Requirements defined: 2026-05-27*
+*Last updated: 2026-05-27 after milestone v1.7 roadmap creation*
