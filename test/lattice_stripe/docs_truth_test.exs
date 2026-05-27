@@ -182,6 +182,23 @@ defmodule LatticeStripe.DocsTruthTest do
     assert tax_id =~ "Invoice.AutomaticTax"
   end
 
+  test "Charge @moduledoc reflects expanded PI-first surface" do
+    source = File.read!("lib/lattice_stripe/charge.ex")
+
+    # Positive: expanded surface + PI-first + Connect anchor
+    assert source =~ "PaymentIntent"
+    assert source =~ "list/3"
+    assert source =~ "search/3"
+    assert source =~ "update/4"
+    assert source =~ "capture/4"
+    assert source =~ "application_fee"
+
+    # Negative: stale retrieve-only language must not return
+    refute source =~ "retrieve-only"
+    refute source =~ "Only three public functions"
+    refute source =~ "never directly manipulated"
+  end
+
   test "flagship guides are published and cross-linked through the docs graph" do
     checkout_recipe = File.read!("guides/checkout-signup-and-portal.md")
     connect_recipe = File.read!("guides/connect-platform-flow.md")
