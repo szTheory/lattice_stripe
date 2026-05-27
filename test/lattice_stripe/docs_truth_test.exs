@@ -92,6 +92,41 @@ defmodule LatticeStripe.DocsTruthTest do
     end
   end
 
+  describe "guides/getting-started.md" do
+    test "release-status prose matches current Hex surface" do
+      getting_started = File.read!("guides/getting-started.md")
+      release_line = current_release_line()
+
+      assert getting_started =~ release_line,
+             "release-status prose drifted from mix.exs version — expected #{release_line}"
+
+      assert getting_started =~ "current published" or
+               getting_started =~ "published line" or
+               getting_started =~ "published Hex",
+             "release-status prose missing published-surface semantic anchor"
+
+      for claim <- @stale_release_status_claims do
+        refute getting_started =~ claim, "stale release claim #{inspect(claim)} in getting-started"
+      end
+
+      refute getting_started =~ "unreleased work from `main`",
+             "getting-started still steers adopters to git dependency from main"
+    end
+
+    test "branches from first success into high-leverage guides" do
+      getting_started = File.read!("guides/getting-started.md")
+
+      assert getting_started =~ "user-flows-and-jtbd.md"
+      assert getting_started =~ "subscriptions.md"
+      assert getting_started =~ "customer-portal.md"
+      assert getting_started =~ "metering.md"
+      assert getting_started =~ "connect.md"
+      assert getting_started =~ "webhooks.md"
+      assert getting_started =~ "testing.md"
+      assert getting_started =~ "error-handling.md"
+    end
+  end
+
   test "readme routes evaluators into the guide ladder" do
     readme = File.read!("README.md")
 
@@ -144,20 +179,6 @@ defmodule LatticeStripe.DocsTruthTest do
     assert readme =~ "production-checklist.md"
     assert readme =~ "event-debugging.md"
     refute readme =~ "1.3.x` line is the current published"
-  end
-
-  test "getting started branches from first success into high-leverage guides" do
-    getting_started = File.read!("guides/getting-started.md")
-
-    refute getting_started =~ "{:lattice_stripe, \"~> 1.2\"}"
-    assert getting_started =~ "user-flows-and-jtbd.md"
-    assert getting_started =~ "subscriptions.md"
-    assert getting_started =~ "customer-portal.md"
-    assert getting_started =~ "metering.md"
-    assert getting_started =~ "connect.md"
-    assert getting_started =~ "webhooks.md"
-    assert getting_started =~ "testing.md"
-    assert getting_started =~ "error-handling.md"
   end
 
   test "jtbd and recipes stay task-first routing layers into canonical guides" do
