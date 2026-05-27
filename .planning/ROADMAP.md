@@ -63,9 +63,9 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 48-01-PLAN.md — Webhook.Plug `@moduledoc` `tolerance: 0` testing-only extension + matching docs-truth grep (closes Phase 47 deferred WR-04 per D-03 3E)
-- [ ] 48-02-PLAN.md — Author `guides/webhooks-thin-events.md` + wire into `mix.exs` ExDoc `extras` and `Operations & DX` group (D-01 + D-03 3C)
-- [ ] 48-05-PLAN.md — Create `test/lattice_stripe/webhook/thin_event_test.exs` — chained Mox-at-Transport integration suite proving VERIFY-03 happy-path, fetch-after-verify, malformed-payload, and tolerance: 0 boundaries (D-02)
+- [x] 48-01-PLAN.md — Webhook.Plug `@moduledoc` `tolerance: 0` testing-only extension + matching docs-truth grep (closes Phase 47 deferred WR-04 per D-03 3E)
+- [x] 48-02-PLAN.md — Author `guides/webhooks-thin-events.md` + wire into `mix.exs` ExDoc `extras` and `Operations & DX` group (D-01 + D-03 3C)
+- [x] 48-05-PLAN.md — Create `test/lattice_stripe/webhook/thin_event_test.exs` — chained Mox-at-Transport integration suite proving VERIFY-03 happy-path, fetch-after-verify, malformed-payload, and tolerance: 0 boundaries (D-02)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -85,7 +85,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 47. Thin-Event SDK Surface & Webhook Reconciliation | 5/5 | Complete    | 2026-05-27 |
-| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 0/6 | Planned | - |
+| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 3/6 | In Progress|  |
 
 ## Next Step
 
