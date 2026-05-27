@@ -34,8 +34,8 @@
 Plans:
 **Wave 1**
 
-- [ ] 47-01-PLAN.md — Types: `EventNotification` + `RelatedObject` modules, `Event.related_object` extension, `ObjectTypes.fetch_module/1`, canonical fixture (THIN-04)
-- [ ] 47-03-PLAN.md — WEBFIX-01 four-surface reconciliation: code clause + Plug schema + test rewrite + CHANGELOG + docs-truth regression (WEBFIX-01)
+- [x] 47-01-PLAN.md — Types: `EventNotification` + `RelatedObject` modules, `Event.related_object` extension, `ObjectTypes.fetch_module/1`, canonical fixture (THIN-04)
+- [x] 47-03-PLAN.md — WEBFIX-01 four-surface reconciliation: code clause + Plug schema + test rewrite + CHANGELOG + docs-truth regression (WEBFIX-01)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -69,7 +69,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 47. Thin-Event SDK Surface & Webhook Reconciliation | 0/5 | Not started | - |
+| 47. Thin-Event SDK Surface & Webhook Reconciliation | 2/5 | In Progress|  |
 | 48. Thin-Event Adoption Surface — Guide & Integration Verification | 0/? | Not started | - |
 
 ## Next Step
