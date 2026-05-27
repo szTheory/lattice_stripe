@@ -69,7 +69,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 48-03-PLAN.md — Discovery wiring: README hardening-ops route + Webhooks bullet, `guides/webhooks.md` closing `Thin events (/v2/events)` section, JTBD Start Here Runtime route + Job 7 Read next (D-04)
+- [x] 48-03-PLAN.md — Discovery wiring: README hardening-ops route + Webhooks bullet, `guides/webhooks.md` closing `Thin events (/v2/events)` section, JTBD Start Here Runtime route + Job 7 Read next (D-04)
 - [ ] 48-04-PLAN.md — Docs-truth regression: 3A guide content locks + 3B install-line canary + 3C ExDoc placement extension + 3D cross-link graph locks (depends on 48-01, 48-02, 48-03)
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -85,7 +85,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 47. Thin-Event SDK Surface & Webhook Reconciliation | 5/5 | Complete    | 2026-05-27 |
-| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 3/6 | In Progress|  |
+| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 4/6 | In Progress|  |
 
 ## Next Step
 
