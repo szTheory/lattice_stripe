@@ -59,7 +59,22 @@ Plans:
   4. Integration tests under `test/lattice_stripe/webhook*` cover thin-event verification happy path, fetch-after-verify roundtrip (returning typed resources via `ObjectTypes` dispatch), malformed-payload rejection, and `tolerance: 0` reconciled semantics — all green in CI.
   5. The docs-truth regression suite is extended so `webhooks-thin-events.md` install + handler snippets stay enforceable (drift in code samples must fail CI), matching the v1.4 docs-truth contract pattern.
 
-**Plans**: TBD
+**Plans**: 6 plans
+Plans:
+**Wave 1**
+
+- [ ] 48-01-PLAN.md — Webhook.Plug `@moduledoc` `tolerance: 0` testing-only extension + matching docs-truth grep (closes Phase 47 deferred WR-04 per D-03 3E)
+- [ ] 48-02-PLAN.md — Author `guides/webhooks-thin-events.md` + wire into `mix.exs` ExDoc `extras` and `Operations & DX` group (D-01 + D-03 3C)
+- [ ] 48-05-PLAN.md — Create `test/lattice_stripe/webhook/thin_event_test.exs` — chained Mox-at-Transport integration suite proving VERIFY-03 happy-path, fetch-after-verify, malformed-payload, and tolerance: 0 boundaries (D-02)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 48-03-PLAN.md — Discovery wiring: README hardening-ops route + Webhooks bullet, `guides/webhooks.md` closing `Thin events (/v2/events)` section, JTBD Start Here Runtime route + Job 7 Read next (D-04)
+- [ ] 48-04-PLAN.md — Docs-truth regression: 3A guide content locks + 3B install-line canary + 3C ExDoc placement extension + 3D cross-link graph locks (depends on 48-01, 48-02, 48-03)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 48-06-PLAN.md — CHANGELOG.md `### [1.5.0]` bullet appending GUIDE-03 + VERIFY-03 + WR-04 closure narrative
 
 ## Outstanding Follow-Through
 
@@ -70,8 +85,8 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 47. Thin-Event SDK Surface & Webhook Reconciliation | 5/5 | Complete    | 2026-05-27 |
-| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 0/? | Not started | - |
+| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 0/6 | Planned | - |
 
 ## Next Step
 
-Run `/gsd:execute-phase 47` to begin executing Phase 47 (5 plans across 3 waves).
+Run `/gsd:execute-phase 48` to begin executing Phase 48 (6 plans across 3 waves).
