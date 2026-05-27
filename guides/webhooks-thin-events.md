@@ -66,8 +66,8 @@ defmodule MyAppWeb.StripeThinEventController do
     end
   end
 
-  defp dispatch(client, %EventNotification{id: id} = notif) do
-    case MyApp.Stripe.IdempotentEvents.claim(id) do
+  defp dispatch(client, %EventNotification{} = notif) do
+    case MyApp.Stripe.IdempotentEvents.claim(notif) do
       :ok                -> dispatch_typed(client, notif)
       :already_processed -> :ok
     end
