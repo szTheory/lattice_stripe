@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.8
 milestone_name: Adopter Truth & Doc Routing Polish
 status: executing
-stopped_at: Completed 58-02-PLAN.md
-last_updated: "2026-05-27T21:56:00.000Z"
+stopped_at: Completed 58-04-PLAN.md
+last_updated: "2026-05-27T21:49:33.000Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 10
-  completed_plans: 8
-  percent: 80
+  completed_plans: 9
+  percent: 90
 ---
 
 # Project State
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-05-27 — milestone v1.8)
 ## Current Position
 
 Phase: 58 (milestone-closure-planning-truth) — EXECUTING
-Plan: 3 of 5 complete
-Status: Ready for 58-04 or 58-05
+Plan: 4 of 5 complete
+Status: Ready for 58-05 (complete-milestone)
 Last activity: 2026-05-27
 
 ## Performance Metrics
@@ -50,10 +50,11 @@ Last activity: 2026-05-27
 - **Maintenance mode #1 post-v1.8 close** — v1.8 doc polish removed from active priority queue.
 - **PROOF-01 closed (58-03)** — tax proof files tracked; adoption contract @moduledoc cites v1.6-MILESTONE-AUDIT.md; CI gate on 1.19/OTP 28.
 - **PLAN-01/02 closed (58-02)** — MILESTONES v1.7 audit footnote forward-resolves v1.8; v1.8 draft section and RETROSPECTIVE appended; `{close_sha}` deferred to 58-05.
+- **v1.8 audit passed (58-04)** — `58-VERIFICATION.md` + `milestones/v1.8-MILESTONE-AUDIT.md` immutable snapshot; 12/12 requirements, 3/3 phases; tech debt documented (CI-01, checkout.md, 54-VERIFICATION).
 
 ### Pending Todos
 
-- **Phase 58 remaining:** plans 58-04, 58-05 (audit artifact + close finalize)
+- **Phase 58 remaining:** plan 58-05 (complete-milestone posture flip)
 - **Awaiting approval:** CI paths-ignore change so guide edits run docs_truth (deferred — not in v1.8 scope)
 
 ### Blockers/Concerns
@@ -62,15 +63,15 @@ Last activity: 2026-05-27
 
 ## Session Continuity
 
-Last session: 2026-05-27T21:56:00.000Z
-Stopped at: Completed 58-02-PLAN.md
+Last session: 2026-05-27T21:49:33.000Z
+Stopped at: Completed 58-04-PLAN.md
 Resume file: None
 Resume path: `/gsd-execute-phase 58`
 Assessment thread: `.planning/threads/v1-8-next-milestone-assessment.md`
 
 ## Operator Next Steps
 
-- **Phase 58 Plan 04:** v1.8-MILESTONE-AUDIT.md — `/gsd-execute-phase 58`
+- **Phase 58 Plan 05:** complete-milestone v1.8 — `/gsd-execute-phase 58`
 
 ## Performance Metrics
 
@@ -79,3 +80,4 @@ Assessment thread: `.planning/threads/v1-8-next-milestone-assessment.md`
 | Phase 58-milestone-closure-planning-truth P01 | 12min | 3 tasks | 1 files |
 | Phase 58-milestone-closure-planning-truth P02 | 8min | 3 tasks | 2 files |
 | Phase 58-milestone-closure-planning-truth P03 | 5min | 3 tasks | 3 files |
+| Phase 58-milestone-closure-planning-truth P04 | 15min | 3 tasks | 2 files |
