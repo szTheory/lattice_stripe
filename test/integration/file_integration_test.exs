@@ -17,7 +17,7 @@ defmodule LatticeStripe.FileIntegrationTest do
 
   @moduletag :integration
 
-  alias LatticeStripe.{File, FileLink, Error}
+  alias LatticeStripe.{File, FileLink}
 
   setup_all do
     case :gen_tcp.connect(~c"localhost", 12_111, [], 1000) do

@@ -106,4 +106,4 @@
 
 ## Next Step
 
-Complete Phase 54 REL-04 (`mix hex.publish` at 1.7.0), then finish Phase 55 plans 55-03 (close_ready) and 55-04. When REL-04 passes: `/gsd-audit-milestone v1.7` then `/gsd-complete-milestone v1.7`.
+**Maintainer:** `git push origin v1.7.0` then `HEX_API_KEY=<publish-capable> mix hex.publish --yes` — verify `mix hex.info lattice_stripe 1.7.0`. Then `/gsd-audit-milestone v1.7` → `/gsd-complete-milestone v1.7`.

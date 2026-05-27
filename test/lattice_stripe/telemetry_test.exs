@@ -78,10 +78,6 @@ defmodule LatticeStripe.TelemetryTest do
     %Request{method: :post, path: path, params: params}
   end
 
-  defp delete_request(path \\ "/v1/customers/cus_123") do
-    %Request{method: :delete, path: path}
-  end
-
   # ---------------------------------------------------------------------------
   # 1. Request start metadata
   # ---------------------------------------------------------------------------
@@ -776,7 +772,7 @@ defmodule LatticeStripe.TelemetryTest do
   describe "invoice auto_advance_scheduled event" do
     alias LatticeStripe.{Error, Invoice}
 
-    defp invoice_json_for_telemetry(overrides \\ %{}) do
+    defp invoice_json_for_telemetry(overrides) do
       Map.merge(
         %{
           "id" => "in_test1234567890",

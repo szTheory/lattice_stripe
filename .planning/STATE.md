@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Polish & Operator
 status: executing
-stopped_at: Phase 55 blocked on REL-04 (Hex 1.7.0 publish)
-last_updated: "2026-05-27T20:00:00.000Z"
-last_activity: 2026-05-27 -- Phase 55 plans 55-01/55-02 complete; 55-03 gated on REL-04
+stopped_at: Awaiting REL-04 Hex publish (maintainer HEX_API_KEY)
+last_updated: "2026-05-27T20:35:00.000Z"
+last_activity: 2026-05-27 -- REL-01–03 and CLOSE-01/02 marked; publish blocked on Hex auth
 progress:
   total_phases: 4
   completed_phases: 3
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-05-27 — milestone v1.7 started)
 ## Current Position
 
 Phase: 55 (milestone-closure-v1-x-stop-signal) — EXECUTING (2/4 plans)
-Plan: 55-03 blocked — REL-04 pre-flight failed (`mix hex.info` shows 1.1.0, not 1.7.0)
-Status: Complete Phase 54-04 Hex publish before close_ready
-Last activity: 2026-05-27 -- 55-01/55-02 shipped; REL-04 gate open
+Plan: Phase 55 complete except REL-04
+Status: Publish `1.7.0` to Hex (local key: "not authorized for this action")
+Last activity: 2026-05-27 -- v1.7.0 tag created; manifest synced; tests green
 
 **Done estimate:** ~88-90% for intended v1.x SDK scope → ~92-95% after v1.7 ships
 

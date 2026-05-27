@@ -4,7 +4,7 @@ defmodule LatticeStripe.Billing.GuardsTest do
   alias LatticeStripe.Billing.Guards
   alias LatticeStripe.{Client, Error}
 
-  defp test_client(overrides \\ []) do
+  defp test_client(overrides) do
     defaults = [api_key: "sk_test_123", finch: :test_finch]
     Client.new!(Keyword.merge(defaults, overrides))
   end

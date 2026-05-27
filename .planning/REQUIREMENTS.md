@@ -22,15 +22,15 @@ Requirements for the Polish & Operator milestone. Each maps to roadmap phases 52
 
 ### Release Truth
 
-- [ ] **REL-01**: `mix.exs` `@version` bumped to `1.7.0`
-- [ ] **REL-02**: CHANGELOG entries for v1.4 through v1.7 summarizing shipped milestones
-- [ ] **REL-03**: Lockstep `~> 1.7` docs-truth flip across README, getting-started, cheatsheet, and guide install anchors
+- [x] **REL-01**: `mix.exs` `@version` bumped to `1.7.0`
+- [x] **REL-02**: CHANGELOG entries for v1.4 through v1.7 summarizing shipped milestones
+- [x] **REL-03**: Lockstep `~> 1.7` docs-truth flip across README, getting-started, cheatsheet, and guide install anchors
 - [ ] **REL-04**: Package published to Hex.pm at `1.7.0` (stop-milestone capstone)
 
 ### Milestone Closure
 
-- [ ] **CLOSE-01**: Phase `41.1` retired as `accepted-external-verification` in planning artifacts (ROADMAP, STATE, MILESTONES, Phase 41.1 directory)
-- [ ] **CLOSE-02**: v1.x stop signal published — library called "done for v1.x scope" in PROJECT, README, and planning truth
+- [x] **CLOSE-01**: Phase `41.1` retired as `accepted-external-verification` in planning artifacts (ROADMAP, STATE, MILESTONES, Phase 41.1 directory)
+- [x] **CLOSE-02**: v1.x stop signal published — library called "done for v1.x scope" in PROJECT, README, and planning truth
 
 ## Future Requirements
 
@@ -70,12 +70,12 @@ Explicitly excluded for v1.7. Documented to prevent scope creep.
 | CHRG-05 | Phase 52 | Complete |
 | OPS-01 | Phase 53 | Complete |
 | OPS-02 | Phase 53 | Complete |
-| REL-01 | Phase 54 | Pending |
-| REL-02 | Phase 54 | Pending |
-| REL-03 | Phase 54 | Pending |
+| REL-01 | Phase 54 | Complete |
+| REL-02 | Phase 54 | Complete |
+| REL-03 | Phase 54 | Complete |
 | REL-04 | Phase 54 | Pending |
-| CLOSE-01 | Phase 55 | Pending |
-| CLOSE-02 | Phase 55 | Pending |
+| CLOSE-01 | Phase 55 | Complete |
+| CLOSE-02 | Phase 55 | Complete |
 
 **Coverage:**
 
