@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.5
-milestone_name: — Thin-Event Webhooks
-status: executing
-stopped_at: Phase 48 context gathered
-last_updated: "2026-05-27T13:11:17.132Z"
-last_activity: 2026-05-27
+milestone_name: Thin-Event Webhooks
+status: shipped
+stopped_at: Milestone v1.5 archived
+last_updated: "2026-05-27T13:35:00.000Z"
+last_activity: 2026-05-27 — Milestone v1.5 completed and archived
 progress:
   total_phases: 2
   completed_phases: 2
@@ -18,28 +18,26 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-27 after v1.5 next-milestone assessment)
-See also: .planning/threads/v1-5-next-milestone-assessment.md (full assessment + wedge dossier)
-         .planning/threads/thin-event-webhook-evaluation.md (locked-in v1.5 shape)
+See: .planning/PROJECT.md (updated 2026-05-27 after v1.5 milestone)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 48 — thin-event-adoption-surface-guide-integration-verification
+**Current focus:** Planning v1.6 Tax milestone
 
 ## Current Position
 
-Phase: 48
-Plan: Not started
-Status: Executing Phase 48
-Last activity: 2026-05-27
+Phase: Milestone v1.5 complete
+Plan: —
+Status: Awaiting v1.6 milestone kickoff
+Last activity: 2026-05-27 — Milestone v1.5 completed and archived
 
 ## Performance Metrics
 
-**Velocity:**
+**Velocity (v1.5):**
 
-- Total phases archived (v1.4): 4
-- Total plans completed (v1.4): 8
-- Total tasks completed (v1.4): 18
-- Total execution time: ~2 days (2026-05-26 → 2026-05-27)
+- Total phases archived: 2 (47, 48)
+- Total plans completed: 11
+- Source diff: 21 files, +2343/-23 lines
+- Total execution time: ~6 hours single-day (2026-05-27 03:34 → 09:14)
 
 ## Accumulated Context
 
@@ -50,22 +48,28 @@ Last activity: 2026-05-27
 ### Pending Todos
 
 - Decide whether Phase `41.1` should be re-run with valid sandbox credentials or retired as an accepted external-only follow-through. (Planned to ride along with v1.7 polish milestone.)
-- v1.5 must reconcile `Webhook.check_tolerance/2` `tolerance: 0` semantics — docstring (`lib/lattice_stripe/webhook.ex:84`) and code path (`lib/lattice_stripe/webhook.ex:268-273`) disagree. (Now mapped to Phase 47 / WEBFIX-01.)
 - v1.7 must fill `Charge` surface gap — only `retrieve/3` and `from_map/1` exist today; `list/3`, `search/3`, `capture/4`, `update/4` are missing.
+- `mix.exs` `@version "1.3.0"` bump + `mix hex.publish` to ship v1.5 line to Hex (out-of-band from milestone planning state).
 
 ### Blockers/Concerns
 
 - Phase 41.1 remains explicitly `pending-external-verification` until sandbox proof is produced or the follow-through is retired.
-- Avoid scope bleed into Accrue during future milestone research and implementation. For v1.6 Tax specifically, negotiate scope in discuss-phase to keep filing orchestration in Accrue (Calculation/Transaction primitives = SDK; multi-jurisdiction filing strategy = Accrue).
+- Avoid scope bleed into Accrue during v1.6 Tax research and implementation. Negotiate scope in discuss-phase to keep filing orchestration in Accrue (Calculation/Transaction primitives = SDK; multi-jurisdiction filing strategy = Accrue).
+
+## Deferred Items
+
+Items acknowledged and deferred at milestone close on 2026-05-27:
+
+| Category | Item | Status |
+|----------|------|--------|
+| quick_task | 260402-wte-research-how-elixir-plug-based-libraries | catalog status unknown; substantively complete — research fed into Phase 7 webhook plug implementation in v1.0. SUMMARY.md present at `.planning/quick/260402-wte-research-how-elixir-plug-based-libraries/260402-wte-SUMMARY.md` with Status: Complete. |
 
 ## Session Continuity
 
-Last session: 2026-05-27T10:37:48.511Z
-Stopped at: Phase 48 context gathered
-Resume path: `/gsd:plan-phase 47`
+Last session: 2026-05-27T13:35:00.000Z
+Stopped at: Milestone v1.5 archived
+Resume path: `/gsd:new-milestone` (v1.6 Tax kickoff)
 
 ## Operator Next Steps
 
-- Run `/gsd:plan-phase 47` to decompose Phase 47 (Thin-Event SDK Surface & Webhook Reconciliation) into plans. The wedge dossier in `.planning/threads/v1-5-next-milestone-assessment.md` and the locked-in shape in `.planning/threads/thin-event-webhook-evaluation.md` are the primary inputs.
-- After Phase 47 ships, `/gsd:plan-phase 48` decomposes the adoption surface (guide + integration verification + docs-truth regression).
-- WEBFIX-01 (`tolerance: 0` reconciliation) is scoped inside Phase 47 — do not defer.
+- Start the next milestone with `/gsd:new-milestone` — v1.6 Tax (`Tax.Calculation`, `Tax.Transaction`, `Tax.Settings`, `Tax.Registration`, `TaxId`).

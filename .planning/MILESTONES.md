@@ -1,5 +1,32 @@
 # Milestones
 
+## v1.5 Thin-Event Webhooks (Shipped: 2026-05-27)
+
+**Phases completed:** 2 phases (47, 48), 11 plans
+
+**Key accomplishments:**
+
+- Shipped the thin-event SDK surface — `Webhook.parse_event_notification/4` (+ bang variant) verifying signatures and returning typed `EventNotification` structs exposing `id`, `type`, `created`, `context`, and a `related_object` reference, using the same error atoms as `construct_event/3`.
+- Added typed fetch-after-verify helpers — `Webhook.fetch_event/2,3` (hitting `/v2/core/events/{id}`) and `Webhook.fetch_related_object/2,3` returning typed resources via the existing `ObjectTypes` registry (no new dispatch table), honoring per-request `:client`, `:api_version`, and `:idempotency_key`.
+- Extended `Event.t()` with a `related_object` field and added net-new `EventNotification` + `EventNotification.RelatedObject` modules (custom `Inspect` impls, infallible `from_map/1`) plus `ObjectTypes.fetch_module/1` typed-gate accessor.
+- Reconciled `Webhook.check_tolerance/2` `tolerance: 0` drift across four surfaces — docstring, code clause, `Webhook.Plug` NimbleOptions schema, and tests — documented inline against future "fix it to be stricter" drift, locked by a CHANGELOG v1.5 entry and a docs-truth grep regression.
+- Published `guides/webhooks-thin-events.md` — a Phoenix controller spine teaching verify → fetch-after-verify → idempotent dispatch keyed on `event.id`, with rate-limit guidance (<90/s under Stripe's 100 req/s ceiling), Connect/context-aware routing, and the verification-vs-payload-shape failure boundary — wired into ExDoc `Operations & DX`, the README hardening-ops route, `guides/webhooks.md` closing section, and the JTBD discovery ladder.
+- Added `LatticeStripe.Testing` thin-event helpers — `generate_thin_event_payload/3` produces signed wire payloads parseable by `parse_event_notification/4`, `event_notification/1` is a typed builder mirroring `dispute/1`/`customer/1`; snapshot helpers remain backwards-compatible.
+- Locked the new surface with `test/lattice_stripe/webhook/thin_event_test.exs` — a chained Mox-at-Transport integration suite proving happy-path, fetch-after-verify roundtrip, malformed-payload boundary, and `tolerance: 0` reconciliation — plus five new docs-truth grep blocks (3A guide content, 3B `~> 1.5` install canary, 3C ExDoc placement, 3D cross-link graph, 3E Plug `@moduledoc` `tolerance: 0` testing-only).
+- Closed Phase 47's deferred WR-04 inside Phase 48 by extending `Webhook.Plug` `@moduledoc` with `tolerance: 0` testing-only language enforced by a dotall regex docs-truth grep.
+
+**Audit:** PASSED — 8/8 requirements satisfied (THIN-01..04, WEBFIX-01, TESTING-01, GUIDE-03, VERIFY-03), 0 critical integration gaps, full E2E adopter flow wired. Tech debt limited to non-blocking polish (WR-01/02/03/05, IN-01..04, Phase 48 VALIDATION.md per-task map placeholder).
+
+**Outstanding follow-through:** Phase 41.1 remains `pending-external-verification` for real-sandbox Quote downstream proof — slated for v1.7 polish milestone per locked v1.5→v1.7 plan.
+
+**Known deferred items at close:** 1 (260402-wte webhook plug research — substantively complete, catalog status flag only; see STATE.md Deferred Items)
+
+**Git range:** `0bd04a9` → `eb56c0c`
+**Source diff:** 21 files (lib/test/guides/CHANGELOG), +2343/-23 lines
+**Timeline:** 2026-05-27 (single-day milestone)
+
+---
+
 ## v1.4 Adoption Closure (Shipped: 2026-05-27)
 
 **Phases completed:** 4 phases, 8 plans, 18 tasks

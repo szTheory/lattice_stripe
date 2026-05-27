@@ -2,6 +2,60 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.5 — Thin-Event Webhooks
+
+**Shipped:** 2026-05-27
+**Phases:** 2 (47, 48) | **Plans:** 11
+
+### What Was Built
+
+- **Thin-event SDK surface** — `Webhook.parse_event_notification/4` (+ bang variant) verifies signatures and returns typed `EventNotification` structs exposing `id`, `type`, `created`, `context`, and a `related_object` reference, reusing the same error atoms as `construct_event/3`.
+- **Typed fetch-after-verify helpers** — `Webhook.fetch_event/2,3` (`/v2/core/events/{id}`) and `Webhook.fetch_related_object/2,3` returning typed resources via the existing `ObjectTypes` registry — no new dispatch table introduced.
+- **`Event.t()` extension + new structs** — net-new `EventNotification` and `EventNotification.RelatedObject` modules with custom `Inspect` impls (defensive against credential-shape leakage); `Event.related_object` field added; `ObjectTypes.fetch_module/1` typed-gate accessor.
+- **`tolerance: 0` four-surface reconciliation (WEBFIX-01)** — docstring at `webhook.ex:84`, code clause at `:268-273`, `Webhook.Plug` NimbleOptions schema (`:pos_integer` → `:non_neg_integer`), tests, CHANGELOG entry, and docs-truth grep regression all reconciled in one plan. `tolerance: 0` now disables the staleness check as the docstring promised — matching stripe-node, stripe-go, and stripe-ruby behavior.
+- **Canonical Phoenix guide** — `guides/webhooks-thin-events.md` (199 lines) teaching controller spine → verify → fetch-after-verify → idempotent dispatch keyed on `event.id`, with rate-limit guidance (<90/s under Stripe's 100 req/s ceiling), Connect/context-aware routing, and the verification-vs-payload-shape failure boundary. Wired into ExDoc `Operations & DX`, README hardening-ops route, `guides/webhooks.md` closing section, and JTBD Start Here Runtime route + Job 7 Read next.
+- **`LatticeStripe.Testing` thin-event helpers** — `generate_thin_event_payload/3` (signed wire payload + matching `Stripe-Signature` header) and `event_notification/1` (typed builder); snapshot helpers backwards-compatible.
+- **Integration coverage** — `test/lattice_stripe/webhook/thin_event_test.exs` (211 lines, 9 tests) chained Mox-at-Transport suite covering happy-path, fetch-after-verify roundtrip, malformed-payload boundary, and `tolerance: 0` reconciliation.
+- **Docs-truth contract extended** — five new grep blocks (3A guide content, 3B `~> 1.5` install canary, 3C ExDoc placement, 3D cross-link graph, 3E Plug `@moduledoc` `tolerance: 0` testing-only). Docs-truth suite now 12 tests, 0 failures.
+
+### What Worked
+
+- **Verifying shipped surface against `lib/` source before milestone kickoff.** The v1.5 assessment found two real code-truth gaps that the v1.4 close had not surfaced: (a) the `tolerance: 0` docstring/code disagreement and (b) the unusually thin `Charge` surface. Planning artifacts alone would not have caught these — the rule "verify shipped surface against `lib/` source before every new milestone" earned its place in PROJECT.md Key Decisions.
+- **Four-surface triangulation for the security-adjacent bug fix.** WEBFIX-01 reconciled `tolerance: 0` across docstring, code clause, Plug schema, and tests — plus CHANGELOG entry + docs-truth grep regression — rather than fixing one surface and leaving drift seams. This pattern is reusable for any future security-adjacent fix touching public docs + code + config schema.
+- **Treating docstring/code drift as a code bug, not a docs-fix.** WEBFIX-01 chose to fix the code clause to match the docstring (and every canonical Stripe SDK) instead of the easier path of changing the docstring to match the code. Locked the decision against future "fix it to be stricter" drift via a docs-truth grep regression on the CHANGELOG entry.
+- **Reusing the existing `ObjectTypes` dispatch table.** `Webhook.fetch_related_object/2,3` typed-dispatches through the registry already used elsewhere in the SDK. Resisting the "new dispatch table" temptation kept v1.5 surface narrow and made the fetcher immediately benefit from `ObjectTypes` typed deserialization.
+- **Chained Mox-at-Transport integration suite for the new surface.** `thin_event_test.exs` runs parse → fetch → verify as one chained flow per test, with `verify_on_exit!` ensuring zero unexpected HTTP. Mirrors the integration-first proof posture validated across prior milestones.
+
+### What Was Inefficient
+
+- **Phase 48 VALIDATION.md left `nyquist_compliant: false` and `wave_0_complete: false`.** The per-task verify map carries a placeholder row (`48-XX-YY`) rather than per-task expansion. Tests are green (9 in `thin_event_test.exs` + 12 in `docs_truth_test.exs`, plus the full 2004-test suite), so this is administrative debt — but it broke milestone-level Nyquist parity (47 compliant, 48 partial). `/gsd:validate-phase 48` would close it.
+- **`thin_event_test.exs` skipped two typed-error paths.** `{:error, :no_related_object}` and `{:error, {:unknown_object_type, type}}` are covered by Phase 47's `webhook/fetch_test.exs` unit tests but not exercised in the Phase 48 integration suite. Not a regression risk; the gap is integration-level redundancy missing.
+- **Bang variants (`parse_event_notification!/4`, `fetch_event!/3`, `fetch_related_object!/3`) covered only by Phase 47 unit tests.** Not exercised in `thin_event_test.exs` or referenced in the canonical guide. Tagged-tuple style is taught exclusively in user-facing docs, which is fine — but the bang surface should have at least one integration-level test for symmetry.
+- **`LatticeStripe.Testing.event_notification/1` exported but not referenced in the guide or `thin_event_test.exs`.** The 0-arity fixture import IS used (line 131 of `thin_event_test.exs`); the typed builder is reachable via that fixture path. Exported helper without canonical-guide demonstration is a docs gap that should be closed when the helper sees first downstream use.
+- **WR-03 hard-coded `created` in snapshot `generate_webhook_payload/3`.** Testing-only inconsistency — the helper uses `System.system_time(:second)` instead of the `:timestamp` opt. Found in Phase 47 review, deferred as non-blocking. Small follow-up patch.
+
+### Patterns Established
+
+- **Four-surface triangulation for security-adjacent fixes.** When fixing a bug that touches behavior surfaced through docs + code + config + tests, reconcile *all four surfaces in the same plan* and add a docs-truth grep regression on the CHANGELOG entry. Documented as a Key Decision; applies directly to v1.7 `Charge` surface work (where `list/3`/`search/3`/`capture/4`/`update/4` need docstring + code + tests + CHANGELOG triangulation).
+- **Source-truth check before milestone kickoff.** Grep `lib/` for the planned surface area before locking the milestone roadmap — planning artifacts can be coherent and still miss code-truth gaps. New rule in PROJECT.md Key Decisions.
+- **Reuse existing dispatch tables instead of growing new ones.** `ObjectTypes` registry served the thin-event fetcher; resisting a new table kept v1.5 narrow and made the new surface inherit typed deserialization for free.
+- **Verify-then-decode for new typed surfaces.** `parse_event_notification/4` follows the exact `construct_event/4` pattern (verify-then-decode, telemetry span reuse, public `{:ok, t()} | {:error, reason}` + bang variant). Pattern is the canonical shape for any future signed-payload entry point.
+
+### Key Lessons
+
+1. **Source-truth verification beats planning-doc coherence.** v1.5 caught two real gaps (`tolerance: 0` bug, thin `Charge` surface) that four prior milestones of planning review missed. The rule now codified: read `lib/` against the planned roadmap before locking the milestone.
+2. **Fix the code, not the docstring, when public-API drift exists.** WEBFIX-01 chose the harder path (fix code clause) over the easier path (change docstring). Result: behavior now matches every canonical Stripe SDK and the more useful semantics. Lock the decision in CHANGELOG + docs-truth grep so it can't drift back.
+3. **Single-day milestones are viable when the wedge is narrow and well-researched.** v1.5 shipped 2 phases / 11 plans / 21 source files / +2343 lines in ~6 hours on 2026-05-27. The dossier (`v1-5-next-milestone-assessment.md`, `thin-event-webhook-evaluation.md`) pre-locked the API shape and reference SDK before phase 47 kicked off — that pre-work compressed the execution loop dramatically.
+4. **Audit-passed-with-tech-debt is a legitimate close posture.** v1.5 audit returned `passed` with 9 tech-debt items (WR-01..05, IN-01..04, Phase 48 VALIDATION placeholder). None are blockers; all are classified at audit time. Don't conflate "audit passed" with "no follow-up work" — explicitly carry tech debt forward.
+
+### Cost Observations
+
+- **Sessions:** Single session for milestone execution and close (this turn-set).
+- **Phase model mix:** Sonnet for integration-checker; main session Opus 4.7 1M.
+- **Notable:** v1.5 shipped in ~6 hours single-day — fastest milestone by wall-clock time to date. Heavy upfront research (the v1.5 assessment + thin-event evaluation dossier landed before milestone kickoff) compressed execution. Pre-locked API shape made the plan-phase loops faster.
+
+---
+
 ## Milestone: v1.4 — Adoption Closure
 
 **Shipped:** 2026-05-27
@@ -63,6 +117,7 @@
 | v1.2 | 10 | 24 | Production hardening + DX: Configuration CRUDL, per-op timeouts, circuit breaker, OpenTelemetry, drift detection, LiveBook |
 | v1.3 | 12 | 26 | Coverage breadth: File/FileLink, Disputes, CreditNote, Mandate, SetupAttempt, Quote + DX follow-through. Phase 41.1 follow-through accepted as `pending-external-verification` |
 | v1.4 | 4 | 8 | Adoption Closure: docs/truth/discovery, four flagship recipes, planning-truth reconciliation. First non-code milestone — verification artifact discipline lagged because of it |
+| v1.5 | 2 | 11 | Thin-Event Webhooks: net-new `parse_event_notification`/`fetch_event`/`fetch_related_object` surface, `tolerance: 0` four-surface reconciliation (WEBFIX-01), canonical Phoenix guide, integration + docs-truth coverage. Fastest milestone by wall-clock (~6 hours single-day). Source-truth verification rule codified |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -70,3 +125,5 @@
 2. **Docs and tests both need to assert truth.** v1.4 found that a green narrow `docs_truth_test` had been hiding `~> 1.2` drift in `getting-started.md`. The fix was broader assertion coverage, not abandoning the test — the same pattern applies to API drift detection added in v1.2.
 3. **Recipes should stitch shipped primitives, not become app workflows.** Both v1.3 (Phoenix webhook recipe, fixture builders) and v1.4 (four flagship guides) held the line against drifting into billing-engine abstractions or Accrue territory. Library-scoped guidance keeps the SDK boundary clear.
 4. **Behaviour-based extensibility plus integration-first proof scales.** Carrying `Transport`/`RetryStrategy`/`Json` behaviours through five milestones, plus integration tests as the default evidence form, kept the SDK from accumulating mock/prod divergence.
+5. **Source-truth verification before milestone scope-lock.** v1.5 codified what prior milestones did informally — grep `lib/` against the planned roadmap before locking. Caught the `tolerance: 0` bug and thin `Charge` surface that planning-doc review had missed for four milestones.
+6. **Reuse existing dispatch tables rather than growing new ones.** v1.5 `Webhook.fetch_related_object/2,3` typed-dispatched via the `ObjectTypes` registry already used elsewhere. Same pattern that kept v1.2 expand wiring narrow. Resisting "new table" temptation keeps the SDK surface coherent.
