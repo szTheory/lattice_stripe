@@ -208,7 +208,8 @@ See [Telemetry](telemetry.md) for handler attachment examples.
 
 Charge is the **result record** of a payment attempt, not payment initiation. Use
 `PaymentIntent` for payment flows; use `Charge` to read/reconcile existing charges.
-Full API: `LatticeStripe.Charge` moduledoc (no separate Charge guide in v1.7).
+Full workflows: [Payments — Charge reconciliation](payments.md#charge-reconciliation) and
+`LatticeStripe.Charge` moduledoc.
 
 For `charge.succeeded` and siblings:
 
@@ -217,6 +218,8 @@ For `charge.succeeded` and siblings:
   (`balance_transaction`, `application_fee_amount`, etc.).
 - **Anti-pattern:** do not use `LatticeStripe.Charge.search/3` to confirm a payment
   that just succeeded — search index lags; use retrieve or PaymentIntent state.
+- Attach support context after dispatch: `LatticeStripe.Charge.update/4` (e.g. ticket id in metadata); idempotency still keyed on `event.id`
+- **Anti-pattern:** do not call `LatticeStripe.Charge.capture/4` from `charge.*` handlers for PaymentIntent flows — use PaymentIntent state or [`PaymentIntent.capture/4`](payments.md#capturing-a-paymentintent-manual-capture)
 
 ## See also
 

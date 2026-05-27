@@ -168,6 +168,19 @@ defmodule LatticeStripe.DocsTruthTest do
     end
   end
 
+  test "operator guides route Charge update/capture to payments reconciliation" do
+    checklist = File.read!("guides/production-checklist.md")
+    debugging = File.read!("guides/event-debugging.md")
+
+    assert checklist =~ "Charge.update/4"
+    assert checklist =~ "Charge.capture/4"
+    assert checklist =~ "payments.md#charge-reconciliation"
+
+    assert debugging =~ "Charge.update/4"
+    assert debugging =~ "Charge.capture/4"
+    assert debugging =~ "payments.md#charge-reconciliation"
+  end
+
   test "readme routes evaluators into the guide ladder" do
     readme = File.read!("README.md")
 

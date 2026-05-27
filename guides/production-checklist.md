@@ -162,13 +162,17 @@ harnesses — do not duplicate that guide here.
 
 Charge is the **result record** of a payment attempt, not payment initiation. Use
 `PaymentIntent` for payment flows; use `Charge` to read/reconcile existing charges.
-Full API: `LatticeStripe.Charge` moduledoc (no separate Charge guide in v1.7).
+Full workflows: [Payments — Charge reconciliation](payments.md#charge-reconciliation) and
+`LatticeStripe.Charge` moduledoc.
 
 For support tickets and audits:
 
 - List or filter settled charges: `LatticeStripe.Charge.list/3`
 - Search by Stripe query syntax: `LatticeStripe.Charge.search/3` — results are
   **eventually consistent**; do not rely on search for seconds-fresh payments
+- Retrieve a known charge id from Dashboard/support: `LatticeStripe.Charge.retrieve/3`
+- Update metadata or description on settled charges: `LatticeStripe.Charge.update/4` (not payment state)
+- Capture uncaptured legacy direct charges only: `LatticeStripe.Charge.capture/4`; PI manual capture → [`PaymentIntent.capture/4`](payments.md#capturing-a-paymentintent-manual-capture)
 - Connect fee reconciliation: follow balance transaction `fee_details` via
   [Connect Money Movement](connect-money-movement.md)
 
