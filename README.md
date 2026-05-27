@@ -5,10 +5,14 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Release status:** The `1.3.x` line is the current published surface. This repo
-> includes the shipped v1.3 production-coverage work: File/FileLink transport,
-> Disputes, Credit Notes, Mandates, SetupAttempts, Quotes, recipes, and the
-> Phoenix webhook quickstart. See [CHANGELOG.md](CHANGELOG.md).
+> **Release status:** **`1.7.x`** ships as the current published line on Hex (capstone release **1.7.0**).
+>
+> - **1.4** — Adoption closure: flagship recipes, docs-truth baseline, discovery ladder
+> - **1.5** — Thin-event webhooks: [`guides/webhooks-thin-events.md`](guides/webhooks-thin-events.md)
+> - **1.6** — Tax: [`guides/tax.md`](guides/tax.md)
+> - **1.7** — Charge list/search/update/capture (PI-first; no create) plus operator playbooks: [`guides/production-checklist.md`](guides/production-checklist.md), [`guides/event-debugging.md`](guides/event-debugging.md)
+>
+> See [CHANGELOG.md](CHANGELOG.md#170).
 
 A production-grade, idiomatic Elixir SDK for the Stripe API.
 
@@ -50,7 +54,7 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:lattice_stripe, "~> 1.3"}
+    {:lattice_stripe, "~> 1.7"}
   ]
 end
 ```
@@ -89,6 +93,7 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 ### Payments
 
 - Customers, PaymentIntents, SetupIntents, PaymentMethods, Refunds, Checkout Sessions (payment / subscription / setup modes)
+- Charge list/search/update/capture for support, audit, and Connect reconciliation — [Charge API](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html) (PI-first; no `create`)
 - Structured, pattern-matchable errors: `:card_error`, `:auth_error`, `:rate_limit_error`, `:server_error`, and more
 - Auto-pagination — stream through large result sets lazily with Elixir Streams
 - [Guide: Payments](guides/payments.md)
@@ -151,7 +156,7 @@ Start here on HexDocs:
 Canonical guide clusters:
 
 - **Payments and billing primitives**:
-  [Payments](https://hexdocs.pm/lattice_stripe/payments.html), [Checkout](https://hexdocs.pm/lattice_stripe/checkout.html), [Invoices](https://hexdocs.pm/lattice_stripe/invoices.html), [Credit Notes](https://hexdocs.pm/lattice_stripe/credit_notes.html), [Subscriptions](https://hexdocs.pm/lattice_stripe/subscriptions.html), [Customer Portal](https://hexdocs.pm/lattice_stripe/customer-portal.html), [Metering](https://hexdocs.pm/lattice_stripe/metering.html)
+  [Payments](https://hexdocs.pm/lattice_stripe/payments.html), [Checkout](https://hexdocs.pm/lattice_stripe/checkout.html), [Invoices](https://hexdocs.pm/lattice_stripe/invoices.html), [Credit Notes](https://hexdocs.pm/lattice_stripe/credit_notes.html), [Subscriptions](https://hexdocs.pm/lattice_stripe/subscriptions.html), [Customer Portal](https://hexdocs.pm/lattice_stripe/customer-portal.html), [Metering](https://hexdocs.pm/lattice_stripe/metering.html), [Tax](https://hexdocs.pm/lattice_stripe/tax.html), [Charge API](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html)
 - **Connect**:
   [Connect](https://hexdocs.pm/lattice_stripe/connect.html), [Connect Accounts](https://hexdocs.pm/lattice_stripe/connect-accounts.html), [Connect Money Movement](https://hexdocs.pm/lattice_stripe/connect-money-movement.html)
 - **Operations and DX**:

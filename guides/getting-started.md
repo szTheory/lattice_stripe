@@ -11,7 +11,7 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:lattice_stripe, "~> 1.3"},
+    {:lattice_stripe, "~> 1.7"},
     {:finch, "~> 0.21"}
   ]
 end

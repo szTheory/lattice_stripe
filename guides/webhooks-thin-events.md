@@ -12,7 +12,7 @@ Thin events are how Stripe confirms reality at the `/v2/events` surface. Add
 LatticeStripe to your project:
 
 ```elixir
-{:lattice_stripe, "~> 1.5"}
+{:lattice_stripe, "~> 1.7"}
 ```
 
 For Stripe's full thin-event reference, see [Stripe Event Destinations](https://docs.stripe.com/event-destinations).
