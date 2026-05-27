@@ -40,6 +40,10 @@ defmodule LatticeStripe.DocsTruthTest do
     # D-03 sub-decision 3C — new v1.5 trust rail extension to Operations & DX
     assert "guides/webhooks-thin-events.md" in extras
     assert "guides/webhooks-thin-events.md" in groups["Operations & DX"]
+    assert "guides/production-checklist.md" in extras
+    assert "guides/production-checklist.md" in groups["Operations & DX"]
+    assert "guides/event-debugging.md" in extras
+    assert "guides/event-debugging.md" in groups["Operations & DX"]
     assert "guides/testing.md" in groups["Operations & DX"]
     assert "guides/error-handling.md" in groups["Operations & DX"]
   end
@@ -358,6 +362,68 @@ defmodule LatticeStripe.DocsTruthTest do
     # JTBD discovery ladder (Start Here Runtime route + Job 7 Read next)
     jtbd = File.read!("guides/user-flows-and-jtbd.md")
     assert jtbd =~ "webhooks-thin-events.md"
+  end
+
+  test "production-checklist guide locks the operator pre-launch contract" do
+    guide = File.read!("guides/production-checklist.md")
+
+    assert guide =~ "Production Stripe integrations fail at boundaries"
+    assert guide =~ "Client.new!"
+    assert guide =~ "Webhook.Plug"
+    assert guide =~ "request_id"
+    assert guide =~ "Your app starts work. Webhooks confirm reality."
+    assert guide =~ "idempotency" or guide =~ "Idempotency"
+    assert guide =~ "Finch" or guide =~ "supervision"
+    assert guide =~ "telemetry" or guide =~ "Telemetry"
+    assert guide =~ "result record"
+    assert guide =~ "PaymentIntent"
+    assert guide =~ "client-configuration.md"
+    assert guide =~ "webhooks.md"
+    assert guide =~ "event-debugging.md"
+  end
+
+  test "event-debugging guide locks the webhook diagnostic contract" do
+    guide = File.read!("guides/event-debugging.md")
+
+    assert guide =~ "Debug from the delivery boundary inward"
+    assert guide =~ ":no_matching_signature"
+    assert guide =~ ":timestamp_expired"
+    assert guide =~ "request_id"
+    assert guide =~ "event.id"
+    assert guide =~ "fetch_event" or guide =~ "fetch_event/"
+    assert guide =~ "at-least-once" or guide =~ "at least once"
+    assert guide =~ "result record"
+    assert guide =~ "webhooks-thin-events.md"
+    assert guide =~ "webhooks.md"
+  end
+
+  test "operator guides are the v1.7 install-line canary" do
+    checklist = File.read!("guides/production-checklist.md")
+    debugging = File.read!("guides/event-debugging.md")
+
+    assert checklist =~ "{:lattice_stripe, \"~> 1.7\"}"
+    assert debugging =~ "{:lattice_stripe, \"~> 1.7\"}"
+  end
+
+  test "operator guides are cross-linked from README/JTBD/sibling guides" do
+    checklist = File.read!("guides/production-checklist.md")
+    debugging = File.read!("guides/event-debugging.md")
+    readme = File.read!("README.md")
+    jtbd = File.read!("guides/user-flows-and-jtbd.md")
+    webhooks = File.read!("guides/webhooks.md")
+    errors = File.read!("guides/error-handling.md")
+    testing = File.read!("guides/testing.md")
+
+    assert checklist =~ "event-debugging.md"
+    assert debugging =~ "production-checklist.md"
+    assert readme =~ "production-checklist.md"
+    assert readme =~ "event-debugging.md"
+    assert jtbd =~ "production-checklist.md"
+    assert jtbd =~ "event-debugging.md"
+    assert webhooks =~ "event-debugging.md"
+    assert errors =~ "production-checklist.md"
+    assert errors =~ "event-debugging.md"
+    assert testing =~ "event-debugging.md"
   end
 
   test "Webhook.Plug @moduledoc documents tolerance: 0 testing-only semantics" do
