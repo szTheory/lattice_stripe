@@ -4,14 +4,10 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - "**.md"
       - ".planning/**"
-      - "guides/**"
   pull_request:
     paths-ignore:
-      - "**.md"
       - ".planning/**"
-      - "guides/**"
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
