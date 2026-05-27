@@ -18,7 +18,7 @@ findings:
   warning: 2
   info: 1
   total: 5
-status: issues_found
+status: clean
 ---
 
 # Phase 48: Code Review Report
