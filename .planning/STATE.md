@@ -4,8 +4,8 @@ milestone: v1.6
 milestone_name: — Tax
 status: executing
 stopped_at: Phase 51 planned
-last_updated: "2026-05-27T16:35:43.850Z"
-last_activity: 2026-05-27 -- Phase 51 planning complete
+last_updated: "2026-05-27T16:36:33.560Z"
+last_activity: 2026-05-27 -- Phase 51 execution started
 progress:
   total_phases: 3
   completed_phases: 2
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-27 — Milestone v1.6 kickoff)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 51 — TaxId, Testing & Adoption Surface (4 plans ready)
+**Current focus:** Phase 51 — taxid-testing-adoption-surface
 
 ## Current Position
 
-Phase: 51
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-27 -- Phase 51 planning complete
+Phase: 51 (taxid-testing-adoption-surface) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 51
+Last activity: 2026-05-27 -- Phase 51 execution started
 
 ## Performance Metrics
 

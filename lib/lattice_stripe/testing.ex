@@ -56,6 +56,8 @@ defmodule LatticeStripe.Testing do
     Mandate,
     Quote,
     SetupAttempt,
+    Tax,
+    TaxId,
     Webhook
   }
 
@@ -102,6 +104,24 @@ defmodule LatticeStripe.Testing do
   """
   @spec quote(map()) :: Quote.t()
   def quote(raw_map), do: Quote.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Tax Calculation fixture map into `%LatticeStripe.Tax.Calculation{}`.
+  """
+  @spec tax_calculation(map()) :: Tax.Calculation.t()
+  def tax_calculation(raw_map), do: Tax.Calculation.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Tax Transaction fixture map into `%LatticeStripe.Tax.Transaction{}`.
+  """
+  @spec tax_transaction(map()) :: Tax.Transaction.t()
+  def tax_transaction(raw_map), do: Tax.Transaction.from_map(raw_map)
+
+  @doc """
+  Converts a canonical TaxId fixture map into `%LatticeStripe.TaxId{}`.
+  """
+  @spec tax_id(map()) :: TaxId.t()
+  def tax_id(raw_map), do: TaxId.from_map(raw_map)
 
   @doc """
   Converts a canonical thin-event notification fixture map into

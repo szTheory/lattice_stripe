@@ -225,6 +225,9 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Testing.Fixtures.Mandate,
             LatticeStripe.Testing.Fixtures.SetupAttempt,
             LatticeStripe.Testing.Fixtures.Quote,
+            LatticeStripe.Testing.Fixtures.TaxCalculation,
+            LatticeStripe.Testing.Fixtures.TaxTransaction,
+            LatticeStripe.Testing.Fixtures.TaxId,
             LatticeStripe.Testing.TestClock,
             LatticeStripe.Testing.TestClock.Owner,
             LatticeStripe.Testing.TestClock.Error

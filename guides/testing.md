@@ -24,12 +24,52 @@ payloads in downstream application tests:
 - `LatticeStripe.Testing.Fixtures.Mandate`
 - `LatticeStripe.Testing.Fixtures.SetupAttempt`
 - `LatticeStripe.Testing.Fixtures.Quote`
+- `LatticeStripe.Testing.Fixtures.TaxCalculation`
+- `LatticeStripe.Testing.Fixtures.TaxTransaction`
+- `LatticeStripe.Testing.Fixtures.TaxId`
 
 The raw map is the canonical test shape. Build other forms explicitly on top:
 
 - `LatticeStripe.Testing.generate_webhook_event/3` for `%LatticeStripe.Event{}`
 - `LatticeStripe.Testing.generate_webhook_payload/3` for signed raw webhook payloads
-- `LatticeStripe.Testing.quote/1`, `dispute/1`, `credit_note/1`, and friends for typed structs
+- `LatticeStripe.Testing.quote/1`, `dispute/1`, `credit_note/1`, `tax_calculation/1`, `tax_transaction/1`, `tax_id/1`, and friends for typed structs
+
+## Tax
+
+Stripe Tax fixtures follow the same two-layer pattern as Credit Notes and Quotes:
+
+1. Build a wire map with `tax_calculation_json/1`, `tax_transaction_json/1`, or `tax_id_json/1`
+2. Convert to a typed struct with `LatticeStripe.Testing.tax_calculation/1`, `tax_transaction/1`, or `tax_id/1`
+
+```elixir
+import LatticeStripe.Testing.Fixtures.TaxCalculation
+import LatticeStripe.Testing.Fixtures.TaxTransaction
+
+alias LatticeStripe.Testing
+alias LatticeStripe.Tax
+
+calc_map = tax_calculation_json(%{"currency" => "eur"})
+calc = Testing.tax_calculation(calc_map)
+
+txn_map =
+  tax_transaction_json(%{
+    "reference" => "order-#{System.unique_integer([:positive])}",
+    "line_items" => %{
+      "object" => "list",
+      "data" => [tax_transaction_line_item_json()],
+      "has_more" => false
+    }
+  })
+
+txn = Testing.tax_transaction(txn_map)
+```
+
+For Mox-at-Transport tests that exercise the calculate → record chain, see
+`test/lattice_stripe/tax/calculation_transaction_test.exs` in this repository.
+
+`Tax.Settings` and `Tax.Registration` wire fixtures remain internal under
+`test/support/fixtures/tax_settings.ex` and `tax_registration.ex` — they are not
+part of the public `LatticeStripe.Testing.Fixtures.*` surface.
 
 ```elixir
 alias LatticeStripe.Testing

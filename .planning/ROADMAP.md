@@ -76,7 +76,7 @@ Plans:
 
 **Plans**: 4 plans (4 waves)
 
-- [ ] 51-01-PLAN.md — TaxId dual-path API + nested structs + ObjectTypes + unit tests (TAXID-01..04)
+- [x] 51-01-PLAN.md — TaxId dual-path API + nested structs + ObjectTypes + unit tests (TAXID-01..04)
 - [ ] 51-02-PLAN.md — Testing fixtures promotion + five-type expand proof (DX-01, DX-02)
 - [ ] 51-03-PLAN.md — guides/tax.md + discovery wiring + moduledoc guide links (DX-04)
 - [ ] 51-04-PLAN.md — docs_truth_test.exs Tax blocks (DX-05)
@@ -91,7 +91,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 49. Tax Calculation & Transaction Core | 3/3 | Complete    | 2026-05-27 |
 | 50. Tax Settings & Registration | 2/2 | Complete    | 2026-05-27 |
-| 51. TaxId, Testing & Adoption Surface | 0/? | Not started | — |
+| 51. TaxId, Testing & Adoption Surface | 1/4 | In Progress|  |
 
 ## Next Milestone
 
