@@ -183,4 +183,17 @@ defmodule LatticeStripe.DocsTruthTest do
     assert changelog =~ "WEBFIX-01"
     assert changelog =~ ~r/##\s*\[?1\.5/
   end
+
+  test "Webhook.Plug @moduledoc documents tolerance: 0 testing-only semantics" do
+    # WR-04 closure (Phase 47 deferred → Phase 48 D-03 3E): the Plug
+    # @moduledoc Configuration Options section must surface the tolerance: 0
+    # testing-only escape hatch. HexDocs renders this @moduledoc as the
+    # landing page for the Plug; without this lock, drift here would silently
+    # stop showing the contract on the page adopters actually read first.
+    # Four-surface triangulation: inline check_tolerance/2 comment + Plug
+    # schema doc: string + CHANGELOG WEBFIX-01 entry + this @moduledoc — all
+    # four must be silenced simultaneously for the contract to silently regress.
+    source = File.read!("lib/lattice_stripe/webhook/plug.ex")
+    assert source =~ ~r/@moduledoc.*tolerance.*0.*testing only/s
+  end
 end
