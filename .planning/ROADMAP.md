@@ -48,7 +48,7 @@
   6. Integration tests under `test/lattice_stripe/charge/` prove list/search/update/capture via Mox-at-Transport.
   7. Docs-truth grep blocks lock Charge moduledoc examples and surface declarations against drift.
 
-**Plans**: TBD
+**Plans**: 3 plans (52-01 implementation, 52-02 Mox wire tests + surface contract, 52-03 docs-truth + integration smokes)
 
 ### Phase 53: Operator Guides
 
