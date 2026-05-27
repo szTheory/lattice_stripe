@@ -171,4 +171,16 @@ defmodule LatticeStripe.DocsTruthTest do
     assert changelog =~ "## [1.3.0]"
     assert changelog =~ "shipped `1.3.x` surface"
   end
+
+  test "CHANGELOG.md documents WEBFIX-01 reconciliation under v1.5" do
+    # WEBFIX-01 / Phase 47 D-03 regression-prevention contract: a future
+    # "fix it to be stricter" PR that silently drops the CHANGELOG entry
+    # MUST fail this grep test. The inline source comment + this test +
+    # the function-boundary test + the Plug-boundary test together
+    # triangulate the decision so the drift cannot silently come back.
+    changelog = File.read!("CHANGELOG.md")
+
+    assert changelog =~ "WEBFIX-01"
+    assert changelog =~ ~r/##\s*\[?1\.5/
+  end
 end

@@ -140,9 +140,10 @@ if Code.ensure_loaded?(Plug) do
                   "Mount path (e.g., \"/webhooks/stripe\"). When omitted, processes all POST requests."
               ],
               tolerance: [
-                type: :pos_integer,
+                type: :non_neg_integer,
                 default: 300,
-                doc: "Max age of webhook timestamp in seconds."
+                doc:
+                  "Max age of webhook timestamp in seconds. Set 0 to disable the staleness check (testing only)."
               ]
             )
 

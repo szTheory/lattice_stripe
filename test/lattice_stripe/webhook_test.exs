@@ -118,11 +118,13 @@ defmodule LatticeStripe.WebhookTest do
       assert {:ok, _ts} = Webhook.verify_signature(@payload, header, @secret, tolerance: 300)
     end
 
-    test "tolerance: 0 fails on any non-zero-age timestamp" do
-      old_ts = System.system_time(:second) - 1
-      header = Webhook.generate_test_signature(@payload, @secret, timestamp: old_ts)
+    test "tolerance: 0 disables the staleness check (any age accepted)" do
+      # WEBFIX-01: reconciled with docstring intent — `tolerance: 0` skips the
+      # staleness check entirely (matches stripe-node / stripe-go behavior).
+      ancient_ts = System.system_time(:second) - 100_000
+      header = Webhook.generate_test_signature(@payload, @secret, timestamp: ancient_ts)
 
-      assert {:error, :timestamp_expired} =
+      assert {:ok, ^ancient_ts} =
                Webhook.verify_signature(@payload, header, @secret, tolerance: 0)
     end
   end
