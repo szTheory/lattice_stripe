@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.7 Polish & Operator (In progress — close-ready pending REL-04)
+
+**Phases:** 52–55 (Charge, Operator guides, Release truth, Milestone closure)
+
+**Stop signal:** As of **1.7.0** in repo, LatticeStripe is **feature-complete for its intended v1.x scope** — mainstream SaaS payments, billing, Connect, tax, webhooks, and operator diagnostics. Further **1.x** work is **maintenance and adoption-driven**.
+
+**Key accomplishments (partial close 2026-05-27):**
+
+- Charge list/search/update/capture surface (Phase 52)
+- `guides/production-checklist.md` and `guides/event-debugging.md` (Phase 53)
+- `guides/scope.md` + README v1.x stop signal (Phase 55)
+- Phase 41.1 retired as `accepted-external-verification` (Phase 55)
+
+**Outstanding:** REL-04 Hex publish at `1.7.0` — `mix hex.info` still shows `1.1.0` as latest (complete Phase 54-04 before audit-milestone).
+
+---
+
 ## v1.6 Tax (Shipped: 2026-05-27)
 
 **Phases completed:** 3 phases (49, 50, 51), 9 plans
@@ -16,7 +33,7 @@
 
 **Audit:** PASSED (retroactive 2026-05-27) — 20/20 requirements satisfied, 0 critical integration gaps, full standalone Tax adopter flow wired. Tech debt: non-blocking WR-01/02/IN-01 from Phase 51 review (WR-01/02 patched post-audit in `ee305c8`, `11ca590`). Nyquist partial (phases 49–50 `nyquist_compliant: false` despite green verification). See [milestones/v1.6-MILESTONE-AUDIT.md](milestones/v1.6-MILESTONE-AUDIT.md).
 
-**Outstanding follow-through:** Phase 41.1 remains `pending-external-verification` — slated for v1.7 polish milestone. `mix.exs` still pinned at `@version "1.3.0"` — Hex publish out-of-band when ready.
+**Outstanding follow-through (resolved at v1.7 close):** Phase 41.1 retired as `accepted-external-verification` in Phase 55. Hex publish at `1.7.0` remains pending REL-04 (see v1.7 section).
 
 **Known deferred items at close:** 1 (260402-wte webhook plug research — substantively complete; see STATE.md Deferred Items)
 
@@ -43,7 +60,7 @@
 
 **Audit:** PASSED — 8/8 requirements satisfied (THIN-01..04, WEBFIX-01, TESTING-01, GUIDE-03, VERIFY-03), 0 critical integration gaps, full E2E adopter flow wired. Tech debt limited to non-blocking polish (WR-01/02/03/05, IN-01..04, Phase 48 VALIDATION.md per-task map placeholder).
 
-**Outstanding follow-through:** Phase 41.1 remains `pending-external-verification` for real-sandbox Quote downstream proof — slated for v1.7 polish milestone per locked v1.5→v1.7 plan.
+**Outstanding follow-through (resolved at v1.7 close):** Phase 41.1 retired as `accepted-external-verification` in Phase 55 (optional manual probe via `scripts/verify_quote_follow_through.exs`).
 
 **Known deferred items at close:** 1 (260402-wte webhook plug research — substantively complete, catalog status flag only; see STATE.md Deferred Items)
 

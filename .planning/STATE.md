@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Polish & Operator
 status: executing
-stopped_at: Phase 55 context gathered
-last_updated: "2026-05-27T19:19:58.349Z"
-last_activity: 2026-05-27 -- Phase 55 planning complete
+stopped_at: Phase 55 blocked on REL-04 (Hex 1.7.0 publish)
+last_updated: "2026-05-27T20:00:00.000Z"
+last_activity: 2026-05-27 -- Phase 55 plans 55-01/55-02 complete; 55-03 gated on REL-04
 progress:
   total_phases: 4
   completed_phases: 3
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-05-27 — milestone v1.7 started)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 55 — milestone-closure-v1-x-stop-signal (after Phase 54 REL-04)
+**Current focus:** Phase 55 — milestone-closure-v1-x-stop-signal
 
 ## Current Position
 
-Phase: 55
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-27 -- Phase 55 planning complete
+Phase: 55 (milestone-closure-v1-x-stop-signal) — EXECUTING (2/4 plans)
+Plan: 55-03 blocked — REL-04 pre-flight failed (`mix hex.info` shows 1.1.0, not 1.7.0)
+Status: Complete Phase 54-04 Hex publish before close_ready
+Last activity: 2026-05-27 -- 55-01/55-02 shipped; REL-04 gate open
 
 **Done estimate:** ~88-90% for intended v1.x SDK scope → ~92-95% after v1.7 ships
 
@@ -55,7 +55,7 @@ Last activity: 2026-05-27 -- Phase 55 planning complete
 - Execute Phase 52: Charge surface expansion
 - Execute Phase 53: Operator guides
 - Execute Phase 54: Release truth capstone (1.7.0 + Hex publish)
-- Execute Phase 55: Milestone closure (Phase 41.1 retire + v1.x stop signal)
+- Finish Phase 55: Mark REL/CLOSE requirements after REL-04; run `/gsd-audit-milestone v1.7`
 
 ### Blockers/Concerns
 

@@ -2,6 +2,25 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.7 — Polish & Operator (partial — pending REL-04)
+
+**In progress:** 2026-05-27
+**Phases:** 52–55 (partial)
+
+### What Was Built (so far)
+
+- **Charge surface expansion** — list/search/update/capture on `LatticeStripe.Charge` with PI-first moduledoc and docs-truth locks (Phase 52).
+- **Operator guides** — `guides/production-checklist.md` and `guides/event-debugging.md` wired into ExDoc and README (Phase 53).
+- **v1.x stop signal** — `guides/scope.md`, README blockquote + `## v1.x scope`, PROJECT.md v1.x Status (Phase 55).
+- **Phase 41.1 retirement** — `41.1-VERIFICATION.md` restored and `accepted-external-verification` (Phase 55).
+
+### Outstanding at partial close
+
+- **REL-04** — Hex publish at `1.7.0` (repo `@version` is 1.7.0; Hex latest remains 1.1.0).
+- **Milestone audit** — `/gsd-audit-milestone v1.7` after REL-04 passes.
+
+---
+
 ## Milestone: v1.6 — Tax
 
 **Shipped:** 2026-05-27

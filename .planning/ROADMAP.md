@@ -6,7 +6,7 @@
 - ✅ **v1.1 — Accrue unblockers (metering + portal)** — Phases 20-21 (shipped 2026-04-14) — [brief](v1.1-accrue-context.md)
 - ✅ **v1.2 — Production Hardening & DX** — Phases 22-31 (shipped 2026-04-17) — [archive](milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 — Production Coverage & Adoption Polish** — Phases 32-42 plus Phase 41.1 follow-through (shipped 2026-05-25 with accepted external-proof gap) — [archive](milestones/v1.3-ROADMAP.md)
-- ✅ **v1.4 — Adoption Closure** — Phases 43-46 (shipped 2026-05-27, Phase 41.1 preserved as `pending-external-verification`) — [archive](milestones/v1.4-ROADMAP.md)
+- ✅ **v1.4 — Adoption Closure** — Phases 43-46 (shipped 2026-05-27, Phase 41.1 retired as `accepted-external-verification` at v1.7 close) — [archive](milestones/v1.4-ROADMAP.md)
 - ✅ **v1.5 — Thin-Event Webhooks** — Phases 47-48 (shipped 2026-05-27) — [archive](milestones/v1.5-ROADMAP.md)
 - ✅ **v1.6 — Tax** — Phases 49-51 (shipped 2026-05-27) — [archive](milestones/v1.6-ROADMAP.md)
 - 🚧 **v1.7 — Polish & Operator** — Phases 52-55 (in progress; planned v1.x stop signal)
@@ -28,8 +28,8 @@
 
 - [x] **Phase 52: Charge Surface Expansion** — Expand retrieve-only Charge module to list/search/update/capture parity with sibling resources; integration tests + docs-truth four-surface triangulation. (completed 2026-05-27)
 - [x] **Phase 53: Operator Guides** — Ship `guides/production-checklist.md` and `guides/event-debugging.md`; wire into ExDoc Operations & DX and README discovery ladder. (completed 2026-05-27)
-- [ ] **Phase 54: Release Truth Capstone** — Bump to 1.7.0, CHANGELOG v1.4–1.7, lockstep `~> 1.7` docs-truth flip, Hex publish.
-- [ ] **Phase 55: Milestone Closure & v1.x Stop Signal** — Retire Phase 41.1 as `accepted-external-verification`; publish "done for v1.x scope" in planning and public docs.
+- [ ] **Phase 54: Release Truth Capstone** — Bump to 1.7.0, CHANGELOG v1.4–1.7, lockstep `~> 1.7` docs-truth flip, Hex publish. **Blocker:** REL-04 — Hex still shows `1.1.0` (complete 54-04).
+- [x] **Phase 55: Milestone Closure & v1.x Stop Signal** — Retire Phase 41.1 as `accepted-external-verification`; publish v1.x stop signal (in progress on planning close-ready — blocked on REL-04).
 
 ## Phase Details
 
@@ -102,8 +102,8 @@
 | 52. Charge Surface Expansion | v1.7 | 3/3 | Complete    | 2026-05-27 |
 | 53. Operator Guides | v1.7 | 4/4 | Complete    | 2026-05-27 |
 | 54. Release Truth Capstone | v1.7 | 3/4 | In Progress|  |
-| 55. Milestone Closure & v1.x Stop Signal | v1.7 | 0/4 | Planned | — |
+| 55. Milestone Closure & v1.x Stop Signal | v1.7 | 2/4 | In Progress | 2026-05-27 |
 
 ## Next Step
 
-Run `/gsd-discuss-phase 52` to gather context and negotiate Charge surface scope, then `/gsd-plan-phase 52` to create execution plans.
+Complete Phase 54 REL-04 (`mix hex.publish` at 1.7.0), then finish Phase 55 plans 55-03 (close_ready) and 55-04. When REL-04 passes: `/gsd-audit-milestone v1.7` then `/gsd-complete-milestone v1.7`.
