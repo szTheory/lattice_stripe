@@ -77,7 +77,7 @@ Each task was committed atomically:
 2. **Task 2: Archive REQUIREMENTS and ROADMAP to milestones/** — `9372652` (chore)
 3. **Task 3: Flip PROJECT.md and STATE.md to maintenance posture** — `251a430` (chore)
 
-**Plan metadata:** `53d043a` (docs: complete plan)
+**Plan metadata:** `40a4e19` (docs: complete plan)
 
 ## Files Created/Modified
 
