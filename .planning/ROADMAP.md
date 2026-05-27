@@ -85,7 +85,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 47. Thin-Event SDK Surface & Webhook Reconciliation | 5/5 | Complete    | 2026-05-27 |
-| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 6/6 | Complete   | 2026-05-27 |
+| 48. Thin-Event Adoption Surface — Guide & Integration Verification | 6/6 | Complete    | 2026-05-27 |
 
 ## Next Step
 

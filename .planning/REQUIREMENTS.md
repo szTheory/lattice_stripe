@@ -36,11 +36,11 @@ created: 2026-05-27
 
 ### Documentation (GUIDE-*)
 
-- [ ] **GUIDE-03**: `guides/webhooks-thin-events.md` published — Phoenix handler skeleton, fetch-after-verify pattern, idempotency keyed on `event.id` (not on fetched resource state), rate-limit guidance (<90/s under Stripe's 100 req/s ceiling), Connect/context-aware routing via `event.context`, explicit verification-vs-payload-shape failure boundary. Linked into ExDoc layered grouping and JTBD discovery ladder.
+- [x] **GUIDE-03**: `guides/webhooks-thin-events.md` published — Phoenix handler skeleton, fetch-after-verify pattern, idempotency keyed on `event.id` (not on fetched resource state), rate-limit guidance (<90/s under Stripe's 100 req/s ceiling), Connect/context-aware routing via `event.context`, explicit verification-vs-payload-shape failure boundary. Linked into ExDoc layered grouping and JTBD discovery ladder.
 
 ### Verification (VERIFY-*)
 
-- [ ] **VERIFY-03**: Integration test coverage for thin-event verification happy path, fetch-after-verify roundtrip, malformed-payload failure boundary, and `tolerance: 0` reconciliation. Tests live under existing `test/lattice_stripe/webhook*` namespace. Docs-truth regression suite extended so `webhooks-thin-events.md` install/handler snippets stay enforceable.
+- [x] **VERIFY-03**: Integration test coverage for thin-event verification happy path, fetch-after-verify roundtrip, malformed-payload failure boundary, and `tolerance: 0` reconciliation. Tests live under existing `test/lattice_stripe/webhook*` namespace. Docs-truth regression suite extended so `webhooks-thin-events.md` install/handler snippets stay enforceable.
 
 ## Future Requirements (Deferred)
 
