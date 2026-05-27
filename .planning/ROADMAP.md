@@ -99,7 +99,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 52. Charge Surface Expansion | v1.7 | 3/3 | Complete   | 2026-05-27 |
+| 52. Charge Surface Expansion | v1.7 | 3/3 | Complete    | 2026-05-27 |
 | 53. Operator Guides | v1.7 | 0/TBD | Not started | — |
 | 54. Release Truth Capstone | v1.7 | 0/TBD | Not started | — |
 | 55. Milestone Closure & v1.x Stop Signal | v1.7 | 0/TBD | Not started | — |

@@ -9,11 +9,11 @@ Requirements for the Polish & Operator milestone. Each maps to roadmap phases 52
 
 ### Charge Surface
 
-- [ ] **CHRG-01**: Developer can list charges with pagination (`list/3`, `list!/3`, `stream!/3`)
-- [ ] **CHRG-02**: Developer can search charges via Stripe search API (`search/3`, `search!/3`, `search_stream!/3`)
-- [ ] **CHRG-03**: Developer can update charge metadata and description (`update/4`, `update!/4`)
-- [ ] **CHRG-04**: Developer can capture an uncaptured charge (`capture/4`, `capture!/4`)
-- [ ] **CHRG-05**: Charge integration tests and docs-truth regression lock the expanded surface (four-surface triangulation: moduledoc + code + tests + docs-truth)
+- [x] **CHRG-01**: Developer can list charges with pagination (`list/3`, `list!/3`, `stream!/3`)
+- [x] **CHRG-02**: Developer can search charges via Stripe search API (`search/3`, `search!/3`, `search_stream!/3`)
+- [x] **CHRG-03**: Developer can update charge metadata and description (`update/4`, `update!/4`)
+- [x] **CHRG-04**: Developer can capture an uncaptured charge (`capture/4`, `capture!/4`)
+- [x] **CHRG-05**: Charge integration tests and docs-truth regression lock the expanded surface (four-surface triangulation: moduledoc + code + tests + docs-truth)
 
 ### Operator Guides
 
@@ -63,11 +63,11 @@ Explicitly excluded for v1.7. Documented to prevent scope creep.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHRG-01 | Phase 52 | Pending |
-| CHRG-02 | Phase 52 | Pending |
-| CHRG-03 | Phase 52 | Pending |
-| CHRG-04 | Phase 52 | Pending |
-| CHRG-05 | Phase 52 | Pending |
+| CHRG-01 | Phase 52 | Complete |
+| CHRG-02 | Phase 52 | Complete |
+| CHRG-03 | Phase 52 | Complete |
+| CHRG-04 | Phase 52 | Complete |
+| CHRG-05 | Phase 52 | Complete |
 | OPS-01 | Phase 53 | Pending |
 | OPS-02 | Phase 53 | Pending |
 | REL-01 | Phase 54 | Pending |
