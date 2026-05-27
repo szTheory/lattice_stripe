@@ -4,14 +4,44 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+> **Publishing note:** The last version published to [Hex.pm](https://hex.pm/packages/lattice_stripe) was **1.1.0** (2026-04-14). Sections **1.4.0** through **1.6.0** below are milestone checkpoints shipped together in **1.7.0** — they were not published as separate Hex releases. Install: `{:lattice_stripe, "~> 1.7"}`.
+
 ## [Unreleased]
 
-### [1.5.0] — Thin-Event SDK Surface & Webhook Reconciliation
+_No unreleased changes._
 
-> Pre-release notes for the upcoming v1.5 line. The mix.exs version bump
-> happens at release time outside this entry's scope.
+## [1.7.0](https://github.com/szTheory/lattice_stripe/compare/v1.1.0...v1.7.0) (2026-05-27)
 
-#### Fixed
+### Highlights
+
+This release publishes **1.7.0** to Hex — the first package since **1.1.0**, bundling v1.4 adoption closure, v1.5 thin-event webhooks, v1.6 Tax, and v1.7 Charge expansion plus operator playbooks. Adopters on `~> 1.1` resolve to **1.7.0**.
+
+**Upgrading from 1.1.x or 1.3.x:** Update your `mix.exs` dependency to `{:lattice_stripe, "~> 1.7"}`. Review the milestone sections below for additive surfaces (Tax, thin events, Charge list/search/update/capture) and the WEBFIX-01 migration under **1.5.0** if you use `tolerance: 0` in tests.
+
+### Added
+
+- **Charge surface expansion** — `LatticeStripe.Charge` gains `list/3`, `list!/3`, `stream!/3`, `search/3`, `search!/3`, `search_stream!/3`, `update/4`, `update!/4`, `capture/4`, and `capture!/4` for support, audit, and Connect reconciliation. PaymentIntent remains the payment-initiation path (`create`/`cancel` intentionally omitted). See [Charge moduledoc](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html).
+- **Operator playbooks** — `guides/production-checklist.md` (pre-launch boundaries) and `guides/event-debugging.md` (webhook diagnostic ladder from delivery boundary inward).
+- **Install and docs-truth lockstep** — All public install surfaces and `docs_truth_test.exs` derive the canonical `{:lattice_stripe, "~> 1.7"}` snippet from `mix.exs` (SSOT contract).
+
+## [1.6.0] — Tax
+
+_Milestone included in 1.7.0. Not published separately to Hex._
+
+### Added
+
+- **Tax.Calculation** — `create/3`, `retrieve/3`, `list_line_items/3` for standalone tax calculation (90-day expiry documented in moduledoc).
+- **Tax.Transaction** — `create_from_calculation/3`, `create_reversal/3`, `retrieve/3`, `list_line_items/3` for recording and reversing tax liability.
+- **Tax.Settings** — singleton retrieve/update for account-level tax configuration.
+- **Tax.Registration** — jurisdiction registration CRUDL with `stream!/3`.
+- **TaxId** — dual-path customer and account tax ID management.
+- **`guides/tax.md`** — canonical Tax adoption guide with scope boundary vs `Invoice.AutomaticTax`.
+
+## [1.5.0] — Thin-Event Webhooks
+
+_Milestone included in 1.7.0. Not published separately to Hex._
+
+### Fixed
 
 - **WEBFIX-01 — `Webhook.check_tolerance/2` `tolerance: 0` semantics reconciled.**
   Before this release, `tolerance: 0` returned `{:error, :timestamp_expired}`
@@ -25,20 +55,23 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   "Set 0 to disable" lever is reachable through the public Plug surface.
   Negative tolerances are still rejected at `init/1` time. **Testing only**
   — never set `tolerance: 0` in production; it removes replay-attack protection.
-  The canonical webhook guide (Phase 48) will document this restriction.
+  See `guides/webhooks-thin-events.md` for the canonical thin-event path.
 
-#### Added
+### Added
 
-- **GUIDE-03 + VERIFY-03 — Thin-event adoption surface published.** New canonical
-  Phoenix thin-event guide `guides/webhooks-thin-events.md` documents
-  `parse_event_notification/4` + `fetch_event/3` + `fetch_related_object/3` with
-  fetch-after-verify idempotency keyed on `event.id`, the verification-vs-payload-shape
-  failure boundary, the Stripe 100 req/s rate-limit ceiling, and Connect routing via
-  `event.context`. Integration coverage in `test/lattice_stripe/webhook/thin_event_test.exs`
-  proves the chained generate → parse → fetch flows under happy-path, malformed-payload,
-  and `tolerance: 0` boundary conditions. Docs-truth regression in `docs_truth_test.exs`
-  locks the new guide content and closes Phase 47 WR-04 by extending the
-  `Webhook.Plug` `@moduledoc` `tolerance: 0` mention.
+- **Thin-event SDK surface** — `Webhook.parse_event_notification/4`, `fetch_event/3`, `fetch_related_object/3` with typed `EventNotification` struct and `Event` extensions for `related_object` and `context`.
+- **`guides/webhooks-thin-events.md`** — canonical Phoenix thin-event guide: fetch-after-verify idempotency on `event.id`, verification-vs-payload-shape failure boundary, Stripe 100 req/s rate-limit ceiling, Connect routing via `event.context`.
+- **Testing helpers** — thin-event payload builders in `LatticeStripe.Testing` for signed wire-format fixtures.
+
+## [1.4.0] — Adoption Closure
+
+_Milestone included in 1.7.0. Not published separately to Hex._
+
+### Added
+
+- **Flagship recipes** — `guides/checkout-signup-and-portal.md`, `guides/connect-platform-flow.md`, `guides/metering-runtime-and-reconciliation.md`, `guides/quote-to-billing-operator.md` with cross-linked discovery ladder.
+- **Docs-truth baseline** — `docs_truth_test.exs` regression locks onboarding install lines, ExDoc extras, and guide cross-link graph (Phase 43).
+- **Guide discovery** — JTBD routing layer, cheatsheet, and README docs ladder aligned to shipped `1.3.x` surface before capstone version flip.
 
 ## [1.3.0](https://github.com/szTheory/lattice_stripe/compare/v1.2...v1.3) (2026-05-25)
 
