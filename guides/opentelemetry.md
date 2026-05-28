@@ -241,9 +241,9 @@ production — that is where you need the traces.
 
 ---
 
-See [Telemetry](telemetry.html) for the complete list of events and metadata
+See [Telemetry](telemetry.md) for the complete list of events and metadata
 keys.
 
-See [Performance](performance.html) for Finch pool sizing and production tuning.
+See [Performance](performance.md) for Finch pool sizing and production tuning.
 
-See [Circuit Breaker](circuit-breaker.html) for failure protection.
+See [Circuit Breaker](circuit-breaker.md) for failure protection.

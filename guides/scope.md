@@ -59,6 +59,11 @@ After **1.7.0**, v1.x work is **maintenance and adoption-driven**: bugfixes, Str
 drift, and narrow additions when real adopters need them. There is no planned new
 resource-family breadth in v1.x absent fresh adopter pull.
 
+## Public documentation
+
+Adopter-facing docs are **[README](../README.md)** and **[HexDocs](https://hexdocs.pm/lattice_stripe)**.
+There is no separate project website — ExDoc already publishes the guides in this repo.
+
 ## Requesting coverage
 
 Open a GitHub issue to describe your use case. That helps prioritize adopter pull;

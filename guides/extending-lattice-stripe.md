@@ -337,7 +337,7 @@ end
 ```
 
 > For a production-ready implementation using the `:fuse` library, see the
-> [Circuit Breaker](circuit-breaker.html) guide.
+> [Circuit Breaker](circuit-breaker.md) guide.
 
 ### Example: No Retries
 

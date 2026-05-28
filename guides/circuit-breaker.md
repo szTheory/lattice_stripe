@@ -288,9 +288,9 @@ disable retries.
 
 ---
 
-See [Extending LatticeStripe](extending-lattice-stripe.html) for the full `RetryStrategy`
+See [Extending LatticeStripe](extending-lattice-stripe.md) for the full `RetryStrategy`
 behaviour reference and other extension points.
 
-See [Performance](performance.html) for Finch pool sizing and connection warm-up.
+See [Performance](performance.md) for Finch pool sizing and connection warm-up.
 
-See [Error Handling](error-handling.html) for retry behavior fundamentals.
+See [Error Handling](error-handling.md) for retry behavior fundamentals.

@@ -44,7 +44,7 @@ end
 
 > **Important:** Don't rely on the redirect to confirm payment. Use webhooks to listen
 > for `checkout.session.completed` — the redirect can be skipped or manipulated. See
-> [Webhooks](webhooks.html) for setup.
+> [Webhooks](webhooks.md) for setup.
 
 ### Ad-Hoc Line Items (Price Data)
 
@@ -274,21 +274,21 @@ error.
 The `session.url` is only valid for 24 hours. Don't cache it. If a customer clicks a
 stale link, redirect them through your checkout flow again to create a fresh session.
 
+**Use webhooks to confirm payment completion — don't rely on the redirect.**
+Customers can close their browser before being redirected to `success_url`, or the
+redirect URL can fail. The only reliable way to know a payment succeeded is the
+`checkout.session.completed` webhook event. See [Webhooks](webhooks.md).
+
+**Subscription mode requires a recurring price, not a one-time price.**
+If you use a one-time price with `"mode" => "subscription"`, Stripe returns a 400 error.
+Create a Price with `"recurring" => %{"interval" => "month"}` for subscription line items.
+
 ## Read next
 
 - [Checkout Signup and Portal Follow-Through](checkout-signup-and-portal.md) — the
   recommended hosted recurring-billing spine from signup through portal follow-through
 - [Subscriptions](subscriptions.md)
 - [Webhooks](webhooks.md)
-
-**Use webhooks to confirm payment completion — don't rely on the redirect.**
-Customers can close their browser before being redirected to `success_url`, or the
-redirect URL can fail. The only reliable way to know a payment succeeded is the
-`checkout.session.completed` webhook event. See [Webhooks](webhooks.html).
-
-**Subscription mode requires a recurring price, not a one-time price.**
-If you use a one-time price with `"mode" => "subscription"`, Stripe returns a 400 error.
-Create a Price with `"recurring" => %{"interval" => "month"}` for subscription line items.
 
 ## See also
 

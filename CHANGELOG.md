@@ -18,13 +18,13 @@ This release publishes **1.7.0** to Hex — the first package since **1.1.0**, b
 
 v1.x scope and maintenance posture: see README and [User Flows & JTBD](guides/user-flows-and-jtbd.md).
 
-**Upgrading from 1.1.x or 1.3.x:** Update your `mix.exs` dependency to `{:lattice_stripe, "~> 1.7"}`. Review the milestone sections below for additive surfaces (Tax, thin events, Charge list/search/update/capture) and the WEBFIX-01 migration under **1.5.0** if you use `tolerance: 0` in tests.
+**Upgrading from 1.1.x or 1.3.x:** Update your `mix.exs` dependency to `{:lattice_stripe, "~> 1.7"}`. Review the milestone sections below for additive surfaces (Tax, thin events, Charge list/search/update/capture) and the **1.5.0** webhook tolerance migration if you use `tolerance: 0` in tests.
 
 ### Added
 
 - **Charge surface expansion** — `LatticeStripe.Charge` gains `list/3`, `list!/3`, `stream!/3`, `search/3`, `search!/3`, `search_stream!/3`, `update/4`, `update!/4`, `capture/4`, and `capture!/4` for support, audit, and Connect reconciliation. PaymentIntent remains the payment-initiation path (`create`/`cancel` intentionally omitted). See [Charge moduledoc](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html).
 - **Operator playbooks** — `guides/production-checklist.md` (pre-launch boundaries) and `guides/event-debugging.md` (webhook diagnostic ladder from delivery boundary inward).
-- **Install and docs-truth lockstep** — All public install surfaces and `docs_truth_test.exs` derive the canonical `{:lattice_stripe, "~> 1.7"}` snippet from `mix.exs` (SSOT contract).
+- **Install contract** — README, Getting Started, and other public surfaces document `{:lattice_stripe, "~> 1.7"}` aligned with the published package version.
 
 ## [1.6.0] — Tax
 
@@ -45,14 +45,14 @@ _Milestone included in 1.7.0. Not published separately to Hex._
 
 ### Fixed
 
-- **WEBFIX-01 — `Webhook.check_tolerance/2` `tolerance: 0` semantics reconciled.**
+- **`Webhook.check_tolerance/2` `tolerance: 0` semantics reconciled.**
   Before this release, `tolerance: 0` returned `{:error, :timestamp_expired}`
   on every call — directly contradicting the `verify_signature/4` docstring
   which has always documented `0` as "disable staleness check". The code clause
   has been corrected to match the docstring (and every canonical Stripe SDK:
   stripe-node's `if (tolerance > 0 && ...)` gate, stripe-go's `IgnoreTolerance`
   flag, stripe-ruby's `if tolerance && ...` guard).
-- **WEBFIX-01 — `Webhook.Plug` NimbleOptions `:tolerance` schema relaxed.**
+- **`Webhook.Plug` NimbleOptions `:tolerance` schema relaxed.**
   Changed from `:pos_integer` to `:non_neg_integer` so the documented
   "Set 0 to disable" lever is reachable through the public Plug surface.
   Negative tolerances are still rejected at `init/1` time. **Testing only**
@@ -72,8 +72,7 @@ _Milestone included in 1.7.0. Not published separately to Hex._
 ### Added
 
 - **Flagship recipes** — `guides/checkout-signup-and-portal.md`, `guides/connect-platform-flow.md`, `guides/metering-runtime-and-reconciliation.md`, `guides/quote-to-billing-operator.md` with cross-linked discovery ladder.
-- **Docs-truth baseline** — `docs_truth_test.exs` regression locks onboarding install lines, ExDoc extras, and guide cross-link graph (Phase 43).
-- **Guide discovery** — JTBD routing layer, cheatsheet, and README docs ladder aligned to shipped `1.3.x` surface before capstone version flip.
+- **Guide discovery** — JTBD routing layer, cheatsheet, and README docs ladder for evaluating and navigating shipped surfaces.
 
 ## [1.3.0](https://github.com/szTheory/lattice_stripe/compare/v1.2...v1.3) (2026-05-25)
 

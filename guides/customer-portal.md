@@ -277,14 +277,14 @@ link after the first use.
 changes, and payment method updates dispatch `customer.subscription.deleted`,
 `customer.subscription.updated`, or `payment_method.attached` events. The `return_url`
 redirect carries no payload. Wire your state to webhook events. See
-[Webhooks](webhooks.html) for setup.
+[Webhooks](webhooks.md) for setup.
 
 ## See also
 
 - [Checkout Signup and Portal Follow-Through](checkout-signup-and-portal.md) — the
   recommended hosted recurring-billing recipe that leads into portal follow-through
-- [`LatticeStripe.BillingPortal.Session`](`LatticeStripe.BillingPortal.Session`) — API reference, options, and security note
-- [Subscriptions](subscriptions.html) — `customer.subscription.*` lifecycle events and proration control
-- [Webhooks](webhooks.html) — receiving portal state-change events
-- [Error Handling](error-handling.html) — support-facing request and retry diagnostics
-- [Checkout](checkout.html) — Stripe-hosted payment flow (complement to the portal)
+- [BillingPortal.Session API reference](https://hexdocs.pm/lattice_stripe/LatticeStripe.BillingPortal.Session.html) — options and security note
+- [Subscriptions](subscriptions.md) — `customer.subscription.*` lifecycle events and proration control
+- [Webhooks](webhooks.md) — receiving portal state-change events
+- [Error Handling](error-handling.md) — support-facing request and retry diagnostics
+- [Checkout](checkout.md) — Stripe-hosted payment flow (complement to the portal)

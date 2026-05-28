@@ -11,8 +11,8 @@ wrong).
 This guide covers the full lifecycle: defining a meter, reporting usage on the
 hot path with two-layer idempotency, correcting over-reports, reconciling
 asynchronous failures via webhooks, and observing the pipeline in production.
-Code examples throughout reflect the exact function signatures shipped in
-Phase 20 (Plans 20-03 through 20-05).
+Code examples throughout reflect the exact function signatures shipped in the
+library.
 
 ## Mental model
 
@@ -99,8 +99,8 @@ storage tier). REQUIRES a well-formed `value_settings.event_payload_key`.
 
 > **Warning:** If you use `"sum"` or `"last"` without a correct
 > `value_settings.event_payload_key`, every event you report will silently drop
-> with `meter_event_value_not_found`. LatticeStripe's `GUARD-01`
-> (`Billing.Guards.check_meter_value_settings!/1`) raises at call time if
+> with `meter_event_value_not_found`. `Billing.Guards.check_meter_value_settings!/1`
+> raises at call time if
 > `value_settings` is missing or empty for these formulas. Fix the meter; do not
 > bypass the guard.
 
@@ -112,7 +112,7 @@ customer, Stripe silently drops the event (see
 [Reconciliation via webhooks](#reconciliation-via-webhooks)).
 
 > **Note:** LatticeStripe does not currently guard `customer_mapping` presence
-> at call time (D-07 deferred). A meter without it drops every event silently
+> at call time. A meter without it drops every event silently
 > with `meter_event_no_customer_defined`.
 
 ### value_settings
@@ -348,7 +348,7 @@ MeterEventAdjustment.create(client, %{
 })
 ```
 
-LatticeStripe's GUARD-03 (`Billing.Guards.check_adjustment_cancel_shape!/1`)
+`Billing.Guards.check_adjustment_cancel_shape!/1`
 raises `ArgumentError` at call time if the `cancel` map is missing `identifier`
 or the shape is wrong. This prevents the wrong shape from reaching the network.
 
@@ -411,7 +411,8 @@ end
 ```
 
 Key shape to remember: `%{"cancel" => %{"identifier" => original_identifier}}`.
-The nested shape is enforced by both GUARD-03 at call time and by Stripe's API.
+The nested shape is enforced by `Billing.Guards.check_adjustment_cancel_shape!/1`
+at call time and by Stripe's API.
 Passing anything else returns a Stripe 400.
 
 ## Reconciliation via webhooks
@@ -445,7 +446,7 @@ end
 | `meter_event_customer_not_found` | customer deleted | YES (async) | Sweep job |
 | `meter_event_no_customer_defined` | payload missing mapping key | YES (async) | Fix reporter |
 | `meter_event_invalid_value` | value not numeric | YES (async) | Fix reporter |
-| `meter_event_value_not_found` | sum/last but no value key | YES (async) | Fix payload (likely GUARD-01 bypass) |
+| `meter_event_value_not_found` | sum/last but no value key | YES (async) | Fix payload (do not bypass value guard) |
 | `archived_meter` | meter deactivated | NO (sync 400) | Alert — data PERMANENTLY LOST |
 | `timestamp_too_far_in_past` | >35 days | NO (sync 400) | Drop batch flush anti-pattern |
 | `timestamp_in_future` | >5 min future | NO (sync 400) | Fix clock skew |
@@ -469,7 +470,8 @@ causes: integer instead of string (`1` vs `"1"`), `nil` for zero (send `"0"`),
 or a formatted string like `"1,000"`.
 
 **`meter_event_value_not_found`:** The payload is missing the key named in
-`value_settings.event_payload_key`. This is exactly the failure mode GUARD-01
+`value_settings.event_payload_key`. This is exactly the failure mode
+`check_meter_value_settings!/1`
 prevents. Fix the meter definition or the reporter payload key.
 
 **`archived_meter`:** Immediately alert. No retry, no recovery. Events against
@@ -536,7 +538,7 @@ runs in production.
 
 LatticeStripe ships two guards for the metering stack:
 
-**GUARD-01 — `check_meter_value_settings!/1`**
+**`Billing.Guards.check_meter_value_settings!/1`**
 
 Raises `ArgumentError` at call time if you attempt to create a meter with
 `"sum"` or `"last"` formula but without a `value_settings.event_payload_key`.
@@ -555,7 +557,7 @@ Frame this guard as "only relevant when porting from another SDK or writing
 one-off scripts." Production code should have the meter schema correct before
 deployment. Fix the meter definition, not the call.
 
-**GUARD-03 — `check_adjustment_cancel_shape!/1`**
+**`Billing.Guards.check_adjustment_cancel_shape!/1`**
 
 Raises `ArgumentError` if `MeterEventAdjustment.create/3` is called with
 a `cancel` map that lacks `identifier`. See the dunning example above for the
@@ -588,7 +590,7 @@ Never use this in production application paths.
 
 3. **Putting `identifier` in the wrong place for adjustments.** The cancel param
    must be `%{"cancel" => %{"identifier" => "..."}}`, not top-level.
-   GUARD-03 catches this at call time. See [Corrections and adjustments](#corrections-and-adjustments).
+   `check_adjustment_cancel_shape!/1` catches this at call time. See [Corrections and adjustments](#corrections-and-adjustments).
 
 4. **Sending numeric values as integers.** The payload value must be a string
    (`"5"`, not `5`). Integers trigger `meter_event_invalid_value` — silently

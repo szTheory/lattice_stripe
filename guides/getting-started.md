@@ -17,7 +17,7 @@ defp deps do
 end
 ```
 
-> **Release status:** **`1.7.x`** ships as the current published line on Hex (capstone release **1.7.0**).
+> **Current Hex line:** **`1.7.x`** published on Hex — see [README](../README.md) and [CHANGELOG](../CHANGELOG.md#170).
 
 Then fetch your dependencies:
 
@@ -206,7 +206,7 @@ you are trying to ship:
   [Connect Money Movement](connect-money-movement.md).
 - **I am hardening support and local confidence**:
   [Testing](testing.md), [Error Handling](error-handling.md), and
-  [Client Configuration](client-configuration.html).
+  [Client Configuration](client-configuration.md).
 
 ## Common Pitfalls
 

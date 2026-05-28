@@ -4,13 +4,13 @@
 
 Account onboarding is only half of Connect. Once an account is active you
 need to move money: attach bank accounts, read balances, send transfers,
-schedule payouts, reconcile platform fees. This section covers every Phase
-18 resource against the D-07 outline.
+schedule payouts, and reconcile platform fees. This section covers Transfers,
+Payouts, Balance, and related money-movement resources.
 
 > **Webhook handoff** — drive application state from webhook events, not
 > from SDK responses. SDK responses reflect a point-in-time snapshot;
 > Stripe may transition state moments later. See the
-> [Webhooks guide](webhooks.html).
+> [Webhooks guide](webhooks.md).
 
 ## External accounts
 
@@ -157,7 +157,7 @@ case payout.trace_id do
 end
 
 # Cancel a pending payout. Use expand: [\"balance_transaction\"] to read the
-# associated BalanceTransaction in one round-trip (D-03).
+# associated BalanceTransaction in one round-trip.
 {:ok, cancelled} =
   LatticeStripe.Payout.cancel(client, payout.id, %{},
     expand: ["balance_transaction"]
@@ -179,7 +179,7 @@ end
 Destination charges are PaymentIntents that automatically transfer funds to
 a connected account and collect a platform fee. **LatticeStripe ships no
 `create_destination_charge` wrapper — the PaymentIntent params ARE the API
-surface** (D-07). Use the existing `LatticeStripe.PaymentIntent.create/3`
+surface**. Use `LatticeStripe.PaymentIntent.create/3`
 with Connect-specific fields:
 
 ```elixir
@@ -318,7 +318,7 @@ totals =
   |> Enum.sum()
 
 # When you need typed access to bt.source, expand it and cast manually
-# per D-05 — the source sum type is not auto-decoded by the SDK.
+# — the source sum type is not auto-decoded by the SDK.
 {:ok, bt} =
   LatticeStripe.BalanceTransaction.retrieve(client, "txn_123",
     expand: ["source"]
@@ -343,7 +343,7 @@ The Connect surface is now complete for money movement. See the
 `LatticeStripe` ExDoc **Connect** module group for the full reference —
 every module mentioned in this guide has typespecs and full function
 documentation. For webhook signature verification and event dispatch, see
-the [Webhooks guide](webhooks.html).
+the [Webhooks guide](webhooks.md).
 
 ## See also
 

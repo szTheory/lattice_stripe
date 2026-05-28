@@ -181,7 +181,7 @@ You can still override any individual request with the per-request `timeout` opt
 LatticeStripe.Customer.list(client, %{limit: 100}, timeout: 90_000)
 ```
 
-See [Client Configuration](client-configuration.html) for the full list of
+See [Client Configuration](client-configuration.md) for the full list of
 client options.
 
 ## Connection Warm-Up
@@ -227,7 +227,7 @@ than continue with an unwarmed connection:
 This is appropriate in environments where a failed Stripe connection at startup
 means the application cannot serve its core function.
 
-See [Client Configuration](client-configuration.html) for the full supervision
+See [Client Configuration](client-configuration.md) for the full supervision
 tree setup including Finch configuration.
 
 ## Benchmarking
@@ -262,7 +262,7 @@ saturated. Either increase `size` (more connections per pool) or `count` (more
 parallel pools) before adding more application instances.
 
 For request-level timing (duration, retry counts, status codes), see the
-[Telemetry](telemetry.html) guide. Telemetry events give you per-request
+[Telemetry](telemetry.md) guide. Telemetry events give you per-request
 visibility that complements the pool-level metrics from `Finch.get_pool_status/2`.
 
 ## Common Pitfalls

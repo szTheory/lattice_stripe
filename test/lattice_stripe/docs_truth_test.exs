@@ -119,7 +119,8 @@ defmodule LatticeStripe.DocsTruthTest do
 
       assert getting_started =~ "current published" or
                getting_started =~ "published line" or
-               getting_started =~ "published Hex",
+               getting_started =~ "published Hex" or
+               getting_started =~ "published on Hex",
              "release-status prose missing published-surface semantic anchor"
 
       for claim <- @stale_release_status_claims do
@@ -259,8 +260,8 @@ defmodule LatticeStripe.DocsTruthTest do
     test "readme publishes stop signal and deferred scope anchors" do
       readme = File.read!("README.md")
 
-      assert readme =~ "feature-complete for its intended scope"
-      assert readme =~ "maintenance and adoption-driven"
+      assert readme =~ "feature-complete for its intended v1.x scope"
+      assert readme =~ "maintenance mode" or readme =~ "maintenance and adoption-driven"
       assert readme =~ "guides/user-flows-and-jtbd.md"
       assert readme =~ "guides/api_stability.md"
       assert readme =~ "## v1.x scope"
@@ -527,16 +528,16 @@ defmodule LatticeStripe.DocsTruthTest do
     assert changelog =~ "last version published"
   end
 
-  test "CHANGELOG.md documents WEBFIX-01 reconciliation under v1.5" do
-    # WEBFIX-01 / Phase 47 D-03 regression-prevention contract: a future
-    # "fix it to be stricter" PR that silently drops the CHANGELOG entry
-    # MUST fail this grep test. The inline source comment + this test +
-    # the function-boundary test + the Plug-boundary test together
-    # triangulate the decision so the drift cannot silently come back.
+  test "CHANGELOG.md documents tolerance: 0 reconciliation under v1.5" do
+    # A future "fix it to be stricter" PR that silently drops the migration
+    # note MUST fail this grep test. The inline source comment + this test +
+    # the function-boundary test + the Plug-boundary test together triangulate
+    # the decision so the drift cannot silently come back.
     changelog = File.read!("CHANGELOG.md")
 
-    assert changelog =~ "WEBFIX-01"
     assert changelog =~ ~r/##\s*\[?1\.5/
+    assert changelog =~ "tolerance: 0"
+    assert changelog =~ "timestamp_expired" or changelog =~ "staleness"
   end
 
   test "webhooks-thin-events guide locks the thin-event adopter contract" do
@@ -657,6 +658,76 @@ defmodule LatticeStripe.DocsTruthTest do
     assert errors =~ "production-checklist.md"
     assert errors =~ "event-debugging.md"
     assert testing =~ "event-debugging.md"
+  end
+
+  @planning_artifact_patterns [
+    ~r/Phase \d+/,
+    ~r/Plans? \d+-\d+/,
+    ~r/\bD-\d+\b/,
+    ~r/\bGUARD-\d+\b/,
+    ~r/docs_truth_test/
+  ]
+
+  @guide_paths Path.wildcard("guides/*.{md,cheatmd}")
+
+  test "canonical guides omit GSD planning artifact vocabulary" do
+    for path <- @guide_paths do
+      content = File.read!(path)
+
+      for pattern <- @planning_artifact_patterns do
+        refute content =~ pattern,
+               "planning artifact #{inspect(pattern)} found in #{path}"
+      end
+    end
+  end
+
+  test "canonical guides use .md for inter-guide links (not .html siblings)" do
+    inter_guide_html =
+      ~r/\]\((?!https?:)(?!#)[^)]+\.html\)/
+
+    for path <- @guide_paths do
+      content = File.read!(path)
+
+      refute content =~ inter_guide_html,
+             "inter-guide .html link in #{path} — use .md for GitHub + HexDocs"
+    end
+  end
+
+  test "guides omit malformed backtick-wrapped module URLs" do
+    for path <- @guide_paths do
+      content = File.read!(path)
+
+      refute content =~ ~r/\]\(`[A-Za-z0-9_.]+`\)/,
+             "malformed module link in #{path}"
+    end
+  end
+
+  test "CHANGELOG header omits internal planning and test-harness vocabulary" do
+    # First ~100 lines ship on HexDocs as the Changelog extra.
+    header =
+      "CHANGELOG.md"
+      |> File.read!()
+      |> String.split("\n")
+      |> Enum.take(100)
+      |> Enum.join("\n")
+
+    refute header =~ ~r/Phase \d+/
+    refute header =~ "docs_truth_test"
+  end
+
+  test "cheatsheet documents list pagination on Response.data" do
+    cheatsheet = File.read!("guides/cheatsheet.cheatmd")
+
+    assert cheatsheet =~ "resp.data.data"
+    assert cheatsheet =~ "resp.data.has_more"
+    refute cheatsheet =~ "result.has_more"
+  end
+
+  test "customer-portal See also links BillingPortal.Session on HexDocs" do
+    guide = File.read!("guides/customer-portal.md")
+
+    assert guide =~ "hexdocs.pm/lattice_stripe/LatticeStripe.BillingPortal.Session.html"
+    refute guide =~ ~r/\]\(`LatticeStripe/
   end
 
   test "Webhook.Plug @moduledoc documents tolerance: 0 testing-only semantics" do

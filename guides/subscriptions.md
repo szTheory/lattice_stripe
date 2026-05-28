@@ -14,7 +14,7 @@ For standalone tax on custom carts (not Subscription `automatic_tax`), see [Tax]
 
 Stripe billing separates **catalog setup** from **runtime signup**:
 
-| Phase | Who runs it | LatticeStripe modules | Typical timing |
+| Stage | Who runs it | LatticeStripe modules | Typical timing |
 | ----- | ----------- | --------------------- | -------------- |
 | Catalog | Deploy script, admin task, or seed | `Product`, `Price` | Once per plan tier / currency |
 | Runtime | App signup or Checkout | `Customer`, `Subscription`, `Checkout.Session` | Per end user |
@@ -370,13 +370,12 @@ LatticeStripe.SubscriptionSchedule.update(client, sched.id, %{
 
 Stripe does NOT accept `proration_behavior` at `phases[].items[]` — only
 at top-level and per-phase. The guard reflects this wire shape and does
-not walk deeper. If your Phase 15 Subscription mutations worked, your
-Phase 16 Schedule mutations use the same mental model — just one level
-deeper into `phases[]`.
+not walk deeper. If your subscription mutations worked, your schedule
+mutations use the same mental model — just one level deeper into `phases[]`.
 
 ### Webhook-driven state transitions
 
-As with Subscriptions (Phase 15), **drive your application state from
+As with subscriptions, **drive your application state from
 webhook events, not from SDK responses**. An SDK response reflects the
 state at the moment of the call, but Stripe may transition the schedule
 moments later (phase boundaries, billing failures, automatic release,
@@ -439,9 +438,9 @@ still pending; the webhook is the authoritative signal.
 
 > #### See also {: .tip}
 >
-> - [Customer Portal](customer-portal.html) — self-serve plan changes and payment-method recovery.
-> - [Webhooks](webhooks.html) — signature verification and event-handler setup.
-> - [Error Handling](error-handling.html) — synchronous request failures versus async billing truth.
+> - [Customer Portal](customer-portal.md) — self-serve plan changes and payment-method recovery.
+> - [Webhooks](webhooks.md) — signature verification and event-handler setup.
+> - [Error Handling](error-handling.md) — synchronous request failures versus async billing truth.
 
 ## Telemetry
 

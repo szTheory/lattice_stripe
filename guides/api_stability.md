@@ -49,8 +49,8 @@ contract. These modules may change in any patch release without notice:
 
 Note: `LatticeStripe.Request` was previously documented as internal but is
 retained as public API in 1.0 because `LatticeStripe.Client.request/2`
-accepts a `Request.t()` struct — see Phase 19 Plan 01 summary for the
-Rule 1 deviation that kept `Request` public.
+accepts a `Request.t()` struct, so `Request` remains part of the public API
+in 1.0.
 
 If your application depends on any of these modules, you are relying on
 an implementation detail and should expect breakage. Prefer the public
@@ -92,10 +92,9 @@ After v1.0.0, LatticeStripe follows post-1.0 semver strictly:
   fields, changed error type semantics, dropped Elixir/OTP version
   support.
 
-**This overrides the pre-1.0 rule from Phase 11 D-16.** While the
-library was in 0.x, breaking changes were allowed in minor bumps. From
-v1.0.0 forward, that rule no longer applies — a breaking change
-requires a major bump, full stop. Pin to `~> 1.0` with confidence.
+**Pre-1.0:** while the library was in 0.x, breaking changes were allowed in
+minor bumps. **From v1.0.0 forward**, a breaking change requires a major bump,
+full stop. Pin to `~> 1.0` with confidence.
 
 ## Deprecation policy
 
@@ -112,7 +111,7 @@ inside the current major line.
 
 ## See also
 
-- [CHANGELOG](../changelog.html) — every release's changes, with
+- [CHANGELOG](../CHANGELOG.md) — every release's changes, with
   Highlights narratives for major versions
 - [Extending LatticeStripe](extending-lattice-stripe.md) — concrete
   recipes for the three public behaviours

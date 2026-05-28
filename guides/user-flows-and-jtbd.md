@@ -325,8 +325,10 @@ LatticeStripe has unusually strong coverage here for an SDK:
 - request batching
 - circuit-breaker guidance
 - testing helpers
-- drift detection
-- LiveBook exploration
+- optional [Stripe explorer LiveBook](../notebooks/stripe_explorer.livemd) in the repo for interactive exploration
+
+Maintainers can run `mix lattice_stripe.check_drift` to compare the SDK against
+Stripe's OpenAPI spec — that is a release-tooling task, not a production runtime path.
 
 This is not decorative. In practice, these are the tools that make the rest of the flows
 safe enough to trust.
@@ -399,7 +401,7 @@ These are the rules most likely to save you from subtle bugs:
 - **Catalog setup and runtime flows should usually be separated.**
 - **Hosted Stripe flows are often the right default until you have a real reason to outgrow them.**
 
-## What Is Already Covered Well, and What Is Still Missing?
+## What's Covered vs Where to Go Deeper
 
 ### Strong today
 

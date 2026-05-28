@@ -5,16 +5,7 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Release status:** **`1.7.x`** ships as the current published line on Hex (capstone release **1.7.0**).
->
-> - **1.4** — Adoption closure: flagship recipes, docs-truth baseline, discovery ladder
-> - **1.5** — Thin-event webhooks: [`guides/webhooks-thin-events.md`](guides/webhooks-thin-events.md)
-> - **1.6** — Tax: [`guides/tax.md`](guides/tax.md)
-> - **1.7** — Charge list/search/update/capture (PI-first; no create) plus operator playbooks: [`guides/production-checklist.md`](guides/production-checklist.md), [`guides/event-debugging.md`](guides/event-debugging.md)
->
-> **v1.x scope:** LatticeStripe is **feature-complete for its intended scope** — mainstream SaaS payments, billing, usage metering, Connect, tax calculation, webhooks, and operator diagnostics. Further **1.x** work is **maintenance and adoption-driven**: bugfixes, Stripe API drift, and narrow additions when real adopters need them. See [User Flows & JTBD](guides/user-flows-and-jtbd.md) for fit and [API Stability](guides/api_stability.md) for the semver contract.
->
-> See [CHANGELOG.md](CHANGELOG.md#170).
+> **Current release:** **`1.7.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see [CHANGELOG](CHANGELOG.md#170) for what shipped since 1.1.0. Evaluating fit? Start with [User Flows & JTBD](guides/user-flows-and-jtbd.md).
 
 A production-grade, idiomatic Elixir SDK for the Stripe API.
 
@@ -33,6 +24,7 @@ As of **1.7.0**, LatticeStripe is **feature-complete for its intended v1.x scope
 - **Tax narrow follow-ups:** Tax Code lookup (`/v1/tax_codes`); Tax Transaction list (if Stripe adds the endpoint)
 
 See [Scope](guides/scope.md) for boundaries, escape hatches, and how to request coverage.
+See [API Stability](guides/api_stability.md) for the semver contract.
 
 ## Docs Ladder
 
@@ -129,7 +121,8 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 - Disputes — retrieve/list, update metadata, stage evidence safely, submit evidence, and close disputes
 - Mandates and SetupAttempts — inspect payment authorization state and SetupIntent failure history
 - Operator playbooks: [Production Checklist](guides/production-checklist.md) · [Event Debugging](guides/event-debugging.md)
-- [Guide: Recipes](guides/recipes.md) · [Guide: Webhooks](guides/webhooks.md) · [Guide: Testing](guides/testing.md)
+- [Guide: Recipes](guides/recipes.md) · [Guide: Webhooks](guides/webhooks.md) · [Guide: Webhooks: Thin Events](guides/webhooks-thin-events.md) · [Guide: Testing](guides/testing.md)
+- Full ops guide ladder: [Docs Ladder](#docs-ladder) and [User Flows & JTBD](guides/user-flows-and-jtbd.md) (Job 7)
 
 ### Connect
 

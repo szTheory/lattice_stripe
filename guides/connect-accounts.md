@@ -74,7 +74,7 @@ Stripe supports three account types:
   information and handling all compliance. Complex to implement correctly.
 
 For new platforms, **Express** is the right default. See the
-[Account module docs](LatticeStripe.Account.html) for the full field reference.
+[Account module docs](https://hexdocs.pm/lattice_stripe/LatticeStripe.Account.html) for the full field reference.
 
 ## Onboarding URL flow
 
@@ -135,7 +135,7 @@ redirect_user_to(link.url)
 Note the signature deviation: `account_id` is the second positional argument
 rather than a key inside the params map. This matches the Stripe API wire shape
 (`POST /v1/accounts/:account_id/login_links`) and every other Stripe SDK.
-See the [LoginLink module docs](LatticeStripe.LoginLink.html) for the full
+See the [LoginLink module docs](https://hexdocs.pm/lattice_stripe/LatticeStripe.LoginLink.html) for the full
 rationale.
 
 Login Links are **Express-only**. Calling this on a Standard or Custom account
@@ -222,7 +222,7 @@ Key Connect events to handle:
 | `account.application.deauthorized` | User or platform disconnected the account |
 | `capability.updated` | A capability's status changed (e.g., `pending` → `active`) |
 
-See the [Webhooks guide](webhooks.html) for signature verification and handler setup.
+See the [Webhooks guide](webhooks.md) for signature verification and handler setup.
 
 ## See also
 

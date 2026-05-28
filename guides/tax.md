@@ -7,8 +7,7 @@ identification numbers.
 
 This guide covers SDK primitives for custom payment flows (calculate → record →
 reverse), account configuration (settings and registrations), and Tax ID
-management. Code examples reflect function signatures shipped in v1.6
-(Phases 49–51).
+management. Code examples reflect function signatures shipped in v1.6.
 
 ## Scope boundary
 

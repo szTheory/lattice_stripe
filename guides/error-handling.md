@@ -237,7 +237,7 @@ Override per-request:
 ```
 
 For custom retry behavior (circuit breakers, custom backoff), see
-[Extending LatticeStripe](extending-lattice-stripe.html).
+[Extending LatticeStripe](extending-lattice-stripe.md).
 
 ## Using request_id for Support
 

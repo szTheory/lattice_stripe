@@ -177,12 +177,12 @@ payment_intent = LatticeStripe.PaymentIntent.retrieve!(
 ### List with limit
 
 ```elixir
-{:ok, result} = LatticeStripe.Customer.list(client, %{
+{:ok, resp} = LatticeStripe.Customer.list(client, %{
   "limit" => 10
 })
 
-result.data     # list of customers
-result.has_more # true if more pages available
+resp.data.data      # list of customers
+resp.data.has_more  # true if more pages available
 ```
 
 ### Auto-paginate with Stream

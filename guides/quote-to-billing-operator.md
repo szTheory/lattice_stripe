@@ -155,4 +155,4 @@ workflow that reacts to them.
 - [Subscriptions](subscriptions.md)
 - [Webhooks](webhooks.md)
 - [Recipes](recipes.md)
-- [LatticeStripe.Quote](LatticeStripe.Quote.html)
+- [LatticeStripe.Quote](https://hexdocs.pm/lattice_stripe/LatticeStripe.Quote.html)
