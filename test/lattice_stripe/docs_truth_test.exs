@@ -330,7 +330,29 @@ defmodule LatticeStripe.DocsTruthTest do
     assert recipes =~ "tax.md"
   end
 
+  describe "guides/subscriptions.md" do
+    test "documents Product and Price catalog strategy" do
+      guide = File.read!("guides/subscriptions.md")
+
+      assert guide =~ "## Product and Price catalog strategy"
+      assert guide =~ "LatticeStripe.Product.create"
+      assert guide =~ "LatticeStripe.Price.create"
+      assert guide =~ "lookup_key"
+      assert guide =~ "catalog setup"
+    end
+  end
+
   describe "guides/recipes.md" do
+    test "mandate recipe documents SetupAttempt list and Mandate retrieve diagnostics" do
+      recipes = File.read!("guides/recipes.md")
+
+      assert recipes =~ "## Mandate and SetupAttempt diagnostics"
+      assert recipes =~ "LatticeStripe.SetupAttempt.list"
+      assert recipes =~ "setup_intent"
+      assert recipes =~ "LatticeStripe.Mandate.retrieve"
+      assert recipes =~ "setup_error"
+    end
+
     test "dispute recipe documents File upload through evidence submit spine" do
       recipes = File.read!("guides/recipes.md")
 

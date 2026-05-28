@@ -420,11 +420,8 @@ narrative polish — not missing primitives:
 
 - **Dispute and file evidence** — `recipes.md` documents File.create → `update_evidence` →
   `submit_evidence`; reason-specific field selection still adopter-owned
-- **Product and Price catalog strategy** — scattered in subscriptions/checkout guides;
-  no dedicated catalog guide
 - **BillingPortal configuration depth** — programmatic CRUD is shipped; see
   [Customer Portal](customer-portal.md) and `BillingPortal.Configuration`
-- **Mandate and SetupAttempt diagnostics** — modules and fixtures exist; thin operator narrative
 
 This guide routes you to the right canonical surface; recipes and flagship guides carry
 the multi-module stories.

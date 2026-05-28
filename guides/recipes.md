@@ -23,6 +23,8 @@ guide for the deeper API and runtime truth:
   [Subscriptions](subscriptions.md), [Webhooks](webhooks.md)
 - disputes, file evidence, and support workflows:
   this guide (§Dispute handling), [Webhooks](webhooks.md), [Testing](testing.md)
+- payment authorization diagnostics (save-card failures):
+  this guide (§Mandate and SetupAttempt diagnostics), [Payments](payments.md), [Testing](testing.md)
 - support and failure handling:
   [Error Handling](error-handling.md), [Testing](testing.md)
 - standalone Stripe Tax on custom payment flows:
@@ -106,6 +108,66 @@ idempotency. For delivery failures, see [Event Debugging](event-debugging.md).
 - [Event Debugging](event-debugging.md)
 - [Testing](testing.md) — `LatticeStripe.Testing.dispute/1` and file fixtures
 - [Credit Notes](credit_notes.md)
+
+## Mandate and SetupAttempt diagnostics
+
+### Job to be done
+
+A customer tried to save a card or bank account with a SetupIntent and the flow failed,
+stalled in `requires_action`, or succeeded but your support team needs to inspect
+**why** Stripe recorded the authorization the way it did.
+
+### Recommended spine
+
+1. **Start from the SetupIntent id** (`seti_*`) from your app logs or a
+   `setup_intent.*` webhook payload.
+2. **List SetupAttempts** scoped to that intent — `setup_intent` is **required** in
+   params; the SDK raises `ArgumentError` without it.
+3. **Read `setup_error`** on the latest attempt for the structured failure code/message.
+4. **Retrieve the Mandate** (`mandate_*`) when you need authorization status or
+   customer acceptance details (`Mandate` is retrieve-only in LatticeStripe).
+
+### Key calls
+
+```elixir
+setup_intent_id = "seti_123"
+
+{:ok, resp} =
+  LatticeStripe.SetupAttempt.list(client, %{"setup_intent" => setup_intent_id})
+
+case List.first(resp.data.data) do
+  %LatticeStripe.SetupAttempt{setup_error: %{code: code, message: msg}} ->
+    IO.inspect({code, msg}, label: "latest setup failure")
+
+  %LatticeStripe.SetupAttempt{status: status, payment_method: pm_id} ->
+    IO.inspect({status, pm_id}, label: "latest attempt")
+
+  nil ->
+    :no_attempts_yet
+end
+
+# When you have a mandate id from the SetupIntent or PaymentMethod:
+{:ok, mandate} = LatticeStripe.Mandate.retrieve(client, "mandate_123")
+
+case mandate.status do
+  :active -> :authorized
+  other -> other
+end
+```
+
+### Webhook confirmation point
+
+`SetupAttempt` records are historical diagnostics — they explain what happened during
+save attempts. Treat `setup_intent.succeeded` / `setup_intent.setup_failed` webhooks
+(or a fresh `SetupIntent` retrieve) as the runtime truth for whether the customer's
+payment method is attachable for off-session use.
+
+### Read next
+
+- [Payments](payments.md) — SetupIntent create/confirm flows
+- [Webhooks](webhooks.md)
+- [Error Handling](error-handling.md)
+- [Testing](testing.md) — `Testing.Fixtures.Mandate`, `Testing.Fixtures.SetupAttempt`
 
 ## Credit issuance and invoice adjustment
 

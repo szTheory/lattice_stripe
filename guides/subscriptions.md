@@ -10,6 +10,56 @@ for the full object reference.
 
 For standalone tax on custom carts (not Subscription `automatic_tax`), see [Tax](tax.md).
 
+## Product and Price catalog strategy
+
+Stripe billing separates **catalog setup** from **runtime signup**:
+
+| Phase | Who runs it | LatticeStripe modules | Typical timing |
+| ----- | ----------- | --------------------- | -------------- |
+| Catalog | Deploy script, admin task, or seed | `Product`, `Price` | Once per plan tier / currency |
+| Runtime | App signup or Checkout | `Customer`, `Subscription`, `Checkout.Session` | Per end user |
+
+**Product** is the marketing container (name, description, metadata). **Price** is what
+you bill — currency, `unit_amount`, and `recurring` interval. Subscriptions reference
+**Price ids** (`price_*`), not Product ids directly.
+
+### Recommended patterns
+
+1. **Create Product + recurring Price at deploy time**, then reference `price.id` in
+   subscription and Checkout params (see example below).
+2. **Use `lookup_key`** on Prices when you want stable app config without hard-coding
+   `price_*` ids — resolve with `Price.list/3` filtered by `lookup_key` before signup.
+3. **Prefer new Prices over editing amounts** on live Prices — Stripe treats amount
+   changes as new billing terms; grandfather existing subscribers on the old `price_*`
+   and attach new signups to a new Price on the same Product.
+4. **Keep catalog out of hot request paths** — cache `price_*` ids or lookup results in
+   your app config; do not call `Product.create/3` per HTTP request.
+
+### Catalog example
+
+```elixir
+{:ok, product} =
+  LatticeStripe.Product.create(client, %{
+    "name" => "Pro Plan",
+    "metadata" => %{"tier" => "pro"}
+  })
+
+{:ok, price} =
+  LatticeStripe.Price.create(client, %{
+    "product" => product.id,
+    "currency" => "usd",
+    "unit_amount" => 2000,
+    "recurring" => %{"interval" => "month"},
+    "lookup_key" => "pro_monthly_usd"
+  })
+
+# Store price.id (or lookup_key) in app config for runtime signup flows.
+```
+
+Hosted Checkout can also inline `price_data` on the session instead of a pre-created
+Price — see [Checkout](checkout.md). Direct `Subscription.create/3` flows should use a
+stable `price_*` id as shown in the next section.
+
 ## Creating a subscription
 
 A subscription needs a customer and at least one item pointing at a recurring
