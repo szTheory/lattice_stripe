@@ -69,7 +69,7 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
     Fluent builder for a single subscription schedule phase.
 
     Use `phase_new/0`, pipe phase setters, then `phase_build/1` before passing
-  to `add_phase/2`.
+    to `add_phase/2`.
     """
 
     @opaque t :: %__MODULE__{}
