@@ -2,15 +2,16 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'release-please--**'
     paths-ignore:
       - ".planning/**"
   pull_request:
     paths-ignore:
       - ".planning/**"
   workflow_dispatch:
-    # Manual dispatch for release-please PR head refs (GITHUB_TOKEN pushes do not
-    # trigger pull_request events on bot branches).
+    # Fallback when release-please uses GITHUB_TOKEN (bot pushes skip pull_request).
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"

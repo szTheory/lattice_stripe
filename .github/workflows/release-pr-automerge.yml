@@ -1,0 +1,105 @@
+# Merge Release Please PRs after ci-gate succeeds on the release branch.
+# Release Please bot commits do not trigger pull_request CI; release.yml dispatches
+# ci.yml on release-please--branches--main, then this workflow merges when green.
+
+name: Release PR Auto-Merge
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  automerge:
+    name: Merge release PR
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_branch, 'release-please--')
+    steps:
+      - name: Verify ci-gate succeeded
+        id: verify
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = context.payload.workflow_run.id;
+            const jobs = await github.paginate(
+              github.rest.actions.listJobsForWorkflowRun,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: runId,
+                per_page: 100
+              }
+            );
+
+            const ciGate = jobs.find((job) => job.name === 'ci-gate');
+
+            if (!ciGate || ciGate.conclusion !== 'success') {
+              core.setFailed(
+                `ci-gate must succeed before auto-merge (found: ${ciGate?.conclusion ?? 'missing'}).`
+              );
+              return;
+            }
+
+            core.info(`ci-gate succeeded on run ${runId}`);
+
+      - name: Find and merge release PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+
+          pr_json=$(gh pr list \
+            --head "$HEAD_BRANCH" \
+            --state open \
+            --json number,title,labels,author,headRefOid)
+
+          count=$(echo "$pr_json" | jq 'length')
+          if [ "$count" -eq 0 ]; then
+            echo "No open PR for head branch $HEAD_BRANCH — already merged or closed."
+            exit 0
+          fi
+
+          pr_number=$(echo "$pr_json" | jq -r '.[0].number')
+          title=$(echo "$pr_json" | jq -r '.[0].title')
+          head_oid=$(echo "$pr_json" | jq -r '.[0].headRefOid')
+          author=$(echo "$pr_json" | jq -r '.[0].author.login')
+          labels=$(echo "$pr_json" | jq -r '.[0].labels[].name' | tr '\n' ' ')
+
+          if [ "$head_oid" != "$HEAD_SHA" ]; then
+            echo "PR #$pr_number head ($head_oid) does not match CI SHA ($HEAD_SHA) — skipping stale run."
+            exit 0
+          fi
+
+          if [[ ! "$title" =~ ^chore\(main\):\ release\  ]]; then
+            echo "PR #$pr_number title does not match release PR pattern: $title"
+            exit 1
+          fi
+
+          if [ "$author" != "github-actions[bot]" ] && [ "$author" != "app/github-actions" ]; then
+            echo "PR #$pr_number author is not github-actions bot: $author"
+            exit 1
+          fi
+
+          if ! grep -q 'autorelease: pending' <<<"$labels"; then
+            echo "PR #$pr_number missing autorelease: pending label — skipping."
+            exit 0
+          fi
+
+          echo "Merging release PR #$pr_number ($title)"
+          if gh pr merge "$pr_number" --merge; then
+            echo "Merged PR #$pr_number"
+          elif gh pr merge "$pr_number" --merge --admin; then
+            echo "Merged PR #$pr_number with admin override"
+          else
+            echo "Failed to merge PR #$pr_number"
+            exit 1
+          fi
