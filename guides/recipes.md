@@ -21,6 +21,8 @@ guide for the deeper API and runtime truth:
 - quote-driven billing follow-through:
   [Quote to Billing Operator Flow](quote-to-billing-operator.md), [Invoices](invoices.md),
   [Subscriptions](subscriptions.md), [Webhooks](webhooks.md)
+- disputes, file evidence, and support workflows:
+  this guide (§Dispute handling), [Webhooks](webhooks.md), [Testing](testing.md)
 - support and failure handling:
   [Error Handling](error-handling.md), [Testing](testing.md)
 - standalone Stripe Tax on custom payment flows:
@@ -34,36 +36,76 @@ API detail and constraints.
 
 ### Job to be done
 
-A cardholder disputed a charge and your app needs to inspect the dispute, attach
-evidence, and treat Stripe's follow-up webhook or retrieval as the source of truth.
+A cardholder disputed a charge and your app needs to inspect the dispute, upload
+supporting files, stage evidence, submit when ready, and treat Stripe webhooks (or
+later `retrieve/3`) as the source of truth for status changes.
+
+### Recommended spine
+
+1. **Retrieve** the dispute (`Dispute.retrieve/3`) when you learn the `dp_*` id from a
+   webhook or support tooling.
+2. **Upload** each evidence file with `File.create/3` (`purpose: "dispute_evidence"`).
+   Files upload to Stripe's Files API (`client.files_base_url`, default
+   `https://files.stripe.com`) — the same `Client` struct handles API and file uploads.
+3. **Stage** text and file references with `Dispute.update_evidence/4` (always sends
+   `submit: false` — safe to call repeatedly while drafting).
+4. **Submit** once with `Dispute.submit_evidence/3` when the package is complete
+   (**irreversible** — evidence locks for the bank review).
+5. **Reconcile** via webhooks (`charge.dispute.created`, `charge.dispute.updated`,
+   `charge.dispute.closed`) or polling `retrieve/3`; do not treat submit's synchronous
+   response as your app's final ticketing state.
+
+Optional: `Dispute.close/3` accepts the loss when you will not contest (also
+irreversible).
 
 ### Key calls
 
 ```elixir
+# 1. Inspect the dispute
 {:ok, dispute} = LatticeStripe.Dispute.retrieve(client, dispute_id)
 
+# 2. Upload evidence bytes (PDF, image, etc.) — returns a file_* id
+evidence_bytes = File.read!("priv/support/receipt.pdf")
+
+{:ok, evidence_file} =
+  LatticeStripe.File.create(client, %{
+    "purpose" => "dispute_evidence",
+    "file" => evidence_bytes,
+    "filename" => "receipt.pdf"
+  })
+
+# 3. Stage evidence (safe — does not submit to the bank)
 {:ok, staged} =
   LatticeStripe.Dispute.update_evidence(client, dispute.id, %{
     "customer_name" => "Ada Lovelace",
     "product_description" => "Annual Pro plan",
-    "receipt" => file_id
+    "uncategorized_file" => evidence_file.id,
+    "uncategorized_text" => "Receipt attached via support portal"
   })
 
+# You can call update_evidence/4 again to add fields before submitting.
+
+# 4. Submit to the issuing bank (irreversible for evidence)
 {:ok, submitted} = LatticeStripe.Dispute.submit_evidence(client, staged.id)
 ```
 
+Use Stripe's [dispute evidence fields](https://docs.stripe.com/disputes/evidence) to pick
+the right keys (`receipt`, `shipping_documentation`, `customer_communication`, etc.).
+File-backed fields take a `file_*` id from `File.create/3`, not a raw path string.
+
 ### Webhook confirmation point
 
-Treat the synchronous update calls as Stripe accepting your request, not as the final
-story. Use your webhook path to reconcile the follow-up dispute state your app cares
-about, especially if internal ticketing, support notes, or fulfillment state must
-change with the dispute lifecycle.
+Treat `update_evidence/4` and `submit_evidence/3` as Stripe accepting your request, not
+as the final story. Wire `charge.dispute.*` events through your existing webhook path
+(see [Webhooks](webhooks.md)) and reconcile internal support state on `event.id`
+idempotency. For delivery failures, see [Event Debugging](event-debugging.md).
 
 ### Read next
 
-- [Credit Notes](credit_notes.md)
 - [Webhooks](webhooks.md)
-- [Testing](testing.md)
+- [Event Debugging](event-debugging.md)
+- [Testing](testing.md) — `LatticeStripe.Testing.dispute/1` and file fixtures
+- [Credit Notes](credit_notes.md)
 
 ## Credit issuance and invoice adjustment
 

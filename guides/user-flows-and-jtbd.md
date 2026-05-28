@@ -418,8 +418,8 @@ Flagship recipe guides and [Recipes](recipes.md) already stitch common SaaS work
 (checkout + portal, Connect platform, metering runtime, quote-to-billing). Remaining
 narrative polish — not missing primitives:
 
-- **Dispute and file evidence** — `recipes.md` covers retrieve → `update_evidence` →
-  `submit_evidence`; no full File.upload → evidence spine yet
+- **Dispute and file evidence** — `recipes.md` documents File.create → `update_evidence` →
+  `submit_evidence`; reason-specific field selection still adopter-owned
 - **Product and Price catalog strategy** — scattered in subscriptions/checkout guides;
   no dedicated catalog guide
 - **BillingPortal configuration depth** — programmatic CRUD is shipped; see

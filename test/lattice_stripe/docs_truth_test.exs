@@ -330,6 +330,21 @@ defmodule LatticeStripe.DocsTruthTest do
     assert recipes =~ "tax.md"
   end
 
+  describe "guides/recipes.md" do
+    test "dispute recipe documents File upload through evidence submit spine" do
+      recipes = File.read!("guides/recipes.md")
+
+      assert recipes =~ "LatticeStripe.File.create"
+      assert recipes =~ "dispute_evidence"
+      assert recipes =~ "LatticeStripe.Dispute.update_evidence"
+      assert recipes =~ "LatticeStripe.Dispute.submit_evidence"
+      assert recipes =~ "uncategorized_file"
+      assert recipes =~ "charge.dispute.created"
+      assert recipes =~ "submit: false"
+      assert recipes =~ "irreversible"
+    end
+  end
+
   test "tax guide locks ExDoc placement, content anchors, cross-links, and moduledocs" do
     root = Path.expand("../..", __DIR__)
     tax_guide = File.read!("guides/tax.md")
