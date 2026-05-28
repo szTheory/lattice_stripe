@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 1.7"}`.
 
+## [1.7.12](https://github.com/szTheory/lattice_stripe/compare/v1.7.11...v1.7.12) (2026-05-28)
+
+
+### Bug Fixes
+
+* **docs:** graduate Connect/Webhook docs_truth clusters and close JTBD narrative ([a49a0f7](https://github.com/szTheory/lattice_stripe/commit/a49a0f7be2cb2b7fe8608f8a42e576c5a24b317b))
+* **drift:** patch known_fields for Balance, BalanceTransaction, and Portal Session ([79f6baf](https://github.com/szTheory/lattice_stripe/commit/79f6baf6da130b4019de078abb87116f5b8b59db))
+
 ## [1.7.11](https://github.com/szTheory/lattice_stripe/compare/v1.7.10...v1.7.11) (2026-05-28)
 
 
