@@ -20,7 +20,7 @@ See also [`.planning/RELEASE-TRAIN.md`](../.planning/RELEASE-TRAIN.md) for commi
 2. Confirm GitHub Actions **CI / ci-gate** is green on `main`.
 3. Wait for Release Please to open a Release PR (patch bump only on the maintenance train).
 4. Review the Release PR: version in `mix.exs`, `.release-please-manifest.json`, and `CHANGELOG.md` must agree.
-5. Merge the Release PR. The **Release** workflow creates the tag; **Publish Hex** runs after `ci-gate` passes on the release SHA.
+5. Merge the Release PR. The **Release** workflow creates the tag, waits up to ~30 minutes for **ci-gate** on that SHA, then publishes to Hex automatically.
 6. Verify `mix hex.info lattice_stripe` lists the new version.
 
 ## Manual recovery (automation failed)

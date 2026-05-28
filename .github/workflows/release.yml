@@ -110,56 +110,88 @@ jobs:
             });
             core.setOutput('sha', commit.data.sha);
 
-      - name: Verify CI is green on tagged SHA
+      - name: Wait for ci-gate on release SHA
         uses: actions/github-script@v7
         with:
           script: |
+            // Release Please tags main immediately; ci.yml often has not started yet.
+            // Poll until ci-gate succeeds (pattern from rindle release.yml).
             const sha = '${{ steps.resolve-sha.outputs.sha }}';
-            const { data } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'ci.yml',
-              head_sha: sha,
-              per_page: 10
-            });
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            const maxAttempts = 60;
+            const waitMs = 30000;
+            let lastRunUrl = '';
 
-            if (data.total_count === 0) {
-              core.setFailed(
-                `Delivery blocked: no ci.yml runs found for SHA ${sha}. ` +
-                'Push the release commit and let CI complete before publishing.'
-              );
-              return;
-            }
-
-            const latest = data.workflow_runs[0];
-            const jobs = await github.paginate(
-              github.rest.actions.listJobsForWorkflowRun,
-              {
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              const { data } = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                run_id: latest.id,
-                per_page: 100
+                workflow_id: 'ci.yml',
+                head_sha: sha,
+                per_page: 20
+              });
+
+              const runs = data.workflow_runs.filter((run) => run.head_sha === sha);
+              const latest = runs[0];
+
+              if (!latest) {
+                core.info(`No ci.yml run yet for ${sha} (${attempt}/${maxAttempts}).`);
+                await sleep(waitMs);
+                continue;
               }
+
+              lastRunUrl = latest.html_url;
+
+              if (latest.status !== 'completed') {
+                core.info(
+                  `ci.yml ${latest.status} for ${sha} (${attempt}/${maxAttempts}): ${latest.html_url}`
+                );
+                await sleep(waitMs);
+                continue;
+              }
+
+              const jobs = await github.paginate(
+                github.rest.actions.listJobsForWorkflowRun,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: latest.id,
+                  per_page: 100
+                }
+              );
+
+              const ciGate = jobs.find((job) => job.name === 'ci-gate');
+
+              if (!ciGate) {
+                core.setFailed(
+                  `Delivery blocked: ci-gate job not found in ci.yml run ${latest.html_url}`
+                );
+                return;
+              }
+
+              if (ciGate.conclusion === 'success') {
+                core.info(`ci-gate succeeded on release SHA ${sha}: ${latest.html_url}`);
+                return;
+              }
+
+              if (ciGate.conclusion === 'failure' || ciGate.conclusion === 'cancelled') {
+                core.setFailed(
+                  `Delivery blocked: ci-gate concluded ${ciGate.conclusion} on SHA ${sha}.\n` +
+                  `Run: ${latest.html_url}`
+                );
+                return;
+              }
+
+              core.info(
+                `ci-gate ${ciGate.conclusion ?? 'pending'} (${attempt}/${maxAttempts}): ${latest.html_url}`
+              );
+              await sleep(waitMs);
+            }
+
+            core.setFailed(
+              `Timed out waiting for ci-gate on SHA ${sha} after ${maxAttempts} attempts (~${(maxAttempts * waitMs) / 60000} min). ` +
+              `Last run: ${lastRunUrl || 'none'}`
             );
-
-            const ciGate = jobs.find((job) => job.name === 'ci-gate');
-
-            if (!ciGate) {
-              core.setFailed(
-                `Delivery blocked: ci-gate job not found in ci.yml run ${latest.html_url}`
-              );
-              return;
-            }
-
-            if (ciGate.conclusion !== 'success') {
-              core.setFailed(
-                `Delivery blocked: ci-gate concluded ${ciGate.conclusion} on SHA ${sha}.\n` +
-                `Run: ${latest.html_url}`
-              );
-              return;
-            }
-
-            core.info(`ci-gate succeeded on release SHA ${sha}`);
 
   publish-hex:
     name: Publish to Hex.pm
