@@ -147,12 +147,16 @@ jobs:
 
             if gh pr merge "$pr_number" --squash -R "$REPOSITORY"; then
               echo "Merged PR #$pr_number"
+              merge_sha=$(gh pr view "$pr_number" --json mergeCommit -q '.mergeCommit.oid' -R "$REPOSITORY")
+              echo "merge_sha=${merge_sha}" >> "$GITHUB_ENV"
               echo "merged=true" >> "$GITHUB_ENV"
               exit 0
             fi
 
             if gh pr merge "$pr_number" --squash --admin -R "$REPOSITORY"; then
               echo "Merged PR #$pr_number with admin override"
+              merge_sha=$(gh pr view "$pr_number" --json mergeCommit -q '.mergeCommit.oid' -R "$REPOSITORY")
+              echo "merge_sha=${merge_sha}" >> "$GITHUB_ENV"
               echo "merged=true" >> "$GITHUB_ENV"
               exit 0
             fi
@@ -164,11 +168,20 @@ jobs:
           echo "Failed to merge PR #$pr_number after 12 attempts"
           exit 1
 
+      - name: Bootstrap CI on merge commit
+        if: env.merged == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # GITHUB_TOKEN merges do not emit push events. main HEAD is the merge commit
+          # immediately after squash merge, so dispatch CI on main (not a raw SHA ref).
+          gh workflow run ci.yml --ref main -R "${{ github.repository }}"
+          echo "Dispatched CI on main at merge commit ${{ env.merge_sha }}."
+
       - name: Trigger release workflow after merge
         if: env.merged == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # GITHUB_TOKEN merges do not emit push events; dispatch Release explicitly.
           gh workflow run release.yml -R "${{ github.repository }}"
           echo "Dispatched Release workflow for tag + Hex publish."

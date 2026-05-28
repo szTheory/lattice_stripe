@@ -20,7 +20,7 @@ See also [`.planning/RELEASE-TRAIN.md`](../.planning/RELEASE-TRAIN.md) for commi
 2. Confirm GitHub Actions **CI / ci-gate** is green on `main`.
 3. **Release** workflow runs Release Please and opens/updates a patch Release PR.
 4. **Bootstrap CI** dispatches `ci.yml` only when a Release PR is open but was **not** just updated (`prs_created` false). Fresh Release Please updates run **pull_request** CI via `RELEASE_PLEASE_TOKEN` — no duplicate dispatch.
-5. When **ci-gate** succeeds, **Release PR Auto-Merge** merges the Release PR and dispatches **Release** (GITHUB_TOKEN merges do not emit push events).
+5. When **ci-gate** succeeds, **Release PR Auto-Merge** merges the Release PR, dispatches **CI** on the merge commit, then **Release** (GITHUB_TOKEN merges do not emit push events).
 6. **Release** workflow tags the merge, waits for **ci-gate** on the tag SHA, then publishes to Hex automatically.
 7. Verify `mix hex.info lattice_stripe` lists the new version.
 
@@ -41,7 +41,7 @@ A **skipped** Release PR Auto-Merge run after a maintainer push to `main` is exp
 
 With `RELEASE_PLEASE_TOKEN`, Release Please PR updates trigger native `pull_request` CI. The bootstrap job **does not** `workflow_dispatch` CI when `prs_created` is true — duplicate runs cancelled each other and left a stale failed `ci-gate` on the PR.
 
-**Automerge** merges with `GITHUB_TOKEN`, which does **not** emit `push` events. **Release PR Auto-Merge** dispatches **Release** after a successful merge so tag + Hex publish still run.
+**Automerge** merges with `GITHUB_TOKEN`, which does **not** emit `push` events. **Release PR Auto-Merge** dispatches **CI** on the merge SHA, then **Release**, so `gate-ci-green` can verify `ci-gate` before Hex publish.
 
 ## Manual recovery (automation failed)
 
