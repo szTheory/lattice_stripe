@@ -111,11 +111,13 @@ jobs:
             --json number \
             -R "${{ github.repository }}" | jq 'length')
 
-          if [ "${PRS_CREATED:-false}" = "true" ] || [ "$open_count" -gt 0 ]; then
-            echo "Dispatching CI on release-please--branches--main (prs_created=${PRS_CREATED:-false}, open=$open_count)"
+          if [ "${PRS_CREATED:-false}" = "true" ]; then
+            echo "Release Please updated the PR — pull_request CI runs via RELEASE_PLEASE_TOKEN; skipping workflow_dispatch."
+          elif [ "$open_count" -gt 0 ]; then
+            echo "Open release PR without a fresh Release Please update — dispatching CI (open=$open_count)"
             gh workflow run ci.yml --ref release-please--branches--main -R "${{ github.repository }}"
           else
-            echo "No open release PR and prs_created not true — skipping CI bootstrap."
+            echo "No open release PR — skipping CI bootstrap."
           fi
 
   gate-ci-green:

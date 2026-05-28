@@ -4,14 +4,13 @@ on:
   push:
     branches:
       - main
-      - 'release-please--**'
     paths-ignore:
       - ".planning/**"
   pull_request:
     paths-ignore:
       - ".planning/**"
   workflow_dispatch:
-    # Fallback when release-please uses GITHUB_TOKEN (bot pushes skip pull_request).
+    # Dispatched by release.yml when a Release PR is open but bot pushes skip pull_request CI.
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"

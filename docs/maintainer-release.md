@@ -19,8 +19,8 @@ See also [`.planning/RELEASE-TRAIN.md`](../.planning/RELEASE-TRAIN.md) for commi
 1. Merge maintainer PRs to `main` using `docs:`, `fix:`, or `chore:` prefixes (patch-eligible).
 2. Confirm GitHub Actions **CI / ci-gate** is green on `main`.
 3. **Release** workflow runs Release Please and opens/updates a patch Release PR.
-4. **Bootstrap CI** dispatches `ci.yml` on `release-please--branches--main` (bot PRs do not trigger `pull_request` CI with `GITHUB_TOKEN`).
-5. When **ci-gate** succeeds, **Release PR Auto-Merge** merges the Release PR (squash).
+4. **Bootstrap CI** dispatches `ci.yml` only when a Release PR is open but was **not** just updated (`prs_created` false). Fresh Release Please updates run **pull_request** CI via `RELEASE_PLEASE_TOKEN` — no duplicate dispatch.
+5. When **ci-gate** succeeds, **Release PR Auto-Merge** merges the Release PR (squash), polling until branch protection sees the latest green check.
 6. **Release** workflow tags the merge, waits for **ci-gate** on the tag SHA, then publishes to Hex automatically.
 7. Verify `mix hex.info lattice_stripe` lists the new version.
 
@@ -32,9 +32,14 @@ Routine patch releases require **`RELEASE_PLEASE_TOKEN`** (fine-grained PAT with
 |----------|--------------|------------------------|
 | **Release** | Every push to `main` | Tag/Hex jobs skip until a Release PR merges (`release_created` is false). |
 | **Release PR Auto-Merge** | After **CI** completes | CI on `main` finishes — only release-branch CI (`release-please--*`) triggers merge. |
-| **Bootstrap CI on Release PR** | After **Release** on `main` | No open `autorelease: pending` Release PR exists. |
+| **Bootstrap CI on Release PR** | After **Release** on `main` | Open Release PR exists but was not just updated by Release Please (`prs_created` false). |
+| **Release PR Auto-Merge** | After release-branch **CI** completes | Manual retry: **Release PR Auto-Merge** workflow_dispatch. |
 
 A **skipped** Release PR Auto-Merge run after a maintainer push to `main` is expected, not a failed release.
+
+### Avoiding duplicate CI on Release PRs
+
+With `RELEASE_PLEASE_TOKEN`, Release Please PR updates trigger native `pull_request` CI. The bootstrap job **does not** also `workflow_dispatch` CI when `prs_created` is true — duplicate runs used to cancel each other and leave a stale failed `ci-gate` on the PR.
 
 ## Manual recovery (automation failed)
 
