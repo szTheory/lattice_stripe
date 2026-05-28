@@ -16,7 +16,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Done estimate:** ~94–96% for intended v1.x scope (doc/CI honesty wedge closed).
 
-**Post-v1.9 assessment (2026-05-27):** Maintenance mode is the default next posture. **Wedge A doc defects closed** via quick task 260527-tkc (2026-05-28). Gap 2 narrative thinness (disputes/files spine, Product/Price catalog, mandate diagnostics) is polish, not blocking. Optional: v1.10 Phase 2 disputes narrative only. See `.planning/threads/v1-10-next-milestone-assessment.md`.
+**Post-v1.9 assessment (2026-05-27):** Maintenance mode is the default next posture. **Wedge A** (260527-tkc) and **Wedge B** disputes/files spine (260527-tm1) closed 2026-05-28. Remaining Gap 2: Product/Price catalog and mandate narrative (opportunistic polish). No structured v1.10 milestone required unless you want explicit phase tracking. See `.planning/threads/v1-10-next-milestone-assessment.md`.
 
 **Latest archived milestone:** v1.9 CI & Doc Honesty (archived 2026-05-27)
 

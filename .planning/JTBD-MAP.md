@@ -96,7 +96,7 @@ When updating this file, review in this order:
 | BillingPortal configuration strategy | Important | Strong | Thin | Shipped but under-documented |
 | Complete end-to-end SaaS recipes | Important | Strong | Strong | Shipped (4 flagship guides, v1.4) |
 | File and FileLink workflows | Important dependency | Strong | Thin | Shipped but under-documented |
-| Disputes and evidence lifecycle | High leverage | Strong | Partial | Shipped but under-documented |
+| Disputes and evidence lifecycle | High leverage | Strong | Good | Shipped; File→evidence spine in recipes.md (quick 260527-tm1) |
 | Credit-note workflows | High leverage | Strong | Partial | Shipped but under-documented |
 | Mandate and SetupAttempt diagnostics | Medium | Strong | Thin | Shipped but under-documented |
 | Quote-to-invoice workflow | High leverage for B2B | Strong | Good | Shipped (flagship guide + code) |
@@ -158,8 +158,8 @@ Product/Price catalog strategy, BillingPortal configuration, disputes/files evid
 Post-v1.9 close (2026-05-27):
 
 1. **Maintenance mode** — Stripe API drift, adopter-pull narrow adds (TAX-01/02), bugfixes (default)
-2. **Gap 2 narrative** — disputes/files spine, Product/Price catalog, mandate diagnostics (opportunistic or v1.10 Phase 2)
-3. **Optional v1.10** — Disputes narrative only if structured closure desired (Wedge A closed via quick task 260527-tkc)
+2. **Gap 2 narrative** — Product/Price catalog, mandate diagnostics (opportunistic)
+3. **Maintenance** — Wedge A (260527-tkc) and Wedge B disputes spine (260527-tm1) closed via quick tasks
 4. **Gap 2: Narrative docs still thin** — Product/Price, BillingPortal deep guide, mandate diagnostics (opportunistic)
 5. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
 6. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only

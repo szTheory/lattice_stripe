@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-05-27 — post-v1.9 next-step assessment
 
 Phase: —
 Plan: —
-Status: maintenance — Wedge A doc defects closed
-Last activity: 2026-05-28 — Completed quick task 260527-tkc: Wedge A doc defect hotfixes
+Status: maintenance — Wedge A + B doc polish closed
+Last activity: 2026-05-28 — Completed quick task 260527-tm1: Wedge B disputes/files narrative
 
 ## Performance Metrics
 
@@ -42,13 +42,13 @@ Last activity: 2026-05-28 — Completed quick task 260527-tkc: Wedge A doc defec
 ### Decisions
 
 - **v1.x stop signal holds** — no new Stripe resource families without documented adopter pull.
-- **Done estimate ~95–96%** — Wedge A doc defects closed (260527-tkc); remaining delta is Gap 2 narrative polish.
+- **Done estimate ~96%** — Wedge A (260527-tkc) + Wedge B disputes spine (260527-tm1) closed; remaining delta is long-tail Gap 2 (catalog, mandate).
 - **CI-01 resolved** — paths-ignore `.planning/**` only (Phase 60); guide/md PRs run docs_truth.
 - **No Hex bump** — v1.9 doc-only like v1.8; future doc milestones same.
 - **PLAN-01 deferred** — `54-VERIFICATION.md` third carry (bookkeeping only).
 - **Next-step assessment (2026-05-27)** — maintenance default; Wedge A (doc defects) highest leverage if acting; optional v1.10 only for structured closure.
 - **Wedge A closed (260527-tkc)** — payments fence, portal Configuration truth, JTBD gap inventory; docs_truth locks added.
-- **Wedge B** — Dispute/File API shipped + integration-tested; gap is narrative (no File.create in recipe spine); doc-only phase ~leverage 7, not API work.
+- **Wedge B closed (260527-tm1)** — recipes.md File.create → update_evidence → submit_evidence spine + docs_truth lock.
 - **docs_truth** — Wedge A surfaces now locked (fence, portal Configuration, JTBD recipes); markdown fence helper for all canonical guides remains a graduation candidate.
 - **v2.core fail-fast is by design** — `{:unknown_object_type, type}` on unmapped thin-event types; not a bug.
 
@@ -61,6 +61,7 @@ Last activity: 2026-05-28 — Completed quick task 260527-tkc: Wedge A doc defec
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260527-tkc | Wedge A doc defect hotfixes (payments fence, portal truth, JTBD gaps) | 2026-05-28 | e24e9a3 | [260527-tkc-doc-defect-hotfixes-wedge-a-payments-md-](./quick/260527-tkc-doc-defect-hotfixes-wedge-a-payments-md/) |
+| 260527-tm1 | Wedge B disputes/files evidence narrative in recipes.md | 2026-05-28 | b5a78dc | [260527-tm1-wedge-b-disputes-files-evidence-narrativ](./quick/260527-tm1-wedge-b-disputes-files-evidence-narrativ/) |
 
 ## Session Continuity
 
@@ -70,5 +71,5 @@ Milestone audit: `.planning/milestones/v1.9-MILESTONE-AUDIT.md`
 ## Operator Next Steps
 
 1. **Default:** Maintenance mode — Stripe drift, adopter-pull fixes
-2. **Optional:** `/gsd-quick` Wedge B disputes/files narrative, or v1.10 Phase 2 only
+2. **Opportunistic:** Gap 2 long-tail (Product/Price catalog, mandate diagnostics) — no structured milestone needed
 3. **Opportunistic:** PLAN-01 backfill `54-VERIFICATION.md` when convenient
