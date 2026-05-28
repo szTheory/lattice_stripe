@@ -51,14 +51,6 @@ jobs:
             pr_number="${BASH_REMATCH[1]}"
           fi
 
-          expected_tag="v$(jq -r '.["."]' .release-please-manifest.json)"
-
-          if gh release view "$expected_tag" >/dev/null 2>&1; then
-            echo "GitHub release $expected_tag already exists; skipping release-please rerun."
-            echo "should_run=false" >>"$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           if [ -z "$pr_number" ]; then
             echo "No merge PR number in head commit; running release-please."
             echo "should_run=true" >>"$GITHUB_OUTPUT"
@@ -68,6 +60,15 @@ jobs:
           labels=$(gh pr view "$pr_number" --json labels --jq '.labels[].name' 2>/dev/null || true)
           if grep -qx 'autorelease: tagged' <<<"$labels"; then
             echo "Release PR #$pr_number is already tagged; skipping release-please rerun."
+            echo "should_run=false" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Merged release PR but tag may already exist from manual recovery — skip
+          # duplicate tag creation only on release-PR merges, not on every push.
+          expected_tag="v$(jq -r '.["."]' .release-please-manifest.json)"
+          if gh release view "$expected_tag" >/dev/null 2>&1; then
+            echo "GitHub release $expected_tag already exists for merged PR; skipping rerun."
             echo "should_run=false" >>"$GITHUB_OUTPUT"
             exit 0
           fi
