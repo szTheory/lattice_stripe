@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** The last version published to [Hex.pm](https://hex.pm/packages/lattice_stripe) was **1.1.0** (2026-04-14). Sections **1.4.0** through **1.6.0** below are milestone checkpoints shipped together in **1.7.0** — they were not published as separate Hex releases. Install: `{:lattice_stripe, "~> 1.7"}`.
 
+## [1.7.1](https://github.com/szTheory/lattice_stripe/compare/v1.7.0...v1.7.1) (2026-05-28)
+
+
+### Bug Fixes
+
+* **58-03:** point adoption contract [@moduledoc](https://github.com/moduledoc) at v1.6 milestone audit ([005b77e](https://github.com/szTheory/lattice_stripe/commit/005b77e88d86f3a7b1950d337b914bce7556b36d))
+* **docs:** Wedge A doc defect hotfixes with docs_truth locks ([e24e9a3](https://github.com/szTheory/lattice_stripe/commit/e24e9a3f41ad9b76dc42ee307f2732a474b86894))
+
 ## [Unreleased]
 
 _No unreleased changes._
