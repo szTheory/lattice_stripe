@@ -114,10 +114,7 @@ defmodule LatticeStripe.Drift do
       else
         header = "Actionable additions (Stripe spec fields missing from @known_fields):\n"
 
-        body =
-          with_additions
-          |> Enum.map(&format_module_additions/1)
-          |> Enum.join("\n\n")
+        body = Enum.map_join(with_additions, "\n\n", &format_module_additions/1)
 
         header <> body
       end
@@ -133,10 +130,7 @@ defmodule LatticeStripe.Drift do
           header =
             "Spec mismatch warnings (@known_fields not on OpenAPI object schema — often noise):\n"
 
-          body =
-            warning_modules
-            |> Enum.map(&format_module_removals/1)
-            |> Enum.join("\n\n")
+          body = Enum.map_join(warning_modules, "\n\n", &format_module_removals/1)
 
           header <> body
       end
