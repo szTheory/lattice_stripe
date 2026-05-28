@@ -4,7 +4,7 @@ milestone: v1.9
 milestone_name: — archived)
 status: maintenance
 last_updated: "2026-05-28"
-last_activity: 2026-05-28
+last_activity: 2026-05-28 — Maintenance capstone assessment refresh (waves 0–3)
 progress:
   total_phases: 2
   completed_phases: 2
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-28 — post-v1.x maintenance posture)
 Phase: —
 Plan: —
 Status: maintenance — v1.x complete; operate finished lib
-Last activity: 2026-05-28 — Post-v1.x maintenance posture recorded (no website; pure maintenance)
+Last activity: 2026-05-28 — Maintenance capstone: assessment refresh; doc-truth clusters + JTBD close + drift patches (in progress)
 
 ## Performance Metrics
 
@@ -42,7 +42,7 @@ Last activity: 2026-05-28 — Post-v1.x maintenance posture recorded (no website
 ### Decisions
 
 - **v1.x stop signal holds** — no new Stripe resource families without documented adopter pull.
-- **Done estimate ~97%** — Wedge A/B + Gap 2 catalog/mandate narratives closed (260527-tp8); v1.x doc polish largely complete.
+- **Done estimate ~98%** — May 28 quicks closed v1.10 wedges; capstone adds Connect/Webhook docs_truth clusters, JTBD narrative close, Issue #13 field patches.
 - **CI-01 resolved** — paths-ignore `.planning/**` only (Phase 60); guide/md PRs run docs_truth.
 - **No Hex bump** — v1.9 doc-only like v1.8; future doc milestones same.
 - **PLAN-01 closed (260527-tqf)** — `54-VERIFICATION.md` backfilled retroactively from Phase 54/55 evidence.
@@ -60,6 +60,10 @@ Last activity: 2026-05-28 — Post-v1.x maintenance posture recorded (no website
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 20260528-i13p | Issue #13 drift patches — Balance, BalanceTransaction, BillingPortal.Session | 2026-05-28 | (pending) | [20260528-issue-13-drift-patches](./quick/20260528-issue-13-drift-patches/) |
+| 20260528-jnc | JTBD narrative close — Adopter-owned depth + Mandates reading order | 2026-05-28 | (pending) | [20260528-jtbd-narrative-close](./quick/20260528-jtbd-narrative-close/) |
+| 20260528-dts | Doc-truth Connect + Webhook sibling clusters | 2026-05-28 | (pending) | [20260528-docs-truth-sibling-clusters](./quick/20260528-docs-truth-sibling-clusters/) |
+| 20260528-car | Capstone assessment refresh — STATE/PROJECT/v1-10 thread | 2026-05-28 | (pending) | [20260528-capstone-assessment-refresh](./quick/20260528-capstone-assessment-refresh/) |
 | 260528-i13 | Issue #13 drift triage — categorized report + maintenance tracker | 2026-05-28 | 8fc5e4b | [260528-issue-13-drift-triage](./quick/260528-issue-13-drift-triage/) |
 | 260528-rgw | Release gate polls for ci-gate before Hex publish | 2026-05-28 | 3934bef | [260528-release-gate-ci-wait](./quick/260528-release-gate-ci-wait/) |
 | 260527-tkc | Wedge A doc defect hotfixes (payments fence, portal truth, JTBD gaps) | 2026-05-28 | e24e9a3 | [260527-tkc-doc-defect-hotfixes-wedge-a-payments-md-](./quick/260527-tkc-doc-defect-hotfixes-wedge-a-payments-md/) |

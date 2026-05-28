@@ -14,7 +14,7 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Latest shipped milestone:** v1.9 CI & Doc Honesty — checkout/README docs_truth locks; CI-01 paths-ignore fix; JTBD-MAP post-v1.9 truth.
 
-**Done estimate:** ~97% for intended v1.x scope (doc polish quick tasks 260527-tkc/tm1/tp8 closed Gap 2 long-tail).
+**Done estimate:** ~98% for intended v1.x scope (May 28 doc quicks + maintenance capstone: docs_truth clusters, JTBD close, drift hygiene).
 
 **Post-v1.x posture (2026-05-28):** **Reactive maintenance only** — no active build track. Assessment wedges and Gap 2 doc polish closed (quick tasks 260527-tkc, tm1, tp8, tqf). No v1.10 milestone; no marketing website.
 

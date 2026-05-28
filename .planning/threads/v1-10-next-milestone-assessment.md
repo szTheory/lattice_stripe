@@ -166,3 +166,36 @@ Parallel wedge research confirmed:
 - `test/lattice_stripe/docs_truth_test.exs`, `test/integration/dispute_integration_test.exs`, `test/integration/file_integration_test.exs`
 - `.github/workflows/ci.yml`
 - `prompts/stripe-lib-priority-user-flows-deep-research.md`
+
+## Capstone close (2026-05-28+)
+
+**Updated done estimate: ~98%** — maintenance capstone; no v1.10 milestone.
+
+### Closed since initial assessment (2026-05-27)
+
+| Item | Quick task | Status |
+|------|------------|--------|
+| Wedge A doc defects (payments fence, portal Configuration, JTBD gaps) | 260527-tkc | Closed |
+| Wedge B disputes/files narrative | 260527-tm1 | Closed |
+| Gap 2 catalog + mandate narratives | 260527-tp8 | Closed |
+| PLAN-01 `54-VERIFICATION.md` | 260527-tqf | Closed |
+| Issue #13 triage infrastructure | 260528-i13 | Closed |
+| Graduation #1 fence integrity | (in-tree) | Closed — global `Fence.assert_balanced_fences!` |
+| Graduation #2 payment + portal sibling clusters | (in-tree) | Closed |
+| Graduation #3–4 portal + JTBD locks | 260527-tkc/tp8 | Closed |
+| Graduation #5 README ops ↔ JTBD | 260527-tkc/tm1 | Mostly closed |
+
+### Capstone waves (maintenance quicks, not v1.10)
+
+1. **Assessment refresh** — STATE/PROJECT/thread update; Hex train at 1.7.11.
+2. **Doc-truth clusters** — Connect + Webhook sibling-guide locks; Mandates routing in JTBD reading order.
+3. **JTBD narrative close** — shrink "Narrative gaps"; explicit Mandates/SetupAttempt route.
+4. **Issue #13 patches** — `Balance.refund_and_dispute_prefunding`, `BalanceTransaction.balance_type`, `BillingPortal.Session` known_fields parse fix + `customer_account`.
+
+### Remaining after capstone (by design)
+
+- Bulk `-` drift warnings (OpenAPI shape noise) — defer per Issue #13 triage rules.
+- Unmodeled specialist families — adopter pull only.
+- TAX-01/02 — adopter pull only.
+
+**Recommendation unchanged:** maintenance-only default; no structured v1.10 milestone.
