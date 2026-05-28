@@ -4,7 +4,7 @@ LatticeStripe is on a **sustaining maintenance** release train after v1.7.x.
 
 ## Standing contract
 
-- Latest released version: `1.7.2` (Hex + GitHub tag `v1.7.2`).
+- Latest released version: `1.7.3` (Hex + GitHub tag `v1.7.3`).
 - `milestone: none` remains the default GSD state — no feature milestones on `main` unless there is clear adopter pull.
 - Patch-eligible merged changes on `main` (`docs:`, `fix:`, `chore:`) flow to the next release through **Release Please** (patch bump).
 - The train moves only when **`main` is green** (`ci-gate` in CI) and `./scripts/maintainer/repo_hygiene_check.sh` reports **0 BLOCK**.

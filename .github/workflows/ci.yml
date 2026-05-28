@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: erlef/setup-beam@v1
         with:
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: erlef/setup-beam@v1
         with:
@@ -70,7 +70,7 @@ jobs:
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -78,7 +78,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -106,7 +106,7 @@ jobs:
           - elixir: '1.19'
             otp: '28'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: erlef/setup-beam@v1
         with:
@@ -153,7 +153,7 @@ jobs:
       STRIPE_MOCK_HOST: localhost
       STRIPE_MOCK_PORT: '12111'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: erlef/setup-beam@v1
         with:
@@ -187,7 +187,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: erlef/setup-beam@v1
         with:
@@ -195,7 +195,7 @@ jobs:
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -203,7 +203,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -221,7 +221,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: erlef/setup-beam@v1
         with:
@@ -229,7 +229,7 @@ jobs:
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -237,7 +237,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
