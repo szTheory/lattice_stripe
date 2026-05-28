@@ -14,18 +14,20 @@ defmodule LatticeStripe.DocsTruth.Fence do
       content
       |> String.split("\n")
       |> Enum.with_index(1)
-      |> Enum.reduce({false, nil}, fn {line, line_no}, {open?, opened_at} ->
-        if Regex.match?(@fence_line, line) do
-          if open?, do: {false, opened_at}, else: {true, line_no}
-        else
-          {open?, opened_at}
-        end
-      end)
+      |> Enum.reduce({false, nil}, &toggle_fence/2)
 
     if open? do
       raise "unclosed markdown fence in #{path} (opened near line #{opened_at})"
     end
 
     :ok
+  end
+
+  defp toggle_fence({line, line_no}, {open?, opened_at}) do
+    if Regex.match?(@fence_line, line) do
+      if open?, do: {false, opened_at}, else: {true, line_no}
+    else
+      {open?, opened_at}
+    end
   end
 end
