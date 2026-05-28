@@ -149,8 +149,7 @@ defmodule LatticeStripe.AccountTest do
 
     test "deprecated status_atom/1 still works (backward compat)" do
       account = Account.from_map(Fixtures.basic())
-      # Use apply/3 to avoid compile-time deprecation warning
-      assert apply(Capability, :status_atom, [account.capabilities["card_payments"]]) == :active
+      assert Capability.status_atom(account.capabilities["card_payments"]) == :active
     end
 
     test "capabilities is nil when not present in map" do

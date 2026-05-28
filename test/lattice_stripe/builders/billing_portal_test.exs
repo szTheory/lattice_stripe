@@ -1,8 +1,8 @@
 defmodule LatticeStripe.Builders.BillingPortalTest do
   use ExUnit.Case, async: true
 
-  alias LatticeStripe.Builders.BillingPortal, as: BPBuilder
   alias LatticeStripe.BillingPortal.Guards
+  alias LatticeStripe.Builders.BillingPortal, as: BPBuilder
 
   @moduletag :billing_portal
 

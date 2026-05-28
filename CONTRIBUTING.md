@@ -20,11 +20,17 @@ Thank you for your interest in contributing to LatticeStripe!
    mix test
    ```
 
-4. Run the full CI checks locally:
+4. Run the full contributor gate locally:
    ```bash
    mix ci
    ```
    This runs: format check, compile warnings, Credo strict, tests, and docs build.
+
+   Maintainers preparing a release also run:
+   ```bash
+   ./scripts/maintainer/repo_hygiene_check.sh
+   ```
+   See [docs/maintainer-release.md](docs/maintainer-release.md) for the release train procedure.
 
 ## Running Integration Tests
 
@@ -69,12 +75,7 @@ Release Please uses these commit messages to automate version bumps and changelo
 
 2. Make your changes with Conventional Commit messages.
 
-3. Ensure all CI checks pass:
-   - `mix format --check-formatted`
-   - `mix compile --warnings-as-errors`
-   - `mix credo --strict`
-   - `mix test`
-   - `mix docs`
+3. Ensure CI passes on your PR. GitHub requires the **`ci-gate`** job (format, compile, test matrix, integration, docs_truth, quality). Locally, `mix ci` covers the contributor gate.
 
 4. Open a PR against `main`. Fill out the PR template.
 

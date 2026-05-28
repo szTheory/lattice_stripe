@@ -65,7 +65,12 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
   @opaque t :: %__MODULE__{}
 
   defmodule Phase do
-    @moduledoc false
+    @moduledoc """
+    Fluent builder for a single subscription schedule phase.
+
+    Use `phase_new/0`, pipe phase setters, then `phase_build/1` before passing
+  to `add_phase/2`.
+    """
 
     @opaque t :: %__MODULE__{}
 
@@ -112,7 +117,7 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
 
   @doc "Create a new empty SubscriptionSchedule builder accumulator."
   @spec new() :: t()
-  def new(), do: %__MODULE__{}
+  def new, do: %__MODULE__{}
 
   @doc "Set the customer ID (Mode 1 — customer + phases)."
   @spec customer(t(), String.t()) :: t()
@@ -180,7 +185,7 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
 
   @doc "Create a new empty Phase accumulator."
   @spec phase_new() :: Phase.t()
-  def phase_new(), do: %Phase{}
+  def phase_new, do: %Phase{}
 
   @doc "Set the items list on a phase."
   @spec phase_items(Phase.t(), list()) :: Phase.t()

@@ -10,8 +10,9 @@ defmodule LatticeStripe.Billing.MeterEventStreamIntegrationTest do
   # Test shape is verified via Mox in meter_event_stream_test.exs.
   # Unskip when stripe-mock adds v2 endpoint support.
 
-  alias LatticeStripe.{Client, Billing.MeterEventStream}
+  alias LatticeStripe.Billing.MeterEventStream
   alias LatticeStripe.Billing.MeterEventStream.Session
+  alias LatticeStripe.Client
 
   setup do
     client =

@@ -263,68 +263,49 @@ defmodule LatticeStripe.Transfer do
   def from_map(nil), do: nil
 
   def from_map(map) when is_map(map) do
-    # Decode the embedded `reversals` sublist. F-001 requires that nothing
-    # is silently lost: if Stripe ever returns an unexpected shape (e.g.
-    # `false` or a bare string — API drift), preserve the raw value under
-    # `extra["reversals_raw"]` rather than dropping it.
-    {reversal_structs, reversals_meta, reversals_raw} =
-      case map["reversals"] do
-        %{"data" => data} = m when is_list(data) ->
-          {Enum.map(data, &TransferReversal.from_map/1), Map.drop(m, ["data"]), nil}
+    {reversal_structs, reversals_meta, reversals_raw} = decode_reversals(map["reversals"])
+    extra = map |> Map.drop(@known_fields) |> merge_reversal_extra(reversals_meta, reversals_raw)
+    build_transfer_struct(map, reversal_structs, extra)
+  end
 
-        %{} = m ->
-          {[], Map.drop(m, ["data"]), nil}
+  defp decode_reversals(%{"data" => data} = m) when is_list(data) do
+    {Enum.map(data, &TransferReversal.from_map/1), Map.drop(m, ["data"]), nil}
+  end
 
-        nil ->
-          {[], %{}, nil}
+  defp decode_reversals(%{} = m), do: {[], Map.drop(m, ["data"]), nil}
+  defp decode_reversals(nil), do: {[], %{}, nil}
+  defp decode_reversals(other), do: {[], %{}, other}
 
-        other ->
-          {[], %{}, other}
-      end
+  defp merge_reversal_extra(extra, reversals_meta, reversals_raw) do
+    extra
+    |> maybe_put_extra("reversals_meta", reversals_meta, map_size(reversals_meta) > 0)
+    |> maybe_put_extra("reversals_raw", reversals_raw, not is_nil(reversals_raw))
+  end
 
-    base_extra = Map.drop(map, @known_fields)
+  defp maybe_put_extra(extra, _key, _value, false), do: extra
+  defp maybe_put_extra(extra, key, value, true), do: Map.put(extra, key, value)
 
-    extra =
-      base_extra
-      |> then(fn e ->
-        if map_size(reversals_meta) > 0, do: Map.put(e, "reversals_meta", reversals_meta), else: e
-      end)
-      |> then(fn e ->
-        if is_nil(reversals_raw), do: e, else: Map.put(e, "reversals_raw", reversals_raw)
-      end)
+  defp maybe_expand(value) do
+    if is_map(value), do: ObjectTypes.maybe_deserialize(value), else: value
+  end
 
+  defp build_transfer_struct(map, reversal_structs, extra) do
     %__MODULE__{
       id: map["id"],
       object: map["object"] || "transfer",
       amount: map["amount"],
       amount_reversed: map["amount_reversed"],
-      balance_transaction:
-        if(is_map(map["balance_transaction"]),
-          do: ObjectTypes.maybe_deserialize(map["balance_transaction"]),
-          else: map["balance_transaction"]
-        ),
+      balance_transaction: maybe_expand(map["balance_transaction"]),
       created: map["created"],
       currency: map["currency"],
       description: map["description"],
-      destination:
-        if(is_map(map["destination"]),
-          do: ObjectTypes.maybe_deserialize(map["destination"]),
-          else: map["destination"]
-        ),
-      destination_payment:
-        if(is_map(map["destination_payment"]),
-          do: ObjectTypes.maybe_deserialize(map["destination_payment"]),
-          else: map["destination_payment"]
-        ),
+      destination: maybe_expand(map["destination"]),
+      destination_payment: maybe_expand(map["destination_payment"]),
       livemode: map["livemode"],
       metadata: map["metadata"],
       reversals: reversal_structs,
       reversed: map["reversed"],
-      source_transaction:
-        if(is_map(map["source_transaction"]),
-          do: ObjectTypes.maybe_deserialize(map["source_transaction"]),
-          else: map["source_transaction"]
-        ),
+      source_transaction: maybe_expand(map["source_transaction"]),
       source_type: map["source_type"],
       transfer_group: map["transfer_group"],
       extra: extra

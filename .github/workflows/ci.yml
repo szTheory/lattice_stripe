@@ -8,6 +8,9 @@ on:
   pull_request:
     paths-ignore:
       - ".planning/**"
+  workflow_dispatch:
+    # Manual dispatch for release-please PR head refs (GITHUB_TOKEN pushes do not
+    # trigger pull_request events on bot branches).
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
@@ -20,10 +23,10 @@ permissions:
   contents: read
 
 jobs:
-  lint:
-    name: Lint
+  format:
+    name: Format
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -54,20 +57,39 @@ jobs:
       - name: Check formatting
         run: mix format --check-formatted
 
+  compile:
+    name: Compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-mix-
+
+      - name: Cache _build
+        uses: actions/cache@v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-build-
+
+      - name: Install dependencies
+        run: mix deps.get
+
       - name: Compile with warnings-as-errors
         run: mix compile --warnings-as-errors
-
-      - name: Run Credo
-        run: mix credo --strict
-
-      - name: Build docs
-        run: mix docs
-
-      - name: Build Hex package
-        run: mix hex.build
-
-      - name: Audit dependencies
-        run: mix deps.audit
 
   test:
     name: "Test (Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }})"
@@ -113,7 +135,7 @@ jobs:
       - name: Run tests
         run: mix test
 
-      - name: Tax adoption contract (Phase 51 UAT gate)
+      - name: Tax adoption contract
         if: matrix.elixir == '1.19' && matrix.otp == '28'
         run: mix test test/lattice_stripe/tax/adoption_contract_test.exs --warnings-as-errors
 
@@ -159,3 +181,110 @@ jobs:
 
       - name: Run integration tests
         run: mix test --include integration
+
+  docs_truth:
+    name: Docs Truth
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-mix-
+
+      - name: Cache _build
+        uses: actions/cache@v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-build-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Run docs_truth regression suite
+        run: mix test test/lattice_stripe/docs_truth_test.exs
+
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Cache deps
+        uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-mix-
+
+      - name: Cache _build
+        uses: actions/cache@v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-build-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Run Credo
+        run: mix credo --strict
+
+      - name: Build docs
+        run: mix docs
+
+      - name: Build Hex package
+        run: mix hex.build
+
+      - name: Audit dependencies
+        run: mix deps.audit
+
+  ci-gate:
+    name: ci-gate
+    runs-on: ubuntu-latest
+    needs: [format, compile, test, integration, docs_truth, quality]
+    if: always()
+    steps:
+      - name: Verify required CI lanes
+        env:
+          FORMAT: ${{ needs.format.result }}
+          COMPILE: ${{ needs.compile.result }}
+          TEST: ${{ needs.test.result }}
+          INTEGRATION: ${{ needs.integration.result }}
+          DOCS_TRUTH: ${{ needs.docs_truth.result }}
+          QUALITY: ${{ needs.quality.result }}
+        run: |
+          set -euo pipefail
+          failed=0
+          for lane in FORMAT COMPILE TEST INTEGRATION DOCS_TRUTH QUALITY; do
+            result="${!lane}"
+            if [[ "$result" != "success" ]]; then
+              echo "Required lane $lane: $result"
+              failed=1
+            fi
+          done
+          if [[ "$failed" -ne 0 ]]; then
+            echo "ci-gate failed: one or more required lanes did not succeed."
+            exit 1
+          fi
+          echo "ci-gate passed: all required lanes succeeded."

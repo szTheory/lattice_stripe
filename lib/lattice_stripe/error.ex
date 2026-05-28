@@ -194,15 +194,22 @@ defmodule LatticeStripe.Error do
     if String.length(leaf) < 4 do
       nil
     else
-      candidates =
-        all_known_fields()
-        |> Enum.reject(&(&1 in @response_only_fields))
-
-      case Enum.max_by(candidates, &String.jaro_distance(leaf, &1), fn -> nil end) do
-        nil -> nil
-        best -> if String.jaro_distance(leaf, best) >= 0.8, do: best, else: nil
-      end
+      leaf
+      |> best_known_field_match()
+      |> maybe_accept_jaro_match(leaf)
     end
+  end
+
+  defp best_known_field_match(leaf) do
+    all_known_fields()
+    |> Enum.reject(&(&1 in @response_only_fields))
+    |> Enum.max_by(&String.jaro_distance(leaf, &1), fn -> nil end)
+  end
+
+  defp maybe_accept_jaro_match(nil, _leaf), do: nil
+
+  defp maybe_accept_jaro_match(best, leaf) do
+    if String.jaro_distance(leaf, best) >= 0.8, do: best, else: nil
   end
 
   # Extract the leaf field name from bracket notation params.

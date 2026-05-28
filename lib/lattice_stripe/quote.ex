@@ -50,6 +50,8 @@ defmodule LatticeStripe.Quote do
     subscription_data subscription_schedule test_clock total_details transfer_data
   ]
 
+  # Stripe Quote objects carry a large field surface; mirroring the API shape is intentional.
+  # credo:disable-for-next-line Credo.Check.Warning.StructFieldAmount
   defstruct [
     :id,
     :amount_subtotal,

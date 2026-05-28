@@ -43,8 +43,8 @@ defmodule LatticeStripe.Tax.Settings do
   See [Stripe Tax Settings](https://docs.stripe.com/api/tax/settings).
   """
 
-  alias LatticeStripe.Tax.Settings.{Defaults, HeadOffice, StatusDetails}
   alias LatticeStripe.{Client, Error, Request, Resource}
+  alias LatticeStripe.Tax.Settings.{Defaults, HeadOffice, StatusDetails}
 
   @known_fields ~w[defaults head_office livemode object status status_details]
 

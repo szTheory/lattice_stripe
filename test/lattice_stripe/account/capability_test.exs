@@ -87,28 +87,29 @@ defmodule LatticeStripe.Account.CapabilityTest do
   end
 
   describe "status_atom/1 (deprecated — backward compat)" do
-    test "struct with atom status returns atom directly (via apply)" do
+    @compile {:no_warn_deprecated, true}
+
+    test "struct with atom status returns atom directly" do
       cap = Capability.cast(%{"status" => "active"})
-      assert apply(Capability, :status_atom, [cap]) == :active
+      assert Capability.status_atom(cap) == :active
     end
 
-    test "struct with inactive status returns :inactive (via apply)" do
+    test "struct with inactive status returns :inactive" do
       cap = Capability.cast(%{"status" => "inactive"})
-      assert apply(Capability, :status_atom, [cap]) == :inactive
+      assert Capability.status_atom(cap) == :inactive
     end
 
-    test "nil returns nil (via apply)" do
-      assert apply(Capability, :status_atom, [nil]) == nil
+    test "nil returns nil" do
+      assert Capability.status_atom(nil) == nil
     end
 
-    test "bare atom :active returns :active (via apply)" do
-      assert apply(Capability, :status_atom, [:active]) == :active
+    test "bare atom :active returns :active" do
+      assert Capability.status_atom(:active) == :active
     end
 
-    test "unknown string passthrough (via apply)" do
+    test "unknown string passthrough" do
       # Now returns the string itself (not :unknown) since atomize_status/1 has no :unknown clause
-      result = apply(Capability, :status_atom, ["zzz_unknown"])
-      assert result == "zzz_unknown"
+      assert Capability.status_atom("zzz_unknown") == "zzz_unknown"
     end
   end
 end

@@ -57,8 +57,8 @@ defmodule LatticeStripe.Tax.Calculation do
     Response
   }
 
-  alias LatticeStripe.Tax.{CustomerDetails, ShipFromDetails, ShippingCost, TaxBreakdown}
   alias LatticeStripe.Tax.Calculation.LineItem
+  alias LatticeStripe.Tax.{CustomerDetails, ShipFromDetails, ShippingCost, TaxBreakdown}
 
   @known_fields ~w[
     id object amount_total currency customer customer_details expires_at line_items

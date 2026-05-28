@@ -170,22 +170,24 @@ defmodule LatticeStripe.Billing.MeterTest do
   # ---------------------------------------------------------------------------
 
   describe "Meter.status_atom/1 (deprecated — backward compat)" do
-    test "still returns :active from struct (via apply to suppress deprecation warning)" do
+    @compile {:no_warn_deprecated, true}
+
+    test "still returns :active from struct" do
       meter =
         Meter.from_map(%{"id" => "mtr_123", "status" => "active", "object" => "billing.meter"})
 
-      assert apply(Meter, :status_atom, [meter]) == :active
+      assert Meter.status_atom(meter) == :active
     end
 
-    test "still returns :inactive from struct (via apply)" do
+    test "still returns :inactive from struct" do
       meter =
         Meter.from_map(%{"id" => "mtr_123", "status" => "inactive", "object" => "billing.meter"})
 
-      assert apply(Meter, :status_atom, [meter]) == :inactive
+      assert Meter.status_atom(meter) == :inactive
     end
 
-    test "returns nil for nil (via apply)" do
-      assert apply(Meter, :status_atom, [nil]) == nil
+    test "returns nil for nil" do
+      assert Meter.status_atom(nil) == nil
     end
   end
 

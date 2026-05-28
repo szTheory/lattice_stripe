@@ -36,8 +36,48 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Skip reruns when a merged release PR was already tagged (manual recovery
+      # or duplicate workflow dispatch after v* exists on GitHub).
+      - name: Detect already-tagged release PR
+        id: release-preflight
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+
+          pr_number=""
+          if [[ "${COMMIT_MESSAGE:-}" =~ Merge\ pull\ request\ #([0-9]+) ]]; then
+            pr_number="${BASH_REMATCH[1]}"
+          fi
+
+          expected_tag="v$(jq -r '.["."]' .release-please-manifest.json)"
+
+          if gh release view "$expected_tag" >/dev/null 2>&1; then
+            echo "GitHub release $expected_tag already exists; skipping release-please rerun."
+            echo "should_run=false" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "$pr_number" ]; then
+            echo "No merge PR number in head commit; running release-please."
+            echo "should_run=true" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          labels=$(gh pr view "$pr_number" --json labels --jq '.labels[].name' 2>/dev/null || true)
+          if grep -qx 'autorelease: tagged' <<<"$labels"; then
+            echo "Release PR #$pr_number is already tagged; skipping release-please rerun."
+            echo "should_run=false" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Release PR #$pr_number not fully published yet; running release-please."
+          echo "should_run=true" >>"$GITHUB_OUTPUT"
+
       - name: Run Release Please
         id: release
+        if: ${{ steps.release-preflight.outputs.should_run == 'true' }}
         uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
@@ -102,41 +142,24 @@ jobs:
               }
             );
 
-            const requiredPrefixes = ['Test (Elixir', 'Integration Tests'];
-            const requiredJobs = jobs.filter((job) =>
-              requiredPrefixes.some((prefix) => job.name.startsWith(prefix))
-            );
+            const ciGate = jobs.find((job) => job.name === 'ci-gate');
 
-            if (requiredJobs.length === 0) {
+            if (!ciGate) {
               core.setFailed(
-                `Delivery blocked: no required test jobs found in ci.yml run ${latest.html_url}`
+                `Delivery blocked: ci-gate job not found in ci.yml run ${latest.html_url}`
               );
               return;
             }
 
-            const blockingFailures = requiredJobs.filter(
-              (job) => job.conclusion !== 'success' && job.conclusion !== 'skipped'
-            );
-
-            if (blockingFailures.length > 0) {
-              const detail = blockingFailures
-                .map((job) => `  - ${job.name} (${job.conclusion})`)
-                .join('\n');
+            if (ciGate.conclusion !== 'success') {
               core.setFailed(
-                `Delivery blocked: required ci.yml jobs failed on SHA ${sha}.\n${detail}\nRun: ${latest.html_url}`
+                `Delivery blocked: ci-gate concluded ${ciGate.conclusion} on SHA ${sha}.\n` +
+                `Run: ${latest.html_url}`
               );
               return;
             }
 
-            const lintJob = jobs.find((job) => job.name === 'Lint');
-            if (lintJob && lintJob.conclusion !== 'success') {
-              core.warning(
-                `Lint job concluded ${lintJob.conclusion}; publish allowed because ` +
-                'Test + Integration jobs passed (pre-existing Credo debt tracked separately).'
-              );
-            }
-
-            core.info(`Required ci.yml jobs succeeded on release SHA ${sha}`);
+            core.info(`ci-gate succeeded on release SHA ${sha}`);
 
   publish-hex:
     name: Publish to Hex.pm
