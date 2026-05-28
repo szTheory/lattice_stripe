@@ -60,7 +60,8 @@ jobs:
           pr_json=$(gh pr list \
             --head "$HEAD_BRANCH" \
             --state open \
-            --json number,title,labels,author,headRefOid)
+            --json number,title,labels,author,headRefOid \
+            -R "${{ github.repository }}")
 
           count=$(echo "$pr_json" | jq 'length')
           if [ "$count" -eq 0 ]; then
@@ -95,9 +96,9 @@ jobs:
           fi
 
           echo "Merging release PR #$pr_number ($title)"
-          if gh pr merge "$pr_number" --merge; then
+          if gh pr merge "$pr_number" --squash -R "${{ github.repository }}"; then
             echo "Merged PR #$pr_number"
-          elif gh pr merge "$pr_number" --merge --admin; then
+          elif gh pr merge "$pr_number" --squash --admin -R "${{ github.repository }}"; then
             echo "Merged PR #$pr_number with admin override"
           else
             echo "Failed to merge PR #$pr_number"
