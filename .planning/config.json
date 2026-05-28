@@ -50,6 +50,7 @@
     "milestone_assessment": {
       "verify_lib_before_scope": true,
       "adopter_lens_default": true,
+      "no_auto_new_milestone_after_assessment": true,
       "stop_milestone_includes_release_truth": true,
       "jtbd_refresh_at_milestone_close": true,
       "docs_truth_prose_surfaces": [
@@ -58,7 +59,16 @@
       ],
       "docs_truth_canonical_guides": [
         "guides/payments.md",
-        "guides/checkout.md"
+        "guides/checkout.md",
+        "guides/customer-portal.md"
+      ],
+      "docs_truth_adopter_jtbd_surfaces": [
+        "guides/user-flows-and-jtbd.md"
+      ],
+      "hotfix_doc_surfaces": [
+        "guides/payments.md",
+        "guides/customer-portal.md",
+        "guides/user-flows-and-jtbd.md"
       ],
       "verify_untracked_proof_files": true,
       "parallel_subagent_research": true,

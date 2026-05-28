@@ -125,6 +125,12 @@ LatticeStripe is already a good fit today for these integrator stories:
 
 v1.9 closed the doc/CI honesty wedge (checkout guide, README error taxonomy, docs_truth locks, CI-01 paths-ignore). Doc-routing polish for getting-started and payments.md shipped in v1.8 (Phases 56–57).
 
+### Doc defects — resolved (quick task 260527-tkc, 2026-05-28)
+
+- ~~`guides/payments.md` unclosed Search fence~~ — fixed; docs_truth lock
+- ~~`guides/customer-portal.md` Dashboard-only portal config claim~~ — fixed; `BillingPortal.Configuration` documented; docs_truth lock
+- ~~`guides/user-flows-and-jtbd.md` stale "Still missing" inventory~~ — refreshed; `recipes.md` in reading order; docs_truth lock
+
 ### Gap 2: Narrative docs still thin for several shipped surfaces
 
 Product/Price catalog strategy, BillingPortal configuration, disputes/files evidence, and mandate diagnostics remain recipe- or fixture-level only. These are polish, not milestone-blocking — defer unless adopter pull surfaces.
@@ -151,11 +157,13 @@ Product/Price catalog strategy, BillingPortal configuration, disputes/files evid
 
 Post-v1.9 close (2026-05-27):
 
-1. **Maintenance mode** — Stripe API drift, adopter-pull narrow adds (TAX-01/02), bugfixes
-2. **Gap 2: Narrative docs still thin** — Product/Price, BillingPortal, disputes/files, mandate diagnostics (adopter pull only)
-3. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
-4. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only
-5. **Long-tail narrative docs** — opportunistic, not milestone-grade
+1. **Maintenance mode** — Stripe API drift, adopter-pull narrow adds (TAX-01/02), bugfixes (default)
+2. **Gap 2 narrative** — disputes/files spine, Product/Price catalog, mandate diagnostics (opportunistic or v1.10 Phase 2)
+3. **Optional v1.10** — Disputes narrative only if structured closure desired (Wedge A closed via quick task 260527-tkc)
+4. **Gap 2: Narrative docs still thin** — Product/Price, BillingPortal deep guide, mandate diagnostics (opportunistic)
+5. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
+6. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only
+7. **Long-tail narrative docs** — opportunistic, not milestone-grade
 
 ## What "Feature-Complete Enough" Looks Like
 

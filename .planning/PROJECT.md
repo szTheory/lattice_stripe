@@ -16,6 +16,8 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Done estimate:** ~94–96% for intended v1.x scope (doc/CI honesty wedge closed).
 
+**Post-v1.9 assessment (2026-05-27):** Maintenance mode is the default next posture. **Wedge A doc defects closed** via quick task 260527-tkc (2026-05-28). Gap 2 narrative thinness (disputes/files spine, Product/Price catalog, mandate diagnostics) is polish, not blocking. Optional: v1.10 Phase 2 disputes narrative only. See `.planning/threads/v1-10-next-milestone-assessment.md`.
+
 **Latest archived milestone:** v1.9 CI & Doc Honesty (archived 2026-05-27)
 
 **What shipped in v1.8:**
@@ -189,6 +191,9 @@ See `.planning/milestones/v1.9-MILESTONE-AUDIT.md` for close-time audit evidence
 | docs_truth must cover canonical guide API examples | payments.md survived with string-vs-atom status bugs and wrong search arity because docs_truth locks cross-links/install pins but not canonical guide body examples | ✓ Assessment (2026-05-27 refresh) |
 | CI paths-ignore on guides bypasses docs_truth | Guide-only PRs skip unit CI; highest-risk edit surface has weakest automated gate — fix requires explicit workflow approval | Pending approval |
 | Post-v1.8 assessment: checkout.md + README + CI-01 are highest remaining adopter-truth gaps | lib/ + guides scan after v1.8 close found checkout.md L206 status-string bug (same class as pre-v1.8 payments.md), README error taxonomy drift, CI-01 still bypasses docs_truth on guide-only PRs; JTBD-MAP hosted checkout rating was overstated | ✓ Assessment (2026-05-27); v1.9 recommended |
+| CI paths-ignore on guides bypasses docs_truth | Guide-only PRs skip unit CI; highest-risk edit surface has weakest automated gate | ✓ Good (v1.9 Phase 60 CI-01) |
+| Post-v1.9 assessment: maintenance default; v1.10 optional | lib/ + guides scan confirms no API breadth wedge; remaining work is doc defects + Gap 2 narrative; structured milestone only if user wants closure | ✓ Assessment (2026-05-27) |
+| docs_truth does not lock markdown fences or JTBD gap-inventory | payments.md unclosed fence survived v1.8–v1.9; portal Dashboard-only claim vs shipped Configuration CRUD; graduation to fence/portal/JTBD locks | ✓ Next-step assessment (2026-05-27) |
 
 ## Evolution
 
@@ -208,4 +213,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 — v1.9 shipped; maintenance mode*
+*Last updated: 2026-05-27 — v1.9 shipped; MILESTONE NEXT-STEP assessment; maintenance default*
