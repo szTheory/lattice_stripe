@@ -6,6 +6,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** The last version published to [Hex.pm](https://hex.pm/packages/lattice_stripe) was **1.7.0** (2026-05-27). Install: `{:lattice_stripe, "~> 1.7"}`.
 
+## [1.7.2](https://github.com/szTheory/lattice_stripe/compare/v1.7.1...v1.7.2) (2026-05-28)
+
+
+### Bug Fixes
+
+* filter .claude paths from hygiene dirty-tree check ([61da051](https://github.com/szTheory/lattice_stripe/commit/61da05169aee1f8ae1efd3fe0ab174b7a8a8becf))
+* hygiene script version parse and worktree allowlist ([c80de18](https://github.com/szTheory/lattice_stripe/commit/c80de18bc4805e84bca94eccad0cd67bbd787b89))
+* indent Phase moduledoc heredoc for compile warning ([c3f4786](https://github.com/szTheory/lattice_stripe/commit/c3f478652a66c4d675ec3ca79917cb280051a7af))
+* relax RELEASE-TRAIN ledger grep in hygiene script ([2236e6f](https://github.com/szTheory/lattice_stripe/commit/2236e6f2ec094d93ab6b48e1994b04e59dc1457e))
+
 ## [Unreleased]
 
 _No unreleased changes._
