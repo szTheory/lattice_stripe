@@ -111,12 +111,16 @@ defmodule LatticeStripe.BillingPortal.Session do
   alias LatticeStripe.BillingPortal.Session.FlowData
   alias LatticeStripe.{Client, ObjectTypes, Request, Resource}
 
-  @known_fields ~w(id object customer url return_url created livemode locale configuration on_behalf_of flow)
+  @known_fields ~w[
+    id object customer customer_account url return_url created livemode locale
+    configuration on_behalf_of flow
+  ]
 
   @type t :: %__MODULE__{
           id: String.t() | nil,
           object: String.t() | nil,
           customer: String.t() | nil,
+          customer_account: String.t() | nil,
           url: String.t() | nil,
           return_url: String.t() | nil,
           created: integer() | nil,
@@ -132,6 +136,7 @@ defmodule LatticeStripe.BillingPortal.Session do
     :id,
     :object,
     :customer,
+    :customer_account,
     :url,
     :return_url,
     :created,
@@ -235,6 +240,7 @@ defmodule LatticeStripe.BillingPortal.Session do
       id: map["id"],
       object: map["object"],
       customer: map["customer"],
+      customer_account: map["customer_account"],
       url: map["url"],
       return_url: map["return_url"],
       created: map["created"],

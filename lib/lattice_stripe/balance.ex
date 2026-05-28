@@ -46,6 +46,7 @@ defmodule LatticeStripe.Balance do
 
   @known_fields ~w[
     object available connect_reserved instant_available issuing livemode pending
+    refund_and_dispute_prefunding
   ]
 
   defstruct [
@@ -55,6 +56,7 @@ defmodule LatticeStripe.Balance do
     :issuing,
     :livemode,
     :pending,
+    :refund_and_dispute_prefunding,
     object: "balance",
     extra: %{}
   ]
@@ -68,6 +70,7 @@ defmodule LatticeStripe.Balance do
           instant_available: [Amount.t()] | nil,
           issuing: map() | nil,
           livemode: boolean() | nil,
+          refund_and_dispute_prefunding: map() | nil,
           extra: map()
         }
 
@@ -115,6 +118,7 @@ defmodule LatticeStripe.Balance do
       instant_available: cast_amount_list(map["instant_available"]),
       issuing: issuing,
       livemode: map["livemode"],
+      refund_and_dispute_prefunding: map["refund_and_dispute_prefunding"],
       extra: Map.drop(map, @known_fields)
     }
   end

@@ -39,7 +39,7 @@ defmodule LatticeStripe.BalanceTransaction do
   alias LatticeStripe.{Client, Error, List, ObjectTypes, Request, Resource, Response}
 
   @known_fields ~w[
-    id object amount available_on created currency description exchange_rate
+    id object amount available_on balance_type created currency description exchange_rate
     fee fee_details net reporting_category source status type
   ]
 
@@ -47,6 +47,7 @@ defmodule LatticeStripe.BalanceTransaction do
     :id,
     :amount,
     :available_on,
+    :balance_type,
     :created,
     :currency,
     :description,
@@ -73,6 +74,7 @@ defmodule LatticeStripe.BalanceTransaction do
           object: String.t(),
           amount: integer() | nil,
           available_on: integer() | nil,
+          balance_type: String.t() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
           description: String.t() | nil,
@@ -188,6 +190,7 @@ defmodule LatticeStripe.BalanceTransaction do
       object: known["object"] || "balance_transaction",
       amount: known["amount"],
       available_on: known["available_on"],
+      balance_type: known["balance_type"],
       created: known["created"],
       currency: known["currency"],
       description: known["description"],
