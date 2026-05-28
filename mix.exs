@@ -1,7 +1,7 @@
 defmodule LatticeStripe.MixProject do
   use Mix.Project
 
-  @version "1.7.6"
+  @version "1.7.7"
   @source_url "https://github.com/szTheory/lattice_stripe"
 
   def project do
