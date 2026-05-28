@@ -6,6 +6,15 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** The last version published to [Hex.pm](https://hex.pm/packages/lattice_stripe) was **1.7.0** (2026-05-27). Install: `{:lattice_stripe, "~> 1.7"}`.
 
+## [1.7.4](https://github.com/szTheory/lattice_stripe/compare/v1.7.3...v1.7.4) (2026-05-28)
+
+
+### Bug Fixes
+
+* credo map_join in drift report formatting ([d5c8ee4](https://github.com/szTheory/lattice_stripe/commit/d5c8ee4fde57e84a3f2c990afb8913c8c0a9de0c))
+* **release:** auto-dispatch CI and merge Release Please PRs ([284a174](https://github.com/szTheory/lattice_stripe/commit/284a1741bb9c82f76c40d8117129f386fa07f261))
+* **release:** pass -R to gh workflow run in bootstrap CI job ([0fea646](https://github.com/szTheory/lattice_stripe/commit/0fea64674fc2c07a17840fdf69326733db33b541))
+
 ## [1.7.3](https://github.com/szTheory/lattice_stripe/compare/v1.7.2...v1.7.3) (2026-05-28)
 
 
