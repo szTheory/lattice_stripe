@@ -21,7 +21,7 @@
 
 - Stripe API version drift and breaking upstream changes
 - Adopter-pull narrow additions (TAX-01/TAX-02, specialist families only with documented pull)
-- Gap 2 narrative docs (Product/Price, BillingPortal, disputes) — opportunistic, not milestone-grade
+- Gap 2 narrative docs — catalog/mandate/disputes closed via quick tasks; BillingPortal depth remains in customer-portal.md
 - PLAN-01 hygiene: backfill `54-VERIFICATION.md` when convenient (third carry)
 
 ## Progress (v1.9 — archived)

@@ -14,9 +14,9 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Latest shipped milestone:** v1.9 CI & Doc Honesty — checkout/README docs_truth locks; CI-01 paths-ignore fix; JTBD-MAP post-v1.9 truth.
 
-**Done estimate:** ~94–96% for intended v1.x scope (doc/CI honesty wedge closed).
+**Done estimate:** ~97% for intended v1.x scope (doc polish quick tasks 260527-tkc/tm1/tp8 closed Gap 2 long-tail).
 
-**Post-v1.9 assessment (2026-05-27):** Maintenance mode is the default next posture. **Wedge A** (260527-tkc) and **Wedge B** disputes/files spine (260527-tm1) closed 2026-05-28. Remaining Gap 2: Product/Price catalog and mandate narrative (opportunistic polish). No structured v1.10 milestone required unless you want explicit phase tracking. See `.planning/threads/v1-10-next-milestone-assessment.md`.
+**Post-v1.9 assessment (2026-05-27):** Maintenance mode is the default next posture. Doc wedges A/B and Gap 2 catalog/mandate narratives closed via quick tasks 2026-05-28 (260527-tkc, tm1, tp8). No structured v1.10 milestone required. See `.planning/threads/v1-10-next-milestone-assessment.md`.
 
 **Latest archived milestone:** v1.9 CI & Doc Honesty (archived 2026-05-27)
 

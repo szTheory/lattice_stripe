@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-05-27 — post-v1.9 next-step assessment
 
 Phase: —
 Plan: —
-Status: maintenance — Wedge A + B doc polish closed
-Last activity: 2026-05-28 — Completed quick task 260527-tm1: Wedge B disputes/files narrative
+Status: maintenance — Gap 2 long-tail narrative closed
+Last activity: 2026-05-28 — Completed quick task 260527-tp8: Product/Price catalog + mandate diagnostics
 
 ## Performance Metrics
 
@@ -42,7 +42,7 @@ Last activity: 2026-05-28 — Completed quick task 260527-tm1: Wedge B disputes/
 ### Decisions
 
 - **v1.x stop signal holds** — no new Stripe resource families without documented adopter pull.
-- **Done estimate ~96%** — Wedge A (260527-tkc) + Wedge B disputes spine (260527-tm1) closed; remaining delta is long-tail Gap 2 (catalog, mandate).
+- **Done estimate ~97%** — Wedge A/B + Gap 2 catalog/mandate narratives closed (260527-tp8); v1.x doc polish largely complete.
 - **CI-01 resolved** — paths-ignore `.planning/**` only (Phase 60); guide/md PRs run docs_truth.
 - **No Hex bump** — v1.9 doc-only like v1.8; future doc milestones same.
 - **PLAN-01 deferred** — `54-VERIFICATION.md` third carry (bookkeeping only).
@@ -62,6 +62,7 @@ Last activity: 2026-05-28 — Completed quick task 260527-tm1: Wedge B disputes/
 |---|-------------|------|--------|-----------|
 | 260527-tkc | Wedge A doc defect hotfixes (payments fence, portal truth, JTBD gaps) | 2026-05-28 | e24e9a3 | [260527-tkc-doc-defect-hotfixes-wedge-a-payments-md-](./quick/260527-tkc-doc-defect-hotfixes-wedge-a-payments-md/) |
 | 260527-tm1 | Wedge B disputes/files evidence narrative in recipes.md | 2026-05-28 | b5a78dc | [260527-tm1-wedge-b-disputes-files-evidence-narrativ](./quick/260527-tm1-wedge-b-disputes-files-evidence-narrativ/) |
+| 260527-tp8 | Gap 2 Product/Price catalog + mandate/SetupAttempt narratives | 2026-05-28 | 4c636f4 | [260527-tp8-gap-2-narrative-product-price-catalog-st](./quick/260527-tp8-gap-2-narrative-product-price-catalog-st/) |
 
 ## Session Continuity
 
@@ -71,5 +72,5 @@ Milestone audit: `.planning/milestones/v1.9-MILESTONE-AUDIT.md`
 ## Operator Next Steps
 
 1. **Default:** Maintenance mode — Stripe drift, adopter-pull fixes
-2. **Opportunistic:** Gap 2 long-tail (Product/Price catalog, mandate diagnostics) — no structured milestone needed
+2. **Opportunistic:** PLAN-01 `54-VERIFICATION.md` backfill — bookkeeping only
 3. **Opportunistic:** PLAN-01 backfill `54-VERIFICATION.md` when convenient
