@@ -4,7 +4,7 @@ LatticeStripe is on a **sustaining maintenance** release train after v1.7.x.
 
 ## Standing contract
 
-- Latest released version: `1.7.6` (Hex + GitHub tag `v1.7.6`).
+- Latest released version: `1.7.9` (Hex + GitHub tag `v1.7.9`).
 - `milestone: none` remains the default GSD state — no feature milestones on `main` unless there is clear adopter pull.
 - Patch-eligible merged changes on `main` (`docs:`, `fix:`, `chore:`) flow to the next release through **Release Please** (patch bump).
 - The train moves only when **`main` is green** (`ci-gate` in CI) and `./scripts/maintainer/repo_hygiene_check.sh` reports **0 BLOCK**.
@@ -23,7 +23,7 @@ LatticeStripe is on a **sustaining maintenance** release train after v1.7.x.
 ## Cadence
 
 1. Merge maintainer PRs to `main` → `ci-gate` green.
-2. Release Please opens a **patch** Release PR (e.g. `1.7.7`).
+2. Release Please opens a **patch** Release PR (e.g. `1.7.10`).
 3. Release branch runs **pull_request** CI (`RELEASE_PLEASE_TOKEN`); **Release PR Auto-Merge** merges when `ci-gate` is green, dispatches **CI** on `main`, then **Release**.
 4. Tag + GitHub Release + Hex publish run automatically; **gate-ci-green** can bootstrap CI on the tag if needed.
 5. **Manual Hex recovery** (`publish-hex.yml` workflow_dispatch) only when automation fails.
