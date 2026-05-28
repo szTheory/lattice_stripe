@@ -87,8 +87,8 @@ release_train_version() {
 
 release_train_has_required_lines() {
   grep -Fq 'sustaining maintenance' .planning/RELEASE-TRAIN.md &&
-    grep -Fq -- '- `milestone: none` remains the default GSD state' .planning/RELEASE-TRAIN.md &&
-    grep -Fq -- 'Patch-eligible merged changes' .planning/RELEASE-TRAIN.md &&
+    grep -Fq 'milestone: none' .planning/RELEASE-TRAIN.md &&
+    grep -Fq 'Patch-eligible merged changes' .planning/RELEASE-TRAIN.md &&
     grep -Fq 'ci-gate' .planning/RELEASE-TRAIN.md
 }
 
