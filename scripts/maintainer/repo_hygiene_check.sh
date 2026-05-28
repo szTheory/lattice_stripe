@@ -167,7 +167,12 @@ local_checks() {
   branch="$(git rev-parse --abbrev-ref HEAD)"
   record_result "PASS" "current branch" "$branch"
 
-  status_output="$(git status --porcelain --untracked-files=all | grep -Ev '^(\?\? | M | M  )\.claude/' || true)"
+  status_output="$(
+    git status --porcelain | while IFS= read -r line; do
+      [[ "$line" == *".claude/"* ]] && continue
+      printf '%s\n' "$line"
+    done
+  )"
   if [[ -z "$status_output" ]]; then
     record_result "PASS" "working tree" "clean (ignoring .claude/ agent worktrees)"
   else
