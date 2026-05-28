@@ -526,7 +526,8 @@ defmodule LatticeStripe.DocsTruthTest do
 
     assert changelog =~ "## [1.7.0]"
     assert changelog =~ "included in 1.7.0"
-    assert changelog =~ "last version published"
+    assert changelog =~ "Publishing note:"
+    assert changelog =~ "Release Please"
   end
 
   test "CHANGELOG.md documents tolerance: 0 reconciliation under v1.5" do
