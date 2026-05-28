@@ -27,3 +27,10 @@ lattice_stripe-*.tar
 
 # macOS Finder metadata.
 .DS_Store
+
+# Claude Code / GSD agent worktrees (local-only)
+.claude/
+.claire/
+
+# Cursor IDE (local-only)
+.cursor/
