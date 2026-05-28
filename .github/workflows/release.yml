@@ -98,7 +98,7 @@ jobs:
       - name: Dispatch CI on release PR branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run ci.yml --ref release-please--branches--main
+        run: gh workflow run ci.yml --ref release-please--branches--main -R "${{ github.repository }}"
 
   gate-ci-green:
     name: Verify CI is green on release SHA
