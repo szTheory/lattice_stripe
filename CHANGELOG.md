@@ -4,11 +4,20 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-> **Publishing note:** The last version published to [Hex.pm](https://hex.pm/packages/lattice_stripe) was **1.1.0** (2026-04-14). Sections **1.4.0** through **1.6.0** below are milestone checkpoints shipped together in **1.7.0** — they were not published as separate Hex releases. Install: `{:lattice_stripe, "~> 1.7"}`.
+> **Publishing note:** The last version published to [Hex.pm](https://hex.pm/packages/lattice_stripe) was **1.7.0** (2026-05-27). Install: `{:lattice_stripe, "~> 1.7"}`.
 
 ## [Unreleased]
 
 _No unreleased changes._
+
+## [1.7.1](https://github.com/szTheory/lattice_stripe/compare/v1.7.0...v1.7.1) (2026-05-28)
+
+### Documentation
+
+- **Public docs UX audit** — fixed broken guide links, corrected cheatsheet list pagination example, removed GSD/planning vocabulary from guides, standardized inter-guide `.md` links, and extended `docs_truth` regression locks.
+- **Adopter-facing polish** — README scope consolidation, JTBD routing and LiveBook pointer, checkout/customer-portal/payments guide corrections, and CHANGELOG copy suitable for HexDocs readers.
+
+_No API changes — documentation and HexDocs only._
 
 ## [1.7.0](https://github.com/szTheory/lattice_stripe/compare/v1.1.0...v1.7.0) (2026-05-27)
 
