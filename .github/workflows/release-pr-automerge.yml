@@ -18,7 +18,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: read
+  actions: write
 
 jobs:
   automerge:
@@ -147,11 +147,13 @@ jobs:
 
             if gh pr merge "$pr_number" --squash -R "$REPOSITORY"; then
               echo "Merged PR #$pr_number"
+              echo "merged=true" >> "$GITHUB_ENV"
               exit 0
             fi
 
             if gh pr merge "$pr_number" --squash --admin -R "$REPOSITORY"; then
               echo "Merged PR #$pr_number with admin override"
+              echo "merged=true" >> "$GITHUB_ENV"
               exit 0
             fi
 
@@ -161,3 +163,12 @@ jobs:
 
           echo "Failed to merge PR #$pr_number after 12 attempts"
           exit 1
+
+      - name: Trigger release workflow after merge
+        if: env.merged == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # GITHUB_TOKEN merges do not emit push events; dispatch Release explicitly.
+          gh workflow run release.yml -R "${{ github.repository }}"
+          echo "Dispatched Release workflow for tag + Hex publish."
