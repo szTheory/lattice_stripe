@@ -126,7 +126,7 @@ trialing -----> active -----> past_due -----> unpaid
 
 > #### See also {: .tip}
 >
-> - [Customer Portal — Canceling a subscription](customer-portal.html#canceling-a-subscription) — let customers self-serve via Stripe's hosted portal.
+> - [Customer Portal — Canceling a subscription](customer-portal.md#canceling-a-subscription) — let customers self-serve via Stripe's hosted portal.
 
 ### `update/4`
 
@@ -200,7 +200,7 @@ Subscription.pause_collection(client, sub.id, :keep_as_draft, %{
 
 > #### See also {: .tip}
 >
-> - [Customer Portal — Updating a subscription](customer-portal.html#updating-a-subscription) — portal-hosted proration preview.
+> - [Customer Portal — Updating a subscription](customer-portal.md#updating-a-subscription) — portal-hosted proration preview.
 
 When you change a subscription's items (swap a price, change quantity, add or
 remove items), Stripe prorates charges by default. The default behavior may

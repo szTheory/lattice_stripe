@@ -24,7 +24,6 @@ defmodule LatticeStripe.DocsTruthTest do
   ]
 
   # Payment-flow cluster: fixing one canonical guide must audit siblings (payments ↔ checkout).
-  # Future cluster: portal — customer-portal.md + subscriptions.md
   @payment_flow_guides ["guides/payments.md", "guides/checkout.md"]
 
   @shared_payment_flow_stale_patterns [
@@ -32,6 +31,14 @@ defmodule LatticeStripe.DocsTruthTest do
     ~s/payment_status == "paid"/,
     "Use `search/2`",
     "PaymentIntent.search(client, %{"
+  ]
+
+  # Portal-flow cluster: portal session flows ↔ subscription lifecycle/proration.
+  @portal_flow_guides ["guides/customer-portal.md", "guides/subscriptions.md"]
+
+  @shared_portal_flow_stale_patterns [
+    "customer-portal.html",
+    "subscriptions.html"
   ]
 
   @stale_payments_api_patterns @stale_payments_only_patterns ++
@@ -217,6 +224,14 @@ defmodule LatticeStripe.DocsTruthTest do
       assert portal =~ "is_default"
       assert portal =~ "hexdocs.pm/lattice_stripe/LatticeStripe.BillingPortal.Configuration.html"
     end
+
+    test "cross-links subscription lifecycle and proration with .md siblings" do
+      portal = File.read!("guides/customer-portal.md")
+
+      assert portal =~ "subscriptions.md#lifecycle-operations"
+      assert portal =~ "subscriptions.md#proration"
+      refute portal =~ "subscriptions.html#"
+    end
   end
 
   describe "guides/checkout.md" do
@@ -363,6 +378,14 @@ defmodule LatticeStripe.DocsTruthTest do
       assert guide =~ "LatticeStripe.Price.create"
       assert guide =~ "lookup_key"
       assert guide =~ "catalog setup"
+    end
+
+    test "cross-links customer portal cancel and update flows with .md siblings" do
+      guide = File.read!("guides/subscriptions.md")
+
+      assert guide =~ "customer-portal.md#canceling-a-subscription"
+      assert guide =~ "customer-portal.md#updating-a-subscription"
+      refute guide =~ "customer-portal.html#"
     end
   end
 
@@ -711,6 +734,13 @@ defmodule LatticeStripe.DocsTruthTest do
     for path <- @payment_flow_guides, pattern <- @shared_payment_flow_stale_patterns do
       refute File.read!(path) =~ pattern,
              "stale API pattern #{inspect(pattern)} in #{path} (payment-flow cluster)"
+    end
+  end
+
+  test "portal-flow sibling guides reject shared stale inter-guide .html links" do
+    for path <- @portal_flow_guides, pattern <- @shared_portal_flow_stale_patterns do
+      refute File.read!(path) =~ pattern,
+             "stale inter-guide .html #{inspect(pattern)} in #{path} (portal-flow cluster)"
     end
   end
 

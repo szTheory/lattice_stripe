@@ -25,7 +25,7 @@ client = LatticeStripe.Client.new!(
   and format but not verified against Stripe's servers until you make an actual request.
 
 - **`finch`** — The name atom of a running Finch pool in your supervision tree. See
-  [Getting Started](getting-started.html#setting-up-finch) for how to configure Finch.
+  [Getting Started](getting-started.md#setting-up-finch) for how to configure Finch.
   Passing a name that has no pool will produce a runtime error on the first request.
 
 `Client.new!` raises `NimbleOptions.ValidationError` if any required option is missing or

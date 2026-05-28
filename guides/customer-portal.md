@@ -169,7 +169,7 @@ Missing `subscription_cancel.subscription` raises `ArgumentError` immediately
 When the customer cancels through the portal, Stripe fires
 `customer.subscription.deleted` (or `customer.subscription.updated` if canceling
 at period end). Drive your application state from that webhook event, not from the
-portal redirect. See [Subscriptions — Lifecycle operations](subscriptions.html#lifecycle-operations)
+portal redirect. See [Subscriptions — Lifecycle operations](subscriptions.md#lifecycle-operations)
 for the full lifecycle event table.
 
 ### Updating a subscription
@@ -192,7 +192,7 @@ subscription. The customer can swap plan, change quantity, or add/remove items:
 Missing `subscription_update.subscription` raises `ArgumentError` immediately.
 
 Portal subscription updates are subject to the same proration logic as SDK-driven
-updates. See [Subscriptions — Proration](subscriptions.html#proration) for how
+updates. See [Subscriptions — Proration](subscriptions.md#proration) for how
 to control proration behavior. State changes from portal updates fire
 `customer.subscription.updated` webhooks — do not rely on the return URL redirect
 as the authoritative signal.
