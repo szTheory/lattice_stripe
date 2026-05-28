@@ -124,7 +124,8 @@ defmodule LatticeStripe.DocsTruthTest do
              "release-status prose missing published-surface semantic anchor"
 
       for claim <- @stale_release_status_claims do
-        refute getting_started =~ claim, "stale release claim #{inspect(claim)} in getting-started"
+        refute getting_started =~ claim,
+               "stale release claim #{inspect(claim)} in getting-started"
       end
 
       refute getting_started =~ "unreleased work from `main`",
