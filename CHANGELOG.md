@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 1.7"}`.
 
+## [1.7.11](https://github.com/szTheory/lattice_stripe/compare/v1.7.10...v1.7.11) (2026-05-28)
+
+
+### Bug Fixes
+
+* **docs:** portal-flow sibling cluster and inter-guide .md links ([aca7b4c](https://github.com/szTheory/lattice_stripe/commit/aca7b4cd9560e6a36347acbee4046ee9bf709eac))
+
 ## [1.7.10](https://github.com/szTheory/lattice_stripe/compare/v1.7.9...v1.7.10) (2026-05-28)
 
 
