@@ -82,7 +82,7 @@ changelog_version() {
 }
 
 release_train_version() {
-  sed -nE 's/^- Latest released version: `([0-9]+\.[0-9]+\.[0-9]+)`/\1/p' .planning/RELEASE-TRAIN.md | head -n 1
+  sed -nE 's/^- Latest released version: `([0-9]+\.[0-9]+\.[0-9]+)`.*/\1/p' .planning/RELEASE-TRAIN.md | head -n 1
 }
 
 release_train_has_required_lines() {
@@ -167,9 +167,9 @@ local_checks() {
   branch="$(git rev-parse --abbrev-ref HEAD)"
   record_result "PASS" "current branch" "$branch"
 
-  status_output="$(git status --porcelain)"
+  status_output="$(git status --porcelain --untracked-files=all | grep -Ev '^(\?\? | M | M  )\.claude/' || true)"
   if [[ -z "$status_output" ]]; then
-    record_result "PASS" "working tree" "clean"
+    record_result "PASS" "working tree" "clean (ignoring .claude/ agent worktrees)"
   else
     record_result "BLOCK" "working tree" "dirty state detected; commit, stash, or discard local changes first"
   fi
@@ -198,7 +198,7 @@ local_checks() {
     if bad_rp="$(open_release_please_pr_bad_bump "$mix_ver")"; then
       record_result "BLOCK" "release please PR" "open Release PR proposes unexpected minor/major: $bad_rp"
     else
-      record_result "PASS" "release please PR" "no open Release Please PR with maintenance-incompatible bump"
+      record_result "PASS" "release please PR" "no maintenance-incompatible Release Please bump (patch PRs OK)"
     fi
 
     dependabot_count="$(gh pr list --state open --author 'app/dependabot' --json number --jq 'length' 2>/dev/null || echo 0)"
