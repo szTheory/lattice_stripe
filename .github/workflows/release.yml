@@ -18,6 +18,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  actions: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -158,6 +159,8 @@ jobs:
             const maxAttempts = 60;
             const waitMs = 30000;
             let lastRunUrl = '';
+            let ciDispatched = false;
+            const tag = '${{ needs.release-please.outputs.tag_name }}';
 
             async function ciGateForRun(runId) {
               const jobs = await github.paginate(
@@ -187,6 +190,16 @@ jobs:
 
               if (runs.length === 0) {
                 core.info(`No ci.yml run yet for ${sha} (${attempt}/${maxAttempts}).`);
+                if (attempt === 3 && !ciDispatched && tag) {
+                  await github.rest.actions.createWorkflowDispatch({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    workflow_id: 'ci.yml',
+                    ref: tag
+                  });
+                  ciDispatched = true;
+                  core.info(`Dispatched ci.yml on tag ${tag} for release SHA ${sha}.`);
+                }
                 await sleep(waitMs);
                 continue;
               }
