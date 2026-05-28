@@ -26,6 +26,16 @@ See also [`.planning/RELEASE-TRAIN.md`](../.planning/RELEASE-TRAIN.md) for commi
 
 Routine patch releases require **`RELEASE_PLEASE_TOKEN`** (fine-grained PAT with Contents + Pull requests write) for GitHub release creation; it also enables native `pull_request` CI on Release Please PRs. **`HEX_API_KEY`** is required for Hex publish.
 
+### What to expect in Actions
+
+| Workflow | When it runs | Skipped is normal when |
+|----------|--------------|------------------------|
+| **Release** | Every push to `main` | Tag/Hex jobs skip until a Release PR merges (`release_created` is false). |
+| **Release PR Auto-Merge** | After **CI** completes | CI on `main` finishes — only release-branch CI (`release-please--*`) triggers merge. |
+| **Bootstrap CI on Release PR** | After **Release** on `main` | No open `autorelease: pending` Release PR exists. |
+
+A **skipped** Release PR Auto-Merge run after a maintainer push to `main` is expected, not a failed release.
+
 ## Manual recovery (automation failed)
 
 Use only when Release Please or Hex publish did not complete (as with **1.7.1**):

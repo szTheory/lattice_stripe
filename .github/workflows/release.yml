@@ -91,15 +91,32 @@ jobs:
     name: Bootstrap CI on Release PR
     runs-on: ubuntu-latest
     needs: release-please
-    if: ${{ needs.release-please.outputs.prs_created == 'true' }}
+    if: always() && needs.release-please.result == 'success'
     permissions:
       actions: write
       contents: read
+      pull-requests: read
     steps:
-      - name: Dispatch CI on release PR branch
+      - name: Dispatch CI when release PR is open or updated
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run ci.yml --ref release-please--branches--main -R "${{ github.repository }}"
+          PRS_CREATED: ${{ needs.release-please.outputs.prs_created }}
+        run: |
+          set -euo pipefail
+
+          open_count=$(gh pr list \
+            --head release-please--branches--main \
+            --state open \
+            --label "autorelease: pending" \
+            --json number \
+            -R "${{ github.repository }}" | jq 'length')
+
+          if [ "${PRS_CREATED:-false}" = "true" ] || [ "$open_count" -gt 0 ]; then
+            echo "Dispatching CI on release-please--branches--main (prs_created=${PRS_CREATED:-false}, open=$open_count)"
+            gh workflow run ci.yml --ref release-please--branches--main -R "${{ github.repository }}"
+          else
+            echo "No open release PR and prs_created not true — skipping CI bootstrap."
+          fi
 
   gate-ci-green:
     name: Verify CI is green on release SHA

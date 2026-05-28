@@ -72,7 +72,6 @@ jobs:
           pr_number=$(echo "$pr_json" | jq -r '.[0].number')
           title=$(echo "$pr_json" | jq -r '.[0].title')
           head_oid=$(echo "$pr_json" | jq -r '.[0].headRefOid')
-          author=$(echo "$pr_json" | jq -r '.[0].author.login')
           labels=$(echo "$pr_json" | jq -r '.[0].labels[].name' | tr '\n' ' ')
 
           if [ "$head_oid" != "$HEAD_SHA" ]; then
@@ -82,11 +81,6 @@ jobs:
 
           if [[ ! "$title" =~ ^chore\(main\):\ release\  ]]; then
             echo "PR #$pr_number title does not match release PR pattern: $title"
-            exit 1
-          fi
-
-          if [ "$author" != "github-actions[bot]" ] && [ "$author" != "app/github-actions" ]; then
-            echo "PR #$pr_number author is not github-actions bot: $author"
             exit 1
           fi
 
