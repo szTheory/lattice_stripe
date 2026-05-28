@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** The last version published to [Hex.pm](https://hex.pm/packages/lattice_stripe) was **1.7.0** (2026-05-27). Install: `{:lattice_stripe, "~> 1.7"}`.
 
+## [1.7.5](https://github.com/szTheory/lattice_stripe/compare/v1.7.4...v1.7.5) (2026-05-28)
+
+
+### Bug Fixes
+
+* **release:** automerge PAT-authored PRs and bootstrap open release CI ([783711d](https://github.com/szTheory/lattice_stripe/commit/783711d8d7317cc4bd21b0975cdea74f6897cbbe))
+* **release:** use squash merge and -R in release PR automerge ([c1c1120](https://github.com/szTheory/lattice_stripe/commit/c1c11205fcb1f981f8d814d3a0bd6b392c9ff6c6))
+
 ## [1.7.4](https://github.com/szTheory/lattice_stripe/compare/v1.7.3...v1.7.4) (2026-05-28)
 
 
