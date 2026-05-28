@@ -12,7 +12,7 @@
 - JTBD-MAP post-v1.9 refresh; milestone audit and maintenance posture (Phase 60)
 
 **Audit:** PASSED — 8/8 required requirements, 2/2 phases verified. See [v1.9-MILESTONE-AUDIT.md](milestones/v1.9-MILESTONE-AUDIT.md).
-**Known deferred at close:** PLAN-01 — `54-VERIFICATION.md` third carry
+**Post-close hygiene:** PLAN-01 — `54-VERIFICATION.md` backfilled 2026-05-28 (quick 260527-tqf)
 
 **Timeline:** 2026-05-27 (single-day milestone)
 

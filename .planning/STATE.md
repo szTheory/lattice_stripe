@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-05-27 — post-v1.9 next-step assessment
 Phase: —
 Plan: —
 Status: maintenance — Gap 2 long-tail narrative closed
-Last activity: 2026-05-28 — Completed quick task 260527-tp8: Product/Price catalog + mandate diagnostics
+Last activity: 2026-05-28 — Completed quick task 260527-tqf: PLAN-01 54-VERIFICATION.md backfill
 
 ## Performance Metrics
 
@@ -45,7 +45,7 @@ Last activity: 2026-05-28 — Completed quick task 260527-tp8: Product/Price cat
 - **Done estimate ~97%** — Wedge A/B + Gap 2 catalog/mandate narratives closed (260527-tp8); v1.x doc polish largely complete.
 - **CI-01 resolved** — paths-ignore `.planning/**` only (Phase 60); guide/md PRs run docs_truth.
 - **No Hex bump** — v1.9 doc-only like v1.8; future doc milestones same.
-- **PLAN-01 deferred** — `54-VERIFICATION.md` third carry (bookkeeping only).
+- **PLAN-01 closed (260527-tqf)** — `54-VERIFICATION.md` backfilled retroactively from Phase 54/55 evidence.
 - **Next-step assessment (2026-05-27)** — maintenance default; Wedge A (doc defects) highest leverage if acting; optional v1.10 only for structured closure.
 - **Wedge A closed (260527-tkc)** — payments fence, portal Configuration truth, JTBD gap inventory; docs_truth locks added.
 - **Wedge B closed (260527-tm1)** — recipes.md File.create → update_evidence → submit_evidence spine + docs_truth lock.
@@ -63,6 +63,7 @@ Last activity: 2026-05-28 — Completed quick task 260527-tp8: Product/Price cat
 | 260527-tkc | Wedge A doc defect hotfixes (payments fence, portal truth, JTBD gaps) | 2026-05-28 | e24e9a3 | [260527-tkc-doc-defect-hotfixes-wedge-a-payments-md-](./quick/260527-tkc-doc-defect-hotfixes-wedge-a-payments-md/) |
 | 260527-tm1 | Wedge B disputes/files evidence narrative in recipes.md | 2026-05-28 | b5a78dc | [260527-tm1-wedge-b-disputes-files-evidence-narrativ](./quick/260527-tm1-wedge-b-disputes-files-evidence-narrativ/) |
 | 260527-tp8 | Gap 2 Product/Price catalog + mandate/SetupAttempt narratives | 2026-05-28 | 4c636f4 | [260527-tp8-gap-2-narrative-product-price-catalog-st](./quick/260527-tp8-gap-2-narrative-product-price-catalog-st/) |
+| 260527-tqf | PLAN-01 backfill 54-VERIFICATION.md | 2026-05-28 | pending | [260527-tqf-plan-01-backfill-54-verification-md-from](./quick/260527-tqf-plan-01-backfill-54-verification-md-from/) |
 
 ## Session Continuity
 
@@ -72,5 +73,4 @@ Milestone audit: `.planning/milestones/v1.9-MILESTONE-AUDIT.md`
 ## Operator Next Steps
 
 1. **Default:** Maintenance mode — Stripe drift, adopter-pull fixes
-2. **Opportunistic:** PLAN-01 `54-VERIFICATION.md` backfill — bookkeeping only
-3. **Opportunistic:** PLAN-01 backfill `54-VERIFICATION.md` when convenient
+2. **Default:** Respond to Stripe drift, adopter issues, and PRs only

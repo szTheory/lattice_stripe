@@ -159,7 +159,7 @@ Post-v1.9 close (2026-05-27):
 
 1. **Maintenance mode** — Stripe API drift, adopter-pull narrow adds (TAX-01/02), bugfixes (default)
 2. **Maintenance** — doc polish quick tasks closed A/B + Gap 2 (260527-tkc, tm1, tp8)
-3. **Bookkeeping** — PLAN-01 `54-VERIFICATION.md` when convenient
+3. **Maintenance** — Stripe drift and adopter-pull only
 4. **Gap 2: Narrative docs still thin** — Product/Price, BillingPortal deep guide, mandate diagnostics (opportunistic)
 5. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
 6. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only

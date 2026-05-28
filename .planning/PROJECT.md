@@ -137,7 +137,8 @@ See `.planning/milestones/v1.9-MILESTONE-AUDIT.md` for close-time audit evidence
 - ✓ Canonical payments guide API examples (GUIDE-01..03) — Phase 57, v1.8
 - ✓ Charge reconciliation doc routing in payments + operator guides (ROUTE-01, ROUTE-02) — Phase 57, v1.8
 - ✓ docs_truth locks canonical payments guide API patterns (VERIFY-04) — Phase 57, v1.8
-- ✓ MILESTONES v1.7 audit footnote + v1.8 draft section (PLAN-01) — Phase 58, v1.8
+- ✓ MILESTONES v1.7 audit footnote + v1.8 draft section — Phase 58, v1.8
+- ✓ PLAN-01 — `54-VERIFICATION.md` backfilled (retroactive, quick 260527-tqf, 2026-05-28)
 - ✓ RETROSPECTIVE v1.8 entry + process lessons (PLAN-02) — Phase 58, v1.8
 - ✓ JTBD-MAP post-v1.8 refresh (ROUTE-03) — Phase 58, v1.8
 - ✓ Tax proof files tracked in CI (PROOF-01) — Phase 58, v1.8
@@ -150,7 +151,6 @@ See `.planning/milestones/v1.9-MILESTONE-AUDIT.md` for close-time audit evidence
 
 - CI-01: Guide-only PRs run docs_truth (CI gate)
 - JTBD-01: Hosted checkout rating honesty in JTBD-MAP
-- PLAN-01 (optional): Backfill 54-VERIFICATION.md
 
 ### Out of Scope
 
