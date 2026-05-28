@@ -28,27 +28,28 @@ defmodule Mix.Tasks.LatticeStripe.CheckDrift do
 
   @impl Mix.Task
   def run(args) do
-    {opts, _, _} = OptionParser.parse(args, strict: [])
+    {opts, _, _} = OptionParser.parse(args, strict: [summary: :boolean])
+    summary_only? = Keyword.get(opts, :summary, false)
     Mix.Task.run("app.start")
 
     case LatticeStripe.Drift.run(opts) do
       {:ok, %{drift_count: 0} = result} ->
-        # No per-module drift. May still have new_resources — these ARE drift;
-        # Stripe has added object types not yet implemented in the SDK.
         if result.new_resources != [] do
-          Mix.shell().info(LatticeStripe.Drift.format_report(result))
+          emit_report(result, summary_only?)
           System.halt(1)
         else
           Mix.shell().info("No drift detected. @known_fields are up to date.")
         end
 
       {:ok, result} ->
-        # drift_count > 0 -- actual drift found
-        Mix.shell().info(LatticeStripe.Drift.format_report(result))
+        emit_report(result, summary_only?)
         System.halt(1)
 
       {:error, reason} ->
         Mix.raise("Drift check failed: #{inspect(reason)}")
     end
   end
+
+  defp emit_report(result, true), do: Mix.shell().info(LatticeStripe.Drift.format_summary(result))
+  defp emit_report(result, false), do: Mix.shell().info(LatticeStripe.Drift.format_report(result))
 end

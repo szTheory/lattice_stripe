@@ -254,17 +254,18 @@ defmodule LatticeStripe.DriftTest do
       result = %{
         drift_count: 0,
         modules: [],
-        new_resources: ["tax.calculation", "identity.verification_session"]
+        new_resources: ["tax.calculation", "identity.verification_session"],
+        stats: Drift.aggregate_stats([], ["tax.calculation", "identity.verification_session"])
       }
 
       report = Drift.format_report(result)
 
-      assert String.contains?(report, "New resources not yet implemented")
+      assert String.contains?(report, "Unmodeled Stripe resources")
       assert String.contains?(report, "tax.calculation")
       assert String.contains?(report, "identity.verification_session")
     end
 
-    test "shows drift count in header" do
+    test "shows drift summary counts in header" do
       result = %{
         drift_count: 2,
         modules: [
@@ -283,12 +284,38 @@ defmodule LatticeStripe.DriftTest do
             spec_types: %{"f2" => "string"}
           }
         ],
-        new_resources: []
+        new_resources: [],
+        stats: nil
       }
 
       report = Drift.format_report(result)
 
-      assert String.contains?(report, "Drift detected in 2 module")
+      assert String.contains?(report, "Drift summary: 2 module(s)")
+      assert String.contains?(report, "Actionable additions")
+    end
+
+    test "format_summary/1 returns triage table" do
+      result = %{
+        drift_count: 1,
+        modules: [
+          %{
+            module: LatticeStripe.Charge,
+            object_type: "charge",
+            additions: MapSet.new(["presentment_details"]),
+            removals: MapSet.new(["invoice"]),
+            spec_types: %{"presentment_details" => "object"}
+          }
+        ],
+        new_resources: ["treasury.transaction"],
+        stats: nil
+      }
+
+      summary = Drift.format_summary(result)
+
+      assert String.contains?(summary, "Drift summary")
+      assert String.contains?(summary, "Actionable field additions")
+      assert String.contains?(summary, "Unmodeled Stripe resources")
+      assert String.contains?(summary, "Triage:")
     end
 
     test "includes field type annotations in additions" do

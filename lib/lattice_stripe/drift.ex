@@ -33,11 +33,57 @@ defmodule LatticeStripe.Drift do
       result = %{
         drift_count: length(modules_with_drift),
         modules: modules_with_drift,
-        new_resources: new_resources
+        new_resources: new_resources,
+        stats: aggregate_stats(modules_with_drift, new_resources)
       }
 
       {:ok, result}
     end
+  end
+
+  @doc false
+  @spec format_summary(map()) :: String.t()
+  def format_summary(result) do
+    stats = Map.get(result, :stats) || aggregate_stats(result.modules, result.new_resources)
+
+    """
+    ## Drift summary (#{Date.utc_today()})
+
+    | Category | Count |
+    |----------|------:|
+    | Modules with drift | #{stats.modules_with_drift} |
+    | Actionable field additions (`+`) | #{stats.addition_fields} in #{stats.modules_with_additions} module(s) |
+    | Spec mismatch warnings (`-`) | #{stats.removal_fields} in #{stats.modules_with_removals} module(s) |
+    | Unmodeled Stripe resources | #{stats.unmodeled_resources} |
+
+    **Triage:** Act on `+` additions for modules adopters use. Defer bulk `-` warnings (OpenAPI shape noise). New resource types need adopter pull — not a release blocker.
+
+    Run locally for full detail: `mix lattice_stripe.check_drift`
+    """
+    |> String.trim()
+  end
+
+  @doc false
+  @spec aggregate_stats(list(), list()) :: map()
+  def aggregate_stats(modules, new_resources) do
+    addition_fields =
+      modules
+      |> Enum.map(&MapSet.size(&1.additions))
+      |> Enum.sum()
+
+    removal_fields =
+      modules
+      |> Enum.map(&MapSet.size(&1.removals))
+      |> Enum.sum()
+
+    %{
+      modules_with_drift: length(modules),
+      modules_with_additions: Enum.count(modules, &(MapSet.size(&1.additions) > 0)),
+      modules_with_removals: Enum.count(modules, &(MapSet.size(&1.removals) > 0)),
+      addition_fields: addition_fields,
+      removal_fields: removal_fields,
+      unmodeled_resources: length(new_resources)
+    }
   end
 
   @doc false
@@ -46,60 +92,97 @@ defmodule LatticeStripe.Drift do
     "No drift detected. @known_fields are up to date."
   end
 
-  def format_report(%{drift_count: count, modules: modules, new_resources: new_resources}) do
-    header =
-      if count > 0 do
-        "Drift detected in #{count} module#{if count == 1, do: "", else: "s"}:\n"
-      else
+  def format_report(result) do
+    modules = result.modules
+    new_resources = result.new_resources
+    stats = Map.get(result, :stats) || aggregate_stats(modules, new_resources)
+
+    summary =
+      """
+      Drift summary: #{stats.modules_with_drift} module(s), \
+      #{stats.addition_fields} actionable addition(s), \
+      #{stats.removal_fields} spec-mismatch warning(s), \
+      #{stats.unmodeled_resources} unmodeled resource(s).
+      """
+
+    {with_additions, _warnings_only} =
+      Enum.split_with(modules, &(MapSet.size(&1.additions) > 0))
+
+    additions_section =
+      if with_additions == [] do
         ""
+      else
+        header = "Actionable additions (Stripe spec fields missing from @known_fields):\n"
+
+        body =
+          with_additions
+          |> Enum.map(&format_module_additions/1)
+          |> Enum.join("\n\n")
+
+        header <> body
       end
 
-    module_sections =
+    warnings_section =
       modules
-      |> Enum.map(fn %{
-                       module: mod,
-                       object_type: object_type,
-                       additions: additions,
-                       removals: removals
-                     } = entry ->
-        spec_types = Map.get(entry, :spec_types, %{})
+      |> Enum.filter(&(MapSet.size(&1.removals) > 0))
+      |> case do
+        [] ->
+          ""
 
-        additions_lines =
-          additions
-          |> MapSet.to_list()
-          |> Enum.sort()
-          |> Enum.map(fn field ->
-            type = Map.get(spec_types, field, "unknown")
-            "  + #{field} (#{type})"
-          end)
+        warning_modules ->
+          header =
+            "Spec mismatch warnings (@known_fields not on OpenAPI object schema — often noise):\n"
 
-        removals_lines =
-          removals
-          |> MapSet.to_list()
-          |> Enum.sort()
-          |> Enum.map(fn field ->
-            "  - #{field} (warning: in @known_fields but not in spec)"
-          end)
+          body =
+            warning_modules
+            |> Enum.map(&format_module_removals/1)
+            |> Enum.join("\n\n")
 
-        lines = additions_lines ++ removals_lines
-        "#{inspect(mod)} (stripe object: \"#{object_type}\")\n#{Enum.join(lines, "\n")}"
-      end)
-
-    new_resources_section =
-      if new_resources != [] do
-        resource_lines = Enum.map_join(new_resources, "\n", &"  #{&1}")
-        "\nNew resources not yet implemented (#{length(new_resources)}):\n#{resource_lines}"
-      else
-        ""
+          header <> body
       end
+
+    new_resources_section = format_new_resources(new_resources)
 
     parts =
-      Enum.reject(
-        [header <> Enum.join(module_sections, "\n\n"), new_resources_section],
-        &(&1 == "")
-      )
+      [summary, additions_section, warnings_section, new_resources_section]
+      |> Enum.reject(&(&1 == ""))
 
-    Enum.join(parts, "\n")
+    Enum.join(parts, "\n\n")
+  end
+
+  defp format_module_additions(%{
+         module: mod,
+         object_type: object_type,
+         additions: additions,
+         spec_types: spec_types
+       }) do
+    lines =
+      additions
+      |> MapSet.to_list()
+      |> Enum.sort()
+      |> Enum.map(fn field ->
+        type = Map.get(spec_types, field, "unknown")
+        "  + #{field} (#{type})"
+      end)
+
+    "#{inspect(mod)} (stripe object: \"#{object_type}\")\n#{Enum.join(lines, "\n")}"
+  end
+
+  defp format_module_removals(%{module: mod, object_type: object_type, removals: removals}) do
+    lines =
+      removals
+      |> MapSet.to_list()
+      |> Enum.sort()
+      |> Enum.map(&"  - #{&1} (warning: in @known_fields but not in spec)")
+
+    "#{inspect(mod)} (stripe object: \"#{object_type}\")\n#{Enum.join(lines, "\n")}"
+  end
+
+  defp format_new_resources([]), do: ""
+
+  defp format_new_resources(new_resources) do
+    resource_lines = Enum.map_join(new_resources, "\n", &"  #{&1}")
+    "Unmodeled Stripe resources (#{length(new_resources)}):\n#{resource_lines}"
   end
 
   @doc false

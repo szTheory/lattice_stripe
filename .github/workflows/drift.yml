@@ -44,11 +44,15 @@ jobs:
       - name: Compile
         run: mix compile
 
-      - name: Ensure drift issue label exists
+      - name: Ensure drift issue labels exist
         run: |
           gh label create "stripe-drift" \
             --color "#e4e669" \
             --description "Stripe OpenAPI spec fields not yet in @known_fields" \
+            --force
+          gh label create "maintenance" \
+            --color "#0e8a16" \
+            --description "Sustaining maintenance — not release-blocking" \
             --force
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -57,8 +61,9 @@ jobs:
         id: drift
         continue-on-error: true
         run: |
-          mix lattice_stripe.check_drift 2>&1 | tee /tmp/drift_report.txt
-          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+          set +e
+          mix lattice_stripe.check_drift --summary 2>&1 | tee /tmp/drift_summary.txt
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 
       - name: Create or update drift issue
         if: steps.drift.outputs.exit_code == '1'
@@ -69,17 +74,17 @@ jobs:
             --json number \
             --jq '.[0].number // empty')
 
-          BODY=$(cat /tmp/drift_report.txt)
-          TITLE="Stripe API drift detected - $(date +%Y-%m-%d)"
+          SUMMARY=$(cat /tmp/drift_summary.txt)
+          TITLE="Stripe API drift tracker (maintenance)"
 
           if [ -n "$EXISTING" ]; then
-            gh issue comment "$EXISTING" \
-              --body "$BODY"
+            gh issue comment "$EXISTING" --body "$SUMMARY"
           else
             gh issue create \
               --title "$TITLE" \
-              --body "$BODY" \
-              --label "stripe-drift"
+              --body "$SUMMARY" \
+              --label "stripe-drift" \
+              --label "maintenance"
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
