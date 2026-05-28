@@ -18,17 +18,26 @@ defmodule LatticeStripe.DocsTruthTest do
     "1.3.x line is the current published"
   ]
 
-  @stale_payments_api_patterns [
+  @stale_payments_only_patterns [
     "\"succeeded\" ->",
-    "\"requires_action\" ->",
-    "intent.status == \"succeeded\"",
+    "\"requires_action\" ->"
+  ]
+
+  # Payment-flow cluster: fixing one canonical guide must audit siblings (payments ↔ checkout).
+  # Future cluster: portal — customer-portal.md + subscriptions.md
+  @payment_flow_guides ["guides/payments.md", "guides/checkout.md"]
+
+  @shared_payment_flow_stale_patterns [
+    ~s/intent.status == "succeeded"/,
+    ~s/payment_status == "paid"/,
     "Use `search/2`",
     "PaymentIntent.search(client, %{"
   ]
 
-  @stale_checkout_api_patterns [
-    ~s/payment_status == "paid"/
-  ]
+  @stale_payments_api_patterns @stale_payments_only_patterns ++
+                                 @shared_payment_flow_stale_patterns
+
+  @stale_checkout_api_patterns @shared_payment_flow_stale_patterns
 
   @stale_readme_error_atoms [
     ":auth_error",
@@ -194,6 +203,19 @@ defmodule LatticeStripe.DocsTruthTest do
       assert portal =~ "create/3"
       refute portal =~ "managed via the Stripe Dashboard in v1.1"
       refute portal =~ "is in the Stripe Dashboard, not per-session params"
+    end
+
+    test "portal configurations section covers programmatic CRUD lifecycle" do
+      portal = File.read!("guides/customer-portal.md")
+
+      assert portal =~ "## Portal configurations (programmatic CRUD)"
+      assert portal =~ "Configuration.create"
+      assert portal =~ "Configuration.update"
+      assert portal =~ "Configuration.retrieve"
+      assert portal =~ "Configuration.list"
+      assert portal =~ ~s/"active" => false/
+      assert portal =~ "is_default"
+      assert portal =~ "hexdocs.pm/lattice_stripe/LatticeStripe.BillingPortal.Configuration.html"
     end
   end
 
@@ -654,8 +676,13 @@ defmodule LatticeStripe.DocsTruthTest do
     assert debugging =~ "production-checklist.md"
     assert readme =~ "production-checklist.md"
     assert readme =~ "event-debugging.md"
+    assert readme =~ "Files and FileLinks"
+    assert readme =~ "Disputes"
+    assert readme =~ "Mandates"
     assert jtbd =~ "production-checklist.md"
     assert jtbd =~ "event-debugging.md"
+    assert jtbd =~ "recipes.md"
+    assert jtbd =~ "File.create" or jtbd =~ "update_evidence"
     assert webhooks =~ "event-debugging.md"
     assert errors =~ "production-checklist.md"
     assert errors =~ "event-debugging.md"
@@ -671,6 +698,21 @@ defmodule LatticeStripe.DocsTruthTest do
   ]
 
   @guide_paths Path.wildcard("guides/*.{md,cheatmd}")
+
+  test "canonical guides have balanced markdown fences" do
+    alias LatticeStripe.DocsTruth.Fence
+
+    for path <- @guide_paths do
+      Fence.assert_balanced_fences!(path, File.read!(path))
+    end
+  end
+
+  test "payment-flow sibling guides reject shared stale API patterns" do
+    for path <- @payment_flow_guides, pattern <- @shared_payment_flow_stale_patterns do
+      refute File.read!(path) =~ pattern,
+             "stale API pattern #{inspect(pattern)} in #{path} (payment-flow cluster)"
+    end
+  end
 
   test "canonical guides omit GSD planning artifact vocabulary" do
     for path <- @guide_paths do

@@ -49,7 +49,7 @@ Last activity: 2026-05-28 — Post-v1.x maintenance posture recorded (no website
 - **Post-v1.x posture (2026-05-28)** — reactive maintenance only; no website; no v1.10; adoption = pure silence until pull.
 - **Wedge A closed (260527-tkc)** — payments fence, portal Configuration truth, JTBD gap inventory; docs_truth locks added.
 - **Wedge B closed (260527-tm1)** — recipes.md File.create → update_evidence → submit_evidence spine + docs_truth lock.
-- **docs_truth** — Wedge A surfaces now locked (fence, portal Configuration, JTBD recipes); markdown fence helper for all canonical guides remains a graduation candidate.
+- **docs_truth** — Fence integrity + payment-flow sibling cluster checks graduated (2026-05-28); Wedge A surfaces locked (portal Configuration, JTBD recipes).
 - **v2.core fail-fast is by design** — `{:unknown_object_type, type}` on unmapped thin-event types; not a bug.
 
 ### Blockers/Concerns
