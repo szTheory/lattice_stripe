@@ -41,6 +41,27 @@ defmodule LatticeStripe.DocsTruthTest do
     "subscriptions.html"
   ]
 
+  # Connect cluster: conceptual overview ↔ account lifecycle ↔ money movement.
+  @connect_flow_guides [
+    "guides/connect.md",
+    "guides/connect-accounts.md",
+    "guides/connect-money-movement.md"
+  ]
+
+  @shared_connect_stale_patterns [
+    "connect.html",
+    "connect-accounts.html",
+    "connect-money-movement.html"
+  ]
+
+  # Webhook cluster: snapshot webhooks ↔ thin events.
+  @webhook_flow_guides ["guides/webhooks.md", "guides/webhooks-thin-events.md"]
+
+  @shared_webhook_stale_patterns [
+    "webhooks.html",
+    "webhooks-thin-events.html"
+  ]
+
   @stale_payments_api_patterns @stale_payments_only_patterns ++
                                  @shared_payment_flow_stale_patterns
 
@@ -352,8 +373,10 @@ defmodule LatticeStripe.DocsTruthTest do
     assert jtbd =~ "testing.md"
     assert jtbd =~ "tax.md"
     assert jtbd =~ "[Recipes](recipes.md)"
-    assert jtbd =~ "Narrative gaps (API shipped"
+    assert jtbd =~ "Adopter-owned depth"
+    assert jtbd =~ "mandate-and-setupattempt-diagnostics"
     refute jtbd =~ "complete end-to-end recipes that stitch"
+    refute jtbd =~ "Still missing"
 
     assert recipes =~ "canonical"
     assert recipes =~ "checkout-signup-and-portal.md"
@@ -706,6 +729,7 @@ defmodule LatticeStripe.DocsTruthTest do
     assert jtbd =~ "event-debugging.md"
     assert jtbd =~ "recipes.md"
     assert jtbd =~ "File.create" or jtbd =~ "update_evidence"
+    assert jtbd =~ "Mandate and SetupAttempt diagnostics"
     assert webhooks =~ "event-debugging.md"
     assert errors =~ "production-checklist.md"
     assert errors =~ "event-debugging.md"
@@ -742,6 +766,43 @@ defmodule LatticeStripe.DocsTruthTest do
       refute File.read!(path) =~ pattern,
              "stale inter-guide .html #{inspect(pattern)} in #{path} (portal-flow cluster)"
     end
+  end
+
+  test "connect-flow sibling guides reject shared stale inter-guide .html links" do
+    for path <- @connect_flow_guides, pattern <- @shared_connect_stale_patterns do
+      refute File.read!(path) =~ pattern,
+             "stale inter-guide .html #{inspect(pattern)} in #{path} (connect-flow cluster)"
+    end
+  end
+
+  test "connect-flow sibling guides cross-link the cluster" do
+    connect = File.read!("guides/connect.md")
+    accounts = File.read!("guides/connect-accounts.md")
+    money = File.read!("guides/connect-money-movement.md")
+
+    assert connect =~ "connect-accounts.md"
+    assert connect =~ "connect-money-movement.md"
+    assert accounts =~ "connect.md"
+    assert accounts =~ "connect-money-movement.md"
+    assert money =~ "connect.md"
+    assert money =~ "connect-accounts.md"
+  end
+
+  test "webhook-flow sibling guides reject shared stale inter-guide .html links" do
+    for path <- @webhook_flow_guides, pattern <- @shared_webhook_stale_patterns do
+      refute File.read!(path) =~ pattern,
+             "stale inter-guide .html #{inspect(pattern)} in #{path} (webhook-flow cluster)"
+    end
+  end
+
+  test "webhook-flow sibling guides cross-link snapshot and thin-event guides" do
+    snapshot = File.read!("guides/webhooks.md")
+    thin = File.read!("guides/webhooks-thin-events.md")
+
+    assert snapshot =~ "webhooks-thin-events.md"
+    assert thin =~ "webhooks.md"
+    assert snapshot =~ "Thin events"
+    assert thin =~ "parse_event_notification"
   end
 
   test "canonical guides omit GSD planning artifact vocabulary" do

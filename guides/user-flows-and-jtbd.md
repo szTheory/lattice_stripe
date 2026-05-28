@@ -416,16 +416,17 @@ These are the rules most likely to save you from subtle bugs:
 - Connect account and money-movement foundations
 - operational glue: webhooks, retries, telemetry, testing
 
-### Narrative gaps (API shipped; docs can go deeper)
+### Adopter-owned depth (not library gaps)
 
-Flagship recipe guides and [Recipes](recipes.md) already stitch common SaaS workflows
-(checkout + portal, Connect platform, metering runtime, quote-to-billing). Remaining
-narrative polish — not missing primitives:
+Flagship recipe guides and [Recipes](recipes.md) stitch common SaaS workflows
+(checkout + portal, Connect platform, metering runtime, quote-to-billing). The
+SDK ships the primitives; your app owns product-specific depth:
 
-- **Dispute and file evidence** — `recipes.md` documents File.create → `update_evidence` →
-  `submit_evidence`; reason-specific field selection still adopter-owned
+- **Dispute evidence fields** — reason-specific field selection (e.g. `product_description`
+  vs `shipping_documentation`) depends on the dispute reason; see
+  [Dispute handling and evidence submission](recipes.md#dispute-handling-and-evidence-submission).
 - **BillingPortal configuration** — programmatic CRUD is documented in
-  [Customer Portal — Portal configurations](customer-portal.md#portal-configurations-programmatic-crud)
+  [Customer Portal — Portal configurations](customer-portal.md#portal-configurations-programmatic-crud).
 
 This guide routes you to the right canonical surface; recipes and flagship guides carry
 the multi-module stories.
@@ -447,6 +448,7 @@ If you are evaluating the library for your own SaaS, this is the shortest useful
    - [Production Checklist](production-checklist.md)
    - [Event Debugging](event-debugging.md)
    - [Recipes](recipes.md) — disputes, files, and evidence workflows
+   - [Recipes — Mandate and SetupAttempt diagnostics](recipes.md#mandate-and-setupattempt-diagnostics)
    - [Testing](testing.md)
    - [Telemetry](telemetry.md)
    - [Performance](performance.md)
@@ -461,6 +463,7 @@ LatticeStripe is already strong where most SaaS teams spend the bulk of their St
 payments, subscriptions, invoices, portal-driven self-service, metering, Connect, tax,
 webhooks (including thin events), and production operator mechanics. The library's center of
 gravity is "typed, idiomatic Elixir access to Stripe, with guards around expensive mistakes."
-For v1.x scope the remaining delta is mostly narrative depth on secondary flows (disputes/files,
-catalog design, mandate diagnostics) — not missing mainstream payment or billing primitives.
-Use [Recipes](recipes.md) and the flagship guides when you need multi-module stories.
+For v1.x scope the remaining delta is adopter-owned product depth on secondary flows
+(reason-specific dispute fields, catalog policy choices) — not missing mainstream payment
+or billing primitives. Use [Recipes](recipes.md) and the flagship guides when you need
+multi-module stories.
