@@ -155,15 +155,14 @@ Product/Price catalog strategy, BillingPortal configuration, disputes/files evid
 
 ## Recommended Priority Order
 
-Post-v1.9 close (2026-05-27):
+Post-v1.x posture (2026-05-28):
 
-1. **Maintenance mode** — Stripe API drift, adopter-pull narrow adds (TAX-01/02), bugfixes (default)
-2. **Maintenance** — doc polish quick tasks closed A/B + Gap 2 (260527-tkc, tm1, tp8)
-3. **Maintenance** — Stripe drift and adopter-pull only
-4. **Gap 2: Narrative docs still thin** — Product/Price, BillingPortal deep guide, mandate diagnostics (opportunistic)
-5. **Specialist breadth families** — Identity, Financial Connections, Terminal, Issuing, Treasury only if real adopter pull appears
-6. **Deferred Tax narrow reqs** — TAX-01 (tax_codes), TAX-02 (transaction list) — adopter pull only
-7. **Long-tail narrative docs** — opportunistic, not milestone-grade
+1. **Reactive maintenance** — bugs, Stripe drift, GitHub issues/PRs (default; no proactive work)
+2. **Adopter-pull only** — TAX-01/02, specialist families, new resource modules (see `guides/scope.md`)
+3. **Opportunistic doc** — BillingPortal narrative depth in `customer-portal.md` if an adopter asks
+4. **No website** — README + HexDocs are the public surface
+
+Assessment doc wedges and Gap 2 narratives closed 2026-05-28 (quick tasks tkc, tm1, tp8, tqf).
 
 ## What "Feature-Complete Enough" Looks Like
 

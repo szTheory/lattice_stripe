@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.9
 milestone_name: — archived)
-status: next-step-assessment-complete
+status: maintenance
 last_updated: "2026-05-28"
 last_activity: 2026-05-28
 progress:
@@ -17,17 +17,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-27 — post-v1.9 next-step assessment)
+See: .planning/PROJECT.md (updated 2026-05-28 — post-v1.x maintenance posture)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Maintenance mode (default) — optional v1.10 doc-only milestone if structured closure desired
+**Current focus:** Reactive maintenance only — bugs, Stripe drift, adopter-pull narrow adds
 
 ## Current Position
 
 Phase: —
 Plan: —
-Status: maintenance — Gap 2 long-tail narrative closed
-Last activity: 2026-05-28 — Completed quick task 260527-tqf: PLAN-01 54-VERIFICATION.md backfill
+Status: maintenance — v1.x complete; operate finished lib
+Last activity: 2026-05-28 — Post-v1.x maintenance posture recorded (no website; pure maintenance)
 
 ## Performance Metrics
 
@@ -46,7 +46,7 @@ Last activity: 2026-05-28 — Completed quick task 260527-tqf: PLAN-01 54-VERIFI
 - **CI-01 resolved** — paths-ignore `.planning/**` only (Phase 60); guide/md PRs run docs_truth.
 - **No Hex bump** — v1.9 doc-only like v1.8; future doc milestones same.
 - **PLAN-01 closed (260527-tqf)** — `54-VERIFICATION.md` backfilled retroactively from Phase 54/55 evidence.
-- **Next-step assessment (2026-05-27)** — maintenance default; Wedge A (doc defects) highest leverage if acting; optional v1.10 only for structured closure.
+- **Post-v1.x posture (2026-05-28)** — reactive maintenance only; no website; no v1.10; adoption = pure silence until pull.
 - **Wedge A closed (260527-tkc)** — payments fence, portal Configuration truth, JTBD gap inventory; docs_truth locks added.
 - **Wedge B closed (260527-tm1)** — recipes.md File.create → update_evidence → submit_evidence spine + docs_truth lock.
 - **docs_truth** — Wedge A surfaces now locked (fence, portal Configuration, JTBD recipes); markdown fence helper for all canonical guides remains a graduation candidate.
@@ -68,9 +68,18 @@ Last activity: 2026-05-28 — Completed quick task 260527-tqf: PLAN-01 54-VERIFI
 ## Session Continuity
 
 Assessment thread: `.planning/threads/v1-10-next-milestone-assessment.md`
+Maintenance posture: `.planning/threads/post-v1x-maintenance-posture.md`
 Milestone audit: `.planning/milestones/v1.9-MILESTONE-AUDIT.md`
 
 ## Operator Next Steps
 
-1. **Default:** Maintenance mode — Stripe drift, adopter-pull fixes
-2. **Default:** Respond to Stripe drift, adopter issues, and PRs only
+**Default:** React to GitHub issues/PRs, Stripe API drift, and adopter-reported bugs only.
+
+| Trigger | Action |
+|---------|--------|
+| Bug / wrong Stripe behavior | `/gsd-quick` or `/gsd-debug` → fix + test; patch release if needed |
+| Stripe breaking change | Narrow update; milestone only if large |
+| New resource family (documented adopter pull) | `/gsd-new-milestone` |
+| Doc typo | `/gsd-quick` + docs_truth lock |
+
+**Do not:** website, v1.10 milestone, Hex bump for doc-only, specialist families without pull.

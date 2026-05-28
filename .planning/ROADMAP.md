@@ -19,9 +19,21 @@
 
 ## Forward Work (maintenance only)
 
-- Stripe API version drift and breaking upstream changes
-- Adopter-pull narrow additions (TAX-01/TAX-02, specialist families only with documented pull)
-- Gap 2 narrative docs — catalog/mandate/disputes closed via quick tasks; BillingPortal depth remains in customer-portal.md
+Reactive maintenance — no active milestone. Act only when triggered:
+
+| Trigger | Response |
+|---------|----------|
+| User-reported bug | Fix + test; semver patch if needed |
+| Stripe API drift | Narrow update + CHANGELOG |
+| Adopter-pull new family | Scope in `guides/scope.md`; implement narrow surface |
+| Doc defect | `/gsd-quick` + docs_truth |
+
+**Deferred (adopter pull only):** TAX-01/02, specialist Stripe families, v2.core typed modules.
+
+**Explicitly out of scope:** marketing website (README + HexDocs sufficient), v1.10 structured milestone, proactive doc polish.
+
+See `.planning/threads/post-v1x-maintenance-posture.md`.
+
 ## Progress (v1.9 — archived)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -31,4 +43,4 @@
 
 ## Next Step
 
-Maintenance mode — no active milestone phases. See `.planning/JTBD-MAP.md` Recommended Priority Order.
+**None** — operate as a finished v1.x library. Triage issues/PRs; use `/gsd-quick` for small fixes. See `.planning/threads/post-v1x-maintenance-posture.md`.

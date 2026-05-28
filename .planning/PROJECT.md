@@ -16,7 +16,11 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 **Done estimate:** ~97% for intended v1.x scope (doc polish quick tasks 260527-tkc/tm1/tp8 closed Gap 2 long-tail).
 
-**Post-v1.9 assessment (2026-05-27):** Maintenance mode is the default next posture. Doc wedges A/B and Gap 2 catalog/mandate narratives closed via quick tasks 2026-05-28 (260527-tkc, tm1, tp8). No structured v1.10 milestone required. See `.planning/threads/v1-10-next-milestone-assessment.md`.
+**Post-v1.x posture (2026-05-28):** **Reactive maintenance only** — no active build track. Assessment wedges and Gap 2 doc polish closed (quick tasks 260527-tkc, tm1, tp8, tqf). No v1.10 milestone; no marketing website.
+
+**Public surface:** [README.md](README.md) + [HexDocs](https://hexdocs.pm/lattice_stripe) + [guides/scope.md](guides/scope.md) — sufficient for an SDK; do not duplicate in a standalone site.
+
+**Adoption:** Pure maintenance until external pull (no scheduled launch post). See `.planning/threads/post-v1x-maintenance-posture.md`.
 
 **Latest archived milestone:** v1.9 CI & Doc Honesty (archived 2026-05-27)
 
@@ -157,6 +161,7 @@ See `.planning/milestones/v1.9-MILESTONE-AUDIT.md` for close-time audit evidence
 - Billing-engine abstractions, entitlement logic, dunning workflows — belong downstream in Accrue or application code
 - Resolving Phase 41.1 as a milestone-blocking requirement — retired as `accepted-external-verification` in v1.7
 - New Stripe resource families in v1.x — v1.7 is the planned stop signal; Identity, Treasury, Issuing, Terminal, Financial Connections, Climate, Sigma, and Reporting deferred unless adopter pull justifies a future milestone
+- Marketing / landing website — README + HexDocs are the public surface for this SDK; a separate site duplicates ExDoc and has low adoption ROI
 
 ## Key Decisions
 
@@ -194,6 +199,9 @@ See `.planning/milestones/v1.9-MILESTONE-AUDIT.md` for close-time audit evidence
 | CI paths-ignore on guides bypasses docs_truth | Guide-only PRs skip unit CI; highest-risk edit surface has weakest automated gate | ✓ Good (v1.9 Phase 60 CI-01) |
 | Post-v1.9 assessment: maintenance default; v1.10 optional | lib/ + guides scan confirms no API breadth wedge; remaining work is doc defects + Gap 2 narrative; structured milestone only if user wants closure | ✓ Assessment (2026-05-27) |
 | docs_truth does not lock markdown fences or JTBD gap-inventory | payments.md unclosed fence survived v1.8–v1.9; portal Dashboard-only claim vs shipped Configuration CRUD; graduation to fence/portal/JTBD locks | ✓ Next-step assessment (2026-05-27) |
+| No marketing website for LatticeStripe | SDK libs are discovered via Hex + README; ExDoc is the canonical reference; site would duplicate docs | ✓ Post-v1.x posture (2026-05-28) |
+| Post-v1.x: reactive maintenance only | v1.x scope complete at Hex 1.7.0; act on bugs, Stripe drift, adopter pull — not proactive milestones | ✓ Post-v1.x posture (2026-05-28) |
+| Adoption: pure silence default | No Forum/blog launch required for "done"; optional cross-link from Accrue when convenient | ✓ Post-v1.x posture (2026-05-28) |
 
 ## Evolution
 
@@ -213,4 +221,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-27 — v1.9 shipped; MILESTONE NEXT-STEP assessment; maintenance default*
+*Last updated: 2026-05-28 — post-v1.x maintenance posture; no website; reactive maintenance only*
