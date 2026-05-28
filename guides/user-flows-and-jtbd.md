@@ -337,6 +337,8 @@ Read next:
 
 - [Production Checklist](production-checklist.md)
 - [Event Debugging](event-debugging.md)
+- [Recipes](recipes.md) — disputes/files evidence spine (`File.create` → `update_evidence` →
+  `submit_evidence`); Files, Disputes, and Mandates APIs are shipped — recipes carry the ops workflow
 - [Testing](testing.md)
 - [Telemetry](telemetry.md)
 - [OpenTelemetry](opentelemetry.md)
@@ -422,8 +424,8 @@ narrative polish — not missing primitives:
 
 - **Dispute and file evidence** — `recipes.md` documents File.create → `update_evidence` →
   `submit_evidence`; reason-specific field selection still adopter-owned
-- **BillingPortal configuration depth** — programmatic CRUD is shipped; see
-  [Customer Portal](customer-portal.md) and `BillingPortal.Configuration`
+- **BillingPortal configuration** — programmatic CRUD is documented in
+  [Customer Portal — Portal configurations](customer-portal.md#portal-configurations-programmatic-crud)
 
 This guide routes you to the right canonical surface; recipes and flagship guides carry
 the multi-module stories.
@@ -442,6 +444,9 @@ If you are evaluating the library for your own SaaS, this is the shortest useful
 4. [Recipes](recipes.md) — compact job-to-primitive bridges and flagship guide entry points
 5. [Webhooks](webhooks.md)
 6. whichever operational guide matches your rollout needs:
+   - [Production Checklist](production-checklist.md)
+   - [Event Debugging](event-debugging.md)
+   - [Recipes](recipes.md) — disputes, files, and evidence workflows
    - [Testing](testing.md)
    - [Telemetry](telemetry.md)
    - [Performance](performance.md)

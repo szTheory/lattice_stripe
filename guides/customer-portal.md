@@ -49,6 +49,78 @@ The `"customer"` param is required. All other params are optional:
 - `"locale"` — Override the portal language (`"en"`, `"fr"`, `"auto"`, etc.).
 - `"on_behalf_of"` — Connect account ID for platform-to-connected-account sessions.
 
+## Portal configurations (programmatic CRUD)
+
+Use the Stripe Dashboard when one default portal is enough. Create
+[`BillingPortal.Configuration`](https://hexdocs.pm/lattice_stripe/LatticeStripe.BillingPortal.Configuration.html)
+resources in code when you need multiple branded portals (per product line, locale, or
+Connect account) and reference the `bpc_*` id from `Session.create/3`.
+
+Configurations cannot be deleted — deactivate with `update/4` and `"active" => false`.
+The account default (`is_default: true`) **cannot be deactivated**; Stripe returns an
+error if you try. Create alternate configs for experiments, then deactivate when done.
+
+### Create a configuration
+
+```elixir
+{:ok, config} =
+  LatticeStripe.BillingPortal.Configuration.create(client, %{
+    "business_profile" => %{
+      "headline" => "Manage your subscription",
+      "privacy_policy_url" => "https://example.com/privacy",
+      "terms_of_service_url" => "https://example.com/terms"
+    },
+    "features" => %{
+      "invoice_history" => %{"enabled" => true},
+      "subscription_cancel" => %{"enabled" => true},
+      "subscription_update" => %{"enabled" => true},
+      "payment_method_update" => %{"enabled" => true}
+    }
+  })
+
+# config.id => "bpc_..."
+```
+
+Feature toggles live on the configuration object — not on individual portal sessions.
+See the [Stripe Portal Configuration API](https://docs.stripe.com/api/customer_portal/configuration)
+for the full `features` schema.
+
+### Retrieve, update, and list
+
+```elixir
+{:ok, config} = LatticeStripe.BillingPortal.Configuration.retrieve(client, "bpc_abc123")
+
+{:ok, _config} =
+  LatticeStripe.BillingPortal.Configuration.update(client, "bpc_abc123", %{
+    "active" => false
+  })
+
+{:ok, resp} = LatticeStripe.BillingPortal.Configuration.list(client)
+configs = resp.data.data
+
+client
+|> LatticeStripe.BillingPortal.Configuration.stream!()
+|> Enum.each(&IO.inspect/1)
+```
+
+### Wire a configuration into sessions
+
+Pass the configuration id when creating a portal session:
+
+```elixir
+{:ok, session} =
+  LatticeStripe.BillingPortal.Session.create(client, %{
+    "customer" => customer_id,
+    "return_url" => return_url,
+    "configuration" => config.id
+  })
+```
+
+**Ops pattern:** create or select configurations at deploy time (or in an admin task),
+store the `bpc_*` id in application config, and pass it on every `Session.create/3`.
+Session params control return URL, locale, flow deep-links, and Connect context — not
+branding or which portal features are enabled.
+
 ## Deep-link flows
 
 Pass `"flow_data"` with a `"type"` key to bypass the portal homepage and take the
