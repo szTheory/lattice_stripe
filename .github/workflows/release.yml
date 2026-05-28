@@ -4,7 +4,8 @@
 # to Hex with HEX_API_KEY.
 #
 # Requires repository secret: HEX_API_KEY (Actions secrets).
-# RELEASE_PLEASE_TOKEN: optional fine-grained PAT for Release Please PRs.
+# RELEASE_PLEASE_TOKEN: required fine-grained PAT for GitHub release creation and
+# native pull_request CI on Release Please PRs (GITHUB_TOKEN alone is insufficient).
 
 name: Release
 
@@ -131,12 +132,26 @@ jobs:
         with:
           script: |
             // Release Please tags main immediately; ci.yml often has not started yet.
-            // Poll until ci-gate succeeds (pattern from rindle release.yml).
+            // Poll until ci-gate succeeds. Ignore stale cancelled/failed runs from merge
+            // push races — a fresh run may start after the tag lands.
             const sha = '${{ steps.resolve-sha.outputs.sha }}';
             const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
             const maxAttempts = 60;
             const waitMs = 30000;
             let lastRunUrl = '';
+
+            async function ciGateForRun(runId) {
+              const jobs = await github.paginate(
+                github.rest.actions.listJobsForWorkflowRun,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: runId,
+                  per_page: 100
+                }
+              );
+              return jobs.find((job) => job.name === 'ci-gate');
+            }
 
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
               const { data } = await github.rest.actions.listWorkflowRuns({
@@ -147,59 +162,43 @@ jobs:
                 per_page: 20
               });
 
-              const runs = data.workflow_runs.filter((run) => run.head_sha === sha);
-              const latest = runs[0];
+              const runs = data.workflow_runs
+                .filter((run) => run.head_sha === sha)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-              if (!latest) {
+              if (runs.length === 0) {
                 core.info(`No ci.yml run yet for ${sha} (${attempt}/${maxAttempts}).`);
                 await sleep(waitMs);
                 continue;
               }
 
-              lastRunUrl = latest.html_url;
+              lastRunUrl = runs[0].html_url;
 
-              if (latest.status !== 'completed') {
+              if (runs.some((run) => run.status !== 'completed')) {
+                const inProgress = runs.find((run) => run.status !== 'completed');
                 core.info(
-                  `ci.yml ${latest.status} for ${sha} (${attempt}/${maxAttempts}): ${latest.html_url}`
+                  `ci.yml ${inProgress.status} for ${sha} (${attempt}/${maxAttempts}): ${inProgress.html_url}`
                 );
                 await sleep(waitMs);
                 continue;
               }
 
-              const jobs = await github.paginate(
-                github.rest.actions.listJobsForWorkflowRun,
-                {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  run_id: latest.id,
-                  per_page: 100
+              for (const run of runs) {
+                const ciGate = await ciGateForRun(run.id);
+
+                if (!ciGate) {
+                  core.info(`ci-gate job not found in run ${run.html_url}; checking other runs.`);
+                  continue;
                 }
-              );
 
-              const ciGate = jobs.find((job) => job.name === 'ci-gate');
-
-              if (!ciGate) {
-                core.setFailed(
-                  `Delivery blocked: ci-gate job not found in ci.yml run ${latest.html_url}`
-                );
-                return;
-              }
-
-              if (ciGate.conclusion === 'success') {
-                core.info(`ci-gate succeeded on release SHA ${sha}: ${latest.html_url}`);
-                return;
-              }
-
-              if (ciGate.conclusion === 'failure' || ciGate.conclusion === 'cancelled') {
-                core.setFailed(
-                  `Delivery blocked: ci-gate concluded ${ciGate.conclusion} on SHA ${sha}.\n` +
-                  `Run: ${latest.html_url}`
-                );
-                return;
+                if (ciGate.conclusion === 'success') {
+                  core.info(`ci-gate succeeded on release SHA ${sha}: ${run.html_url}`);
+                  return;
+                }
               }
 
               core.info(
-                `ci-gate ${ciGate.conclusion ?? 'pending'} (${attempt}/${maxAttempts}): ${latest.html_url}`
+                `No successful ci-gate yet for ${sha} (${attempt}/${maxAttempts}); waiting for a fresh run.`
               );
               await sleep(waitMs);
             }

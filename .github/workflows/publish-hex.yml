@@ -69,68 +69,103 @@ jobs:
         with:
           script: |
             const sha = '${{ steps.validate.outputs.sha }}';
-            const { data } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'ci.yml',
-              head_sha: sha,
-              per_page: 10
-            });
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            const maxAttempts = 10;
+            const waitMs = 30000;
+            const requiredPrefixes = ['Test (Elixir', 'Integration Tests'];
+            let lastRunUrl = '';
 
-            if (data.total_count === 0) {
-              core.setFailed(
-                `Delivery blocked: no ci.yml runs found for SHA ${sha}. ` +
-                'Push the tagged commit and let CI complete before publishing.'
+            async function runPassesRequiredJobs(run) {
+              if (run.status !== 'completed') {
+                return 'pending';
+              }
+
+              const jobs = await github.paginate(
+                github.rest.actions.listJobsForWorkflowRun,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  run_id: run.id,
+                  per_page: 100
+                }
               );
-              return;
+
+              const requiredJobs = jobs.filter((job) =>
+                requiredPrefixes.some((prefix) => job.name.startsWith(prefix))
+              );
+
+              if (requiredJobs.length === 0) {
+                return 'no_jobs';
+              }
+
+              const blockingFailures = requiredJobs.filter(
+                (job) => job.conclusion !== 'success' && job.conclusion !== 'skipped'
+              );
+
+              if (blockingFailures.length > 0) {
+                return 'failed';
+              }
+
+              const lintJob = jobs.find((job) => job.name === 'Lint');
+              if (lintJob && lintJob.conclusion !== 'success') {
+                core.warning(
+                  `Lint job concluded ${lintJob.conclusion}; publish allowed because ` +
+                  'Test + Integration jobs passed (pre-existing Credo debt tracked separately).'
+                );
+              }
+
+              return 'success';
             }
 
-            const latest = data.workflow_runs[0];
-            const jobs = await github.paginate(
-              github.rest.actions.listJobsForWorkflowRun,
-              {
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+              const { data } = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                run_id: latest.id,
-                per_page: 100
+                workflow_id: 'ci.yml',
+                head_sha: sha,
+                per_page: 20
+              });
+
+              const runs = data.workflow_runs
+                .filter((run) => run.head_sha === sha)
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+              if (runs.length === 0) {
+                core.info(`No ci.yml run yet for ${sha} (${attempt}/${maxAttempts}).`);
+                await sleep(waitMs);
+                continue;
               }
-            );
 
-            const requiredPrefixes = ['Test (Elixir', 'Integration Tests'];
-            const requiredJobs = jobs.filter((job) =>
-              requiredPrefixes.some((prefix) => job.name.startsWith(prefix))
-            );
+              lastRunUrl = runs[0].html_url;
 
-            if (requiredJobs.length === 0) {
-              core.setFailed(
-                `Delivery blocked: no required test jobs found in ci.yml run ${latest.html_url}`
+              if (runs.some((run) => run.status !== 'completed')) {
+                const inProgress = runs.find((run) => run.status !== 'completed');
+                core.info(
+                  `ci.yml ${inProgress.status} for ${sha} (${attempt}/${maxAttempts}): ${inProgress.html_url}`
+                );
+                await sleep(waitMs);
+                continue;
+              }
+
+              for (const run of runs) {
+                const result = await runPassesRequiredJobs(run);
+
+                if (result === 'success') {
+                  core.info(`Required ci.yml jobs succeeded on release SHA ${sha}: ${run.html_url}`);
+                  return;
+                }
+              }
+
+              core.info(
+                `No passing ci.yml run yet for ${sha} (${attempt}/${maxAttempts}); waiting for a fresh run.`
               );
-              return;
+              await sleep(waitMs);
             }
 
-            const blockingFailures = requiredJobs.filter(
-              (job) => job.conclusion !== 'success' && job.conclusion !== 'skipped'
+            core.setFailed(
+              `Delivery blocked: timed out waiting for green ci.yml on SHA ${sha} after ${maxAttempts} attempts. ` +
+              `Last run: ${lastRunUrl || 'none'}`
             );
-
-            if (blockingFailures.length > 0) {
-              const detail = blockingFailures
-                .map((job) => `  - ${job.name} (${job.conclusion})`)
-                .join('\n');
-              core.setFailed(
-                `Delivery blocked: required ci.yml jobs failed on SHA ${sha}.\n${detail}\nRun: ${latest.html_url}`
-              );
-              return;
-            }
-
-            const lintJob = jobs.find((job) => job.name === 'Lint');
-            if (lintJob && lintJob.conclusion !== 'success') {
-              core.warning(
-                `Lint job concluded ${lintJob.conclusion}; publish allowed because ` +
-                'Test + Integration jobs passed (pre-existing Credo debt tracked separately).'
-              );
-            }
-
-            core.info(`Required ci.yml jobs succeeded on release SHA ${sha}`);
 
   publish:
     name: Publish to Hex.pm

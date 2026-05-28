@@ -20,11 +20,11 @@ See also [`.planning/RELEASE-TRAIN.md`](../.planning/RELEASE-TRAIN.md) for commi
 2. Confirm GitHub Actions **CI / ci-gate** is green on `main`.
 3. **Release** workflow runs Release Please and opens/updates a patch Release PR.
 4. **Bootstrap CI** dispatches `ci.yml` on `release-please--branches--main` (bot PRs do not trigger `pull_request` CI with `GITHUB_TOKEN`).
-5. When **ci-gate** succeeds, **Release PR Auto-Merge** merges the Release PR (merge commit).
+5. When **ci-gate** succeeds, **Release PR Auto-Merge** merges the Release PR (squash).
 6. **Release** workflow tags the merge, waits for **ci-gate** on the tag SHA, then publishes to Hex automatically.
 7. Verify `mix hex.info lattice_stripe` lists the new version.
 
-No manual `workflow_dispatch` is required for routine patch releases. Optionally set **`RELEASE_PLEASE_TOKEN`** (fine-grained PAT) so Release Please PRs also trigger native `pull_request` CI.
+Routine patch releases require **`RELEASE_PLEASE_TOKEN`** (fine-grained PAT with Contents + Pull requests write) for GitHub release creation; it also enables native `pull_request` CI on Release Please PRs. **`HEX_API_KEY`** is required for Hex publish.
 
 ## Manual recovery (automation failed)
 
