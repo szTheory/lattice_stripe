@@ -214,6 +214,7 @@ Use `search/3` for full-text search across PaymentIntents:
   LatticeStripe.PaymentIntent.search(client, "metadata['order_id']:'ord_456'")
 
 results = resp.data.data
+```
 
 > **Note:** Stripe's Search API has eventual consistency. Newly created objects may not
 > appear in search results immediately. For real-time lookups, use `list/3` with filters or

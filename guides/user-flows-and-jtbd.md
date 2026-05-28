@@ -412,18 +412,22 @@ These are the rules most likely to save you from subtle bugs:
 - Connect account and money-movement foundations
 - operational glue: webhooks, retries, telemetry, testing
 
-### Still thinner than it should be for a full SaaS playbook
+### Narrative gaps (API shipped; docs can go deeper)
 
-- complete end-to-end recipes that stitch multiple modules into one business workflow
-- dispute and evidence handling
-- credit-note workflows
-- quote-to-invoice flows
-- clearer public guidance around catalog design with Product and Price
-- clearer public guidance around portal configuration strategy
-- stronger "if you are building X, start here" maps for common SaaS shapes
+Flagship recipe guides and [Recipes](recipes.md) already stitch common SaaS workflows
+(checkout + portal, Connect platform, metering runtime, quote-to-billing). Remaining
+narrative polish — not missing primitives:
 
-That gap is normal. The codebase is already broader than the narrative docs in a few places.
-This guide is meant to close that distance over time.
+- **Dispute and file evidence** — `recipes.md` covers retrieve → `update_evidence` →
+  `submit_evidence`; no full File.upload → evidence spine yet
+- **Product and Price catalog strategy** — scattered in subscriptions/checkout guides;
+  no dedicated catalog guide
+- **BillingPortal configuration depth** — programmatic CRUD is shipped; see
+  [Customer Portal](customer-portal.md) and `BillingPortal.Configuration`
+- **Mandate and SetupAttempt diagnostics** — modules and fixtures exist; thin operator narrative
+
+This guide routes you to the right canonical surface; recipes and flagship guides carry
+the multi-module stories.
 
 ## A Practical Reading Order
 
@@ -436,8 +440,9 @@ If you are evaluating the library for your own SaaS, this is the shortest useful
    - [Payments](payments.md)
    - [Subscriptions](subscriptions.md)
    - [Invoices](invoices.md)
-4. [Webhooks](webhooks.md)
-5. whichever operational guide matches your rollout needs:
+4. [Recipes](recipes.md) — compact job-to-primitive bridges and flagship guide entry points
+5. [Webhooks](webhooks.md)
+6. whichever operational guide matches your rollout needs:
    - [Testing](testing.md)
    - [Telemetry](telemetry.md)
    - [Performance](performance.md)
@@ -449,9 +454,9 @@ If you are building a marketplace or platform, swap in the Connect guides early.
 If you want the one-paragraph summary:
 
 LatticeStripe is already strong where most SaaS teams spend the bulk of their Stripe time:
-payments, subscriptions, invoices, portal-driven self-service, metering, Connect foundations,
-and the production mechanics around them. The library's center of gravity is "typed, idiomatic
-Elixir access to Stripe, with guards around expensive mistakes." The biggest remaining gap is
-not raw API breadth so much as full-business-flow storytelling: more recipe-level guidance,
-more final-mile workflows, and a clearer map from common SaaS jobs to the best combination of
-modules.
+payments, subscriptions, invoices, portal-driven self-service, metering, Connect, tax,
+webhooks (including thin events), and production operator mechanics. The library's center of
+gravity is "typed, idiomatic Elixir access to Stripe, with guards around expensive mistakes."
+For v1.x scope the remaining delta is mostly narrative depth on secondary flows (disputes/files,
+catalog design, mandate diagnostics) — not missing mainstream payment or billing primitives.
+Use [Recipes](recipes.md) and the flagship guides when you need multi-module stories.

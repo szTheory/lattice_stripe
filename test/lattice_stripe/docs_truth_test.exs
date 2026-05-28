@@ -160,6 +160,13 @@ defmodule LatticeStripe.DocsTruthTest do
       end
     end
 
+    test "search example closes the Elixir fence before the Search API note" do
+      payments = File.read!("guides/payments.md")
+
+      assert payments =~ "results = resp.data.data\n```\n\n> **Note:** Stripe's Search API"
+      refute payments =~ "results = resp.data.data\n\n> **Note:**"
+    end
+
     test "routes Charge reconciliation after PaymentIntent flows" do
       payments = File.read!("guides/payments.md")
 
@@ -174,6 +181,17 @@ defmodule LatticeStripe.DocsTruthTest do
       {creating_idx, _} = :binary.match(payments, "## Creating a PaymentIntent")
       {charge_idx, _} = :binary.match(payments, "## Charge reconciliation")
       assert creating_idx < charge_idx
+    end
+  end
+
+  describe "guides/customer-portal.md" do
+    test "documents programmatic BillingPortal.Configuration" do
+      portal = File.read!("guides/customer-portal.md")
+
+      assert portal =~ "BillingPortal.Configuration"
+      assert portal =~ "create/3"
+      refute portal =~ "managed via the Stripe Dashboard in v1.1"
+      refute portal =~ "is in the Stripe Dashboard, not per-session params"
     end
   end
 
@@ -294,6 +312,9 @@ defmodule LatticeStripe.DocsTruthTest do
     assert jtbd =~ "webhooks.md"
     assert jtbd =~ "testing.md"
     assert jtbd =~ "tax.md"
+    assert jtbd =~ "[Recipes](recipes.md)"
+    assert jtbd =~ "Narrative gaps (API shipped"
+    refute jtbd =~ "complete end-to-end recipes that stitch"
 
     assert recipes =~ "canonical"
     assert recipes =~ "checkout-signup-and-portal.md"

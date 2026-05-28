@@ -34,14 +34,18 @@ redirect(conn, external: session.url)
 ```
 
 Omitting `flow_data` sends the customer to the portal homepage, where Stripe renders
-whichever features your portal configuration (set via the Stripe Dashboard) allows.
+whichever features your portal configuration allows (create and manage configurations
+with `LatticeStripe.BillingPortal.Configuration` or use the account default from the
+Stripe Dashboard).
 
 The `"customer"` param is required. All other params are optional:
 
 - `"return_url"` — Absolute HTTPS URL to redirect the customer after the portal.
 - `"flow_data"` — Deep-link into a specific portal flow (see §Deep-link flows below).
 - `"configuration"` — A `bpc_*` portal configuration ID. Defaults to the account
-  default. Portal configuration is managed via the Stripe Dashboard in v1.1.
+  default. Create and update configurations with
+  [`LatticeStripe.BillingPortal.Configuration`](https://hexdocs.pm/lattice_stripe/LatticeStripe.BillingPortal.Configuration.html)
+  (`create/3`, `retrieve/3`, `update/4`, `list/3`) or manage defaults in the Stripe Dashboard.
 - `"locale"` — Override the portal language (`"en"`, `"fr"`, `"auto"`, etc.).
 - `"on_behalf_of"` — Connect account ID for platform-to-connected-account sessions.
 
@@ -247,7 +251,10 @@ IO.inspect(session, structs: false)
 **Security rules:** Use an absolute HTTPS `return_url` (phishing risk otherwise). Redirect
 immediately — do not persist `session.url` in a database or cache. The portal redirect
 back to `return_url` is NOT authentication — use webhooks for state-change confirmation.
-Portal configuration (branding, allowed features) is in the Stripe Dashboard, not per-session params.
+Portal configuration (branding, allowed features) is defined on
+`BillingPortal.Configuration` resources — not on per-session params. Pass a `bpc_*` id
+via `"configuration"` when you need a non-default config; session params only control
+return URL, locale, flow deep-links, and Connect context.
 
 ## Common pitfalls
 
