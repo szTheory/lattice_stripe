@@ -6,6 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 1.7"}`.
 
+## [1.7.13](https://github.com/szTheory/lattice_stripe/compare/v1.7.12...v1.7.13) (2026-05-29)
+
+
+### Bug Fixes
+
+* **docs:** cut patch release for README hex.pm guide links ([326d155](https://github.com/szTheory/lattice_stripe/commit/326d1553684d26dcdc80cc3105830018e3bf678b))
+
 ## [1.7.12](https://github.com/szTheory/lattice_stripe/compare/v1.7.11...v1.7.12) (2026-05-28)
 
 
