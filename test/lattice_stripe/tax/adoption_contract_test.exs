@@ -131,7 +131,7 @@ defmodule LatticeStripe.Tax.AdoptionContractTest do
       jtbd = File.read!("guides/user-flows-and-jtbd.md")
       recipes = File.read!("guides/recipes.md")
 
-      assert readme =~ "guides/tax.md"
+      assert readme =~ "hexdocs.pm/lattice_stripe/tax.html"
       assert payments =~ "tax.md"
       assert jtbd =~ "tax.md"
       assert recipes =~ "tax.md"

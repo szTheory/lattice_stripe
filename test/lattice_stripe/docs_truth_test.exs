@@ -284,6 +284,13 @@ defmodule LatticeStripe.DocsTruthTest do
                "stale error atom #{inspect(atom)} in README.md"
       end
     end
+
+    test "guide links use HexDocs URLs not relative guides/*.md paths" do
+      readme = File.read!("README.md")
+
+      refute readme =~ ~r/\]\(guides\/[^)]+\.md/,
+             "README guide links must use HexDocs URLs for hex.pm portability"
+    end
   end
 
   test "operator guides route Charge update/capture to payments reconciliation" do
@@ -302,15 +309,15 @@ defmodule LatticeStripe.DocsTruthTest do
   test "readme routes evaluators into the guide ladder" do
     readme = File.read!("README.md")
 
-    assert readme =~ "guides/user-flows-and-jtbd.md"
-    assert readme =~ "guides/subscriptions.md"
-    assert readme =~ "guides/customer-portal.md"
-    assert readme =~ "guides/metering.md"
-    assert readme =~ "guides/tax.md"
-    assert readme =~ "guides/connect.md"
-    assert readme =~ "guides/webhooks.md"
-    assert readme =~ "guides/testing.md"
-    assert readme =~ "guides/error-handling.md"
+    assert readme =~ "hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/subscriptions.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/customer-portal.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/metering.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/tax.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/connect.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/webhooks.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/testing.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/error-handling.html"
     assert readme =~ "https://hexdocs.pm/lattice_stripe/recipes.html"
     refute readme =~ "What's new in v1.1"
   end
@@ -321,8 +328,8 @@ defmodule LatticeStripe.DocsTruthTest do
 
       assert readme =~ "feature-complete for its intended v1.x scope"
       assert readme =~ "maintenance mode" or readme =~ "maintenance and adoption-driven"
-      assert readme =~ "guides/user-flows-and-jtbd.md"
-      assert readme =~ "guides/api_stability.md"
+      assert readme =~ "hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html"
+      assert readme =~ "hexdocs.pm/lattice_stripe/api_stability.html"
       assert readme =~ "## v1.x scope"
       assert readme =~ "Identity"
       assert readme =~ "Reporting"
@@ -347,9 +354,9 @@ defmodule LatticeStripe.DocsTruthTest do
     assert readme =~ current_release_line()
     assert readme =~ "hexdocs.pm/lattice_stripe/tax.html"
     assert readme =~ "LatticeStripe.Charge.html"
-    assert readme =~ "webhooks-thin-events.md"
-    assert readme =~ "production-checklist.md"
-    assert readme =~ "event-debugging.md"
+    assert readme =~ "hexdocs.pm/lattice_stripe/webhooks-thin-events.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/production-checklist.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/event-debugging.html"
 
     for claim <- @stale_release_status_claims do
       refute readme =~ claim, "stale release claim #{inspect(claim)} in README"
@@ -669,7 +676,7 @@ defmodule LatticeStripe.DocsTruthTest do
 
     # README discovery route
     readme = File.read!("README.md")
-    assert readme =~ "webhooks-thin-events.md"
+    assert readme =~ "hexdocs.pm/lattice_stripe/webhooks-thin-events.html"
 
     # JTBD discovery ladder (Start Here Runtime route + Job 7 Read next)
     jtbd = File.read!("guides/user-flows-and-jtbd.md")
@@ -720,8 +727,8 @@ defmodule LatticeStripe.DocsTruthTest do
 
     assert checklist =~ "event-debugging.md"
     assert debugging =~ "production-checklist.md"
-    assert readme =~ "production-checklist.md"
-    assert readme =~ "event-debugging.md"
+    assert readme =~ "hexdocs.pm/lattice_stripe/production-checklist.html"
+    assert readme =~ "hexdocs.pm/lattice_stripe/event-debugging.html"
     assert readme =~ "Files and FileLinks"
     assert readme =~ "Disputes"
     assert readme =~ "Mandates"

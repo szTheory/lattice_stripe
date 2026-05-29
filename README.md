@@ -5,14 +5,14 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Current release:** **`1.7.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see [CHANGELOG](CHANGELOG.md#170) for what shipped since 1.1.0. Evaluating fit? Start with [User Flows & JTBD](guides/user-flows-and-jtbd.md).
+> **Current release:** **`1.7.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see [CHANGELOG](CHANGELOG.md#170) for what shipped since 1.1.0. Evaluating fit? Start with [User Flows & JTBD][user-flows-and-jtbd].
 
 A production-grade, idiomatic Elixir SDK for the Stripe API.
 
 Full documentation available on [HexDocs](https://hexdocs.pm/lattice_stripe).
 
 If you are evaluating how this fits into a real SaaS billing architecture, start with
-[Guide: User Flows & JTBD](guides/user-flows-and-jtbd.md).
+[Guide: User Flows & JTBD][user-flows-and-jtbd].
 
 ## v1.x scope
 
@@ -23,35 +23,35 @@ As of **1.7.0**, LatticeStripe is **feature-complete for its intended v1.x scope
 - **Specialist Stripe families:** Identity; Treasury; Issuing; Terminal; Financial Connections; Climate; Sigma; Reporting
 - **Tax narrow follow-ups:** Tax Code lookup (`/v1/tax_codes`); Tax Transaction list (if Stripe adds the endpoint)
 
-See [Scope](guides/scope.md) for boundaries, escape hatches, and how to request coverage.
-See [API Stability](guides/api_stability.md) for the semver contract.
+See [Scope][scope] for boundaries, escape hatches, and how to request coverage.
+See [API Stability][api-stability] for the semver contract.
 
 ## Docs Ladder
 
 Use the docs in this order:
 
 - **README** for the repo-level surface map and route-by-intent overview
-- **[Getting Started](guides/getting-started.md)** for first success with a live client and API call
-- **[User Flows & JTBD](guides/user-flows-and-jtbd.md)** for "which Stripe path fits my SaaS?"
-- **[Scope](guides/scope.md)** for v1.x boundaries and deferred families
+- **[Getting Started][getting-started]** for first success with a live client and API call
+- **[User Flows & JTBD][user-flows-and-jtbd]** for "which Stripe path fits my SaaS?"
+- **[Scope][scope]** for v1.x boundaries and deferred families
 - **Canonical guides** for the surface you will actually ship
-- **[Recipes](guides/recipes.md)** for compact job-to-primitive bridges
-- **[Webhooks](guides/webhooks.md)**, **[Production Checklist](guides/production-checklist.md)**, **[Event Debugging](guides/event-debugging.md)**, **[Testing](guides/testing.md)**, and **[Error Handling](guides/error-handling.md)** for runtime truth and support posture
+- **[Recipes][recipes]** for compact job-to-primitive bridges
+- **[Webhooks][webhooks]**, **[Production Checklist][production-checklist]**, **[Event Debugging][event-debugging]**, **[Testing][testing]**, and **[Error Handling][error-handling]** for runtime truth and support posture
 
 ## Choose Your Route
 
 - **I want first success fast**:
-  [Getting Started](guides/getting-started.md), [Payments](guides/payments.md), [Checkout](guides/checkout.md)
+  [Getting Started][getting-started], [Payments][payments], [Checkout][checkout]
 - **I am evaluating recurring billing for a SaaS**:
-  [User Flows & JTBD](guides/user-flows-and-jtbd.md), [Subscriptions](guides/subscriptions.md), [Customer Portal](guides/customer-portal.md), [Webhooks](guides/webhooks.md)
+  [User Flows & JTBD][user-flows-and-jtbd], [Subscriptions][subscriptions], [Customer Portal][customer-portal], [Webhooks][webhooks]
 - **I need usage-based billing and reconciliation**:
-  [Metering](guides/metering.md), [Webhooks](guides/webhooks.md), [Testing](guides/testing.md)
+  [Metering][metering], [Webhooks][webhooks], [Testing][testing]
 - **I calculate tax on custom payment flows (not only Checkout/Invoices)**:
-  [Tax](guides/tax.md), [Payments](guides/payments.md), [Testing](guides/testing.md)
+  [Tax][tax], [Payments][payments], [Testing][testing]
 - **I run a marketplace or platform**:
-  [Connect](guides/connect.md), [Connect Accounts](guides/connect-accounts.md), [Connect Money Movement](guides/connect-money-movement.md)
+  [Connect][connect], [Connect Accounts][connect-accounts], [Connect Money Movement][connect-money-movement]
 - **I am hardening ops and support paths**:
-  [Production Checklist](guides/production-checklist.md), [Error Handling](guides/error-handling.md), [Testing](guides/testing.md), [Webhooks](guides/webhooks.md), [Webhooks: Thin Events](guides/webhooks-thin-events.md), [Event Debugging](guides/event-debugging.md)
+  [Production Checklist][production-checklist], [Error Handling][error-handling], [Testing][testing], [Webhooks][webhooks], [Webhooks: Thin Events][webhooks-thin-events], [Event Debugging][event-debugging]
 
 ## Installation
 
@@ -100,9 +100,9 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 
 - Customers, PaymentIntents, SetupIntents, PaymentMethods, Refunds, Checkout Sessions (payment / subscription / setup modes)
 - Charge list/search/update/capture for support, audit, and Connect reconciliation — [Charge API](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html) (PI-first; no `create`)
-- Structured, pattern-matchable errors: `:card_error`, `:authentication_error`, `:rate_limit_error`, `:api_error`, and more — [Guide: Error Handling](guides/error-handling.md)
+- Structured, pattern-matchable errors: `:card_error`, `:authentication_error`, `:rate_limit_error`, `:api_error`, and more — [Guide: Error Handling][error-handling]
 - Auto-pagination — stream through large result sets lazily with Elixir Streams
-- [Guide: Payments](guides/payments.md)
+- [Guide: Payments][payments]
 
 ### Billing
 
@@ -113,16 +113,16 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 - Subscription Schedules for phased billing with proration guards
 - Billing Metering — usage-based billing with `Meter`, `MeterEvent`, and `MeterEventAdjustment`; two-layer idempotency and pre-flight value guards
 - Customer Portal — `BillingPortal.Session` for self-service portal URLs with 4 flow types (subscription_cancel, subscription_update, subscription_update_confirm, payment_method_update) and Inspect masking
-- [Guide: Subscriptions](guides/subscriptions.md) · [Guide: Credit Notes](guides/credit_notes.md) · [Guide: Metering](guides/metering.md) · [Guide: Tax](guides/tax.md) · [Guide: Customer Portal](guides/customer-portal.md)
+- [Guide: Subscriptions][subscriptions] · [Guide: Credit Notes][credit-notes] · [Guide: Metering][metering] · [Guide: Tax][tax] · [Guide: Customer Portal][customer-portal]
 
 ### Operations and diagnostics
 
 - Files and FileLinks — upload files to Stripe, manage shareable file links, and download binary content
 - Disputes — retrieve/list, update metadata, stage evidence safely, submit evidence, and close disputes
 - Mandates and SetupAttempts — inspect payment authorization state and SetupIntent failure history
-- Operator playbooks: [Production Checklist](guides/production-checklist.md) · [Event Debugging](guides/event-debugging.md)
-- [Guide: Recipes](guides/recipes.md) · [Guide: Webhooks](guides/webhooks.md) · [Guide: Webhooks: Thin Events](guides/webhooks-thin-events.md) · [Guide: Testing](guides/testing.md)
-- Full ops guide ladder: [Docs Ladder](#docs-ladder) and [User Flows & JTBD](guides/user-flows-and-jtbd.md) (Job 7)
+- Operator playbooks: [Production Checklist][production-checklist] · [Event Debugging][event-debugging]
+- [Guide: Recipes][recipes] · [Guide: Webhooks][webhooks] · [Guide: Webhooks: Thin Events][webhooks-thin-events] · [Guide: Testing][testing]
+- Full ops guide ladder: [Docs Ladder](#docs-ladder) and [User Flows & JTBD][user-flows-and-jtbd] (Job 7)
 
 ### Connect
 
@@ -130,7 +130,7 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 - Transfers, TransferReversals, Payouts, External Accounts
 - Balance + BalanceTransactions for platform-fee reconciliation
 - Per-client and per-request `stripe_account` for platform integrations
-- [Guide: Connect](guides/connect.md)
+- [Guide: Connect][connect]
 
 ### Platform
 
@@ -139,7 +139,7 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 - Automatic idempotency-key generation and safe replay
 - Telemetry events for every request, compatible with any monitoring stack
 - Phoenix-ready `Webhook.Plug` snapshot path + thin-event (`/v2/events`) helpers for fetch-after-verify integration
-- [Guide: Extending LatticeStripe](guides/extending-lattice-stripe.md)
+- [Guide: Extending LatticeStripe][extending-lattice-stripe]
 
 ## Compatibility
 
@@ -156,23 +156,54 @@ Full documentation with guides, examples, and API reference is available on
 
 Start here on HexDocs:
 
-- [Getting Started](https://hexdocs.pm/lattice_stripe/getting-started.html)
-- [User Flows & JTBD](https://hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html)
-- [Recipes](https://hexdocs.pm/lattice_stripe/recipes.html)
+- [Getting Started][getting-started]
+- [User Flows & JTBD][user-flows-and-jtbd]
+- [Recipes][recipes]
 
 Canonical guide clusters:
 
 - **Payments and billing primitives**:
-  [Payments](https://hexdocs.pm/lattice_stripe/payments.html), [Checkout](https://hexdocs.pm/lattice_stripe/checkout.html), [Invoices](https://hexdocs.pm/lattice_stripe/invoices.html), [Credit Notes](https://hexdocs.pm/lattice_stripe/credit_notes.html), [Subscriptions](https://hexdocs.pm/lattice_stripe/subscriptions.html), [Customer Portal](https://hexdocs.pm/lattice_stripe/customer-portal.html), [Metering](https://hexdocs.pm/lattice_stripe/metering.html), [Tax](https://hexdocs.pm/lattice_stripe/tax.html), [Charge API](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html)
+  [Payments][payments], [Checkout][checkout], [Invoices][invoices], [Credit Notes][credit-notes], [Subscriptions][subscriptions], [Customer Portal][customer-portal], [Metering][metering], [Tax][tax], [Charge API](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html)
 - **Connect**:
-  [Connect](https://hexdocs.pm/lattice_stripe/connect.html), [Connect Accounts](https://hexdocs.pm/lattice_stripe/connect-accounts.html), [Connect Money Movement](https://hexdocs.pm/lattice_stripe/connect-money-movement.html)
+  [Connect][connect], [Connect Accounts][connect-accounts], [Connect Money Movement][connect-money-movement]
 - **Operations and DX**:
-  [Webhooks](https://hexdocs.pm/lattice_stripe/webhooks.html), [Webhooks: Thin Events](https://hexdocs.pm/lattice_stripe/webhooks-thin-events.html), [Production Checklist](https://hexdocs.pm/lattice_stripe/production-checklist.html), [Event Debugging](https://hexdocs.pm/lattice_stripe/event-debugging.html), [Testing](https://hexdocs.pm/lattice_stripe/testing.html), [Error Handling](https://hexdocs.pm/lattice_stripe/error-handling.html), [Client Configuration](https://hexdocs.pm/lattice_stripe/client-configuration.html), [Performance](https://hexdocs.pm/lattice_stripe/performance.html), [Circuit Breaker](https://hexdocs.pm/lattice_stripe/circuit-breaker.html), [OpenTelemetry](https://hexdocs.pm/lattice_stripe/opentelemetry.html), [Telemetry](https://hexdocs.pm/lattice_stripe/telemetry.html), [API Stability](https://hexdocs.pm/lattice_stripe/api_stability.html), [Extending LatticeStripe](https://hexdocs.pm/lattice_stripe/extending-lattice-stripe.html), [Cheatsheet](https://hexdocs.pm/lattice_stripe/cheatsheet.html)
+  [Webhooks][webhooks], [Webhooks: Thin Events][webhooks-thin-events], [Production Checklist][production-checklist], [Event Debugging][event-debugging], [Testing][testing], [Error Handling][error-handling], [Client Configuration][client-configuration], [Performance][performance], [Circuit Breaker][circuit-breaker], [OpenTelemetry][opentelemetry], [Telemetry][telemetry], [API Stability][api-stability], [Extending LatticeStripe][extending-lattice-stripe], [Cheatsheet][cheatsheet]
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+See [CONTRIBUTING.md](https://github.com/szTheory/lattice_stripe/blob/main/CONTRIBUTING.md) for development setup and guidelines.
 
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+<!-- HexDocs guide links (README is not an ExDoc extra; use HexDocs URLs for hex.pm + GitHub portability) -->
+[getting-started]: https://hexdocs.pm/lattice_stripe/getting-started.html
+[user-flows-and-jtbd]: https://hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html
+[scope]: https://hexdocs.pm/lattice_stripe/scope.html
+[api-stability]: https://hexdocs.pm/lattice_stripe/api_stability.html
+[recipes]: https://hexdocs.pm/lattice_stripe/recipes.html
+[payments]: https://hexdocs.pm/lattice_stripe/payments.html
+[checkout]: https://hexdocs.pm/lattice_stripe/checkout.html
+[subscriptions]: https://hexdocs.pm/lattice_stripe/subscriptions.html
+[customer-portal]: https://hexdocs.pm/lattice_stripe/customer-portal.html
+[metering]: https://hexdocs.pm/lattice_stripe/metering.html
+[tax]: https://hexdocs.pm/lattice_stripe/tax.html
+[connect]: https://hexdocs.pm/lattice_stripe/connect.html
+[connect-accounts]: https://hexdocs.pm/lattice_stripe/connect-accounts.html
+[connect-money-movement]: https://hexdocs.pm/lattice_stripe/connect-money-movement.html
+[production-checklist]: https://hexdocs.pm/lattice_stripe/production-checklist.html
+[event-debugging]: https://hexdocs.pm/lattice_stripe/event-debugging.html
+[webhooks]: https://hexdocs.pm/lattice_stripe/webhooks.html
+[webhooks-thin-events]: https://hexdocs.pm/lattice_stripe/webhooks-thin-events.html
+[testing]: https://hexdocs.pm/lattice_stripe/testing.html
+[error-handling]: https://hexdocs.pm/lattice_stripe/error-handling.html
+[credit-notes]: https://hexdocs.pm/lattice_stripe/credit_notes.html
+[extending-lattice-stripe]: https://hexdocs.pm/lattice_stripe/extending-lattice-stripe.html
+[invoices]: https://hexdocs.pm/lattice_stripe/invoices.html
+[client-configuration]: https://hexdocs.pm/lattice_stripe/client-configuration.html
+[performance]: https://hexdocs.pm/lattice_stripe/performance.html
+[circuit-breaker]: https://hexdocs.pm/lattice_stripe/circuit-breaker.html
+[opentelemetry]: https://hexdocs.pm/lattice_stripe/opentelemetry.html
+[telemetry]: https://hexdocs.pm/lattice_stripe/telemetry.html
+[cheatsheet]: https://hexdocs.pm/lattice_stripe/cheatsheet.html
