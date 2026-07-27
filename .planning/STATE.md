@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-07-27T22:36:56.121Z"
 last_activity: 2026-07-27
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,17 +17,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-28 — post-v1.x maintenance posture)
+See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Reactive maintenance only — bugs, Stripe drift, adopter-pull narrow adds
+**Current focus:** v1.10 Accrue Surface Closure (Hex 1.8.0) — Entitlements + meter reads + object types + Finch DX + Product↔Feature; all additive.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (roadmap created; Phases 61-67 defined)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-07-27 — Milestone v1.10 started
+Status: Roadmap created — ready for `/gsd-plan-phase 61`
+Last activity: 2026-07-27 — Milestone v1.10 roadmap created (7 phases, 19 requirements mapped)
 
 ## Performance Metrics
 
@@ -41,20 +41,17 @@ Last activity: 2026-07-27 — Milestone v1.10 started
 
 ### Decisions
 
-- **v1.x stop signal holds** — no new Stripe resource families without documented adopter pull.
-- **Done estimate ~98%** — May 28 quicks closed v1.10 wedges; capstone adds Connect/Webhook docs_truth clusters, JTBD narrative close, Issue #13 field patches.
-- **CI-01 resolved** — paths-ignore `.planning/**` only (Phase 60); guide/md PRs run docs_truth.
-- **No Hex bump** — v1.9 doc-only like v1.8; future doc milestones same.
-- **PLAN-01 closed (260527-tqf)** — `54-VERIFICATION.md` backfilled retroactively from Phase 54/55 evidence.
-- **Post-v1.x posture (2026-05-28)** — reactive maintenance only; no website; no v1.10; adoption = pure silence until pull.
-- **Wedge A closed (260527-tkc)** — payments fence, portal Configuration truth, JTBD gap inventory; docs_truth locks added.
-- **Wedge B closed (260527-tm1)** — recipes.md File.create → update_evidence → submit_evidence spine + docs_truth lock.
-- **Capstone closed (20260528-car/dts/jnc/i13p)** — Connect/Webhook docs_truth clusters, JTBD narrative close, Issue #13 field patches on Balance/BalanceTransaction/BillingPortal.Session.
-- **v2.core fail-fast is by design** — `{:unknown_object_type, type}` on unmapped thin-event types; not a bug.
+- **v1.10 reopens the build track** — adopter-pull gate fired (Accrue's verified blocking need for Stripe-native Entitlements); scope narrow + additive → Hex minor bump 1.8.0. Numbering diverges: GSD milestone v1.10, Hex tag 1.8.0 (v1.8/v1.9 were doc-only).
+- **Wave 0 first** — default Finch pool (live footgun, DX-01) + "1.1 → 1.7 what landed" migration guide (DOC-01) are near-zero-code, de-risk, and unblock the most downstream accrue work.
+- **Entitlements: pull/pagination shape only** — NO per-request `entitled?` gate helper (actively harmful for accrue's fail-closed local gate).
+- **No new metering writes** — accrue uses exactly one (`MeterEvent.create/3`); all four write surfaces already ship. Only reads (EventSummary) are missing.
+- **SEED-005 §6 stability contracts FROZEN** — nil `stripe_account` omits header; per-request opts override per-client; api_version default `2026-03-25.dahlia`; `Client.new!/1` takes a keyword list.
+- **Lower-priority DX deferred to SEED-006** — brief §3.2, 3.5–3.9, 3.11 are real but non-blocking; not in this milestone.
+- **v1.x stop signal otherwise holds** — no broad resource-family breadth (Identity, Treasury, Issuing, Terminal, etc.) in this reopen.
 
 ### Blockers/Concerns
 
-- None
+- **Requirement count**: REQUIREMENTS.md header says "17 v1 requirements" but the enumerated list contains **19 distinct IDs** (ENT×5, MTR×4, OBJ×3, PROD×2, DX×3, DOC×2). All 19 are mapped to phases (100% coverage). The "17" is a stale count in the source header, not a coverage gap.
 
 ### Quick Tasks Completed
 
@@ -73,19 +70,19 @@ Last activity: 2026-07-27 — Milestone v1.10 started
 
 ## Session Continuity
 
+Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
+Gap brief: `.planning/research/accrue-gap-brief-2026-07-27.txt`
 Assessment thread: `.planning/threads/v1-10-next-milestone-assessment.md`
-Maintenance posture: `.planning/threads/post-v1x-maintenance-posture.md`
-Milestone audit: `.planning/milestones/v1.9-MILESTONE-AUDIT.md`
+Deferred DX: `.planning/seeds/SEED-006-accrue-dx-ergonomics.md`
 
 ## Operator Next Steps
 
-**Default:** React to GitHub issues/PRs, Stripe API drift, and adopter-reported bugs only.
+**Default:** Plan and execute the v1.10 roadmap, Wave 0 first.
 
 | Trigger | Action |
 |---------|--------|
-| Bug / wrong Stripe behavior | `/gsd-quick` or `/gsd-debug` → fix + test; patch release if needed |
-| Stripe breaking change | Narrow update; milestone only if large |
-| New resource family (documented adopter pull) | `/gsd-new-milestone` |
-| Doc typo | `/gsd-quick` + docs_truth lock |
+| Ready to plan | `/gsd-plan-phase 61` (default Finch pool) or `62` (migration guide) — both Wave 0 |
+| Wave 0 done | `/gsd-plan-phase 63` (Entitlements flagship) |
+| Bug / wrong Stripe behavior | `/gsd-quick` or `/gsd-debug` → fix + test |
 
-**Do not:** website, v1.10 milestone, Hex bump for doc-only, specialist families without pull.
+**Do not:** broad resource-family breadth; new metering writes; a per-request `entitled?` gate helper; break SEED-005 §6 stability contracts.

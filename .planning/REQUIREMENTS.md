@@ -68,17 +68,42 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (to be filled by roadmapper) | | |
+| ENT-01 | Phase 63 | Pending |
+| ENT-02 | Phase 63 | Pending |
+| ENT-03 | Phase 63 | Pending |
+| ENT-04 | Phase 63 | Pending |
+| ENT-05 | Phase 63 | Pending |
+| MTR-01 | Phase 64 | Pending |
+| MTR-02 | Phase 64 | Pending |
+| MTR-03 | Phase 64 | Pending |
+| MTR-04 | Phase 64 | Pending |
+| OBJ-01 | Phase 65 | Pending |
+| OBJ-02 | Phase 65 | Pending |
+| OBJ-03 | Phase 65 | Pending |
+| PROD-01 | Phase 66 | Pending |
+| PROD-02 | Phase 66 | Pending |
+| DX-01 | Phase 61 | Pending |
+| DX-02 | Phase 67 | Pending |
+| DX-03 | Phase 67 | Pending |
+| DOC-01 | Phase 62 | Pending |
+| DOC-02 | Phase 67 | Pending |
 
 **Coverage:**
-- v1 requirements: 17 total
-- Mapped to phases: TBD (roadmapper)
-- Unmapped: TBD
+- v1 requirements: **19 total** (the enumerated list contains 19 distinct IDs — ENT×5, MTR×4, OBJ×3, PROD×2, DX×3, DOC×2; the earlier "17" header count was stale)
+- Mapped to phases: 19/19 ✓
+- Unmapped: 0
+
+**Phase → requirement rollup:**
+- Phase 61 (Wave 0): DX-01
+- Phase 62 (Wave 0): DOC-01
+- Phase 63 (Wave 1): ENT-01, ENT-02, ENT-03, ENT-04, ENT-05
+- Phase 64 (Wave 2): MTR-01, MTR-02, MTR-03, MTR-04
+- Phase 65 (Wave 2): OBJ-01, OBJ-02, OBJ-03
+- Phase 66 (Wave 3): PROD-01, PROD-02
+- Phase 67 (Wave 3): DX-02, DX-03, DOC-02
 
 ---
 *Requirements defined: 2026-07-27*
-*Last updated: 2026-07-27 after milestone v1.10 definition*
+*Last updated: 2026-07-27 after milestone v1.10 roadmap creation (traceability filled, 19/19 mapped)*
