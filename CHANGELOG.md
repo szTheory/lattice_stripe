@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 1.7"}`.
 
+## [Unreleased]
+
+### Features
+
+* **client:** ship an optional `LatticeStripe.Application` that starts a default `LatticeStripe.Finch` pool at boot; `:finch` is no longer required and now defaults to `LatticeStripe.Finch`, so you can call Stripe without wiring a Finch pool yourself. This change is additive and backwards-compatible — existing callers that pass `:finch` or start their own pool are unaffected. BYO-supervision users who already run their own Finch pool can disable the default with `config :lattice_stripe, start_default_finch: false` to avoid a duplicate idle pool.
+
 ## [1.7.13](https://github.com/szTheory/lattice_stripe/compare/v1.7.12...v1.7.13) (2026-05-29)
 
 
