@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure
-status: planning
-last_updated: "2026-07-27T22:36:56.121Z"
+status: executing
+last_updated: "2026-07-27T23:16:05.203Z"
 last_activity: 2026-07-27
 progress:
-  total_phases: 7
+  total_phases: 1
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** v1.10 Accrue Surface Closure (Hex 1.8.0) — Entitlements + meter reads + object types + Finch DX + Product↔Feature; all additive.
+**Current focus:** Phase 61 — default-finch-pool-optional-application
 
 ## Current Position
 
-Phase: Not started (roadmap created; Phases 61-67 defined)
-Plan: —
-Status: Roadmap created — ready for `/gsd-plan-phase 61`
-Last activity: 2026-07-27 — Milestone v1.10 roadmap created (7 phases, 19 requirements mapped)
+Phase: 61 (default-finch-pool-optional-application) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-07-27
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Last activity: 2026-07-27 — Milestone v1.10 roadmap created (7 phases, 19 requ
 - **SEED-005 §6 stability contracts FROZEN** — nil `stripe_account` omits header; per-request opts override per-client; api_version default `2026-03-25.dahlia`; `Client.new!/1` takes a keyword list.
 - **Lower-priority DX deferred to SEED-006** — brief §3.2, 3.5–3.9, 3.11 are real but non-blocking; not in this milestone.
 - **v1.x stop signal otherwise holds** — no broad resource-family breadth (Identity, Treasury, Issuing, Terminal, etc.) in this reopen.
+- [Phase ?]: Phase 61 default Finch pool: LatticeStripe.Application starts LatticeStripe.Finch at boot; :finch defaults to it (was required); opt-out via config :lattice_stripe, start_default_finch: false
 
 ### Blockers/Concerns
 
@@ -67,6 +68,7 @@ Last activity: 2026-07-27 — Milestone v1.10 roadmap created (7 phases, 19 requ
 | 260527-tm1 | Wedge B disputes/files evidence narrative in recipes.md | 2026-05-28 | b5a78dc | [260527-tm1-wedge-b-disputes-files-evidence-narrativ](./quick/260527-tm1-wedge-b-disputes-files-evidence-narrativ/) |
 | 260527-tp8 | Gap 2 Product/Price catalog + mandate/SetupAttempt narratives | 2026-05-28 | 4c636f4 | [260527-tp8-gap-2-narrative-product-price-catalog-st](./quick/260527-tp8-gap-2-narrative-product-price-catalog-st/) |
 | 260527-tqf | PLAN-01 backfill 54-VERIFICATION.md | 2026-05-28 | 69c0134 | [260527-tqf-plan-01-backfill-54-verification-md-from](./quick/260527-tqf-plan-01-backfill-54-verification-md-from/) |
+| Phase 61 P01 | 5min | 2 tasks | 7 files |
 
 ## Session Continuity
 
