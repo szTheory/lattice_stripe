@@ -49,7 +49,9 @@
   3. An existing caller that passes `:finch` explicitly continues to work unchanged (backwards-compatible).
   4. `:finch` is no longer `required: true` in `config.ex` and is dropped from `@enforce_keys` in `client.ex`, proven by a test that constructs a client with no `:finch`.
 **Build constraints**: Follow `lib/lattice_stripe/config.ex` (`required: true` at L34/L71) + `lib/lattice_stripe/client.ex` (`@enforce_keys` at L51). MUST NOT break SEED-005 §6 stability contracts: `Client.new!/1` takes a keyword list; per-request opts override per-client; nil `stripe_account` omits the `Stripe-Account` header; `api_version` default `2026-03-25.dahlia`.
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 61-01-PLAN.md — Default Finch pool wired end-to-end: `LatticeStripe.Application` + `mod:`, relax config/client `:finch` requirements, opt-out toggle, tests (Wave 1)
+- [ ] 61-02-PLAN.md — Docs & CHANGELOG: guides note the default pool + optional `:finch` + opt-out (Wave 2)
 
 ### Phase 62: "1.1 → 1.7 What Landed" Migration Guide
 **Goal**: Adopters pinned to 1.1 can discover every surface that shipped since 1.1 with before/after examples.
@@ -125,7 +127,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 61. Default Finch Pool & Optional Application | v1.10 | 0/? | Not started | - |
+| 61. Default Finch Pool & Optional Application | v1.10 | 0/2 | Not started | - |
 | 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
 | 63. Stripe-Native Entitlements | v1.10 | 0/? | Not started | - |
 | 64. Meter Event-Summary Reads | v1.10 | 0/? | Not started | - |
