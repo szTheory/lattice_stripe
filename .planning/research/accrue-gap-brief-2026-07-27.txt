@@ -1,0 +1,849 @@
+================================================================================
+ACCRUE -> LATTICE_STRIPE : PRIORITIZED GAP BRIEF
+Derived 2026-07-27 from a full scan of /Users/jon/projects/accrue
+Verified against the vendored dep at accrue/deps/lattice_stripe (v1.7.13)
+================================================================================
+
+HOW TO USE THIS DOCUMENT
+------------------------
+You are working in ~/projects/lattice_stripe. This is the complete, prioritized
+list of what Accrue (the sibling billing library that consumes lattice_stripe)
+needs from you. Every claim below was checked directly against the vendored
+1.7.13 source tree, not inferred from Accrue's docs.
+
+Read the sections in this order:
+
+  SECTION 0 -- the framing problem. Read this first or you will build the
+               wrong things.
+  SECTION 1 -- P0. Genuinely missing. Blocks documented, already-designed
+               Accrue work.
+  SECTION 2 -- P1. Genuinely missing. Blocks queued Accrue work.
+  SECTION 3 -- P2. Ergonomics/DX gaps, each evidenced by machinery Accrue
+               had to duplicate.
+  SECTION 4 -- NOT UPSTREAM WORK. Things Accrue believes are missing that you
+               already shipped. Do not build these. Fix Accrue's docs instead.
+  SECTION 5 -- Explicit do-NOT-build list.
+  SECTION 6 -- Stability contracts to freeze.
+  SECTION 7 -- Appendix: the actual consumed API surface today.
+
+File:line references point into /Users/jon/projects/accrue unless the path
+starts with accrue/deps/lattice_stripe, which is your own 1.7.13 source.
+
+
+================================================================================
+SECTION 0 -- THE FRAMING PROBLEM (read first)
+================================================================================
+
+Accrue pins:   {:lattice_stripe, "~> 1.1"}      accrue/mix.exs:64
+Accrue locks:  1.7.13                            accrue/mix.lock:37
+                                                 accrue_admin/mix.lock:41
+                                                 examples/accrue_host/mix.lock:50
+
+Accrue's ENTIRE planning corpus -- 9+ artifacts, the CLAUDE.md dependency
+table, four guides, and a standing STATE.md deferral -- reasons against
+lattice_stripe 1.1. Six minor versions have shipped since. Roughly half of
+Accrue's recorded "lattice_stripe gaps" are already closed upstream and nobody
+on the Accrue side noticed.
+
+Concretely: BillingPortal.Configuration, Charge.list, TestHelpers.TestClock,
+Testing.Fixtures, Dispute, Tax.*, CreditNote, Payout, Quote, BalanceTransaction,
+and EventNotification (thin events) all exist in 1.7.13 and are all completely
+unconsumed by Accrue. Two of them are cited in Accrue as active blockers with
+hardcoded workarounds still shipping.
+
+CONSEQUENCE FOR YOUR ROADMAP: the single highest-ROI thing you can do is not
+code. It is publishing a "1.1 -> 1.7: what landed" migration note. That one
+document unblocks four separate Accrue deferrals at zero upstream cost. It is
+listed as item 4.0 in Section 4.
+
+After you strip out the stale beliefs, there are exactly THREE genuinely
+missing capabilities. They are Sections 1 and 2.
+
+
+================================================================================
+SECTION 1 -- P0: GENUINELY MISSING, BLOCKS DESIGNED WORK
+================================================================================
+
+--------------------------------------------------------------------------------
+1.1  LatticeStripe.Entitlements.*   <-- THE ask. Highest priority by a wide margin.
+--------------------------------------------------------------------------------
+
+VERIFIED ABSENT. `find lib -ipath '*entitle*'` and `grep -ril entitlement lib`
+both return zero results in your 1.7.13 tree.
+
+WANTED SURFACE
+  LatticeStripe.Entitlements.ActiveEntitlement
+      list/3        GET /v1/entitlements/active_entitlements  (customer: filter)
+      stream!/3     auto-paginating
+      retrieve/3    GET /v1/entitlements/active_entitlements/:id
+  LatticeStripe.Entitlements.Feature
+      create/retrieve/update/list   /v1/entitlements/features
+
+The paginated list/stream is the load-bearing piece. Everything else is
+secondary.
+
+WHY THIS IS THE TOP ASK -- Accrue has already built the consumer side around
+its absence, and is carrying three separate scars:
+
+  (a) Accrue's entitlement webhook reducer is the ONLY reducer in the codebase
+      that is not refetch-canonical. Every other one (e.g. the Connect reducer)
+      refetches canonical state from Stripe on each event to immunize against
+      out-of-order delivery. The entitlement reducer cannot, and says so:
+
+      accrue/lib/accrue/webhook/default_handler.ex:485-490
+        "That option is unavailable here: `lattice_stripe` 1.1 ships no
+         Entitlements list API (verified -- typed reads land in
+         `lattice_stripe >= 1.2`), so there is nothing to refetch."
+
+      It is forced into monotonic-snapshot mode as a result. This is a
+      correctness weakness, not a style preference.
+
+  (b) Accrue is ALREADY PERSISTING YOUR PAGINATION HANDLE, waiting for you:
+
+      accrue/lib/accrue/billing/entitlement_summary.ex:14-16
+        "...plus a `data` jsonb with the full payload (including the
+         `entitlements.url` pagination handle) for the deferred
+         `lattice_stripe >= 1.2` paginated reconcile."
+
+  (c) Stripe inlines at most 10 entitlements in the summary webhook and sets
+      has_more. Accrue cannot follow the cursor, so it shipped a telemetry
+      event whose only purpose is to admit the truncation:
+
+      [:accrue, :ops, :entitlement_summary_truncated]
+      accrue/guides/telemetry.md:463  -- "full pagination lands with
+      lattice_stripe >= 1.2"
+
+      And a `truncated` DB column to record it.
+
+THE STANDING DEFERRAL, whose revisit trigger is literally your release:
+
+  .planning/STATE.md:717
+    | Typed upstream Stripe Entitlements resources + live API reads
+    | deferred to `lattice_stripe >= 1.2`
+    | revisit_trigger: ... or explicit dependency capability change
+
+  .planning/milestones/v1.39-REQUIREMENTS.md:56  (the most precise spec anywhere)
+    "Typed upstream Stripe Entitlements resources -- first-class
+     Feature/ProductFeature/ActiveEntitlement modules + live API reads via
+     lattice_stripe >= 1.2 (candidate upstream contribution / SEED)."
+
+Also cited in: accrue/guides/entitlements.md:337-347 (a whole section titled
+"Deferred: the full paginated read"), .planning/processor-support-matrix.md:73,
+.planning/MILESTONES.md:344, .planning/milestones/v1.39-ROADMAP.md:116,
+.planning/RETROSPECTIVE.md:1107, .planning/milestones/v1.47-REQUIREMENTS.md.
+
+DESIGN CONSTRAINT -- IMPORTANT, this shapes the API you should build:
+
+  Accrue will consume this in a RECONCILER (background job / startup sweep),
+  NEVER on the entitlement gate path. This is enforced by a merge-blocking CI
+  gate, scripts/ci/verify_entitlement_sync_isolation.sh, which statically proves
+  that 8 gate-path files contain zero references to the Stripe entitlement cache
+  when sync is disabled. Accrue's gate (Accrue.Entitlements.entitled?/3) is
+  fail-closed, local-only, and makes zero processor calls by design.
+
+  => Build a PULL/PAGINATION shape (list / stream!), not a per-request
+     `entitled?(customer, feature)` convenience helper. A convenience helper
+     would be actively unhelpful -- Accrue cannot use it and it would invite
+     hosts to put a network call on their auth path.
+
+  Accrue's config already reserves the enum slot for this:
+  stripe_native_sync: :disabled | :advisory   (accrue/lib/accrue/config.ex:526-537)
+  A third value lands when you ship.
+
+ALSO NOTE: Accrue.Entitlements.StripeSync.summary_for_customer/1 currently
+ships INERT with zero callers, explicitly waiting on this
+(.planning/RETROSPECTIVE.md:1107).
+
+
+--------------------------------------------------------------------------------
+1.2  Product <-> Feature attachment  (/v1/products/:id/features)
+--------------------------------------------------------------------------------
+
+VERIFIED PARTIAL. accrue/deps/lattice_stripe/lib/lattice_stripe/product.ex has
+`features` and `marketing_features` as raw untyped `[map()]` struct fields
+(product.ex:67, :100, :408) -- deserialized straight from the JSON with no
+typing. There is no Product.Feature module and no attach/list/delete endpoint
+support.
+
+WANTED
+  LatticeStripe.Product.Feature.create/list/delete
+      POST   /v1/products/:id/features
+      GET    /v1/products/:id/features
+      DELETE /v1/products/:id/features/:id
+  plus typing the existing Product.features field into a struct.
+
+WHY IT MATTERS -- this is the highest PRODUCT leverage item in the whole brief,
+above even 1.1 in long-term impact:
+
+  Accrue's entitlement catalog is 100% duplicated host configuration. The host
+  hand-maintains a plan -> feature -> price_id map:
+
+  accrue/lib/accrue/config.ex:453-541
+    plans: [plan_atom: [features: [atom],
+                        limits:   [atom: pos_integer],
+                        price_ids: [string]]]
+
+  There is no way to derive this from Stripe, so Stripe's product/feature
+  catalog and Accrue's config drift silently. Accrue's admin diagnostic
+  (accrue/lib/accrue/entitlements/admin.ex) can only report unmapped PRICE IDs;
+  it cannot report unmapped FEATURES, because it has no view of Stripe's feature
+  catalog at all.
+
+  With Product.Feature reads, Accrue could derive the catalog from Stripe
+  instead of requiring hosts to duplicate it, and could ship real drift
+  detection. That removes an entire class of "my customer paid but doesn't have
+  the feature" support ticket.
+
+
+================================================================================
+SECTION 2 -- P1: GENUINELY MISSING, BLOCKS QUEUED WORK
+================================================================================
+
+--------------------------------------------------------------------------------
+2.1  Meter event summaries  (GET /v1/billing/meters/:id/event_summaries)
+--------------------------------------------------------------------------------
+
+VERIFIED ABSENT. grep for "event_summaries|EventSummary|event_summary" across
+your lib/ returns zero. Your billing/ directory has meter.ex, meter_event.ex,
+meter_event_adjustment.ex, meter_event_stream.ex -- all WRITE surfaces. There is
+no read-back surface.
+
+WANTED
+  LatticeStripe.Billing.Meter.EventSummary.list/4  (+ stream!)
+    params: customer, start_time, end_time, value_grouping_window
+
+WHY IT MATTERS
+  This is the only real hole in metering, and it is a total one: Accrue has
+  ZERO usage read surface. It can push meter events to Stripe and it can never
+  read the totals back. Consequences:
+
+  - The admin UI has no usage view at all. The only meter-related thing on the
+    dashboard is a failure counter (accrue_admin dashboard_live.ex:401-457,
+    `failed_meter_event_count`).
+  - The queued SEED-004 M3 admin "Usage / meters room" cannot be built.
+    .planning/ROADMAP.md:279, .planning/REQUIREMENTS.md:46,
+    .planning/research/FEATURES.md:55 ("New rooms: Usage / meters /
+    metered-renewals ... Fills real IA gaps").
+  - No customer-facing "your usage this period" is possible in accrue_portal.
+
+  Accrue would add a `list_meter_event_summaries/2` callback to its
+  Accrue.Processor behaviour the day this lands.
+
+CONTEXT ON THE REST OF METERING: you are AHEAD of Accrue here, not behind.
+MeterEventAdjustment.create, MeterEventStream.create_session/send_events, and
+the full Meter CRUD all ship in 1.7.13 and Accrue calls NONE of them. Accrue
+uses exactly one metering function: Billing.MeterEvent.create/3, at
+accrue/lib/accrue/processor/stripe.ex:610. Do not build more metering writes
+for Accrue's sake -- build the read.
+
+One small contract question worth answering in docs: confirm that
+Billing.MeterEvent.create/3 accepts arbitrary custom `payload` dimensions and
+decimal string `value`s. Accrue currently hardcodes only stripe_customer_id +
+value (stripe.ex:591-598) and silently drops the host's :payload option
+(accrue/lib/accrue/billing/meter_event_actions.ex:43), partly because the
+contract is unclear.
+
+
+--------------------------------------------------------------------------------
+2.2  ObjectTypes registrations  <-- CHEAPEST HIGH-VALUE WIN IN THIS DOCUMENT
+--------------------------------------------------------------------------------
+
+VERIFIED. accrue/deps/lattice_stripe/lib/lattice_stripe/object_types.ex:5-52
+registers ~48 object types. Missing:
+
+  "entitlements.active_entitlement"
+  "entitlements.active_entitlement_summary"
+  "billing.meter_event"
+  "billing.meter_event_summary"
+  "billing.meter_error_report"
+
+("billing.meter" IS registered, at object_types.ex:47.)
+
+WHAT THIS COSTS ACCRUE TODAY
+  Because maybe_deserialize/1 cannot resolve these, Accrue's webhook handler
+  scavenges the raw map out of context by trial and error -- including, absurdly,
+  looking for the entitlement summary under a METER key:
+
+  accrue/lib/accrue/webhook/default_handler.ex:798-809
+    defp entitlement_summary_object_from_ctx(ctx) when is_map(ctx) do
+      Map.get(ctx, :entitlement_summary_object) || ... ||
+        Map.get(ctx, :meter_error_object) || ...
+
+  Plus a raw-map field dance at default_handler.ex:687-695 doing
+  get(ent, :feature) / get(ent, :lookup_key) against untyped data, and a
+  dedicated handle_event/3 clause at default_handler.ex:115-121 that exists
+  solely because the summary object has no top-level id and would otherwise be
+  dropped by the generic object_id: nil short-circuit.
+
+  Same story for meter error reports: reduce_meter_error_report/2 at
+  default_handler.ex:463-478 hand-extracts an identifier from a raw map, with no
+  typed validation_errors, for both billing.meter.error_report_triggered and the
+  v2 thin v1.billing.meter.error_report_triggered.
+
+CAVEAT YOU MUST HANDLE
+  The active_entitlement_summary object has NO top-level `id` field. Your
+  deserializer and any id-keyed logic must tolerate that. See Accrue's schema
+  note at accrue/lib/accrue/billing/entitlement_summary.ex:9-13 and the
+  hand-rolled fixture at accrue/test/support/stripe_fixtures.ex:407-409.
+
+BONUS, same area, cheap: add entitlement-summary and meter fixtures to
+LatticeStripe.Testing.Fixtures. Your fixtures module currently covers 10 objects
+(credit_note, dispute, file, file_link, mandate, quote, setup_attempt,
+tax_calculation, tax_id, tax_transaction) -- none of the core billing objects.
+Accrue hand-built a 76-line entitlement summary fixture at
+accrue/test/support/stripe_fixtures.ex:403-479 because of this.
+
+
+================================================================================
+SECTION 3 -- P2: ERGONOMICS / DX
+Each item below is evidenced by machinery Accrue had to duplicate.
+================================================================================
+
+--------------------------------------------------------------------------------
+3.1  `finch:` is required:true and fails at first live call
+     ** This is currently a live bug in Accrue. Highest-severity DX item. **
+--------------------------------------------------------------------------------
+
+VERIFIED, both sides:
+  accrue/deps/lattice_stripe/lib/lattice_stripe/config.ex:69-74
+    finch: [type: :atom, required: true,
+            doc: "Name of the Finch pool to use for HTTP requests.
+                  Must be started in your supervision tree."]
+  accrue/deps/lattice_stripe/lib/lattice_stripe/client.ex:51
+    @enforce_keys [:api_key, :finch]
+
+  Accrue's three Client.new!/1 call sites:
+    accrue/lib/accrue/processor/stripe.ex:863   (platform-scoped)
+    accrue/lib/accrue/processor/stripe.ex:1028  (account-scoped)
+    accrue/test/live_stripe/proration_fidelity_live_test.exs:156
+  NONE pass :finch.
+
+  grep -i finch across accrue/lib, accrue/config, examples/accrue_host/lib,
+  examples/accrue_host/config returns only three PROSE mentions
+  (application.ex:11, config/config.exs:36, host runtime.exs:129) and zero
+  wiring. Accrue.Config's NimbleOptions schema has no :finch key at all.
+
+  => Every live Stripe call from Accrue should raise NimbleOptions.ValidationError
+     at new!/1. It is invisible because CI runs Accrue.Processor.Fake and the
+     live lane is opt-in (mix test.live).
+
+ROOT CAUSE is a documentation-induced mental model. Accrue's own CLAUDE.md:152
+says all Stripe traffic goes through lattice_stripe "which uses :finch
+INTERNALLY", and accrue/lib/accrue/application.ex:11 says the host's supervision
+tree owns the pool -- with no wiring instructions anywhere.
+
+ASK (any one of these, in order of preference):
+  a) Ship an optional LatticeStripe.Application that starts a default
+     LatticeStripe.Finch pool, and default the :finch option to it.
+  b) Accept finch: nil and lazily start a default pool.
+  c) At minimum: make this a boot-time or compile-time diagnostic rather than a
+     first-live-request raise, and put a loud "you must start a Finch pool"
+     block at the top of the README/getting-started.
+
+Note this is fixable on Accrue's side too, and will be. But (a) would have
+prevented it entirely, and Accrue will not be the only consumer to hit it.
+
+
+--------------------------------------------------------------------------------
+3.2  Semver discipline on struct shape / value types
+--------------------------------------------------------------------------------
+
+accrue/deps/lattice_stripe/CHANGELOG.md:179-215 (v1.3.0) shipped two breaking
+changes under a MINOR bump, which `~> 1.1` silently accepted:
+
+  1. Status atomization -- "All resource modules with a documented finite
+     `status` field now return atoms" across PaymentIntent, Subscription,
+     SubscriptionSchedule, Charge, Refund, SetupIntent, Payout,
+     BalanceTransaction, BankAccount, Checkout.Session, Billing.Meter,
+     Account.Capability.
+  2. Expand deserialization -- expanded fields now return typed structs
+     (e.g. %Customer{}) instead of raw maps.
+
+Accrue survived (1) only because it had independently hardened every projection
+to accept both shapes BEFORE the change -- e.g.
+accrue/lib/accrue/billing/subscription_projection.ex:159-163,
+accrue/lib/accrue/billing/invoice_projection.ex:237-246,
+accrue/lib/accrue/billing/intent_result.ex:130-137. That is luck, not a held
+contract.
+
+(2) is the riskier one and is untested in Accrue: Accrue requests expansion
+(ensure_expand(params, ["balance_transaction", "charge.balance_transaction"]) at
+stripe.ex:561-565) and then writes the result into a jsonb column via
+to_string_keys/1. It happens to handle nested structs
+(subscription_projection.ex:242-243). Again: luck.
+
+ASK: treat struct-shape and value-type changes as major, or gate them behind an
+opt-in client flag (e.g. atomize_statuses: true) for one deprecation cycle.
+
+
+--------------------------------------------------------------------------------
+3.3  %LatticeStripe.Error{} has no headers / retry_after
+--------------------------------------------------------------------------------
+
+VERIFIED: error.ex:91-102 exposes type, code, message, status, request_id,
+param, decline_code, charge, doc_url, raw_body. No headers.
+
+Stripe returns Retry-After as an HTTP RESPONSE HEADER. Accrue therefore has:
+
+  accrue/lib/accrue/processor/stripe/error_mapper.ex:152
+    defp retry_after_from(%LatticeStripe.Error{raw_body: %{"retry_after" => v}}), do: v
+    defp retry_after_from(_), do: nil
+
+which is structurally always nil. Accrue.RateLimitError.retry_after is therefore
+a permanently-empty field in Accrue's public API.
+
+ASK: add `headers` (or at minimum a parsed `retry_after`) to the Error struct.
+
+RELATED: signature verification failures currently surface TWO different ways --
+a typed Webhook.SignatureVerificationError struct AND an
+%Error{type: :invalid_request_error, code: "signature_verification_failed"}.
+Accrue carries two mapper clauses for this (error_mapper.ex:50 and :56-61).
+Pick one shape.
+
+RELATED FACADE LEAK (Accrue-side, but worth knowing): Accrue stores the raw
+%LatticeStripe.Error{} inside its own public error structs as :processor_error
+(errors.ex:16,35,55,71). That is the one place lattice_stripe internals escape
+Accrue's facade, and it is flagged in-repo as a PII/logging hazard
+(errors.ex:12,24). Only one of ten mapper clauses sanitizes it.
+
+
+--------------------------------------------------------------------------------
+3.4  Promote Webhook.CacheBodyReader out of @moduledoc false
+--------------------------------------------------------------------------------
+
+Your CHANGELOG.md:277 marks LatticeStripe.Webhook.CacheBodyReader as
+"documented as private via @moduledoc false and ... excluded from the semver
+contract."
+
+That marking is the DIRECT and sole cause of Accrue duplicating it:
+accrue/lib/accrue/webhook/caching_body_reader.ex (52 lines, functionally
+identical Plug.Parsers body reader).
+
+Same for LatticeStripe.Webhook.Plug and LatticeStripe.Webhook.Handler -- both
+unused; Accrue rolled its own Accrue.Webhook.Plug (169 lines).
+
+ASK: promote CacheBodyReader to public + semver-covered. It is 50 lines and it
+is the single most copy-pasted thing in Stripe-on-Elixir integrations.
+
+
+--------------------------------------------------------------------------------
+3.5  Opt-in DateTime deserialization
+--------------------------------------------------------------------------------
+
+lattice_stripe returns raw Unix integers for every created / expires_at /
+period_end / trial_end. Accrue has 13 DateTime.from_unix sites in accrue/lib
+plus FOUR near-identical private converters:
+
+  accrue/lib/accrue/billing/invoice_projection.ex:277-281
+  accrue/lib/accrue/billing/promotion_code_projection.ex:55-59
+  accrue/lib/accrue/billing/coupon_actions.ex:310-313
+  accrue/lib/accrue/billing/subscription_projection.ex:132-142  (public
+     unix_to_dt/1, which even special-cases the string "now" for a Fake echo)
+
+ASK: a client option (e.g. datetimes: true) that deserializes documented
+timestamp fields into DateTime. Opt-in so it is not a breaking change --
+see 3.2.
+
+
+--------------------------------------------------------------------------------
+3.6  A canonical deep to_map/1
+--------------------------------------------------------------------------------
+
+Accrue's translate_resource/1 does Map.from_struct(result) (stripe.ex:934),
+which yields ATOM keys at the top level and STRING keys nested. Webhook payloads
+are all-string. Accrue.Processor.Fake is all-atom. So Accrue reimplements the
+identical two-line dual-key accessor
+
+    Map.get(map, key) || Map.get(map, Atom.to_string(key))
+
+in FIFTEEN files:
+
+  accrue/lib/accrue/billing.ex
+  accrue/lib/accrue/billing/charge_actions.ex
+  accrue/lib/accrue/billing/coupon_actions.ex
+  accrue/lib/accrue/billing/payment_method_actions.ex
+  accrue/lib/accrue/billing/refund_actions.ex
+  accrue/lib/accrue/billing/subscription_projection.ex
+  accrue/lib/accrue/billing_portal/session.ex
+  accrue/lib/accrue/checkout.ex
+  accrue/lib/accrue/checkout/session.ex
+  accrue/lib/accrue/connect.ex
+  accrue/lib/accrue/connect/account_link.ex
+  accrue/lib/accrue/connect/login_link.ex
+  accrue/lib/accrue/connect/projection.ex
+  accrue/lib/accrue/processor/fake.ex
+  accrue/lib/accrue/webhook/default_handler.ex
+
+The cause is stated in-repo at accrue/lib/accrue/connect/projection.ex:6-10.
+
+ASK: LatticeStripe.Resource.to_map/1,2 -- deep, with a configurable key shape
+(:string | :atom | :existing_atom). One canonical projection instead of fifteen
+hand-written accessors in every downstream.
+
+
+--------------------------------------------------------------------------------
+3.7  platform_scoped: true request option
+--------------------------------------------------------------------------------
+
+Some Connect endpoints (Account Links, Login Links) 400 if the Stripe-Account
+header is present. Accrue handles this by building an entire SECOND client:
+
+  accrue/lib/accrue/processor/stripe.ex:838-842
+    "Used for platform-scoped Connect calls (Account Links, Login Links) where
+     any inherited Accrue.Connect.with_account/2 scope would cause Stripe to
+     400 -- the Stripe-Account header is forbidden on these endpoints."
+
+  build_platform_client!/1 -- ~25 duplicated lines around stripe.ex:863.
+
+ASK: a per-request `platform_scoped: true` (or `stripe_account: :none`) opt that
+suppresses the header without a second client.
+
+
+--------------------------------------------------------------------------------
+3.8  Documented idempotency_key_fn hook
+--------------------------------------------------------------------------------
+
+You auto-generate idk_ltc_-prefixed UUIDv4 keys per POST and reuse them across
+retries (client.ex:159-162, :204-206). Accrue independently generates
+DETERMINISTIC, operation-seeded keys:
+
+  accrue/lib/accrue/processor/stripe.ex:953-963
+    "accr_" <> Base.url_encode64(:crypto.hash(:sha256,
+        "#{op}|#{subject_id}|#{seed}")) |> slice(0..21)
+
+Accrue's scheme is strictly better for billing (survives process death, not just
+in-request retries), but now there are two idempotency systems, and Accrue has a
+degradation path it has to warn about:
+
+  stripe.ex:1035-1044
+    Logger.warning("... no operation_id seed for #{op}/#{subject_id};
+                    retries will NOT be idempotent")
+
+ASK: a documented `idempotency_key_fn` client hook so a consumer's deterministic
+scheme can be THE scheme, not a parallel one.
+
+
+--------------------------------------------------------------------------------
+3.9  A stub transport / official fake
+--------------------------------------------------------------------------------
+
+You already have the right primitives -- a Transport behaviour
+(transport: LatticeStripe.Transport.Finch is a config option, config.ex) and
+Testing.Fixtures. They are not wired together into a usable fake.
+
+Because of that, Accrue hand-carved a 2,736-line simulator,
+accrue/lib/accrue/processor/fake.ex, which hand-writes ~20 Stripe object shapes
+(subscription :2195, subscription_item :2224, customer :2236, invoice :2300,
+invoice_item :2333, line_item :2390, payment_intent :2561, setup_intent :2584,
+payment_method :2603, charge :2625, subscription_schedule :2656, refund :2689,
+event :2716, billing.meter_event :1417, account/account_link/login_link/
+transfer/coupon, and the %{object: "list", data:, has_more:} envelope in seven
+places), plus a full in-memory test clock that "mirrors Stripe test-clock
+semantics".
+
+NUANCE -- do not over-read this. Accrue explicitly does NOT want you to own its
+Fake; Accrue.Processor.Fake is processor-agnostic (it also backs the Braintree
+lane) and Accrue's stated boundary is "even Stripe doesn't ship UI in the API
+library; Accrue should not either"
+(.planning/research/v1.33-PHASE-101-A-*.md:33).
+
+ASK, scoped: `transport: LatticeStripe.Transport.Stub` returning correctly-shaped
+TYPED structs for the core billing objects, so downstreams can diff their fakes
+against a canonical shape rather than divining it from the API docs. Extending
+Testing.Fixtures to the core billing objects (subscription, invoice, customer,
+payment_intent, subscription_schedule) gets most of the value on its own.
+
+
+--------------------------------------------------------------------------------
+3.10  Charge.create: state the position permanently
+--------------------------------------------------------------------------------
+
+Charge.list/search/update/capture shipped in 1.7. Charge.create is still
+deliberately absent (Stripe removed direct charge creation in the dahlia era).
+
+Accrue routes around it:
+  accrue/lib/accrue/processor/stripe.ex:511-526 -- create_charge goes through
+  PaymentIntent.create with confirmation_method: :automatic.
+
+ASK: say in the docs, explicitly and permanently, that Charge.create will never
+exist and PaymentIntent.create(confirm: true) is the sanctioned path. Right now
+Accrue carries it as a "lattice_stripe 1.0 does not expose..." comment, i.e. as
+a temporary gap, which means it will never get cleaned up.
+
+(Accrue's Charge.LIST 501 is a separate, purely-stale bug -- see 4.2.)
+
+
+--------------------------------------------------------------------------------
+3.11  Lower-priority ergonomics, listed for completeness
+--------------------------------------------------------------------------------
+
+  - Client.new!/1 runs full NimbleOptions validation on EVERY API call
+    (~60 call sites in Accrue, stripe.ex:1006-1033). A memoized/named client
+    (LatticeStripe.Client.fetch(:default)) would remove per-call validation cost.
+
+  - Native :expand opt is unused by Accrue. You support it (client.ex:202,208);
+    Accrue hand-injects expand into params instead (ensure_expand/2,
+    stripe.ex:919-929). Pure duplication -- and it means the 1.3 typed-expand
+    change reaches Accrue through an untested path. Worth a docs callout.
+
+  - Auto-pagination has ZERO adoption. List.stream / stream!/3 /
+    search_stream!/3 all exist and Accrue never calls them; it threads
+    starting_after/ending_before/limit by hand
+    (accrue/lib/accrue/billing/payment_method_actions.ex:28-36). Worse, Accrue's
+    Fake always returns has_more: false, so no pagination path is exercised in
+    CI at all. A docs example would likely fix this.
+
+  - Retries/timeouts unconfigured. max_retries, retry_strategy, timeout,
+    operation_timeouts all exist; Accrue sets none of them.
+
+  - Telemetry unattached. You emit [:lattice_stripe, :request, :start/:stop/
+    :exception/:retry] and ship attach_default_logger. Accrue attaches to none
+    of it and instead wraps its own Accrue.Telemetry.span/3 AROUND the call
+    (stripe.ex:105-108), so no Accrue span links to a lattice_stripe span.
+    accrue/guides/telemetry.md:249-250 hand-waves this. A short "integrating
+    with your app's telemetry" guide section would close it.
+
+  - require_explicit_proration (config.ex:110-115) is exactly the safety Accrue's
+    proration correctness depends on, and Accrue never enables it. Free safety
+    left on the table; worth surfacing in docs as a recommended-on setting.
+
+
+================================================================================
+SECTION 4 -- NOT UPSTREAM WORK
+Already shipped in 1.7.13. Accrue's docs are wrong. Do NOT build these.
+================================================================================
+
+4.0  ** THE ACTION ITEM FOR THIS WHOLE SECTION **
+     Publish a "1.1 -> 1.7: what landed" migration note. Accrue's planning
+     corpus reasons entirely against 1.1; everything below shipped without the
+     consumer noticing. This single document unblocks four Accrue deferrals at
+     zero code cost, and is more valuable than any single item in Section 3.
+
+4.1  BillingPortal.Configuration -- SHIPPED.
+     Verified: lib/lattice_stripe/billing_portal/configuration.ex plus
+     configuration/features.ex and configuration/features/{subscription_cancel,
+     subscription_update, customer_update, payment_method_update}.ex
+
+     Accrue says "deferred to lattice_stripe 1.2" in FOURTEEN places, including
+     CLAUDE.md:39, .planning/milestones/v1.47-REQUIREMENTS.md:60,
+     v1.24-REQUIREMENTS.md:49, and the canonical decision record at
+     .planning/milestones/v1.0-phases/04-*/04-CONTEXT.md:30.
+
+     This one is not cosmetic -- it is blocking a THREAT MITIGATION. Accrue's
+     STRIDE model T-04-07-03 (04-07-PLAN.md:401) accepts as a known limitation
+     that a customer can cancel via the portal and bypass dunning entirely,
+     because Stripe's default is immediate cancel and Accrue "cannot enforce
+     programmatically until BillingPortal.Configuration lands in
+     lattice_stripe 1.2". The mitigation today is a manual Dashboard checklist,
+     accrue/guides/portal_configuration_checklist.md, which at :116-120 promises
+     users an Accrue.BillingPortal.Configuration.create/1 helper "when it lands".
+
+     It landed. Accrue can build the guard now.
+
+4.2  Charge.list -- SHIPPED (list/301, list!/311, stream!/339, search/367,
+     search_stream!/403, update/434, capture/472).
+
+     Accrue still returns a hardcoded HTTP 501 for list_charges/2:
+       accrue/lib/accrue/processor/stripe.ex:539-551
+         "LatticeStripe.Charge.list/3 is not available in lattice_stripe ~> 1.0;
+          use Accrue.Processor.list_payment_intents/2 (Phase 4)."
+     This is a live capability regression in Accrue caused purely by stale
+     belief. Accrue's capabilities/0 (stripe.ex:79-101) also doesn't advertise
+     charge listing, so it is baked in twice.
+
+4.3  TestHelpers.TestClock + Testing.TestClock -- SHIPPED
+     (test_helpers/test_clock.ex, testing/test_clock.ex, testing/test_clock/
+     {owner,error}.ex, plus a mix task lattice_stripe.test_clock.cleanup).
+
+     Zero references anywhere in accrue/lib or accrue/test.
+     Accrue's TEST-02 requirement (v1.0-REQUIREMENTS.md:224) promises
+     "Accrue.Test.advance_clock/2 -- drives BOTH Fake and Stripe test-clock API"
+     and is marked [x] complete. It is half-shipped: accrue/lib/accrue/test/
+     clock.ex only ever drives Accrue.Processor.Fake. The DUN-09 real-Stripe
+     dunning E2E lane (v1.40-REQUIREMENTS.md:38) that depends on test clocks
+     does not exist.
+
+4.4  Testing.Fixtures -- SHIPPED, entirely unreferenced by Accrue.
+     (See 2.2 for the gap that DOES remain: no core-billing / entitlement /
+     meter fixtures.)
+
+4.5  Also shipped and completely unconsumed, each named as a future Accrue need
+     somewhere in the corpus:
+       Dispute + dispute/     -- ranked the #1 remaining future JTBD in
+                                 .planning/research/JTBD-FRONTIER.md:130
+                                 ("project charge.dispute.* into the ledger +
+                                 admin"); Accrue has no dispute schema at all
+       Tax.{Calculation,Transaction,Settings,Registration} + TaxId
+                              -- Accrue uses only the automatic_tax boolean
+       CreditNote, Payout, Quote, Mandate, SetupAttempt, File/FileLink
+       BalanceTransaction     -- would back the queued SEED-004 M3
+                                 "fee-reconciliation room"
+       EventNotification / thin events / v2
+                              -- zero mentions anywhere in Accrue
+       drift.ex               -- Accrue's only API-drift canary is an advisory,
+                                 secret-less, currently-skipping nightly job.
+                                 Worth documenting drift.ex prominently.
+
+4.6  Two live Accrue bugs this staleness has produced, for your awareness:
+       - :finch never passed => live Stripe lane raises (see 3.1)
+       - Charge.list 501 (see 4.2)
+     Both are Accrue's to fix. Mentioned here only because they're the concrete
+     cost of the missing migration note.
+
+
+================================================================================
+SECTION 5 -- DO NOT BUILD (for Accrue's sake)
+================================================================================
+
+Accrue records these as standing non-goals. Building wrappers for them will not
+be consumed:
+
+  Sigma                     -- explicit FIN-03 non-goal; Sigma is the COMPARATOR
+                               in accrue/guides/finance-handoff.md, not a target
+  Reporting / RevRec        -- same; "evidence and filing obligations remain with
+                               Stripe and your finance process"
+  Radar                     -- cited in Accrue research ONLY as a reason to keep
+                               Stripe-Hosted Checkout ("value Accrue cannot match
+                               and should not pretend to")
+  Terminal                  -- out of product scope
+  Payment Links             -- 2 incidental mentions, neither an ask
+  Credit Notes / Quotes     -- 1 incidental prose mention between them
+
+See PROJECT.md:490-499 and .planning/processor-support-matrix.md:112-133.
+
+(These are "not needed by Accrue". If lattice_stripe is aiming at general Stripe
+coverage independent of Accrue, weigh accordingly -- this section is scoped to
+the Accrue consumer only.)
+
+
+================================================================================
+SECTION 6 -- STABILITY CONTRACTS TO FREEZE
+Accrue's Connect and versioning layers depend on these. Breaking them is worse
+than shipping nothing.
+================================================================================
+
+  1. nil stripe_account => the Stripe-Account header is OMITTED (not sent empty).
+     Accrue relies on this for platform-scoped semantics.
+     Verified against client.ex during Accrue's Phase 5;
+     recorded at .planning/milestones/v1.0-phases/05-connect/05-01-SUMMARY.md:81.
+
+  2. Per-request opts override per-client settings.
+     Accrue builds a 3-level precedence chain (opts > process dict > app config)
+     for BOTH api_version and stripe_account directly on top of this.
+     05-CONTEXT.md:34, stripe.ex resolve_api_version/1 + Accrue.Stripe.with_api_version/2.
+
+  3. api_version default "2026-03-25.dahlia" (config.ex:50).
+     Accrue surfaces this as user-facing config documented as
+     "Stripe API version pinned by the :lattice_stripe wrapper"
+     (accrue/lib/accrue/config.ex:109), and it is a public MARKETING claim in
+     Accrue's brand book comparison table (brandbook/copy.md:138: "Current via
+     lattice_stripe (tracks Stripe 2026-03-25.dahlia)") against stripity_stripe's
+     2019 pin. Version currency is the stated reason lattice_stripe exists.
+
+  4. Client.new!/1 takes a KEYWORD LIST (not a bare api_key string). Accrue has
+     already been broken once by assuming otherwise
+     (.planning/quick/260414-l9q-*-SUMMARY.md:103).
+
+
+================================================================================
+SECTION 7 -- APPENDIX: THE ACTUAL CONSUMED SURFACE TODAY
+================================================================================
+
+Architectural note worth knowing: Accrue enforces a strict facade. A CI test
+(accrue/test/accrue/processor/stripe_test.exs:296-323) allow-lists LatticeStripe
+references to exactly SIX files:
+
+    lib/accrue/processor/stripe.ex
+    lib/accrue/processor/stripe/error_mapper.ex
+    lib/accrue/webhook/event.ex
+    lib/accrue/webhook/ingest.ex
+    lib/accrue/webhook/plug.ex
+    lib/accrue/webhook/signature.ex
+
+accrue_admin, accrue_portal, and examples/accrue_host contain ZERO direct
+LatticeStripe references. Everything funnels through Accrue.Processor.Stripe.
+
+Consequence for you: gaps never show up as scattered coupling. They show up as
+duplicated machinery inside Accrue -- which is why Section 3 reads the way it
+does.
+
+FUNCTIONS CALLED (all in accrue/lib/accrue/processor/stripe.ex unless noted):
+
+  Client            new!/1  (:863 platform, :1028 account-scoped)
+  Customer          create :118 / retrieve :135 / update :157, :501
+  Subscription      create :174 / retrieve :184 / update :196 / cancel :206,:217
+                    resume :227 / pause_collection :238
+  SubscriptionItem  create :624 / update :635 / delete :646
+  SubscriptionSchedule create :662 / update :673 / release :683 / cancel :693
+                    retrieve :702
+  Invoice           create :257 / retrieve :266 / update :277 / finalize :287
+                    void :297 / pay :307 / send_invoice :317
+                    mark_uncollectible :327 / create_preview :336
+  InvoiceItem       create :346 / delete :358
+  PaymentIntent     create :372 (+ :522 as the Charge.create substitute)
+                    retrieve :381 / confirm :392
+  SetupIntent       create :406 / retrieve :415 / confirm :426
+  PaymentMethod     create :440 / retrieve :449 / attach :460 / detach :470
+                    list :479 / update :490
+  Charge            retrieve :534 ONLY  (create shimmed :522; list 501'd :539)
+  Refund            create :570 / retrieve :579
+  Coupon            create :716 / retrieve :725
+  PromotionCode     create :735 / retrieve :744
+  Checkout.Session  create :758 / retrieve :767
+  BillingPortal.Session create :777
+  Billing.MeterEvent create :610          <-- the ONLY metering call
+  Connect           AccountLink.create :796 / LoginLink.create :807
+                    Transfer.create :825 / Transfer.retrieve :834
+                    (LatticeStripe.Account.* is NEVER called -- see below)
+  Webhook           construct_event!/4     webhook/signature.ex:29
+                    SignatureVerificationError rescue  signature.ex:31
+  Event             %LatticeStripe.Event{} constructed  webhook/plug.ex:106
+                    Event.t() typespec  webhook/{event,ingest,signature}.ex
+  Error             10 mapper clauses  processor/stripe/error_mapper.ex:56-155
+  Testing           generate_test_signature/2,3  (test files only)
+
+NOT CALLED despite shipping: Account.* (full Connect account CRUD), Price,
+Product, Balance, BalanceTransaction, Payout, Dispute, CreditNote, Quote, Tax.*,
+TaxId, Mandate, SetupAttempt, File, FileLink, TransferReversal,
+BillingPortal.Configuration, Billing.Meter CRUD, Billing.MeterEventAdjustment,
+Billing.MeterEventStream, List.stream!, Testing.Fixtures, TestHelpers.TestClock,
+EventNotification, drift.
+
+One notable hole in that list: Accrue's Accrue.Processor behaviour declares six
+Connect ACCOUNT callbacks (processor.ex:271-276) and marks them
+@optional_callbacks (processor.ex:284-296). Accrue.Processor.Fake implements all
+six; Accrue.Processor.Stripe implements NONE, even though LatticeStripe.Account
+ships update/reject/Capability/Requirements/Individual/Company/Settings/
+BusinessProfile/TosAcceptance. Accrue.Connect exposes the whole public facade
+(connect.ex:143-296) with no Stripe backing. That is Accrue-side work, not an
+upstream gap -- listed so you know the surface is there and unexercised.
+
+
+================================================================================
+SUMMARY -- IF YOU ONLY DO FIVE THINGS
+================================================================================
+
+  1. Publish the "1.1 -> 1.7 what landed" migration note.          (Section 4.0)
+     Zero code. Unblocks four Accrue deferrals and two live bugs.
+
+  2. LatticeStripe.Entitlements.ActiveEntitlement.list + stream!.  (Section 1.1)
+     The only capability with a standing deferral whose revisit trigger is
+     literally your release. Pull/pagination shape, not a gate helper.
+
+  3. Register the 5 missing ObjectTypes + add entitlement/meter/core-billing
+     fixtures.                                                     (Section 2.2)
+     Cheapest high-value win in the document.
+
+  4. Billing.Meter.EventSummary.list.                              (Section 2.1)
+     Unblocks Accrue's entire (currently nonexistent) usage surface.
+
+  5. Make :finch not fail at first live call.                      (Section 3.1)
+     Accrue is silently broken on this right now and will not be the last.
+
+  Then, if there's room: Product.Feature attach (1.2) -- the highest long-term
+  product leverage item here, since it lets consumers derive the entitlement
+  catalog from Stripe instead of duplicating it in host config.
+
+================================================================================
+END
+================================================================================

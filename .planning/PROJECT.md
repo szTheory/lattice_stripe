@@ -75,6 +75,48 @@ The library is **done for v1.x scope** — intended mainstream SaaS Stripe cover
 
 See `.planning/milestones/v1.9-MILESTONE-AUDIT.md` for close-time audit evidence.
 
+## Reopen for Adopter Pull (2026-07-27) — v1.8.0 "Accrue Surface Closure"
+
+**The documented reopen gate has fired.** Maintenance-mode posture always reserved
+one trigger for new build: *"New Stripe resource families... deferred unless adopter
+pull justifies a future milestone"* (Out of Scope, below). Accrue — the downstream
+billing lib that already consumes LatticeStripe — has a **verified, blocking**
+dependency on Stripe-native Entitlements plus a small set of surface gaps. A gap
+scan of Accrue against its vendored `lattice_stripe` 1.7.13 source is captured at
+`.planning/seeds/SEED-005-stripe-native-entitlements.md` (evidence:
+`.planning/research/accrue-gap-brief-2026-07-27.txt`).
+
+**This is a genuine code milestone (not doc-only): the next Hex release is a minor
+bump to 1.8.0.** Scope is deliberately narrow — three genuinely-missing capabilities
+(Entitlements, Billing.Meter event summaries, 5 ObjectTypes/fixtures), one live DX
+footgun (default Finch pool), and Product↔Feature — all additive, all in service of
+letting Accrue adopt a newer LatticeStripe. It does **not** reopen broad
+resource-family breadth (Identity, Treasury, Issuing, Terminal, etc. stay deferred).
+
+**Note the numbering divergence:** GSD planning milestones reached v1.9 (doc-only,
+no Hex bump), so this is GSD-milestone **v1.10** even though the Hex tag is **1.8.0**.
+
+## Current Milestone: v1.10 Accrue Surface Closure (Hex 1.8.0)
+
+**Goal:** Close the three verified `lattice_stripe` surface gaps blocking accrue —
+Stripe-native Entitlements, meter usage reads, and webhook object-type coverage —
+plus the default-Finch-pool DX fix and Product↔Feature, so accrue can adopt a
+current release. All additive → Hex minor bump to 1.8.0.
+
+**Target features:**
+- Entitlements: `ActiveEntitlement` (list/stream!/retrieve) + `Feature` CRUD (pull/pagination shape, no gate helper)
+- Billing.Meter event-summary reads (accrue's entire usage-read surface today is zero)
+- 5 webhook ObjectTypes + typed fixtures (entitlement/meter/core-billing; summary has no `id`)
+- Optional `LatticeStripe.Application` + default Finch pool (fixes a live consumer footgun)
+- Product↔Feature attach + typed `Product.features` (lets consumers derive the entitlement catalog from Stripe)
+- "1.1 → 1.7 what landed" migration guide (zero-code; unblocks four accrue deferrals)
+
+**Key context:** Driven by the verified accrue gap brief
+(`.planning/research/accrue-gap-brief-2026-07-27.txt`, SEED-005). Lower-priority DX
+(brief §3.2–3.11) is deferred to SEED-006. Stability contracts in SEED-005 §6 must
+not break. Finch fix approach locked to the optional-Application + default-pool
+option.
+
 ## Context
 
 **Ecosystem gap:** At project start, the Elixir ecosystem lacked a modern, maintained Stripe SDK. `stripity_stripe` was outdated, with known issues around nested encoding and stale API coverage. LatticeStripe fills that gap with a production-minded Elixir-first surface.
@@ -202,6 +244,7 @@ See `.planning/milestones/v1.9-MILESTONE-AUDIT.md` for close-time audit evidence
 | No marketing website for LatticeStripe | SDK libs are discovered via Hex + README; ExDoc is the canonical reference; site would duplicate docs | ✓ Post-v1.x posture (2026-05-28) |
 | Post-v1.x: reactive maintenance only | v1.x scope complete at Hex 1.7.0; act on bugs, Stripe drift, adopter pull — not proactive milestones | ✓ Post-v1.x posture (2026-05-28) |
 | Adoption: pure silence default | No Forum/blog launch required for "done"; optional cross-link from Accrue when convenient | ✓ Post-v1.x posture (2026-05-28) |
+| Reopen maintenance mode for v1.8.0 "Accrue Surface Closure" | The adopter-pull gate fired: Accrue has a verified, blocking need for Stripe-native Entitlements + a narrow set of surface gaps (SEED-005); scope is additive and Accrue-driven, not broad breadth | ✓ Reopen decision (2026-07-27) |
 
 ## Evolution
 
@@ -221,4 +264,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-28 — post-v1.x maintenance posture; no website; reactive maintenance only*
+*Last updated: 2026-07-27 — reopened for v1.8.0 "Accrue Surface Closure" under the adopter-pull gate (SEED-005); prior maintenance posture otherwise intact*

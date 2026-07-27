@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.9
-milestone_name: — archived)
-status: maintenance
-last_updated: "2026-05-28"
-last_activity: 2026-05-28 — Maintenance capstone assessment refresh (waves 0–3)
+milestone: v1.10
+milestone_name: Accrue Surface Closure
+status: planning
+last_updated: "2026-07-27T22:36:56.121Z"
+last_activity: 2026-07-27
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-05-28 — post-v1.x maintenance posture)
 
 ## Current Position
 
-Phase: —
+Phase: Not started (defining requirements)
 Plan: —
-Status: maintenance — v1.x complete; operate finished lib
-Last activity: 2026-05-28 — Maintenance capstone: assessment refresh; doc-truth clusters + JTBD close + drift patches (in progress)
+Status: Defining requirements
+Last activity: 2026-07-27 — Milestone v1.10 started
 
 ## Performance Metrics
 
