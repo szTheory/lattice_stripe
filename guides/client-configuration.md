@@ -11,31 +11,41 @@ This approach means:
 
 ## Required Options
 
-Every client requires exactly two options:
+The only required option is `api_key`:
 
 ```elixir
+# :finch defaults to the auto-started LatticeStripe.Finch pool
 client = LatticeStripe.Client.new!(
-  api_key: "sk_test_YOUR_STRIPE_TEST_KEY",
-  finch: MyApp.Finch
+  api_key: "sk_test_YOUR_STRIPE_TEST_KEY"
 )
 ```
 
-- **`api_key`** — Your Stripe secret key. Use `sk_test_...` in development and `sk_live_...`
-  in production. Both are valid at `Client.new!` time — the key is validated for presence
-  and format but not verified against Stripe's servers until you make an actual request.
+- **`api_key`** (required) — Your Stripe secret key. Use `sk_test_...` in development and
+  `sk_live_...` in production. Both are valid at `Client.new!` time — the key is validated for
+  presence and format but not verified against Stripe's servers until you make an actual request.
 
-- **`finch`** — The name atom of a running Finch pool in your supervision tree. See
-  [Getting Started](getting-started.md#setting-up-finch) for how to configure Finch.
-  Passing a name that has no pool will produce a runtime error on the first request.
+- **`finch`** (optional, defaults to `LatticeStripe.Finch`) — The name atom of a running Finch
+  pool. LatticeStripe ships an optional `LatticeStripe.Application` that starts a default
+  `LatticeStripe.Finch` pool at boot, so you can omit `:finch` entirely. Pass your own pool
+  name to override the default with a pool from your own supervision tree (see
+  [Getting Started](getting-started.md#setting-up-finch) for how to configure Finch). Passing a
+  name that has no running pool will produce a runtime error on the first request.
 
-`Client.new!` raises `NimbleOptions.ValidationError` if any required option is missing or
-any option has the wrong type. This catches misconfiguration at startup, not buried in a
+  > **Already run your own Finch pool?** Prevent the default pool from starting (so you don't run
+  > a duplicate idle pool) with:
+  >
+  > ```elixir
+  > config :lattice_stripe, start_default_finch: false
+  > ```
+
+`Client.new!` raises `NimbleOptions.ValidationError` if a required option is missing or any
+option has the wrong type. This catches misconfiguration at startup, not buried in a
 production request.
 
 If you prefer a non-raising variant:
 
 ```elixir
-case LatticeStripe.Client.new(api_key: "sk_test_...", finch: MyApp.Finch) do
+case LatticeStripe.Client.new(api_key: "sk_test_...") do
   {:ok, client} -> client
   {:error, error} -> raise "Invalid Stripe client config: #{Exception.message(error)}"
 end

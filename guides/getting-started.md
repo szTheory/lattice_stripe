@@ -33,8 +33,22 @@ $ mix deps.get
 LatticeStripe uses [Finch](https://hex.pm/packages/finch) as its HTTP client. Finch is a
 connection-pooling HTTP library built on Mint — the modern standard for HTTP in Elixir.
 
-You need to start a Finch pool in your application's supervision tree. Add it to
-`lib/my_app/application.ex`:
+> **A default pool starts automatically.** As of the default-pool change, LatticeStripe ships
+> an optional `LatticeStripe.Application` that starts a `LatticeStripe.Finch` pool in its own
+> supervision tree at boot. You don't have to start a pool yourself — `:finch` defaults to this
+> `LatticeStripe.Finch` pool. The manual setup below is now **optional**: use it when you want
+> your own named pool (custom pool sizing, sharing one pool across libraries, or full control of
+> your supervision tree).
+>
+> **Already start your own Finch pool?** You can prevent the default pool from starting (so you
+> don't run a duplicate idle pool) by adding to your config:
+>
+> ```elixir
+> config :lattice_stripe, start_default_finch: false
+> ```
+
+If you want your own pool instead of (or in addition to) the default, start a Finch pool in your
+application's supervision tree. Add it to `lib/my_app/application.ex`:
 
 ```elixir
 defmodule MyApp.Application do
@@ -68,7 +82,18 @@ creating a LatticeStripe client.
 ## Creating a Client
 
 LatticeStripe is configured through a plain struct — no global state, no config files.
-Create a client with your Stripe API key and your Finch pool name:
+The only required option is your Stripe API key:
+
+```elixir
+# :finch defaults to the auto-started LatticeStripe.Finch pool
+client = LatticeStripe.Client.new!(
+  api_key: "sk_test_YOUR_STRIPE_TEST_KEY"
+)
+```
+
+Only `api_key` is required. `:finch` now defaults to the auto-started `LatticeStripe.Finch`
+pool, so you can omit it. If you run your own named pool, pass it explicitly to override the
+default:
 
 ```elixir
 client = LatticeStripe.Client.new!(
@@ -77,7 +102,7 @@ client = LatticeStripe.Client.new!(
 )
 ```
 
-Both `api_key` and `finch` are required. Everything else has sensible defaults.
+Everything else has sensible defaults.
 
 **Where to get your API keys:** Log in to the [Stripe Dashboard](https://dashboard.stripe.com/apikeys).
 Use `sk_test_...` keys in development — they don't charge real cards.
@@ -210,10 +235,13 @@ you are trying to ship:
 
 ## Common Pitfalls
 
-**Finch must be started before making API calls.**
-If you see `(Finch.Error) no pool found` errors, Finch isn't in your supervision tree or
-hasn't started yet. Make sure `{Finch, name: MyApp.Finch}` is in your `children` list in
-`application.ex`.
+**Custom Finch pools must be started before making API calls.**
+The default `LatticeStripe.Finch` pool starts automatically, so the common case just works. But
+if you pass your own pool name (`finch: MyApp.Finch`) that pool must be running. If you see
+`(Finch.Error) no pool found` errors, your named Finch pool isn't in your supervision tree or
+hasn't started yet — make sure `{Finch, name: MyApp.Finch}` is in your `children` list in
+`application.ex`. (If you disabled the default pool with
+`config :lattice_stripe, start_default_finch: false`, you must start a pool yourself.)
 
 **Amount is in cents, not dollars.**
 `2000` means $20.00 USD, not $2,000. This is a very common mistake that produces confusing
@@ -225,8 +253,9 @@ Test keys start with `sk_test_`. Live keys start with `sk_live_`. Never use live
 development or CI — test mode keys can't charge real cards, so mistakes are harmless.
 
 **Client is a struct, not a process.**
-You don't need to start a GenServer or add LatticeStripe to your supervision tree (beyond
-Finch). Just create the struct and pass it around. It's safe to share across processes.
+You don't need to start a GenServer or add LatticeStripe to your supervision tree. The default
+`LatticeStripe.Finch` pool starts on its own, so unless you bring your own named pool there's
+nothing to wire. Just create the struct and pass it around. It's safe to share across processes.
 
 **Validation errors raise, not return `{:error, ...}`.**
 If you pass invalid options to `Client.new!`, it raises `NimbleOptions.ValidationError`
