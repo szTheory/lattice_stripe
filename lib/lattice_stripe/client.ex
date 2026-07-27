@@ -76,7 +76,7 @@ defmodule LatticeStripe.Client do
   - `finch` - Name of the Finch pool for HTTP requests. Defaults to
     `LatticeStripe.Finch` (started automatically at boot). Guaranteed non-`nil`
     only when the struct is built via `new!/1`/`new/1` (which run
-    `Config.validate!/1`); a bare `struct!/2` bypasses the default
+    `LatticeStripe.Config.validate!/1`); a bare `struct!/2` bypasses the default
   - `stripe_account` - Connected account ID for Stripe Connect platforms, or `nil`
   - `base_url` - Stripe API base URL (default: `"https://api.stripe.com"`)
   - `files_base_url` - Stripe Files API base URL for uploads (default: `"https://files.stripe.com"`)
