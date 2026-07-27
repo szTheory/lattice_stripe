@@ -48,7 +48,7 @@ defmodule LatticeStripe.Client do
 
   @version Mix.Project.config()[:version]
 
-  @enforce_keys [:api_key, :finch]
+  @enforce_keys [:api_key]
   defstruct [
     :api_key,
     :finch,
@@ -73,7 +73,10 @@ defmodule LatticeStripe.Client do
   It is a plain struct with no process state — safe to share across processes.
 
   - `api_key` - Stripe secret key (`sk_test_...` or `sk_live_...`)
-  - `finch` - Name of the Finch pool started in your supervision tree
+  - `finch` - Name of the Finch pool for HTTP requests. Defaults to
+    `LatticeStripe.Finch` (started automatically at boot). Guaranteed non-`nil`
+    only when the struct is built via `new!/1`/`new/1` (which run
+    `Config.validate!/1`); a bare `struct!/2` bypasses the default
   - `stripe_account` - Connected account ID for Stripe Connect platforms, or `nil`
   - `base_url` - Stripe API base URL (default: `"https://api.stripe.com"`)
   - `files_base_url` - Stripe Files API base URL for uploads (default: `"https://files.stripe.com"`)
@@ -114,14 +117,20 @@ defmodule LatticeStripe.Client do
   ## Required Options
 
   - `:api_key` - Your Stripe API key (e.g., `"sk_test_..."`)
-  - `:finch` - Name atom of a running Finch pool (e.g., `MyApp.Finch`)
 
   ## Optional Options
+
+  - `:finch` - Name atom of a running Finch pool (e.g., `MyApp.Finch`). Defaults
+    to `LatticeStripe.Finch`, started automatically at application boot.
 
   See `LatticeStripe.Config` for the full schema with defaults and documentation.
 
   ## Example
 
+      # Zero-config — uses the default LatticeStripe.Finch pool:
+      client = LatticeStripe.Client.new!(api_key: "sk_test_...")
+
+      # Or bring your own pool:
       client = LatticeStripe.Client.new!(api_key: "sk_test_...", finch: MyApp.Finch)
   """
   @spec new!(keyword()) :: t()

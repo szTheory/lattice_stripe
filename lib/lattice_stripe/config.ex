@@ -8,20 +8,27 @@ defmodule LatticeStripe.Config do
   ## Required Options
 
   - `:api_key` - Your Stripe API key (`sk_test_...` or `sk_live_...`)
-  - `:finch` - Name of the Finch pool started in your supervision tree
 
   ## Optional Options
+
+  - `:finch` - Name of the Finch pool for HTTP requests. Defaults to
+    `LatticeStripe.Finch`, started automatically at application boot unless
+    disabled via `config :lattice_stripe, start_default_finch: false`. Pass your
+    own pool name to override.
 
   See `schema/0` for full option documentation with defaults.
 
   ## Example
 
-      # In your application supervisor:
+      # Zero-config: the default LatticeStripe.Finch pool is started for you.
+      {:ok, config} = LatticeStripe.Config.validate(api_key: "sk_test_...")
+
+      # Or bring your own pool. In your application supervisor:
       children = [
         {Finch, name: MyApp.Finch}
       ]
 
-      # Create a validated config:
+      # Then pass it explicitly to override the default:
       {:ok, config} = LatticeStripe.Config.validate(
         api_key: "sk_test_...",
         finch: MyApp.Finch
@@ -68,9 +75,11 @@ defmodule LatticeStripe.Config do
             ],
             finch: [
               type: :atom,
-              required: true,
+              default: LatticeStripe.Finch,
               doc:
-                "Name of the Finch pool to use for HTTP requests. Must be started in your supervision tree."
+                "Name of the Finch pool to use for HTTP requests. Defaults to LatticeStripe.Finch, " <>
+                  "started automatically at application boot unless disabled via " <>
+                  "`config :lattice_stripe, start_default_finch: false`. Pass your own pool name to override."
             ],
             timeout: [
               type: :pos_integer,

@@ -107,6 +107,7 @@ defmodule LatticeStripe.MixProject do
         groups_for_modules: [
           "Client & Configuration": [
             LatticeStripe,
+            LatticeStripe.Application,
             LatticeStripe.Client,
             LatticeStripe.Batch,
             LatticeStripe.Config,
@@ -264,6 +265,7 @@ defmodule LatticeStripe.MixProject do
 
   def application do
     [
+      mod: {LatticeStripe.Application, []},
       extra_applications: [:logger]
     ]
   end
