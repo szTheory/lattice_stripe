@@ -95,11 +95,17 @@ defmodule LatticeStripe.ClientTest do
       end
     end
 
-    # Test 3: new!/1 without finch raises NimbleOptions.ValidationError
-    test "new!/1 without finch raises NimbleOptions.ValidationError" do
-      assert_raise NimbleOptions.ValidationError, ~r/finch/, fn ->
-        Client.new!(api_key: "sk_test_123")
-      end
+    # Test 3: new!/1 without finch resolves to the default LatticeStripe.Finch pool (SC-1)
+    test "new!/1 without finch defaults to LatticeStripe.Finch without raising" do
+      client =
+        Client.new!(
+          api_key: "sk_test_123",
+          transport: LatticeStripe.MockTransport,
+          telemetry_enabled: false
+        )
+
+      assert %Client{} = client
+      assert client.finch == LatticeStripe.Finch
     end
 
     # Test 4: new/1 with valid opts returns {:ok, %Client{}}

@@ -17,10 +17,14 @@ defmodule LatticeStripe.ConfigTest do
       end
     end
 
-    test "raises NimbleOptions.ValidationError mentioning :finch when missing" do
-      assert_raise NimbleOptions.ValidationError, ~r/finch/, fn ->
-        Config.validate!(api_key: "sk_test_123")
-      end
+    test "defaults :finch to LatticeStripe.Finch when omitted (SC-1)" do
+      result = Config.validate!(api_key: "sk_test_123")
+      assert result[:finch] == LatticeStripe.Finch
+    end
+
+    test "explicit :finch overrides the LatticeStripe.Finch default (SC-3)" do
+      result = Config.validate!(api_key: "sk_test_123", finch: MyFinch)
+      assert result[:finch] == MyFinch
     end
 
     test "raises when api_key is not a string" do
