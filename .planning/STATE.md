@@ -4,17 +4,17 @@ milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 64
 current_phase_name: Meter Event-Summary Reads
-status: planned
-stopped_at: Completed 64-04-PLAN.md
+status: executing
+stopped_at: Wave 2 complete (64-03, 64-04 merged)
 last_updated: "2026-07-28T23:50:24.165Z"
 last_activity: 2026-07-28
-last_activity_desc: "Phase 63 verified via `/gsd-verify-work 63`: 63/63 UAT checkpoints pass (56 auto-covered by tests, 7 human-approved), verification status `passed`, phase marked complete. Phase 64 remains planned and ready to execute."
+last_activity_desc: "Phase 64 Wave 2 complete: 64-03 (MeterEventSummary list!/stream! + moduledoc) and 64-04 (MeterErrorReport + three value objects + ObjectTypes lock) executed in parallel and merged. Full suite 2264 tests / 0 failures; docs warnings held at the 42-warning baseline. 4 of 10 plans done; Wave 3 (64-05, 64-06) is next."
 progress:
-  total_phases: 3
+  total_phases: 7
   completed_phases: 2
   total_plans: 19
-  completed_plans: 12
-  percent: 63
+  completed_plans: 13
+  percent: 29
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 ## Current Position
 
-Phase: 64 (meter-event-summary-reads) — PLANNED
-Plan: 1 of 10 complete (6 waves)
-Status: Ready to execute
-Last activity: 2026-07-28 — Phase 63 verified via `/gsd-verify-work 63`: 63/63 UAT checkpoints pass (56 auto-covered by tests, 7 human-approved), verification status `passed`, phase marked complete. Phase 64 remains planned and ready to execute.
+Phase: 64 (meter-event-summary-reads) — EXECUTING
+Plan: 4 of 10 complete (Waves 1-2 of 6 merged)
+Status: Wave 3 (64-05, 64-06) ready to dispatch
+Last activity: 2026-07-28 — Wave 2 complete: 64-03 (MeterEventSummary `list!/2..4`, `stream!/2..4`, D-31 refutation set, full moduledoc) and 64-04 (MeterErrorReport + `.Reason`/`.ErrorType`/`.SampleError`, `from_event/1`, ObjectTypes dead-key lock) executed in parallel and merged with zero file overlap. Full suite 2264 tests / 0 failures / 1 skipped; `mix docs` held at the 42-warning baseline with none naming a Phase 64 file.
 
 ## Performance Metrics
 

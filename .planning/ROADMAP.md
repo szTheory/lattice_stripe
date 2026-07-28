@@ -129,7 +129,7 @@
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 64-03-PLAN.md — `list!/2..4`, `stream!/2..4`, the D-31 refutation set, and the full moduledoc (Wave 2)
+- [x] 64-03-PLAN.md — `list!/2..4`, `stream!/2..4`, the D-31 refutation set, and the full moduledoc (Wave 2)
 - [x] 64-04-PLAN.md — `MeterErrorReport` + `.Reason`/`.ErrorType`/`.SampleError`, `from_event/1`, fixture, ObjectTypes dead-key lock (Wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
