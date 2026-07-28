@@ -32,9 +32,8 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
 
   `customer` is a **required** filter — Stripe has no account-wide active-entitlement list,
   and both `list/3` and `stream!/3` raise `ArgumentError` before any network call if it is
-  missing. That guard is `LatticeStripe.Resource.require_param!/3`, which checks
-  **presence, not emptiness**: a `customer` key whose value is `""` or `nil` passes the
-  guard and fails at Stripe instead.
+  missing. That pre-network guard checks **presence, not emptiness**: a `customer` key
+  whose value is `""` or `nil` passes the guard and fails at Stripe instead.
 
   Stripe's `limit` defaults to **10** and maxes at **100**, so a single `list/3` call
   silently returns a *partial* set for any customer with more than ten active entitlements —
@@ -130,8 +129,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
   @doc """
   List a customer's active entitlements.
 
-  `params` **must** contain `"customer"`. The guard is
-  `LatticeStripe.Resource.require_param!/3`, which raises `ArgumentError` before any
+  `params` **must** contain `"customer"`. The guard raises `ArgumentError` before any
   network call and checks key **presence, not value emptiness**.
 
   Supports Stripe's `limit` (default 10, max 100), `starting_after`, `ending_before`, and

@@ -115,9 +115,9 @@ defmodule LatticeStripe.Entitlements.Feature do
   Create an entitlement feature.
 
   Requires `lookup_key` and `name` params (string keys — Stripe wire format). Both are
-  guarded by `LatticeStripe.Resource.require_param!/3`, which raises `ArgumentError`
-  **before any network call** and checks key **presence, not value emptiness**: a
-  `lookup_key` whose value is `""` or `nil` passes the guard and fails at Stripe instead.
+  guarded **before any network call**: the guard raises `ArgumentError` and checks key
+  **presence, not value emptiness**, so a `lookup_key` whose value is `""` or `nil` passes
+  the guard and fails at Stripe instead.
 
   `params` has no default. An argument-less create could only ever raise, so the arity that
   would allow one does not exist.
