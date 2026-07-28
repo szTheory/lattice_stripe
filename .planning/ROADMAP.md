@@ -31,7 +31,7 @@
 
 - [x] **Phase 61: Default Finch Pool & Optional Application** - Live Stripe calls work without a manually-started Finch pool (Wave 0) (completed 2026-07-27)
 - [ ] **Phase 62: "1.1 → 1.7 What Landed" Migration Guide** - Zero-code HexDocs guide enumerating every surface shipped since 1.1 (Wave 0)
-- [ ] **Phase 63: Stripe-Native Entitlements** - Pull/paginate active entitlements + manage entitlement features (Wave 1, flagship)
+- [x] **Phase 63: Stripe-Native Entitlements** - Pull/paginate active entitlements + manage entitlement features (Wave 1, flagship) (completed 2026-07-28)
 - [ ] **Phase 64: Meter Event-Summary Reads** - Read metered usage totals back from Stripe (Wave 2)
 - [ ] **Phase 65: Webhook ObjectTypes & Testing Fixtures** - Five entitlement/meter object types deserialize; public fixtures (Wave 2)
 - [ ] **Phase 66: Product ↔ Feature Attachment** - Attach/list/delete product features + typed `Product.features` (Wave 3)
@@ -85,7 +85,7 @@
   5. An `active_entitlement_summary` payload with **no top-level `id`** deserializes into a typed struct without being dropped.
 
 **Build constraints**: Follow `lib/lattice_stripe/charge.ex` full-resource template (`@known_fields`, `defstruct [..., object:, extra: %{}]`, `from_map/1`, `Resource.unwrap_*`) and `lib/lattice_stripe/list.ex` `List.stream!` for pagination. Deserializer MUST tolerate the missing top-level `id`. **Do NOT build a per-request `entitled?(customer, feature)` gate helper** (explicitly out of scope — pull/pagination shape only). New public modules need valid `@moduledoc`/`@doc` + ExDoc group registration in `mix.exs`.
-**Plans**: 5/7 plans executed
+**Plans**: 7/7 plans executed
 **Wave 1**
 
 - [x] 63-01-PLAN.md — TRACER: typed `ActiveEntitlement.list/3` end-to-end (fixtures, `list_json/3`, `Feature` decode, `list/3`, L1 surface locks) (Wave 1)
@@ -106,7 +106,7 @@
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 63-07-PLAN.md — docs-truth locks (ExDoc placement + three prose fences) and the five phase gates (Wave 5)
+- [x] 63-07-PLAN.md — docs-truth locks (ExDoc placement + three prose fences) and the five phase gates (Wave 5)
 
 ### Phase 64: Meter Event-Summary Reads
 
@@ -172,7 +172,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 61. Default Finch Pool & Optional Application | v1.10 | 2/2 | Complete    | 2026-07-27 |
 | 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
-| 63. Stripe-Native Entitlements | v1.10 | 6/7 | In Progress|  |
+| 63. Stripe-Native Entitlements | v1.10 | 7/7 | Complete    | 2026-07-28 |
 | 64. Meter Event-Summary Reads | v1.10 | 0/? | Not started | - |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 0/? | Not started | - |
 | 66. Product ↔ Feature Attachment | v1.10 | 0/? | Not started | - |

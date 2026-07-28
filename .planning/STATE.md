@@ -5,16 +5,16 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 63
 current_phase_name: stripe-native-entitlements
 status: executing
-stopped_at: Completed 63-06-PLAN.md
-last_updated: "2026-07-28T16:01:00.925Z"
+stopped_at: Completed 63-07-PLAN.md — Phase 63 complete
+last_updated: "2026-07-28T16:15:00.000Z"
 last_activity: 2026-07-28
-last_activity_desc: "63-06 complete: guides/entitlements.md shipped with the entitled? refusal AND its fail-closed replacement, registered in both ExDoc surfaces plus a new Entitlements module group; mix docs warnings 52 -> 48 (all four transient guide-link warnings resolved)"
+last_activity_desc: "63-07 complete: docs-truth locks the entitlements ExDoc placement and the three prose fences (mutation-checked 4x); the phase's docs debt is closed — mix docs warnings 48 -> 42, exactly the clean-HEAD baseline, zero naming an entitlements file. All five phase gates green. Phase 63 complete (7/7)"
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
-  percent: 50
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 ## Current Position
 
-Phase: 63 (stripe-native-entitlements) — EXECUTING
-Plan: 6 of 7 complete (Waves 1–3 done; Wave 4 done — 63-06 complete, only 63-07 remains)
-Status: Ready to execute
-Last activity: 2026-07-28 -- 63-06 complete: guides/entitlements.md shipped with the entitled? refusal AND its fail-closed replacement, registered in both ExDoc surfaces plus a new Entitlements module group; mix docs warnings 52 -> 48 (all four transient guide-link warnings resolved)
+Phase: 63 (stripe-native-entitlements) — COMPLETE
+Plan: 7 of 7 complete (all five waves done)
+Status: Ready to verify
+Last activity: 2026-07-28 -- 63-07 complete: docs-truth locks the entitlements ExDoc placement and the three prose fences (mutation-checked 4x); mix docs warnings 48 -> 42, exactly the clean-HEAD baseline, zero naming an entitlements file. All five phase gates green
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Last activity: 2026-07-28 -- 63-06 complete: guides/entitlements.md shipped with
 | Phase 63 P04 | 4min | 2 tasks | 2 files |
 | Phase 63 P05 | 8min | 2 tasks | 2 files |
 | Phase 63 P06 | 6min | 2 tasks | 3 files |
+| Phase 63 P07 | 12min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,9 @@ Last activity: 2026-07-28 -- 63-06 complete: guides/entitlements.md shipped with
 - [Phase ?]: 63-06: guides/entitlements.md ships the entitled? refusal WITH the four-step fail-closed local-gate replacement in the same section (D-19.2); a refusal without an alternative is what the next contributor deletes
 - [Phase ?]: 63-06: the guide's reconciler example uses ActiveEntitlementSummary.from_map/1, not ObjectTypes.maybe_deserialize/1 as CONTEXT.md's snippet shows — the registry row is Phase 65, so maybe_deserialize/1 returns a raw map today and the snippet would raise
 - [Phase ?]: 63-06: new Entitlements: groups_for_modules group between Billing Metering and Connect (D-17); Phase 66 appends Product.Feature here with a one-line diff
+- [Phase ?]: 63-07: D-24 held — entitled? is asserted PRESENT in three docs-truth places (guide, ActiveEntitlement source, scope.md) and refuted nowhere; the new test contains zero `refute`, because refuting the name would forbid the documentation the fence depends on
+- [Phase ?]: 63-07: gate 3 failed at 48 vs baseline 42 and was answered by fixing the autolinks, never by raising the baseline — the three `Resource.require_param!/3` prose sites from 63-01/63-03 were reworded to document the guard without naming a @moduledoc false helper; phase ends at 42 = baseline, surface count 0
+- [Phase ?]: 63-07: mix ci is still RED, but now entirely on 42 pre-existing warnings (Tax.* nested types, File.create/3, ../README.md, ObjectTypes) — steps 1-4 pass and zero warnings name an entitlements file; clearing them is Phase 67-shaped work
 
 ### Blockers/Concerns
 
@@ -111,8 +115,8 @@ Last activity: 2026-07-28 -- 63-06 complete: guides/entitlements.md shipped with
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T16:00:52.134Z
-**Stopped at:** Completed 63-06-PLAN.md
+**Last session:** 2026-07-28T16:15:00.000Z
+**Stopped at:** Completed 63-07-PLAN.md — Phase 63 complete (7/7)
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
@@ -122,13 +126,13 @@ Deferred DX: `.planning/seeds/SEED-006-accrue-dx-ergonomics.md`
 
 ## Operator Next Steps
 
-**Default:** Continue Phase 63. Wave 0 (61, 62) is done; Wave 1 (63-01, the tracer) is done; Wave 2 (63-02, 63-03) is done.
+**Default:** Phase 63 is complete (7/7). Verify it, then move to Phase 64.
 
 | Trigger | Action |
 |---------|--------|
-| Ready to continue | `/gsd-execute-phase 63` — Wave 3 (63-04 `ActiveEntitlementSummary`, whose `stream_entitlements!/3` delegates to the shipped `ActiveEntitlement.stream!/3`) |
-| Starting 63-06 | `guides/entitlements.md` closes a transient ExDoc warning: `feature.ex` already links to that path (63-03), so the link resolves the moment the file lands |
-| Starting 63-07 | Docs-truth L3 targets are in place in `feature.ex` — the `## Archiving` and `## Using lookup_key as your system identifier` headings, the literal `%{"archived" => true}`, and the `immutable` claim. Baseline for the differential docs gate is 42; the phase currently sits at 50 (4 distinct warnings × 2 counted ExDoc passes), all attributed in 63-02/63-03 SUMMARYs |
+| Ready to verify | `/gsd-verify-work 63` — all five gates are green and recorded in `63-07-SUMMARY.md` |
+| Ready for the next phase | `/gsd-discuss-phase 64` (Meter Event-Summary Reads) |
+| `mix ci` still red | Expected, and not Phase 63's doing. Steps 1–4 pass; `docs --warnings-as-errors` trips on 42 pre-existing warnings (Tax.* / TaxId.* nested types, `File.create/3`, `../README.md`, `../notebooks/stripe_explorer.livemd`, hidden `ObjectTypes` / `BillingPortal.Guards` / `Webhook.check_tolerance`). Zero name an entitlements file. Clearing them is Phase 67-shaped |
 | Bug / wrong Stripe behavior | `/gsd-quick` or `/gsd-debug` → fix + test |
 
 **Do not:** broad resource-family breadth; new metering writes; a per-request `entitled?` gate helper; break SEED-005 §6 stability contracts.
