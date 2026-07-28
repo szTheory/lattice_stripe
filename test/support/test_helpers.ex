@@ -52,11 +52,11 @@ defmodule LatticeStripe.TestHelpers do
      }}
   end
 
-  def list_json(items, url \\ "/v1/objects") do
+  def list_json(items, url \\ "/v1/objects", has_more \\ false) do
     %{
       "object" => "list",
       "data" => items,
-      "has_more" => false,
+      "has_more" => has_more,
       "url" => url
     }
   end

@@ -1,0 +1,133 @@
+defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
+  use ExUnit.Case, async: true
+
+  import Mox
+  import LatticeStripe.TestHelpers
+
+  alias LatticeStripe.Entitlements.{ActiveEntitlement, Feature}
+  alias LatticeStripe.Test.Fixtures.Entitlements
+
+  setup :verify_on_exit!
+
+  # ---------------------------------------------------------------------------
+  # ENT-01 — list/3
+  # ---------------------------------------------------------------------------
+
+  describe "ActiveEntitlement.list/3" do
+    test "GETs /v1/entitlements/active_entitlements with the customer filter" do
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert req.url =~ "/v1/entitlements/active_entitlements"
+        assert req.url =~ "customer=cus_123"
+
+        ok_response(Entitlements.active_entitlement_list_json())
+      end)
+
+      assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{} = list}} =
+               ActiveEntitlement.list(test_client(), %{"customer" => "cus_123"})
+
+      assert [%ActiveEntitlement{id: "ent_123"}] = list.data
+    end
+
+    test "returns a typed empty list for an empty page" do
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Entitlements.active_entitlement_list_json([], false))
+      end)
+
+      assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{} = list}} =
+               ActiveEntitlement.list(test_client(), %{"customer" => "cus_123"})
+
+      assert list.data == []
+      assert list.has_more == false
+    end
+
+    test "keeps entitlements sharing a lookup_key as distinct structs in wire order" do
+      items = [
+        Entitlements.active_entitlement_json(%{"id" => "ent_a"}),
+        Entitlements.active_entitlement_json(%{"id" => "ent_b"})
+      ]
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Entitlements.active_entitlement_list_json(items))
+      end)
+
+      assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{} = list}} =
+               ActiveEntitlement.list(test_client(), %{"customer" => "cus_123"})
+
+      assert [
+               %ActiveEntitlement{id: "ent_a", lookup_key: "premium_support"},
+               %ActiveEntitlement{id: "ent_b", lookup_key: "premium_support"}
+             ] = list.data
+    end
+  end
+
+  describe "ActiveEntitlement.list!/3" do
+    test "returns the response directly" do
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Entitlements.active_entitlement_list_json())
+      end)
+
+      assert %LatticeStripe.Response{data: %LatticeStripe.List{data: [%ActiveEntitlement{}]}} =
+               ActiveEntitlement.list!(test_client(), %{"customer" => "cus_123"})
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # ENT-01 — from_map/1 (decode, including the expandable feature field)
+  # ---------------------------------------------------------------------------
+
+  describe "ActiveEntitlement.from_map/1" do
+    test "decodes an expanded feature into a %Feature{}" do
+      wire = Entitlements.active_entitlement_json(%{"feature" => Entitlements.feature_json()})
+
+      assert %ActiveEntitlement{feature: %Feature{id: "feat_123", lookup_key: "premium_support"}} =
+               ActiveEntitlement.from_map(wire)
+    end
+
+    test "leaves an unexpanded feature as the bare id string" do
+      assert %ActiveEntitlement{feature: "feat_123"} =
+               ActiveEntitlement.from_map(Entitlements.active_entitlement_json())
+    end
+
+    test "captures unknown wire keys in :extra" do
+      entitlement =
+        ActiveEntitlement.from_map(
+          Entitlements.active_entitlement_json(%{"future_field" => "surprise"})
+        )
+
+      assert entitlement.extra == %{"future_field" => "surprise"}
+      refute Map.has_key?(Map.from_struct(entitlement), :future_field)
+    end
+
+    test "returns nil for nil" do
+      assert ActiveEntitlement.from_map(nil) == nil
+    end
+
+    test "is idempotent" do
+      wire = Entitlements.active_entitlement_json(%{"feature" => Entitlements.feature_json()})
+      once = ActiveEntitlement.from_map(wire)
+
+      assert ActiveEntitlement.from_map(once) == once
+    end
+  end
+
+  describe "Feature.from_map/1" do
+    test "decodes the wire object into a %Feature{}" do
+      assert %Feature{
+               id: "feat_123",
+               object: "entitlements.feature",
+               active: true,
+               lookup_key: "premium_support",
+               name: "Premium Support",
+               livemode: false
+             } = Feature.from_map(Entitlements.feature_json())
+    end
+
+    test "returns nil for nil and is idempotent" do
+      assert Feature.from_map(nil) == nil
+
+      once = Feature.from_map(Entitlements.feature_json())
+      assert Feature.from_map(once) == once
+    end
+  end
+end
