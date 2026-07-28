@@ -547,6 +547,14 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ "error-handling.md"
     assert guide =~ "metering.md" or guide =~ "customer-portal.md"
 
+    # An adopter who reads "shipped in vX" searches hex.pm for exactly that
+    # string. GSD milestone labels are two-part (v1.10) and are not Hex
+    # releases; published versions are three-part semver. The label leaked into
+    # this line once already, so lock the shape rather than the literal — the
+    # version legitimately changes, the number of parts does not.
+    [[_, claimed_version]] = Regex.scan(~r/shipped in v(\d+(?:\.\d+)*)/, guide)
+    assert claimed_version =~ ~r/^\d+\.\d+\.\d+$/
+
     entitlements_lib = Path.join(root, "lib/lattice_stripe/entitlements")
     active_entitlement = File.read!(Path.join(entitlements_lib, "active_entitlement.ex"))
     summary = File.read!(Path.join(entitlements_lib, "active_entitlement_summary.ex"))

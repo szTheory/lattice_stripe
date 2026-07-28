@@ -8,7 +8,7 @@ customer per feature. LatticeStripe exposes that family as typed modules under
 
 This guide covers reading a customer's entitlements, the webhook-driven
 reconciler pattern that keeps a local copy honest, and managing the feature
-catalog itself. Code examples reflect function signatures shipped in v1.10.
+catalog itself. Code examples reflect function signatures shipped in v1.8.0.
 
 ## Scope boundary
 
