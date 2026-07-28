@@ -744,16 +744,22 @@ A guide listed in `groups_for_extras` but absent from `extras:` is **silently dr
 | A3 | Stripe will not add a `DELETE /v1/entitlements/features` before v1.10 tags | ENT-04 surface completeness | LOW. D-08's `refute function_exported?(Feature, :delete, …)` lock is a *shape* lock, not a Stripe-behavior claim; if Stripe adds one, that is a future minor bump. |
 | A4 | `guides/entitlements.md` at ~200-260 lines is the right spine size | D-18 | NONE — pure discretion; `tax.md` is 350 lines, `customer-portal.md` is 362. |
 
-## Open Questions
+## Open Questions (RESOLVED)
+
+> All three were absorbed into the phase plan set on 2026-07-27. The findings below are unchanged;
+> each carries an inline `RESOLVED` line naming the plan and task that took the recommendation.
 
 1. **D-27's "git mv … verbatim" is not literally possible.** See *Correction C-01*. The private fixture namespace is `LatticeStripe.Test.Fixtures.*`; the public one is `LatticeStripe.Testing.Fixtures.*`.
    - What we know: `test/support/fixtures/metering.ex` defines `LatticeStripe.Test.Fixtures.Metering`; `lib/lattice_stripe/testing/fixtures/tax_id.ex` defines `LatticeStripe.Testing.Fixtures.TaxId`. `[VERIFIED: read both files 2026-07-28]`
    - What's unclear: whether D-27 intended the module name to change on promotion (it must) and whether the flat `active_entitlement_json/1`-style function names should be preserved (the public fixtures use different naming — check `lib/lattice_stripe/testing/fixtures/tax_id.ex` conventions during planning).
    - Recommendation: keep D-27's **function names** exactly as specified (that is the load-bearing part for Phase 65), name the private module `LatticeStripe.Test.Fixtures.Entitlements`, and word the header comment as: `# PROMOTION TARGET (Phase 65 / OBJ-02): move to lib/lattice_stripe/testing/fixtures/entitlements.ex and rename the module to LatticeStripe.Testing.Fixtures.Entitlements. Function names and bodies transfer unchanged — do not re-author.`
+   - **RESOLVED** — taken in full. `63-01` Task 1 creates the private module as `LatticeStripe.Test.Fixtures.Entitlements` with D-27's flat function names and the reworded promotion header comment; `63-05` Task 2 records the promote-by-move contract (path + module rename) in Phase 65's ROADMAP build constraints, so the rename cannot be lost between phases. Tracked as correction C-01.
 
 2. **D-29's baseline number is stale.** CONTEXT says 43 warnings; the re-verified count is **42**. Recommendation: the plan should capture the baseline dynamically rather than hardcoding a number — e.g. `mix docs --warnings-as-errors 2>&1 | grep -c "warning:"` on clean HEAD vs. post-change, plus a hard `grep -ci entitle` == 0. That satisfies D-29 without a magic constant that drifts again.
+   - **RESOLVED** — taken in full, and no number is hardcoded anywhere in the phase. `63-01` Task 1 captures the clean-HEAD count *before* any `lib/` change and `tee`s it into `docs-warning-baseline.txt`; `63-07` Task 2 reads that file with a no-fallback `cat` and gates on `current <= baseline` plus a zero count of warning lines naming the new surface. Tracked as correction C-02, which also bars the `ci` alias as a gate.
 
 3. **`mix lattice_stripe.check_drift` already exits 1 today** because entitlement schemas appear in `new_resources` (spec types not in `ObjectTypes.object_map()`). `[VERIFIED: drift.ex:15-45]` It runs in a **separate scheduled workflow** (`.github/workflows/drift.yml`), not in `ci.yml`, and files an issue rather than blocking. Phase 63 does not change this. Recommendation: no plan task should treat drift as a gate; optionally note in the phase's verification that the drift issue will still list `entitlements.*` until Phase 65 lands.
+   - **RESOLVED** — taken in full. No plan in this phase runs `check_drift`, and none of the five phase gates in `63-07` Task 2 include it. The reasoning is recorded permanently as the `mix lattice_stripe.check_drift` enrolment OPT-OUT row in `COVERAGE.md`, which states that enrolment derives from `ObjectTypes.object_map()` (Phase 65's file), that the job is a scheduled workflow filing an issue rather than blocking CI, and that it already exits 1 today for unrelated reasons.
 
 ## Corrections to CONTEXT.md
 

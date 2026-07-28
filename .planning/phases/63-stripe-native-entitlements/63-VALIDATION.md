@@ -39,10 +39,18 @@ created: 2026-07-27
 - **Before `/gsd-verify-work`:** all five phase gates green —
   1. `mix test` — 0 failures
   2. `mix test --include integration` — stripe-mock running on :12111
-  3. `mix docs` — exit 0, warning count ≤ dynamically-captured clean-HEAD baseline, and `mix docs --warnings-as-errors 2>&1 | grep -ci entitle` == `0`
+  3. `mix docs` — exit 0, warning count ≤ dynamically-captured clean-HEAD baseline, and zero warning
+     lines naming the new surface (`grep 'warning:' <log> | grep -ci entitle` == `0`, scoped to
+     warning lines, not the whole log). Canonical command: `63-07-PLAN.md` Task 2 `<verify>` — note
+     that both count assignments there carry `|| true`, since a counting grep exits 1 when it prints `0`
   4. `mix credo --strict` — 0 issues
   5. `mix test test/lattice_stripe/docs_truth_test.exs` — green (its own required CI lane)
-- **Max feedback latency:** 5 seconds
+- **Max feedback latency:** 5 seconds — **per-task sampling only**. This bounds the after-every-task
+  command on line 37 (`mix format` + `mix compile` + the scoped `mix test`), which is the loop the
+  executor runs dozens of times. **Phase gates are exempt** and are expected to take minutes: the
+  Docker-backed integration run (pulling and starting `stripe/stripe-mock` on first use), the full
+  `mix test` suite, and both `mix docs` builds. A slow phase gate is normal, not a hang and not
+  flakiness — let it finish rather than interrupting and retrying.
 
 ---
 
@@ -112,7 +120,7 @@ no task in this phase carries a `MISSING` automated verify.
 - [ ] Sampling continuity: no 3 consecutive tasks without automated verify
 - [ ] Wave 0 covers all MISSING references
 - [ ] No watch-mode flags
-- [ ] Feedback latency < 5s
+- [ ] Feedback latency < 5s for the per-task sampling command (phase gates exempt — see § Sampling Rate)
 - [ ] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
