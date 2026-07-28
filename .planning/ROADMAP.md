@@ -135,7 +135,7 @@
   3. Public `LatticeStripe.Testing.Fixtures` (with typed-conversion wrappers in `LatticeStripe.Testing`) exist for entitlement + meter objects, including the no-`id` summary.
   4. Public `Testing.Fixtures` exist for core billing objects — subscription, invoice, customer, payment_intent.
 
-**Build constraints**: Register in `lib/lattice_stripe/object_types.ex` (`billing.meter_event` module already exists — registrable as-is). Each key → a module with `from_map/1`; the `active_entitlement_summary` key must tolerate the missing `id`. Follow existing `LatticeStripe.Testing` fixture patterns (e.g. `dispute/1`, `customer/1`).
+**Build constraints**: Register in `lib/lattice_stripe/object_types.ex` (`billing.meter_event` module already exists — registrable as-is). Each key → a module with `from_map/1`; the `active_entitlement_summary` key must tolerate the missing `id`. Follow existing `LatticeStripe.Testing` fixture patterns (e.g. `dispute/1`, `customer/1`). Phase 63's `test/support/fixtures/entitlements.ex` is a promotion target: move it to `lib/lattice_stripe/testing/fixtures/entitlements.ex` **and** rename the module from `LatticeStripe.Test.Fixtures.Entitlements` to `LatticeStripe.Testing.Fixtures.Entitlements` — this is a move *plus* a module rename, because the private test-support namespace (`LatticeStripe.Test.Fixtures.*`) differs from the public one (`LatticeStripe.Testing.Fixtures.*`) and a literal file move alone produces a compile error; carry the four function names (`active_entitlement_json/1`, `active_entitlement_summary_json/1`, `feature_json/1`, `active_entitlement_list_json/2`) and their bodies over unchanged rather than re-authoring them.
 **Plans**: TBD
 
 ### Phase 66: Product ↔ Feature Attachment
