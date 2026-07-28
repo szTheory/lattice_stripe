@@ -5,16 +5,16 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 63
 current_phase_name: stripe-native-entitlements
 status: executing
-stopped_at: Completed 63-02-PLAN.md
-last_updated: "2026-07-28T15:20:23.951Z"
+stopped_at: Completed 63-03-PLAN.md
+last_updated: "2026-07-28T15:32:22.446Z"
 last_activity: 2026-07-28
-last_activity_desc: "63-02 complete: retrieve/3 + auto-paginating stream!/3 with the cross-tenant page-2 guard (ENT-02, ENT-03)"
+last_activity_desc: "63-03 complete: the full Entitlements.Feature verb surface plus the archiving and lookup_key landmine docs (ENT-04)"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 9
-  completed_plans: 5
-  percent: 56
+  completed_plans: 6
+  percent: 61
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 63 (stripe-native-entitlements) — EXECUTING
-Plan: 2 of 7 complete (63-01 tracer + 63-02 read surface/pagination done; 63-03 `Feature` verb surface is the remaining Wave 2 plan)
+Plan: 3 of 7 complete (Wave 1 tracer 63-01 + all of Wave 2 — 63-02 read surface/pagination and 63-03 `Feature` verb surface — done; Wave 3 is next)
 Status: Ready to execute
-Last activity: 2026-07-28 -- 63-02 complete: retrieve/3 + auto-paginating stream!/3 with the cross-tenant page-2 guard (ENT-02, ENT-03)
+Last activity: 2026-07-28 -- 63-03 complete: the full Entitlements.Feature verb surface plus the archiving and lookup_key landmine docs (ENT-04)
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Last activity: 2026-07-28 -- 63-02 complete: retrieve/3 + auto-paginating stream
 |------|----------|-------|-------|
 | Phase 63 P01 | 5min | 2 tasks | 6 files |
 | Phase 63 P02 | 3min | 2 tasks | 3 files |
+| Phase 63 P03 | 3min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,10 @@ Last activity: 2026-07-28 -- 63-02 complete: retrieve/3 + auto-paginating stream
 - **[63-02]** D-10/Pitfall 6: the customer guard is stream!/3's FIRST statement so it raises at call time; Stream.resource/3 defers its start function, so a lazily-built guard would raise on the first Enum step far from the caller
 - **[63-02]** T-63-02 mutation-checked: zeroing base_params in List.build_next_page_request/1 fails exactly 'page 2 preserves the customer filter' and nothing else — that test is proven load-bearing, not merely green, and must keep its specific name
 - **[63-02]** stream!/3 ships with NO non-bang twin, refuted structurally at arities 1/2/3 (two defaulted args means arity-3-only refutation would leak a def stream/2)
+- [Phase ?]: **[63-03]** 63-01 carry-forward discharged: alias LatticeStripe.{Client, Request, Resource} added to feature.ex and the NOTE deleted; the vestigial @doc false list_path/0 accessor REMOVED (five verbs read @list_path now) while ActiveEntitlement.list_path/0 stays because 63-04's summary url rewrite consumes it
+- [Phase ?]: **[63-03]** D-08 held: no archive/3, no unarchive/3, no set_active/4, no delete at any arity — archiving is update/4 with active: false, and every one of those names is refuted structurally at every exported arity
+- [Phase ?]: **[63-03]** T-63-08 is documentation-only by necessity: the active-field vs archived-filter split and its false-deletion consequence live in an {: .warning} moduledoc admonition because no function signature can carry the fact and stripe-mock does not vary by filter
+- [Phase ?]: **[63-03]** D-12 held: no retrieve_by_lookup_key/3 — a single-match lookup_key filter is asserted to return a %List{} of one, and lookup_key's post-create immutability (absent from the update body schema) is documented as the reason it is safe to key host config on
 
 ### Blockers/Concerns
 
@@ -93,8 +98,8 @@ Last activity: 2026-07-28 -- 63-02 complete: retrieve/3 + auto-paginating stream
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T15:20:05.356Z
-**Stopped at:** Completed 63-02-PLAN.md
+**Last session:** 2026-07-28T15:31:56.877Z
+**Stopped at:** Completed 63-03-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
@@ -104,12 +109,13 @@ Deferred DX: `.planning/seeds/SEED-006-accrue-dx-ergonomics.md`
 
 ## Operator Next Steps
 
-**Default:** Continue Phase 63. Wave 0 (61, 62) is done; Wave 1 (63-01, the tracer) is done; 63-02 is done.
+**Default:** Continue Phase 63. Wave 0 (61, 62) is done; Wave 1 (63-01, the tracer) is done; Wave 2 (63-02, 63-03) is done.
 
 | Trigger | Action |
 |---------|--------|
-| Ready to continue | `/gsd-execute-phase 63` — 63-03 (`Feature` verb surface) closes Wave 2; then Wave 3 (63-04 `ActiveEntitlementSummary`, whose `stream_entitlements!/3` now delegates to the shipped `ActiveEntitlement.stream!/3`) |
-| Starting 63-03 | Add `alias LatticeStripe.{Client, Request, Resource}` to `lib/lattice_stripe/entitlements/feature.ex` — deliberately omitted in 63-01, marked with an in-source `NOTE:` |
+| Ready to continue | `/gsd-execute-phase 63` — Wave 3 (63-04 `ActiveEntitlementSummary`, whose `stream_entitlements!/3` delegates to the shipped `ActiveEntitlement.stream!/3`) |
+| Starting 63-06 | `guides/entitlements.md` closes a transient ExDoc warning: `feature.ex` already links to that path (63-03), so the link resolves the moment the file lands |
+| Starting 63-07 | Docs-truth L3 targets are in place in `feature.ex` — the `## Archiving` and `## Using lookup_key as your system identifier` headings, the literal `%{"archived" => true}`, and the `immutable` claim. Baseline for the differential docs gate is 42; the phase currently sits at 50 (4 distinct warnings × 2 counted ExDoc passes), all attributed in 63-02/63-03 SUMMARYs |
 | Bug / wrong Stripe behavior | `/gsd-quick` or `/gsd-debug` → fix + test |
 
 **Do not:** broad resource-family breadth; new metering writes; a per-request `entitled?` gate helper; break SEED-005 §6 stability contracts.

@@ -12,7 +12,7 @@ Source: verified accrue gap brief (`.planning/research/accrue-gap-brief-2026-07-
 - [x] **ENT-01**: Developer can list a customer's active entitlements via `LatticeStripe.Entitlements.ActiveEntitlement.list/3` (`GET /v1/entitlements/active_entitlements`, customer filter)
 - [x] **ENT-02**: Developer can auto-paginate all active entitlements via `ActiveEntitlement.stream!/3` (follows `has_more`/cursor — the load-bearing piece for accrue's reconciler)
 - [x] **ENT-03**: Developer can retrieve a single active entitlement by id via `ActiveEntitlement.retrieve/3`
-- [ ] **ENT-04**: Developer can create, retrieve, update, and list entitlement features via `LatticeStripe.Entitlements.Feature` (`/v1/entitlements/features`)
+- [x] **ENT-04**: Developer can create, retrieve, update, and list entitlement features via `LatticeStripe.Entitlements.Feature` (`/v1/entitlements/features`)
 - [ ] **ENT-05**: `active_entitlement_summary` payloads (which have **no top-level `id`**) deserialize correctly without being dropped
 
 ### Metering Reads
@@ -73,7 +73,7 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 | ENT-01 | Phase 63 | Complete |
 | ENT-02 | Phase 63 | Complete |
 | ENT-03 | Phase 63 | Complete |
-| ENT-04 | Phase 63 | Pending |
+| ENT-04 | Phase 63 | Complete |
 | ENT-05 | Phase 63 | Pending |
 | MTR-01 | Phase 64 | Pending |
 | MTR-02 | Phase 64 | Pending |
