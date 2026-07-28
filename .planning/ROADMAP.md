@@ -127,7 +127,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 61. Default Finch Pool & Optional Application | v1.10 | 2/2 | Complete   | 2026-07-27 |
+| 61. Default Finch Pool & Optional Application | v1.10 | 2/2 | Complete    | 2026-07-27 |
 | 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
 | 63. Stripe-Native Entitlements | v1.10 | 0/? | Not started | - |
 | 64. Meter Event-Summary Reads | v1.10 | 0/? | Not started | - |
