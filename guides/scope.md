@@ -34,6 +34,12 @@ v1.x is in **maintenance mode** for scope breadth: new resource families ship on
   pull relative to mainstream SaaS billing.
 - **Tax narrow follow-ups:** Tax Code lookup (`/v1/tax_codes`); Tax Transaction list
   (if Stripe adds the endpoint) — lookup/list gaps only, not missing Tax core.
+- **Per-request entitlement gates:** there is no `entitled?` helper and no
+  authorization predicate that calls Stripe on the request path. A network gate
+  **fails open** under partition — the call times out, and the pragmatic fallback
+  grants access the customer did not buy. Reconcile entitlements from the summary
+  webhook, gate against your own local store, and fail closed on staleness; the
+  full recipe is in [Entitlements](entitlements.md).
 
 ## Tax note
 

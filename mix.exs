@@ -45,6 +45,7 @@ defmodule LatticeStripe.MixProject do
           "guides/connect-accounts.md",
           "guides/connect-money-movement.md",
           "guides/customer-portal.md",
+          "guides/entitlements.md",
           "guides/webhooks.md",
           "guides/webhooks-thin-events.md",
           "guides/error-handling.md",
@@ -79,6 +80,7 @@ defmodule LatticeStripe.MixProject do
              "guides/credit_notes.md",
              "guides/subscriptions.md",
              "guides/customer-portal.md",
+             "guides/entitlements.md",
              "guides/metering.md",
              "guides/tax.md",
              "guides/connect.md",
@@ -185,6 +187,11 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Billing.MeterEventAdjustment.Cancel,
             LatticeStripe.Billing.MeterEventStream,
             LatticeStripe.Billing.MeterEventStream.Session
+          ],
+          Entitlements: [
+            LatticeStripe.Entitlements.ActiveEntitlement,
+            LatticeStripe.Entitlements.ActiveEntitlementSummary,
+            LatticeStripe.Entitlements.Feature
           ],
           Connect: [
             LatticeStripe.Account,

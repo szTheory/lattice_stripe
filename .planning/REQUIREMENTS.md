@@ -9,22 +9,22 @@ Source: verified accrue gap brief (`.planning/research/accrue-gap-brief-2026-07-
 
 ### Entitlements
 
-- [ ] **ENT-01**: Developer can list a customer's active entitlements via `LatticeStripe.Entitlements.ActiveEntitlement.list/3` (`GET /v1/entitlements/active_entitlements`, customer filter)
-- [ ] **ENT-02**: Developer can auto-paginate all active entitlements via `ActiveEntitlement.stream!/3` (follows `has_more`/cursor — the load-bearing piece for accrue's reconciler)
-- [ ] **ENT-03**: Developer can retrieve a single active entitlement by id via `ActiveEntitlement.retrieve/3`
-- [ ] **ENT-04**: Developer can create, retrieve, update, and list entitlement features via `LatticeStripe.Entitlements.Feature` (`/v1/entitlements/features`)
-- [ ] **ENT-05**: `active_entitlement_summary` payloads (which have **no top-level `id`**) deserialize correctly without being dropped
+- [x] **ENT-01**: Developer can list a customer's active entitlements via `LatticeStripe.Entitlements.ActiveEntitlement.list/3` (`GET /v1/entitlements/active_entitlements`, customer filter)
+- [x] **ENT-02**: Developer can auto-paginate all active entitlements via `ActiveEntitlement.stream!/3` (follows `has_more`/cursor — the load-bearing piece for accrue's reconciler)
+- [x] **ENT-03**: Developer can retrieve a single active entitlement by id via `ActiveEntitlement.retrieve/3`
+- [x] **ENT-04**: Developer can create, retrieve, update, and list entitlement features via `LatticeStripe.Entitlements.Feature` (`/v1/entitlements/features`)
+- [x] **ENT-05**: `active_entitlement_summary` payloads (which have **no top-level `id`**) deserialize correctly without being dropped
 
 ### Metering Reads
 
-- [ ] **MTR-01**: Developer can read meter event summaries via `LatticeStripe.Billing.Meter.EventSummary.list/4` (`GET /v1/billing/meters/:id/event_summaries`; params customer, start_time, end_time, value_grouping_window)
-- [ ] **MTR-02**: Developer can auto-paginate meter event summaries via `Billing.Meter.EventSummary.stream!`
-- [ ] **MTR-03**: `LatticeStripe.Billing.MeterErrorReport` is a typed struct (with `validation_errors`), deserialized from webhooks
+- [ ] **MTR-01**: Developer can read meter event summaries via `LatticeStripe.Billing.MeterEventSummary.list/4` (`GET /v1/billing/meters/:id/event_summaries`; params customer, start_time, end_time, value_grouping_window)
+- [ ] **MTR-02**: Developer can auto-paginate meter event summaries via `Billing.MeterEventSummary.stream!`
+- [ ] **MTR-03**: `LatticeStripe.Billing.MeterErrorReport` is a typed struct (exposing `reason.error_types`), deserialized from the `v1.billing.meter.error_report_triggered` v2 thin event via `from_event/1`
 - [ ] **MTR-04**: Docs confirm `Billing.MeterEvent.create/3` accepts arbitrary custom `payload` dimensions and decimal-string `value`s
 
 ### Object Types & Fixtures
 
-- [ ] **OBJ-01**: The five missing webhook object types deserialize via `ObjectTypes.maybe_deserialize/1` — `entitlements.active_entitlement`, `entitlements.active_entitlement_summary`, `billing.meter_event`, `billing.meter_event_summary`, `billing.meter_error_report`
+- [ ] **OBJ-01**: The four missing webhook object types deserialize via `ObjectTypes.maybe_deserialize/1` — `entitlements.active_entitlement`, `entitlements.active_entitlement_summary`, `billing.meter_event`, `billing.meter_event_summary`. (`billing.meter_error_report` is **excluded**: it is a v2 thin-event `data` payload carrying no `"object"` key, so `maybe_deserialize/1`'s `%{"object" => _}` dispatch can never reach it — see Phase 64 CONTEXT F-13/D-14. It is decoded explicitly via `MeterErrorReport.from_event/1`.)
 - [ ] **OBJ-02**: Public `LatticeStripe.Testing.Fixtures` exist for entitlement + meter objects (incl. the no-`id` summary), each with a typed-conversion wrapper in `LatticeStripe.Testing`
 - [ ] **OBJ-03**: Public `Testing.Fixtures` exist for core billing objects (subscription, invoice, customer, payment_intent)
 
@@ -70,11 +70,11 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENT-01 | Phase 63 | Pending |
-| ENT-02 | Phase 63 | Pending |
-| ENT-03 | Phase 63 | Pending |
-| ENT-04 | Phase 63 | Pending |
-| ENT-05 | Phase 63 | Pending |
+| ENT-01 | Phase 63 | Complete |
+| ENT-02 | Phase 63 | Complete |
+| ENT-03 | Phase 63 | Complete |
+| ENT-04 | Phase 63 | Complete |
+| ENT-05 | Phase 63 | Complete |
 | MTR-01 | Phase 64 | Pending |
 | MTR-02 | Phase 64 | Pending |
 | MTR-03 | Phase 64 | Pending |
@@ -91,11 +91,13 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 | DOC-02 | Phase 67 | Pending |
 
 **Coverage:**
+
 - v1 requirements: **19 total** (the enumerated list contains 19 distinct IDs — ENT×5, MTR×4, OBJ×3, PROD×2, DX×3, DOC×2; the earlier "17" header count was stale)
 - Mapped to phases: 19/19 ✓
 - Unmapped: 0
 
 **Phase → requirement rollup:**
+
 - Phase 61 (Wave 0): DX-01
 - Phase 62 (Wave 0): DOC-01
 - Phase 63 (Wave 1): ENT-01, ENT-02, ENT-03, ENT-04, ENT-05
