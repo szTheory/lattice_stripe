@@ -73,6 +73,43 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
   end
 
   # ---------------------------------------------------------------------------
+  # ENT-03 — retrieve/3
+  # ---------------------------------------------------------------------------
+
+  describe "ActiveEntitlement.retrieve/3" do
+    test "GETs /v1/entitlements/active_entitlements/{id} and returns a typed struct" do
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert String.ends_with?(req.url, "/v1/entitlements/active_entitlements/ent_123")
+
+        ok_response(Entitlements.active_entitlement_json())
+      end)
+
+      assert {:ok, %ActiveEntitlement{id: "ent_123", lookup_key: "premium_support"}} =
+               ActiveEntitlement.retrieve(test_client(), "ent_123")
+    end
+  end
+
+  describe "ActiveEntitlement.retrieve!/3" do
+    test "returns the bare struct on success" do
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Entitlements.active_entitlement_json())
+      end)
+
+      assert %ActiveEntitlement{id: "ent_123"} =
+               ActiveEntitlement.retrieve!(test_client(), "ent_123")
+    end
+
+    test "raises LatticeStripe.Error when Stripe returns an error payload" do
+      expect(LatticeStripe.MockTransport, :request, fn _req -> error_response() end)
+
+      assert_raise LatticeStripe.Error, fn ->
+        ActiveEntitlement.retrieve!(test_client(), "ent_nope")
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # ENT-01 — from_map/1 (decode, including the expandable feature field)
   # ---------------------------------------------------------------------------
 
@@ -151,6 +188,22 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
                    "LatticeStripe.Entitlements.ActiveEntitlement.list/3 requires a customer param",
                    fn -> ActiveEntitlement.list(test_client(), %{"limit" => "5"}) end
     end
+
+    # Pitfall 6: `Stream.resource/3` defers its start function, so a guard built lazily
+    # would not raise until the stream is consumed — far from the call site. There is
+    # deliberately no `Enum` step below: the raise must happen while constructing the
+    # stream, not while stepping it.
+    test "stream!/3 raises ArgumentError at call time, before any Enum step" do
+      assert_raise ArgumentError,
+                   "LatticeStripe.Entitlements.ActiveEntitlement.stream!/3 requires a customer param",
+                   fn -> ActiveEntitlement.stream!(test_client(), %{}) end
+    end
+
+    test "stream!/3 raises when params carry only unrelated keys — presence, not emptiness" do
+      assert_raise ArgumentError,
+                   "LatticeStripe.Entitlements.ActiveEntitlement.stream!/3 requires a customer param",
+                   fn -> ActiveEntitlement.stream!(test_client(), %{"limit" => "100"}) end
+    end
   end
 
   # ---------------------------------------------------------------------------
@@ -178,8 +231,17 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
       assert function_exported?(ActiveEntitlement, :list, 1)
       assert function_exported?(ActiveEntitlement, :list, 3)
       assert function_exported?(ActiveEntitlement, :list!, 3)
+      assert function_exported?(ActiveEntitlement, :retrieve, 3)
+      assert function_exported?(ActiveEntitlement, :retrieve!, 3)
+      assert function_exported?(ActiveEntitlement, :stream!, 3)
       assert function_exported?(ActiveEntitlement, :from_map, 1)
       assert function_exported?(ActiveEntitlement, :list_path, 0)
+    end
+
+    test "stream! has no non-bang twin — auto-pagination raises, it does not return tuples" do
+      refute function_exported?(ActiveEntitlement, :stream, 1)
+      refute function_exported?(ActiveEntitlement, :stream, 2)
+      refute function_exported?(ActiveEntitlement, :stream, 3)
     end
   end
 end
