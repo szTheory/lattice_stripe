@@ -5,16 +5,16 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 63
 current_phase_name: stripe-native-entitlements
 status: executing
-stopped_at: Completed 63-01-PLAN.md
-last_updated: "2026-07-28T15:11:34.546Z"
+stopped_at: Completed 63-02-PLAN.md
+last_updated: "2026-07-28T15:20:23.951Z"
 last_activity: 2026-07-28
-last_activity_desc: "63-01 complete: typed ActiveEntitlement.list/3 end-to-end (ENT-01)"
+last_activity_desc: "63-02 complete: retrieve/3 + auto-paginating stream!/3 with the cross-tenant page-2 guard (ENT-02, ENT-03)"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 9
-  completed_plans: 3
-  percent: 33
+  completed_plans: 5
+  percent: 56
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 63 (stripe-native-entitlements) — EXECUTING
-Plan: 1 of 7 complete (63-01 tracer done; Wave 2 = 63-02 + 63-03 next, parallelizable)
-Status: Executing Phase 63
-Last activity: 2026-07-28 -- 63-01 complete: typed ActiveEntitlement.list/3 end-to-end (ENT-01)
+Plan: 2 of 7 complete (63-01 tracer + 63-02 read surface/pagination done; 63-03 `Feature` verb surface is the remaining Wave 2 plan)
+Status: Ready to execute
+Last activity: 2026-07-28 -- 63-02 complete: retrieve/3 + auto-paginating stream!/3 with the cross-tenant page-2 guard (ENT-02, ENT-03)
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Last activity: 2026-07-28 -- 63-01 complete: typed ActiveEntitlement.list/3 end-
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 63 P01 | 5min | 2 tasks | 6 files |
+| Phase 63 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -64,6 +65,10 @@ Last activity: 2026-07-28 -- 63-01 complete: typed ActiveEntitlement.list/3 end-
 - **[63-01]** T-63-04 mitigated structurally: refute function_exported?(:entitled?, 2/3/4) forbids the gate helper (a rename cannot defeat it); the moduledoc keeps the name entitled? PRESENT in prose (D-24) and ships the fail-closed local-gate replacement
 - **[63-01]** Feature.ex ships decode-only; its alias LatticeStripe.{Client, Request, Resource} was omitted (unused-alias vs --warnings-as-errors) and 63-03 MUST add it with the verb surface — an in-source NOTE marks the spot
 - **[63-01]** Clean-HEAD ExDoc warning baseline = 42, recorded for the 63-07 differential docs gate; mix ci stays un-run this phase because its docs --warnings-as-errors step is RED at clean HEAD (C-02)
+- **[63-02]** stream!/3 delegates the entire cursor state machine to LatticeStripe.List.stream!/2 — no per-resource pagination is ever re-grown; the resource module only supplies a %Request{} and maps from_map/1
+- **[63-02]** D-10/Pitfall 6: the customer guard is stream!/3's FIRST statement so it raises at call time; Stream.resource/3 defers its start function, so a lazily-built guard would raise on the first Enum step far from the caller
+- **[63-02]** T-63-02 mutation-checked: zeroing base_params in List.build_next_page_request/1 fails exactly 'page 2 preserves the customer filter' and nothing else — that test is proven load-bearing, not merely green, and must keep its specific name
+- **[63-02]** stream!/3 ships with NO non-bang twin, refuted structurally at arities 1/2/3 (two defaulted args means arity-3-only refutation would leak a def stream/2)
 
 ### Blockers/Concerns
 
@@ -88,8 +93,8 @@ Last activity: 2026-07-28 -- 63-01 complete: typed ActiveEntitlement.list/3 end-
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T15:11:09.585Z
-**Stopped at:** Completed 63-01-PLAN.md
+**Last session:** 2026-07-28T15:20:05.356Z
+**Stopped at:** Completed 63-02-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
@@ -99,11 +104,11 @@ Deferred DX: `.planning/seeds/SEED-006-accrue-dx-ergonomics.md`
 
 ## Operator Next Steps
 
-**Default:** Continue Phase 63. Wave 0 (61, 62) is done; Wave 1 (63-01, the tracer) is done.
+**Default:** Continue Phase 63. Wave 0 (61, 62) is done; Wave 1 (63-01, the tracer) is done; 63-02 is done.
 
 | Trigger | Action |
 |---------|--------|
-| Ready to continue | `/gsd-execute-phase 63` — Wave 2 is 63-02 (`retrieve/3` + `stream!/3` + pagination) and 63-03 (`Feature` verb surface), parallelizable |
+| Ready to continue | `/gsd-execute-phase 63` — 63-03 (`Feature` verb surface) closes Wave 2; then Wave 3 (63-04 `ActiveEntitlementSummary`, whose `stream_entitlements!/3` now delegates to the shipped `ActiveEntitlement.stream!/3`) |
 | Starting 63-03 | Add `alias LatticeStripe.{Client, Request, Resource}` to `lib/lattice_stripe/entitlements/feature.ex` — deliberately omitted in 63-01, marked with an in-source `NOTE:` |
 | Bug / wrong Stripe behavior | `/gsd-quick` or `/gsd-debug` → fix + test |
 
