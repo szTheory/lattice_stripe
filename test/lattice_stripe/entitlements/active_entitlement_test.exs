@@ -130,4 +130,56 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
       assert Feature.from_map(once) == once
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # T-63-01 — the customer filter is enforced BEFORE any transport call (C-07)
+  # ---------------------------------------------------------------------------
+
+  describe "pre-network customer guard" do
+    # No Mox expectation is set in either test below. `verify_on_exit!` therefore proves
+    # the raise happened before the transport was ever reached — stripe-mock answers a
+    # missing required param with a 400, and the client-side guard means we never get there.
+
+    test "list/3 raises ArgumentError with no customer param and makes no transport call" do
+      assert_raise ArgumentError,
+                   "LatticeStripe.Entitlements.ActiveEntitlement.list/3 requires a customer param",
+                   fn -> ActiveEntitlement.list(test_client(), %{}) end
+    end
+
+    test "list/3 raises when params carry only unrelated keys — presence, not emptiness" do
+      assert_raise ArgumentError,
+                   "LatticeStripe.Entitlements.ActiveEntitlement.list/3 requires a customer param",
+                   fn -> ActiveEntitlement.list(test_client(), %{"limit" => "5"}) end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # D-23 L1 — structural surface lock. With no Dialyzer and documentation-only
+  # typespecs, this is the ONLY enforcement of public surface shape.
+  # ---------------------------------------------------------------------------
+
+  describe "module surface" do
+    test "does not export a per-request network gate helper" do
+      refute function_exported?(ActiveEntitlement, :entitled?, 2)
+      refute function_exported?(ActiveEntitlement, :entitled?, 3)
+      refute function_exported?(ActiveEntitlement, :entitled?, 4)
+    end
+
+    test "does not export write verbs — active entitlements are read-only" do
+      refute function_exported?(ActiveEntitlement, :create, 2)
+      refute function_exported?(ActiveEntitlement, :create, 3)
+      refute function_exported?(ActiveEntitlement, :update, 3)
+      refute function_exported?(ActiveEntitlement, :update, 4)
+      refute function_exported?(ActiveEntitlement, :delete, 2)
+      refute function_exported?(ActiveEntitlement, :delete, 3)
+    end
+
+    test "exports the shipped read surface" do
+      assert function_exported?(ActiveEntitlement, :list, 1)
+      assert function_exported?(ActiveEntitlement, :list, 3)
+      assert function_exported?(ActiveEntitlement, :list!, 3)
+      assert function_exported?(ActiveEntitlement, :from_map, 1)
+      assert function_exported?(ActiveEntitlement, :list_path, 0)
+    end
+  end
 end
