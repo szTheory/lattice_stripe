@@ -15,8 +15,8 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
   > fallback is to let the request through — granting a customer access to something they
   > did not buy.
   >
-  > Do this instead. Reconcile a customer's entitlements with `list/3` (or the streaming
-  > variant, once it lands, for customers with more than one page), persist the result to a
+  > Do this instead. Reconcile a customer's entitlements with `stream!/3` (or `list/3` when
+  > you genuinely only want one page), persist the result to a
   > local store keyed on `lookup_key`, and **gate against that local store** on every
   > request. When the local store is stale beyond your freshness budget, **fail closed** —
   > deny access and re-reconcile — rather than reaching for Stripe on the authorization
@@ -25,15 +25,20 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
 
   ## Listing a customer's entitlements
 
-  `customer` is a **required** filter — Stripe has no account-wide active-entitlement list,
-  and `list/3` raises `ArgumentError` before any network call if it is missing. That guard
-  is `LatticeStripe.Resource.require_param!/3`, which checks **presence, not emptiness**: a
-  `customer` key whose value is `""` or `nil` passes the guard and fails at Stripe instead.
+  The read surface is `list/3` (one page), `stream!/3` (every page, lazily), and
+  `retrieve/3` (one entitlement by id), each with the usual bang twin where one applies.
 
-  Stripe's `limit` defaults to **10** and maxes at **100**. A customer with more
-  entitlements than the page size will be silently truncated if you only read the first
-  page, which is why full enumeration wants the streaming variant rather than a bare
-  `list/3` call.
+  `customer` is a **required** filter — Stripe has no account-wide active-entitlement list,
+  and both `list/3` and `stream!/3` raise `ArgumentError` before any network call if it is
+  missing. That guard is `LatticeStripe.Resource.require_param!/3`, which checks
+  **presence, not emptiness**: a `customer` key whose value is `""` or `nil` passes the
+  guard and fails at Stripe instead.
+
+  Stripe's `limit` defaults to **10** and maxes at **100**, so a single `list/3` call
+  silently returns a *partial* set for any customer with more than ten active entitlements —
+  and a truncated set makes a paying customer look unentitled. `stream!/3` is therefore the
+  reconciler's entry point: it follows `has_more` across every page and raises rather than
+  quietly returning a short list.
 
   Each entitlement carries its own `lookup_key`, mirroring the feature's. That is the field
   a local gate keys on, and it is present **without** expanding `feature` — so the common
@@ -53,6 +58,12 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
         LatticeStripe.Entitlements.ActiveEntitlement.list(client, %{"customer" => "cus_123"})
 
       keys = Enum.map(resp.data.data, & &1.lookup_key)
+
+      # Every page, not just the first:
+      keys =
+        client
+        |> LatticeStripe.Entitlements.ActiveEntitlement.stream!(%{"customer" => "cus_123"})
+        |> Enum.map(& &1.lookup_key)
   """
 
   alias LatticeStripe.{Client, Request, Resource}
@@ -88,7 +99,30 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
   def list_path, do: @list_path
 
   # ---------------------------------------------------------------------------
-  # LIST
+  # RETRIEVE
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Retrieve a single active entitlement by id.
+
+  The id is the `ent_`-prefixed identifier from a `list/3` or `stream!/3` result, or from
+  an `entitlements.active_entitlement_summary` webhook payload.
+  """
+  @spec retrieve(Client.t(), String.t(), keyword()) ::
+          {:ok, t()} | {:error, LatticeStripe.Error.t()}
+  def retrieve(%Client{} = client, id, opts \\ []) when is_binary(id) do
+    %Request{method: :get, path: @list_path <> "/#{id}", params: %{}, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Bang variant of `retrieve/3`. Raises `LatticeStripe.Error` on failure."
+  @spec retrieve!(Client.t(), String.t(), keyword()) :: t()
+  def retrieve!(client, id, opts \\ []),
+    do: client |> retrieve(id, opts) |> Resource.unwrap_bang!()
+
+  # ---------------------------------------------------------------------------
+  # LIST + STREAM
   # ---------------------------------------------------------------------------
 
   @doc """
@@ -119,6 +153,46 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
   @spec list!(Client.t(), map(), keyword()) :: LatticeStripe.Response.t()
   def list!(client, params \\ %{}, opts \\ []),
     do: client |> list(params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Returns a lazy stream of **all** of a customer's active entitlements (auto-pagination).
+
+  Emits individual `%ActiveEntitlement{}` structs, following `has_more` and fetching each
+  subsequent page as the stream is consumed. Raises `LatticeStripe.Error` if any page fetch
+  fails, so a partial enumeration surfaces as an error rather than as a short list.
+
+  `params` **must** contain `"customer"`, and the guard raises `ArgumentError` at call time —
+  before the stream is stepped — so the failure lands at the call site rather than at the
+  first `Enum` step.
+
+  Consume it with `Enum.to_list/1` when you intend to hold every entitlement in memory, or
+  bound it with `Stream.take/2` when you do not:
+
+      client
+      |> LatticeStripe.Entitlements.ActiveEntitlement.stream!(%{"customer" => "cus_123"})
+      |> Stream.take(50)
+      |> Enum.to_list()
+
+  There is no non-bang `stream/3` twin — a lazy stream cannot return an error tuple at
+  construction time for a failure that happens pages later.
+  """
+  @spec stream!(Client.t(), map(), keyword()) :: Enumerable.t()
+  def stream!(%Client{} = client, params \\ %{}, opts \\ []) do
+    # MUST be the first statement. `Stream.resource/3` defers its start function, so a
+    # guard constructed lazily would not raise until the stream is consumed.
+    Resource.require_param!(
+      params,
+      "customer",
+      "LatticeStripe.Entitlements.ActiveEntitlement.stream!/3 requires a customer param"
+    )
+
+    req = %Request{method: :get, path: @list_path, params: params, opts: opts}
+
+    # The cursor state machine — base_params preservation, the starting_after cursor, and
+    # the idempotency-key strip on page fetches — belongs to LatticeStripe.List and is not
+    # re-grown here. This function's only job is to hand it correctly-shaped state.
+    LatticeStripe.List.stream!(client, req) |> Stream.map(&from_map/1)
+  end
 
   # ---------------------------------------------------------------------------
   # DECODE
