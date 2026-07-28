@@ -2,6 +2,7 @@ defmodule LatticeStripe.ObjectTypesTest do
   use ExUnit.Case, async: true
 
   alias LatticeStripe.ObjectTypes
+  alias LatticeStripe.Test.Fixtures.Metering.MeterErrorReport, as: MeterErrorReportFixture
 
   describe "maybe_deserialize/1" do
     test "returns nil for nil input" do
@@ -176,6 +177,18 @@ defmodule LatticeStripe.ObjectTypesTest do
     test "returns empty map as raw map" do
       assert ObjectTypes.maybe_deserialize(%{}) == %{}
     end
+
+    test "returns the meter error report payload unchanged — it has no object key" do
+      # The structural reason the registry can never deserialize this payload:
+      # it is event `data`, not an object, so it carries no "object" key for the
+      # dispatch head to match. It comes back as the raw map it went in as.
+      data = MeterErrorReportFixture.basic()
+
+      result = ObjectTypes.maybe_deserialize(data)
+
+      assert result == data
+      refute is_struct(result)
+    end
   end
 
   describe "fetch_module/1" do
@@ -199,6 +212,18 @@ defmodule LatticeStripe.ObjectTypesTest do
 
     test "returns :error for an empty string" do
       assert ObjectTypes.fetch_module("") == :error
+    end
+
+    test "carries no billing.meter_error_report key — the dispatch cannot reach it" do
+      # maybe_deserialize/1 dispatches on `%{"object" => object_type}`. The
+      # v1.billing.meter.error_report_triggered `data` payload has no "object"
+      # key at all, so a registry row for it would be a DEAD key — present,
+      # never reached, and assumed to work by the next contributor who sees it.
+      # LatticeStripe.Billing.MeterErrorReport.from_event/1 must be called
+      # explicitly. Phase 65's OBJ-01 excludes this key for the same reason;
+      # this test is what keeps the exclusion from being quietly undone.
+      refute Map.has_key?(ObjectTypes.object_map(), "billing.meter_error_report")
+      assert ObjectTypes.fetch_module("billing.meter_error_report") == :error
     end
 
     test "resolves all five Tax family object types" do

@@ -5,16 +5,16 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 64
 current_phase_name: Meter Event-Summary Reads
 status: planned
-stopped_at: Phase 64 planned (10 plans, 6 waves) — ready to execute
-last_updated: "2026-07-28T19:45:35.234Z"
+stopped_at: Completed 64-04-PLAN.md
+last_updated: "2026-07-28T23:50:24.165Z"
 last_activity: 2026-07-28
-last_activity_desc: "Phase 63 UAT complete (63/63 pass: 56 auto-covered, 7 human-approved); verification passed; phase marked complete and transitioned to Phase 64"
+last_activity_desc: "Phase 63 verified via `/gsd-verify-work 63`: 63/63 UAT checkpoints pass (56 auto-covered by tests, 7 human-approved), verification status `passed`, phase marked complete. Phase 64 remains planned and ready to execute."
 progress:
-  total_phases: 7
+  total_phases: 3
   completed_phases: 2
   total_plans: 19
-  completed_plans: 9
-  percent: 29
+  completed_plans: 12
+  percent: 63
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 64 (meter-event-summary-reads) — PLANNED
-Plan: 0 of 10 complete (6 waves)
+Plan: 1 of 10 complete (6 waves)
 Status: Ready to execute
 Last activity: 2026-07-28 — Phase 63 verified via `/gsd-verify-work 63`: 63/63 UAT checkpoints pass (56 auto-covered by tests, 7 human-approved), verification status `passed`, phase marked complete. Phase 64 remains planned and ready to execute.
 
@@ -52,6 +52,7 @@ Last activity: 2026-07-28 — Phase 63 verified via `/gsd-verify-work 63`: 63/63
 | Phase 63 P05 | 8min | 2 tasks | 2 files |
 | Phase 63 P06 | 6min | 2 tasks | 3 files |
 | Phase 63 P07 | 12min | 2 tasks | 3 files |
+| Phase 64 P04 | 21min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,9 @@ Last activity: 2026-07-28 — Phase 63 verified via `/gsd-verify-work 63`: 63/63
 - [Phase ?]: 63-07: D-24 held — entitled? is asserted PRESENT in three docs-truth places (guide, ActiveEntitlement source, scope.md) and refuted nowhere; the new test contains zero `refute`, because refuting the name would forbid the documentation the fence depends on
 - [Phase ?]: 63-07: gate 3 failed at 48 vs baseline 42 and was answered by fixing the autolinks, never by raising the baseline — the three `Resource.require_param!/3` prose sites from 63-01/63-03 were reworded to document the guard without naming a @moduledoc false helper; phase ends at 42 = baseline, surface count 0
 - [Phase ?]: 63-07: mix ci is still RED, but now entirely on 42 pre-existing warnings (Tax.* nested types, File.create/3, ../README.md, ObjectTypes) — steps 1-4 pass and zero warnings name an entitlements file; clearing them is Phase 67-shaped work
+- [Phase ?]: 64-04: v2 validation timestamps confirmed RFC3339 strings against the live Stripe reference (RESEARCH A3 settled) — MeterErrorReport types validation_start/end as String.t()
+- [Phase ?]: 64-04: MeterErrorReport.from_event/1 raises a directive ArgumentError on a data-less event rather than a bare BadMapError — the delivered-webhook-body trap
+- [Phase ?]: 64-04: ExDoc references to @moduledoc-false modules (LatticeStripe.ObjectTypes) must be plain prose, not backticked autolinks — they add warnings past the 42 baseline
 
 ### Blockers/Concerns
 
@@ -115,9 +119,9 @@ Last activity: 2026-07-28 — Phase 63 verified via `/gsd-verify-work 63`: 63/63
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T17:29:03.520Z
-**Stopped at:** Phase 63 verified and closed; Phase 64 planned (10 plans, 6 waves) and ready to execute
-**Resume file:** .planning/phases/64-meter-event-summary-reads/64-01-PLAN.md
+**Last session:** 2026-07-28T23:50:24.148Z
+**Stopped at:** Completed 64-04-PLAN.md
+**Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
 Gap brief: `.planning/research/accrue-gap-brief-2026-07-27.txt`
