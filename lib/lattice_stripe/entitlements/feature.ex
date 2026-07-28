@@ -7,6 +7,64 @@ defmodule LatticeStripe.Entitlements.Feature do
   own system keys on, and then attached to Products so that customers who buy those
   Products receive a matching `LatticeStripe.Entitlements.ActiveEntitlement`.
 
+  The surface is `create/3`, `retrieve/3`, `update/4` and `list/3` — plus `stream!/3` — and
+  that is the *complete* surface, not a partial one. Stripe ships no DELETE for features,
+  so nothing here is deferred.
+
+  See [Entitlements](guides/entitlements.md) for the end-to-end story.
+
+  ## Archiving
+
+  Two words, one concept. The feature object carries a boolean field named **`active`**.
+  The list endpoint takes a boolean filter named **`archived`**, whose sense is
+  **inverted**: a feature with `active: false` is one the `archived` filter calls archived.
+  Nothing in a function signature surfaces that split.
+
+  Stripe's own description of the `active` field states the consequence: *inactive features
+  cannot be attached to new products and will not be returned from the features list
+  endpoint*. So `list/3` and `stream!/3` return a **filtered view** by default — the
+  sellable catalog, not the whole catalog.
+
+  > #### Archived is not deleted {: .warning}
+  >
+  > A reconciler that diffs Stripe's feature catalog against a local configuration and
+  > passes no filter will see archived features simply **vanish** from the response, and a
+  > naive diff reports them as **deleted**. Acting on that — revoking access, pruning local
+  > rows — can cut off a customer who still legitimately holds the entitlement.
+  >
+  > When the job is catalog reconciliation rather than "what can I sell today", pass
+  > `%{"archived" => true}` explicitly and reconcile both views.
+
+  There is deliberately **no `archive/3` verb**. Stripe ships no archive endpoint, and the
+  house rule is that explicit verbs mirror explicit Stripe endpoints — a wrapper over
+  `update/4` is named after the exact wire field it sets, which here would make it
+  `set_active/4`. Archiving is therefore `update/4` with `active: false`, and unarchiving
+  is `update/4` with `active: true`:
+
+      {:ok, archived} =
+        LatticeStripe.Entitlements.Feature.update(client, feature.id, %{"active" => false})
+
+  `LatticeStripe.Price` and `LatticeStripe.Product` use the identical `active: false`
+  archive mechanic and likewise ship no archive verb.
+
+  ## Using lookup_key as your system identifier
+
+  Filter `list/3` by lookup key:
+
+      {:ok, resp} =
+        LatticeStripe.Entitlements.Feature.list(client, %{"lookup_key" => "premium_support"})
+
+  That returns a **list**, not a singleton, even when exactly one feature matches. Stripe
+  defines no unique-lookup retrieval, so there is no `retrieve_by_lookup_key/3` here — a
+  helper would have to invent semantics for the zero-result and multi-result cases that
+  Stripe does not define. You decide what those mean for your system.
+
+  The unlock is that **`lookup_key` is immutable after create**. It is absent from the
+  update request body schema entirely, so Stripe silently ignores an attempt to change it
+  rather than erroring. That immutability is what makes it safe to key host application
+  configuration on the lookup key instead of on the generated `feat_` id — the string you
+  chose at create time is the string that will still be there.
+
   ## Relationship to other feature surfaces
 
   This module is **not** `LatticeStripe.Product.Feature`. This module is the entitlement
