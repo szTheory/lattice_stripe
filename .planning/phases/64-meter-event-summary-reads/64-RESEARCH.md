@@ -943,41 +943,58 @@ CONTEXT §Specific Ideas snippet needs no change other than reflecting N-01's ex
 | A5 | stripe-mock `v0.199.0`'s behavior described in F-10 (one synthetic item, ignores `limit`/`starting_after`, accepts unaligned timestamps, placeholder `url`) — I could **not** re-verify this, as stripe-mock is not running locally | D-34, Environment | **Medium.** If stripe-mock actually honors `limit`, D-34's "cannot prove pagination" claim is too pessimistic — but the mitigation (prove pagination via Mox) is correct either way and costs nothing. Phase 63's STATE note independently records the same stripe-mock limitation, which corroborates it. |
 | A6 | The 42-warning ExDoc baseline will still be 42 at the time plans execute | D-29 | Low. Re-measured this session: **42, exit 0**. Any drift is caught by the gate itself. |
 
-## Open Questions
+## Open Questions (DISPOSITIONED)
 
 Carried from CONTEXT (O-01…O-05, unchanged and still unresolved) plus one new.
 
+**Every question below remains factually unresolved, and every one has a disposition.** "Dispositioned" does
+not mean "answered" — it means the phase ships an outcome that stays correct under *every* possible answer,
+so nothing here blocks planning or execution. Each disposition is enforced by a named plan prohibition and is
+enumerated in `64-10-PLAN.md` `<planner_assumptions_surfaced>`. If a live probe later resolves one, the
+correct response is an additive documentation change, not a retrofit.
+
 1. **O-01 — does Stripe's parser accept `1.0e-5` as a `payload[value]`?**
+   *(DISPOSITIONED — not claimed either way; enforced by 64-07 and 64-08 prohibitions "Do not claim whether
+   Stripe's parser accepts exponent notation" and by 64-02's prohibition on patching `to_string/1`.)*
    - What we know: our encoder emits it (verified); stripe-mock validates only `type: string` so it passes
      trivially and proves nothing.
    - What's unclear: whether mangling fails **loudly** (sync 400 / async `meter_event_invalid_value`) or
      **silently corrupts a bill**.
-   - Recommendation: **do not guard, do not claim.** Ship the outcome-independent sentence quoted in
+   - Disposition: **do not guard, do not claim.** Ship the outcome-independent sentence quoted in
      Pitfall 6. It gets *stronger*, not corrected, if a probe later shows a 400. Blocks the deferred
-     `float_to_binary` change (D-23).
+     `float_to_binary` change (D-23). 64-02 instead *locks current behavior* on both sides of the cliff, so a
+     future decision to change it must be deliberate and must break a named test.
 
 2. **O-02 — max/min window span and lookback limit for summary reads.** Undocumented. The verified 35-day
-   limit applies to **ingestion**, not summary reads. Recommendation: say nothing.
+   limit applies to **ingestion**, not summary reads.
+   *(DISPOSITIONED — say nothing. No plan documents or guards a span limit; the absence is deliberate.)*
 
 3. **O-03 — the actual error code for a misaligned timestamp.** Re-confirmed absent from the spec's error
-   enums (F-07). Recommendation: **do not pattern-match on it.** GUARD-04 exists precisely because we cannot
-   improve this 400 after the fact.
+   enums (F-07).
+   *(DISPOSITIONED — never pattern-matched, never named; enforced by 64-05's prohibition "Do not
+   pattern-match on Stripe's error code for a misaligned timestamp".)* GUARD-04 exists precisely because we
+   cannot improve this 400 after the fact — this absence is the guard's whole justification.
 
 4. **O-04 — do deactivated meters still serve summaries?** Believed yes, unverified. Note `archived_meter`
    is a live error code, which is suggestive but not dispositive.
+   *(DISPOSITIONED — not claimed. No moduledoc or guide sentence asserts behavior for a deactivated meter.)*
 
-5. **O-05 — are zero-value buckets emitted for empty periods, or skipped?** Recommendation: charts must fill
-   gaps **by `start_time`, never by index.** State this as defensive guidance regardless of the answer.
+5. **O-05 — are zero-value buckets emitted for empty periods, or skipped?**
+   *(DISPOSITIONED — defensive guidance shipped regardless of the answer, in 64-07's "Reading usage back"
+   section.)* Charts must fill gaps **by `start_time`, never by index.** That rule is correct whether Stripe
+   emits zero buckets or skips them, which is why it can ship unresolved.
 
 6. **⚠ O-06 (NEW) — is the guide's sync-vs-async classification of `archived_meter`,
    `timestamp_in_future`, and `timestamp_too_far_in_past` correct?**
+   *(DISPOSITIONED — the three rows ship labelled unverified rather than restated; enforced by 64-07's
+   prohibition "Do not restate the synchronous-versus-asynchronous classification as fact for the three codes
+   flagged unverified" and by threat T-64-16.)*
    - What we know: `guides/metering.md:450-452` marks all three *"NO (sync 400)"*. All three **are** values
      of the async error-report `code` enum (N-02).
    - What's unclear: whether they are async-only, sync-only, or both.
-   - Recommendation: when rewriting the error-code table (N-03 row 6), **do not restate the "Silent drop?"
-     column as verified fact for these three.** Either drop the column for them, mark them "both/unverified",
-     or resolve with a live probe. Restating an unverified classification is exactly the failure mode MTR-04
-     exists to fix.
+   - Disposition: when rewriting the error-code table (N-03 row 6), **do not restate the "Silent drop?"
+     column as verified fact for these three** — mark them unverified. Restating an unverified classification
+     is exactly the failure mode MTR-04 exists to fix, so guessing here would reintroduce the phase's own bug.
 
 ## Environment Availability
 

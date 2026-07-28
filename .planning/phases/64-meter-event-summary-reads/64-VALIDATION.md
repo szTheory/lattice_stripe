@@ -51,12 +51,18 @@ Steps 1–4 of `mix ci` pass. Use the five-step differential gate below in its p
 2. `mix credo --strict` — green
 3. `mix test` — green, count **≥ 2188** (never fewer)
 4. `mix docs` exits 0 **and** warning count **≤ 42** (never up)
-   - *Bonus target 40:* the two fixable warnings are
+   - *Required, not bonus:* the two fixable warnings are
      `lib/lattice_stripe/billing/meter_event_stream.ex:15` and `:24`
      (*"Illegal attributes […] ignored in IAL"*, from indented code-block lines beginning `{:ok, …}`).
-     Re-indent or fence them and step 5 may use the clean `meter` substring.
-5. **Zero** `mix docs` warnings naming any Phase 64 **new file path** — scoped by exact path,
-   **not** by the substring `meter` (unless step 4's bonus lands first).
+     64-09 clears both as a hard acceptance criterion — measured as an exact **minus-two delta** around its
+     own edits rather than against the absolute 42, since a same-wave plan may move the absolute underneath
+     it. That clearing is what makes step 5 a single substring check.
+5. **Zero** `mix docs` warnings matching the substring `meter`. **Unconditional — no fallback branch.**
+   A substring keeps protecting when a file is added; an enumerated path list silently stops. If a warning
+   naming a metering file is present here, that is a gate **failure** to be fixed at its cause. Do **not**
+   rescope this step to an exact-path list to make it pass: rescoping a gate to route around what it caught
+   is the same move as raising a baseline, and Phase 63 (STATE `[63-07]`) settled that the answer is to fix
+   the warning. 64-10 carries this as an explicit prohibition.
 
 ### Not in the gate — run explicitly
 

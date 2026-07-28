@@ -129,10 +129,10 @@
 - [ ] 64-04-PLAN.md — `MeterErrorReport` + `.Reason`/`.ErrorType`/`.SampleError`, `from_event/1`, fixture, ObjectTypes dead-key lock (Wave 2)
 - [ ] 64-05-PLAN.md — GUARD-04 `check_summary_window!/2`, its two call sites, and the alignment matrix (Wave 3)
 - [ ] 64-06-PLAN.md — D-30's nine pagination assertions, two of them mutation-checked (Wave 3)
-- [ ] 64-08-PLAN.md — Runtime-guide handler rewrite, `scope.md` dimension-read limit, `MeterEvent.create/3` `@doc` payload bullet (Wave 3)
 - [ ] 64-07-PLAN.md — `guides/metering.md`: "Reading usage back", "The payload contract", and six corrections to false prose (Wave 4)
 - [ ] 64-09-PLAN.md — stripe-mock integration suite, ExDoc placement locks, clear the two metering docs warnings (Wave 4)
-- [ ] 64-10-PLAN.md — D-29 five-step differential phase gate + operator sign-off (Wave 5)
+- [ ] 64-08-PLAN.md — Runtime-guide handler rewrite, `scope.md` dimension-read limit, `MeterEvent.create/3` `@doc` payload bullet (Wave 5 — cross-references headings 64-07 creates)
+- [ ] 64-10-PLAN.md — D-29 five-step differential phase gate + operator sign-off (Wave 6)
 
 ### Phase 65: Webhook ObjectTypes & Testing Fixtures
 
