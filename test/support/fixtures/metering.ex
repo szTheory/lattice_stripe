@@ -1,3 +1,9 @@
+# PROMOTION TARGET (Phase 65 / OBJ-02): move this file to
+# lib/lattice_stripe/testing/fixtures/metering.ex AND rename the module to
+# LatticeStripe.Testing.Fixtures.Metering. The private test-support namespace is
+# LatticeStripe.Test.Fixtures.*; the public one is LatticeStripe.Testing.Fixtures.* — the
+# promotion is a move PLUS a module rename, and skipping the rename is a compile error.
+# Function names and bodies transfer unchanged — do not re-author.
 defmodule LatticeStripe.Test.Fixtures.Metering do
   @moduledoc false
 
@@ -131,6 +137,50 @@ defmodule LatticeStripe.Test.Fixtures.Metering do
         "livemode" => false
       }
       |> Map.merge(overrides)
+    end
+  end
+
+  defmodule MeterEventSummary do
+    @moduledoc false
+
+    @doc """
+    Basic MeterEventSummary fixture matching Stripe's wire format.
+
+    Carries exactly the seven fields Stripe's spec marks required — and no
+    `customer`. You filter *by* customer, but the returned object never says
+    which customer it belongs to (F-02), so a fixture that invented one would
+    teach the wrong shape.
+
+    `aggregated_value` is a **float** on the read path (F-05). Writes take a
+    decimal string; reads return a JSON number. The fixture carries `42.5`
+    rather than a whole number so a test can prove the value is never rounded
+    or coerced to an integer.
+    """
+    def basic(overrides \\ %{}) do
+      %{
+        "id" => "mtrusg_123",
+        "object" => "billing.meter_event_summary",
+        "aggregated_value" => 42.5,
+        "start_time" => 1_753_620_000,
+        "end_time" => 1_753_706_400,
+        "meter" => "mtr_123",
+        "livemode" => false
+      }
+      |> Map.merge(overrides)
+    end
+
+    @doc """
+    Stripe list response wrapping one or more MeterEventSummary fixtures.
+
+    Defaults to a single `basic/1` item. Pass a custom list to override.
+    """
+    def list_response(items \\ [basic()]) do
+      %{
+        "object" => "list",
+        "data" => items,
+        "has_more" => false,
+        "url" => "/v1/billing/meters/mtr_123/event_summaries"
+      }
     end
   end
 end
