@@ -186,7 +186,8 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Billing.MeterEventAdjustment,
             LatticeStripe.Billing.MeterEventAdjustment.Cancel,
             LatticeStripe.Billing.MeterEventStream,
-            LatticeStripe.Billing.MeterEventStream.Session
+            LatticeStripe.Billing.MeterEventStream.Session,
+            LatticeStripe.Billing.MeterEventSummary
           ],
           Entitlements: [
             LatticeStripe.Entitlements.ActiveEntitlement,
