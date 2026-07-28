@@ -1,6 +1,6 @@
 {
   "model_profile": "inherit",
-  "runtime": "cursor",
+  "runtime": "claude",
   "resolve_model_ids": "omit",
   "models": {
     "planning": "inherit",
