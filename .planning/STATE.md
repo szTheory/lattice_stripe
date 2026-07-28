@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
-status: verifying
-stopped_at: Phase 64 context gathered
-last_updated: "2026-07-28T17:29:03.524Z"
-last_activity: "2026-07-28 -- 63-07 complete: docs-truth locks the entitlements ExDoc placement and the three prose fences (mutation-checked 4x); mix docs warnings 48 -> 42, exactly the clean-HEAD baseline, zero naming an entitlements file. All five phase gates green"
+status: planned
+stopped_at: Phase 64 planned (10 plans, 6 waves)
+last_updated: "2026-07-28T21:14:00.000Z"
+last_activity: "2026-07-28 -- Phase 64 planned: 10 plans across 6 waves, verification PASSED after 2 revision iterations (2 blockers + 6 warnings -> 0). Decision coverage 34/34; MTR-01..04 all covered"
 progress:
-  total_phases: 3
+  total_phases: 7
   completed_phases: 2
-  total_plans: 9
+  total_plans: 19
   completed_plans: 9
-  percent: 67
+  percent: 29
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 ## Current Position
 
-Phase: 63 (stripe-native-entitlements) — COMPLETE
-Plan: 7 of 7 complete (all five waves done)
-Status: Ready to verify
-Last activity: 2026-07-28 -- 63-07 complete: docs-truth locks the entitlements ExDoc placement and the three prose fences (mutation-checked 4x); mix docs warnings 48 -> 42, exactly the clean-HEAD baseline, zero naming an entitlements file. All five phase gates green
+Phase: 64 (meter-event-summary-reads) — PLANNED
+Plan: 0 of 10 complete (6 waves)
+Status: Ready to execute
+Last activity: 2026-07-28 -- Phase 64 planned: 10 plans across 6 waves; plan-checker PASSED after 2 revision iterations. Phase 63 remains COMPLETE but NOT yet verified (`/gsd-verify-work 63` outstanding)
 
 ## Performance Metrics
 
@@ -123,12 +123,13 @@ Deferred DX: `.planning/seeds/SEED-006-accrue-dx-ergonomics.md`
 
 ## Operator Next Steps
 
-**Default:** Phase 63 is complete (7/7). Verify it, then move to Phase 64.
+**Default:** Phase 64 is planned (10 plans, 6 waves, checker PASSED). Execute it. Phase 63 is still awaiting verification.
 
 | Trigger | Action |
 |---------|--------|
-| Ready to verify | `/gsd-verify-work 63` — all five gates are green and recorded in `63-07-SUMMARY.md` |
-| Ready for the next phase | `/gsd-discuss-phase 64` (Meter Event-Summary Reads) |
+| Ready to execute Phase 64 | `/gsd-execute-phase 64` — wave 1 opens with a **blocking `checkpoint:decision`** (D-01 module naming, the phase's only one-way door). Start stripe-mock before wave 4: `docker run -p 12111-12112:12111-12112 stripe/stripe-mock:latest` |
+| Phase 63 still unverified | `/gsd-verify-work 63` — all five gates green and recorded in `63-07-SUMMARY.md`; outstanding since 2026-07-28 |
+| Phase 64 gate reminder | Do **not** use `mix ci` as Phase 64's gate — it is RED at clean HEAD. Use D-29's five-step differential gate in `64-VALIDATION.md` |
 | `mix ci` still red | Expected, and not Phase 63's doing. Steps 1–4 pass; `docs --warnings-as-errors` trips on 42 pre-existing warnings (Tax.* / TaxId.* nested types, `File.create/3`, `../README.md`, `../notebooks/stripe_explorer.livemd`, hidden `ObjectTypes` / `BillingPortal.Guards` / `Webhook.check_tolerance`). Zero name an entitlements file. Clearing them is Phase 67-shaped |
 | Bug / wrong Stripe behavior | `/gsd-quick` or `/gsd-debug` → fix + test |
 

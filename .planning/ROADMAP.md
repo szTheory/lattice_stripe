@@ -122,16 +122,32 @@
 
 **Build constraints**: Follow the parent-scoped `/v1/parent/:id/child` path pattern in `lib/lattice_stripe/transfer_reversal.ex` (the primary template — flat, wire-named, already ships `list/4` + `stream!/4`) + `tax_id.ex` + `external_account.ex`. **Modules are FLAT at depth 2** (`Billing.MeterEventSummary`, `Billing.MeterErrorReport`), named after the wire `"object"` string — parent-scoping is expressed in the signature, not the module name. Zero of the ~50 request-owning modules in `lib/` sit at depth 3; in `"Billing Metering"` specifically, depth 3 *means* value object. Only `MeterErrorReport`'s sub-structs (`.Reason`, `.ErrorType`, `.SampleError`) nest, and they own no `%Request{}`. See Phase 64 CONTEXT D-01. **Do NOT add new metering write surfaces** — accrue uses exactly one (`MeterEvent.create/3`) and ignores the rest; all four writes already ship. New modules need `@moduledoc`/`@doc` + ExDoc group registration.
 **Plans**: 10 plans
+**Wave 1**
 
 - [ ] 64-01-PLAN.md — Tracer: end-to-end `MeterEventSummary.list/4` read slice + ExDoc registration + fixture (Wave 1, gated by the D-01 one-way module-name decision)
 - [ ] 64-02-PLAN.md — MTR-04 encoder truth tests (float cliff, decimal strings, payload pass-through) + the `drift.ex` known-fields regex fix (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 64-03-PLAN.md — `list!/2..4`, `stream!/2..4`, the D-31 refutation set, and the full moduledoc (Wave 2)
 - [ ] 64-04-PLAN.md — `MeterErrorReport` + `.Reason`/`.ErrorType`/`.SampleError`, `from_event/1`, fixture, ObjectTypes dead-key lock (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 64-05-PLAN.md — GUARD-04 `check_summary_window!/2`, its two call sites, and the alignment matrix (Wave 3)
 - [ ] 64-06-PLAN.md — D-30's nine pagination assertions, two of them mutation-checked (Wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 64-07-PLAN.md — `guides/metering.md`: "Reading usage back", "The payload contract", and six corrections to false prose (Wave 4)
 - [ ] 64-09-PLAN.md — stripe-mock integration suite, ExDoc placement locks, clear the two metering docs warnings (Wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 64-08-PLAN.md — Runtime-guide handler rewrite, `scope.md` dimension-read limit, `MeterEvent.create/3` `@doc` payload bullet (Wave 5 — cross-references headings 64-07 creates)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
 - [ ] 64-10-PLAN.md — D-29 five-step differential phase gate + operator sign-off (Wave 6)
 
 ### Phase 65: Webhook ObjectTypes & Testing Fixtures
