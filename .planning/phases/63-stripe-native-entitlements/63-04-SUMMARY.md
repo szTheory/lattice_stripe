@@ -275,8 +275,16 @@ acceptance criteria already required and weaken no criterion.
 
 ## Issues Encountered
 
-None. Both files passed their gates on first write. The one intentional failure was the fail-first
-mutation check, which behaved exactly as the plan predicted.
+None attributable to this plan. Both files passed their gates on first write, and the one intentional
+failure was the fail-first mutation check, which behaved exactly as the plan predicted.
+
+**One unattributed flake, recorded rather than dropped.** One full-suite run reported
+`2187 tests, 1 failure` and exited before printing a failure block. It did not reproduce across **eight**
+subsequent consecutive full-suite runs, and `mix test test/lattice_stripe/entitlements/` was green on
+every run including that one. Both files this plan added are `async: true` pure-transformation tests
+with no transport, no shared process state, and no timing dependency, so they are not plausible sources.
+This is noted here so a future flake sighting has a prior data point, not because a defect was
+identified.
 
 ### Verification results
 
