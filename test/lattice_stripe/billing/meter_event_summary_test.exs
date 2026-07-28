@@ -241,5 +241,167 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
       assert {:ok, %LatticeStripe.Response{}} =
                MeterEventSummary.list(test_client(), @meter_id, params)
     end
+
+    # D-08's second message set. The arity in the message must name the function
+    # the caller actually invoked — a `stream!/4` call that reports `list/4` sends
+    # the reader to the wrong doc page.
+    #
+    # Every test below calls `stream!/4` WITHOUT consuming the returned stream.
+    # That is the assertion: `Stream.resource/3` defers its start function, so a
+    # guard placed anywhere but first would not raise until the first `Enum` step,
+    # far from the call site. No Mox expectation is set, so `verify_on_exit!` also
+    # proves nothing reached the transport.
+    test "stream!/4 raises on a nil meter id at call time, before any Enum step" do
+      assert_raise ArgumentError,
+                   "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires a non-empty meter id",
+                   fn -> MeterEventSummary.stream!(test_client(), nil, @window) end
+    end
+
+    test "stream!/4 raises on an empty-string meter id at call time" do
+      assert_raise ArgumentError,
+                   "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires a non-empty meter id",
+                   fn -> MeterEventSummary.stream!(test_client(), "", @window) end
+    end
+
+    test "stream!/4 raises when customer is missing, at call time" do
+      assert_raise ArgumentError,
+                   "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires a customer param",
+                   fn -> MeterEventSummary.stream!(test_client(), @meter_id, %{}) end
+    end
+
+    test "stream!/4 raises when start_time is missing" do
+      assert_raise ArgumentError,
+                   "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires a start_time param",
+                   fn ->
+                     MeterEventSummary.stream!(
+                       test_client(),
+                       @meter_id,
+                       Map.delete(@window, "start_time")
+                     )
+                   end
+    end
+
+    test "stream!/4 raises when end_time is missing" do
+      assert_raise ArgumentError,
+                   "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires an end_time param",
+                   fn ->
+                     MeterEventSummary.stream!(
+                       test_client(),
+                       @meter_id,
+                       Map.delete(@window, "end_time")
+                     )
+                   end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # MTR-01 — list!/4
+  # ---------------------------------------------------------------------------
+
+  describe "MeterEventSummary.list!/4" do
+    test "returns the %Response{} directly rather than an {:ok, _} tuple" do
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Metering.MeterEventSummary.list_response())
+      end)
+
+      assert %LatticeStripe.Response{data: %LatticeStripe.List{} = list} =
+               MeterEventSummary.list!(test_client(), @meter_id, @window)
+
+      assert [%MeterEventSummary{id: "mtrusg_123"}] = list.data
+    end
+
+    test "raises LatticeStripe.Error when Stripe rejects the call" do
+      expect(LatticeStripe.MockTransport, :request, fn _req -> error_response() end)
+
+      assert_raise LatticeStripe.Error, fn ->
+        MeterEventSummary.list!(test_client(), @meter_id, @window)
+      end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # MTR-02 — stream!/4
+  #
+  # Multi-page cursor behaviour is proven separately against the transport; this
+  # block proves only that the delegation is wired and yields decoded structs.
+  # ---------------------------------------------------------------------------
+
+  describe "MeterEventSummary.stream!/4" do
+    test "yields decoded %MeterEventSummary{} structs across a single page" do
+      items = [
+        Metering.MeterEventSummary.basic(%{"id" => "mtrusg_a"}),
+        Metering.MeterEventSummary.basic(%{"id" => "mtrusg_b"})
+      ]
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        assert req.url =~ "/v1/billing/meters/mtr_123/event_summaries"
+
+        ok_response(Metering.MeterEventSummary.list_response(items))
+      end)
+
+      summaries =
+        test_client()
+        |> MeterEventSummary.stream!(@meter_id, @window)
+        |> Enum.to_list()
+
+      assert [%MeterEventSummary{id: "mtrusg_a"}, %MeterEventSummary{id: "mtrusg_b"}] = summaries
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # D-31 — structural surface lock. With no Dialyzer and documentation-only
+  # typespecs, `refute function_exported?` is the ONLY enforcement of public
+  # surface shape in this project.
+  # ---------------------------------------------------------------------------
+
+  describe "module surface" do
+    # F-04: there is exactly one path, `GET /v1/billing/meters/:id/event_summaries`.
+    # Stripe serves no get-by-summary-id route, so there is nothing to retrieve.
+    test "does not export retrieve — Stripe serves no GET /{summary_id}" do
+      refute function_exported?(MeterEventSummary, :retrieve, 2)
+      refute function_exported?(MeterEventSummary, :retrieve, 3)
+    end
+
+    test "does not export write verbs — the endpoint is GET only" do
+      refute function_exported?(MeterEventSummary, :create, 2)
+      refute function_exported?(MeterEventSummary, :create, 3)
+      refute function_exported?(MeterEventSummary, :update, 3)
+      refute function_exported?(MeterEventSummary, :update, 4)
+      refute function_exported?(MeterEventSummary, :delete, 2)
+      refute function_exported?(MeterEventSummary, :delete, 3)
+    end
+
+    # Refuted at 1, 2 AND 3, not at the top arity alone: with two defaulted
+    # arguments a lower arity would otherwise slip through unnoticed (Phase 63
+    # STATE [63-02]).
+    test "stream! has no non-bang twin — auto-pagination raises, it does not return tuples" do
+      refute function_exported?(MeterEventSummary, :stream, 1)
+      refute function_exported?(MeterEventSummary, :stream, 2)
+      refute function_exported?(MeterEventSummary, :stream, 3)
+    end
+
+    # Encodes the D-10 rejection structurally. This library will not choose floor
+    # versus ceil for the caller, because that choice changes which usage the
+    # window includes — a business decision, not a formatting one.
+    test "does not export a window-aligning helper" do
+      refute function_exported?(MeterEventSummary, :align_window, 2)
+    end
+
+    # These arities exist via default arguments, and refuting any of them would be
+    # incorrect — the shipped surface is genuinely `list/2..4`, `list!/2..4` and
+    # `stream!/2..4` (D-31's explicit warning).
+    test "exports the shipped read surface at every defaulted arity" do
+      assert function_exported?(MeterEventSummary, :list, 2)
+      assert function_exported?(MeterEventSummary, :list, 3)
+      assert function_exported?(MeterEventSummary, :list, 4)
+      assert function_exported?(MeterEventSummary, :list!, 2)
+      assert function_exported?(MeterEventSummary, :list!, 3)
+      assert function_exported?(MeterEventSummary, :list!, 4)
+      assert function_exported?(MeterEventSummary, :stream!, 2)
+      assert function_exported?(MeterEventSummary, :stream!, 3)
+      assert function_exported?(MeterEventSummary, :stream!, 4)
+      assert function_exported?(MeterEventSummary, :from_map, 1)
+    end
   end
 end
