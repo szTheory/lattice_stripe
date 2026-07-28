@@ -75,7 +75,14 @@
   4. `LatticeStripe.Entitlements.Feature` supports create/retrieve/update/list over `/v1/entitlements/features`.
   5. An `active_entitlement_summary` payload with **no top-level `id`** deserializes into a typed struct without being dropped.
 **Build constraints**: Follow `lib/lattice_stripe/charge.ex` full-resource template (`@known_fields`, `defstruct [..., object:, extra: %{}]`, `from_map/1`, `Resource.unwrap_*`) and `lib/lattice_stripe/list.ex` `List.stream!` for pagination. Deserializer MUST tolerate the missing top-level `id`. **Do NOT build a per-request `entitled?(customer, feature)` gate helper** (explicitly out of scope — pull/pagination shape only). New public modules need valid `@moduledoc`/`@doc` + ExDoc group registration in `mix.exs`.
-**Plans**: TBD
+**Plans**: 7 plans
+- [ ] 63-01-PLAN.md — TRACER: typed `ActiveEntitlement.list/3` end-to-end (fixtures, `list_json/3`, `Feature` decode, `list/3`, L1 surface locks) (Wave 1)
+- [ ] 63-02-PLAN.md — `retrieve/3` + `stream!/3` and the ten-assertion pagination proof incl. "page 2 preserves the customer filter" (Wave 2)
+- [ ] 63-03-PLAN.md — `Entitlements.Feature` full verb surface, the archiving + `lookup_key` moduledocs, L2 locks (Wave 2)
+- [ ] 63-04-PLAN.md — `ActiveEntitlementSummary` with no `:id`, typed nested `%List{}`, cursor-order lock, `stream_entitlements!/3` (Wave 3)
+- [ ] 63-05-PLAN.md — stripe-mock integration proof for all six verbs + Phase 65 fixture-promotion handoff (Wave 3)
+- [ ] 63-06-PLAN.md — `guides/entitlements.md`, `guides/scope.md` fence, ExDoc registration in `mix.exs` (Wave 4)
+- [ ] 63-07-PLAN.md — docs-truth locks (ExDoc placement + three prose fences) and the five phase gates (Wave 5)
 
 ### Phase 64: Meter Event-Summary Reads
 **Goal**: Developers can read metered usage totals back from Stripe (accrue's entire usage-read surface is zero today).
@@ -129,7 +136,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 61. Default Finch Pool & Optional Application | v1.10 | 2/2 | Complete    | 2026-07-27 |
 | 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
-| 63. Stripe-Native Entitlements | v1.10 | 0/? | Not started | - |
+| 63. Stripe-Native Entitlements | v1.10 | 0/7 | Not started | - |
 | 64. Meter Event-Summary Reads | v1.10 | 0/? | Not started | - |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 0/? | Not started | - |
 | 66. Product ↔ Feature Attachment | v1.10 | 0/? | Not started | - |
