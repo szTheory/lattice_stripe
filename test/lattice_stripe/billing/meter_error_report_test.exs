@@ -252,5 +252,17 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
       assert report.meter == nil
       assert %Reason{} = report.reason
     end
+
+    test "raises a directive ArgumentError when the event carries no data" do
+      # This is the signature of passing a *delivered webhook body* rather than
+      # a fetched event — the documented trap. Without this clause the caller
+      # gets a bare BadMapError from a struct update, which names neither the
+      # cause nor the fix.
+      event = Event.from_map(Map.delete(Fixture.event(), "data"))
+
+      assert_raise ArgumentError, ~r/fetch_event/, fn ->
+        MeterErrorReport.from_event(event)
+      end
+    end
   end
 end
