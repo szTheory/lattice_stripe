@@ -115,12 +115,12 @@
 **Requirements**: MTR-01, MTR-02, MTR-03, MTR-04
 **Success Criteria** (what must be TRUE):
 
-  1. `LatticeStripe.Billing.Meter.EventSummary.list/4` returns summaries from `GET /v1/billing/meters/:id/event_summaries` with `customer`, `start_time`, `end_time`, `value_grouping_window` params.
-  2. `Billing.Meter.EventSummary.stream!` auto-paginates meter event summaries.
-  3. `LatticeStripe.Billing.MeterErrorReport` is a typed struct exposing `validation_errors`, deserializable from a webhook payload.
+  1. `LatticeStripe.Billing.MeterEventSummary.list/4` returns summaries from `GET /v1/billing/meters/:id/event_summaries` with `customer`, `start_time`, `end_time`, `value_grouping_window` params.
+  2. `Billing.MeterEventSummary.stream!` auto-paginates meter event summaries.
+  3. `LatticeStripe.Billing.MeterErrorReport` is a typed struct exposing `reason.error_types` (with nested `sample_errors`), deserializable from the `v1.billing.meter.error_report_triggered` v2 thin event via `from_event/1`.
   4. `Billing.MeterEvent.create/3` docs confirm arbitrary custom `payload` dimensions and decimal-string `value`s are accepted.
 
-**Build constraints**: Follow the parent-scoped `/v1/parent/:id/child` path pattern in `lib/lattice_stripe/tax_id.ex` + `transfer_reversal.ex`, and the nested-namespace pattern in `lib/lattice_stripe/billing/meter.ex`. **Do NOT add new metering write surfaces** — accrue uses exactly one (`MeterEvent.create/3`) and ignores the rest; all four writes already ship. New modules need `@moduledoc`/`@doc` + ExDoc group registration.
+**Build constraints**: Follow the parent-scoped `/v1/parent/:id/child` path pattern in `lib/lattice_stripe/transfer_reversal.ex` (the primary template — flat, wire-named, already ships `list/4` + `stream!/4`) + `tax_id.ex` + `external_account.ex`. **Modules are FLAT at depth 2** (`Billing.MeterEventSummary`, `Billing.MeterErrorReport`), named after the wire `"object"` string — parent-scoping is expressed in the signature, not the module name. Zero of the ~50 request-owning modules in `lib/` sit at depth 3; in `"Billing Metering"` specifically, depth 3 *means* value object. Only `MeterErrorReport`'s sub-structs (`.Reason`, `.ErrorType`, `.SampleError`) nest, and they own no `%Request{}`. See Phase 64 CONTEXT D-01. **Do NOT add new metering write surfaces** — accrue uses exactly one (`MeterEvent.create/3`) and ignores the rest; all four writes already ship. New modules need `@moduledoc`/`@doc` + ExDoc group registration.
 **Plans**: TBD
 
 ### Phase 65: Webhook ObjectTypes & Testing Fixtures
@@ -130,7 +130,7 @@
 **Requirements**: OBJ-01, OBJ-02, OBJ-03
 **Success Criteria** (what must be TRUE):
 
-  1. `ObjectTypes.maybe_deserialize/1` returns typed structs for `entitlements.active_entitlement`, `entitlements.active_entitlement_summary`, `billing.meter_event`, `billing.meter_event_summary`, `billing.meter_error_report`.
+  1. `ObjectTypes.maybe_deserialize/1` returns typed structs for `entitlements.active_entitlement`, `entitlements.active_entitlement_summary`, `billing.meter_event`, `billing.meter_event_summary`. **`billing.meter_error_report` is deliberately NOT registered** — it is a v2 thin-event `data` payload with no `"object"` key, so `maybe_deserialize/1`'s dispatch can never reach it; registering it would create a dead key. It is decoded explicitly via `Billing.MeterErrorReport.from_event/1`. See Phase 64 CONTEXT F-13/D-14, and lock the absence with a `refute`.
   2. Each `object_types.ex` registration key matches the wire `"object"` string verbatim and maps to a module exposing `from_map/1`.
   3. Public `LatticeStripe.Testing.Fixtures` (with typed-conversion wrappers in `LatticeStripe.Testing`) exist for entitlement + meter objects, including the no-`id` summary.
   4. Public `Testing.Fixtures` exist for core billing objects — subscription, invoice, customer, payment_intent.
