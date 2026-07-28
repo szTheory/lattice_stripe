@@ -23,6 +23,8 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
   > path. A local gate is fast, is available when Stripe is not, and has a failure mode you
   > choose rather than one the network chooses for you.
 
+  See [Entitlements](guides/entitlements.md) for the end-to-end story.
+
   ## Listing a customer's entitlements
 
   The read surface is `list/3` (one page), `stream!/3` (every page, lazily), and
