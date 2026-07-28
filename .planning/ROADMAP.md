@@ -85,7 +85,7 @@
   5. An `active_entitlement_summary` payload with **no top-level `id`** deserializes into a typed struct without being dropped.
 
 **Build constraints**: Follow `lib/lattice_stripe/charge.ex` full-resource template (`@known_fields`, `defstruct [..., object:, extra: %{}]`, `from_map/1`, `Resource.unwrap_*`) and `lib/lattice_stripe/list.ex` `List.stream!` for pagination. Deserializer MUST tolerate the missing top-level `id`. **Do NOT build a per-request `entitled?(customer, feature)` gate helper** (explicitly out of scope — pull/pagination shape only). New public modules need valid `@moduledoc`/`@doc` + ExDoc group registration in `mix.exs`.
-**Plans**: 3/7 plans executed
+**Plans**: 4/7 plans executed
 **Wave 1**
 
 - [x] 63-01-PLAN.md — TRACER: typed `ActiveEntitlement.list/3` end-to-end (fixtures, `list_json/3`, `Feature` decode, `list/3`, L1 surface locks) (Wave 1)
@@ -97,7 +97,7 @@
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 63-04-PLAN.md — `ActiveEntitlementSummary` with no `:id`, typed nested `%List{}`, cursor-order lock, `stream_entitlements!/3` (Wave 3)
+- [x] 63-04-PLAN.md — `ActiveEntitlementSummary` with no `:id`, typed nested `%List{}`, cursor-order lock, `stream_entitlements!/3` (Wave 3)
 - [ ] 63-05-PLAN.md — stripe-mock integration proof for all six verbs + Phase 65 fixture-promotion handoff (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
@@ -172,7 +172,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 61. Default Finch Pool & Optional Application | v1.10 | 2/2 | Complete    | 2026-07-27 |
 | 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
-| 63. Stripe-Native Entitlements | v1.10 | 3/7 | In Progress|  |
+| 63. Stripe-Native Entitlements | v1.10 | 4/7 | In Progress|  |
 | 64. Meter Event-Summary Reads | v1.10 | 0/? | Not started | - |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 0/? | Not started | - |
 | 66. Product ↔ Feature Attachment | v1.10 | 0/? | Not started | - |

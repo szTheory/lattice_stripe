@@ -5,16 +5,16 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 63
 current_phase_name: stripe-native-entitlements
 status: executing
-stopped_at: Completed 63-03-PLAN.md
-last_updated: "2026-07-28T15:32:22.446Z"
+stopped_at: Completed 63-04-PLAN.md
+last_updated: "2026-07-28T15:42:26.583Z"
 last_activity: 2026-07-28
-last_activity_desc: "63-03 complete: the full Entitlements.Feature verb surface plus the archiving and lookup_key landmine docs (ENT-04)"
+last_activity_desc: "63-04 complete: ActiveEntitlementSummary typed decode with the mutation-checked cursor ordering lock (ENT-05)"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 9
   completed_plans: 6
-  percent: 61
+  percent: 50
 ---
 
 # Project State
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 63 (stripe-native-entitlements) — EXECUTING
-Plan: 3 of 7 complete (Wave 1 tracer 63-01 + all of Wave 2 — 63-02 read surface/pagination and 63-03 `Feature` verb surface — done; Wave 3 is next)
+Plan: 4 of 7 complete (Waves 1–2 done; Wave 3 opened with 63-04 `ActiveEntitlementSummary` — 63-05/63-06/63-07 remain)
 Status: Ready to execute
-Last activity: 2026-07-28 -- 63-03 complete: the full Entitlements.Feature verb surface plus the archiving and lookup_key landmine docs (ENT-04)
+Last activity: 2026-07-28 -- 63-04 complete: ActiveEntitlementSummary typed decode with the mutation-checked cursor ordering lock (ENT-05)
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Last activity: 2026-07-28 -- 63-03 complete: the full Entitlements.Feature verb 
 | Phase 63 P01 | 5min | 2 tasks | 6 files |
 | Phase 63 P02 | 3min | 2 tasks | 3 files |
 | Phase 63 P03 | 3min | 3 tasks | 2 files |
+| Phase 63 P04 | 4min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,10 @@ Last activity: 2026-07-28 -- 63-03 complete: the full Entitlements.Feature verb 
 - [Phase ?]: **[63-03]** D-08 held: no archive/3, no unarchive/3, no set_active/4, no delete at any arity — archiving is update/4 with active: false, and every one of those names is refuted structurally at every exported arity
 - [Phase ?]: **[63-03]** T-63-08 is documentation-only by necessity: the active-field vs archived-filter split and its false-deletion consequence live in an {: .warning} moduledoc admonition because no function signature can carry the fact and stripe-mock does not vary by filter
 - [Phase ?]: **[63-03]** D-12 held: no retrieve_by_lookup_key/3 — a single-match lookup_key filter is asserted to return a %List{} of one, and lookup_key's post-create immutability (absent from the update body schema) is documented as the reason it is safe to key host config on
+- [Phase ?]: **[63-04]** D-05 mutation-checked: typing the nested data before List.from_json/3 in parse_entitlements/2 fails exactly '_last_id is derived from the raw maps before typing' — call order is the whole mitigation and the test that proves it must keep its name
+- [Phase ?]: **[63-04]** F-02 held: %ActiveEntitlementSummary{} has NO :id field (the Stripe object has no id property and no x-resourceId); the omission carries a source comment so it is not 'fixed' later
+- [Phase ?]: **[63-04]** D-03 held: stream_entitlements!/3 is a FULL canonical re-fetch at limit=100 keyed on summary.customer — never a cursor-resume from the inline page, which would stitch two points in time into one hybrid snapshot
+- [Phase ?]: **[63-04]** D-04 held: the nested list's url is rewritten to /v1/entitlements/active_entitlements and _params is populated with the customer filter, so List.stream/2 over summary.entitlements is callable and tenant-scoped rather than 404-ing on the webhook's /v1/customer/{cus}/entitlements path
 
 ### Blockers/Concerns
 
@@ -98,8 +103,8 @@ Last activity: 2026-07-28 -- 63-03 complete: the full Entitlements.Feature verb 
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T15:31:56.877Z
-**Stopped at:** Completed 63-03-PLAN.md
+**Last session:** 2026-07-28T15:41:27.508Z
+**Stopped at:** Completed 63-04-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
