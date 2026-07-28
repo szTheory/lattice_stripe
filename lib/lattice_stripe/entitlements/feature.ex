@@ -18,10 +18,11 @@ defmodule LatticeStripe.Entitlements.Feature do
   decodes to a `LatticeStripe.Entitlements.Feature`.
   """
 
-  # NOTE: `alias LatticeStripe.{Client, Request, Resource}` lands in 63-03 alongside the verb
-  # surface. Adding it here would be an unused alias, and `mix compile --warnings-as-errors`
-  # is a per-task gate for this plan.
+  alias LatticeStripe.{Client, Request, Resource}
 
+  # D-06: the canonical path lives here once. `create/3`, `retrieve/3`, `update/4`, `list/3`
+  # and `stream!/3` all read it, so they physically cannot diverge. Item paths compose as
+  # `@list_path <> "/#{id}"` rather than re-declaring the string.
   @list_path "/v1/entitlements/features"
 
   @known_fields ~w(id object active lookup_key name metadata livemode)
@@ -47,6 +48,174 @@ defmodule LatticeStripe.Entitlements.Feature do
     object: "entitlements.feature",
     extra: %{}
   ]
+
+  # ---------------------------------------------------------------------------
+  # CREATE
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Create an entitlement feature.
+
+  Requires `lookup_key` and `name` params (string keys — Stripe wire format). Both are
+  guarded by `LatticeStripe.Resource.require_param!/3`, which raises `ArgumentError`
+  **before any network call** and checks key **presence, not value emptiness**: a
+  `lookup_key` whose value is `""` or `nil` passes the guard and fails at Stripe instead.
+
+  `params` has no default. An argument-less create could only ever raise, so the arity that
+  would allow one does not exist.
+
+  `lookup_key` is **immutable after create** — see the moduledoc section
+  *Using lookup_key as your system identifier*. Choose it deliberately.
+
+  Optional params: `metadata`, `expand`.
+
+      {:ok, feature} =
+        LatticeStripe.Entitlements.Feature.create(client, %{
+          "lookup_key" => "premium_support",
+          "name" => "Premium Support"
+        })
+  """
+  @spec create(Client.t(), map(), keyword()) :: {:ok, t()} | {:error, LatticeStripe.Error.t()}
+  def create(%Client{} = client, params, opts \\ []) when is_map(params) do
+    Resource.require_param!(
+      params,
+      "lookup_key",
+      "LatticeStripe.Entitlements.Feature.create/3 requires a lookup_key param"
+    )
+
+    Resource.require_param!(
+      params,
+      "name",
+      "LatticeStripe.Entitlements.Feature.create/3 requires a name param"
+    )
+
+    %Request{method: :post, path: @list_path, params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Bang variant of `create/3`. Raises `LatticeStripe.Error` on failure."
+  @spec create!(Client.t(), map(), keyword()) :: t()
+  def create!(client, params, opts \\ []),
+    do: client |> create(params, opts) |> Resource.unwrap_bang!()
+
+  # ---------------------------------------------------------------------------
+  # RETRIEVE
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Retrieve an entitlement feature by ID.
+
+  The id is the `feat_`-prefixed identifier returned by `create/3`, `list/3` or
+  `stream!/3`. There is no retrieval by `lookup_key` — Stripe defines none; filter `list/3`
+  instead.
+  """
+  @spec retrieve(Client.t(), String.t(), keyword()) ::
+          {:ok, t()} | {:error, LatticeStripe.Error.t()}
+  def retrieve(%Client{} = client, id, opts \\ []) when is_binary(id) do
+    %Request{method: :get, path: @list_path <> "/#{id}", params: %{}, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Bang variant of `retrieve/3`. Raises `LatticeStripe.Error` on failure."
+  @spec retrieve!(Client.t(), String.t(), keyword()) :: t()
+  def retrieve!(client, id, opts \\ []),
+    do: client |> retrieve(id, opts) |> Resource.unwrap_bang!()
+
+  # ---------------------------------------------------------------------------
+  # UPDATE
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Update an entitlement feature.
+
+  Stripe accepts `active`, `name`, `metadata` and `expand`; other keys in `params` are
+  passed through for forward compatibility. `lookup_key` is **not** an accepted update
+  param — Stripe ignores it silently rather than erroring, which is precisely what makes it
+  a safe key for host configuration.
+
+  **This is the archive operation.** There is no `archive/3` verb; see the moduledoc
+  section *Archiving* for why.
+
+      {:ok, archived} =
+        LatticeStripe.Entitlements.Feature.update(client, "feat_123", %{"active" => false})
+  """
+  @spec update(Client.t(), String.t(), map(), keyword()) ::
+          {:ok, t()} | {:error, LatticeStripe.Error.t()}
+  def update(%Client{} = client, id, params, opts \\ [])
+      when is_binary(id) and is_map(params) do
+    %Request{method: :post, path: @list_path <> "/#{id}", params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_singular(&from_map/1)
+  end
+
+  @doc "Bang variant of `update/4`. Raises `LatticeStripe.Error` on failure."
+  @spec update!(Client.t(), String.t(), map(), keyword()) :: t()
+  def update!(client, id, params, opts \\ []),
+    do: client |> update(id, params, opts) |> Resource.unwrap_bang!()
+
+  # ---------------------------------------------------------------------------
+  # LIST + STREAM
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  List entitlement features.
+
+  Unlike `LatticeStripe.Entitlements.ActiveEntitlement.list/3`, no filter is required —
+  features are account-wide catalog objects, not customer-scoped.
+
+  Supports Stripe's `archived` (boolean) and `lookup_key` filters, plus `limit` (default
+  **10**, max 100), `starting_after`, `ending_before` and `expand`.
+
+  **`archived` defaults to omitting archived features.** A catalog reconciler that passes
+  no filter sees a *filtered view* and will report archived features as deleted — read the
+  moduledoc section *Archiving* before diffing this against a local catalog.
+
+  A `lookup_key` filter returns a **list**, not a singleton, even when exactly one feature
+  matches.
+  """
+  @spec list(Client.t(), map(), keyword()) ::
+          {:ok, LatticeStripe.Response.t()} | {:error, LatticeStripe.Error.t()}
+  def list(%Client{} = client, params \\ %{}, opts \\ []) do
+    %Request{method: :get, path: @list_path, params: params, opts: opts}
+    |> then(&Client.request(client, &1))
+    |> Resource.unwrap_list(&from_map/1)
+  end
+
+  @doc "Bang variant of `list/3`. Raises `LatticeStripe.Error` on failure."
+  @spec list!(Client.t(), map(), keyword()) :: LatticeStripe.Response.t()
+  def list!(client, params \\ %{}, opts \\ []),
+    do: client |> list(params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Returns a lazy stream of **all** entitlement features (auto-pagination).
+
+  Emits individual `%Feature{}` structs, following `has_more` and fetching each subsequent
+  page as the stream is consumed. Raises `LatticeStripe.Error` if any page fetch fails, so
+  a partial enumeration surfaces as an error rather than as a short list.
+
+  This is the entry point for catalog drift detection: `limit` defaults to 10, so a single
+  `list/3` call over a catalog of more than ten features silently returns a partial set.
+  Filters pass through to every page, so pair it with `%{"archived" => true}` when
+  reconciling.
+
+      client
+      |> LatticeStripe.Entitlements.Feature.stream!()
+      |> Enum.map(& &1.lookup_key)
+
+  There is no non-bang `stream/3` twin — a lazy stream cannot return an error tuple at
+  construction time for a failure that happens pages later.
+  """
+  @spec stream!(Client.t(), map(), keyword()) :: Enumerable.t()
+  def stream!(%Client{} = client, params \\ %{}, opts \\ []) do
+    req = %Request{method: :get, path: @list_path, params: params, opts: opts}
+
+    # The cursor state machine — base_params preservation, the starting_after cursor, and
+    # the idempotency-key strip on page fetches — belongs to LatticeStripe.List and is not
+    # re-grown here.
+    LatticeStripe.List.stream!(client, req) |> Stream.map(&from_map/1)
+  end
 
   # ---------------------------------------------------------------------------
   # DECODE
@@ -78,7 +247,4 @@ defmodule LatticeStripe.Entitlements.Feature do
       extra: extra
     }
   end
-
-  @doc false
-  def list_path, do: @list_path
 end
