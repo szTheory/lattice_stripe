@@ -192,6 +192,7 @@ option.
 - ✓ Checkout guide docs_truth regression locks (CHECKOUT-03) — Phase 59, v1.9
 - ✓ README error taxonomy canonical atoms + docs_truth lock (README-01, README-02) — Phase 59, v1.9
 - ✓ docs_truth checkout.md content locks alongside payments (VERIFY-05) — Phase 59, v1.9
+- ✓ Stripe-native entitlements read surface: `ActiveEntitlement` list/retrieve/`stream!`, `Feature` CRUDL, `ActiveEntitlementSummary` webhook decode + `stream_entitlements!/3` (ENT-01..05) — Phase 63, v1.10
 
 ### Active
 
@@ -204,6 +205,7 @@ option.
 - Resolving Phase 41.1 as a milestone-blocking requirement — retired as `accepted-external-verification` in v1.7
 - New Stripe resource families in v1.x — v1.7 is the planned stop signal; Identity, Treasury, Issuing, Terminal, Financial Connections, Climate, Sigma, and Reporting deferred unless adopter pull justifies a future milestone
 - Marketing / landing website — README + HexDocs are the public surface for this SDK; a separate site duplicates ExDoc and has low adoption ROI
+- Per-request `entitled?(customer, feature)` gate helper — an authorization gate that makes a network call fails **open** under partition; the SDK ships the reconciler plus a local fail-closed recipe instead (D-19, Phase 63)
 
 ## Key Decisions
 
@@ -213,6 +215,7 @@ option.
 | Integration-first proof posture | Real boundaries catch drift earlier than mock-only tests | ✓ Good |
 | Explicit verbs over magical updates | Clearer SDK semantics for irreversible actions | ✓ Good |
 | Shift-left verification default | Docs/example flows should become executable proof where feasible | ✓ Good |
+| Refuse network-calling authorization gates | A gate that calls Stripe per request fails open under partition; reconcile-then-gate-locally is the correct shape | ✓ Good (Phase 63) |
 | Keep LatticeStripe lower-level than Accrue | Billing-engine abstractions belong downstream, not in the SDK | ✓ Good |
 | Prioritize adoption closure before new breadth | Public truth and guide clarity unlock more value than another narrow Stripe family | ✓ Good (v1.4 confirmed) |
 | Treat public docs/support truth as milestone-grade | First-run trust and flagship guidance change adoption more than another small API family | ✓ Good (v1.4 confirmed) |
@@ -264,4 +267,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-27 — reopened for v1.8.0 "Accrue Surface Closure" under the adopter-pull gate (SEED-005); prior maintenance posture otherwise intact*
+*Last updated: 2026-07-28 after Phase 63 — Stripe-native entitlements read surface validated (ENT-01..05); the per-request `entitled?` gate helper recorded as a durable refusal (D-19)*

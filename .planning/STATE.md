@@ -2,10 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
+current_phase: 64
+current_phase_name: Meter Event-Summary Reads
 status: planned
-stopped_at: Phase 64 planned (10 plans, 6 waves)
-last_updated: "2026-07-28T21:14:00.000Z"
-last_activity: "2026-07-28 -- Phase 64 planned: 10 plans across 6 waves, verification PASSED after 2 revision iterations (2 blockers + 6 warnings -> 0). Decision coverage 34/34; MTR-01..04 all covered"
+stopped_at: Phase 64 planned (10 plans, 6 waves) — ready to execute
+last_updated: "2026-07-28T19:45:35.234Z"
+last_activity: 2026-07-28
+last_activity_desc: "Phase 63 UAT complete (63/63 pass: 56 auto-covered, 7 human-approved); verification passed; phase marked complete and transitioned to Phase 64"
 progress:
   total_phases: 7
   completed_phases: 2
@@ -21,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 63 — stripe-native-entitlements
+**Current focus:** Phase 64 — meter-event-summary-reads
 
 ## Current Position
 
 Phase: 64 (meter-event-summary-reads) — PLANNED
 Plan: 0 of 10 complete (6 waves)
 Status: Ready to execute
-Last activity: 2026-07-28 -- Phase 64 planned: 10 plans across 6 waves; plan-checker PASSED after 2 revision iterations. Phase 63 remains COMPLETE but NOT yet verified (`/gsd-verify-work 63` outstanding)
+Last activity: 2026-07-28 — Phase 63 verified via `/gsd-verify-work 63`: 63/63 UAT checkpoints pass (56 auto-covered by tests, 7 human-approved), verification status `passed`, phase marked complete. Phase 64 remains planned and ready to execute.
 
 ## Performance Metrics
 
@@ -113,8 +116,8 @@ Last activity: 2026-07-28 -- Phase 64 planned: 10 plans across 6 waves; plan-che
 ## Session Continuity
 
 **Last session:** 2026-07-28T17:29:03.520Z
-**Stopped at:** Phase 64 context gathered
-**Resume file:** .planning/phases/64-meter-event-summary-reads/64-CONTEXT.md
+**Stopped at:** Phase 63 verified and closed; Phase 64 planned (10 plans, 6 waves) and ready to execute
+**Resume file:** .planning/phases/64-meter-event-summary-reads/64-01-PLAN.md
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
 Gap brief: `.planning/research/accrue-gap-brief-2026-07-27.txt`
@@ -123,12 +126,12 @@ Deferred DX: `.planning/seeds/SEED-006-accrue-dx-ergonomics.md`
 
 ## Operator Next Steps
 
-**Default:** Phase 64 is planned (10 plans, 6 waves, checker PASSED). Execute it. Phase 63 is still awaiting verification.
+**Default:** Phase 64 is planned (10 plans, 6 waves, checker PASSED). Execute it. Phase 63 is verified and closed (63/63 UAT, 2026-07-28).
 
 | Trigger | Action |
 |---------|--------|
 | Ready to execute Phase 64 | `/gsd-execute-phase 64` — wave 1 opens with a **blocking `checkpoint:decision`** (D-01 module naming, the phase's only one-way door). Start stripe-mock before wave 4: `docker run -p 12111-12112:12111-12112 stripe/stripe-mock:latest` |
-| Phase 63 still unverified | `/gsd-verify-work 63` — all five gates green and recorded in `63-07-SUMMARY.md`; outstanding since 2026-07-28 |
+| Phase 63 verification | Done 2026-07-28 — `63-UAT.md` records 63/63 (56 auto-covered, 7 human-approved); `63-VERIFICATION.md` status `passed`. Accepted risk A1: multi-page pagination proven at the Mox layer only (stripe-mock ignores the cursor; no live key here) |
 | Phase 64 gate reminder | Do **not** use `mix ci` as Phase 64's gate — it is RED at clean HEAD. Use D-29's five-step differential gate in `64-VALIDATION.md` |
 | `mix ci` still red | Expected, and not Phase 63's doing. Steps 1–4 pass; `docs --warnings-as-errors` trips on 42 pre-existing warnings (Tax.* / TaxId.* nested types, `File.create/3`, `../README.md`, `../notebooks/stripe_explorer.livemd`, hidden `ObjectTypes` / `BillingPortal.Guards` / `Webhook.check_tolerance`). Zero name an entitlements file. Clearing them is Phase 67-shaped |
 | Bug / wrong Stripe behavior | `/gsd-quick` or `/gsd-debug` → fix + test |
