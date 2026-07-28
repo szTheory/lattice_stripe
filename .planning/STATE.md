@@ -1,14 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.10
-milestone_name: Accrue Surface Closure
+milestone_name: Accrue Surface Closure (Hex 1.8.0)
+current_phase: 61
 status: milestone_complete
-last_updated: 2026-07-27T23:25:05.839Z
+last_updated: "2026-07-28T03:03:47.216Z"
 last_activity: 2026-07-27
+last_activity_desc: Phase 63 planning complete
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
-  total_plans: 2
+  total_plans: 9
   completed_plans: 2
   percent: 100
 stopped_at: Milestone complete (Phase 61 was final phase)
@@ -28,7 +30,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 Phase: 61
 Plan: Not started
 Status: Milestone complete
-Last activity: 2026-07-27
+Last activity: 2026-07-27 — Phase 63 planning complete
 
 ## Performance Metrics
 
