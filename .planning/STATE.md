@@ -5,15 +5,15 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 63
 current_phase_name: stripe-native-entitlements
 status: executing
-stopped_at: Completed 63-04-PLAN.md
-last_updated: "2026-07-28T15:42:26.583Z"
+stopped_at: Completed 63-05-PLAN.md
+last_updated: "2026-07-28T15:51:34.060Z"
 last_activity: 2026-07-28
-last_activity_desc: "63-04 complete: ActiveEntitlementSummary typed decode with the mutation-checked cursor ordering lock (ENT-05)"
+last_activity_desc: "63-05 complete: all six entitlements verbs routed green against stripe-mock v0.199.0, plus the Phase 65 fixture promote-by-move contract (ENT-01/03/04)"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
   percent: 50
 ---
 
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 63 (stripe-native-entitlements) — EXECUTING
-Plan: 4 of 7 complete (Waves 1–2 done; Wave 3 opened with 63-04 `ActiveEntitlementSummary` — 63-05/63-06/63-07 remain)
+Plan: 5 of 7 complete (Waves 1–2 done; Wave 3 in progress — 63-04 and 63-05 done, 63-06/63-07 remain)
 Status: Ready to execute
-Last activity: 2026-07-28 -- 63-04 complete: ActiveEntitlementSummary typed decode with the mutation-checked cursor ordering lock (ENT-05)
+Last activity: 2026-07-28 -- 63-05 complete: all six entitlements verbs routed green against stripe-mock v0.199.0, plus the Phase 65 fixture promote-by-move contract (ENT-01/03/04)
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Last activity: 2026-07-28 -- 63-04 complete: ActiveEntitlementSummary typed deco
 | Phase 63 P02 | 3min | 2 tasks | 3 files |
 | Phase 63 P03 | 3min | 3 tasks | 2 files |
 | Phase 63 P04 | 4min | 2 tasks | 2 files |
+| Phase 63 P05 | 8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Last activity: 2026-07-28 -- 63-04 complete: ActiveEntitlementSummary typed deco
 - [Phase ?]: **[63-04]** F-02 held: %ActiveEntitlementSummary{} has NO :id field (the Stripe object has no id property and no x-resourceId); the omission carries a source comment so it is not 'fixed' later
 - [Phase ?]: **[63-04]** D-03 held: stream_entitlements!/3 is a FULL canonical re-fetch at limit=100 keyed on summary.customer — never a cursor-resume from the inline page, which would stitch two points in time into one hybrid snapshot
 - [Phase ?]: **[63-04]** D-04 held: the nested list's url is rewritten to /v1/entitlements/active_entitlements and _params is populated with the customer filter, so List.stream/2 over summary.entitlements is callable and tenant-scoped rather than 404-ing on the webhook's /v1/customer/{cus}/entitlements path
+- [Phase ?]: 63-05: integration setup_all RAISES with the docker command when stripe-mock is absent — no @tag :skip and no capability probe, because a probe's failure mode is the silent skip (T-63-15/D-20)
+- [Phase ?]: 63-05: pagination deliberately NOT asserted against stripe-mock — it ignores page size and cursor and returns one synthetic item per list; the proof stays in 63-02's Mox multi-page suite
+- [Phase ?]: 63-05: no raw-DELETE test — the absent delete verb is an SDK-shape fact already locked in feature_test.exs, not a Stripe-behavior fact to re-probe
 
 ### Blockers/Concerns
 
@@ -103,8 +107,8 @@ Last activity: 2026-07-28 -- 63-04 complete: ActiveEntitlementSummary typed deco
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T15:41:27.508Z
-**Stopped at:** Completed 63-04-PLAN.md
+**Last session:** 2026-07-28T15:51:06.803Z
+**Stopped at:** Completed 63-05-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
