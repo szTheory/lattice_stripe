@@ -2,18 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
-current_phase: 61
-status: milestone_complete
-last_updated: "2026-07-28T03:03:47.216Z"
-last_activity: 2026-07-27
-last_activity_desc: Phase 63 planning complete
+current_phase: 63
+current_phase_name: stripe-native-entitlements
+status: executing
+stopped_at: Completed 63-01-PLAN.md
+last_updated: "2026-07-28T15:11:34.546Z"
+last_activity: 2026-07-28
+last_activity_desc: "63-01 complete: typed ActiveEntitlement.list/3 end-to-end (ENT-01)"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 9
-  completed_plans: 2
-  percent: 100
-stopped_at: Milestone complete (Phase 61 was final phase)
+  completed_plans: 3
+  percent: 33
 ---
 
 # Project State
@@ -23,14 +24,14 @@ stopped_at: Milestone complete (Phase 61 was final phase)
 See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Milestone complete
+**Current focus:** Phase 63 — stripe-native-entitlements
 
 ## Current Position
 
-Phase: 61
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-07-27 — Phase 63 planning complete
+Phase: 63 (stripe-native-entitlements) — EXECUTING
+Plan: 1 of 7 complete (63-01 tracer done; Wave 2 = 63-02 + 63-03 next, parallelizable)
+Status: Executing Phase 63
+Last activity: 2026-07-28 -- 63-01 complete: typed ActiveEntitlement.list/3 end-to-end (ENT-01)
 
 ## Performance Metrics
 
@@ -39,6 +40,12 @@ Last activity: 2026-07-27 — Phase 63 planning complete
 - Total phases: 2 (59–60)
 - Total plans completed: 6
 - Timeline: single-day (2026-05-27)
+
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 63 P01 | 5min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -52,6 +59,11 @@ Last activity: 2026-07-27 — Phase 63 planning complete
 - **Lower-priority DX deferred to SEED-006** — brief §3.2, 3.5–3.9, 3.11 are real but non-blocking; not in this milestone.
 - **v1.x stop signal otherwise holds** — no broad resource-family breadth (Identity, Treasury, Issuing, Terminal, etc.) in this reopen.
 - [Phase ?]: Phase 61 default Finch pool: LatticeStripe.Application starts LatticeStripe.Finch at boot; :finch defaults to it (was required); opt-out via config :lattice_stripe, start_default_finch: false
+- **[63-01]** D-16 (one-way): no parent lib/lattice_stripe/entitlements.ex — LatticeStripe.Entitlements.ActiveEntitlement is the published semver name once v1.10 tags; renaming after release is breaking
+- **[63-01]** D-06: ActiveEntitlement owns the canonical /v1/entitlements/active_entitlements path as one @list_path + list_path/0 accessor; 63-02 stream!/3 and 63-04's summary url rewrite read it rather than re-declaring it
+- **[63-01]** T-63-04 mitigated structurally: refute function_exported?(:entitled?, 2/3/4) forbids the gate helper (a rename cannot defeat it); the moduledoc keeps the name entitled? PRESENT in prose (D-24) and ships the fail-closed local-gate replacement
+- **[63-01]** Feature.ex ships decode-only; its alias LatticeStripe.{Client, Request, Resource} was omitted (unused-alias vs --warnings-as-errors) and 63-03 MUST add it with the verb surface — an in-source NOTE marks the spot
+- **[63-01]** Clean-HEAD ExDoc warning baseline = 42, recorded for the 63-07 differential docs gate; mix ci stays un-run this phase because its docs --warnings-as-errors step is RED at clean HEAD (C-02)
 
 ### Blockers/Concerns
 
@@ -76,6 +88,10 @@ Last activity: 2026-07-27 — Phase 63 planning complete
 
 ## Session Continuity
 
+**Last session:** 2026-07-28T15:11:09.585Z
+**Stopped at:** Completed 63-01-PLAN.md
+**Resume file:** None
+
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
 Gap brief: `.planning/research/accrue-gap-brief-2026-07-27.txt`
 Assessment thread: `.planning/threads/v1-10-next-milestone-assessment.md`
@@ -83,12 +99,12 @@ Deferred DX: `.planning/seeds/SEED-006-accrue-dx-ergonomics.md`
 
 ## Operator Next Steps
 
-**Default:** Plan and execute the v1.10 roadmap, Wave 0 first.
+**Default:** Continue Phase 63. Wave 0 (61, 62) is done; Wave 1 (63-01, the tracer) is done.
 
 | Trigger | Action |
 |---------|--------|
-| Ready to plan | `/gsd-plan-phase 61` (default Finch pool) or `62` (migration guide) — both Wave 0 |
-| Wave 0 done | `/gsd-plan-phase 63` (Entitlements flagship) |
+| Ready to continue | `/gsd-execute-phase 63` — Wave 2 is 63-02 (`retrieve/3` + `stream!/3` + pagination) and 63-03 (`Feature` verb surface), parallelizable |
+| Starting 63-03 | Add `alias LatticeStripe.{Client, Request, Resource}` to `lib/lattice_stripe/entitlements/feature.ex` — deliberately omitted in 63-01, marked with an in-source `NOTE:` |
 | Bug / wrong Stripe behavior | `/gsd-quick` or `/gsd-debug` → fix + test |
 
 **Do not:** broad resource-family breadth; new metering writes; a per-request `entitled?` gate helper; break SEED-005 §6 stability contracts.

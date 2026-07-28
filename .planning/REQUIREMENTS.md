@@ -9,7 +9,7 @@ Source: verified accrue gap brief (`.planning/research/accrue-gap-brief-2026-07-
 
 ### Entitlements
 
-- [ ] **ENT-01**: Developer can list a customer's active entitlements via `LatticeStripe.Entitlements.ActiveEntitlement.list/3` (`GET /v1/entitlements/active_entitlements`, customer filter)
+- [x] **ENT-01**: Developer can list a customer's active entitlements via `LatticeStripe.Entitlements.ActiveEntitlement.list/3` (`GET /v1/entitlements/active_entitlements`, customer filter)
 - [ ] **ENT-02**: Developer can auto-paginate all active entitlements via `ActiveEntitlement.stream!/3` (follows `has_more`/cursor — the load-bearing piece for accrue's reconciler)
 - [ ] **ENT-03**: Developer can retrieve a single active entitlement by id via `ActiveEntitlement.retrieve/3`
 - [ ] **ENT-04**: Developer can create, retrieve, update, and list entitlement features via `LatticeStripe.Entitlements.Feature` (`/v1/entitlements/features`)
@@ -70,7 +70,7 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENT-01 | Phase 63 | Pending |
+| ENT-01 | Phase 63 | Complete |
 | ENT-02 | Phase 63 | Pending |
 | ENT-03 | Phase 63 | Pending |
 | ENT-04 | Phase 63 | Pending |
@@ -91,11 +91,13 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 | DOC-02 | Phase 67 | Pending |
 
 **Coverage:**
+
 - v1 requirements: **19 total** (the enumerated list contains 19 distinct IDs — ENT×5, MTR×4, OBJ×3, PROD×2, DX×3, DOC×2; the earlier "17" header count was stale)
 - Mapped to phases: 19/19 ✓
 - Unmapped: 0
 
 **Phase → requirement rollup:**
+
 - Phase 61 (Wave 0): DX-01
 - Phase 62 (Wave 0): DOC-01
 - Phase 63 (Wave 1): ENT-01, ENT-02, ENT-03, ENT-04, ENT-05
