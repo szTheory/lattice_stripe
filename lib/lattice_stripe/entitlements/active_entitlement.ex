@@ -55,8 +55,8 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
       keys = Enum.map(resp.data.data, & &1.lookup_key)
   """
 
-  alias LatticeStripe.Entitlements.Feature
   alias LatticeStripe.{Client, Request, Resource}
+  alias LatticeStripe.Entitlements.Feature
 
   # D-06: the canonical path lives here once. `list/3`, the streaming variant, and the
   # summary module's url rewrite all read it, so they physically cannot diverge.
