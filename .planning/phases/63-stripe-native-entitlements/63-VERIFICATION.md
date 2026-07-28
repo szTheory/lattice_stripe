@@ -1,28 +1,34 @@
 ---
 phase: 63-stripe-native-entitlements
 verified: 2026-07-28T16:21:13Z
-status: human_needed
+status: passed
 score: 5/5 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
 gaps: []
 deferred:
+
   - truth: "entitlements.* object-type registry rows in lib/lattice_stripe/object_types.ex (automatic webhook deserialization)"
     addressed_in: "Phase 65"
     evidence: "Phase 65 goal: 'Five entitlement/meter object types deserialize; public fixtures (Wave 2)'. Phase 63 confirmed to have ZERO runtime dependency on the missing rows."
+
   - truth: "Public LatticeStripe.Testing.Fixtures.Entitlements"
     addressed_in: "Phase 65"
     evidence: "ROADMAP Phase 65 build constraint records the move-plus-rename promotion contract for test/support/fixtures/entitlements.ex"
+
   - truth: "product_feature attachment surface (LatticeStripe.Product.Feature)"
     addressed_in: "Phase 66"
     evidence: "Phase 66: 'Product ↔ Feature Attachment — Attach/list/delete product features + typed Product.features (Wave 3)'"
+
   - truth: "mix ci green (docs --warnings-as-errors on 42 pre-existing warnings)"
     addressed_in: "Phase 62 / Phase 67"
     evidence: "Phase 62 Success Criterion 3: 'mix ci passes (docs --warnings-as-errors, credo --strict)'. Phase 63 contributes zero of the 42 warnings (verified by attribution below)."
 human_verification:
+
   - test: "Run ActiveEntitlement.stream!/3 against LIVE Stripe (not stripe-mock) for a customer with >10 active entitlements; confirm the returned count equals the dashboard count."
     expected: "Every entitlement is returned across multiple pages, with the customer filter preserved on page 2+."
     why_human: "Declared `verification: backstop` in 63-05-PLAN.md — non-inferable. stripe-mock ignores `limit`/`starting_after` and returns one synthetic item per list, so live-Stripe cursor honoring is structurally unprovable in CI. The SDK-side cursor construction IS proven (Mox multi-page, 10 assertions); what is unproven is Stripe's server-side response to the requests this SDK builds."
+
   - test: "Decide whether `guides/entitlements.md:11` should read 'v1.10' (the internal milestone label) or '1.8.0' (the Hex release this ships in)."
     expected: "The published HexDocs guide names a version an adopter can actually pin to."
     why_human: "Editorial/release-naming decision. mix.exs @version is 1.7.13; ROADMAP milestone v1.10 is explicitly labelled '(Hex 1.8.0)'. Precedent guides/tax.md says 'v1.6' where milestone and Hex version coincided; here they diverge, so the label is ambiguous rather than plainly wrong. No docs_truth lock covers it."
