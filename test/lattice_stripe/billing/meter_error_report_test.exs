@@ -1,7 +1,10 @@
 defmodule LatticeStripe.Billing.MeterErrorReportTest do
   use ExUnit.Case, async: true
 
+  alias LatticeStripe.Billing.MeterErrorReport
   alias LatticeStripe.Billing.MeterErrorReport.{ErrorType, Reason, SampleError}
+  alias LatticeStripe.Event
+  alias LatticeStripe.Test.Fixtures.Metering.MeterErrorReport, as: Fixture
 
   # ---------------------------------------------------------------------------
   # SampleError — the leaf, and the module's whole point: `request_identifier`
@@ -139,6 +142,115 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
       reason = Reason.from_map(%{"error_count" => 1})
 
       assert reason.error_types == []
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # MeterErrorReport.from_map/1 — the low-level constructor. It sees only
+  # `data`, so it structurally cannot know which meter failed.
+  # ---------------------------------------------------------------------------
+
+  describe "from_map/1" do
+    test "decodes all four data fields from the published payload" do
+      report = MeterErrorReport.from_map(Fixture.basic())
+
+      assert %MeterErrorReport{} = report
+      assert report.developer_message_summary == "There are 902 invalid events"
+      assert %Reason{} = report.reason
+      assert report.validation_start == "2024-09-26T17:46:10.000Z"
+      assert report.validation_end == "2024-09-26T17:46:20.000Z"
+    end
+
+    test "validation timestamps round-trip as binaries, not Unix integers" do
+      report = MeterErrorReport.from_map(Fixture.basic())
+
+      # v2 event timestamps are RFC3339 strings. One official SDK types them as
+      # integers; that is wrong and is deliberately not copied here.
+      assert is_binary(report.validation_start)
+      assert is_binary(report.validation_end)
+    end
+
+    test "returns nil for nil" do
+      assert MeterErrorReport.from_map(nil) == nil
+    end
+
+    test "is idempotent on an already-decoded struct" do
+      report = MeterErrorReport.from_map(Fixture.basic())
+
+      assert MeterErrorReport.from_map(report) == report
+    end
+
+    test "leaves :meter nil — the meter id is not in data (asserted contract)" do
+      # Not an incidental. `data` never names the meter; only the event
+      # envelope's related_object does. from_map/1 therefore cannot know it,
+      # and inventing a lookup here would be a lie.
+      assert MeterErrorReport.from_map(Fixture.basic()).meter == nil
+    end
+
+    test "puts unrecognised top-level keys in :extra rather than dropping them" do
+      report =
+        MeterErrorReport.from_map(Fixture.basic(%{"future_field" => "surprise"}))
+
+      assert report.extra == %{"future_field" => "surprise"}
+    end
+
+    test "navigates fully typed all the way down to a request identifier" do
+      report = MeterErrorReport.from_map(Fixture.basic())
+
+      assert [%ErrorType{} = first | _rest] = report.reason.error_types
+      assert [%SampleError{} = sample | _] = first.sample_errors
+      assert sample.request_identifier == "cb447754-6880-45c2-8f2f-ef19b6ce81e9"
+    end
+
+    test "code decodes as a String — the enum is open and must never be atomized" do
+      # A closed union would fail to deserialize the next code Stripe adds, and
+      # Stripe has already retired one value this repository still documents.
+      report = MeterErrorReport.from_map(Fixture.basic())
+      [%ErrorType{code: code} | _] = report.reason.error_types
+
+      assert is_binary(code)
+    end
+
+    test "tolerates a nil reason" do
+      report = MeterErrorReport.from_map(Fixture.basic(%{"reason" => nil}))
+
+      assert report.reason == nil
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # from_event/1 — the primary constructor, and the ONLY one that can populate
+  # :meter, because the meter id lives in the event envelope (D-16, F-14).
+  # ---------------------------------------------------------------------------
+
+  describe "from_event/1" do
+    test "lifts the meter id from the event's related object" do
+      event = Event.from_map(Fixture.event())
+      report = MeterErrorReport.from_event(event)
+
+      assert report.meter == Fixture.meter_id()
+    end
+
+    test "differs from from_map/1 in :meter and nothing else" do
+      event = Event.from_map(Fixture.event())
+
+      from_event = MeterErrorReport.from_event(event)
+      from_map = MeterErrorReport.from_map(Fixture.basic())
+
+      assert %{from_event | meter: nil} == from_map
+    end
+
+    test "tolerates a wholly absent related_object — the no_meter_found shape" do
+      # v1.billing.meter.no_meter_found shares this payload byte-for-byte and
+      # carries no related_object at all (F-17, N-06).
+      event = Event.from_map(Fixture.no_meter_found_event())
+
+      assert event.related_object == nil
+
+      report = MeterErrorReport.from_event(event)
+
+      assert report.meter == nil
+      assert %Reason{} = report.reason
     end
   end
 end
