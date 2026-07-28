@@ -323,4 +323,20 @@ defmodule LatticeStripe.Billing.MeterTest do
       assert {:ok, %Meter{id: "mtr_123", status: :active}} = Meter.reactivate(client, "mtr_123")
     end
   end
+
+  describe "module surface" do
+    # Stripe's own Java SDK documentation advertised a `Meter.getEventSummaries()`
+    # for years. It never existed; Stripe's reply on stripe-java#1852 was that
+    # "the docs is wrong". Event summaries are read through their own module, and
+    # Meter deliberately ships no convenience delegator to them — coherent with
+    # the existing "no Transfer.reverse/4 delegator" precedent.
+    #
+    # With no Dialyzer in this project and typespecs documentation-only, a
+    # `refute function_exported?` is the only enforcement of public surface
+    # shape available.
+    test "does not export an event_summaries delegator (stripe-java#1852)" do
+      refute function_exported?(Meter, :event_summaries, 3)
+      refute function_exported?(Meter, :event_summaries, 4)
+    end
+  end
 end

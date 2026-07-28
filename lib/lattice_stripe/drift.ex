@@ -207,7 +207,8 @@ defmodule LatticeStripe.Drift do
   end
 
   defp parse_known_fields(content) do
-    case Regex.run(~r/@known_fields\s+~w\[([^\]]+)\]/s, content) do
+    # Both word-sigil delimiters: ~w[...] and ~w(...) are both in use across lib/.
+    case Regex.run(~r/@known_fields\s+~w[\[(]([^\])]+)[\])]/s, content) do
       [_, fields_str] ->
         fields_str |> String.split(~r/\s+/, trim: true) |> MapSet.new()
 

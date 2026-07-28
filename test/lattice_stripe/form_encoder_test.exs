@@ -192,4 +192,101 @@ defmodule LatticeStripe.FormEncoderTest do
       assert result =~ "phases[0][proration_behavior]=create_prorations"
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # These two describe blocks back published prose in `guides/metering.md`
+  # ("The payload contract"). Each assertion below is a sentence the guide
+  # states as fact. Breaking one of these tests does not merely change library
+  # behavior — it makes a shipped, published sentence false. If you change the
+  # encoder, update the guide in the same commit.
+  # ---------------------------------------------------------------------------
+
+  describe "encode/1 payload contract (backs guides/metering.md)" do
+    test "arbitrary custom dimension keys survive byte-exact — there is no allowlist" do
+      # None of these dimension names share a prefix with "value", so a whitelist
+      # anywhere between the caller and the wire would visibly drop them.
+      result =
+        FormEncoder.encode(%{
+          "payload" => %{
+            "region" => "us-west-2",
+            "sku" => "gpu-a100",
+            "tenant_tier" => "enterprise",
+            "value" => "0.000001"
+          }
+        })
+
+      assert result ==
+               "payload[region]=us-west-2&payload[sku]=gpu-a100" <>
+                 "&payload[tenant_tier]=enterprise&payload[value]=0.000001"
+    end
+
+    test "a decimal passed as a string survives to 36 significant digits, unrounded" do
+      # The encoder stringifies; it never computes. No rounding, no truncation,
+      # no tie-breaking of any kind is applied to a value that arrives as a binary.
+      decimal = "0.123456789012345678901234567890123456"
+
+      assert FormEncoder.encode(%{"payload" => %{"value" => decimal}}) ==
+               "payload[value]=" <> decimal
+    end
+
+    test "an integer payload value encodes identically to its string form (v1 path)" do
+      # guides/metering.md pitfall #4 claimed integers trigger
+      # `meter_event_invalid_value`. That is false on the v1 form-encoded path —
+      # the two bodies are byte-identical. The string rule is real but applies
+      # only to the v2 JSON stream (meter_event_stream.ex).
+      as_integer = FormEncoder.encode(%{"payload" => %{"value" => 5}})
+      as_string = FormEncoder.encode(%{"payload" => %{"value" => "5"}})
+
+      assert as_integer == as_string
+      assert as_integer == "payload[value]=5"
+    end
+
+    test "a nil value is dropped entirely, not sent as an empty string" do
+      # Consequence for callers: a zero must be sent as the string "0". There is
+      # no way to express "send this key with no value" via nil.
+      assert FormEncoder.encode(%{"a" => nil, "b" => "1"}) == "b=1"
+    end
+
+    test "encode/1 is pure — the same map twice yields identical output" do
+      params = %{"payload" => %{"region" => "eu-central-1", "value" => "1.5"}}
+
+      assert FormEncoder.encode(params) == FormEncoder.encode(params)
+    end
+
+    test "multi-byte UTF-8 in a dimension key and value reassembles after URI decoding" do
+      key = "région_🌍"
+      value = "café_東京"
+
+      body = FormEncoder.encode(%{"payload" => %{key => value}})
+      [encoded_key, encoded_value] = String.split(body, "=", parts: 2)
+
+      inner_key =
+        encoded_key |> String.trim_leading("payload[") |> String.trim_trailing("]")
+
+      assert URI.decode_www_form(inner_key) == key
+      assert URI.decode_www_form(encoded_value) == value
+    end
+  end
+
+  describe "encode/1 float hazard (backs guides/metering.md)" do
+    test "below the cliff: 0.0001 encodes in literal decimal form" do
+      # Proves the threshold is exactly where the guide says it is.
+      assert FormEncoder.encode(%{"v" => 0.0001}) == "v=0.0001"
+    end
+
+    test "at the cliff: 0.00001 encodes in exponent form as 1.0e-5" do
+      # Elixir's `to_string/1` flips to scientific notation at 1.0e-5 — the
+      # narrowest threshold in the ecosystem, and one decimal place away from
+      # values people actually bill on (per-token costs). This assertion is the
+      # lock that stops the guide's warning from silently becoming false.
+      assert FormEncoder.encode(%{"v" => 0.00001}) == "v=1.0e-5"
+    end
+
+    test "a binary-float artifact reaches the wire unrepaired" do
+      # Distinct from the decimal-string case above: that one says the encoder
+      # never computes on strings; this one says it never repairs what float
+      # arithmetic already did before the value arrived.
+      assert FormEncoder.encode(%{"v" => 0.1 + 0.2}) == "v=0.30000000000000004"
+    end
+  end
 end
