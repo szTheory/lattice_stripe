@@ -265,4 +265,36 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
       end
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Public surface shape. With no Dialyzer in this project and typespecs
+  # documentation-only, a refutation block is the ONLY enforcement of public
+  # surface shape available (D-31).
+  # ---------------------------------------------------------------------------
+
+  describe "module surface" do
+    test "ships no read or write verbs — no endpoint serves this payload" do
+      # Not a gap to apologize for. Stripe has no /v1/billing/meter_error_reports
+      # collection and no billing.meter_error_report object; this payload arrives
+      # only as the `data` of an event, so there is nothing to list, retrieve or
+      # create it from (F-11, D-21).
+      refute function_exported?(MeterErrorReport, :list, 2)
+      refute function_exported?(MeterErrorReport, :list, 3)
+      refute function_exported?(MeterErrorReport, :retrieve, 2)
+      refute function_exported?(MeterErrorReport, :retrieve, 3)
+      refute function_exported?(MeterErrorReport, :create, 2)
+      refute function_exported?(MeterErrorReport, :create, 3)
+    end
+
+    test "exports exactly the two constructors" do
+      assert function_exported?(MeterErrorReport, :from_map, 1)
+      assert function_exported?(MeterErrorReport, :from_event, 1)
+    end
+
+    test "ships no grouping or counting helpers — the wire supplies them" do
+      # Stripe groups by error_types and supplies error_count at both levels.
+      refute function_exported?(MeterErrorReport, :group_by_code, 1)
+      refute function_exported?(MeterErrorReport, :error_count, 1)
+    end
+  end
 end
