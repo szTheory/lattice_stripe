@@ -102,7 +102,7 @@
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 63-06-PLAN.md — `guides/entitlements.md`, `guides/scope.md` fence, ExDoc registration in `mix.exs` (Wave 4)
+- [x] 63-06-PLAN.md — `guides/entitlements.md`, `guides/scope.md` fence, ExDoc registration in `mix.exs` (Wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -172,7 +172,7 @@
 |-------|-----------|----------------|--------|-----------|
 | 61. Default Finch Pool & Optional Application | v1.10 | 2/2 | Complete    | 2026-07-27 |
 | 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
-| 63. Stripe-Native Entitlements | v1.10 | 5/7 | In Progress|  |
+| 63. Stripe-Native Entitlements | v1.10 | 6/7 | In Progress|  |
 | 64. Meter Event-Summary Reads | v1.10 | 0/? | Not started | - |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 0/? | Not started | - |
 | 66. Product ↔ Feature Attachment | v1.10 | 0/? | Not started | - |

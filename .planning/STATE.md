@@ -5,15 +5,15 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 63
 current_phase_name: stripe-native-entitlements
 status: executing
-stopped_at: Completed 63-05-PLAN.md
-last_updated: "2026-07-28T15:51:34.060Z"
+stopped_at: Completed 63-06-PLAN.md
+last_updated: "2026-07-28T16:01:00.925Z"
 last_activity: 2026-07-28
-last_activity_desc: "63-05 complete: all six entitlements verbs routed green against stripe-mock v0.199.0, plus the Phase 65 fixture promote-by-move contract (ENT-01/03/04)"
+last_activity_desc: "63-06 complete: guides/entitlements.md shipped with the entitled? refusal AND its fail-closed replacement, registered in both ExDoc surfaces plus a new Entitlements module group; mix docs warnings 52 -> 48 (all four transient guide-link warnings resolved)"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 50
 ---
 
@@ -29,9 +29,9 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 63 (stripe-native-entitlements) — EXECUTING
-Plan: 5 of 7 complete (Waves 1–2 done; Wave 3 in progress — 63-04 and 63-05 done, 63-06/63-07 remain)
+Plan: 6 of 7 complete (Waves 1–3 done; Wave 4 done — 63-06 complete, only 63-07 remains)
 Status: Ready to execute
-Last activity: 2026-07-28 -- 63-05 complete: all six entitlements verbs routed green against stripe-mock v0.199.0, plus the Phase 65 fixture promote-by-move contract (ENT-01/03/04)
+Last activity: 2026-07-28 -- 63-06 complete: guides/entitlements.md shipped with the entitled? refusal AND its fail-closed replacement, registered in both ExDoc surfaces plus a new Entitlements module group; mix docs warnings 52 -> 48 (all four transient guide-link warnings resolved)
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Last activity: 2026-07-28 -- 63-05 complete: all six entitlements verbs routed g
 | Phase 63 P03 | 3min | 3 tasks | 2 files |
 | Phase 63 P04 | 4min | 2 tasks | 2 files |
 | Phase 63 P05 | 8min | 2 tasks | 2 files |
+| Phase 63 P06 | 6min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Last activity: 2026-07-28 -- 63-05 complete: all six entitlements verbs routed g
 - [Phase ?]: 63-05: integration setup_all RAISES with the docker command when stripe-mock is absent — no @tag :skip and no capability probe, because a probe's failure mode is the silent skip (T-63-15/D-20)
 - [Phase ?]: 63-05: pagination deliberately NOT asserted against stripe-mock — it ignores page size and cursor and returns one synthetic item per list; the proof stays in 63-02's Mox multi-page suite
 - [Phase ?]: 63-05: no raw-DELETE test — the absent delete verb is an SDK-shape fact already locked in feature_test.exs, not a Stripe-behavior fact to re-probe
+- [Phase ?]: 63-06: guides/entitlements.md ships the entitled? refusal WITH the four-step fail-closed local-gate replacement in the same section (D-19.2); a refusal without an alternative is what the next contributor deletes
+- [Phase ?]: 63-06: the guide's reconciler example uses ActiveEntitlementSummary.from_map/1, not ObjectTypes.maybe_deserialize/1 as CONTEXT.md's snippet shows — the registry row is Phase 65, so maybe_deserialize/1 returns a raw map today and the snippet would raise
+- [Phase ?]: 63-06: new Entitlements: groups_for_modules group between Billing Metering and Connect (D-17); Phase 66 appends Product.Feature here with a one-line diff
 
 ### Blockers/Concerns
 
@@ -107,8 +111,8 @@ Last activity: 2026-07-28 -- 63-05 complete: all six entitlements verbs routed g
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T15:51:06.803Z
-**Stopped at:** Completed 63-05-PLAN.md
+**Last session:** 2026-07-28T16:00:52.134Z
+**Stopped at:** Completed 63-06-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
