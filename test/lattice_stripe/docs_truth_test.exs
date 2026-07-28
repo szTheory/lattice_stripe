@@ -345,6 +345,8 @@ defmodule LatticeStripe.DocsTruthTest do
       assert scope =~ "Reporting" or scope =~ "Sigma"
       assert scope =~ "adopter pull" or scope =~ "maintenance mode"
       assert scope =~ "Client.request"
+      assert scope =~ "entitled?"
+      assert scope =~ "entitlements.md"
     end
   end
 
@@ -517,6 +519,58 @@ defmodule LatticeStripe.DocsTruthTest do
     assert tax_id =~ "/v1/tax_ids"
     assert tax_id =~ "customers"
     assert tax_id =~ "Invoice.AutomaticTax"
+  end
+
+  test "entitlements guide locks ExDoc placement, content anchors, cross-links, and moduledocs" do
+    root = Path.expand("../..", __DIR__)
+    guide = File.read!("guides/entitlements.md")
+    docs = docs_config()
+    groups = docs[:groups_for_extras] |> Map.new()
+
+    # Both halves of the registration: a guide in a group but absent from extras:
+    # is silently dropped from the build, so neither assertion is redundant.
+    assert "guides/entitlements.md" in docs[:extras]
+    assert "guides/entitlements.md" in groups["Canonical Guides"]
+
+    entitlements_group = docs[:groups_for_modules][:Entitlements]
+    assert LatticeStripe.Entitlements.ActiveEntitlement in entitlements_group
+    assert LatticeStripe.Entitlements.ActiveEntitlementSummary in entitlements_group
+    assert LatticeStripe.Entitlements.Feature in entitlements_group
+
+    assert guide =~ "Scope boundary"
+    assert guide =~ "entitled?"
+    assert guide =~ "fail closed"
+    assert guide =~ "stream_entitlements!"
+    assert guide =~ "archived"
+    assert guide =~ "lookup_key"
+
+    assert guide =~ "error-handling.md"
+    assert guide =~ "metering.md" or guide =~ "customer-portal.md"
+
+    entitlements_lib = Path.join(root, "lib/lattice_stripe/entitlements")
+    active_entitlement = File.read!(Path.join(entitlements_lib, "active_entitlement.ex"))
+    summary = File.read!(Path.join(entitlements_lib, "active_entitlement_summary.ex"))
+    feature = File.read!(Path.join(entitlements_lib, "feature.ex"))
+
+    for source <- [active_entitlement, summary, feature] do
+      assert source =~ "guides/entitlements.md"
+    end
+
+    # The gate fence. `entitled?` is asserted PRESENT here and never denied: the
+    # helper's absence is already proven structurally by the export locks in
+    # active_entitlement_test.exs, and the name has to stay greppable in prose so a
+    # contributor who searches for it lands on the reason it is absent.
+    assert active_entitlement =~ "gate"
+    assert active_entitlement =~ "fail closed"
+    assert active_entitlement =~ "stream!/3"
+    assert active_entitlement =~ "entitled?"
+
+    # The summary object carries no id property, so the struct has no :id field.
+    assert summary =~ "no top-level"
+
+    # The archiving vocabulary split: field `active`, filter `archived`, sense inverted.
+    assert feature =~ "## Archiving"
+    assert feature =~ "immutable"
   end
 
   test "Charge @moduledoc reflects expanded PI-first surface" do
