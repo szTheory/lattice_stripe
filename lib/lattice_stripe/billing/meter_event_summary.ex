@@ -5,14 +5,63 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
 
   Wire object `billing.meter_event_summary`, ids prefixed `mtrusg_`, served from a
   single parent-scoped path: `GET /v1/billing/meters/:meter_id/event_summaries`.
-  There is no top-level `/v1/billing/meter_event_summaries` collection and no
-  `GET /{summary_id}` — a summary is only ever reachable through its meter, which
-  is why `list/4` takes the meter id positionally and why this module ships no
-  `retrieve/3`.
+  That is the only path Stripe serves for this object — there is no top-level
+  `/v1/billing/meter_event_summaries` collection and no `GET /{summary_id}` — which
+  is why the meter id is a positional argument to `list/4` and `stream!/4` rather
+  than a filter, and why this module ships no retrieve function.
 
-  `customer`, `start_time` and `end_time` are all **required** filters. Stripe
-  answers a call missing any of them with an HTTP 400; `list/4` raises
+  > #### Two ways to read a confidently wrong number {: .warning}
+  >
+  > **The returned object never says which customer it belongs to.** It has exactly
+  > seven fields, not one of them names a customer, and it cannot be expanded to add
+  > one. The customer is an *input* to the query and never an *output*. So a
+  > reconciler that lists summaries for several customers and merges the results has
+  > lost the attribution completely — and the warning sign is easy to miss, because
+  > grouping the merged list by a customer field is not something you can even
+  > attempt: the field does not exist. Keep the association out of band, alongside
+  > the customer id you filtered on.
+  >
+  > **The figure is not live.** Stripe's own specification states that these summaries
+  > are **eventually consistent**. The object carries no freshness field and Stripe
+  > publishes no staleness SLA, so a caller has no way to tell how old a number is.
+  > Label the figure in your UI with the time you fetched it, never present it as
+  > real-time, and never treat it as a billing source of truth — Stripe bills from the
+  > meter, not from these summaries.
+
+  ## The window boundary is ambiguous
+
+  Stripe's specification contradicts itself about whether the end of the window is
+  included. The `end_time` query parameter and the `end_time` field on the returned
+  object are both documented as **exclusive**, while `aggregated_value`'s own
+  description — on that same object — says the aggregation covers `start_time` through
+  `end_time` **inclusive**. Two of the three say exclusive.
+
+  All three descriptions ship verbatim into every SDK's generated documentation, so the
+  same contradiction is waiting in Stripe's other libraries. **This library asserts
+  neither reading** and does not adjust your window to compensate for either. If one
+  boundary event would change a decision you are making, do not settle it by reading
+  documentation — measure it against your own account.
+
+  ## Listing
+
+  `customer`, `start_time` and `end_time` are all **required** filters. Stripe answers a
+  call missing any of them with an HTTP 400; `list/4` and `stream!/4` raise
   `ArgumentError` before the request leaves the process instead.
+
+  Stripe's `limit` ranges from 1 to 100 and **defaults to 10** — and that default is the
+  trap. Ask for hourly buckets across a 31-day month and the window holds **744** of
+  them. A caller who sums the ten rows that come back, without checking whether more
+  exist, gets a plausible-looking number that is about one and a third percent of the
+  truth. (Illustrative, assuming usage spread evenly across the buckets; the real
+  fraction depends on your data.)
+
+  The fix is usually not to paginate harder — it is to ask the question you actually
+  have.
+
+  **For a total, omit `value_grouping_window`.** Stripe aggregates server-side and
+  returns a single bucket, in one request, with no pagination and no client-side float
+  summation. This is what an admin screen showing "usage this period" almost always
+  wants:
 
       params = %{
         "customer" => "cus_123",
@@ -20,13 +69,66 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
         "end_time" => 1_753_706_400
       }
 
-      {:ok, resp} =
-        LatticeStripe.Billing.MeterEventSummary.list(client, "mtr_123", params)
+      resp = LatticeStripe.Billing.MeterEventSummary.list!(client, "mtr_123", params)
+      [summary] = resp.data.data
 
-      summaries = resp.data.data
+      summary.aggregated_value
 
-  Omit `value_grouping_window` for one server-aggregated total over the whole
-  window; pass `"hour"` or `"day"` for a bucketed series.
+  **For a series, pass `value_grouping_window`** as `"hour"` or `"day"` and stream it, so
+  that `has_more` is followed for you rather than silently ignored:
+
+      buckets = Map.put(params, "value_grouping_window", "hour")
+
+      client
+      |> LatticeStripe.Billing.MeterEventSummary.stream!("mtr_123", buckets)
+      |> Enum.map(&{&1.start_time, &1.aggregated_value})
+
+  The difference compounds across a customer base: rendering one usage figure for 200
+  customers costs roughly 15,000 requests at the default page size, 1,600 at
+  `limit=100`, and 200 with no window at all. See `LatticeStripe.List` for the memory
+  guidance that applies to any stream you do not bound with `Stream.take/2`.
+
+  ## Timestamp alignment
+
+  Stripe requires `start_time` and `end_time` to be aligned to **minute** boundaries on
+  every query, to **UTC hour** boundaries when `value_grouping_window` is `"hour"`, and
+  to **UTC day** boundaries (00:00 UTC) when it is `"day"`. The timezone is UTC — not
+  the account's, not the customer's.
+
+  The most natural inputs are the ones that violate this. A subscription's
+  `current_period_start` and `current_period_end` derive from its billing cycle anchor,
+  so they land on an arbitrary second and are almost never aligned to anything.
+
+  **This library will not align them for you.** Rounding changes what the query means:
+  floor the start and you sweep in usage from before the period; ceil it and you drop
+  usage that belongs to it. That is a business decision, not a formatting detail, and a
+  library that makes it silently produces a wrong number its caller never sees. Do the
+  arithmetic yourself, where you can see it:
+
+      start_time = Integer.floor_div(start_time, 86_400) * 86_400
+      end_time = -Integer.floor_div(-end_time, 86_400) * 86_400
+
+  `Integer.floor_div/2` rather than `div/2` — `div/2` truncates toward zero, which
+  rounds the wrong way for negative inputs.
+
+  ## Design
+
+  Three things this module deliberately does not have:
+
+  - **No retrieve function.** Stripe serves no get-by-summary-id route, so there is no
+    operation to wrap. This is an absence in the API, not a gap to apologise for.
+  - **No window-aligning helper.** Rejected on domain grounds: any snap has to choose
+    floor or ceil, that choice changes which usage the window covers, and adjacent
+    metering platforms that do auto-align demonstrate the cost — one of them turns a
+    three-day range into four windows without saying so.
+  - **No convenience accessor on `LatticeStripe.Billing.Meter`.** Parent-scoping is
+    expressed in this module's signatures, not by a delegator on the parent. Stripe's
+    own Java SDK documentation once advertised exactly such a method; it never existed,
+    and Stripe's answer was that the documentation was wrong.
+
+  Note the read/write type asymmetry: `aggregated_value` comes back as a **float**,
+  while `LatticeStripe.Billing.MeterEvent` writes take the value as a **decimal
+  string**. See `guides/metering.md` for the payload contract.
 
   See the [Stripe Meter Event Summary API](https://docs.stripe.com/api/billing/meter-event_summary).
   """
