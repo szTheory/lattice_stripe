@@ -1,5 +1,9 @@
 defmodule LatticeStripe.Billing.MeterEventTest do
   use ExUnit.Case, async: true
+
+  import Mox
+  import LatticeStripe.TestHelpers
+
   alias LatticeStripe.Billing.MeterEvent
   alias LatticeStripe.Test.Fixtures.Metering
 
@@ -38,6 +42,43 @@ defmodule LatticeStripe.Billing.MeterEventTest do
       assert_raise ArgumentError, ~r/payload/, fn ->
         MeterEvent.create(minimal_client(), %{"event_name" => "x"})
       end
+    end
+  end
+
+  describe "create/3 payload pass-through (MTR-04)" do
+    setup :verify_on_exit!
+
+    # Observed at the transport, which is the only place the claim is provable.
+    # `guides/metering.md` tells adopters they may attach arbitrary dimensions to
+    # a payload; this is the proof that nothing between create/3 and the wire
+    # filters, renames or reorders those keys.
+    test "arbitrary dimension keys all reach the wire — create/3 filters nothing" do
+      client = test_client()
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :post
+        assert String.ends_with?(req.url, "/v1/billing/meter_events")
+
+        # None of these three share a prefix with "value", so a plausible
+        # allowlist would not contain them.
+        assert req.body =~ "payload[region]=us-west-2"
+        assert req.body =~ "payload[sku]=gpu-a100"
+        assert req.body =~ "payload[tenant_tier]=enterprise"
+        assert req.body =~ "payload[value]=0.000001"
+
+        ok_response(Metering.MeterEvent.basic())
+      end)
+
+      assert {:ok, %MeterEvent{}} =
+               MeterEvent.create(client, %{
+                 "event_name" => "api_call",
+                 "payload" => %{
+                   "region" => "us-west-2",
+                   "sku" => "gpu-a100",
+                   "tenant_tier" => "enterprise",
+                   "value" => "0.000001"
+                 }
+               })
     end
   end
 
