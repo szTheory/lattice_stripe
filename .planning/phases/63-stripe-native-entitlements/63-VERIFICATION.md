@@ -227,5 +227,40 @@ Status is `human_needed` rather than `passed` for two items only: (1) the `verif
 
 ---
 
+## UAT Resolution (2026-07-28)
+
+`status` moved `human_needed` → `passed` after `/gsd-verify-work 63`. Both items
+that held it at `human_needed` were resolved:
+
+1. **Live-Stripe multi-page cursor honoring (63-05 backstop).** Accepted as risk A1.
+   stripe-mock returns one synthetic item per list and ignores both page size and
+   cursor, so this is structurally unprovable at that leg; the proof stands at the Mox
+   layer (`active_entitlement_stream_test.exs`, 63-02), and no live Stripe key exists
+   in this environment. Recorded in `63-UAT.md` test 3.
+2. **The `v1.10` guide version label.** Resolved editorially in commit 578f7b8
+   ("correct guide version claim to the Hex release and lock its shape").
+
+`63-UAT.md` records 63/63 — 56 deliverables deterministically covered by passing
+tests, 7 human-judgment checkpoints approved by the maintainer.
+
+### Re-verification after coverage-block repair
+
+The seven `*-SUMMARY.md` files were subsequently edited to repair schema defects in
+their `coverage:` blocks (an illegal `status: deferred` in 63-03 D10 and 63-05 D7;
+a missing required `rationale` on all seven `human_judgment: true` entries). Those
+edits touched coverage **metadata only** — no claim about the code changed.
+
+Re-verified after the repair, all green:
+- `mix test` — 2188 tests, 0 failures, 1 skipped
+- `mix test --only integration` against stripe-mock v0.199.0 — 192 tests, 0 failures
+- entitlements integration suite — 7 tests, 0 failures
+- `check api-coverage.verify-pre` — passed (28 capabilities, 18 INTEGRATE, 10 OPT-OUT)
+- `uat classify-coverage` over all seven summaries — 0 errors, and the classification
+  is unchanged in shape (56 auto-passed, the same 7 human checkpoints), now reporting
+  `reason: human_judgment` instead of `reason: validation_failed`
+
+---
+
 _Verified: 2026-07-28T16:21:13Z_
 _Verifier: Claude (gsd-verifier)_
+_UAT resolved + re-verified: 2026-07-28 (gsd-verify-work)_

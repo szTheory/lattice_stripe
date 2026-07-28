@@ -104,8 +104,9 @@ coverage:
     verification:
       - kind: other
         ref: "Mox multi-page proof in test/lattice_stripe/entitlements/active_entitlement_stream_test.exs (plan 63-02); live-Stripe confirmation remains a backstop truth with no live key in this environment (accepted risk A1)"
-        status: deferred
+        status: unknown
     human_judgment: true
+    rationale: "Accepting Mox-level pagination proof as sufficient is a risk call, not a fact. stripe-mock returns one synthetic item per list and ignores both page size and cursor, so multi-page behavior is structurally unprovable at this leg, and no live Stripe key exists in this environment. Someone has to decide that risk A1 is acceptable to ship."
   - id: D8
     description: "D-27: Phase 65's build constraints record that the fixture promotion is a move PLUS a module rename, so it cannot be planned as a verbatim file move"
     requirement: ENT-03
@@ -114,6 +115,7 @@ coverage:
         ref: ".planning/ROADMAP.md Phase 65 build-constraints line contains LatticeStripe.Testing.Fixtures.Entitlements, test/support/fixtures/entitlements.ex, and all four function names"
         status: pass
     human_judgment: true
+    rationale: "Grep proves the strings are in the constraints line; it cannot prove a future planner will read them and correctly avoid planning a verbatim file move. Whether the move-plus-rename contract is stated clearly enough to survive into Phase 65 planning is a judgment about a downstream reader."
 
 # Metrics
 duration: 8min

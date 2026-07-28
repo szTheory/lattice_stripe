@@ -657,10 +657,20 @@ Test suite run at UAT start (2026-07-28):
 - `mix test --only integration test/integration/entitlements_integration_test.exs` — 7 tests, 0 failures
 
 Schema defects found in SUMMARY `coverage:` blocks (surfaced per #1602, non-blocking —
-entries were treated as human checkpoints rather than dropped):
-- 63-03 D10, 63-05 D7: `verification[].status: deferred` is not one of {pass, fail, unknown}
+entries were treated as human checkpoints rather than dropped) — SINCE FIXED:
+- 63-03 D10, 63-05 D7: `verification[].status: deferred` is not one of {pass, fail,
+  unknown}. Both were proofs deliberately deferred to another leg (the L3 prose lock to
+  63-07; live-Stripe pagination to a backstop that has no key here), so both are now
+  `unknown` with the deferral preserved in the ref text.
 - 63-03 D10, 63-03 D11, 63-05 D7, 63-05 D8, 63-06 D3, 63-06 D7, 63-07 D8:
-  `rationale` is required when `human_judgment: true` but was omitted
+  `rationale` is required when `human_judgment: true` but was omitted. All seven now
+  carry a rationale stating what the human is being asked to judge and why no
+  assertion can stand in for it.
+
+Re-classification after the fix is byte-identical in shape — 56 auto-passed, the same 7
+human checkpoints — but each of the 7 now reports `reason: human_judgment` rather than
+`reason: validation_failed`, confirming they were the right checkpoints for the right
+reason rather than schema casualties.
 
 `COVERAGE.md` verify:pre gate: initially blocked with 6 over-length `reason` cells
 (>200 chars); reasons were condensed without changing any decision. Gate now passes —

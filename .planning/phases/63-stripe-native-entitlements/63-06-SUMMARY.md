@@ -75,6 +75,7 @@ coverage:
         ref: "guides/entitlements.md ## Scope boundary — contains the literals `entitled?`, `gate`, `fails **open**`, and `fail closed`, followed by the four-step numbered recipe (reconcile / persist / gate locally / fail closed on staleness)"
         status: pass
     human_judgment: true
+    rationale: "The T-63-04 mitigation only works if refusal-plus-replacement reads as a complete answer rather than a missing feature — a refusal a reader experiences as a gap is one the next contributor deletes and reimplements. Whether the section lands that way is exactly what a literal-presence assertion cannot measure."
   - id: D4
     description: "The reconciler example is one call with no has_more branch — the reader never learns that Stripe inlines ten"
     requirement: ENT-05
@@ -110,6 +111,7 @@ coverage:
         ref: "guides/entitlements.md — the three headings exist, each with one paragraph naming what will live there and pointing at the guide (testing.md / webhooks.md) that covers the pattern today"
         status: pass
     human_judgment: true
+    rationale: "Heading presence is assertable; whether the stubs read as useful to a reader today rather than as an unfinished guide is not. A stub that advertises absence without an interim answer costs more credibility than it saves Phases 65/66 in restructuring."
   - id: D8
     description: "mix docs builds the guide with no new warnings and no warning naming the new surface"
     requirement: ENT-01

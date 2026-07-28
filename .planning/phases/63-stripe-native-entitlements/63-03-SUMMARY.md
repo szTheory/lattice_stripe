@@ -166,9 +166,10 @@ coverage:
         ref: "lib/lattice_stripe/entitlements/feature.ex ## Archiving — contains both `active` and `archived`, the {: .warning} 'Archived is not deleted' admonition, and the literal %{\"archived\" => true} prescription; mix docs exits 0"
         status: pass
       - kind: other
-        ref: "L3 prose lock deferred to the 63-07 docs-truth suite by plan instruction"
-        status: deferred
+        ref: "L3 prose lock deferred to the 63-07 docs-truth suite by plan instruction — landed there, but not proven at this leg"
+        status: unknown
     human_judgment: true
+    rationale: "Whether the warning is placed and worded well enough that a developer writing a reconciler actually avoids the false-deletion bug is a readability judgment no assertion can make. stripe-mock's response does not vary by filter, so documentation is the only available mitigation for T-63-08 and its quality is the whole control."
   - id: D11
     description: "D-12: lookup_key's post-create immutability is documented as the reason it is safe to key host configuration on, alongside the filter form and the list-not-singleton return shape"
     requirement: ENT-04
@@ -177,6 +178,7 @@ coverage:
         ref: "lib/lattice_stripe/entitlements/feature.ex ## Using lookup_key as your system identifier — contains `immutable`, the filter recipe, and the no-retrieve_by_lookup_key rationale"
         status: pass
     human_judgment: true
+    rationale: "A test can assert the words are present; it cannot judge whether they give an adopter enough confidence to key host application configuration on lookup keys instead of generated feat_ ids. That adoption decision is the point of the section, so a human has to read it."
 
 # Metrics
 duration: 3min

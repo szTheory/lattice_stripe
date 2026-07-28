@@ -117,6 +117,7 @@ coverage:
         ref: "The new test asserts no `has_more` / `starting_after` / pagination prose against any source; the ten-assertion stream suite from 63-02 remains the structural proof"
         status: pass
     human_judgment: true
+    rationale: "How much prose to freeze is a calibration call with costs in both directions: too few locks and safety-critical wording rots silently, too many and ordinary documentation edits start failing CI. A test can count the locks but cannot judge whether three is the right number for this family."
   - id: D9
     description: "T-63-19 (high, Repudiation): all five phase gates green, measured rather than asserted"
     requirement: ENT-01
