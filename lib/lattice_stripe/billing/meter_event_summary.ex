@@ -104,7 +104,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     # Every raise below fires before %Request{} is constructed. Order is
     # load-bearing: first failure wins, and it is the id, then customer, then
     # start_time, then end_time.
-    validate_id!(meter_id, "meter id")
+    validate_id!(meter_id, "list/4")
 
     Resource.require_param!(
       params,
@@ -127,6 +127,82 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     %Request{method: :get, path: path(meter_id), params: params, opts: opts}
     |> then(&Client.request(client, &1))
     |> Resource.unwrap_list(&from_map/1)
+  end
+
+  @doc "Like `list/4` but raises on failure."
+  @spec list!(Client.t(), String.t(), map(), keyword()) :: LatticeStripe.Response.t()
+  def list!(client, meter_id, params \\ %{}, opts \\ []) do
+    client |> list(meter_id, params, opts) |> Resource.unwrap_bang!()
+  end
+
+  # ---------------------------------------------------------------------------
+  # STREAM
+  # ---------------------------------------------------------------------------
+
+  @doc """
+  Returns a lazy stream of **every** usage summary in the window (auto-pagination).
+
+  Emits individual `%MeterEventSummary{}` structs, following `has_more` and fetching
+  each subsequent page as the stream is consumed. Raises `LatticeStripe.Error` if any
+  page fetch fails, so a partial enumeration surfaces as an error rather than as a
+  short — and silently wrong — series.
+
+  This is the correct entry point for a bucketed series. Stripe's `limit` defaults to
+  **10** while a 31-day hourly window is 744 buckets, so a bare `list/4` over one
+  returns the first ten and no indication that a sum over them is a fraction of the
+  truth. For a single **total**, omit `value_grouping_window` and use `list/4` — one
+  server-aggregated bucket, one request, no pagination.
+
+  The same guards `list/4` applies fire here, and they raise at **call time** rather
+  than at the first `Enum` step, so the failure lands at the call site.
+
+  Consume it with `Enum.to_list/1` when you intend to hold every bucket in memory, or
+  bound it with `Stream.take/2` when you do not — see `LatticeStripe.List` for the
+  memory guidance:
+
+      client
+      |> LatticeStripe.Billing.MeterEventSummary.stream!(meter_id, params)
+      |> Enum.map(& &1.aggregated_value)
+
+  There is no non-bang `stream/4` twin — a lazy stream cannot return an error tuple at
+  construction time for a failure that happens pages later.
+  """
+  @spec stream!(Client.t(), String.t(), map(), keyword()) :: Enumerable.t()
+  def stream!(client, meter_id, params \\ %{}, opts \\ [])
+
+  def stream!(%Client{} = client, meter_id, params, opts) do
+    # These MUST be the function's literal first statements. `Stream.resource/3`
+    # defers its start function, so a guard constructed lazily would not raise until
+    # the stream is consumed — arbitrarily far from the caller that made the mistake.
+    # Order matches `list/4`: id, then customer, then start_time, then end_time.
+    validate_id!(meter_id, "stream!/4")
+
+    Resource.require_param!(
+      params,
+      "customer",
+      "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires a customer param"
+    )
+
+    Resource.require_param!(
+      params,
+      "start_time",
+      "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires a start_time param"
+    )
+
+    Resource.require_param!(
+      params,
+      "end_time",
+      "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires an end_time param"
+    )
+
+    req = %Request{method: :get, path: path(meter_id), params: params, opts: opts}
+
+    # The cursor state machine — base_params preservation, the starting_after cursor,
+    # and the idempotency-key strip on page fetches — belongs to LatticeStripe.List and
+    # is not re-grown here. This function's only job is to hand it correctly-shaped
+    # state. It works unmodified because the summary carries a required top-level `id`
+    # (F-01), which is what `List` matches on to derive its cursor.
+    LatticeStripe.List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
   # ---------------------------------------------------------------------------
@@ -178,13 +254,15 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
   # "", producing /v1/billing/meters//event_summaries and a 404 with no hint the id
   # was the problem.
   #
-  # The `name` argument keeps the external_account.ex helper shape (there will be a
-  # second caller in `stream!/4`) while the message stays fixed, because D-09 locks
-  # it to carry the arity so all four ArgumentErrors from `list/4` share one grammar.
-  defp validate_id!(value, _name) when is_binary(value) and value != "", do: :ok
+  # The second argument keeps the external_account.ex helper shape and carries the
+  # caller's own `fun/arity` spelling, because D-09 locks the message to name the
+  # arity so all four ArgumentErrors from one call site share a single grammar —
+  # and D-08 specifies two message sets, `list/4`'s and `stream!/4`'s. A `stream!/4`
+  # call that reported `list/4` would send the reader to the wrong doc page.
+  defp validate_id!(value, _fun) when is_binary(value) and value != "", do: :ok
 
-  defp validate_id!(_value, _name) do
+  defp validate_id!(_value, fun) do
     raise ArgumentError,
-          "LatticeStripe.Billing.MeterEventSummary.list/4 requires a non-empty meter id"
+          "LatticeStripe.Billing.MeterEventSummary.#{fun} requires a non-empty meter id"
   end
 end
