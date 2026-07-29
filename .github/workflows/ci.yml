@@ -36,7 +36,7 @@ jobs:
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -70,7 +70,7 @@ jobs:
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -78,7 +78,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -114,7 +114,7 @@ jobs:
           otp-version: ${{ matrix.otp }}
 
       - name: Cache deps
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: deps
           key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-${{ hashFiles('**/mix.lock') }}
@@ -122,7 +122,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-
 
       - name: Cache _build
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: _build
           key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-build-${{ hashFiles('**/mix.lock') }}
@@ -161,7 +161,7 @@ jobs:
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -169,7 +169,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -195,7 +195,7 @@ jobs:
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -203,7 +203,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -235,7 +235,7 @@ jobs:
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -243,7 +243,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
