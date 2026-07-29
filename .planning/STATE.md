@@ -2,18 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
-current_phase: 65
-current_phase_name: webhook-objecttypes-testing-fixtures
-status: executing
+status: verifying
 stopped_at: Completed 65-05-PLAN.md
-last_updated: "2026-07-29T02:58:56.140Z"
-last_activity: 2026-07-28
+last_updated: "2026-07-29T03:10:06.203Z"
+last_activity: 2026-07-29
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 25
-  completed_plans: 24
-  percent: 75
+  completed_plans: 25
+  percent: 100
 ---
 
 # Project State
@@ -29,8 +27,8 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 Phase: 65 (webhook-objecttypes-testing-fixtures) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
-Last activity: 2026-07-28
+Status: Phase complete — ready for verification
+Last activity: 2026-07-29
 
 **Carry-forward for Phase 65 and later:**
 
@@ -70,6 +68,7 @@ Last activity: 2026-07-28
 | Phase 65 P04 | 4min | 2 tasks | 2 files |
 | Phase 65 P03 | 6min | 2 tasks | 14 files |
 | Phase 65 P05 | 4min | 1 tasks | 7 files |
+| Phase 65 P06 | 12min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -128,6 +127,11 @@ Last activity: 2026-07-28
 - [Phase ?]: **[65-03]** Q2 rename cost measured at 31 edits, not the 4 the plan implies — one `alias ..., as: Fixtures` line fronting 28 `Fixtures.basic(` call sites in subscription_test.exs, plus 3 internal composition call sites at subscription.ex :54/:71/:86 (the plan says :85; that line is the `def canceled` head). Also: the 65-02 `as: <Object>Fixture` caller-alias lesson is CONDITIONAL — it applies only when a caller aliases the fixture by its bare last segment; a caller already using a generic or `as:`-renamed alias needs no rewrite.
 - [Phase ?]: [65-05] Invoice fixture caller uses import, not 'alias as: InvoiceFixture' — imports cannot collide with the LatticeStripe.Invoice alias, so all ~40 call sites stayed byte-identical
 - [Phase ?]: [65-05] Verbatim lift verified by diffing the extracted body against the pre-delete source, not by a passing suite alone — catches drift in fields no assertion covers
+- [Phase ?]: [65-06] Corrected ROADMAP Phase 65 prose from FIVE to FOUR entitlement/meter object types — Phase 64 D-14 proved billing.meter_error_report structurally unregistrable; OBJ-01, Success Criterion 1 and the object_types_test refute all already said four
+- [Phase ?]: [65-06] The stale 'v1.3 resource families' claim was REPLACED with a scope description in both fixtures.ex and guides/testing.md, not bumped to a newer version — a version-pinned moduledoc claim is the recurring staleness trap that caused this correction
+- [Phase ?]: [65-06] 65-RESEARCH.md Pitfall 7's count-assertion parenthetical was corrected (51 -> 52), not deleted — deleting it would strand both 65-04's deliberate decline of the map_size assertion and COVERAGE.md's OPT-OUT record
+- [Phase ?]: [65-06] The three meter basic/1 builders were NOT renamed here (15 of 18 public fixture modules use <object>_json; exactly these 3 use basic). Recorded in .planning/phases/65-.../deferred-items.md as cheap before the Hex 1.8.0 tag and a breaking change after it
+- [Phase ?]: [65-06] Phase 65 closed and validated: 65-VALIDATION.md status: validated, nyquist_compliant: true, 19/19 rows green. Gate numbers Phase 66 gates against: mix test 2332, mix docs 38 warnings, 0/0/0/0 substring matches, map_size(object_map()) 52
 
 ### Blockers/Concerns
 
