@@ -55,6 +55,7 @@ defmodule LatticeStripe.MixProject do
           "guides/api_stability.md",
           "guides/extending-lattice-stripe.md",
           "guides/cheatsheet.cheatmd",
+          "guides/upgrading-1-1-to-1-7.md",
           "CHANGELOG.md"
         ],
         groups_for_extras: [
@@ -104,6 +105,7 @@ defmodule LatticeStripe.MixProject do
              "guides/extending-lattice-stripe.md",
              "guides/cheatsheet.cheatmd"
            ]},
+          {"Upgrading", ["guides/upgrading-1-1-to-1-7.md"]},
           {"Changelog", ["CHANGELOG.md"]}
         ],
         # Regex patterns, not enumerated module lists. ExDoc performs ZERO validation of
