@@ -581,6 +581,20 @@ defmodule LatticeStripe.DocsTruthTest do
     assert feature =~ "immutable"
   end
 
+  test "the promoted entitlements fixture keeps its ExDoc placement and guide mention" do
+    docs = docs_config()
+
+    # A module absent from its group is silently dropped from the published docs, so an
+    # adopter reading HexDocs would never learn the fixture exists — the promotion out of
+    # test/support/ would buy nothing. Structural, not decorative.
+    testing_group = docs[:groups_for_modules][:Testing]
+    assert LatticeStripe.Testing.Fixtures.Entitlements in testing_group
+
+    guide = File.read!("guides/testing.md")
+    assert guide =~ "LatticeStripe.Testing.Fixtures.Entitlements"
+    assert guide =~ "active_entitlement/1"
+  end
+
   test "metering guide and the Phase 64 metering modules keep their ExDoc placement" do
     docs = docs_config()
     groups = docs[:groups_for_extras] |> Map.new()

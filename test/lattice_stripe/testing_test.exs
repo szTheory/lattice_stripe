@@ -4,6 +4,7 @@ defmodule LatticeStripe.TestingTest do
   alias LatticeStripe.{
     CreditNote,
     Dispute,
+    Entitlements,
     Event,
     EventNotification,
     File,
@@ -28,6 +29,27 @@ defmodule LatticeStripe.TestingTest do
       assert is_map(Fixtures.Mandate.mandate_json())
       assert is_map(Fixtures.SetupAttempt.setup_attempt_json())
       assert is_map(Fixtures.Quote.quote_json())
+    end
+
+    test "promoted entitlement builders are callable at arity 0 (OBJ-02 empty-input edge)" do
+      # Every promoted builder defaults `overrides` to %{}, so a no-argument call must
+      # return the canonical map rather than raising on a missing argument.
+      assert is_map(Fixtures.Entitlements.active_entitlement_json())
+      assert is_map(Fixtures.Entitlements.feature_json())
+      assert is_map(Fixtures.Entitlements.active_entitlement_summary_json())
+      assert is_map(Fixtures.Entitlements.active_entitlement_list_json())
+    end
+
+    test "entitlement builder overrides win over the canonical value" do
+      overridden = Fixtures.Entitlements.active_entitlement_json(%{"id" => "ent_override"})
+      assert overridden["id"] == "ent_override"
+      assert overridden["object"] == "entitlements.active_entitlement"
+    end
+
+    test "active_entitlement_list_json/0 returns a one-element list envelope" do
+      envelope = Fixtures.Entitlements.active_entitlement_list_json()
+      assert envelope["object"] == "list"
+      assert length(envelope["data"]) == 1
     end
   end
 
@@ -250,6 +272,22 @@ defmodule LatticeStripe.TestingTest do
       assert %Mandate{} = Testing.mandate(Fixtures.Mandate.mandate_json())
       assert %SetupAttempt{} = Testing.setup_attempt(Fixtures.SetupAttempt.setup_attempt_json())
       assert %Quote{} = Testing.quote(Fixtures.Quote.quote_json())
+    end
+
+    test "return typed entitlement structs from the promoted public fixtures" do
+      assert %Entitlements.ActiveEntitlement{id: "ent_123"} =
+               Testing.active_entitlement(Fixtures.Entitlements.active_entitlement_json())
+
+      summary =
+        Testing.active_entitlement_summary(
+          Fixtures.Entitlements.active_entitlement_summary_json()
+        )
+
+      assert %Entitlements.ActiveEntitlementSummary{customer: "cus_ABC123customer"} = summary
+
+      # ENT-05 / Phase 63 F-02: the Stripe object has no id property, so the struct has
+      # no :id field. The public wrapper must not reintroduce one.
+      refute Map.has_key?(summary, :id)
     end
 
     test "keep wrapper shapes explicit instead of option-driven" do
