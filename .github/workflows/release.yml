@@ -35,7 +35,7 @@ jobs:
       sha: ${{ steps.release.outputs.sha }}
       prs_created: ${{ steps.release.outputs.prs_created }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -117,7 +117,7 @@ jobs:
             -R "${{ github.repository }}" | jq 'length')
           echo "found=$([ "$open_count" -gt 0 ] && echo true || echo false)" >>"$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: steps.pr.outputs.found == 'true'
         with:
           ref: release-please--branches--main
@@ -337,7 +337,7 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.release-please.outputs.version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ needs.release-please.outputs.tag_name }}
 
