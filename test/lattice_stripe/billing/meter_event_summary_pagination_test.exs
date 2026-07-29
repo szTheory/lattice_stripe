@@ -62,6 +62,18 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
      }}
   end
 
+  defp server_error_response(status) do
+    {:ok,
+     %{
+       status: status,
+       headers: [{"request-id", "req_err_#{System.unique_integer([:positive])}"}],
+       body:
+         Jason.encode!(%{
+           "error" => %{"type" => "api_error", "message" => "Server error", "code" => nil}
+         })
+     }}
+  end
+
   # Ids carry the real `mtrusg_` prefix because the prefix is load-bearing for the
   # cursor-derivation assertion below.
   defp summary(id, overrides \\ %{}) do
@@ -277,6 +289,166 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
                1_753_660_800,
                1_753_747_200
              ]
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # MTR-02 — request scoping on pages the caller never constructs
+  # (D-30 assertions 2, 5, 6 / T-64-02, T-64-03, T-64-04)
+  # ---------------------------------------------------------------------------
+
+  describe "stream!/4 request scoping on pages the caller never constructs" do
+    # D-30 assertion 2 / T-64-03 — the phase's highest-value assertion, MUTATION-CHECKED.
+    # Do not rename it, do not fold it into a generic pagination case, and do not collapse
+    # the four checks into one combined comparison.
+    #
+    # Each filter is asserted SEPARATELY because the failure mode that matters is a
+    # PARTIAL drop. A total drop makes Stripe answer 400 loudly. A partial drop is silent
+    # and unfalsifiable downstream: the returned summaries carry no `customer` field at
+    # all (F-02), so nothing can compare what came back against what was asked for. And
+    # `value_grouping_window` is optional, so losing only that one does not error either —
+    # page 2 quietly stops returning per-day rows and returns one whole-range aggregate
+    # instead, producing a series with a single absurd outlier and no error anywhere.
+    #
+    # Verified load-bearing: zeroing `base_params` in `List.build_next_page_request/1`
+    # fails this test. See 64-06-SUMMARY.md.
+    test "page 2 preserves customer, start_time, end_time and value_grouping_window" do
+      LatticeStripe.MockTransport
+      |> expect(:request, fn req ->
+        params = query_params(req)
+
+        assert params["customer"] == "cus_1"
+        assert params["start_time"] == "1753574400"
+        assert params["end_time"] == "1753660800"
+        assert params["value_grouping_window"] == "day"
+
+        summaries_response([summary("mtrusg_a")], true)
+      end)
+      |> expect(:request, fn req ->
+        params = query_params(req)
+
+        assert params["customer"] == "cus_1"
+        assert params["start_time"] == "1753574400"
+        assert params["end_time"] == "1753660800"
+        assert params["value_grouping_window"] == "day"
+
+        # The cursor is carried in ADDITION to the filters, never instead of them.
+        assert params["starting_after"] == "mtrusg_a"
+
+        summaries_response([summary("mtrusg_b")], false)
+      end)
+
+      summaries =
+        test_client()
+        |> MeterEventSummary.stream!(@meter_id, @bucketed_window)
+        |> Enum.to_list()
+
+      assert length(summaries) == 2
+    end
+
+    # D-30 assertion 5 / T-64-02. This is an ACCESS-CONTROL assertion, not a convenience
+    # one: a dropped `stripe-account` header on page 2 executes that read against the
+    # PLATFORM account rather than the connected account, so half the series comes back
+    # from the wrong books with nothing to indicate it.
+    test "the stripe-account header carries to page 2" do
+      LatticeStripe.MockTransport
+      |> expect(:request, fn req ->
+        assert {"stripe-account", "acct_connected"} in req.headers
+        summaries_response([summary("mtrusg_a")], true)
+      end)
+      |> expect(:request, fn req ->
+        assert {"stripe-account", "acct_connected"} in req.headers
+        summaries_response([summary("mtrusg_b")], false)
+      end)
+
+      summaries =
+        [stripe_account: "acct_connected"]
+        |> test_client()
+        |> MeterEventSummary.stream!(@meter_id, @window)
+        |> Enum.to_list()
+
+      assert length(summaries) == 2
+    end
+
+    test "a per-request stripe_account override also carries to page 2" do
+      LatticeStripe.MockTransport
+      |> expect(:request, fn req ->
+        assert {"stripe-account", "acct_per_request"} in req.headers
+        summaries_response([summary("mtrusg_a")], true)
+      end)
+      |> expect(:request, fn req ->
+        assert {"stripe-account", "acct_per_request"} in req.headers
+        summaries_response([summary("mtrusg_b")], false)
+      end)
+
+      summaries =
+        test_client()
+        |> MeterEventSummary.stream!(@meter_id, @window, stripe_account: "acct_per_request")
+        |> Enum.to_list()
+
+      assert length(summaries) == 2
+    end
+
+    # D-30 assertion 6 / T-64-04. Page 1's opts DO supply a key, so this proves the strip
+    # at list.ex:267 rather than proving a key was never there in the first place.
+    test "no idempotency-key is sent on page 2" do
+      LatticeStripe.MockTransport
+      |> expect(:request, fn req ->
+        assert Enum.any?(req.headers, fn {k, _v} -> k == "idempotency-key" end)
+        summaries_response([summary("mtrusg_a")], true)
+      end)
+      |> expect(:request, fn req ->
+        # `LatticeStripe.List` deletes :idempotency_key from _opts when building a page
+        # request. Assert the key is absent from the OUTGOING request, not from source.
+        refute Enum.any?(req.headers, fn {k, _v} -> k == "idempotency-key" end)
+        summaries_response([summary("mtrusg_b")], false)
+      end)
+
+      summaries =
+        test_client()
+        |> MeterEventSummary.stream!(@meter_id, @window, idempotency_key: "idem_123")
+        |> Enum.to_list()
+
+      assert length(summaries) == 2
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # MTR-02 — enumeration is complete or it fails loudly, never partial
+  # (D-30 assertion 8)
+  # ---------------------------------------------------------------------------
+
+  describe "stream!/4 error propagation" do
+    test "a 500 on page 2 raises LatticeStripe.Error out of the stream" do
+      LatticeStripe.MockTransport
+      |> expect(:request, fn _req -> summaries_response([summary("mtrusg_a")], true) end)
+      |> expect(:request, fn _req -> server_error_response(500) end)
+
+      assert_raise LatticeStripe.Error, fn ->
+        test_client()
+        |> MeterEventSummary.stream!(@meter_id, @window)
+        |> Enum.to_list()
+      end
+    end
+
+    # The raise must come from the SECOND fetch, not from a stream that never started:
+    # page-1 items are emitted first. Messages are sent synchronously from the consuming
+    # process, so `assert_received` needs no timeout and adds no timing dependency.
+    test "page-1 items are emitted before the page-2 error surfaces" do
+      parent = self()
+
+      LatticeStripe.MockTransport
+      |> expect(:request, fn _req -> summaries_response([summary("mtrusg_a")], true) end)
+      |> expect(:request, fn _req -> server_error_response(500) end)
+
+      assert_raise LatticeStripe.Error, fn ->
+        test_client()
+        |> MeterEventSummary.stream!(@meter_id, @window)
+        |> Stream.each(&send(parent, {:emitted, &1.id}))
+        |> Enum.to_list()
+      end
+
+      assert_received {:emitted, "mtrusg_a"}
     end
   end
 end
