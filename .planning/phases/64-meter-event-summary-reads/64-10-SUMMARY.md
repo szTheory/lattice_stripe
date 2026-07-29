@@ -144,3 +144,49 @@ operator judgment call and is recorded as outstanding.
 Per this plan: if the operator reports an issue it is to be recorded verbatim and routed to a
 follow-up plan or quick task — **not** fixed inside this plan, because a gate plan that also
 changes code cannot honestly report on itself.
+
+### Pre-verification of the seven steps
+
+Each step's objectively checkable content was verified against the built artifacts, so the
+operator is confirming a checked claim rather than an unchecked one. This does **not** substitute
+for the sign-off.
+
+| Step | Objective check | Result |
+|---|---|---|
+| 1 | `MeterEventSummary` in sidebar group, admonition present | group `Billing Metering` (parsed from `sidebar_items-AB3D2A87.js`); 2 admonition blocks; "eventually consistent" present |
+| 2 | "Reading usage back" exists; total-vs-series taught first | heading present; `A total, or a series` is its first subsection |
+| 3 | ten codes; three labelled unverified; handler opens with a fetch | **10** code rows; **3** `(unverified)`; `fetch_event` present; retired `meter_event_value_not_found` **absent (0)** |
+| 4 | guard raises naming value, rule, cause, floor **and** ceil | verified by live probe — see below |
+| 5 | gate results | recorded above, all five green |
+| 6 | integration explicit, 0 excluded | re-run here: 10 tests, 0 failures, 0 excluded |
+| 7 | dimension-read limit present; build fence absent | "Deferred by design" present, dimensions covered; build-fence language (`no new metering write`, `Billing.Meter.event_summaries`, `MTR-0*`) **absent** |
+
+Step 4's probe, run via `mix run` against a client with a throwaway key (the guard raises
+pre-network, so no live credential is involved) — `start_time` deliberately off-by-one second:
+
+```
+RAISED ArgumentError:
+LatticeStripe.Billing.MeterEventSummary.list/4: start_time 1753660801 is not aligned to a UTC
+day boundary (00:00 UTC). Stripe requires day-aligned timestamps when value_grouping_window is
+"day", and rejects unaligned values with HTTP 400.
+
+Subscription current_period_start/current_period_end derive from billing_cycle_anchor and are
+almost never aligned. Align them yourself — this library will not choose floor vs. ceil for you,
+because that choice changes which usage the window includes:
+
+    start_time = Integer.floor_div(start_time, 86400) * 86400   # floor
+    end_time   = -Integer.floor_div(-end_time, 86400) * 86400   # ceil
+```
+
+All four required elements are present: the offending value, the rule, the
+`billing_cycle_anchor` cause, and both expressions.
+
+**What remains genuinely subjective** and is the operator's to judge: step 2's requirement that
+the two Phase 65 stubs "read as real prose rather than placeholders," and the overall quality of
+the rewritten sections.
+
+### CI
+
+PR [#46](https://github.com/szTheory/lattice_stripe/pull/46) (draft). All 12 checks green,
+including `ci-gate`, `Integration Tests`, `Docs Truth`, `Quality`, and the test matrix across
+Elixir 1.15/OTP 26, 1.17/OTP 27 and 1.19/OTP 28.
