@@ -5,7 +5,7 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Current release:** **`2.0.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see [CHANGELOG](CHANGELOG.md#200) for what shipped since 1.7.13. Evaluating fit? Start with [User Flows & JTBD][user-flows-and-jtbd].
+> **Current release:** **`2.1.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see [CHANGELOG](CHANGELOG.md#210) for what shipped since 2.0.0. Evaluating fit? Start with [User Flows & JTBD][user-flows-and-jtbd].
 
 A production-grade, idiomatic Elixir SDK for the Stripe API.
 
@@ -60,7 +60,7 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:lattice_stripe, "~> 2.0"}
+    {:lattice_stripe, "~> 2.1"}
   ]
 end
 ```
