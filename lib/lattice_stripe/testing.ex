@@ -148,7 +148,7 @@ defmodule LatticeStripe.Testing do
   Converts a canonical Feature fixture map into
   `%LatticeStripe.Entitlements.Feature{}`.
 
-  `entitlements.feature` is deliberately absent from `LatticeStripe.ObjectTypes`'
+  `entitlements.feature` is deliberately absent from the internal ObjectTypes
   dispatch registry (it is not a webhook `data.object` payload), so this wrapper is
   the only typed decode path the public surface offers for it.
   """

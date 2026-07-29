@@ -4,7 +4,7 @@ defmodule LatticeStripe.Builders.BillingPortal do
 
   These builders construct the nested `flow_data` map that `Session.create/3` expects,
   using named constructor functions for each portal flow type. Builder output passes
-  `LatticeStripe.BillingPortal.Guards.check_flow_data!/1` validation automatically.
+  the internal BillingPortal.Guards flow_data validation automatically.
 
   ## Usage
 

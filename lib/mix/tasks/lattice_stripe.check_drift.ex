@@ -4,9 +4,9 @@ defmodule Mix.Tasks.LatticeStripe.CheckDrift do
   `@known_fields` module attributes and reports any drift.
 
   Downloads the latest `spec3.json` from the `stripe/openapi` GitHub
-  repository and checks every module registered in
-  `LatticeStripe.ObjectTypes` for field additions (in spec, not in
-  `@known_fields`) and field removals (in `@known_fields`, not in spec).
+  repository and checks every module registered in the ObjectTypes registry
+  for field additions (in spec, not in `@known_fields`) and field removals
+  (in `@known_fields`, not in spec).
 
   Also reports Stripe object types present in the spec that have no
   corresponding entry in the ObjectTypes registry.

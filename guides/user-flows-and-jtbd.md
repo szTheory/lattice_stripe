@@ -325,7 +325,7 @@ LatticeStripe has unusually strong coverage here for an SDK:
 - request batching
 - circuit-breaker guidance
 - testing helpers
-- optional [Stripe explorer LiveBook](../notebooks/stripe_explorer.livemd) in the repo for interactive exploration
+- optional [Stripe explorer LiveBook](https://github.com/szTheory/lattice_stripe/blob/main/notebooks/stripe_explorer.livemd) in the repo for interactive exploration
 
 Maintainers can run `mix lattice_stripe.check_drift` to compare the SDK against
 Stripe's OpenAPI spec — that is a release-tooling task, not a production runtime path.
