@@ -144,7 +144,7 @@
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 64-08-PLAN.md — Runtime-guide handler rewrite, `scope.md` dimension-read limit, `MeterEvent.create/3` `@doc` payload bullet (Wave 5 — cross-references headings 64-07 creates)
+- [x] 64-08-PLAN.md — Runtime-guide handler rewrite, `scope.md` dimension-read limit, `MeterEvent.create/3` `@doc` payload bullet (Wave 5 — cross-references headings 64-07 creates)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
