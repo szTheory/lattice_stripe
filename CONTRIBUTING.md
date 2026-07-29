@@ -141,6 +141,31 @@ Two other cases that bite:
 - **Guides have no alias context.** Inside a guide, `` `File.create/3` `` resolves to Elixir's
   stdlib `File`, not ours. Fully qualify as `` `LatticeStripe.File.create/3` ``.
 
+## Published Version Prose
+
+The version appears in prose on surfaces Release Please does not touch: the
+`{:lattice_stripe, "~> MAJOR.MINOR"}` install snippets in `README.md` and six guides, and the
+"current release" lines in `README.md` and `guides/getting-started.md`.
+`test/lattice_stripe/docs_truth_test.exs` derives its expectations from `mix.exs`, so if these
+drift, CI fails.
+
+You should never need to edit them by hand:
+
+```bash
+mix lattice_stripe.version_prose --check    # part of `mix ci`
+mix lattice_stripe.version_prose --update   # rewrite from mix.exs
+```
+
+Unlike the API surface lock, running `--update` here is **not** a way to silence a real
+problem. `mix.exs` is the single source of truth and Release Please owns it; this task only
+propagates that value outward, so there is no judgement call to launder. That is why the
+`sync-version-prose` job in `.github/workflows/release.yml` runs `--update` on the release
+branch automatically — before this existed, every release PR was born red and stalled.
+
+Historical `CHANGELOG.md` entries are deliberately left alone. Only the top-of-file
+publishing note is rewritten; pins recorded under past release headings keep their original
+values, because rewriting them would silently falsify release history.
+
 ## Pull Request Process
 
 1. Create a branch from `main` using the naming convention:

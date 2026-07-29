@@ -32,10 +32,27 @@ Routine patch releases require **`RELEASE_PLEASE_TOKEN`** (fine-grained PAT with
 |----------|--------------|------------------------|
 | **Release** | Every push to `main` | Tag/Hex jobs skip until a Release PR merges (`release_created` is false). |
 | **Release PR Auto-Merge** | After **CI** completes | CI on `main` finishes — only release-branch CI (`release-please--*`) triggers merge. |
+| **Sync version prose on release PR** | After **Release** on `main` | No open Release PR, or the prose already matches `mix.exs`. |
 | **Bootstrap CI on Release PR** | After **Release** on `main` | Open Release PR exists but was not just updated by Release Please (`prs_created` false). |
 | **Release PR Auto-Merge** | After release-branch **CI** completes | Manual retry: **Release PR Auto-Merge** workflow_dispatch. |
 
 A **skipped** Release PR Auto-Merge run after a maintainer push to `main` is expected, not a failed release.
+
+### Version prose on the Release PR
+
+Release Please updates `mix.exs` and `CHANGELOG.md`. It does **not** update the install
+snippets or "current release" lines in `README.md` and the guides, and it cannot: the pins are
+`~> MAJOR.MINOR`, which no `x-release-please-*` annotation produces, and they sit inside fenced
+code blocks where an HTML-comment annotation would render literally.
+
+Because `docs_truth_test.exs` derives its expectations from `mix.exs`, that gap made every
+Release PR fail CI on three assertions and stall — it blocked 2.0.0 until fixed by hand. The
+**Sync version prose on release PR** job now runs `mix lattice_stripe.version_prose --update`
+on the release branch and pushes the result, so the PR reaches `ci-gate` green on its own.
+
+The push needs `RELEASE_PLEASE_TOKEN`: pushes authenticated with `GITHUB_TOKEN` do not start
+workflow runs, which would leave `ci-gate` never reporting and the PR unmergeable. The job
+dispatches CI explicitly afterwards as a fallback.
 
 ### Avoiding duplicate CI on Release PRs
 
