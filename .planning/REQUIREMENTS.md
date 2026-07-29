@@ -26,7 +26,7 @@ Source: verified accrue gap brief (`.planning/research/accrue-gap-brief-2026-07-
 
 - [x] **OBJ-01**: The four missing webhook object types deserialize via `ObjectTypes.maybe_deserialize/1` — `entitlements.active_entitlement`, `entitlements.active_entitlement_summary`, `billing.meter_event`, `billing.meter_event_summary`. (`billing.meter_error_report` is **excluded**: it is a v2 thin-event `data` payload carrying no `"object"` key, so `maybe_deserialize/1`'s `%{"object" => _}` dispatch can never reach it — see Phase 64 CONTEXT F-13/D-14. It is decoded explicitly via `MeterErrorReport.from_event/1`.)
 - [x] **OBJ-02**: Public `LatticeStripe.Testing.Fixtures` exist for entitlement + meter objects (incl. the no-`id` summary), each with a typed-conversion wrapper in `LatticeStripe.Testing`
-- [ ] **OBJ-03**: Public `Testing.Fixtures` exist for core billing objects (subscription, invoice, customer, payment_intent)
+- [x] **OBJ-03**: Public `Testing.Fixtures` exist for core billing objects (subscription, invoice, customer, payment_intent)
 
 ### Product ↔ Feature
 
@@ -81,7 +81,7 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 | MTR-04 | Phase 64 | Complete |
 | OBJ-01 | Phase 65 | Complete |
 | OBJ-02 | Phase 65 | Complete |
-| OBJ-03 | Phase 65 | Pending |
+| OBJ-03 | Phase 65 | Complete |
 | PROD-01 | Phase 66 | Pending |
 | PROD-02 | Phase 66 | Pending |
 | DX-01 | Phase 61 | Complete |

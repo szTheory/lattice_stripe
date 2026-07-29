@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
 status: executing
-stopped_at: Completed 65-04-PLAN.md
-last_updated: "2026-07-29T02:46:27.523Z"
-last_activity: 2026-07-29 -- Phase 65 execution started
+stopped_at: Completed 65-03-PLAN.md
+last_updated: "2026-07-29T02:52:02.192Z"
+last_activity: 2026-07-29
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 25
-  completed_plans: 22
+  completed_plans: 23
   percent: 75
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 65 (webhook-objecttypes-testing-fixtures) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
-Last activity: 2026-07-29 -- Phase 65 execution started
+Last activity: 2026-07-29
 
 **Carry-forward for Phase 65 and later:**
 
@@ -66,6 +66,7 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 | Phase 65 P01 | 5min | 2 tasks | 12 files |
 | Phase 65 P02 | 7min | 2 tasks | 15 files |
 | Phase 65 P04 | 4min | 2 tasks | 2 files |
+| Phase 65 P03 | 6min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,7 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 - [Phase ?]: No map_size count assertion on @object_map — brittle against Phase 66's product.feature row; per-key fetch_module/1 assertions cover it instead
 - [Phase ?]: Open question Q3 resolved NO: meter_event.ex gets no @known_fields, since from_map/1 never consults it and a decorative attribute would read as load-bearing
 - [Phase ?]: **[65-03]** Q2 = `move-and-rename` (operator decision, one-way door): the three private core-billing fixtures (customer, payment_intent, subscription) are MOVED into lib/lattice_stripe/testing/fixtures/ — no private twin remains, so drift is structurally impossible and no drift lock is needed; `Subscription.basic/1` is renamed to `subscription_json/1` on promotion, joining the dominant `<object>_json` convention (11 of 14 public fixture modules, ~30 functions) rather than the 3 meter modules' `basic/1`, which are artifacts of 65-02's verbatim-movement rule. Follow-up for a later phase (NOT this one): the three meter `basic/1` builders are now the public-surface outliers and are worth aligning before the Hex 1.8.0 tag.
+- [Phase ?]: **[65-03]** Q2 rename cost measured at 31 edits, not the 4 the plan implies — one `alias ..., as: Fixtures` line fronting 28 `Fixtures.basic(` call sites in subscription_test.exs, plus 3 internal composition call sites at subscription.ex :54/:71/:86 (the plan says :85; that line is the `def canceled` head). Also: the 65-02 `as: <Object>Fixture` caller-alias lesson is CONDITIONAL — it applies only when a caller aliases the fixture by its bare last segment; a caller already using a generic or `as:`-renamed alias needs no rewrite.
 
 ### Blockers/Concerns
 
@@ -145,8 +147,8 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 
 ## Session Continuity
 
-**Last session:** 2026-07-29T02:40:04.104Z
-**Stopped at:** Completed 65-04-PLAN.md
+**Last session:** 2026-07-29T02:51:52.781Z
+**Stopped at:** Completed 65-03-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`

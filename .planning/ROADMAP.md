@@ -176,7 +176,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 65-03-PLAN.md — core-billing fixture promotion (customer, payment_intent, subscription); opens with the Q2 one-way `checkpoint:decision` on move-vs-duplicate (Wave 3)
+- [x] 65-03-PLAN.md — core-billing fixture promotion (customer, payment_intent, subscription); opens with the Q2 one-way `checkpoint:decision` on move-vs-duplicate (Wave 3)
 - [x] 65-04-PLAN.md — remaining three `@object_map` rows + OBJ-01 completion; verifies the two Phase 64 locks (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
@@ -227,7 +227,7 @@ Plans:
 | 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
 | 63. Stripe-Native Entitlements | v1.10 | 7/7 | Complete    | 2026-07-28 |
 | 64. Meter Event-Summary Reads | v1.10 | 10/10 | Complete    | 2026-07-28 |
-| 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 3/6 | In Progress|  |
+| 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 4/6 | In Progress|  |
 | 66. Product ↔ Feature Attachment | v1.10 | 0/? | Not started | - |
 | 67. DX Hardening & Milestone Doc Close | v1.10 | 0/? | Not started | - |
 
