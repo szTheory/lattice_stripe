@@ -215,7 +215,7 @@ defmodule LatticeStripe.MixProject do
         "Changelog" => "#{@source_url}/blob/main/CHANGELOG.md",
         "HexDocs" => "https://hexdocs.pm/lattice_stripe"
       },
-      files: ["lib", "mix.exs", "README.md", "CHANGELOG.md", "LICENSE"]
+      files: ["lib", "priv/api", "mix.exs", "README.md", "CHANGELOG.md", "LICENSE"]
     ]
   end
 
@@ -229,6 +229,7 @@ defmodule LatticeStripe.MixProject do
         "compile --warnings-as-errors",
         "credo --strict",
         "test",
+        "lattice_stripe.api_surface --check",
         "docs --warnings-as-errors"
       ]
     ]

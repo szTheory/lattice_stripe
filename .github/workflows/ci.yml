@@ -216,6 +216,12 @@ jobs:
       - name: Run docs_truth regression suite
         run: mix test test/lattice_stripe/docs_truth_test.exs
 
+      # Also runs inside the `test` matrix on 1.15/1.17/1.19, which is what proves the
+      # snapshot is byte-identical across Elixir versions. This lane exists so the failure
+      # surfaces under a named step instead of buried in a matrix leg.
+      - name: Public API surface lock
+        run: mix test test/lattice_stripe/api_surface_lock_test.exs
+
   quality:
     name: Quality
     runs-on: ubuntu-latest

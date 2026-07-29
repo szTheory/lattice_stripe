@@ -134,6 +134,33 @@ Use these entry points:
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->
 
+## Verification Policy
+
+Full policy: `.agents/skills/lattice-verification-policy/SKILL.md`, wired to the verifier,
+executor and planner via `agent_skills` in `.planning/config.json`.
+
+The rule: **eliminate a human verification item by writing the test, never by
+reclassifying the deliverable.** If a deliverable cannot be proven by a named, passing
+check, it stays `human_judgment: true`.
+
+This is a headless Hex library — no UI, no user flow, no real-time behaviour, no
+perceived-performance surface — so those verification categories are inapplicable by
+construction. Stripe is reached only through the Mox-mocked `LatticeStripe.Transport`
+behaviour plus the `stripe-mock` integration lane.
+
+Standing machine-checked locks. Cite these as evidence rather than re-deriving them:
+
+| Lock | Guards against |
+|---|---|
+| `test/lattice_stripe/api_surface_lock_test.exs` + `priv/api/current.txt` | any public module/function/arity/field/type/callback/protocol-impl change landing without a visible diff |
+| `test/lattice_stripe/docs_truth_test.exs` | ungrouped public modules, phantom ExDoc group entries, guides drifting from the shipped surface |
+| `test/lattice_stripe/testing/wrapper_completeness_test.exs` | a fixture object type with no typed-wrapper decision, or an opt-out reason that is factually false |
+| `test/lattice_stripe/object_types_test.exs` | a new `@object_map` row silently flipping `Webhook.fetch_related_object/3` from fail-fast to a doomed GET |
+
+Prefer an invariant that makes a bad state unrepresentable over a prose rationale nobody
+can verify. `mix lattice_stripe.api_surface --update` is refused when `CI` is set, and must
+never be run to turn a red build green.
+
 
 
 <!-- GSD:profile-start -->

@@ -1,0 +1,8 @@
+# Render the API surface lock as a reviewable diff rather than collapsing it as generated
+# output. The whole point of committing it is that a human sees the change in the PR.
+priv/api/** linguist-generated=false
+
+# Deliberately NO merge driver for priv/api/**. A union merge silently resurrects a deleted
+# API line — precisely the break the lock exists to catch — and merge-driver definitions
+# live in unversioned .git/config, so CI and GitHub's web merge would ignore them anyway.
+# Conflicts here should be resolved by hand.
