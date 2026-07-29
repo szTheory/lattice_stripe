@@ -3442,3 +3442,4 @@ LatticeStripe.Webhook.SignatureVerificationError type verify_error/0
 Mix.Tasks.LatticeStripe.ApiSurface module
 Mix.Tasks.LatticeStripe.CheckDrift module
 Mix.Tasks.LatticeStripe.TestClock.Cleanup module
+Mix.Tasks.LatticeStripe.VersionProse module

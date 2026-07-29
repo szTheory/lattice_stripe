@@ -230,6 +230,7 @@ defmodule LatticeStripe.MixProject do
         "credo --strict",
         "test",
         "lattice_stripe.api_surface --check",
+        "lattice_stripe.version_prose --check",
         "docs --warnings-as-errors"
       ]
     ]

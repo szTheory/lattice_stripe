@@ -88,10 +88,97 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
+  # release-please updates mix.exs and CHANGELOG.md only. The published version also appears
+  # in install snippets and release-status prose across README.md and the guides, and
+  # docs_truth_test.exs derives its expectations from mix.exs — so without this step the
+  # release PR is born red and the release stalls. release-please's own `extra-files`
+  # updaters cannot do it: the pins are `~> MAJOR.MINOR` (no annotation produces that) and
+  # they sit inside fenced code blocks where an HTML-comment annotation would render.
+  sync-version-prose:
+    name: Sync version prose on release PR
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: always() && needs.release-please.result == 'success'
+    permissions:
+      contents: write
+      pull-requests: read
+      actions: write
+    steps:
+      - name: Check for an open release PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          open_count=$(gh pr list \
+            --head release-please--branches--main \
+            --state open \
+            --json number \
+            -R "${{ github.repository }}" | jq 'length')
+          echo "found=$([ "$open_count" -gt 0 ] && echo true || echo false)" >>"$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v6
+        if: steps.pr.outputs.found == 'true'
+        with:
+          ref: release-please--branches--main
+          # A PAT is required for the push below to trigger CI. Pushes authenticated with
+          # GITHUB_TOKEN do not start workflow runs, which would leave ci-gate never
+          # reporting and the release PR unmergeable. The explicit dispatch at the end is
+          # the fallback for when only GITHUB_TOKEN is available.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - uses: erlef/setup-beam@v1
+        if: steps.pr.outputs.found == 'true'
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Install Hex + Rebar
+        if: steps.pr.outputs.found == 'true'
+        run: |
+          mix local.hex --force
+          mix local.rebar --force
+
+      - name: Fetch deps
+        if: steps.pr.outputs.found == 'true'
+        run: mix deps.get
+
+      - name: Sync version prose
+        id: sync
+        if: steps.pr.outputs.found == 'true'
+        run: |
+          set -euo pipefail
+          mix lattice_stripe.version_prose --update
+          if git diff --quiet; then
+            echo "Version prose already in sync."
+            echo "changed=false" >>"$GITHUB_OUTPUT"
+          else
+            git diff --stat
+            echo "changed=true" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and push
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore(main): sync version prose to $(jq -r '.["."]' .release-please-manifest.json)"
+          git push origin HEAD:release-please--branches--main
+
+      - name: Ensure CI runs on the pushed commit
+        if: steps.sync.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # No-op when the push already started CI via the PAT; a duplicate run is harmless
+          # next to a release that cannot merge because no run ever reported.
+          gh workflow run ci.yml --ref release-please--branches--main -R "${{ github.repository }}" || true
+
   bootstrap-release-pr-ci:
     name: Bootstrap CI on Release PR
     runs-on: ubuntu-latest
-    needs: release-please
+    needs: [release-please, sync-version-prose]
     if: always() && needs.release-please.result == 'success'
     permissions:
       actions: write
