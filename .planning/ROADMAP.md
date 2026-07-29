@@ -148,7 +148,7 @@
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 64-10-PLAN.md — D-29 five-step differential phase gate + operator sign-off (Wave 6)
+- [x] 64-10-PLAN.md — D-29 five-step differential phase gate + operator sign-off (Wave 6)
 
 ### Phase 65: Webhook ObjectTypes & Testing Fixtures
 

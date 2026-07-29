@@ -5,7 +5,7 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 64
 current_phase_name: Meter Event-Summary Reads
 status: executing
-stopped_at: Wave 5 complete (64-08 merged)
+stopped_at: Wave 6 gate green; 64-10 Task 2 operator sign-off pending
 last_updated: "2026-07-28T23:50:24.165Z"
 last_activity: 2026-07-28
 last_activity_desc: "Phase 64 Wave 4 complete: 64-07 (guides/metering.md repair — 'Reading usage back', 'The payload contract', six false-prose corrections) and 64-09 (stripe-mock integration suite, ExDoc placement locks, two IAL warnings cleared) executed in parallel and merged. Full suite 2305 tests / 0 failures / 1 skipped, plus 10 integration tests against stripe-mock. ExDoc warning baseline intentionally moved 42 -> 40. 8 of 10 plans done; Wave 5 (64-08) is next."
@@ -13,7 +13,7 @@ progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 19
-  completed_plans: 18
+  completed_plans: 19
   percent: 29
 ---
 
@@ -29,8 +29,8 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 64 (meter-event-summary-reads) — EXECUTING
-Plan: 9 of 10 complete (Waves 1-5 of 6 merged)
-Status: Wave 6 (64-10) ready to dispatch — final plan, D-29 differential phase gate
+Plan: 10 of 10 executed (all 6 waves merged)
+Status: D-29 differential gate GREEN (all 5 steps). Blocking operator sign-off (64-10 Task 2) outstanding.
 Last activity: 2026-07-28 — Wave 4 complete: 64-07 (`guides/metering.md` repair) and 64-09 (stripe-mock integration suite + ExDoc placement locks) executed in parallel and merged. Full suite 2305 tests / 0 failures / 1 skipped; 10 integration tests actually executed against stripe-mock (`--include integration`), not skipped. **ExDoc warning baseline deliberately moved 42 → 40** — 64-09 cleared the two `meter_event_stream.ex` IAL warnings; the merge-durable invariant for 64-10 is the −2 delta and the `meter` substring, not the absolute number.
 
 ## Performance Metrics

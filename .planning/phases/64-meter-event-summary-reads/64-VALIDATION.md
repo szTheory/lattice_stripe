@@ -3,9 +3,9 @@ phase: 64
 slug: meter-event-summary-reads
 # status lifecycle: draft (seeded by plan-phase) → validated (set by validate-phase §6)
 # audit-milestone §5.5 distinguishes NOT-VALIDATED (draft) from PARTIAL (validated + nyquist_compliant: false) (#2117)
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-07-28
 ---
 
@@ -84,31 +84,31 @@ integration tests ran. stripe-mock is confirmed **not currently running** (Docke
 
 | Requirement | Behavior | Test Type | Automated Command | File Exists | Status |
 |-------------|----------|-----------|-------------------|-------------|--------|
-| MTR-01 | `list/4` builds `GET /v1/billing/meters/:id/event_summaries` with all four params | unit (Mox) | `mix test test/lattice_stripe/billing/meter_event_summary_test.exs` | ❌ W0 | ⬜ pending |
-| MTR-01 | `from_map/1` types all 7 fields; `aggregated_value` is a float; no `:customer` key exists | unit | same | ❌ W0 | ⬜ pending |
-| MTR-01 | `from_map(%MeterEventSummary{})` is idempotent (D-07) | unit | same | ❌ W0 | ⬜ pending |
-| MTR-01 | three `require_param!` raises fire first-failure in order `customer`→`start_time`→`end_time`, D-08 verbatim messages | unit | same | ❌ W0 | ⬜ pending |
-| MTR-01 | `validate_id!/2` raises on `nil` and `""` meter id, message per D-09 | unit | same | ❌ W0 | ⬜ pending |
-| MTR-01 | GUARD-04 matrix: aligned passes; misaligned raises for divisor 60/3600/86400; unknown window passes through; absent/unparseable timestamps pass through | unit | `mix test test/lattice_stripe/billing/guards_test.exs test/lattice_stripe/billing/meter_guards_test.exs` | ⚠️ files exist, cases ❌ W0 | ⬜ pending |
-| MTR-01 | surface refutation: `retrieve/2,3`, `create/2,3`, `update/3,4`, `delete/2,3`, `stream/3`, `align_window/2` absent; **`list/2,3` NOT refuted** | unit (structural) | `mix test test/lattice_stripe/billing/meter_event_summary_test.exs` | ❌ W0 | ⬜ pending |
-| MTR-01 | `Billing.Meter.event_summaries/3,4` absent (stripe-java#1852 lock) | unit (structural) | `mix test test/lattice_stripe/billing/meter_test.exs` | ⚠️ file exists, case ❌ W0 | ⬜ pending |
-| MTR-01 | live path served; three required-param 400s in order; enum rejection; served body decodes | integration | `mix test --only integration test/integration/meter_event_summary_integration_test.exs` | ❌ W0 — needs stripe-mock | ⬜ pending |
-| MTR-02 | D-30's nine assertions (cursor from last `mtrusg_` id; page 2 preserves all four filters; N pages = N calls; `Stream.take(1)` = 1 call; `stripe-account` carries; no `idempotency-key` on page 2; page-2 path = response `url`; page-2 500 raises `LatticeStripe.Error`; `_last_id` derived before typing) | unit (Mox, multi-page) | `mix test test/lattice_stripe/billing/meter_event_summary_pagination_test.exs` | ❌ W0 | ⬜ pending |
-| MTR-03 | `from_map/1` decodes verbatim published payload incl. `developer_message_summary`, `validation_start`, `validation_end` (N-01) | unit (pure) | `mix test test/lattice_stripe/billing/meter_error_report_test.exs` | ❌ W0 | ⬜ pending |
-| MTR-03 | `request_identifier` resolves (the join key); also resolves from legacy `%{"idempotency_key" => …}` shape | unit (pure) | same | ❌ W0 | ⬜ pending |
-| MTR-03 | `assert is_binary(code)` — encodes D-18's no-atomization decision | unit (pure) | same | ❌ W0 | ⬜ pending |
-| MTR-03 | `refute Map.has_key?(struct, :id)` / `:object` / `:livemode` (encodes D-17) | unit (structural) | same | ❌ W0 | ⬜ pending |
-| MTR-03 | missing `error_types` → `[]` not `nil` (D-19) | unit (pure) | same | ❌ W0 | ⬜ pending |
-| MTR-03 | `sample_errors: []` with `error_count: 900` still decodes (real high-volume shape) | unit (pure) | same | ❌ W0 | ⬜ pending |
-| MTR-03 | `from_map(data).meter == nil` while `from_event/1` populates it (D-16 as asserted contract) | unit (pure) | same | ❌ W0 | ⬜ pending |
-| MTR-03 | a `no_meter_found`-shaped event with `related_object: nil` decodes (F-17/N-06) | unit (pure) | same | ❌ W0 | ⬜ pending |
-| MTR-03 | `list/2,3`, `retrieve/2,3`, `create/2,3` absent; `from_map/1` + `from_event/1` present | unit (structural) | same | ❌ W0 | ⬜ pending |
-| MTR-03 | `ObjectTypes` has no `billing.meter_error_report` key (D-14/D-31) | unit (structural) | `mix test test/lattice_stripe/object_types_test.exs` | ⚠️ file exists, case ❌ W0 | ⬜ pending |
-| MTR-04 | exact-body round-trip: three custom dimensions + decimal-string value | unit | `mix test test/lattice_stripe/form_encoder_test.exs` | ⚠️ file exists (27 tests, zero float/decimal), cases ❌ W0 | ⬜ pending |
-| MTR-04 | `encode(%{"v" => 0.00001}) == "v=1.0e-5"` — locks known behavior so the doc warning cannot silently become false | unit | same | ❌ W0 | ⬜ pending |
-| MTR-04 | `MeterEvent.create/3` does not filter `payload` keys | unit (Mox at transport, assert `req.body`) | `mix test test/lattice_stripe/billing/meter_event_test.exs` | ⚠️ file exists, case ❌ W0 | ⬜ pending |
-| MTR-04 | flat dimensions → 200 **and** nested payload → 400 (only proof of the Stripe-side half; would have caught F-20.2) | integration | `mix test --only integration` | ❌ W0 — needs stripe-mock | ⬜ pending |
-| MTR-04 | ExDoc **placement** assertion extended to Phase 64's five new modules (D-26's structural exception) | unit (config) | `mix test test/lattice_stripe/docs_truth_test.exs` | ⚠️ file exists, case ❌ W0 | ⬜ pending |
+| MTR-01 | `list/4` builds `GET /v1/billing/meters/:id/event_summaries` with all four params | unit (Mox) | `mix test test/lattice_stripe/billing/meter_event_summary_test.exs` | ❌ W0 | ✅ green |
+| MTR-01 | `from_map/1` types all 7 fields; `aggregated_value` is a float; no `:customer` key exists | unit | same | ❌ W0 | ✅ green |
+| MTR-01 | `from_map(%MeterEventSummary{})` is idempotent (D-07) | unit | same | ❌ W0 | ✅ green |
+| MTR-01 | three `require_param!` raises fire first-failure in order `customer`→`start_time`→`end_time`, D-08 verbatim messages | unit | same | ❌ W0 | ✅ green |
+| MTR-01 | `validate_id!/2` raises on `nil` and `""` meter id, message per D-09 | unit | same | ❌ W0 | ✅ green |
+| MTR-01 | GUARD-04 matrix: aligned passes; misaligned raises for divisor 60/3600/86400; unknown window passes through; absent/unparseable timestamps pass through | unit | `mix test test/lattice_stripe/billing/guards_test.exs test/lattice_stripe/billing/meter_guards_test.exs` | ⚠️ files exist, cases ❌ W0 | ✅ green |
+| MTR-01 | surface refutation: `retrieve/2,3`, `create/2,3`, `update/3,4`, `delete/2,3`, `stream/3`, `align_window/2` absent; **`list/2,3` NOT refuted** | unit (structural) | `mix test test/lattice_stripe/billing/meter_event_summary_test.exs` | ❌ W0 | ✅ green |
+| MTR-01 | `Billing.Meter.event_summaries/3,4` absent (stripe-java#1852 lock) | unit (structural) | `mix test test/lattice_stripe/billing/meter_test.exs` | ⚠️ file exists, case ❌ W0 | ✅ green |
+| MTR-01 | live path served; three required-param 400s in order; enum rejection; served body decodes | integration | `mix test --only integration test/integration/meter_event_summary_integration_test.exs` | ❌ W0 — needs stripe-mock | ✅ green |
+| MTR-02 | D-30's nine assertions (cursor from last `mtrusg_` id; page 2 preserves all four filters; N pages = N calls; `Stream.take(1)` = 1 call; `stripe-account` carries; no `idempotency-key` on page 2; page-2 path = response `url`; page-2 500 raises `LatticeStripe.Error`; `_last_id` derived before typing) | unit (Mox, multi-page) | `mix test test/lattice_stripe/billing/meter_event_summary_pagination_test.exs` | ❌ W0 | ✅ green |
+| MTR-03 | `from_map/1` decodes verbatim published payload incl. `developer_message_summary`, `validation_start`, `validation_end` (N-01) | unit (pure) | `mix test test/lattice_stripe/billing/meter_error_report_test.exs` | ❌ W0 | ✅ green |
+| MTR-03 | `request_identifier` resolves (the join key); also resolves from legacy `%{"idempotency_key" => …}` shape | unit (pure) | same | ❌ W0 | ✅ green |
+| MTR-03 | `assert is_binary(code)` — encodes D-18's no-atomization decision | unit (pure) | same | ❌ W0 | ✅ green |
+| MTR-03 | `refute Map.has_key?(struct, :id)` / `:object` / `:livemode` (encodes D-17) | unit (structural) | same | ❌ W0 | ✅ green |
+| MTR-03 | missing `error_types` → `[]` not `nil` (D-19) | unit (pure) | same | ❌ W0 | ✅ green |
+| MTR-03 | `sample_errors: []` with `error_count: 900` still decodes (real high-volume shape) | unit (pure) | same | ❌ W0 | ✅ green |
+| MTR-03 | `from_map(data).meter == nil` while `from_event/1` populates it (D-16 as asserted contract) | unit (pure) | same | ❌ W0 | ✅ green |
+| MTR-03 | a `no_meter_found`-shaped event with `related_object: nil` decodes (F-17/N-06) | unit (pure) | same | ❌ W0 | ✅ green |
+| MTR-03 | `list/2,3`, `retrieve/2,3`, `create/2,3` absent; `from_map/1` + `from_event/1` present | unit (structural) | same | ❌ W0 | ✅ green |
+| MTR-03 | `ObjectTypes` has no `billing.meter_error_report` key (D-14/D-31) | unit (structural) | `mix test test/lattice_stripe/object_types_test.exs` | ⚠️ file exists, case ❌ W0 | ✅ green |
+| MTR-04 | exact-body round-trip: three custom dimensions + decimal-string value | unit | `mix test test/lattice_stripe/form_encoder_test.exs` | ⚠️ file exists (27 tests, zero float/decimal), cases ❌ W0 | ✅ green |
+| MTR-04 | `encode(%{"v" => 0.00001}) == "v=1.0e-5"` — locks known behavior so the doc warning cannot silently become false | unit | same | ❌ W0 | ✅ green |
+| MTR-04 | `MeterEvent.create/3` does not filter `payload` keys | unit (Mox at transport, assert `req.body`) | `mix test test/lattice_stripe/billing/meter_event_test.exs` | ⚠️ file exists, case ❌ W0 | ✅ green |
+| MTR-04 | flat dimensions → 200 **and** nested payload → 400 (only proof of the Stripe-side half; would have caught F-20.2) | integration | `mix test --only integration` | ❌ W0 — needs stripe-mock | ✅ green |
+| MTR-04 | ExDoc **placement** assertion extended to Phase 64's five new modules (D-26's structural exception) | unit (config) | `mix test test/lattice_stripe/docs_truth_test.exs` | ⚠️ file exists, case ❌ W0 | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -116,11 +116,11 @@ integration tests ran. stripe-mock is confirmed **not currently running** (Docke
 
 ## Wave 0 Requirements
 
-- [ ] `test/lattice_stripe/billing/meter_event_summary_test.exs` — MTR-01 (surface, guards, `from_map`, refutations)
-- [ ] `test/lattice_stripe/billing/meter_event_summary_pagination_test.exs` — MTR-02 (D-30's nine assertions)
-- [ ] `test/lattice_stripe/billing/meter_error_report_test.exs` — MTR-03 (pure, no transport)
-- [ ] `test/integration/meter_event_summary_integration_test.exs` — MTR-01 wire behavior + MTR-04's nested-payload 400
-- [ ] `test/support/fixtures/` — a metering fixture module seeded from the **verbatim published payload**
+- [x] `test/lattice_stripe/billing/meter_event_summary_test.exs` — MTR-01 (surface, guards, `from_map`, refutations)
+- [x] `test/lattice_stripe/billing/meter_event_summary_pagination_test.exs` — MTR-02 (D-30's nine assertions)
+- [x] `test/lattice_stripe/billing/meter_error_report_test.exs` — MTR-03 (pure, no transport)
+- [x] `test/integration/meter_event_summary_integration_test.exs` — MTR-01 wire behavior + MTR-04's nested-payload 400
+- [x] `test/support/fixtures/` — a metering fixture module seeded from the **verbatim published payload**
       (D-32), carrying the `PROMOTION TARGET (Phase 65)` header comment cloned from
       `test/support/fixtures/entitlements.ex`
 - [ ] New cases in existing files: `guards_test.exs` / `meter_guards_test.exs` (GUARD-04 matrix),
@@ -147,10 +147,10 @@ integration tests ran. stripe-mock is confirmed **not currently running** (Docke
 
 - [ ] All tasks have `<automated>` verify or Wave 0 dependencies
 - [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 3s
-- [ ] Integration suite run explicitly against a running stripe-mock (not inferred from a green `mix test`)
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 3s (full suite 2.6s)
+- [x] Integration suite run explicitly against a running stripe-mock (not inferred from a green `mix test`)
+- [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
