@@ -140,7 +140,7 @@
 **Wave 4** *(blocked on Wave 3 completion)*
 
 - [ ] 64-07-PLAN.md — `guides/metering.md`: "Reading usage back", "The payload contract", and six corrections to false prose (Wave 4)
-- [ ] 64-09-PLAN.md — stripe-mock integration suite, ExDoc placement locks, clear the two metering docs warnings (Wave 4)
+- [x] 64-09-PLAN.md — stripe-mock integration suite, ExDoc placement locks, clear the two metering docs warnings (Wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
