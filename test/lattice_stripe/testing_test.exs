@@ -4,6 +4,7 @@ defmodule LatticeStripe.TestingTest do
   alias LatticeStripe.{
     Billing,
     CreditNote,
+    Customer,
     Dispute,
     Entitlements,
     Event,
@@ -11,8 +12,10 @@ defmodule LatticeStripe.TestingTest do
     File,
     FileLink,
     Mandate,
+    PaymentIntent,
     Quote,
     SetupAttempt,
+    Subscription,
     Testing,
     Webhook
   }
@@ -68,6 +71,46 @@ defmodule LatticeStripe.TestingTest do
       overridden = Fixtures.MeterEventSummary.basic(%{"aggregated_value" => 99.0})
       assert overridden["aggregated_value"] == 99.0
       assert overridden["object"] == "billing.meter_event_summary"
+    end
+
+    test "promoted core-billing builders are callable at arity 0 (OBJ-03 empty-input edge)" do
+      # Q2 = move-and-rename: these three moved out of test/support/ with no private twin,
+      # and Subscription's base builder is `subscription_json/1`, NOT `basic/1` — the name
+      # is semver-covered public API from the Hex 1.8.0 tag onward.
+      assert is_map(Fixtures.Customer.customer_json())
+      assert is_map(Fixtures.PaymentIntent.payment_intent_json())
+      assert is_map(Fixtures.Subscription.subscription_json())
+      assert is_map(Fixtures.Subscription.with_items())
+      assert is_map(Fixtures.Subscription.paused())
+      assert is_map(Fixtures.Subscription.canceled())
+    end
+
+    test "core-billing builder overrides win over the canonical value" do
+      overridden = Fixtures.Customer.customer_json(%{"email" => "override@example.com"})
+      assert overridden["email"] == "override@example.com"
+      assert overridden["object"] == "customer"
+    end
+
+    test "OBJ-03 ordering edge: a caller override beats both the variant and the base" do
+      # with_items/1 composes on subscription_json/1, and each layer is a Map.merge where
+      # the LAST map wins. The caller's map is merged into the variant's map before that
+      # result reaches the base, so a caller key must beat:
+      #   (a) the variant's own key      -> "items", set by with_items/1
+      #   (b) the base canonical value   -> "status", set by subscription_json/1
+      # If either assertion flips, the composition chain has been reordered and callers
+      # silently lose the ability to override.
+      overridden =
+        Fixtures.Subscription.with_items(%{
+          "items" => %{"object" => "list", "data" => [], "has_more" => false},
+          "status" => "past_due"
+        })
+
+      assert overridden["items"]["data"] == []
+      assert overridden["status"] == "past_due"
+
+      # Un-overridden keys from both layers still come through.
+      assert overridden["object"] == "subscription"
+      assert Fixtures.Subscription.with_items()["items"]["data"] |> length() == 2
     end
   end
 
@@ -316,6 +359,17 @@ defmodule LatticeStripe.TestingTest do
 
       assert %Billing.MeterEventSummary{id: "mtrusg_123"} =
                Testing.meter_event_summary(Fixtures.MeterEventSummary.basic())
+    end
+
+    test "return typed core-billing structs from the promoted public fixtures" do
+      assert %Customer{id: "cus_test1234567890"} =
+               Testing.customer(Fixtures.Customer.customer_json())
+
+      assert %PaymentIntent{id: "pi_test1234567890abc"} =
+               Testing.payment_intent(Fixtures.PaymentIntent.payment_intent_json())
+
+      assert %Subscription{id: "sub_test1234567890"} =
+               Testing.subscription(Fixtures.Subscription.subscription_json())
     end
 
     test "keep wrapper shapes explicit instead of option-driven" do

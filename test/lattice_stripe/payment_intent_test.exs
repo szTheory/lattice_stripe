@@ -3,7 +3,7 @@ defmodule LatticeStripe.PaymentIntentTest do
 
   import Mox
   import LatticeStripe.TestHelpers
-  import LatticeStripe.Test.Fixtures.PaymentIntent
+  import LatticeStripe.Testing.Fixtures.PaymentIntent
 
   alias LatticeStripe.{Error, List, PaymentIntent, Response}
 

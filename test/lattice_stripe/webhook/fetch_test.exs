@@ -5,7 +5,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
   import LatticeStripe.TestHelpers
   import LatticeStripe.Test.Fixtures.Event, only: [event_map: 1]
   import LatticeStripe.Test.Fixtures.EventNotification
-  import LatticeStripe.Test.Fixtures.Customer, only: [customer_json: 1]
+  import LatticeStripe.Testing.Fixtures.Customer, only: [customer_json: 1]
 
   alias LatticeStripe.{Customer, Error, Event, EventNotification, Webhook}
   alias LatticeStripe.EventNotification.RelatedObject

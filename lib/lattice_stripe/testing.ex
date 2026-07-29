@@ -49,6 +49,7 @@ defmodule LatticeStripe.Testing do
   alias LatticeStripe.{
     Billing,
     CreditNote,
+    Customer,
     Dispute,
     Entitlements,
     Event,
@@ -56,8 +57,10 @@ defmodule LatticeStripe.Testing do
     File,
     FileLink,
     Mandate,
+    PaymentIntent,
     Quote,
     SetupAttempt,
+    Subscription,
     Tax,
     TaxId,
     Webhook
@@ -153,6 +156,24 @@ defmodule LatticeStripe.Testing do
   """
   @spec meter_event_summary(map()) :: Billing.MeterEventSummary.t()
   def meter_event_summary(raw_map), do: Billing.MeterEventSummary.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Customer fixture map into `%LatticeStripe.Customer{}`.
+  """
+  @spec customer(map()) :: Customer.t()
+  def customer(raw_map), do: Customer.from_map(raw_map)
+
+  @doc """
+  Converts a canonical PaymentIntent fixture map into `%LatticeStripe.PaymentIntent{}`.
+  """
+  @spec payment_intent(map()) :: PaymentIntent.t()
+  def payment_intent(raw_map), do: PaymentIntent.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Subscription fixture map into `%LatticeStripe.Subscription{}`.
+  """
+  @spec subscription(map()) :: Subscription.t()
+  def subscription(raw_map), do: Subscription.from_map(raw_map)
 
   @doc """
   Converts a canonical thin-event notification fixture map into

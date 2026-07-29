@@ -1,8 +1,11 @@
-defmodule LatticeStripe.Test.Fixtures.Subscription do
-  @moduledoc false
+defmodule LatticeStripe.Testing.Fixtures.Subscription do
+  @moduledoc """
+  Canonical raw fixtures for Stripe Subscription objects.
+  """
 
   @doc "Basic active subscription with no items."
-  def basic(overrides \\ %{}) do
+  @spec subscription_json(map()) :: map()
+  def subscription_json(overrides \\ %{}) do
     Map.merge(
       %{
         "id" => "sub_test1234567890",
@@ -30,6 +33,7 @@ defmodule LatticeStripe.Test.Fixtures.Subscription do
   end
 
   @doc "Subscription with two items, each carrying an id (stripity_stripe regression guard)."
+  @spec with_items(map()) :: map()
   def with_items(overrides \\ %{}) do
     item1 = %{
       "id" => "si_test1",
@@ -51,7 +55,7 @@ defmodule LatticeStripe.Test.Fixtures.Subscription do
       "metadata" => %{}
     }
 
-    basic(
+    subscription_json(
       Map.merge(
         %{
           "items" => %{
@@ -67,8 +71,9 @@ defmodule LatticeStripe.Test.Fixtures.Subscription do
   end
 
   @doc "Paused subscription (collection paused with keep_as_draft)."
+  @spec paused(map()) :: map()
   def paused(overrides \\ %{}) do
-    basic(
+    subscription_json(
       Map.merge(
         %{
           "pause_collection" => %{
@@ -82,8 +87,9 @@ defmodule LatticeStripe.Test.Fixtures.Subscription do
   end
 
   @doc "Canceled subscription with cancellation_details."
+  @spec canceled(map()) :: map()
   def canceled(overrides \\ %{}) do
-    basic(
+    subscription_json(
       Map.merge(
         %{
           "status" => "canceled",

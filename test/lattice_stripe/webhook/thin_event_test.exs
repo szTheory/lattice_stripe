@@ -6,7 +6,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
 
   import LatticeStripe.Test.Fixtures.EventNotification, only: [event_notification_map: 0]
 
-  import LatticeStripe.Test.Fixtures.Customer, only: [customer_json: 1]
+  import LatticeStripe.Testing.Fixtures.Customer, only: [customer_json: 1]
   import LatticeStripe.Test.Fixtures.Event, only: [event_map: 1]
 
   alias LatticeStripe.{Customer, Event, EventNotification, Testing, Webhook}

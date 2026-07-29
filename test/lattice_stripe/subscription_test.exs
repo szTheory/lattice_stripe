@@ -7,7 +7,7 @@ defmodule LatticeStripe.SubscriptionTest do
   alias LatticeStripe.{Error, List, Response, Subscription}
   alias LatticeStripe.Invoice.AutomaticTax
   alias LatticeStripe.Subscription.{CancellationDetails, PauseCollection, TrialSettings}
-  alias LatticeStripe.Test.Fixtures.Subscription, as: Fixtures
+  alias LatticeStripe.Testing.Fixtures.Subscription, as: Fixtures
 
   setup :verify_on_exit!
 
@@ -21,7 +21,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
 
     test "maps basic known fields" do
-      sub = Subscription.from_map(Fixtures.basic())
+      sub = Subscription.from_map(Fixtures.subscription_json())
 
       assert sub.id == "sub_test1234567890"
       assert sub.object == "subscription"
@@ -34,7 +34,7 @@ defmodule LatticeStripe.SubscriptionTest do
     test "decodes automatic_tax via Invoice.AutomaticTax" do
       sub =
         Subscription.from_map(
-          Fixtures.basic(%{
+          Fixtures.subscription_json(%{
             "automatic_tax" => %{"enabled" => true, "status" => "complete", "liability" => nil}
           })
         )
@@ -62,7 +62,7 @@ defmodule LatticeStripe.SubscriptionTest do
     test "decodes trial_settings into a typed struct" do
       sub =
         Subscription.from_map(
-          Fixtures.basic(%{
+          Fixtures.subscription_json(%{
             "trial_settings" => %{"end_behavior" => %{"missing_payment_method" => "cancel"}}
           })
         )
@@ -89,50 +89,56 @@ defmodule LatticeStripe.SubscriptionTest do
     end
 
     test "unknown top-level fields land in :extra" do
-      sub = Subscription.from_map(Fixtures.basic(%{"future_field" => "hello"}))
+      sub = Subscription.from_map(Fixtures.subscription_json(%{"future_field" => "hello"}))
       assert sub.extra == %{"future_field" => "hello"}
     end
 
     test "atomizes status to atom" do
-      sub = Subscription.from_map(Fixtures.basic(%{"status" => "active"}))
+      sub = Subscription.from_map(Fixtures.subscription_json(%{"status" => "active"}))
       assert sub.status == :active
     end
 
     test "passes through unknown status as string" do
-      sub = Subscription.from_map(Fixtures.basic(%{"status" => "future_unknown"}))
+      sub = Subscription.from_map(Fixtures.subscription_json(%{"status" => "future_unknown"}))
       assert sub.status == "future_unknown"
     end
 
     test "handles nil status" do
-      sub = Subscription.from_map(Fixtures.basic(%{"status" => nil}))
+      sub = Subscription.from_map(Fixtures.subscription_json(%{"status" => nil}))
       assert sub.status == nil
     end
 
     test "atomizes collection_method to atom" do
       sub =
-        Subscription.from_map(Fixtures.basic(%{"collection_method" => "charge_automatically"}))
+        Subscription.from_map(
+          Fixtures.subscription_json(%{"collection_method" => "charge_automatically"})
+        )
 
       assert sub.collection_method == :charge_automatically
     end
 
     test "atomizes send_invoice collection_method to atom" do
-      sub = Subscription.from_map(Fixtures.basic(%{"collection_method" => "send_invoice"}))
+      sub =
+        Subscription.from_map(
+          Fixtures.subscription_json(%{"collection_method" => "send_invoice"})
+        )
+
       assert sub.collection_method == :send_invoice
     end
 
     test "customer field: keeps string ID when not expanded" do
-      sub = Subscription.from_map(Fixtures.basic(%{"customer" => "cus_123"}))
+      sub = Subscription.from_map(Fixtures.subscription_json(%{"customer" => "cus_123"}))
       assert sub.customer == "cus_123"
     end
 
     test "customer field: deserializes to %Customer{} when expanded" do
       expanded = %{"object" => "customer", "id" => "cus_123", "email" => "x@y.com"}
-      sub = Subscription.from_map(Fixtures.basic(%{"customer" => expanded}))
+      sub = Subscription.from_map(Fixtures.subscription_json(%{"customer" => expanded}))
       assert %LatticeStripe.Customer{id: "cus_123"} = sub.customer
     end
 
     test "customer field: handles nil" do
-      sub = Subscription.from_map(Fixtures.basic(%{"customer" => nil}))
+      sub = Subscription.from_map(Fixtures.subscription_json(%{"customer" => nil}))
       assert sub.customer == nil
     end
   end
@@ -148,7 +154,7 @@ defmodule LatticeStripe.SubscriptionTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
         assert String.ends_with?(req.url, "/v1/subscriptions")
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       assert {:ok, %Subscription{id: "sub_test1234567890"}} =
@@ -180,7 +186,7 @@ defmodule LatticeStripe.SubscriptionTest do
       client = test_client(require_explicit_proration: true)
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       params = %{
@@ -205,7 +211,7 @@ defmodule LatticeStripe.SubscriptionTest do
                  String.downcase(k) == "idempotency-key" and v == "test-ik-create"
                end)
 
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       assert {:ok, %Subscription{}} =
@@ -226,7 +232,7 @@ defmodule LatticeStripe.SubscriptionTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert String.ends_with?(req.url, "/v1/subscriptions/sub_test1234567890")
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       assert {:ok, %Subscription{id: "sub_test1234567890"}} =
@@ -245,7 +251,7 @@ defmodule LatticeStripe.SubscriptionTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
         assert String.ends_with?(req.url, "/v1/subscriptions/sub_test1234567890")
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       assert {:ok, %Subscription{}} =
@@ -269,7 +275,7 @@ defmodule LatticeStripe.SubscriptionTest do
                  String.downcase(k) == "idempotency-key" and v == "test-ik-update"
                end)
 
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       assert {:ok, %Subscription{}} =
@@ -338,7 +344,7 @@ defmodule LatticeStripe.SubscriptionTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
         assert String.ends_with?(req.url, "/v1/subscriptions/sub_test1234567890/resume")
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       assert {:ok, %Subscription{}} = Subscription.resume(client, "sub_test1234567890")
@@ -352,7 +358,7 @@ defmodule LatticeStripe.SubscriptionTest do
                  String.downcase(k) == "idempotency-key" and v == "ik-resume"
                end)
 
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       assert {:ok, %Subscription{}} =
@@ -415,7 +421,7 @@ defmodule LatticeStripe.SubscriptionTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert String.ends_with?(req.url, "/v1/subscriptions")
-        ok_response(list_json([Fixtures.basic()], "/v1/subscriptions"))
+        ok_response(list_json([Fixtures.subscription_json()], "/v1/subscriptions"))
       end)
 
       assert {:ok, %Response{data: %List{data: [%Subscription{id: "sub_test1234567890"}]}}} =
@@ -442,7 +448,7 @@ defmodule LatticeStripe.SubscriptionTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert req.url =~ "/v1/subscriptions/search"
-        ok_response(list_json([Fixtures.basic()], "/v1/subscriptions/search"))
+        ok_response(list_json([Fixtures.subscription_json()], "/v1/subscriptions/search"))
       end)
 
       assert {:ok, %Response{data: %List{}}} =
@@ -469,7 +475,7 @@ defmodule LatticeStripe.SubscriptionTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       assert %Subscription{} = Subscription.create!(client, %{"customer" => "cus_test123"})
@@ -512,7 +518,7 @@ defmodule LatticeStripe.SubscriptionTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       assert %Subscription{} = Subscription.resume!(client, "sub_test1234567890")
@@ -532,7 +538,7 @@ defmodule LatticeStripe.SubscriptionTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(list_json([Fixtures.basic()], "/v1/subscriptions"))
+        ok_response(list_json([Fixtures.subscription_json()], "/v1/subscriptions"))
       end)
 
       assert %Response{data: %List{data: [%Subscription{}]}} = Subscription.list!(client)
@@ -564,7 +570,7 @@ defmodule LatticeStripe.SubscriptionTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(list_json([Fixtures.basic()], "/v1/subscriptions"))
+        ok_response(list_json([Fixtures.subscription_json()], "/v1/subscriptions"))
       end)
 
       assert [%Subscription{id: "sub_test1234567890"}] =
@@ -601,7 +607,7 @@ defmodule LatticeStripe.SubscriptionTest do
     test "hides customer and payment_settings raw values" do
       sub =
         Subscription.from_map(
-          Fixtures.basic(%{
+          Fixtures.subscription_json(%{
             "customer" => "cus_super_secret_abcdef",
             "payment_settings" => %{
               "payment_method_options" => %{"card" => %{"request_three_d_secure" => "any"}}
@@ -637,7 +643,7 @@ defmodule LatticeStripe.SubscriptionTest do
         # Body must be a non-empty string; form encoder must not crash on weird keys.
         assert is_binary(req.body)
         refute req.body == ""
-        ok_response(Fixtures.basic())
+        ok_response(Fixtures.subscription_json())
       end)
 
       params = %{
