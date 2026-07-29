@@ -759,19 +759,19 @@ bump, and Stripe has retired one already.
 | `meter_event_invalid_value` | value rejected by Stripe's parser | YES (async) | See [The payload contract](#the-payload-contract) |
 | `meter_event_value_too_many_digits` | value exceeds Stripe's 15-digit limit | YES (async) | Round before reporting; do not send full float precision |
 | `meter_event_dimension_count_too_high` | too many payload dimension keys | YES (async) | Reduce dimensions on the reporter |
-| `missing_dimension_payload_keys` | a configured dimension key is absent from `payload` | YES (async) | Fix reporter payload keys |
+| `missing_dimension_payload_keys` | `payload` is missing a dimension key the meter expects | YES (async) | Fix reporter payload keys |
 | `no_meter` | no meter matches the `event_name` | YES (async) | Fix the `event_name`, or create the meter |
-| `archived_meter` | meter deactivated | **unverified** | Alert — data PERMANENTLY LOST |
-| `timestamp_too_far_in_past` | >35 days | **unverified** | Drop batch flush anti-pattern |
-| `timestamp_in_future` | >5 min future | **unverified** | Fix clock skew |
+| `archived_meter` | meter deactivated | YES — also sync? (unverified) | Alert — data PERMANENTLY LOST |
+| `timestamp_too_far_in_past` | >35 days | YES — also sync? (unverified) | Drop batch flush anti-pattern |
+| `timestamp_in_future` | >5 min future | YES — also sync? (unverified) | Fix clock skew |
 
-> **Why three rows say "unverified".** This guide used to classify
-> `archived_meter`, `timestamp_too_far_in_past` and `timestamp_in_future` as
-> synchronous-only `400`s. All three are also values of the asynchronous
-> error-report enum above. Both can be true at once — Stripe could return a code
-> synchronously *and* report it asynchronously — but we have not verified which,
-> so the classification is marked unverified rather than restated. Handle these
-> three on **both** paths.
+> **Why three rows carry a question mark.** Every code in this table is a value of
+> the asynchronous error-report enum, so all ten can reach you asynchronously.
+> This guide additionally used to classify `archived_meter`,
+> `timestamp_too_far_in_past` and `timestamp_in_future` as synchronous-only
+> `400`s, *exclusively*. That exclusive claim is unverified — Stripe could return
+> a code synchronously and also report it asynchronously — so it is labelled here
+> rather than restated. Handle these three on **both** paths.
 
 The "Silent drop?" column is what makes this table worth reading. An asynchronous
 failure means usage was silently not recorded against the customer, so it affects
