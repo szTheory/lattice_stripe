@@ -5,15 +5,15 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 65
 current_phase_name: webhook-objecttypes-testing-fixtures
 status: executing
-stopped_at: Completed 65-02-PLAN.md
-last_updated: "2026-07-29T02:31:50.116Z"
+stopped_at: Completed 65-04-PLAN.md
+last_updated: "2026-07-29T02:40:13.035Z"
 last_activity: 2026-07-29
 last_activity_desc: Phase 65 execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 25
-  completed_plans: 21
+  completed_plans: 22
   percent: 75
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 65 (webhook-objecttypes-testing-fixtures) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-07-29 -- Phase 65 execution started
 
@@ -68,6 +68,7 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 | Phase 64 P04 | 21min | 3 tasks | 8 files |
 | Phase 65 P01 | 5min | 2 tasks | 12 files |
 | Phase 65 P02 | 7min | 2 tasks | 15 files |
+| Phase 65 P04 | 4min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,9 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 - [Phase ?]: [65-02] Meter, MeterEventAdjustment and MeterEventStreamSession stay PRIVATE in test/support/fixtures/metering.ex — no requirement names them, so semver surface grows only where OBJ-01/OBJ-02 require. No Testing.Fixtures.Metering namespace exists; zero depth-4 public fixture names.
 - [Phase ?]: [65-02] The Phase-64 in-source nested-promotion header on metering.ex was SUPERSEDED and replaced with a note recording flat-three, not deleted silently.
 - [Phase ?]: [65-02] Promoted fixtures need 'as: <Object>Fixture' aliases in callers: the flat name collides with the LatticeStripe.Billing struct alias already in the same test module.
+- [Phase ?]: Registered exactly three registry rows; billing.meter_error_report stays out — its v2 thin-event payload has no "object" key so the row would be a dead key (Phase 64 F-13/D-14)
+- [Phase ?]: No map_size count assertion on @object_map — brittle against Phase 66's product.feature row; per-key fetch_module/1 assertions cover it instead
+- [Phase ?]: Open question Q3 resolved NO: meter_event.ex gets no @known_fields, since from_map/1 never consults it and a decorative attribute would read as load-bearing
 
 ### Blockers/Concerns
 
@@ -143,8 +147,8 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 
 ## Session Continuity
 
-**Last session:** 2026-07-29T02:31:50.103Z
-**Stopped at:** Completed 65-02-PLAN.md
+**Last session:** 2026-07-29T02:40:04.104Z
+**Stopped at:** Completed 65-04-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`

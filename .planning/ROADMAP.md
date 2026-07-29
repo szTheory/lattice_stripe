@@ -163,7 +163,7 @@
   4. Public `Testing.Fixtures` exist for core billing objects — subscription, invoice, customer, payment_intent.
 
 **Build constraints**: Register in `lib/lattice_stripe/object_types.ex` (`billing.meter_event` module already exists — registrable as-is). Each key → a module with `from_map/1`; the `active_entitlement_summary` key must tolerate the missing `id`. Follow existing `LatticeStripe.Testing` fixture patterns (e.g. `dispute/1`, `customer/1`). Phase 63's `test/support/fixtures/entitlements.ex` is a promotion target: move it to `lib/lattice_stripe/testing/fixtures/entitlements.ex` **and** rename the module from `LatticeStripe.Test.Fixtures.Entitlements` to `LatticeStripe.Testing.Fixtures.Entitlements` — this is a move *plus* a module rename, because the private test-support namespace (`LatticeStripe.Test.Fixtures.*`) differs from the public one (`LatticeStripe.Testing.Fixtures.*`) and a literal file move alone produces a compile error; carry the four function names (`active_entitlement_json/1`, `active_entitlement_summary_json/1`, `feature_json/1`, `active_entitlement_list_json/2`) and their bodies over unchanged rather than re-authoring them.
-**Plans**: 2/6 plans executed
+**Plans**: 3/6 plans executed
 
 Plans:
 **Wave 1**
@@ -177,7 +177,7 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [ ] 65-03-PLAN.md — core-billing fixture promotion (customer, payment_intent, subscription); opens with the Q2 one-way `checkpoint:decision` on move-vs-duplicate (Wave 3)
-- [ ] 65-04-PLAN.md — remaining three `@object_map` rows + OBJ-01 completion; verifies the two Phase 64 locks (Wave 3)
+- [x] 65-04-PLAN.md — remaining three `@object_map` rows + OBJ-01 completion; verifies the two Phase 64 locks (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -227,7 +227,7 @@ Plans:
 | 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
 | 63. Stripe-Native Entitlements | v1.10 | 7/7 | Complete    | 2026-07-28 |
 | 64. Meter Event-Summary Reads | v1.10 | 10/10 | Complete    | 2026-07-28 |
-| 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 2/6 | In Progress|  |
+| 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 3/6 | In Progress|  |
 | 66. Product ↔ Feature Attachment | v1.10 | 0/? | Not started | - |
 | 67. DX Hardening & Milestone Doc Close | v1.10 | 0/? | Not started | - |
 
