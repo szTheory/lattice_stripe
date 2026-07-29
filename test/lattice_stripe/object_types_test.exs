@@ -70,6 +70,24 @@ defmodule LatticeStripe.ObjectTypesTest do
       assert %LatticeStripe.Billing.MeterEvent{event_name: "api_call"} = result
     end
 
+    test "a deserialized meter event keeps its payload masked in inspect/1 output" do
+      # T-65-02. Registering "billing.meter_event" is precisely what lets this struct
+      # reach adopter Logger output, crash dumps and telemetry handlers, and its payload
+      # carries the customer-mapping key plus the metered value. The custom
+      # `defimpl Inspect` in lib/lattice_stripe/billing/meter_event.ex allowlists
+      # structural fields only; deleting it would silently start leaking both.
+      result = ObjectTypes.maybe_deserialize(MeterEventFixture.basic())
+      rendered = inspect(result)
+
+      refute rendered =~ "cus_test_123"
+      refute rendered =~ "stripe_customer_id"
+      refute rendered =~ "payload"
+
+      # Structural fields must still be visible — masking, not blanket redaction.
+      assert rendered =~ "api_call"
+      assert rendered =~ "req_abc"
+    end
+
     test "dispatches the public meter event summary fixture to MeterEventSummary.from_map/1" do
       map = MeterEventSummaryFixture.basic()
       result = ObjectTypes.maybe_deserialize(map)
