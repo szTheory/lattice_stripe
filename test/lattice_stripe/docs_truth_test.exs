@@ -581,6 +581,30 @@ defmodule LatticeStripe.DocsTruthTest do
     assert feature =~ "immutable"
   end
 
+  test "metering guide and the Phase 64 metering modules keep their ExDoc placement" do
+    docs = docs_config()
+    groups = docs[:groups_for_extras] |> Map.new()
+
+    # Both halves of the registration: a guide listed in a group but absent from
+    # extras is silently dropped from the build, so neither assertion is
+    # redundant. The guide gained major new sections this phase and a silent drop
+    # would take them with it.
+    assert "guides/metering.md" in docs[:extras]
+    assert "guides/metering.md" in groups["Canonical Guides"]
+
+    # A module absent from its group is silently dropped from the published docs,
+    # so an adopter reading HexDocs would never learn these exist. Structural
+    # assertion only — this is the sole docs-truth addition this phase, and
+    # deliberately not a prose grep.
+    metering_group = docs[:groups_for_modules][:"Billing Metering"]
+
+    assert LatticeStripe.Billing.MeterEventSummary in metering_group
+    assert LatticeStripe.Billing.MeterErrorReport in metering_group
+    assert LatticeStripe.Billing.MeterErrorReport.Reason in metering_group
+    assert LatticeStripe.Billing.MeterErrorReport.ErrorType in metering_group
+    assert LatticeStripe.Billing.MeterErrorReport.SampleError in metering_group
+  end
+
   test "Charge @moduledoc reflects expanded PI-first surface" do
     source = File.read!("lib/lattice_stripe/charge.ex")
 
