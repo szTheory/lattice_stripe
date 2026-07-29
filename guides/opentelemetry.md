@@ -14,7 +14,7 @@ application's `mix.exs`:
 # In your application's mix.exs
 defp deps do
   [
-    {:lattice_stripe, "~> 2.0"},
+    {:lattice_stripe, "~> 2.1"},
     # OpenTelemetry — exporter must be listed BEFORE opentelemetry
     {:opentelemetry_exporter, "~> 1.8"},
     {:opentelemetry, "~> 1.5"},
