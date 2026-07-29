@@ -40,6 +40,15 @@ v1.x is in **maintenance mode** for scope breadth: new resource families ship on
   grants access the customer did not buy. Reconcile entitlements from the summary
   webhook, gate against your own local store, and fail closed on staleness; the
   full recipe is in [Entitlements](entitlements.md).
+- **Usage reads grouped by a custom dimension:** on the generally available API you
+  cannot read usage back grouped by a custom dimension. Dimensions are **write-only**
+  today — Stripe stores them and offers no way to group by them: the summary object has
+  no dimensions field, a group-by parameter on the read is rejected, declaring dimension
+  keys at meter creation is rejected, and Stripe's canonical meter-configuration
+  documentation does not mention dimensions at all. Dimension grouping exists only in
+  preview surfaces. The workarounds are one meter per dimension value, or your own event
+  store alongside Stripe's; choose before you design the payload. See
+  [The payload contract](metering.md#the-payload-contract).
 
 ## Tax note
 
@@ -67,7 +76,7 @@ resource-family breadth in v1.x absent fresh adopter pull.
 
 ## Public documentation
 
-Adopter-facing docs are **[README](../README.md)** and **[HexDocs](https://hexdocs.pm/lattice_stripe)**.
+Adopter-facing docs are **[README](https://github.com/szTheory/lattice_stripe#readme)** and **[HexDocs](https://hexdocs.pm/lattice_stripe)**.
 There is no separate project website — ExDoc already publishes the guides in this repo.
 
 ## Requesting coverage
