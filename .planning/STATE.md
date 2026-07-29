@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 65
-current_phase_name: Webhook ObjectTypes & Testing Fixtures
-status: planned
-stopped_at: Phase 65 planned (6 plans / 5 waves, plan-checker PASSED 0 blockers 0 warnings)
-last_updated: "2026-07-28T23:50:24.165Z"
-last_activity: 2026-07-28
-last_activity_desc: "Phase 64 COMPLETE — 10/10 plans across 6 waves. D-29 differential gate green on all five steps (2305 tests / 0 failures; mix docs exit 0 at 38 warnings; zero warnings matching 'meter'); integration suite explicitly run against stripe-mock (10 tests, 0 excluded); mix.lock and object_types.ex verified unchanged against the PRE-PHASE commit a22e197. Operator sign-off approved, no issues. Shipped on PR #46 (draft) with all 12 CI checks green. ExDoc warning baseline moved 42 -> 40 -> 38, downward both times and required by plan criteria — later phases must gate against 38, not 42."
+current_phase_name: webhook-objecttypes-testing-fixtures
+status: executing
+stopped_at: Completed 65-01-PLAN.md
+last_updated: "2026-07-29T02:21:08.377Z"
+last_activity: 2026-07-29
+last_activity_desc: Phase 65 execution started
 progress:
-  total_phases: 7
+  total_phases: 4
   completed_phases: 3
   total_plans: 25
-  completed_plans: 19
-  percent: 43
+  completed_plans: 20
+  percent: 75
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 65 — webhook-objecttypes-and-testing-fixtures (planned, 6 plans across 5 waves)
+**Current focus:** Phase 65 — webhook-objecttypes-testing-fixtures
 
 ## Current Position
 
-Phase: 65 (webhook-objecttypes-and-testing-fixtures) — PLANNED
-Plan: 0 of 6 — Phase 64 closed at 10/10
-Status: Ready to execute (`/gsd-execute-phase 65`). Plans passed the checker with 0 blockers / 0 warnings (issue count 4 → 3 → 0 across two revision iterations). **Execution will halt at two blocking operator checkpoints** — Q1 at the top of 65-02 (metering fixture shape) and Q2 at the top of 65-03 (move-vs-duplicate + the `Subscription.basic/1` rename); both are one-way public-API doors that lock on the Hex 1.8.0 tag.
-Last activity: 2026-07-28 — **Phase 65 planned.** 6 plans / 5 waves, research + patterns + validation strategy written, plan-checker PASSED. No CONTEXT.md was captured (discuss-phase was not run); plans were grounded on the ROADMAP build constraints plus Phase 63/64 CONTEXT.
+Phase: 65 (webhook-objecttypes-testing-fixtures) — EXECUTING
+Plan: 2 of 6
+Status: Ready to execute
+Last activity: 2026-07-29 -- Phase 65 execution started
 
 **Carry-forward for Phase 65 and later:**
 
@@ -41,6 +41,7 @@ Last activity: 2026-07-28 — **Phase 65 planned.** 6 plans / 5 waves, research 
   1. `test/lattice_stripe/client_test.exs:912` — retry telemetry asserts `metadata.attempts == 2`, intermittently reads `1` (~1 in 20). Suspected globally-attached `:telemetry` handler in an `async: true` test catching another test's stop event.
   2. `test/lattice_stripe/batch_test.exs:72` — error-isolation test asserts one `{:ok, _}` slot, intermittently gets 2 (~1 in 30): the task meant to fail succeeds. **Proven pre-existing** by reproducing it on the pre-phase commit `a22e197` in a clean worktree with none of Phase 64's code present, and by `git diff` showing Phase 64 touched no Batch file.
   Combined, the suite has roughly a 1-in-12 chance of a spurious red on any given full run. Worth fixing before it erodes trust in CI.
+
 - **`guides/getting-started.md` carries the same broken `../README.md` link** 64-08 repaired in `scope.md` (2 of the remaining 38 warnings). One-line follow-up.
 - **Anchor form correction:** the metering guide's Rule 4 heading renders `rule-4-dimensions-are-write-only-on-the-generally-available-api` — **single** hyphen. Earmark collapses the em-dash separator; a double-hyphen form does not exist.
 - **`mix ci` remains RED at clean HEAD** on the surviving 38 warnings (its final step is `docs --warnings-as-errors`, while CI's Quality lane runs plain `mix docs`, `ci.yml:254`). Clearing them is Phase 67-shaped work. Do not use `mix ci` as a phase gate until then.
@@ -65,6 +66,7 @@ Last activity: 2026-07-28 — **Phase 65 planned.** 6 plans / 5 waves, research 
 | Phase 63 P06 | 6min | 2 tasks | 3 files |
 | Phase 63 P07 | 12min | 2 tasks | 3 files |
 | Phase 64 P04 | 21min | 3 tasks | 8 files |
+| Phase 65 P01 | 5min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -107,6 +109,11 @@ Last activity: 2026-07-28 — **Phase 65 planned.** 6 plans / 5 waves, research 
 - [Phase ?]: 64-04: v2 validation timestamps confirmed RFC3339 strings against the live Stripe reference (RESEARCH A3 settled) — MeterErrorReport types validation_start/end as String.t()
 - [Phase ?]: 64-04: MeterErrorReport.from_event/1 raises a directive ArgumentError on a data-less event rather than a bare BadMapError — the delivered-webhook-body trap
 - [Phase ?]: 64-04: ExDoc references to @moduledoc-false modules (LatticeStripe.ObjectTypes) must be plain prose, not backticked autolinks — they add warnings past the 42 baseline
+- [Phase ?]: [65-01] The test/support/ -> lib/ fixture promotion is proven: git mv + module rename Test.Fixtures->Testing.Fixtures + real @moduledoc + one @spec per builder + mix.exs groups_for_modules[:Testing] + guide bullet + caller alias retargets, ALL in one commit, gated by MIX_ENV=prod mix compile (exit 0). 65-02/65-03/65-05 repeat this recipe.
+- [Phase ?]: [65-01] active_entitlement_list_json/2 stays in-module — LatticeStripe.TestHelpers.list_json/3 lives in test/support/ and is unreachable from lib/; calling it compiles in :test and fails MIX_ENV=prod mix compile (RESEARCH Pitfall 3)
+- [Phase ?]: [65-01] @object_map is now 49 rows (was 48); "entitlements.active_entitlement" appended at the family-grouped tail, NOT alphabetically — the map is only roughly alphabetical through "transfer_reversal" and mix format never reorders map keys. 65-04 takes it to 52.
+- [Phase ?]: [65-01] Fully-qualified nested calls in tests trip mix credo --strict Design.AliasUsage — alias the promoted fixture at the top of the test module (the MeterErrorReportFixture convention); expansion plans should alias from the start
+- [Phase ?]: [65-01] ExDoc warning count held at the 38 baseline with 0 matching entitlement|meter|testing|fixture — the differential docs gate stays usable for the rest of Phase 65
 
 ### Blockers/Concerns
 
@@ -131,8 +138,8 @@ Last activity: 2026-07-28 — **Phase 65 planned.** 6 plans / 5 waves, research 
 
 ## Session Continuity
 
-**Last session:** 2026-07-28T23:50:24.148Z
-**Stopped at:** Completed 64-04-PLAN.md
+**Last session:** 2026-07-29T02:20:52.536Z
+**Stopped at:** Completed 65-01-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
