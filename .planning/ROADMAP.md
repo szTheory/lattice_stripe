@@ -134,7 +134,7 @@
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 64-05-PLAN.md — GUARD-04 `check_summary_window!/2`, its two call sites, and the alignment matrix (Wave 3)
+- [x] 64-05-PLAN.md — GUARD-04 `check_summary_window!/2`, its two call sites, and the alignment matrix (Wave 3)
 - [ ] 64-06-PLAN.md — D-30's nine pagination assertions, two of them mutation-checked (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
