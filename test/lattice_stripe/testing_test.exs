@@ -11,6 +11,7 @@ defmodule LatticeStripe.TestingTest do
     EventNotification,
     File,
     FileLink,
+    Invoice,
     Mandate,
     PaymentIntent,
     Quote,
@@ -111,6 +112,29 @@ defmodule LatticeStripe.TestingTest do
       # Un-overridden keys from both layers still come through.
       assert overridden["object"] == "subscription"
       assert Fixtures.Subscription.with_items()["items"]["data"] |> length() == 2
+    end
+
+    test "the authored invoice builder is callable at arity 0 (OBJ-03 empty-input edge)" do
+      # Invoice is the one OBJ-03 fixture with no prior source anywhere — it was authored,
+      # not promoted. Q2 = move-and-rename fixes the builder name as `invoice_json/1`.
+      assert is_map(Fixtures.Invoice.invoice_json())
+    end
+
+    test "OBJ-03 empty edge: the default invoice carries an EMPTY lines envelope" do
+      # The empty collection is the canonical default, not an unfilled placeholder. A
+      # populated default would silently change what every `lines` assertion means, and
+      # callers who want line items pass them explicitly as an override.
+      lines = Fixtures.Invoice.invoice_json()["lines"]
+
+      assert lines["object"] == "list"
+      assert lines["data"] == []
+      assert lines["has_more"] == false
+    end
+
+    test "invoice builder overrides win over the canonical value" do
+      overridden = Fixtures.Invoice.invoice_json(%{"status" => "paid"})
+      assert overridden["status"] == "paid"
+      assert overridden["object"] == "invoice"
     end
   end
 
@@ -370,6 +394,11 @@ defmodule LatticeStripe.TestingTest do
 
       assert %Subscription{id: "sub_test1234567890"} =
                Testing.subscription(Fixtures.Subscription.subscription_json())
+    end
+
+    test "return a typed Invoice struct from the authored public fixture" do
+      assert %Invoice{id: "in_test1234567890"} =
+               Testing.invoice(Fixtures.Invoice.invoice_json())
     end
 
     test "keep wrapper shapes explicit instead of option-driven" do

@@ -56,6 +56,7 @@ defmodule LatticeStripe.Testing do
     EventNotification,
     File,
     FileLink,
+    Invoice,
     Mandate,
     PaymentIntent,
     Quote,
@@ -174,6 +175,12 @@ defmodule LatticeStripe.Testing do
   """
   @spec subscription(map()) :: Subscription.t()
   def subscription(raw_map), do: Subscription.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Invoice fixture map into `%LatticeStripe.Invoice{}`.
+  """
+  @spec invoice(map()) :: Invoice.t()
+  def invoice(raw_map), do: Invoice.from_map(raw_map)
 
   @doc """
   Converts a canonical thin-event notification fixture map into

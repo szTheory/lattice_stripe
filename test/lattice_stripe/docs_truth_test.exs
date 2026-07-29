@@ -633,6 +633,20 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ "subscription/1"
   end
 
+  test "the authored Invoice fixture keeps its ExDoc placement and guide mention" do
+    docs = docs_config()
+
+    # A module absent from its group is silently dropped from the published docs, so an
+    # adopter reading HexDocs would never learn the fixture exists — authoring it into
+    # lib/ would buy nothing. Structural, not decorative.
+    testing_group = docs[:groups_for_modules][:Testing]
+    assert LatticeStripe.Testing.Fixtures.Invoice in testing_group
+
+    guide = File.read!("guides/testing.md")
+    assert guide =~ "LatticeStripe.Testing.Fixtures.Invoice"
+    assert guide =~ "invoice/1"
+  end
+
   test "metering guide and the Phase 64 metering modules keep their ExDoc placement" do
     docs = docs_config()
     groups = docs[:groups_for_extras] |> Map.new()

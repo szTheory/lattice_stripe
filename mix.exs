@@ -256,6 +256,7 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Testing.Fixtures.Customer,
             LatticeStripe.Testing.Fixtures.PaymentIntent,
             LatticeStripe.Testing.Fixtures.Subscription,
+            LatticeStripe.Testing.Fixtures.Invoice,
             LatticeStripe.Testing.TestClock,
             LatticeStripe.Testing.TestClock.Owner,
             LatticeStripe.Testing.TestClock.Error
