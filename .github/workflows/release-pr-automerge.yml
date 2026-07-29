@@ -64,7 +64,7 @@ jobs:
           fi
 
       - name: Verify ci-gate succeeded on target SHA
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const sha = '${{ steps.target.outputs.sha }}';

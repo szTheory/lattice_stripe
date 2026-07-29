@@ -65,7 +65,7 @@ jobs:
           fi
 
       - name: Verify CI is green on release SHA
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const sha = '${{ steps.validate.outputs.sha }}';
