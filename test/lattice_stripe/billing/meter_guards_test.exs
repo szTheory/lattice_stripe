@@ -1,7 +1,13 @@
 defmodule LatticeStripe.Billing.MeterGuardsTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureLog
+  import Mox
+  import LatticeStripe.TestHelpers
   alias LatticeStripe.Billing.Guards
+  alias LatticeStripe.Billing.MeterEventSummary
+  alias LatticeStripe.Test.Fixtures.Metering
+
+  setup :verify_on_exit!
 
   describe "check_meter_value_settings!/1 — 8-case matrix from CONTEXT D-01" do
     test "1. sum + no value_settings → :ok" do
@@ -310,6 +316,124 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
       refute function_exported?(Guards, :align_window, 1)
       refute function_exported?(Guards, :align_window, 2)
       refute function_exported?(Guards, :check_summary_window!, 1)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # GUARD-04 wiring — the guard as MeterEventSummary.list/4 and stream!/4 use it.
+  #
+  # No Mox expectation is set anywhere in the raising tests below. `verify_on_exit!`
+  # therefore proves the raise happened pre-network: had the request escaped,
+  # MockTransport would have raised "no expectation defined" instead.
+  # ---------------------------------------------------------------------------
+
+  @meter_id "mtr_123"
+
+  # Day-aligned, so it satisfies all three divisors and only the deliberately
+  # perturbed value below is ever the reason a call raises.
+  @aligned_window %{
+    "customer" => "cus_1",
+    "start_time" => 1_753_660_800,
+    "end_time" => 1_753_747_200
+  }
+
+  describe "GUARD-04 wired into MeterEventSummary" do
+    test "list/4 raises on a misaligned window, naming list/4, before any request" do
+      params = %{@aligned_window | "start_time" => 1_753_660_801}
+
+      err =
+        assert_raise ArgumentError, fn ->
+          MeterEventSummary.list(test_client(), @meter_id, params)
+        end
+
+      assert err.message =~ "LatticeStripe.Billing.MeterEventSummary.list/4"
+      assert err.message =~ "start_time 1753660801"
+    end
+
+    # The stream is NOT consumed here, and that is the assertion. `Stream.resource/3`
+    # defers its start function, so a guard placed after the stream's construction
+    # would raise only on the first `Enum` step — and a test that enumerated would
+    # pass either way, proving the wrong thing.
+    test "stream!/4 raises at call time on a misaligned window, naming stream!/4" do
+      params = %{@aligned_window | "start_time" => 1_753_660_801}
+
+      err =
+        assert_raise ArgumentError, fn ->
+          MeterEventSummary.stream!(test_client(), @meter_id, params)
+        end
+
+      assert err.message =~ "LatticeStripe.Billing.MeterEventSummary.stream!/4"
+      refute err.message =~ "list/4"
+    end
+
+    test "the hour window is enforced through list/4 as well as through the guard directly" do
+      params =
+        @aligned_window
+        |> Map.put("value_grouping_window", "hour")
+        |> Map.put("start_time", 1_753_660_800 + 60)
+
+      err =
+        assert_raise ArgumentError, fn ->
+          MeterEventSummary.list(test_client(), @meter_id, params)
+        end
+
+      assert err.message =~ "UTC hour boundary"
+    end
+
+    # Ordering: the alignment guard is the LAST of the five pre-network raises, so
+    # a caller who got two things wrong hears about the more fundamental one.
+    test "the meter id is checked before the window alignment" do
+      params = %{@aligned_window | "start_time" => 1_753_660_801}
+
+      assert_raise ArgumentError,
+                   "LatticeStripe.Billing.MeterEventSummary.list/4 requires a non-empty meter id",
+                   fn -> MeterEventSummary.list(test_client(), nil, params) end
+    end
+
+    test "a missing required filter is reported before the window alignment" do
+      params =
+        @aligned_window
+        |> Map.delete("customer")
+        |> Map.put("start_time", 1_753_660_801)
+
+      assert_raise ArgumentError,
+                   "LatticeStripe.Billing.MeterEventSummary.list/4 requires a customer param",
+                   fn -> MeterEventSummary.list(test_client(), @meter_id, params) end
+    end
+
+    test "stream!/4 reports a missing required filter before the window alignment" do
+      params =
+        @aligned_window
+        |> Map.delete("customer")
+        |> Map.put("start_time", 1_753_660_801)
+
+      assert_raise ArgumentError,
+                   "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires a customer param",
+                   fn -> MeterEventSummary.stream!(test_client(), @meter_id, params) end
+    end
+
+    test "an aligned window still reaches the transport through list/4" do
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Metering.MeterEventSummary.list_response())
+      end)
+
+      params = Map.put(@aligned_window, "value_grouping_window", "day")
+
+      assert {:ok, %LatticeStripe.Response{}} =
+               MeterEventSummary.list(test_client(), @meter_id, params)
+    end
+
+    test "an aligned window still reaches the transport through stream!/4" do
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        ok_response(Metering.MeterEventSummary.list_response())
+      end)
+
+      params = Map.put(@aligned_window, "value_grouping_window", "day")
+
+      assert [%MeterEventSummary{}] =
+               test_client()
+               |> MeterEventSummary.stream!(@meter_id, params)
+               |> Enum.to_list()
     end
   end
 
