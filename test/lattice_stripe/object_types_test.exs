@@ -4,6 +4,8 @@ defmodule LatticeStripe.ObjectTypesTest do
   alias LatticeStripe.ObjectTypes
   alias LatticeStripe.Testing.Fixtures.Entitlements, as: EntitlementsFixture
   alias LatticeStripe.Testing.Fixtures.MeterErrorReport, as: MeterErrorReportFixture
+  alias LatticeStripe.Testing.Fixtures.MeterEvent, as: MeterEventFixture
+  alias LatticeStripe.Testing.Fixtures.MeterEventSummary, as: MeterEventSummaryFixture
 
   describe "maybe_deserialize/1" do
     test "returns nil for nil input" do
@@ -40,6 +42,46 @@ defmodule LatticeStripe.ObjectTypesTest do
       map = EntitlementsFixture.active_entitlement_json()
       result = ObjectTypes.maybe_deserialize(map)
       assert %LatticeStripe.Entitlements.ActiveEntitlement{id: "ent_123"} = result
+    end
+
+    test "dispatches the public entitlement summary fixture to ActiveEntitlementSummary.from_map/1" do
+      map = EntitlementsFixture.active_entitlement_summary_json()
+      result = ObjectTypes.maybe_deserialize(map)
+
+      assert %LatticeStripe.Entitlements.ActiveEntitlementSummary{
+               customer: "cus_ABC123customer"
+             } = result
+
+      # The refute is the point, not a leftover: Stripe's
+      # entitlements.active_entitlement_summary object has NO `id` property — not even an
+      # optional one — so the struct deliberately omits :id (Phase 63 F-02). Asserting on an
+      # :id here would raise KeyError. Do not "fix" the struct by adding the field.
+      refute Map.has_key?(result, :id)
+    end
+
+    test "dispatches the public meter event fixture to MeterEvent.from_map/1" do
+      map = MeterEventFixture.basic()
+      result = ObjectTypes.maybe_deserialize(map)
+
+      # Asserted on :event_name, NEVER on the object field — %MeterEvent{} is the EVENT-05
+      # minimal shape and has no :object key, so reading that field off the result raises
+      # KeyError, even though the wire payload carries "object" => "billing.meter_event"
+      # (which is exactly what routed it here).
+      assert %LatticeStripe.Billing.MeterEvent{event_name: "api_call"} = result
+    end
+
+    test "dispatches the public meter event summary fixture to MeterEventSummary.from_map/1" do
+      map = MeterEventSummaryFixture.basic()
+      result = ObjectTypes.maybe_deserialize(map)
+
+      # 42.5 in the pattern pins the FLOAT: `42.5 = 42` does not match, so a silent
+      # integer coercion on the read path would fail this test (F-05).
+      assert %LatticeStripe.Billing.MeterEventSummary{
+               id: "mtrusg_123",
+               aggregated_value: 42.5
+             } = result
+
+      assert is_float(result.aggregated_value)
     end
 
     test "dispatches invoice map to Invoice.from_map/1" do
@@ -242,6 +284,33 @@ defmodule LatticeStripe.ObjectTypesTest do
       assert ObjectTypes.fetch_module("tax.settings") == {:ok, LatticeStripe.Tax.Settings}
       assert ObjectTypes.fetch_module("tax.registration") == {:ok, LatticeStripe.Tax.Registration}
       assert ObjectTypes.fetch_module("tax_id") == {:ok, LatticeStripe.TaxId}
+    end
+
+    test "resolves all four Phase 65 entitlement and meter object types" do
+      # Four, not five. The fifth candidate key is deliberately absent — see the
+      # dedicated absence test above for why registering it would be a dead row.
+      assert ObjectTypes.fetch_module("entitlements.active_entitlement") ==
+               {:ok, LatticeStripe.Entitlements.ActiveEntitlement}
+
+      assert ObjectTypes.fetch_module("entitlements.active_entitlement_summary") ==
+               {:ok, LatticeStripe.Entitlements.ActiveEntitlementSummary}
+
+      assert ObjectTypes.fetch_module("billing.meter_event") ==
+               {:ok, LatticeStripe.Billing.MeterEvent}
+
+      assert ObjectTypes.fetch_module("billing.meter_event_summary") ==
+               {:ok, LatticeStripe.Billing.MeterEventSummary}
+    end
+
+    test "matches wire strings by exact bytes — no case folding, normalization, or trimming" do
+      # Lookup is Map.fetch/2 on a string-keyed map, so a near-miss key is a silently
+      # DEAD row rather than a loud failure. Pinning this is what makes a future
+      # mis-cased or space-padded registry key fail here instead of in production.
+      assert ObjectTypes.fetch_module("Billing.meter_event") == :error
+      assert ObjectTypes.fetch_module("BILLING.METER_EVENT") == :error
+      assert ObjectTypes.fetch_module(" billing.meter_event") == :error
+      assert ObjectTypes.fetch_module("billing.meter_event ") == :error
+      assert ObjectTypes.fetch_module("Entitlements.active_entitlement_summary") == :error
     end
   end
 end

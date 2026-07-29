@@ -45,12 +45,16 @@ defmodule LatticeStripe.ObjectTypes do
     "transfer" => LatticeStripe.Transfer,
     "transfer_reversal" => LatticeStripe.TransferReversal,
     "billing.meter" => LatticeStripe.Billing.Meter,
+    "billing.meter_event" => LatticeStripe.Billing.MeterEvent,
+    "billing.meter_event_summary" => LatticeStripe.Billing.MeterEventSummary,
     "billing_portal.configuration" => LatticeStripe.BillingPortal.Configuration,
     "billing_portal.session" => LatticeStripe.BillingPortal.Session,
     "checkout.session" => LatticeStripe.Checkout.Session,
     "test_helpers.test_clock" => LatticeStripe.TestHelpers.TestClock,
     "line_item" => LatticeStripe.Invoice.LineItem,
-    "entitlements.active_entitlement" => LatticeStripe.Entitlements.ActiveEntitlement
+    "entitlements.active_entitlement" => LatticeStripe.Entitlements.ActiveEntitlement,
+    "entitlements.active_entitlement_summary" =>
+      LatticeStripe.Entitlements.ActiveEntitlementSummary
   }
 
   @doc false
