@@ -65,8 +65,8 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
 
       params = %{
         "customer" => "cus_123",
-        "start_time" => 1_753_620_000,
-        "end_time" => 1_753_706_400
+        "start_time" => 1_753_660_800,
+        "end_time" => 1_753_747_200
       }
 
       resp = LatticeStripe.Billing.MeterEventSummary.list!(client, "mtr_123", params)
@@ -98,6 +98,11 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
   The most natural inputs are the ones that violate this. A subscription's
   `current_period_start` and `current_period_end` derive from its billing cycle anchor,
   so they land on an arbitrary second and are almost never aligned to anything.
+
+  `list/4` and `stream!/4` raise `ArgumentError` on a misaligned timestamp before the
+  request leaves the process, naming the offending value and the boundary it missed.
+  Stripe would answer with an HTTP 400 whose error code it does not document, so the
+  failure can be prevented but not improved after the fact.
 
   **This library will not align them for you.** Rounding changes what the query means:
   floor the start and you sweep in usage from before the period; ceil it and you drop
@@ -133,6 +138,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
   See the [Stripe Meter Event Summary API](https://docs.stripe.com/api/billing/meter-event_summary).
   """
 
+  alias LatticeStripe.Billing
   alias LatticeStripe.{Client, Request, Resource}
 
   # Exactly the seven fields Stripe's spec marks required — the object has no
@@ -192,7 +198,9 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
 
   Timestamps are Unix seconds. Stripe requires them aligned to minute boundaries
   always, to UTC hour boundaries when `value_grouping_window` is `"hour"`, and to
-  UTC day boundaries (00:00 UTC) when it is `"day"`.
+  UTC day boundaries (00:00 UTC) when it is `"day"`. A misaligned value raises
+  `ArgumentError` here too, printing the arithmetic rather than applying it — see
+  the module docs for why the choice of floor versus ceil is yours.
 
   Also supports Stripe's `limit` (default **10**, max 100) and `starting_after` /
   `ending_before` cursors. A 31-day hourly window is 744 buckets, so a bare
@@ -205,7 +213,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
   def list(%Client{} = client, meter_id, params, opts) do
     # Every raise below fires before %Request{} is constructed. Order is
     # load-bearing: first failure wins, and it is the id, then customer, then
-    # start_time, then end_time.
+    # start_time, then end_time, then window alignment.
     validate_id!(meter_id, "list/4")
 
     Resource.require_param!(
@@ -225,6 +233,11 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
       "end_time",
       "LatticeStripe.Billing.MeterEventSummary.list/4 requires an end_time param"
     )
+
+    # GUARD-04, last of the five and deliberately after the require_param! block:
+    # a missing timestamp must produce the missing-param message rather than being
+    # silently skipped by the alignment guard's non-integer hatch.
+    Billing.Guards.check_summary_window!(params, "list/4")
 
     %Request{method: :get, path: path(meter_id), params: params, opts: opts}
     |> then(&Client.request(client, &1))
@@ -276,7 +289,8 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     # These MUST be the function's literal first statements. `Stream.resource/3`
     # defers its start function, so a guard constructed lazily would not raise until
     # the stream is consumed — arbitrarily far from the caller that made the mistake.
-    # Order matches `list/4`: id, then customer, then start_time, then end_time.
+    # Order matches `list/4`: id, then customer, then start_time, then end_time,
+    # then window alignment.
     validate_id!(meter_id, "stream!/4")
 
     Resource.require_param!(
@@ -296,6 +310,10 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
       "end_time",
       "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires an end_time param"
     )
+
+    # GUARD-04, still ahead of the stream's construction for the reason above: a
+    # raise built lazily would surface at the first `Enum` step instead of here.
+    Billing.Guards.check_summary_window!(params, "stream!/4")
 
     req = %Request{method: :get, path: path(meter_id), params: params, opts: opts}
 
