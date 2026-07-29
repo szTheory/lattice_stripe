@@ -98,8 +98,8 @@ storage tier). REQUIRES a well-formed `value_settings.event_payload_key`.
 ```
 
 > **Warning:** If you use `"sum"` or `"last"` without a correct
-> `value_settings.event_payload_key`, every event you report will silently drop
-> with `meter_event_value_not_found`. `Billing.Guards.check_meter_value_settings!/1`
+> `value_settings.event_payload_key`, every event you report will silently drop in
+> the async pipeline. `Billing.Guards.check_meter_value_settings!/1`
 > raises at call time if
 > `value_settings` is missing or empty for these formulas. Fix the meter; do not
 > bypass the guard.
@@ -118,12 +118,17 @@ customer, Stripe silently drops the event (see
 ### value_settings
 
 Specifies which payload key holds the numeric usage value. Required for `"sum"`
-and `"last"` formulas. The value MUST be a numeric string (`"5"`, not `5`) —
-integers trigger `meter_event_invalid_value` and are silently dropped.
+and `"last"` formulas.
 
 ```elixir
 "value_settings" => %{"event_payload_key" => "value"}
 ```
+
+Pass that value as a decimal **string**. A plain integer is safe on the v1 path —
+`5` and `"5"` produce byte-identical request bodies — but a float is not, and the
+string form is the one that is safe everywhere. The full rules, and the table of
+what each input shape actually puts on the wire, are in
+[The payload contract](#the-payload-contract).
 
 ### Lifecycle verbs
 
@@ -142,8 +147,10 @@ Meters support three lifecycle operations beyond create:
 ```
 
 Once deactivated, any new `MeterEvent.create/3` call against that meter's
-`event_name` returns a synchronous `400` with `error_code: "archived_meter"`.
-**Data is permanently lost** — no buffer, no catch-up. Alert immediately.
+`event_name` fails with the `archived_meter` code. **Data is permanently lost** —
+no buffer, no catch-up. Alert immediately. Whether that failure reaches you
+synchronously as a `400`, asynchronously on the error-report webhook, or both, is
+unverified — see [Error codes you must handle](#error-codes-you-must-handle).
 
 ## Reporting usage (the hot path)
 
@@ -162,16 +169,29 @@ defmodule AccrueLike.UsageReporter do
   alias LatticeStripe.Billing.MeterEvent
 
   # Non-blocking: schedules a supervised task. Returns :ok immediately.
-  def report(client, event_name, customer_id, value, opts \\ []) do
+  #
+  # `value` is a decimal STRING, and `dimensions` is a flat map of extra payload
+  # keys — see "The payload contract" for why both of those are the case.
+  def report(client, event_name, customer_id, value, dimensions \\ %{}, opts \\ []) do
     event_id = Keyword.get_lazy(opts, :identifier, fn ->
       "#{event_name}:#{customer_id}:#{System.unique_integer([:positive])}"
     end)
 
+    payload =
+      Map.merge(dimensions, %{
+        "stripe_customer_id" => customer_id,
+        # Pass `value` in already as a decimal string. Do NOT call to_string/1 on
+        # a float here — that call is the float hazard, not a fix for it.
+        "value" => value
+      })
+
     Task.Supervisor.start_child(AccrueLike.TaskSupervisor, fn ->
       :telemetry.span([:accrue, :usage_report], %{event_name: event_name}, fn ->
+        # `idempotency_key:` is domain-derived on purpose: it is the only key
+        # Stripe echoes back in an async error report.
         result = MeterEvent.create(client, %{
           "event_name" => event_name,
-          "payload" => %{"stripe_customer_id" => customer_id, "value" => to_string(value)},
+          "payload" => payload,
           "identifier" => event_id
         }, idempotency_key: event_id)
 
@@ -308,8 +328,10 @@ Report usage inline (or from a supervised task) at the moment it occurs:
 def handle_api_request(conn, customer_id) do
   result = process_request(conn)
 
-  # Fire and forget — does not block the response
-  AccrueLike.UsageReporter.report(stripe_client, "api_call", customer_id, 1,
+  # Fire and forget — does not block the response.
+  # "1" is a string, and the dimensions map is flat: see The payload contract.
+  AccrueLike.UsageReporter.report(stripe_client, "api_call", customer_id, "1",
+    %{"region" => "us-west-2"},
     identifier: conn.assigns.request_id)
 
   result
@@ -678,39 +700,85 @@ later release, and this section will cover it when it does. See
 
 Most metering failure modes surface asynchronously. Stripe fires
 `v1.billing.meter.error_report_triggered` when processing errors accumulate.
-Wire it into your handler:
+
+This is a **v2 thin event**: what Stripe POSTs to your endpoint is an
+announcement, not a payload. Its body carries `id`, `type`, `created`,
+`related_object` and a `reason` — and no `data` member at all. `data` is a
+*fetched* attribute, so the handler's first move is to re-request the versioned
+event over your authenticated channel. That re-fetch is also what makes the
+payload trustworthy: the delivered body is attacker-reachable, the fetched event
+is not.
 
 ```elixir
-def handle_event(%LatticeStripe.Event{
-  type: "v1.billing.meter.error_report_triggered"} = event) do
-  report = event.data["object"]
-  MyApp.Billing.handle_meter_error(
-    report["meter"],
-    get_in(report, ["reason", "error_code"]),
-    get_in(report, ["reason", "error_count"])
-  )
-  :ok
+alias LatticeStripe.{EventNotification, Webhook}
+alias LatticeStripe.Billing.MeterErrorReport
+alias LatticeStripe.Billing.MeterErrorReport.{ErrorType, SampleError}
+
+def handle_notification(
+      %EventNotification{type: "v1.billing.meter.error_report_triggered"} = notif,
+      client
+    ) do
+  # NOT optional, and the step every adopter gets wrong: `data` is a fetched
+  # attribute — the webhook body does not contain it.
+  {:ok, event} = Webhook.fetch_event(client, notif)
+  report = MeterErrorReport.from_event(event)
+
+  for %ErrorType{code: code, sample_errors: samples} <- report.reason.error_types,
+      %SampleError{request_identifier: key, error_message: msg} <- samples do
+    MyApp.Billing.MeterEvents.mark_failed_by_idempotency_key(key, code, msg)
+  end
 end
 ```
 
-> **Note:** Keep this handler fast — log, enqueue, return `:ok`. No inline DB
-> queries or external calls.
+`report.meter` is the meter id, lifted from the event envelope — it is not in
+`data`, so only `LatticeStripe.Billing.MeterErrorReport.from_event/1` can populate
+it. `report.validation_start` and `report.validation_end` delimit the window of
+usage the report covers, and they are RFC3339 strings rather than Unix integers.
+That window is the one to re-read with
+`LatticeStripe.Billing.MeterEventSummary.list/4` when you want to see the hole the
+failures left.
+
+There are no grouping or counting helpers to reach for, deliberately: Stripe
+already groups by error type and supplies a count at both levels, so the wire
+supplies the ergonomics.
+
+> **Note:** Keep this handler fast — log, enqueue, return. No inline DB
+> queries or external calls beyond the event fetch itself.
 
 ### Error codes you must handle
 
-| `error_code` | When | Silent drop? | Remediation |
+These are the ten values of the `code` field on
+`reason.error_types[]`. Stripe documents the enum as **open**, so match on the
+binary and always keep a catch-all clause — new values arrive without a version
+bump, and Stripe has retired one already.
+
+| `code` | When | Silent drop? | Remediation |
 |---|---|---|---|
 | `meter_event_customer_not_found` | customer deleted | YES (async) | Sweep job |
 | `meter_event_no_customer_defined` | payload missing mapping key | YES (async) | Fix reporter |
-| `meter_event_invalid_value` | value not numeric | YES (async) | Fix reporter |
-| `meter_event_value_not_found` | sum/last but no value key | YES (async) | Fix payload (do not bypass value guard) |
-| `archived_meter` | meter deactivated | NO (sync 400) | Alert — data PERMANENTLY LOST |
-| `timestamp_too_far_in_past` | >35 days | NO (sync 400) | Drop batch flush anti-pattern |
-| `timestamp_in_future` | >5 min future | NO (sync 400) | Fix clock skew |
+| `meter_event_invalid_value` | value rejected by Stripe's parser | YES (async) | See [The payload contract](#the-payload-contract) |
+| `meter_event_value_too_many_digits` | value exceeds Stripe's 15-digit limit | YES (async) | Round before reporting; do not send full float precision |
+| `meter_event_dimension_count_too_high` | too many payload dimension keys | YES (async) | Reduce dimensions on the reporter |
+| `missing_dimension_payload_keys` | a configured dimension key is absent from `payload` | YES (async) | Fix reporter payload keys |
+| `no_meter` | no meter matches the `event_name` | YES (async) | Fix the `event_name`, or create the meter |
+| `archived_meter` | meter deactivated | **unverified** | Alert — data PERMANENTLY LOST |
+| `timestamp_too_far_in_past` | >35 days | **unverified** | Drop batch flush anti-pattern |
+| `timestamp_in_future` | >5 min future | **unverified** | Fix clock skew |
 
-The "Silent drop?" column is critical: async errors (YES) mean usage was silently
-not recorded against the customer. These affect revenue. Sync errors (NO) are
-surfaced as `{:error, %LatticeStripe.Error{}}` from `MeterEvent.create/3` directly.
+> **Why three rows say "unverified".** This guide used to classify
+> `archived_meter`, `timestamp_too_far_in_past` and `timestamp_in_future` as
+> synchronous-only `400`s. All three are also values of the asynchronous
+> error-report enum above. Both can be true at once — Stripe could return a code
+> synchronously *and* report it asynchronously — but we have not verified which,
+> so the classification is marked unverified rather than restated. Handle these
+> three on **both** paths.
+
+The "Silent drop?" column is what makes this table worth reading. An asynchronous
+failure means usage was silently not recorded against the customer, so it affects
+revenue and you will only ever hear about it here. A synchronous failure comes
+back directly as `{:error, %LatticeStripe.Error{}}` from `MeterEvent.create/3`.
+The three rows above are documented on both paths without a verified resolution;
+assume either can reach you.
 
 ### Remediation patterns
 
@@ -722,14 +790,16 @@ customer table.
 in `customer_mapping.event_payload_key`. Fix the reporter key to match the meter
 schema — every event is dropping silently until you do.
 
-**`meter_event_invalid_value`:** The value is not a numeric string. Common
-causes: integer instead of string (`1` vs `"1"`), `nil` for zero (send `"0"`),
-or a formatted string like `"1,000"`.
+**`meter_event_invalid_value`:** Stripe could not parse the value. Common causes:
+`nil` where you meant zero (a `nil` vanishes from the encoded body entirely — send
+`"0"`), a formatted string like `"1,000"`, or a float that stringified into
+exponent notation. Note that a plain integer is *not* a cause on the v1 path; see
+[The payload contract](#the-payload-contract).
 
-**`meter_event_value_not_found`:** The payload is missing the key named in
-`value_settings.event_payload_key`. This is exactly the failure mode
-`check_meter_value_settings!/1`
-prevents. Fix the meter definition or the reporter payload key.
+**A missing value key:** if the meter's formula is `"sum"` or `"last"` and the
+payload has no key matching `value_settings.event_payload_key`, the event is
+dropped. This is exactly the failure mode `check_meter_value_settings!/1` prevents
+at call time. Fix the meter definition or the reporter payload key.
 
 **`archived_meter`:** Immediately alert. No retry, no recovery. Events against
 a deactivated meter are permanently lost.
@@ -849,9 +919,12 @@ Never use this in production application paths.
    must be `%{"cancel" => %{"identifier" => "..."}}`, not top-level.
    `check_adjustment_cancel_shape!/1` catches this at call time. See [Corrections and adjustments](#corrections-and-adjustments).
 
-4. **Sending numeric values as integers.** The payload value must be a string
-   (`"5"`, not `5`). Integers trigger `meter_event_invalid_value` — silently
-   dropped in the async pipeline.
+4. **Sending a payload value as a float.** Elixir's default stringifier flips to
+   scientific notation at `0.00001`, so a per-token cost can reach Stripe as
+   `1.0e-5`. Pass decimals as strings. An integer is safe on the v1 path — `5` and
+   `"5"` encode byte-identically — with one exception: the v2 event stream encodes
+   as JSON, where the value genuinely must be a string. See
+   [The payload contract](#the-payload-contract).
 
 5. **Batch flushing accumulated events.** Events older than 35 days cannot be
    reported. Report at occurrence time, not in a nightly job. See
