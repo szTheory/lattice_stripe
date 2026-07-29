@@ -1,5 +1,17 @@
 defmodule LatticeStripe.Tax.TaxBreakdown do
-  @moduledoc false
+  @moduledoc """
+  One entry in the `tax_breakdown` list on a Stripe Tax calculation.
+
+  Reachable from `t:LatticeStripe.Tax.Calculation.t/0` as `list(t())`. Each entry is one
+  jurisdiction's share of the total, so this is what you sum or display when itemising
+  tax on an invoice.
+
+  `:inclusive` distinguishes tax added on top of the amount from tax already contained
+  within it — reading the total without checking it double-counts inclusive tax.
+
+  Embedded value struct: fields are additive. Keys Stripe adds later appear under
+  `:extra` rather than being dropped, so a new field never breaks decoding.
+  """
 
   @known_fields ~w[amount inclusive tax_rate_details taxability_reason taxable_amount]
 

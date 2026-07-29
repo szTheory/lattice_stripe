@@ -1,5 +1,15 @@
 defmodule LatticeStripe.Tax.ShippingCost do
-  @moduledoc false
+  @moduledoc """
+  The `shipping_cost` object embedded in a Stripe Tax calculation or transaction.
+
+  Reachable from `t:LatticeStripe.Tax.Calculation.t/0` and
+  `t:LatticeStripe.Tax.Transaction.t/0`. Carries the shipping amount alongside its own
+  `tax_breakdown`, because shipping is taxed separately from line items in most
+  jurisdictions.
+
+  Embedded value struct: fields are additive. Keys Stripe adds later appear under
+  `:extra` rather than being dropped, so a new field never breaks decoding.
+  """
 
   @known_fields ~w[amount amount_tax shipping_rate tax_behavior tax_code tax_breakdown]
 

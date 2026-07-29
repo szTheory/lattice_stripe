@@ -1,5 +1,14 @@
 defmodule LatticeStripe.Tax.Settings.Defaults do
-  @moduledoc false
+  @moduledoc """
+  The `defaults` object embedded in your account's Stripe Tax settings.
+
+  Reachable from `t:LatticeStripe.Tax.Settings.t/0`. These values apply to calculations
+  that do not override them — notably `tax_behavior`, which decides whether your prices
+  are treated as tax-inclusive or tax-exclusive.
+
+  Embedded value struct: fields are additive. Keys Stripe adds later appear under
+  `:extra` rather than being dropped, so a new field never breaks decoding.
+  """
 
   @known_fields ~w[tax_behavior tax_code provider]
 

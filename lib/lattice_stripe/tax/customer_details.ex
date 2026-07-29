@@ -1,5 +1,15 @@
 defmodule LatticeStripe.Tax.CustomerDetails do
-  @moduledoc false
+  @moduledoc """
+  The `customer_details` object embedded in a Stripe Tax calculation or transaction.
+
+  Reachable from `t:LatticeStripe.Tax.Calculation.t/0` and
+  `t:LatticeStripe.Tax.Transaction.t/0`. It records the address Stripe actually used to
+  source the tax decision, which is what you inspect when a calculation lands in an
+  unexpected jurisdiction.
+
+  Embedded value struct: fields are additive. Keys Stripe adds later appear under
+  `:extra` rather than being dropped, so a new field never breaks decoding.
+  """
 
   @known_fields ~w[address address_source ip_address tax_ids taxability_override]
 

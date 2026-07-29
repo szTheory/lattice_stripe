@@ -2,6 +2,14 @@ defmodule LatticeStripe.File do
   @moduledoc """
   Represents a file uploaded to Stripe.
 
+  > #### Name shadowing {: .warning}
+  >
+  > `alias LatticeStripe.File` shadows Elixir's built-in `File` module for the rest of
+  > that file, so `File.read!/1` would then resolve here and fail. Either fully qualify
+  > (`LatticeStripe.File.retrieve/3`) or alias under another name:
+  >
+  >     alias LatticeStripe.File, as: StripeFile
+
   Files are created via multipart upload to `files.stripe.com` and used for
   dispute evidence, identity verification, and other purposes. Files are
   immutable after creation -- there is no update or delete operation.

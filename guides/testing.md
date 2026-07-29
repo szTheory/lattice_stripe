@@ -520,6 +520,28 @@ client = LatticeStripe.Client.new!(
 )
 ```
 
+## Which TestClock do I want?
+
+Two public modules carry the name, and they sit at different levels. Almost always you
+want the first.
+
+| | `LatticeStripe.Testing.TestClock` | `LatticeStripe.TestHelpers.TestClock` |
+|---|---|---|
+| What it is | ExUnit ergonomics layer (`use`-able) | Thin wrapper over Stripe's REST surface |
+| Reach for it when | writing a test that needs to move time | you need direct clock CRUD, or you are building your own helper |
+| Cleanup | automatic on test exit, including on crash or assertion failure | you call `delete/3` yourself |
+| Mirrors | nothing — it is our ergonomics | Stripe's literal `/v1/test_helpers/test_clocks` path |
+
+`Testing.TestClock` is built on `TestHelpers.TestClock`, so this is a layering, not two
+competing ways to do the same thing — the same relationship as `Ecto.Repo` and
+`Ecto.Adapters.*`. Both are public and both are covered by semver.
+
+Start with `Testing.TestClock.test_clock/1`; it registers each clock with a per-test owner
+process that deletes it on exit, which is what keeps test clocks from accumulating against
+your account. Stripe caps how many you may have, so leaked clocks eventually fail your
+suite. If you do create clocks directly through `TestHelpers.TestClock`, the
+`mix lattice_stripe.test_clock.cleanup` task sweeps up what you left behind.
+
 ## Common Pitfalls
 
 **Mock response bodies must be valid JSON strings**

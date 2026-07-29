@@ -86,6 +86,93 @@ defmodule LatticeStripe.DocsTruthTest do
     LatticeStripe.MixProject.project()[:docs]
   end
 
+  # Resolves a module to its ExDoc group using ExDoc's own matcher semantics
+  # (deps/ex_doc/lib/ex_doc/config.ex:240-268): patterns may be a Regex, an exact module-id
+  # string, a module atom, or a 1-arity metadata function, and the FIRST group whose pattern
+  # list matches wins. Returns nil when no group matches, which is exactly the case ExDoc
+  # renders under a generic "Modules" heading.
+  #
+  # groups_for_modules is regex-driven, so `Mod in group` no longer works — the group value
+  # is a pattern list, not a module list.
+  defp docs_group_of(module) do
+    id = inspect(module)
+
+    Enum.find_value(docs_config()[:groups_for_modules], fn {group, patterns} ->
+      matched? =
+        patterns
+        |> List.wrap()
+        |> Enum.any?(fn
+          %Regex{} = re -> Regex.match?(re, id)
+          s when is_binary(s) -> id == s
+          a when is_atom(a) -> a == module
+        end)
+
+      matched? && group
+    end)
+  end
+
+  test "every public module lands in exactly one documented ExDoc group" do
+    # TOTALITY GUARD. ExDoc performs NO validation of groups_for_modules
+    # (deps/ex_doc/lib/ex_doc/config.ex:240-268): a phantom entry naming a module that does
+    # not exist simply never matches, and an unmatched module silently renders under a
+    # generic "Modules" heading. Neither is a warning, so `mix docs --warnings-as-errors`
+    # cannot catch either one.
+    #
+    # Both defects existed here before this test. `LatticeStripe.Testing.TestClock.Error`
+    # was listed in the Testing group and does not exist — the real module is
+    # TestClockError — so the real one fell out of the sidebar while the phantom no-oped.
+    # And 20 public modules, including Price, Product and the entire Tax surface, were in
+    # no group at all. An ungrouped module is absent from the sidebar's navigable structure
+    # and reachable only by exact search, which halves its discoverability.
+    #
+    # This is the assertion that makes both permanently unrepresentable. No surveyed Elixir
+    # library has it; we are setting our own convention here deliberately.
+    public_modules =
+      :lattice_stripe
+      |> Application.spec(:modules)
+      |> Enum.filter(fn m ->
+        # A real @moduledoc means public per guides/api_stability.md. `:hidden` is
+        # `@moduledoc false` and every defimpl/defprotocol shim.
+        match?({:docs_v1, _, _, _, %{"en" => _}, _, _}, Code.fetch_docs(m))
+      end)
+
+    assert public_modules != [], "module enumeration returned nothing — the check is inert"
+
+    ungrouped = Enum.filter(public_modules, &(docs_group_of(&1) == nil))
+
+    assert ungrouped == [], """
+    Public module(s) in no groups_for_modules group. ExDoc will bury each under a generic
+    "Modules" heading, where the sidebar does not surface it:
+
+      #{ungrouped |> Enum.map(&inspect/1) |> Enum.sort() |> Enum.join("\n  ")}
+
+    Add a group in mix.exs, or extend an existing pattern. If the module is meant to be
+    internal, give it `@moduledoc false` instead — that removes it from the public surface
+    and from this check.
+    """
+
+    # Every ENUMERATED (non-regex) entry must resolve to a module that actually exists and
+    # is public. This is the phantom regression test proper: patterns cannot go stale this
+    # way, but any explicit atom still can.
+    public_set = MapSet.new(public_modules)
+
+    phantoms =
+      for {group, patterns} <- docs_config()[:groups_for_modules],
+          pattern <- List.wrap(patterns),
+          is_atom(pattern) and not MapSet.member?(public_set, pattern),
+          do: {group, pattern}
+
+    assert phantoms == [], """
+    groups_for_modules names module(s) that do not exist or are not public. ExDoc ignores
+    these silently — it never validates group entries — so the intended module is NOT
+    grouped:
+
+      #{phantoms |> Enum.map(fn {g, m} -> "#{inspect(m)} (in group #{inspect(g)})" end) |> Enum.sort() |> Enum.join("\n  ")}
+
+    Check for a typo in the module name, or drop the entry if the module was removed.
+    """
+  end
+
   test "exdoc keeps the primary public truth surfaces published" do
     docs = docs_config()
     extras = docs[:extras]
@@ -532,10 +619,9 @@ defmodule LatticeStripe.DocsTruthTest do
     assert "guides/entitlements.md" in docs[:extras]
     assert "guides/entitlements.md" in groups["Canonical Guides"]
 
-    entitlements_group = docs[:groups_for_modules][:Entitlements]
-    assert LatticeStripe.Entitlements.ActiveEntitlement in entitlements_group
-    assert LatticeStripe.Entitlements.ActiveEntitlementSummary in entitlements_group
-    assert LatticeStripe.Entitlements.Feature in entitlements_group
+    assert docs_group_of(LatticeStripe.Entitlements.ActiveEntitlement) == :Entitlements
+    assert docs_group_of(LatticeStripe.Entitlements.ActiveEntitlementSummary) == :Entitlements
+    assert docs_group_of(LatticeStripe.Entitlements.Feature) == :Entitlements
 
     assert guide =~ "Scope boundary"
     assert guide =~ "entitled?"
@@ -582,13 +668,10 @@ defmodule LatticeStripe.DocsTruthTest do
   end
 
   test "the promoted entitlements fixture keeps its ExDoc placement and guide mention" do
-    docs = docs_config()
-
     # A module absent from its group is silently dropped from the published docs, so an
     # adopter reading HexDocs would never learn the fixture exists — the promotion out of
     # test/support/ would buy nothing. Structural, not decorative.
-    testing_group = docs[:groups_for_modules][:Testing]
-    assert LatticeStripe.Testing.Fixtures.Entitlements in testing_group
+    assert docs_group_of(LatticeStripe.Testing.Fixtures.Entitlements) == :Testing
 
     guide = File.read!("guides/testing.md")
     assert guide =~ "LatticeStripe.Testing.Fixtures.Entitlements"
@@ -596,15 +679,12 @@ defmodule LatticeStripe.DocsTruthTest do
   end
 
   test "the promoted meter fixtures keep their ExDoc placement and guide mention" do
-    docs = docs_config()
-
     # A module absent from its group is silently dropped from the published docs, so an
     # adopter reading HexDocs would never learn the fixture exists — the promotion out of
     # test/support/ would buy nothing. Structural, not decorative.
-    testing_group = docs[:groups_for_modules][:Testing]
-    assert LatticeStripe.Testing.Fixtures.MeterEvent in testing_group
-    assert LatticeStripe.Testing.Fixtures.MeterEventSummary in testing_group
-    assert LatticeStripe.Testing.Fixtures.MeterErrorReport in testing_group
+    assert docs_group_of(LatticeStripe.Testing.Fixtures.MeterEvent) == :Testing
+    assert docs_group_of(LatticeStripe.Testing.Fixtures.MeterEventSummary) == :Testing
+    assert docs_group_of(LatticeStripe.Testing.Fixtures.MeterErrorReport) == :Testing
 
     guide = File.read!("guides/testing.md")
     assert guide =~ "LatticeStripe.Testing.Fixtures.MeterEvent"
@@ -614,15 +694,12 @@ defmodule LatticeStripe.DocsTruthTest do
   end
 
   test "the promoted core-billing fixtures keep their ExDoc placement and guide mention" do
-    docs = docs_config()
-
     # A module absent from its group is silently dropped from the published docs, so an
     # adopter reading HexDocs would never learn the fixture exists — the promotion out of
     # test/support/ would buy nothing. Structural, not decorative.
-    testing_group = docs[:groups_for_modules][:Testing]
-    assert LatticeStripe.Testing.Fixtures.Customer in testing_group
-    assert LatticeStripe.Testing.Fixtures.PaymentIntent in testing_group
-    assert LatticeStripe.Testing.Fixtures.Subscription in testing_group
+    assert docs_group_of(LatticeStripe.Testing.Fixtures.Customer) == :Testing
+    assert docs_group_of(LatticeStripe.Testing.Fixtures.PaymentIntent) == :Testing
+    assert docs_group_of(LatticeStripe.Testing.Fixtures.Subscription) == :Testing
 
     guide = File.read!("guides/testing.md")
     assert guide =~ "LatticeStripe.Testing.Fixtures.Customer"
@@ -634,13 +711,10 @@ defmodule LatticeStripe.DocsTruthTest do
   end
 
   test "the authored Invoice fixture keeps its ExDoc placement and guide mention" do
-    docs = docs_config()
-
     # A module absent from its group is silently dropped from the published docs, so an
     # adopter reading HexDocs would never learn the fixture exists — authoring it into
     # lib/ would buy nothing. Structural, not decorative.
-    testing_group = docs[:groups_for_modules][:Testing]
-    assert LatticeStripe.Testing.Fixtures.Invoice in testing_group
+    assert docs_group_of(LatticeStripe.Testing.Fixtures.Invoice) == :Testing
 
     guide = File.read!("guides/testing.md")
     assert guide =~ "LatticeStripe.Testing.Fixtures.Invoice"
@@ -708,13 +782,14 @@ defmodule LatticeStripe.DocsTruthTest do
     # so an adopter reading HexDocs would never learn these exist. Structural
     # assertion only — this is the sole docs-truth addition this phase, and
     # deliberately not a prose grep.
-    metering_group = docs[:groups_for_modules][:"Billing Metering"]
 
-    assert LatticeStripe.Billing.MeterEventSummary in metering_group
-    assert LatticeStripe.Billing.MeterErrorReport in metering_group
-    assert LatticeStripe.Billing.MeterErrorReport.Reason in metering_group
-    assert LatticeStripe.Billing.MeterErrorReport.ErrorType in metering_group
-    assert LatticeStripe.Billing.MeterErrorReport.SampleError in metering_group
+    assert docs_group_of(LatticeStripe.Billing.MeterEventSummary) == :"Billing Metering"
+    assert docs_group_of(LatticeStripe.Billing.MeterErrorReport) == :"Billing Metering"
+    assert docs_group_of(LatticeStripe.Billing.MeterErrorReport.Reason) == :"Billing Metering"
+    assert docs_group_of(LatticeStripe.Billing.MeterErrorReport.ErrorType) == :"Billing Metering"
+
+    assert docs_group_of(LatticeStripe.Billing.MeterErrorReport.SampleError) ==
+             :"Billing Metering"
   end
 
   test "Charge @moduledoc reflects expanded PI-first surface" do

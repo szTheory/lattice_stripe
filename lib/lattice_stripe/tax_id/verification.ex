@@ -1,5 +1,18 @@
 defmodule LatticeStripe.TaxId.Verification do
-  @moduledoc false
+  @moduledoc """
+  The `verification` object embedded in a Stripe Tax ID.
+
+  Reachable from `t:LatticeStripe.TaxId.t/0`. `:status` is the field to match on before
+  trusting a customer-supplied tax ID — see the Tax guide for the full status set and
+  what each one means for invoicing.
+
+  This struct holds PII. `:verified_name` and `:verified_address` are redacted in
+  `Inspect` output to keep them out of logs and IEx sessions; read them explicitly by
+  field when you need them.
+
+  Embedded value struct: fields are additive. Keys Stripe adds later appear under
+  `:extra` rather than being dropped, so a new field never breaks decoding.
+  """
 
   @known_fields ~w[status verified_address verified_name]
 
