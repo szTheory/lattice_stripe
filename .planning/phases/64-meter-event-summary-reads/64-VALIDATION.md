@@ -153,4 +153,4 @@ integration tests ran. stripe-mock is confirmed **not currently running** (Docke
 - [x] Integration suite run explicitly against a running stripe-mock (not inferred from a green `mix test`)
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved — operator sign-off 2026-07-28 (64-10 Task 2), no issues raised

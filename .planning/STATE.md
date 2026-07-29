@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
-current_phase: 64
-current_phase_name: Meter Event-Summary Reads
-status: executing
-stopped_at: Wave 6 gate green; 64-10 Task 2 operator sign-off pending
+current_phase: 65
+current_phase_name: Webhook ObjectTypes & Testing Fixtures
+status: complete
+stopped_at: Phase 64 complete (10/10 plans, gate green, operator approved)
 last_updated: "2026-07-28T23:50:24.165Z"
 last_activity: 2026-07-28
-last_activity_desc: "Phase 64 Wave 4 complete: 64-07 (guides/metering.md repair — 'Reading usage back', 'The payload contract', six false-prose corrections) and 64-09 (stripe-mock integration suite, ExDoc placement locks, two IAL warnings cleared) executed in parallel and merged. Full suite 2305 tests / 0 failures / 1 skipped, plus 10 integration tests against stripe-mock. ExDoc warning baseline intentionally moved 42 -> 40. 8 of 10 plans done; Wave 5 (64-08) is next."
+last_activity_desc: "Phase 64 COMPLETE — 10/10 plans across 6 waves. D-29 differential gate green on all five steps (2305 tests / 0 failures; mix docs exit 0 at 38 warnings; zero warnings matching 'meter'); integration suite explicitly run against stripe-mock (10 tests, 0 excluded); mix.lock and object_types.ex verified unchanged against the PRE-PHASE commit a22e197. Operator sign-off approved, no issues. Shipped on PR #46 (draft) with all 12 CI checks green. ExDoc warning baseline moved 42 -> 40 -> 38, downward both times and required by plan criteria — later phases must gate against 38, not 42."
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 19
   completed_plans: 19
-  percent: 29
+  percent: 43
 ---
 
 # Project State
@@ -24,14 +24,23 @@ progress:
 See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 64 — meter-event-summary-reads
+**Current focus:** Phase 65 — webhook-objecttypes-and-testing-fixtures (not yet planned)
 
 ## Current Position
 
-Phase: 64 (meter-event-summary-reads) — EXECUTING
-Plan: 10 of 10 executed (all 6 waves merged)
-Status: D-29 differential gate GREEN (all 5 steps). Blocking operator sign-off (64-10 Task 2) outstanding.
-Last activity: 2026-07-28 — Wave 4 complete: 64-07 (`guides/metering.md` repair) and 64-09 (stripe-mock integration suite + ExDoc placement locks) executed in parallel and merged. Full suite 2305 tests / 0 failures / 1 skipped; 10 integration tests actually executed against stripe-mock (`--include integration`), not skipped. **ExDoc warning baseline deliberately moved 42 → 40** — 64-09 cleared the two `meter_event_stream.ex` IAL warnings; the merge-durable invariant for 64-10 is the −2 delta and the `meter` substring, not the absolute number.
+Phase: 65 (webhook-objecttypes-and-testing-fixtures) — NOT STARTED
+Plan: 0 of ? — Phase 64 closed at 10/10
+Status: Ready to plan (`/gsd-plan-phase 65`). Phase 64 shipped on PR #46 (draft, all 12 CI checks green).
+Last activity: 2026-07-28 — **Phase 64 closed.** 10/10 plans across 6 waves, each executed in an isolated worktree and merged `--no-ff`. D-29 differential gate green on all five steps; operator sign-off approved with no issues; PR #46 (draft) green on all 12 CI checks.
+
+**Carry-forward for Phase 65 and later:**
+
+- **Gate against an ExDoc baseline of 38**, not the 42 that still appears in older planning prose. It moved 42 → 40 (64-09 cleared the two `meter_event_stream.ex` IAL warnings, cause pinned as a code-block line beginning `{:`) → 38 (64-08's `scope.md` `../README.md` repair). Both decrements were downward and required by plan acceptance criteria; the baseline was never raised to make a step pass.
+- **`lib/lattice_stripe/object_types.ex` is byte-identical to its pre-phase state** and 64-04 locked the absence of a `billing.meter_error_report` key by test — Phase 65 owns every registry row.
+- **Pre-existing flake, not introduced here and not fixed here:** `test/lattice_stripe/client_test.exs:912` asserts `metadata.attempts == 2` on retry telemetry and intermittently reads `1` (~1 run in 20, reproduced twice across ~145 runs). Suspected globally-attached `:telemetry` handler in an `async: true` test catching another test's stop event. Logged in `deferred-items.md`.
+- **`guides/getting-started.md` carries the same broken `../README.md` link** 64-08 repaired in `scope.md` (2 of the remaining 38 warnings). One-line follow-up.
+- **Anchor form correction:** the metering guide's Rule 4 heading renders `rule-4-dimensions-are-write-only-on-the-generally-available-api` — **single** hyphen. Earmark collapses the em-dash separator; a double-hyphen form does not exist.
+- **`mix ci` remains RED at clean HEAD** on the surviving 38 warnings (its final step is `docs --warnings-as-errors`, while CI's Quality lane runs plain `mix docs`, `ci.yml:254`). Clearing them is Phase 67-shaped work. Do not use `mix ci` as a phase gate until then.
 
 ## Performance Metrics
 

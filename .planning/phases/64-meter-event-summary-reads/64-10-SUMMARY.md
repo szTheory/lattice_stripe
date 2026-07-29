@@ -135,7 +135,9 @@ All five new modules publish under the **Billing Metering** group, confirmed by 
 
 ## Task 2 — operator sign-off
 
-**Status: pending.** Task 2 is a `checkpoint:human-verify` gate and cannot be self-signed.
+**Status: APPROVED** by the operator on 2026-07-28, resume-signal `"approved"`, no issues raised.
+
+Task 2 is a `checkpoint:human-verify` gate and was not self-signed.
 The automated half of it is green (`mix docs` exits 0;
 `doc/LatticeStripe.Billing.MeterEventSummary.html`, `doc/metering.html` and `doc/scope.html`
 all exist), and the objective claims above are verified — but the seven-step walkthrough is an

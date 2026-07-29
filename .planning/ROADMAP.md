@@ -32,7 +32,7 @@
 - [x] **Phase 61: Default Finch Pool & Optional Application** - Live Stripe calls work without a manually-started Finch pool (Wave 0) (completed 2026-07-27)
 - [ ] **Phase 62: "1.1 → 1.7 What Landed" Migration Guide** - Zero-code HexDocs guide enumerating every surface shipped since 1.1 (Wave 0)
 - [x] **Phase 63: Stripe-Native Entitlements** - Pull/paginate active entitlements + manage entitlement features (Wave 1, flagship) (completed 2026-07-28)
-- [ ] **Phase 64: Meter Event-Summary Reads** - Read metered usage totals back from Stripe (Wave 2)
+- [x] **Phase 64: Meter Event-Summary Reads** - Read metered usage totals back from Stripe (Wave 2) (completed 2026-07-28)
 - [ ] **Phase 65: Webhook ObjectTypes & Testing Fixtures** - Five entitlement/meter object types deserialize; public fixtures (Wave 2)
 - [ ] **Phase 66: Product ↔ Feature Attachment** - Attach/list/delete product features + typed `Product.features` (Wave 3)
 - [ ] **Phase 67: DX Hardening & Milestone Doc Close** - Error `retry_after`, public `CacheBodyReader`, `Charge.create`-by-design docs (Wave 3)
@@ -121,7 +121,7 @@
   4. `Billing.MeterEvent.create/3` docs confirm arbitrary custom `payload` dimensions and decimal-string `value`s are accepted.
 
 **Build constraints**: Follow the parent-scoped `/v1/parent/:id/child` path pattern in `lib/lattice_stripe/transfer_reversal.ex` (the primary template — flat, wire-named, already ships `list/4` + `stream!/4`) + `tax_id.ex` + `external_account.ex`. **Modules are FLAT at depth 2** (`Billing.MeterEventSummary`, `Billing.MeterErrorReport`), named after the wire `"object"` string — parent-scoping is expressed in the signature, not the module name. Zero of the ~50 request-owning modules in `lib/` sit at depth 3; in `"Billing Metering"` specifically, depth 3 *means* value object. Only `MeterErrorReport`'s sub-structs (`.Reason`, `.ErrorType`, `.SampleError`) nest, and they own no `%Request{}`. See Phase 64 CONTEXT D-01. **Do NOT add new metering write surfaces** — accrue uses exactly one (`MeterEvent.create/3`) and ignores the rest; all four writes already ship. New modules need `@moduledoc`/`@doc` + ExDoc group registration.
-**Plans**: 3/10 plans executed
+**Plans**: 10/10 plans executed
 **Wave 1**
 
 - [x] 64-01-PLAN.md — Tracer: end-to-end `MeterEventSummary.list/4` read slice + ExDoc registration + fixture (Wave 1, gated by the D-01 one-way module-name decision)
@@ -200,11 +200,11 @@
 | 61. Default Finch Pool & Optional Application | v1.10 | 2/2 | Complete    | 2026-07-27 |
 | 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
 | 63. Stripe-Native Entitlements | v1.10 | 7/7 | Complete    | 2026-07-28 |
-| 64. Meter Event-Summary Reads | v1.10 | 3/10 | In Progress|  |
+| 64. Meter Event-Summary Reads | v1.10 | 10/10 | Complete    | 2026-07-28 |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 0/? | Not started | - |
 | 66. Product ↔ Feature Attachment | v1.10 | 0/? | Not started | - |
 | 67. DX Hardening & Milestone Doc Close | v1.10 | 0/? | Not started | - |
 
 ## Next Step
 
-**`/gsd-plan-phase 61`** — plan the Wave 0 default Finch pool fix (the live accrue footgun). Phase 62 (migration guide) is parallelizable. Entitlements (Phase 63) is the flagship and should follow Wave 0.
+**`/gsd-plan-phase 65`** — Webhook ObjectTypes & Testing Fixtures. Phase 64 deliberately left `lib/lattice_stripe/object_types.ex` byte-identical (verified at gate time), and 64-04 locked the absence of a `billing.meter_error_report` key by test, so Phase 65 owns every registry row. Phase 62 (migration guide, Wave 0, zero-code) remains unstarted and is parallelizable with it.
