@@ -415,6 +415,172 @@ The nested shape is enforced by `Billing.Guards.check_adjustment_cancel_shape!/1
 at call time and by Stripe's API.
 Passing anything else returns a Stripe 400.
 
+## Reading usage back
+
+You reported the usage. Now something has to show it — a customer-facing "usage
+this period" figure, an internal admin room, or a reconciliation job comparing
+Stripe's totals against your own event store.
+
+`LatticeStripe.Billing.MeterEventSummary` is the read half of the metering stack.
+It serves exactly one Stripe endpoint,
+`GET /v1/billing/meters/:meter_id/event_summaries`, and that is why the meter id
+is a **positional argument** rather than a filter: Stripe offers no top-level
+summary collection and no get-by-summary-id route, so every read is scoped to one
+parent meter. `customer`, `start_time` and `end_time` are all required filters,
+and the library raises `ArgumentError` before the request leaves your process if
+any of them is missing.
+
+### A total, or a series
+
+This is the first decision, and the default is the trap.
+
+**For a total, omit `value_grouping_window`.** Stripe aggregates server-side and
+returns a single bucket: one request, no pagination, no client-side float
+summation. This is what an admin screen showing "usage this period" almost always
+wants.
+
+```elixir
+alias LatticeStripe.Billing.MeterEventSummary
+
+# For a TOTAL: omit value_grouping_window -> one server-aggregated bucket,
+# one request, no pagination, no client-side float summation.
+{:ok, %{data: %{data: [summary]}}} =
+  MeterEventSummary.list(client, meter.id, %{
+    "customer" => sub.customer,
+    "start_time" => aligned_start,
+    "end_time" => aligned_end
+  })
+
+summary.aggregated_value
+#=> 1042.0
+```
+
+**For a series, pass `value_grouping_window`** as `"hour"` or `"day"`, and read it
+with `stream!/4` so that `has_more` is followed for you rather than silently
+ignored.
+
+```elixir
+client
+|> MeterEventSummary.stream!(meter.id, %{
+  "customer" => sub.customer,
+  "start_time" => aligned_start,
+  "end_time" => aligned_end,
+  "value_grouping_window" => "hour"
+})
+|> Enum.map(&{&1.start_time, &1.aggregated_value})
+```
+
+### The default page size returns a plausible wrong number
+
+Stripe's `limit` ranges from 1 to 100 and **defaults to 10**. Ask for hourly
+buckets across a 31-day month and the window holds **744** of them. Sum the ten
+rows a bare `list/4` hands back, without checking `has_more`, and you get a
+believable figure that is about one and a third percent of the truth. (That
+percentage is an illustration assuming usage spread evenly across the buckets, not
+a law — your real fraction depends on your data.)
+
+The fix is usually not to paginate harder. It is to ask the question you actually
+have. Rendering one usage figure for 200 customers costs roughly:
+
+| How you ask | Requests across 200 customers |
+|---|---|
+| hourly buckets at the default limit of 10 | ~15,000 |
+| hourly buckets at `"limit" => 100` | ~1,600 |
+| no `value_grouping_window` at all | 200 |
+
+`Enum.sum` over a `list/4` result is the warning sign. If you need every bucket,
+use `stream!/4`; if you need one number, drop the window. See `LatticeStripe.List`
+for the memory guidance that applies to any stream you do not bound with
+`Stream.take/2`.
+
+### Three things the signature will not tell you
+
+**The summary never says which customer it belongs to.** The object has seven
+fields — `id`, `object`, `aggregated_value`, `start_time`, `end_time`, `meter` and
+`livemode` — not one of them names a customer, and it cannot be expanded to add
+one. The customer is an *input* to the query and never an *output*. A reconciler
+that lists summaries for several customers and merges the results has lost the
+attribution completely, and the warning sign is easy to miss: grouping the merged
+list by a customer field is not something you can even attempt, because the field
+does not exist. Keep the association out of band, alongside the customer id you
+filtered on.
+
+**The figure is eventually consistent.** Stripe's specification says so in as many
+words. There is no freshness field on the object and no published staleness SLA,
+so a caller has no way to tell how old a number is. Label the figure in your UI
+with the time you fetched it, never present it as live, and never treat it as a
+billing source of truth — Stripe bills from the meter, not from these summaries.
+
+**The end of the window is ambiguous, and this library asserts neither reading.**
+Stripe's own specification contradicts itself. The `end_time` query parameter and
+the `end_time` field on the returned object are both documented as *exclusive*,
+while `aggregated_value`'s description on that same object says the aggregation
+covers `start_time` through `end_time` *inclusive*. Two of the three say
+exclusive. All three ship verbatim into every SDK's generated documentation, so
+the same contradiction is waiting in Stripe's other libraries. If one boundary
+event would change a decision you are making, do not settle it by reading
+documentation — measure it against your own account.
+
+One more, for anyone drawing a chart: do not assume a bucket exists for every
+interval in the window. Fill gaps by `start_time`, never by index.
+
+### Timestamps must be aligned, and this library will not align them for you
+
+Stripe requires `start_time` and `end_time` to be aligned to **minute** boundaries
+on every query, to **UTC hour** boundaries when `value_grouping_window` is
+`"hour"`, and to **UTC day** boundaries (00:00 UTC) when it is `"day"`. The
+timezone is UTC — not the account's, not the customer's.
+
+The most natural inputs are the ones that violate this. A subscription's
+`current_period_start` and `current_period_end` derive from its
+`billing_cycle_anchor`, so they land on an arbitrary second and are almost never
+aligned to anything.
+
+`Billing.Guards.check_summary_window!/2` raises `ArgumentError` from both `list/4`
+and `stream!/4` **before** the request is built, naming the offending value and
+the boundary it missed. Stripe answers a misaligned window with an HTTP 400 whose
+error code it does not document, so this failure can be prevented but not improved
+after the fact.
+
+The guard prints the arithmetic instead of applying it. Rounding changes what the
+query means — floor the start and you sweep in usage from before the period, ceil
+it and you drop usage that belongs to it — and that is a business decision, not a
+formatting detail. Do it yourself, where you can see it:
+
+```elixir
+# Day-aligned window. Use 3_600 for "hour", and 60 when no grouping window is set.
+start_time = Integer.floor_div(start_time, 86_400) * 86_400
+end_time = -Integer.floor_div(-end_time, 86_400) * 86_400
+```
+
+`Integer.floor_div/2` rather than `div/2`: `div/2` truncates toward zero, which
+rounds the wrong way for negative inputs.
+
+### Testing
+
+Meter summary reads are unit-tested the way every other resource family is: Mox at
+the Transport boundary with wire-shaped fixture maps. That is also the only place
+pagination can be proven — `stripe-mock` serves this path and validates the
+required parameters and the window enum, but it returns a single synthetic item
+and ignores both `limit` and `starting_after`, so it cannot exercise a second
+page. The summary fixtures are private test support today; public
+`LatticeStripe.Testing` fixtures for the metering objects land in a later release,
+and this section will document them when they do. See [testing.md](testing.md)
+for the Mox setup this family follows.
+
+### Webhooks
+
+Metering's asynchronous failures arrive as the
+`v1.billing.meter.error_report_triggered` event, and its payload is decoded by
+calling `LatticeStripe.Billing.MeterErrorReport.from_event/1` explicitly rather
+than through the webhook object registry. The registry dispatches on an `"object"`
+key that this payload does not carry — it is event data, not an object — so it
+cannot reach it, and that is a structural fact about the wire format rather than a
+gap. [Reconciliation via webhooks](#reconciliation-via-webhooks) below is the
+working handler. Registry coverage for the other metering object types lands in a
+later release, and this section will cover it when it does. See
+[webhooks.md](webhooks.md) for signature verification and handler setup.
+
 ## Reconciliation via webhooks
 
 ### The error-report webhook
