@@ -41,6 +41,7 @@
 | meter-event fixture + `Testing.meter_event/1` wrapper | INTEGRATE | |
 | meter-event-summary fixture + `Testing.meter_event_summary/1` wrapper | INTEGRATE | |
 | meter-error-report fixture (public) | INTEGRATE | OBJ-02 says "meter objects"; its 25-line verbatim-from-Stripe provenance comment is worth publishing. |
+| `Testing.meter_error_report/1` typed wrapper | OPT-OUT | The fixture is promoted, but this object is decoded by `Billing.MeterErrorReport.from_event/1`, not `from_map/1` — it is v2 thin-event `data`, not a `%{"object" => _}` envelope (F-13/D-14). A `from_map`-shaped wrapper would misrepresent how the object is actually consumed and imply a decode path that does not exist. OBJ-02's "each with a typed-conversion wrapper" is satisfied for every fixture that has a `from_map/1` to wrap. |
 | `Meter`, `MeterEventAdjustment`, `MeterEventStreamSession` fixtures | OPT-OUT | Pending Q1 checkpoint (65-02). OBJ-02 names neither; promoting them expands the semver-covered surface for free with no requirement asking for it. They stay private in `test/support/fixtures/`. If the operator overrules Q1 toward "promote all six", this row is struck at the checkpoint. |
 | `Testing.Fixtures.Entitlements.Feature` typed wrapper (`Testing.feature/1`) | OPT-OUT | The fixture is promoted (it is one of the four functions carried over unchanged), but `Entitlements.Feature` typed-struct conversion is not named by OBJ-02, which scopes wrappers to "entitlement + meter objects (incl. the no-`id` summary)". Adding the wrapper later is additive and non-breaking. |
 
