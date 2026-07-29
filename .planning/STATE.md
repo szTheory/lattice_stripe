@@ -8,7 +8,7 @@ status: executing
 stopped_at: Wave 4 complete (64-07, 64-09 merged)
 last_updated: "2026-07-28T23:50:24.165Z"
 last_activity: 2026-07-28
-last_activity_desc: "Phase 64 Wave 2 complete: 64-03 (MeterEventSummary list!/stream! + moduledoc) and 64-04 (MeterErrorReport + three value objects + ObjectTypes lock) executed in parallel and merged. Full suite 2264 tests / 0 failures; docs warnings held at the 42-warning baseline. 4 of 10 plans done; Wave 3 (64-05, 64-06) is next."
+last_activity_desc: "Phase 64 Wave 4 complete: 64-07 (guides/metering.md repair — 'Reading usage back', 'The payload contract', six false-prose corrections) and 64-09 (stripe-mock integration suite, ExDoc placement locks, two IAL warnings cleared) executed in parallel and merged. Full suite 2305 tests / 0 failures / 1 skipped, plus 10 integration tests against stripe-mock. ExDoc warning baseline intentionally moved 42 -> 40. 8 of 10 plans done; Wave 5 (64-08) is next."
 progress:
   total_phases: 7
   completed_phases: 2
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 Phase: 64 (meter-event-summary-reads) — EXECUTING
 Plan: 8 of 10 complete (Waves 1-4 of 6 merged)
 Status: Wave 5 (64-08) ready to dispatch
-Last activity: 2026-07-28 — Wave 2 complete: 64-03 (MeterEventSummary `list!/2..4`, `stream!/2..4`, D-31 refutation set, full moduledoc) and 64-04 (MeterErrorReport + `.Reason`/`.ErrorType`/`.SampleError`, `from_event/1`, ObjectTypes dead-key lock) executed in parallel and merged with zero file overlap. Full suite 2264 tests / 0 failures / 1 skipped; `mix docs` held at the 42-warning baseline with none naming a Phase 64 file.
+Last activity: 2026-07-28 — Wave 4 complete: 64-07 (`guides/metering.md` repair) and 64-09 (stripe-mock integration suite + ExDoc placement locks) executed in parallel and merged. Full suite 2305 tests / 0 failures / 1 skipped; 10 integration tests actually executed against stripe-mock (`--include integration`), not skipped. **ExDoc warning baseline deliberately moved 42 → 40** — 64-09 cleared the two `meter_event_stream.ex` IAL warnings; the merge-durable invariant for 64-10 is the −2 delta and the `meter` substring, not the absolute number.
 
 ## Performance Metrics
 
