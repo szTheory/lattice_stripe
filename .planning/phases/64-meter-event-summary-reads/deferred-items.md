@@ -18,3 +18,28 @@ Out-of-scope discoveries logged during execution. Not fixed here.
   captured metadata belongs to a single-attempt call rather than the retried one.
 - **Suggested fix:** scope the handler by a unique per-test telemetry ref/config and filter
   received events by it, rather than asserting on the first event received.
+
+## Pre-existing flaky test: Batch error isolation (SECOND, distinct flake)
+
+- **Discovered during:** 64-10 phase-close verification (full-suite re-run after the gate).
+- **Test:** `test/lattice_stripe/batch_test.exs:72` —
+  `test run/3 — error isolation one failing task returns {:error, %Error{}} in its slot, others succeed`
+- **Symptom:** `assert Enum.count(results, &match?({:ok, _}, &1)) == 1` fails with `left: 2,
+  right: 1` at `batch_test.exs:94` — i.e. the task that was supposed to fail **succeeded**,
+  so two slots came back `{:ok, _}` instead of one.
+- **Frequency:** ~1 in 30 runs.
+- **Proven pre-existing, not introduced by Phase 64.** Two independent lines of evidence:
+  1. `git diff --name-only a22e197..HEAD` shows Phase 64 touched **no** Batch file — neither
+     `lib/lattice_stripe/batch.ex` nor `test/lattice_stripe/batch_test.exs`.
+  2. Reproduced on the **pre-phase commit `a22e197`** in a separate worktree with none of
+     Phase 64's code present: 1 failure in 30 runs of `batch_test.exs` alone, with a
+     byte-identical assertion message and stack frame.
+- **This is a different flake from the client-retry one above** — different file, different
+  test, different failure mode. It was initially and wrongly assumed to be the known one;
+  capturing the actual output disproved that.
+- **Likely cause (unconfirmed):** the "failing" task is made to fail by a mechanism that is
+  timing- or ordering-dependent rather than deterministic, so under some schedules it
+  completes successfully. Worth checking whether the intended failure is induced by a
+  sleep/race rather than by a stubbed error return.
+- **Why out of scope here:** 64-10 is a gate plan and changes no code — "a gate plan that
+  also changes code cannot honestly report on itself." Route to a follow-up.
