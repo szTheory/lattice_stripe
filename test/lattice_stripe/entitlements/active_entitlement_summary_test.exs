@@ -10,7 +10,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementSummaryTest do
 
   alias LatticeStripe.Entitlements.{ActiveEntitlement, ActiveEntitlementSummary}
   alias LatticeStripe.List
-  alias LatticeStripe.Test.Fixtures.Entitlements
+  alias LatticeStripe.Testing.Fixtures.Entitlements
 
   # Overrides the fixture's nested envelope, preserving the webhook-shaped url so the
   # rewrite stays provable.

@@ -2,6 +2,15 @@ defmodule LatticeStripe.List do
   @moduledoc """
   Represents a paginated list of Stripe objects.
 
+  > #### Name shadowing {: .warning}
+  >
+  > `alias LatticeStripe.List` shadows Elixir's built-in `List` module for the rest of
+  > that file, so `List.first/1` would then resolve here and fail. This is the most
+  > disruptive of the three shadowing names in this library. Either fully qualify
+  > (`LatticeStripe.List.stream/2`) or alias under another name:
+  >
+  >     alias LatticeStripe.List, as: StripeList
+
   Stripe returns two kinds of paginated collections:
 
   - **Cursor-based lists** — standard list endpoints (e.g., `/v1/customers`). Use

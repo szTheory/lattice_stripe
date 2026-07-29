@@ -1,6 +1,9 @@
-defmodule LatticeStripe.Test.Fixtures.Customer do
-  @moduledoc false
+defmodule LatticeStripe.Testing.Fixtures.Customer do
+  @moduledoc """
+  Canonical raw fixtures for Stripe Customer objects.
+  """
 
+  @spec customer_json(map()) :: map()
   def customer_json(overrides \\ %{}) do
     Map.merge(
       %{

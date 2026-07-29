@@ -15,7 +15,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
   import LatticeStripe.TestHelpers
 
   alias LatticeStripe.Entitlements.Feature
-  alias LatticeStripe.Test.Fixtures.Entitlements
+  alias LatticeStripe.Testing.Fixtures.Entitlements
 
   setup :verify_on_exit!
 

@@ -11,8 +11,8 @@ For Stripe's official testing documentation (test card numbers, bank accounts, e
 
 ## Public fixture builders
 
-LatticeStripe now ships canonical raw-map fixtures for the v1.3 resource families under
-`LatticeStripe.Testing.Fixtures.*`.
+LatticeStripe ships canonical raw-map fixtures under `LatticeStripe.Testing.Fixtures.*`. These
+modules are the canonical fixture source of truth for the resource families LatticeStripe ships.
 
 These modules are the recommended starting point when you want realistic Stripe-shaped
 payloads in downstream application tests:
@@ -27,12 +27,20 @@ payloads in downstream application tests:
 - `LatticeStripe.Testing.Fixtures.TaxCalculation`
 - `LatticeStripe.Testing.Fixtures.TaxTransaction`
 - `LatticeStripe.Testing.Fixtures.TaxId`
+- `LatticeStripe.Testing.Fixtures.Entitlements`
+- `LatticeStripe.Testing.Fixtures.MeterEvent`
+- `LatticeStripe.Testing.Fixtures.MeterEventSummary`
+- `LatticeStripe.Testing.Fixtures.MeterErrorReport`
+- `LatticeStripe.Testing.Fixtures.Customer`
+- `LatticeStripe.Testing.Fixtures.PaymentIntent`
+- `LatticeStripe.Testing.Fixtures.Subscription`
+- `LatticeStripe.Testing.Fixtures.Invoice`
 
 The raw map is the canonical test shape. Build other forms explicitly on top:
 
 - `LatticeStripe.Testing.generate_webhook_event/3` for `%LatticeStripe.Event{}`
 - `LatticeStripe.Testing.generate_webhook_payload/3` for signed raw webhook payloads
-- `LatticeStripe.Testing.quote/1`, `dispute/1`, `credit_note/1`, `tax_calculation/1`, `tax_transaction/1`, `tax_id/1`, and friends for typed structs
+- `LatticeStripe.Testing.quote/1`, `dispute/1`, `credit_note/1`, `tax_calculation/1`, `tax_transaction/1`, `tax_id/1`, `active_entitlement/1`, `active_entitlement_summary/1`, `feature/1`, `meter_event/1`, `meter_event_summary/1`, `meter_error_report/1`, `customer/1`, `payment_intent/1`, `subscription/1`, `invoice/1`, and friends for typed structs
 
 ## Tax
 
@@ -511,6 +519,28 @@ client = LatticeStripe.Client.new!(
   telemetry_enabled: false
 )
 ```
+
+## Which TestClock do I want?
+
+Two public modules carry the name, and they sit at different levels. Almost always you
+want the first.
+
+| | `LatticeStripe.Testing.TestClock` | `LatticeStripe.TestHelpers.TestClock` |
+|---|---|---|
+| What it is | ExUnit ergonomics layer (`use`-able) | Thin wrapper over Stripe's REST surface |
+| Reach for it when | writing a test that needs to move time | you need direct clock CRUD, or you are building your own helper |
+| Cleanup | automatic on test exit, including on crash or assertion failure | you call `delete/3` yourself |
+| Mirrors | nothing — it is our ergonomics | Stripe's literal `/v1/test_helpers/test_clocks` path |
+
+`Testing.TestClock` is built on `TestHelpers.TestClock`, so this is a layering, not two
+competing ways to do the same thing — the same relationship as `Ecto.Repo` and
+`Ecto.Adapters.*`. Both are public and both are covered by semver.
+
+Start with `Testing.TestClock.test_clock/1`; it registers each clock with a per-test owner
+process that deletes it on exit, which is what keeps test clocks from accumulating against
+your account. Stripe caps how many you may have, so leaked clocks eventually fail your
+suite. If you do create clocks directly through `TestHelpers.TestClock`, the
+`mix lattice_stripe.test_clock.cleanup` task sweeps up what you left behind.
 
 ## Common Pitfalls
 

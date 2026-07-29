@@ -437,7 +437,7 @@ schedule for subscription customers.
 
 ```elixir
 # Create a test clock
-{:ok, clock} = LatticeStripe.TestClock.create(client, %{
+{:ok, clock} = LatticeStripe.TestHelpers.TestClock.create(client, %{
   "frozen_time" => DateTime.utc_now() |> DateTime.to_unix()
 })
 
@@ -453,11 +453,10 @@ schedule for subscription customers.
   "items" => [%{"price" => "price_xxx"}]
 })
 
-# Advance the clock past the billing date
+# Advance the clock past the billing date.
+# advance/4 takes the new frozen time as a bare Unix integer, not a params map.
 one_month_later = clock.frozen_time + 31 * 86_400
-{:ok, _} = LatticeStripe.TestClock.advance(client, clock.id, %{
-  "frozen_time" => one_month_later
-})
+{:ok, _} = LatticeStripe.TestHelpers.TestClock.advance(client, clock.id, one_month_later)
 
 # Verify that Stripe created and paid the subscription invoice
 {:ok, resp} = LatticeStripe.Invoice.list(client, %{

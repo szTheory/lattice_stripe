@@ -1,6 +1,6 @@
 {
   "model_profile": "inherit",
-  "runtime": "cursor",
+  "runtime": "claude",
   "resolve_model_ids": "omit",
   "models": {
     "planning": "inherit",
@@ -73,12 +73,23 @@
       "verify_untracked_proof_files": true,
       "parallel_subagent_research": true,
       "assessment_output_thread": ".planning/threads/v1-{N}-next-milestone-assessment.md"
-    }
+    },
+    "human_verify_mode": "end-of-phase"
   },
   "hooks": {
     "context_warnings": true
   },
-  "agent_skills": {},
+  "agent_skills": {
+    "gsd-verifier": [
+      ".agents/skills/lattice-verification-policy"
+    ],
+    "gsd-executor": [
+      ".agents/skills/lattice-verification-policy"
+    ],
+    "gsd-planner": [
+      ".agents/skills/lattice-verification-policy"
+    ]
+  },
   "mode": "yolo",
   "granularity": "fine"
 }

@@ -1,6 +1,9 @@
-defmodule LatticeStripe.Test.Fixtures.PaymentIntent do
-  @moduledoc false
+defmodule LatticeStripe.Testing.Fixtures.PaymentIntent do
+  @moduledoc """
+  Canonical raw fixtures for Stripe PaymentIntent objects.
+  """
 
+  @spec payment_intent_json(map()) :: map()
   def payment_intent_json(overrides \\ %{}) do
     Map.merge(
       %{

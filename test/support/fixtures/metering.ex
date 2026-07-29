@@ -1,3 +1,13 @@
+# Phase 65 (OBJ-02) promoted three of this file's six fixtures into the PUBLIC surface, flat
+# rather than nested — Q1 was answered `flat-three`. MeterEvent, MeterEventSummary and
+# MeterErrorReport now live in lib/lattice_stripe/testing/fixtures/ as
+# LatticeStripe.Testing.Fixtures.MeterEvent / .MeterEventSummary / .MeterErrorReport, matching the
+# flat convention every other public fixture follows. This supersedes the Phase 64 header that
+# asked for a whole-file move to a nested LatticeStripe.Testing.Fixtures.Metering namespace.
+#
+# Meter, MeterEventAdjustment and MeterEventStreamSession stay PRIVATE here on purpose: no
+# requirement names them, and every module promoted becomes semver-covered public API at the
+# Hex 1.8.0 tag. Do not promote them without a decision that says to.
 defmodule LatticeStripe.Test.Fixtures.Metering do
   @moduledoc false
 
@@ -57,34 +67,6 @@ defmodule LatticeStripe.Test.Fixtures.Metering do
         "has_more" => false,
         "url" => "/v1/billing/meters"
       }
-    end
-  end
-
-  defmodule MeterEvent do
-    @moduledoc false
-
-    @doc """
-    Basic MeterEvent fixture matching Stripe's wire format.
-
-    The `payload` field intentionally includes both the customer mapping key
-    (`stripe_customer_id`) and the value key (`value`). Tests for Inspect
-    masking should assert that `:payload` is hidden in the string
-    representation of `%LatticeStripe.Billing.MeterEvent{}`.
-    """
-    def basic(overrides \\ %{}) do
-      %{
-        "object" => "billing.meter_event",
-        "event_name" => "api_call",
-        "identifier" => "req_abc",
-        "payload" => %{
-          "stripe_customer_id" => "cus_test_123",
-          "value" => "1"
-        },
-        "timestamp" => 1_712_345_678,
-        "created" => 1_712_345_679,
-        "livemode" => false
-      }
-      |> Map.merge(overrides)
     end
   end
 

@@ -2,6 +2,14 @@ defmodule LatticeStripe.Quote do
   @moduledoc """
   Operations on Stripe Quote objects.
 
+  > #### Name shadowing {: .warning}
+  >
+  > `alias LatticeStripe.Quote` makes the bare atom `Quote` refer to this module. It does
+  > not break the `quote/1` special form, which is lowercase, but it does shadow Elixir's
+  > `Quote`-prefixed references. Prefer fully qualifying, or alias under another name:
+  >
+  >     alias LatticeStripe.Quote, as: StripeQuote
+
   Quotes model a proposal before it becomes billable downstream Stripe objects.
   LatticeStripe exposes the Stripe-shaped Quote resource surface directly:
   create and iterate on a draft, finalize it into an open quote, optionally

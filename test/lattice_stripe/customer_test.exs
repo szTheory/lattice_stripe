@@ -3,7 +3,7 @@ defmodule LatticeStripe.CustomerTest do
 
   import Mox
   import LatticeStripe.TestHelpers
-  import LatticeStripe.Test.Fixtures.Customer
+  import LatticeStripe.Testing.Fixtures.Customer
 
   alias LatticeStripe.{Customer, Error, List, Response}
 

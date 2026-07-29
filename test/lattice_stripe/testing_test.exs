@@ -2,15 +2,21 @@ defmodule LatticeStripe.TestingTest do
   use ExUnit.Case, async: true
 
   alias LatticeStripe.{
+    Billing,
     CreditNote,
+    Customer,
     Dispute,
+    Entitlements,
     Event,
     EventNotification,
     File,
     FileLink,
+    Invoice,
     Mandate,
+    PaymentIntent,
     Quote,
     SetupAttempt,
+    Subscription,
     Testing,
     Webhook
   }
@@ -28,6 +34,111 @@ defmodule LatticeStripe.TestingTest do
       assert is_map(Fixtures.Mandate.mandate_json())
       assert is_map(Fixtures.SetupAttempt.setup_attempt_json())
       assert is_map(Fixtures.Quote.quote_json())
+    end
+
+    test "promoted entitlement builders are callable at arity 0 (OBJ-02 empty-input edge)" do
+      # Every promoted builder defaults `overrides` to %{}, so a no-argument call must
+      # return the canonical map rather than raising on a missing argument.
+      assert is_map(Fixtures.Entitlements.active_entitlement_json())
+      assert is_map(Fixtures.Entitlements.feature_json())
+      assert is_map(Fixtures.Entitlements.active_entitlement_summary_json())
+      assert is_map(Fixtures.Entitlements.active_entitlement_list_json())
+    end
+
+    test "entitlement builder overrides win over the canonical value" do
+      overridden = Fixtures.Entitlements.active_entitlement_json(%{"id" => "ent_override"})
+      assert overridden["id"] == "ent_override"
+      assert overridden["object"] == "entitlements.active_entitlement"
+    end
+
+    test "active_entitlement_list_json/0 returns a one-element list envelope" do
+      envelope = Fixtures.Entitlements.active_entitlement_list_json()
+      assert envelope["object"] == "list"
+      assert length(envelope["data"]) == 1
+    end
+
+    test "promoted meter builders are callable at arity 0 (OBJ-02 empty-input edge)" do
+      # Q1 = flat-three: exactly these three meter fixtures are public, and they are flat
+      # (Testing.Fixtures.MeterEvent), never nested under a Metering namespace.
+      assert is_map(Fixtures.MeterEvent.meter_event_json())
+      assert is_map(Fixtures.MeterEventSummary.meter_event_summary_json())
+      assert is_map(Fixtures.MeterEventSummary.meter_event_summary_list_json())
+      assert is_map(Fixtures.MeterErrorReport.meter_error_report_json())
+      assert is_map(Fixtures.MeterErrorReport.meter_error_report_event_json())
+      assert is_map(Fixtures.MeterErrorReport.no_meter_found_meter_error_report_event_json())
+    end
+
+    test "meter builder overrides win over the canonical value" do
+      overridden =
+        Fixtures.MeterEventSummary.meter_event_summary_json(%{"aggregated_value" => 99.0})
+
+      assert overridden["aggregated_value"] == 99.0
+      assert overridden["object"] == "billing.meter_event_summary"
+    end
+
+    test "promoted core-billing builders are callable at arity 0 (OBJ-03 empty-input edge)" do
+      # Q2 = move-and-rename: these three moved out of test/support/ with no private twin,
+      # and Subscription's base builder is `subscription_json/1`, NOT `basic/1` — the name
+      # is semver-covered public API from the Hex 1.8.0 tag onward.
+      assert is_map(Fixtures.Customer.customer_json())
+      assert is_map(Fixtures.PaymentIntent.payment_intent_json())
+      assert is_map(Fixtures.Subscription.subscription_json())
+      assert is_map(Fixtures.Subscription.subscription_with_items_json())
+      assert is_map(Fixtures.Subscription.paused_subscription_json())
+      assert is_map(Fixtures.Subscription.canceled_subscription_json())
+    end
+
+    test "core-billing builder overrides win over the canonical value" do
+      overridden = Fixtures.Customer.customer_json(%{"email" => "override@example.com"})
+      assert overridden["email"] == "override@example.com"
+      assert overridden["object"] == "customer"
+    end
+
+    test "OBJ-03 ordering edge: a caller override beats both the variant and the base" do
+      # with_items/1 composes on subscription_json/1, and each layer is a Map.merge where
+      # the LAST map wins. The caller's map is merged into the variant's map before that
+      # result reaches the base, so a caller key must beat:
+      #   (a) the variant's own key      -> "items", set by with_items/1
+      #   (b) the base canonical value   -> "status", set by subscription_json/1
+      # If either assertion flips, the composition chain has been reordered and callers
+      # silently lose the ability to override.
+      overridden =
+        Fixtures.Subscription.subscription_with_items_json(%{
+          "items" => %{"object" => "list", "data" => [], "has_more" => false},
+          "status" => "past_due"
+        })
+
+      assert overridden["items"]["data"] == []
+      assert overridden["status"] == "past_due"
+
+      # Un-overridden keys from both layers still come through.
+      assert overridden["object"] == "subscription"
+
+      assert Fixtures.Subscription.subscription_with_items_json()["items"]["data"] |> length() ==
+               2
+    end
+
+    test "the authored invoice builder is callable at arity 0 (OBJ-03 empty-input edge)" do
+      # Invoice is the one OBJ-03 fixture with no prior source anywhere — it was authored,
+      # not promoted. Q2 = move-and-rename fixes the builder name as `invoice_json/1`.
+      assert is_map(Fixtures.Invoice.invoice_json())
+    end
+
+    test "OBJ-03 empty edge: the default invoice carries an EMPTY lines envelope" do
+      # The empty collection is the canonical default, not an unfilled placeholder. A
+      # populated default would silently change what every `lines` assertion means, and
+      # callers who want line items pass them explicitly as an override.
+      lines = Fixtures.Invoice.invoice_json()["lines"]
+
+      assert lines["object"] == "list"
+      assert lines["data"] == []
+      assert lines["has_more"] == false
+    end
+
+    test "invoice builder overrides win over the canonical value" do
+      overridden = Fixtures.Invoice.invoice_json(%{"status" => "paid"})
+      assert overridden["status"] == "paid"
+      assert overridden["object"] == "invoice"
     end
   end
 
@@ -250,6 +361,71 @@ defmodule LatticeStripe.TestingTest do
       assert %Mandate{} = Testing.mandate(Fixtures.Mandate.mandate_json())
       assert %SetupAttempt{} = Testing.setup_attempt(Fixtures.SetupAttempt.setup_attempt_json())
       assert %Quote{} = Testing.quote(Fixtures.Quote.quote_json())
+    end
+
+    test "return typed entitlement structs from the promoted public fixtures" do
+      assert %Entitlements.ActiveEntitlement{id: "ent_123"} =
+               Testing.active_entitlement(Fixtures.Entitlements.active_entitlement_json())
+
+      summary =
+        Testing.active_entitlement_summary(
+          Fixtures.Entitlements.active_entitlement_summary_json()
+        )
+
+      assert %Entitlements.ActiveEntitlementSummary{customer: "cus_ABC123customer"} = summary
+
+      # ENT-05 / Phase 63 F-02: the Stripe object has no id property, so the struct has
+      # no :id field. The public wrapper must not reintroduce one.
+      refute Map.has_key?(summary, :id)
+    end
+
+    test "return typed meter structs from the promoted public fixtures" do
+      # Match on :event_name, NOT :object — %Billing.MeterEvent{} has no :object field
+      # (EVENT-05 minimal struct), so result.object would raise KeyError.
+      assert %Billing.MeterEvent{event_name: "api_call"} =
+               Testing.meter_event(Fixtures.MeterEvent.meter_event_json())
+
+      assert %Billing.MeterEventSummary{id: "mtrusg_123"} =
+               Testing.meter_event_summary(Fixtures.MeterEventSummary.meter_event_summary_json())
+    end
+
+    test "return a typed Feature struct from the promoted public fixture" do
+      # OBJ-02: `entitlements.feature` is deliberately absent from @object_map (it is
+      # not a webhook data.object payload), so this wrapper is the only typed decode
+      # path the public surface offers for it.
+      assert %Entitlements.Feature{id: "feat_123", lookup_key: "premium_support"} =
+               Testing.feature(Fixtures.Entitlements.feature_json())
+    end
+
+    test "return a typed MeterErrorReport struct, with :meter always nil (from_map contract)" do
+      report =
+        Testing.meter_error_report(Fixtures.MeterErrorReport.meter_error_report_json())
+
+      assert %Billing.MeterErrorReport{
+               developer_message_summary: "There are 902 invalid events"
+             } = report
+
+      assert report.reason.error_count == 902
+
+      # F-13 / D-14: `data` never names the meter. from_map/1 structurally cannot fill
+      # :meter — only from_event/1 can. The wrapper must not paper over that.
+      assert report.meter == nil
+    end
+
+    test "return typed core-billing structs from the promoted public fixtures" do
+      assert %Customer{id: "cus_test1234567890"} =
+               Testing.customer(Fixtures.Customer.customer_json())
+
+      assert %PaymentIntent{id: "pi_test1234567890abc"} =
+               Testing.payment_intent(Fixtures.PaymentIntent.payment_intent_json())
+
+      assert %Subscription{id: "sub_test1234567890"} =
+               Testing.subscription(Fixtures.Subscription.subscription_json())
+    end
+
+    test "return a typed Invoice struct from the authored public fixture" do
+      assert %Invoice{id: "in_test1234567890"} =
+               Testing.invoice(Fixtures.Invoice.invoice_json())
     end
 
     test "keep wrapper shapes explicit instead of option-driven" do

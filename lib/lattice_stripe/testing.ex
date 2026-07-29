@@ -47,15 +47,21 @@ defmodule LatticeStripe.Testing do
   """
 
   alias LatticeStripe.{
+    Billing,
     CreditNote,
+    Customer,
     Dispute,
+    Entitlements,
     Event,
     EventNotification,
     File,
     FileLink,
+    Invoice,
     Mandate,
+    PaymentIntent,
     Quote,
     SetupAttempt,
+    Subscription,
     Tax,
     TaxId,
     Webhook
@@ -122,6 +128,84 @@ defmodule LatticeStripe.Testing do
   """
   @spec tax_id(map()) :: TaxId.t()
   def tax_id(raw_map), do: TaxId.from_map(raw_map)
+
+  @doc """
+  Converts a canonical ActiveEntitlement fixture map into
+  `%LatticeStripe.Entitlements.ActiveEntitlement{}`.
+  """
+  @spec active_entitlement(map()) :: Entitlements.ActiveEntitlement.t()
+  def active_entitlement(raw_map), do: Entitlements.ActiveEntitlement.from_map(raw_map)
+
+  @doc """
+  Converts a canonical ActiveEntitlementSummary fixture map into
+  `%LatticeStripe.Entitlements.ActiveEntitlementSummary{}`.
+  """
+  @spec active_entitlement_summary(map()) :: Entitlements.ActiveEntitlementSummary.t()
+  def active_entitlement_summary(raw_map),
+    do: Entitlements.ActiveEntitlementSummary.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Feature fixture map into
+  `%LatticeStripe.Entitlements.Feature{}`.
+
+  `entitlements.feature` is deliberately absent from `LatticeStripe.ObjectTypes`'
+  dispatch registry (it is not a webhook `data.object` payload), so this wrapper is
+  the only typed decode path the public surface offers for it.
+  """
+  @spec feature(map()) :: Entitlements.Feature.t()
+  def feature(raw_map), do: Entitlements.Feature.from_map(raw_map)
+
+  @doc """
+  Converts a canonical MeterEvent fixture map into
+  `%LatticeStripe.Billing.MeterEvent{}`.
+  """
+  @spec meter_event(map()) :: Billing.MeterEvent.t()
+  def meter_event(raw_map), do: Billing.MeterEvent.from_map(raw_map)
+
+  @doc """
+  Converts a canonical MeterEventSummary fixture map into
+  `%LatticeStripe.Billing.MeterEventSummary{}`.
+  """
+  @spec meter_event_summary(map()) :: Billing.MeterEventSummary.t()
+  def meter_event_summary(raw_map), do: Billing.MeterEventSummary.from_map(raw_map)
+
+  @doc """
+  Converts a canonical MeterErrorReport `data` map into
+  `%LatticeStripe.Billing.MeterErrorReport{}`.
+
+  Wraps `from_map/1`, the low-level constructor: `:meter` is **always** `nil` here
+  because the meter id lives in the event envelope, not in `data`. When you have the
+  whole `v2.core.event` (see
+  `LatticeStripe.Testing.Fixtures.MeterErrorReport.meter_error_report_event_json/1`),
+  call `LatticeStripe.Billing.MeterErrorReport.from_event/1` instead — it is the only
+  path that can populate `:meter`.
+  """
+  @spec meter_error_report(map()) :: Billing.MeterErrorReport.t()
+  def meter_error_report(raw_map), do: Billing.MeterErrorReport.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Customer fixture map into `%LatticeStripe.Customer{}`.
+  """
+  @spec customer(map()) :: Customer.t()
+  def customer(raw_map), do: Customer.from_map(raw_map)
+
+  @doc """
+  Converts a canonical PaymentIntent fixture map into `%LatticeStripe.PaymentIntent{}`.
+  """
+  @spec payment_intent(map()) :: PaymentIntent.t()
+  def payment_intent(raw_map), do: PaymentIntent.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Subscription fixture map into `%LatticeStripe.Subscription{}`.
+  """
+  @spec subscription(map()) :: Subscription.t()
+  def subscription(raw_map), do: Subscription.from_map(raw_map)
+
+  @doc """
+  Converts a canonical Invoice fixture map into `%LatticeStripe.Invoice{}`.
+  """
+  @spec invoice(map()) :: Invoice.t()
+  def invoice(raw_map), do: Invoice.from_map(raw_map)
 
   @doc """
   Converts a canonical thin-event notification fixture map into

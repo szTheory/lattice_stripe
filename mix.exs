@@ -106,6 +106,25 @@ defmodule LatticeStripe.MixProject do
            ]},
           {"Changelog", ["CHANGELOG.md"]}
         ],
+        # Regex patterns, not enumerated module lists. ExDoc performs ZERO validation of
+        # groups_for_modules entries (deps/ex_doc/lib/ex_doc/config.ex:240-268): a phantom
+        # atom naming a module that does not exist simply never matches, silently. That is
+        # how `LatticeStripe.Testing.TestClock.Error` sat here undetected while the real
+        # module, TestClockError, fell out of the sidebar. Patterns self-file new modules
+        # and cannot go stale the same way.
+        #
+        # The ($|\.) anchor is LOAD-BEARING. It is what keeps sibling prefixes apart
+        # without ordering hacks: `Billing($|\.)` deliberately does not match
+        # BillingPortal.Session, and likewise Tax/TaxId, Transfer/TransferReversal,
+        # Balance/BalanceTransaction, File/FileLink, Invoice/InvoiceItem,
+        # Account/AccountLink, Subscription/SubscriptionItem. Each such sibling is listed
+        # explicitly in its own alternation. An unanchored prefix would mis-group all eight.
+        #
+        # Matching is first-match-wins, so order matters. Coverage — every public module in
+        # at least one group — is asserted by the totality test in docs_truth_test.exs;
+        # ExDoc itself would silently dump an unmatched module into a generic "Modules"
+        # bucket. Note ExDoc also auto-appends "Deprecated" and "Exceptions" groups after
+        # these (config.ex:72-77).
         groups_for_modules: [
           "Client & Configuration": [
             LatticeStripe,
@@ -119,150 +138,29 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Request
           ],
           Payments: [
-            LatticeStripe.PaymentIntent,
-            LatticeStripe.Customer,
-            LatticeStripe.PaymentMethod,
-            LatticeStripe.Mandate,
-            LatticeStripe.Mandate.CustomerAcceptance,
-            LatticeStripe.Mandate.SingleUse,
-            LatticeStripe.SetupAttempt,
-            LatticeStripe.SetupAttempt.SetupError,
-            LatticeStripe.SetupIntent,
-            LatticeStripe.Refund,
-            LatticeStripe.Dispute,
-            LatticeStripe.Dispute.Evidence,
-            LatticeStripe.Dispute.EvidenceDetails,
-            LatticeStripe.Dispute.PaymentMethodDetails
+            ~r/^LatticeStripe\.(PaymentIntent|PaymentMethod|Customer|Mandate|SetupAttempt|SetupIntent|Refund|Dispute|Charge|Card)($|\.)/
           ],
-          Checkout: [
-            LatticeStripe.Checkout.Session,
-            LatticeStripe.Checkout.LineItem
-          ],
+          Checkout: [~r/^LatticeStripe\.Checkout($|\.)/],
           Billing: [
-            LatticeStripe.Invoice,
-            LatticeStripe.Invoice.LineItem,
-            LatticeStripe.CreditNote,
-            LatticeStripe.CreditNote.LineItem,
-            LatticeStripe.Quote,
-            LatticeStripe.Quote.LineItem,
-            LatticeStripe.Quote.Computed,
-            LatticeStripe.Quote.StatusTransitions,
-            LatticeStripe.Invoice.StatusTransitions,
-            LatticeStripe.Invoice.AutomaticTax,
-            LatticeStripe.InvoiceItem,
-            LatticeStripe.InvoiceItem.Period,
-            LatticeStripe.Subscription,
-            LatticeStripe.Subscription.CancellationDetails,
-            LatticeStripe.Subscription.PauseCollection,
-            LatticeStripe.Subscription.TrialSettings,
-            LatticeStripe.SubscriptionItem,
-            LatticeStripe.SubscriptionSchedule,
-            LatticeStripe.SubscriptionSchedule.Phase,
-            LatticeStripe.SubscriptionSchedule.CurrentPhase,
-            LatticeStripe.SubscriptionSchedule.PhaseItem,
-            LatticeStripe.SubscriptionSchedule.AddInvoiceItem
+            ~r/^LatticeStripe\.(Invoice|InvoiceItem|CreditNote|Quote|Subscription|SubscriptionItem|SubscriptionSchedule|Coupon|Price|Product|PromotionCode)($|\.)/
           ],
-          "Customer Portal": [
-            LatticeStripe.BillingPortal.Session,
-            LatticeStripe.BillingPortal.Session.FlowData,
-            LatticeStripe.BillingPortal.Session.FlowData.AfterCompletion,
-            LatticeStripe.BillingPortal.Session.FlowData.SubscriptionCancel,
-            LatticeStripe.BillingPortal.Session.FlowData.SubscriptionUpdate,
-            LatticeStripe.BillingPortal.Session.FlowData.SubscriptionUpdateConfirm,
-            LatticeStripe.BillingPortal.Configuration,
-            LatticeStripe.BillingPortal.Configuration.Features,
-            LatticeStripe.BillingPortal.Configuration.Features.CustomerUpdate,
-            LatticeStripe.BillingPortal.Configuration.Features.PaymentMethodUpdate,
-            LatticeStripe.BillingPortal.Configuration.Features.SubscriptionCancel,
-            LatticeStripe.BillingPortal.Configuration.Features.SubscriptionUpdate
-          ],
-          "Billing Metering": [
-            LatticeStripe.Billing.Meter,
-            LatticeStripe.Billing.Meter.DefaultAggregation,
-            LatticeStripe.Billing.Meter.CustomerMapping,
-            LatticeStripe.Billing.Meter.ValueSettings,
-            LatticeStripe.Billing.Meter.StatusTransitions,
-            LatticeStripe.Billing.MeterEvent,
-            LatticeStripe.Billing.MeterEventAdjustment,
-            LatticeStripe.Billing.MeterEventAdjustment.Cancel,
-            LatticeStripe.Billing.MeterEventStream,
-            LatticeStripe.Billing.MeterEventStream.Session
-          ],
-          Entitlements: [
-            LatticeStripe.Entitlements.ActiveEntitlement,
-            LatticeStripe.Entitlements.ActiveEntitlementSummary,
-            LatticeStripe.Entitlements.Feature
-          ],
+          "Customer Portal": [~r/^LatticeStripe\.BillingPortal($|\.)/],
+          "Billing Metering": [~r/^LatticeStripe\.Billing($|\.)/],
+          Entitlements: [~r/^LatticeStripe\.Entitlements($|\.)/],
+          Tax: [~r/^LatticeStripe\.(Tax|TaxId)($|\.)/],
           Connect: [
-            LatticeStripe.Account,
-            LatticeStripe.Account.BusinessProfile,
-            LatticeStripe.Account.Capability,
-            LatticeStripe.Account.Company,
-            LatticeStripe.Account.Individual,
-            LatticeStripe.Account.Requirements,
-            LatticeStripe.Account.Settings,
-            LatticeStripe.Account.TosAcceptance,
-            LatticeStripe.AccountLink,
-            LatticeStripe.LoginLink,
-            LatticeStripe.BankAccount,
-            LatticeStripe.Card,
-            LatticeStripe.ExternalAccount,
-            LatticeStripe.ExternalAccount.Unknown,
-            LatticeStripe.Transfer,
-            LatticeStripe.TransferReversal,
-            LatticeStripe.Payout,
-            LatticeStripe.Payout.TraceId,
-            LatticeStripe.Balance,
-            LatticeStripe.Balance.Amount,
-            LatticeStripe.Balance.SourceTypes,
-            LatticeStripe.BalanceTransaction,
-            LatticeStripe.BalanceTransaction.FeeDetail,
-            LatticeStripe.Charge
+            ~r/^LatticeStripe\.(Account|AccountLink|LoginLink|BankAccount|ExternalAccount|Transfer|TransferReversal|Payout|Balance|BalanceTransaction)($|\.)/
           ],
-          Webhooks: [
-            LatticeStripe.Webhook,
-            LatticeStripe.Webhook.Plug,
-            LatticeStripe.Webhook.Handler,
-            LatticeStripe.Webhook.SignatureVerificationError,
-            LatticeStripe.Event,
-            LatticeStripe.EventNotification,
-            LatticeStripe.EventNotification.RelatedObject
-          ],
-          Telemetry: [
-            LatticeStripe.Telemetry
-          ],
-          Testing: [
-            LatticeStripe.Testing,
-            LatticeStripe.Testing.Fixtures,
-            LatticeStripe.Testing.Fixtures.File,
-            LatticeStripe.Testing.Fixtures.FileLink,
-            LatticeStripe.Testing.Fixtures.Dispute,
-            LatticeStripe.Testing.Fixtures.CreditNote,
-            LatticeStripe.Testing.Fixtures.Mandate,
-            LatticeStripe.Testing.Fixtures.SetupAttempt,
-            LatticeStripe.Testing.Fixtures.Quote,
-            LatticeStripe.Testing.Fixtures.TaxCalculation,
-            LatticeStripe.Testing.Fixtures.TaxTransaction,
-            LatticeStripe.Testing.Fixtures.TaxId,
-            LatticeStripe.Testing.TestClock,
-            LatticeStripe.Testing.TestClock.Owner,
-            LatticeStripe.Testing.TestClock.Error
-          ],
-          Internals: [
-            LatticeStripe.Transport,
-            LatticeStripe.Transport.Finch,
-            LatticeStripe.Json,
-            LatticeStripe.Json.Jason,
-            LatticeStripe.RetryStrategy,
-            LatticeStripe.RetryStrategy.Default,
-            LatticeStripe.FormEncoder,
-            LatticeStripe.Resource,
-            LatticeStripe.Billing.Guards
-          ],
-          "Param Builders": [
-            LatticeStripe.Builders.SubscriptionSchedule,
-            LatticeStripe.Builders.BillingPortal
-          ]
+          Files: [~r/^LatticeStripe\.(File|FileLink)($|\.)/],
+          Webhooks: [~r/^LatticeStripe\.(Webhook|Event|EventNotification)($|\.)/],
+          Telemetry: [~r/^LatticeStripe\.Telemetry($|\.)/],
+          Testing: [~r/^LatticeStripe\.(Testing|TestHelpers)($|\.)/],
+          "Param Builders": [~r/^LatticeStripe\.Builders($|\.)/],
+          # Renamed from "Internals": these three behaviours are what
+          # guides/api_stability.md already calls designed-in extension points, so the old
+          # name contradicted the guide.
+          "Extension Points": [~r/^LatticeStripe\.(Transport|Json|RetryStrategy)($|\.)/],
+          "Mix Tasks": [~r/^Mix\.Tasks\./]
         ]
       ],
       package: package(),
@@ -317,7 +215,7 @@ defmodule LatticeStripe.MixProject do
         "Changelog" => "#{@source_url}/blob/main/CHANGELOG.md",
         "HexDocs" => "https://hexdocs.pm/lattice_stripe"
       },
-      files: ["lib", "mix.exs", "README.md", "CHANGELOG.md", "LICENSE"]
+      files: ["lib", "priv/api", "mix.exs", "README.md", "CHANGELOG.md", "LICENSE"]
     ]
   end
 
@@ -331,6 +229,7 @@ defmodule LatticeStripe.MixProject do
         "compile --warnings-as-errors",
         "credo --strict",
         "test",
+        "lattice_stripe.api_surface --check",
         "docs --warnings-as-errors"
       ]
     ]

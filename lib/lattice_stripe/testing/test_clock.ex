@@ -47,7 +47,10 @@ defmodule LatticeStripe.Testing.TestClock do
   ## Cleanup strategy
 
   Every clock created via `test_clock/1` is registered with a per-test
-  `Owner` GenServer (internal, not part of the public API). On test exit
+  `LatticeStripe.Testing.TestClock.Owner` GenServer. You do not interact with it
+  directly — `test_clock/1` owns its lifecycle — but it is documented rather than
+  hidden, because it has shipped with a `@moduledoc` since 1.0.0 and is therefore
+  public API under `guides/api_stability.md`. On test exit
   (including crash / assertion failure), the Owner deletes each
   registered clock via `LatticeStripe.TestHelpers.TestClock.delete/3`.
   Stripe's delete cascades to attached Customers and Subscriptions.

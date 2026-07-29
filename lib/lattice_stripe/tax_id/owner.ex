@@ -1,5 +1,14 @@
 defmodule LatticeStripe.TaxId.Owner do
-  @moduledoc false
+  @moduledoc """
+  The `owner` object embedded in a Stripe Tax ID.
+
+  Reachable from `t:LatticeStripe.TaxId.t/0`. `:type` says which of the sibling fields is
+  populated — a tax ID may belong to an account, an application, or a customer — so
+  match on `:type` rather than probing the fields for a non-nil value.
+
+  Embedded value struct: fields are additive. Keys Stripe adds later appear under
+  `:extra` rather than being dropped, so a new field never breaks decoding.
+  """
 
   alias LatticeStripe.ObjectTypes
 

@@ -25,9 +25,16 @@ defmodule LatticeStripe.Billing.MeterEvent do
   ## Params
 
   - `event_name` (required, string) — must match a `Billing.Meter.event_name`
-  - `payload` (required, map) — customer-mapping key plus the numeric value (for
-    sum/last meters); the payload key that carries the value is the meter's
-    `value_settings.event_payload_key` (default `"value"`)
+  - `payload` (required, map) — carries the customer-mapping key and, for
+    `sum`/`last` meters, the value key named by the meter's
+    `value_settings.event_payload_key` (default `"value"`) — **plus any number of
+    additional custom dimension keys of your choosing**, which Stripe stores and
+    this library passes through without filtering. Pass decimal values as
+    **strings**: a float goes through Elixir's default stringifier, which can put
+    the value on the wire in scientific notation. See `guides/metering.md` → "The
+    payload contract" for the coercion table, the flat-only and cardinality rules,
+    and the fact that dimensions cannot be read back grouped on the generally
+    available API.
   - `timestamp` (optional, integer — Unix seconds) — when the usage occurred;
     must be within the 35-day backdating window and no more than 5 minutes in
     the future

@@ -102,6 +102,28 @@ defmodule LatticeStripe.DriftTest do
       assert MapSet.member?(fields, "customer")
     end
 
+    # LOAD-BEARING (D-20): Drift.parse_known_fields/1 must accept BOTH word-sigil
+    # delimiter pairs. 18 files in lib/ use the parenthesised form; before the regex
+    # was widened they all parsed to an empty MapSet and produced a spurious drift
+    # entry claiming every field on the object was a new addition. Narrowing the
+    # regex back to square brackets only must fail exactly this test.
+    test "extracts @known_fields from the parenthesised ~w() form (D-20 regression lock)" do
+      assert {:ok, fields} = Drift.known_fields_for(LatticeStripe.Billing.Meter)
+
+      refute Enum.empty?(fields)
+      assert MapSet.member?(fields, "id")
+      assert MapSet.member?(fields, "display_name")
+      assert MapSet.member?(fields, "event_name")
+    end
+
+    test "still extracts @known_fields from the square-bracket ~w[] form" do
+      assert {:ok, fields} = Drift.known_fields_for(LatticeStripe.TransferReversal)
+
+      refute Enum.empty?(fields)
+      assert MapSet.member?(fields, "id")
+      assert MapSet.member?(fields, "amount")
+    end
+
     test "returns {:error, :no_source} when source path is nil" do
       # Hard to test without a mock module that returns nil from __info__(:compile)[:source].
       # Skipping direct test — covered by the nil guard in known_fields_for/1 implementation.

@@ -108,27 +108,46 @@ Metering truth is asynchronous. Your reconciliation path should assume that some
 will fail later even after the initial API request looked fine.
 
 Use your webhook handling to route downstream meter-processing failures into operator or
-repair workflows:
+repair workflows. `v1.billing.meter.error_report_triggered` is a **v2 thin event**: the body
+Stripe POSTs to your endpoint is an announcement carrying `id`, `type`, `created`,
+`related_object` and a `reason` — and no `data` member at all. So the handler's first move is
+to re-request the versioned event over your authenticated channel, which is also what makes
+the payload trustworthy: the delivered body is attacker-reachable, the fetched event is not.
 
 ```elixir
-defmodule MyApp.StripeWebhookHandler do
-  @behaviour LatticeStripe.Webhook.Handler
+alias LatticeStripe.{EventNotification, Webhook}
+alias LatticeStripe.Billing.MeterErrorReport
 
-  @impl true
-  def handle_event(%LatticeStripe.Event{type: "v1.billing.meter.error_report_triggered"} = event) do
-    error_report = event.data["object"]
-    MyApp.Billing.enqueue_meter_reconciliation(error_report["id"])
-    :ok
-  end
+def handle_notification(
+      %EventNotification{type: "v1.billing.meter.error_report_triggered"} = notif,
+      client
+    ) do
+  # NOT optional: `data` is a fetched attribute and the delivered body does not
+  # carry it. Skip this and there is nothing to decode.
+  {:ok, event} = Webhook.fetch_event(client, notif)
+  report = MeterErrorReport.from_event(event)
 
-  @impl true
-  def handle_event(_event), do: :ok
+  MyApp.Billing.enqueue_meter_reconciliation(
+    report.meter,
+    report.validation_start,
+    report.validation_end
+  )
 end
 ```
 
+`report.meter` is lifted from the event envelope's `related_object`, not from `data`, so only
+`MeterErrorReport.from_event/1` can populate it. `validation_start` and `validation_end`
+delimit the window of usage the report covers, and they arrive as RFC3339 strings rather than
+Unix integers. For the full walk over `reason.error_types` and their sample errors, the error
+code table, and the remediation patterns, see
+[Reconciliation via webhooks](metering.md#reconciliation-via-webhooks) in the metering guide.
+
 This is where the correlation metadata from the original meter event starts paying for
 itself. When an operator needs to trace the failure back to a request, account, or internal
-job, the event identity should already exist.
+job, the event identity should already exist. The correlation key Stripe hands back is
+`request_identifier` on each sample error — and that value is the **HTTP idempotency key of
+the failing write**, so a caller who lets the library generate one has nothing to join
+against.
 
 ## 5. Correct mistakes with `MeterEventAdjustment`
 
@@ -166,7 +185,9 @@ Keep test fixtures and replay-safe worker logic close to the metering path. Veri
 
 ## Runtime footguns to keep in view
 
-- Do not emit bare integers when the meter expects a numeric string payload value.
+- Do not emit decimal values as floats. A float goes through the default stringifier and can
+  reach the wire in scientific notation; pass decimals as strings. (A bare integer is fine on
+  the v1 API — see [The payload contract](metering.md#the-payload-contract).)
 - Do not let browser code own meter-event writes.
 - Do not treat accepted create responses as billed truth.
 - Do not rely on immediate re-query or search as your main correctness story.
