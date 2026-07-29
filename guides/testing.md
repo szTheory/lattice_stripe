@@ -11,8 +11,8 @@ For Stripe's official testing documentation (test card numbers, bank accounts, e
 
 ## Public fixture builders
 
-LatticeStripe now ships canonical raw-map fixtures for the v1.3 resource families under
-`LatticeStripe.Testing.Fixtures.*`.
+LatticeStripe ships canonical raw-map fixtures under `LatticeStripe.Testing.Fixtures.*`. These
+modules are the canonical fixture source of truth for the resource families LatticeStripe ships.
 
 These modules are the recommended starting point when you want realistic Stripe-shaped
 payloads in downstream application tests:
@@ -40,7 +40,7 @@ The raw map is the canonical test shape. Build other forms explicitly on top:
 
 - `LatticeStripe.Testing.generate_webhook_event/3` for `%LatticeStripe.Event{}`
 - `LatticeStripe.Testing.generate_webhook_payload/3` for signed raw webhook payloads
-- `LatticeStripe.Testing.quote/1`, `dispute/1`, `credit_note/1`, `tax_calculation/1`, `tax_transaction/1`, `tax_id/1`, `active_entitlement/1`, `meter_event/1`, `customer/1`, `payment_intent/1`, `subscription/1`, `invoice/1`, and friends for typed structs
+- `LatticeStripe.Testing.quote/1`, `dispute/1`, `credit_note/1`, `tax_calculation/1`, `tax_transaction/1`, `tax_id/1`, `active_entitlement/1`, `active_entitlement_summary/1`, `meter_event/1`, `meter_event_summary/1`, `customer/1`, `payment_intent/1`, `subscription/1`, `invoice/1`, and friends for typed structs
 
 ## Tax
 

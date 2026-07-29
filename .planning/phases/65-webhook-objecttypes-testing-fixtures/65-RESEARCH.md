@@ -88,7 +88,7 @@ Phase 65 is small in code volume and disproportionately large in *decision* cont
 mechanically distinct jobs sharing one phase:
 
 **Job A (OBJ-01) — four registry rows.** `lib/lattice_stripe/object_types.ex` is a single
-47-entry compile-time map (`@object_map`) at module attribute scope with a three-clause
+48-entry compile-time map (`@object_map`) at module attribute scope with a three-clause
 `maybe_deserialize/1` and a `fetch_module/1` accessor. Adding a key is a one-line insertion.
 **All four target modules already exist and all four already expose a working `from_map/1`** — I
 executed each one against its existing fixture this session and confirmed a typed struct comes
@@ -286,7 +286,7 @@ why (Phase 64 D-20 + the `drift.ex` regex fix in 64-02). Do not "normalize" it t
                                           ▼
                     ╔═════════════════════════════════════════════╗
                     ║ lib/lattice_stripe/object_types.ex          ║
-                    ║ @object_map  (47 rows today → 51 after 65)  ║
+                    ║ @object_map  (48 rows today → 52 after 65)  ║
                     ║                                             ║
                     ║ maybe_deserialize(nil)        → nil         ║
                     ║ maybe_deserialize(binary)     → binary      ║
@@ -615,7 +615,7 @@ reads that as "write a new test." **Phase 64 Plan 04 already wrote it**, twice:
 **How to avoid:** Phase 65's task is to **verify these two tests are present and green** after the
 four rows are added (they are the regression proof that adding rows did not tempt a fifth), not to
 write new ones. If the planner wants an additional lock, the useful new one is a *count* assertion
-(`map_size(ObjectTypes.object_map()) == 51`) — but that is brittle against Phase 66's
+(`map_size(ObjectTypes.object_map()) == 52`) — but that is brittle against Phase 66's
 `product.feature` row and is **not recommended**.
 **Warning signs:** Two near-identical `describe` blocks in `object_types_test.exs`.
 [VERIFIED: file read directly; both tests currently green in a 2305-test run]

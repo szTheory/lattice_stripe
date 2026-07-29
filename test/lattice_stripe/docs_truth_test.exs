@@ -647,6 +647,50 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ "invoice/1"
   end
 
+  test "guides/testing.md names every public fixture module Phase 65 published" do
+    # The per-plan tests above each lock their own bullet, so dropping ONE bullet
+    # fails one narrow test that a reader may not connect to the guide as a whole.
+    # This is the consolidated lock: the full Phase 65 set asserted in one place,
+    # so a bulk edit to the bullet list cannot silently shrink the published
+    # surface. Structural, not decorative — a module missing from this list is a
+    # module an adopter never discovers.
+    guide = File.read!("guides/testing.md")
+
+    for module <- [
+          "LatticeStripe.Testing.Fixtures.Entitlements",
+          "LatticeStripe.Testing.Fixtures.MeterEvent",
+          "LatticeStripe.Testing.Fixtures.MeterEventSummary",
+          "LatticeStripe.Testing.Fixtures.MeterErrorReport",
+          "LatticeStripe.Testing.Fixtures.Customer",
+          "LatticeStripe.Testing.Fixtures.PaymentIntent",
+          "LatticeStripe.Testing.Fixtures.Subscription",
+          "LatticeStripe.Testing.Fixtures.Invoice"
+        ] do
+      assert guide =~ "- `#{module}`",
+             "guides/testing.md is missing the public-fixture bullet for #{module}"
+    end
+
+    # The typed-wrapper sentence must name every wrapper the phase added, including
+    # the two summary wrappers whose objects have no id / no object key.
+    for wrapper <- [
+          "active_entitlement/1",
+          "active_entitlement_summary/1",
+          "meter_event/1",
+          "meter_event_summary/1",
+          "customer/1",
+          "payment_intent/1",
+          "subscription/1",
+          "invoice/1"
+        ] do
+      assert guide =~ "`#{wrapper}`",
+             "guides/testing.md typed-wrapper sentence is missing #{wrapper}"
+    end
+
+    # The version-pinned claim this phase removed must not come back: a moduledoc or
+    # guide that pins the fixture surface to a release number goes stale every phase.
+    refute guide =~ "v1.3 resource families"
+  end
+
   test "metering guide and the Phase 64 metering modules keep their ExDoc placement" do
     docs = docs_config()
     groups = docs[:groups_for_extras] |> Map.new()

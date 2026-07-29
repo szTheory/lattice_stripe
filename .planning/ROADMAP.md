@@ -33,7 +33,7 @@
 - [ ] **Phase 62: "1.1 → 1.7 What Landed" Migration Guide** - Zero-code HexDocs guide enumerating every surface shipped since 1.1 (Wave 0)
 - [x] **Phase 63: Stripe-Native Entitlements** - Pull/paginate active entitlements + manage entitlement features (Wave 1, flagship) (completed 2026-07-28)
 - [x] **Phase 64: Meter Event-Summary Reads** - Read metered usage totals back from Stripe (Wave 2) (completed 2026-07-28)
-- [ ] **Phase 65: Webhook ObjectTypes & Testing Fixtures** - Five entitlement/meter object types deserialize; public fixtures (Wave 2)
+- [ ] **Phase 65: Webhook ObjectTypes & Testing Fixtures** - Four entitlement/meter object types deserialize; public fixtures (Wave 2)
 - [ ] **Phase 66: Product ↔ Feature Attachment** - Attach/list/delete product features + typed `Product.features` (Wave 3)
 - [ ] **Phase 67: DX Hardening & Milestone Doc Close** - Error `retry_after`, public `CacheBodyReader`, `Charge.create`-by-design docs (Wave 3)
 
@@ -152,7 +152,7 @@
 
 ### Phase 65: Webhook ObjectTypes & Testing Fixtures
 
-**Goal**: The five missing entitlement/meter webhook object types deserialize into typed structs, and public fixtures cover them plus core billing objects.
+**Goal**: The four missing entitlement/meter webhook object types deserialize into typed structs, and public fixtures cover them plus core billing objects.
 **Depends on**: Phase 63 (Entitlements modules), Phase 64 (`MeterErrorReport` + `EventSummary` modules)
 **Requirements**: OBJ-01, OBJ-02, OBJ-03
 **Success Criteria** (what must be TRUE):

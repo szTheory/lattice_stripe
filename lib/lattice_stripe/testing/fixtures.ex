@@ -4,8 +4,8 @@ defmodule LatticeStripe.Testing.Fixtures do
 
   The resource-specific modules under `LatticeStripe.Testing.Fixtures.*` return
   Stripe-shaped maps that act as the canonical fixture source of truth for the
-  v1.3 resource families. Build `%LatticeStripe.Event{}` structs, signed webhook
-  payloads, and typed resource structs on top of these maps via
+  resource families LatticeStripe ships. Build `%LatticeStripe.Event{}` structs,
+  signed webhook payloads, and typed resource structs on top of these maps via
   `LatticeStripe.Testing`.
   """
 end
