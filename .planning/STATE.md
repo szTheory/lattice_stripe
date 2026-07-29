@@ -2,13 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
-current_phase: 65
-current_phase_name: webhook-objecttypes-testing-fixtures
 status: executing
 stopped_at: Completed 65-04-PLAN.md
-last_updated: "2026-07-29T02:40:13.035Z"
-last_activity: 2026-07-29
-last_activity_desc: Phase 65 execution started
+last_updated: "2026-07-29T02:46:27.523Z"
+last_activity: 2026-07-29 -- Phase 65 execution started
 progress:
   total_phases: 4
   completed_phases: 3
@@ -123,6 +120,7 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 - [Phase ?]: Registered exactly three registry rows; billing.meter_error_report stays out — its v2 thin-event payload has no "object" key so the row would be a dead key (Phase 64 F-13/D-14)
 - [Phase ?]: No map_size count assertion on @object_map — brittle against Phase 66's product.feature row; per-key fetch_module/1 assertions cover it instead
 - [Phase ?]: Open question Q3 resolved NO: meter_event.ex gets no @known_fields, since from_map/1 never consults it and a decorative attribute would read as load-bearing
+- [Phase ?]: **[65-03]** Q2 = `move-and-rename` (operator decision, one-way door): the three private core-billing fixtures (customer, payment_intent, subscription) are MOVED into lib/lattice_stripe/testing/fixtures/ — no private twin remains, so drift is structurally impossible and no drift lock is needed; `Subscription.basic/1` is renamed to `subscription_json/1` on promotion, joining the dominant `<object>_json` convention (11 of 14 public fixture modules, ~30 functions) rather than the 3 meter modules' `basic/1`, which are artifacts of 65-02's verbatim-movement rule. Follow-up for a later phase (NOT this one): the three meter `basic/1` builders are now the public-surface outliers and are worth aligning before the Hex 1.8.0 tag.
 
 ### Blockers/Concerns
 
