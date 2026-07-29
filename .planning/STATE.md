@@ -5,15 +5,15 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 65
 current_phase_name: webhook-objecttypes-testing-fixtures
 status: executing
-stopped_at: Completed 65-01-PLAN.md
-last_updated: "2026-07-29T02:21:08.377Z"
+stopped_at: Completed 65-02-PLAN.md
+last_updated: "2026-07-29T02:31:50.116Z"
 last_activity: 2026-07-29
 last_activity_desc: Phase 65 execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 25
-  completed_plans: 20
+  completed_plans: 21
   percent: 75
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 65 (webhook-objecttypes-testing-fixtures) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-07-29 -- Phase 65 execution started
 
@@ -67,6 +67,7 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 | Phase 63 P07 | 12min | 2 tasks | 3 files |
 | Phase 64 P04 | 21min | 3 tasks | 8 files |
 | Phase 65 P01 | 5min | 2 tasks | 12 files |
+| Phase 65 P02 | 7min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,10 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 - [Phase ?]: [65-01] @object_map is now 49 rows (was 48); "entitlements.active_entitlement" appended at the family-grouped tail, NOT alphabetically — the map is only roughly alphabetical through "transfer_reversal" and mix format never reorders map keys. 65-04 takes it to 52.
 - [Phase ?]: [65-01] Fully-qualified nested calls in tests trip mix credo --strict Design.AliasUsage — alias the promoted fixture at the top of the test module (the MeterErrorReportFixture convention); expansion plans should alias from the start
 - [Phase ?]: [65-01] ExDoc warning count held at the 38 baseline with 0 matching entitlement|meter|testing|fixture — the differential docs gate stays usable for the rest of Phase 65
+- [Phase ?]: [65-02] Q1 = flat-three: promote exactly three meter fixtures to public FLAT depth-3 names — LatticeStripe.Testing.Fixtures.MeterEvent / .MeterEventSummary / .MeterErrorReport. One-way door; semver-covered at Hex 1.8.0. 65-04 writes dispatch tests against these exact names.
+- [Phase ?]: [65-02] Meter, MeterEventAdjustment and MeterEventStreamSession stay PRIVATE in test/support/fixtures/metering.ex — no requirement names them, so semver surface grows only where OBJ-01/OBJ-02 require. No Testing.Fixtures.Metering namespace exists; zero depth-4 public fixture names.
+- [Phase ?]: [65-02] The Phase-64 in-source nested-promotion header on metering.ex was SUPERSEDED and replaced with a note recording flat-three, not deleted silently.
+- [Phase ?]: [65-02] Promoted fixtures need 'as: <Object>Fixture' aliases in callers: the flat name collides with the LatticeStripe.Billing struct alias already in the same test module.
 
 ### Blockers/Concerns
 
@@ -138,8 +143,8 @@ Last activity: 2026-07-29 -- Phase 65 execution started
 
 ## Session Continuity
 
-**Last session:** 2026-07-29T02:20:52.536Z
-**Stopped at:** Completed 65-01-PLAN.md
+**Last session:** 2026-07-29T02:31:50.103Z
+**Stopped at:** Completed 65-02-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
