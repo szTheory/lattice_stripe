@@ -316,6 +316,97 @@ def handle_api_request(conn, customer_id) do
 end
 ```
 
+## The payload contract
+
+`payload` is the one part of a meter event you design yourself, and it is the one
+part with no schema to check it against. Stripe types it as an object whose values
+must all be strings; this library's encoder is a generic flattener that will
+faithfully encode things Stripe then refuses. Here is what actually reaches the
+wire.
+
+| You pass | What goes on the wire | Verdict |
+|---|---|---|
+| `"value" => "5"` | `payload[value]=5` | Safe. The documented shape. |
+| `"value" => 5` | `payload[value]=5` | Safe on v1 — byte-identical to the string form. |
+| `"value" => "0.000001"` | `payload[value]=0.000001` | Safe. A string is passed through, never computed on. |
+| `"value" => "0.123456789012345678901234567890123456"` | the same 36 digits | Safe. No rounding, no truncation. |
+| `"value" => 0.0001` | `payload[value]=0.0001` | Survives — but it is a float. See Rule 2. |
+| `"value" => 0.00001` | `payload[value]=1.0e-5` | **The cliff.** Exponent notation reaches Stripe. |
+| `"value" => 0.1 + 0.2` | `payload[value]=0.30000000000000004` | Binary-float artifact, sent unrepaired. |
+| `"region" => "us-west-2"` | `payload[region]=us-west-2` | Any dimension key you like. There is no allowlist. |
+| `"meta" => %{"a" => "b"}` | `payload[meta][a]=b` | **Stripe rejects it.** Values must be strings. |
+| `"tags" => ["a", "b"]` | `payload[tags][0]=a&payload[tags][1]=b` | Same — a list is not a string either. |
+| `"value" => nil` | *(the key vanishes)* | Silently dropped. Send `"0"`, never `nil`. |
+
+Four rules follow from that table, ordered by what they cost you when you get them
+wrong.
+
+### Rule 1 — flat only
+
+Payload values must be strings as far as Stripe is concerned. This library's
+encoder will happily flatten a nested map into bracketed keys, so the SDK lets you
+build a request Stripe refuses; the rejection comes back naming the offending kind
+(a map, a list). Keep every payload value a scalar, one level deep. If you have
+structured data, flatten it into separate keys yourself before you call.
+
+### Rule 2 — decimals as strings
+
+A decimal passed as a **string** survives byte-exact to at least 36 significant
+digits. A decimal passed as a **float** goes through Elixir's default stringifier,
+which flips to scientific notation at `0.00001` — one decimal place away from
+values people genuinely bill on, such as a per-token cost. The point is not that
+the cliff exists somewhere far away; it is that the cliff is close.
+
+Elixir's threshold is the narrowest in the ecosystem: Node flips a decimal place
+later, and stripe-go formats with a verb that never emits exponent form at all.
+Elixir is the language most likely to put an exponent on your wire.
+
+Binary floating point also produces artifacts of its own, before any
+stringification: adding two ordinary decimals can yield a long tail of digits
+(`0.1 + 0.2` becomes `0.30000000000000004`), and that tail is sent as-is.
+
+So: **pass decimals as strings, because Stripe does not document whether its parser
+accepts exponent notation, so do not rely on it either way.**
+
+One more consequence of the table: a `nil` value vanishes from the encoded body
+entirely rather than being sent as empty, so a zero must be sent as a string zero
+(`"0"`).
+
+### Rule 3 — cardinality
+
+Every distinct dimension value becomes its own series. Keep the value set bounded
+and enumerable — `"region"`, `"sku"`, `"tenant_tier"` are dimensions; a user id, a
+request id, or a session id is not. Never put an unbounded identifier in a
+dimension.
+
+### Rule 4 — dimensions are write-only on the generally available API
+
+This is the rule that saves a week. On the GA API **you cannot read usage back
+grouped by a custom dimension.** Stripe stores your dimensions, and offers no way
+to group by them: the summary object has no dimensions field, a group-by parameter
+on the read is rejected, and Stripe's canonical meter-configuration documentation
+does not mention dimensions at all. Dimension grouping exists only in preview.
+
+The workarounds are one meter per dimension value, or your own event store
+alongside Stripe's. Choose before you design the payload, not after.
+
+For what reads *are* possible today, see
+[Reading usage back](#reading-usage-back).
+
+### Why the idempotency key on a write is a read-path decision
+
+When a meter event fails validation asynchronously, the only correlation key
+Stripe hands back is the HTTP idempotency key of the failing request. This library
+**auto-generates** one for every write when the caller does not supply
+`idempotency_key:` — a value created inside the request, used once, and never
+returned to you. Let it default and the only join key in the error report points
+at something that exists nowhere in your system.
+
+Pass a domain-derived `idempotency_key:` on every meter event write, one you can
+look up later. The fire-and-forget recipe above already does this; the reason is
+that error reports are useless without it. See
+[Reconciliation via webhooks](#reconciliation-via-webhooks).
+
 ## Corrections and adjustments
 
 ### MeterEventAdjustment.create/3
