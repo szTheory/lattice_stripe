@@ -41,9 +41,9 @@
 | meter-event fixture + `Testing.meter_event/1` wrapper | INTEGRATE | |
 | meter-event-summary fixture + `Testing.meter_event_summary/1` wrapper | INTEGRATE | |
 | meter-error-report fixture (public) | INTEGRATE | OBJ-02 says "meter objects"; its 25-line verbatim-from-Stripe provenance comment is worth publishing. |
-| `Testing.meter_error_report/1` typed wrapper | OPT-OUT | The fixture is promoted, but this object is decoded by `Billing.MeterErrorReport.from_event/1`, not `from_map/1` — it is v2 thin-event `data`, not a `%{"object" => _}` envelope (F-13/D-14). A `from_map`-shaped wrapper would misrepresent how the object is actually consumed and imply a decode path that does not exist. OBJ-02's "each with a typed-conversion wrapper" is satisfied for every fixture that has a `from_map/1` to wrap. |
-| `Meter`, `MeterEventAdjustment`, `MeterEventStreamSession` fixtures | OPT-OUT | Pending Q1 checkpoint (65-02). OBJ-02 names neither; promoting them expands the semver-covered surface for free with no requirement asking for it. They stay private in `test/support/fixtures/`. If the operator overrules Q1 toward "promote all six", this row is struck at the checkpoint. |
-| `Testing.Fixtures.Entitlements.Feature` typed wrapper (`Testing.feature/1`) | OPT-OUT | The fixture is promoted (it is one of the four functions carried over unchanged), but `Entitlements.Feature` typed-struct conversion is not named by OBJ-02, which scopes wrappers to "entitlement + meter objects (incl. the no-`id` summary)". Adding the wrapper later is additive and non-breaking. |
+| `Testing.meter_error_report/1` typed wrapper | INTEGRATE | **Reversed post-verification (UAT checkpoint 2).** The original opt-out rationale was factually wrong: it asserted OBJ-02 was satisfied "for every fixture that has a `from_map/1` to wrap", but `LatticeStripe.Billing.MeterErrorReport.from_map/1` exists at `meter_error_report.ex:220` and decodes the promoted fixture into a populated struct. The surviving half of the argument — that `:meter` can only be filled by `from_event/1`, because the meter id lives in the event envelope and never in `data` (F-13/D-14) — is real, and is now carried in the wrapper's own `@doc` and asserted by `testing_test.exs`, which is a stronger guarantee than omitting the wrapper. Completeness is enforced by `test/lattice_stripe/testing/wrapper_completeness_test.exs`, which machine-checks each opt-out *reason*: a `:no_from_map` claim now runs `refute function_exported?/3` and would have failed this row on the day it was written. |
+| `Meter`, `MeterEventAdjustment`, `MeterEventStreamSession` fixtures | OPT-OUT | Q1 resolved as `flat-three` and now locked mechanically: `priv/api/current.txt` records the exact public surface, so promoting these three later is a visible, reviewed diff rather than a silent expansion. OBJ-02 names neither; they stay private in `test/support/fixtures/`. |
+| `Testing.Fixtures.Entitlements.Feature` typed wrapper (`Testing.feature/1`) | INTEGRATE | **Reversed post-verification (UAT checkpoint 2).** Added rather than deferred: `Entitlements.Feature.from_map/1` exists at `feature.ex:288`, and `entitlements.feature` is deliberately absent from `@object_map`, so this wrapper is the only typed decode path the public surface offers for the object. The addition is additive and non-breaking, and it removes a scope-reading question that would otherwise have needed a human to adjudicate. |
 
 ## OBJ-03 — core-billing public fixtures
 
@@ -64,3 +64,16 @@ accepted side effect, flip `Webhook.fetch_related_object/3` from `{:error, {:unk
 t}}` to "issue `GET related_object.url`" for the four newly-registered types — `@object_map` has
 two consumers and the phase brief describes only one (65-RESEARCH.md § Pitfall 1, Phase 47 D-05).
 That behavior change is intentional; see threat `T-65-04` in each plan's `<threat_model>`.
+
+**Now test-locked (UAT checkpoint 3).** A paired characterization test in
+`test/lattice_stripe/webhook/fetch_test.exs` pins both halves: a registered-but-non-retrievable
+type issues exactly one doomed GET, and an unregistered type still short-circuits with zero HTTP.
+The pair makes it a characterization of the registry's dual role rather than a fact about one
+object type. A triage invariant in `test/lattice_stripe/object_types_test.exs` partitions all 52
+`@object_map` keys, so a future row must state its retrievability explicitly instead of silently
+flipping fetch behaviour.
+
+Adding an `{:error, {:not_retrievable, _}}` branch stays deferred (deferred-items.md item 2), on
+semver grounds rather than effort: widening a documented return union breaks adopters whose `case`
+is exhaustive over the three published variants, and Elixir does not warn on a non-exhaustive
+`case`. The characterization test makes implementing it later a loud, deliberate change.

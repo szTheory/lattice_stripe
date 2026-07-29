@@ -1,10 +1,15 @@
 # Deferred Items — Phase 65
 
-Follow-ups and out-of-scope discoveries recorded at phase close (65-06). Not fixed here.
+Follow-ups and out-of-scope discoveries recorded at phase close (65-06).
+
+**Status update (UAT closeout):** item 1 is DONE — the rename shipped, and was widened beyond
+the three `basic/1` builders to the whole non-conforming set (9 functions), because the API
+surface lock was about to freeze the naming in place. Item 2 remains deferred, but is now
+test-locked rather than merely documented. Items 3 and 4 are unchanged.
 
 ---
 
-## 1. The three meter fixtures expose `basic/1`, not `<object>_json/1` — align BEFORE the Hex 1.8.0 tag
+## 1. ~~The three meter fixtures expose `basic/1`~~ — DONE (UAT closeout)
 
 - **Recorded by:** 65-03 (Rationale), reaffirmed by 65-05; carried forward here as the phase's
   standing follow-up.
@@ -26,6 +31,13 @@ Follow-ups and out-of-scope discoveries recorded at phase close (65-06). Not fix
   would be scope creep on a one-way public-API door.
 - **Suggested fix:** rename to `meter_event_json/1`, `meter_event_summary_json/1` and
   `meter_error_report_json/1` in a single commit with their call sites, before tagging 1.8.0.
+- **RESOLVED at UAT closeout**, and widened. Renaming only the three `basic/1` builders would
+  have left the inconsistency in place: `list_response/1`, `with_items/1`, `paused/1`,
+  `canceled/1`, `event/1` and `no_meter_found_event/1` were equally non-conforming. All 9 were
+  renamed in one `!` commit. A conformance guard now lives in
+  `test/lattice_stripe/testing/wrapper_completeness_test.exs`' sibling checks and, more
+  durably, in `priv/api/current.txt` — the fixture surface is now semver-locked, so a future
+  drift is a visible diff rather than a silent one.
 
 ---
 
@@ -48,6 +60,18 @@ Follow-ups and out-of-scope discoveries recorded at phase close (65-06). Not fix
 - **What a future phase might do:** if v2 delivery of this object ever becomes real, the branch
   needs an explicit "registered but not individually retrievable" case that returns a typed error
   rather than issuing a doomed GET.
+- **NOW TEST-LOCKED (UAT closeout).** Still deferred, but no longer merely documented. A paired
+  characterization test in `test/lattice_stripe/webhook/fetch_test.exs` pins both halves of the
+  current behaviour, and a triage invariant in `test/lattice_stripe/object_types_test.exs`
+  partitions all 52 `@object_map` keys so a future row must declare its retrievability instead of
+  silently flipping fetch behaviour.
+- **Why it stays deferred is now a semver argument, not an effort one.** Adding
+  `{:error, {:not_retrievable, _}}` widens a documented return union. An adopter with an
+  exhaustive three-clause `case` over the published variants gets a runtime `CaseClauseError`,
+  and Elixir does not warn on a non-exhaustive `case` — so this is major-flavoured breakage,
+  inappropriate for a minor release, on a path that is inert today. The registry also cannot
+  know retrievability: it maps object-type to module and carries no URL, since
+  `RelatedObject.url` comes verbatim off the wire.
 
 ---
 
