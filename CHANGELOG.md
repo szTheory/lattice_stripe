@@ -4,7 +4,25 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-> **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 1.7"}`.
+> **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 2.0"}`.
+
+## [2.0.0](https://github.com/szTheory/lattice_stripe/compare/v1.7.13...v2.0.0) (2026-07-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* **65:** public test-fixture builders are renamed to the `<object>_json` convention already used by 15 of 18 fixture modules. These are called from adopters' own test suites, so the rename is free now and breaking after the 1.8.0 tag.
+
+### Features
+
+* **61-01:** wire default Finch pool end-to-end, relax :finch requirement ([f7fc710](https://github.com/szTheory/lattice_stripe/commit/f7fc7102458f2e3abc8a3959f6d9634971d94b27))
+* **65:** zero human UAT — mechanize phase 65's verification checkpoints ([#47](https://github.com/szTheory/lattice_stripe/issues/47)) ([cd1f896](https://github.com/szTheory/lattice_stripe/commit/cd1f8968c8332cc3c120eaa38163ebf7d4c0502d))
+* **entitlements:** stripe-native entitlements surface (ENT-01..05) ([#45](https://github.com/szTheory/lattice_stripe/issues/45)) ([a22e197](https://github.com/szTheory/lattice_stripe/commit/a22e197658a6a9cb02ed9da2049059c4914d54ce))
+
+
+### Bug Fixes
+
+* **61-01:** use fully-qualified Config.validate!/1 in Client typedoc ([bb39266](https://github.com/szTheory/lattice_stripe/commit/bb392664ffd9fbb8539f6c95ba237ec8b9b56728))
 
 ## [Unreleased]
 

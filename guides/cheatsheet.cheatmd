@@ -9,7 +9,7 @@
 # mix.exs
 def deps do
   [
-    {:lattice_stripe, "~> 1.7"}
+    {:lattice_stripe, "~> 2.0"}
   ]
 end
 ```
