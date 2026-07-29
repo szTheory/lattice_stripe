@@ -195,7 +195,8 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
 
     test "8a. the exact boundary passes for every divisor, on both keys" do
       for window <- [nil, "hour", "day"], key <- ["start_time", "end_time"] do
-        assert :ok = Guards.check_summary_window!(window_params(window, key, @day_start), "list/4")
+        assert :ok =
+                 Guards.check_summary_window!(window_params(window, key, @day_start), "list/4")
       end
     end
 

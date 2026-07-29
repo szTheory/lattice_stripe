@@ -8,6 +8,11 @@ defmodule LatticeStripe.Billing.Guards do
   #              documentation guarantee enforced by a Code.fetch_docs test,
   #              not a function in this module.
   #   GUARD-03 — check_adjustment_cancel_shape!/1 (cancel must nest identifier)
+  #   GUARD-04 — check_summary_window!/2 (meter event summary reads: start_time and
+  #              end_time must align to minute boundaries always, to UTC hour
+  #              boundaries for the "hour" window, and to UTC day boundaries for
+  #              the "day" window. Raises with the arithmetic printed; never snaps
+  #              the window itself — see the @doc for why)
   #
   # PII masking on %MeterEvent{} is implemented via a custom Inspect protocol in
   # lib/lattice_stripe/billing/meter_event.ex (tagged PII-01), not a guard here.
@@ -169,4 +174,98 @@ defmodule LatticeStripe.Billing.Guards do
             ~s[sub-object. Expected %{"cancel" => %{"identifier" => "..."}}, ] <>
             "got: #{inspect(params)}"
   end
+
+  @doc """
+  Pre-flight guard for `LatticeStripe.Billing.MeterEventSummary.list/4` and
+  `LatticeStripe.Billing.MeterEventSummary.stream!/4`.
+
+  Raises `ArgumentError` when `start_time` or `end_time` is not aligned to the
+  boundary Stripe requires: **minute** boundaries on every query, **UTC hour**
+  boundaries when `value_grouping_window` is `"hour"`, and **UTC day** boundaries
+  (00:00 UTC) when it is `"day"`. Stripe rejects a misaligned window with an HTTP
+  400 whose error code it does not document, so the failure cannot be improved
+  after the fact — only prevented. This raise fires before the request is built.
+
+  The guard reports the arithmetic and **does not apply it**. Snapping a window
+  has to choose flooring or ceiling, and that choice changes which usage the
+  window covers, so it belongs to the caller.
+
+  `fun` is the caller's own `fun/arity` spelling, so the message names whichever
+  entry point was invoked — `list/4` and `stream!/4` produce the same message with
+  a different function name.
+
+  Silently passes when the `value_grouping_window` value is unrecognised (Stripe
+  has extended that enum before and will again), when a timestamp is absent
+  (`LatticeStripe.Resource.require_param!/3` owns that case), and when a timestamp
+  is not an integer (Stripe's own type validation owns that case). Reads string
+  keys only (Stripe wire format), so an atom-keyed params map bypasses the guard.
+  """
+  @spec check_summary_window!(map(), String.t()) :: :ok
+  def check_summary_window!(params, fun) when is_map(params) do
+    case summary_divisor(params["value_grouping_window"]) do
+      # MANDATORY HATCH 1 — forward compatibility. An unrecognised window value is
+      # not checked at all, deliberately: Stripe added "day" to this enum in
+      # mid-2024, and a guard that rejected unknown values would have broken every
+      # caller on the day it was extended. This clause is the design, not a gap.
+      nil ->
+        :ok
+
+      divisor ->
+        check_aligned!(params, "start_time", divisor, fun)
+        check_aligned!(params, "end_time", divisor, fun)
+    end
+  end
+
+  def check_summary_window!(_non_map, _fun), do: :ok
+
+  # An absent window means 60, not "skip": Stripe states the minute rule on
+  # start_time and end_time themselves, independently of the window clause, so it
+  # applies to every query whether or not a grouping window was supplied.
+  defp summary_divisor(nil), do: 60
+  defp summary_divisor("hour"), do: 3_600
+  defp summary_divisor("day"), do: 86_400
+  defp summary_divisor(_unrecognised), do: nil
+
+  # MANDATORY HATCH 2 — division of responsibility. An absent or non-integer
+  # timestamp is skipped rather than raised on: require_param!/3 already owns
+  # absence and Stripe owns the wrong type, and an alignment message would send
+  # the reader somewhere useless in both cases.
+  defp check_aligned!(params, key, divisor, fun) do
+    value = Map.get(params, key)
+
+    if is_integer(value) and rem(value, divisor) != 0 do
+      raise ArgumentError, misaligned_message(key, value, divisor, fun)
+    end
+
+    :ok
+  end
+
+  # `Integer.floor_div/2` rather than `div/2` in the printed arithmetic: `div/2`
+  # truncates toward zero and so rounds the wrong way for negative inputs. Elixir
+  # has no beginning-of-hour helper and `DateTime.truncate/2` only handles
+  # sub-second precision, so this is integer arithmetic by necessity.
+  defp misaligned_message(key, value, divisor, fun) do
+    "LatticeStripe.Billing.MeterEventSummary.#{fun}: #{key} #{value} is not " <>
+      "aligned to #{boundary_name(divisor)}. #{alignment_rule(divisor)}, and " <>
+      "rejects unaligned values with HTTP 400.\n\n" <>
+      "Subscription current_period_start/current_period_end derive from " <>
+      "billing_cycle_anchor and are almost never aligned. Align them yourself — " <>
+      "this library will not choose floor vs. ceil for you, because that choice " <>
+      "changes which usage the window includes:\n\n" <>
+      "    start_time = Integer.floor_div(start_time, #{divisor}) * #{divisor}   # floor\n" <>
+      "    end_time   = -Integer.floor_div(-end_time, #{divisor}) * #{divisor}   # ceil\n"
+  end
+
+  defp boundary_name(60), do: "a minute boundary"
+  defp boundary_name(3_600), do: "a UTC hour boundary (00:00, 01:00, ..., 23:00)"
+  defp boundary_name(86_400), do: "a UTC day boundary (00:00 UTC)"
+
+  defp alignment_rule(60),
+    do: "Stripe requires minute-aligned start_time and end_time on every query"
+
+  defp alignment_rule(3_600),
+    do: ~s[Stripe requires hour-aligned timestamps when value_grouping_window is "hour"]
+
+  defp alignment_rule(86_400),
+    do: ~s[Stripe requires day-aligned timestamps when value_grouping_window is "day"]
 end
