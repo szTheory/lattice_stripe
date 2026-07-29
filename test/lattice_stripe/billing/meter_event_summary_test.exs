@@ -52,6 +52,9 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
                MeterEventSummary.list(test_client(), @meter_id, @window)
     end
 
+    # The timestamps here are 00:00 UTC (86_400 * 20_297 and * 20_298) rather than
+    # @window's merely minute-aligned pair, because a "day" window with @window's
+    # timestamps is exactly what GUARD-04 refuses to send.
     test "places value_grouping_window on the wire when supplied" do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.url =~ "value_grouping_window=day"
@@ -59,7 +62,12 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
         ok_response(Metering.MeterEventSummary.list_response())
       end)
 
-      params = Map.put(@window, "value_grouping_window", "day")
+      params = %{
+        "customer" => "cus_1",
+        "start_time" => 1_753_660_800,
+        "end_time" => 1_753_747_200,
+        "value_grouping_window" => "day"
+      }
 
       assert {:ok, %LatticeStripe.Response{}} =
                MeterEventSummary.list(test_client(), @meter_id, params)
