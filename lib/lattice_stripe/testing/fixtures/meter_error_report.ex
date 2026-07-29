@@ -52,8 +52,8 @@ defmodule LatticeStripe.Testing.Fixtures.MeterErrorReport do
   the count without sampling every failure — and the decoder must yield `[]`
   rather than `nil` for it.
   """
-  @spec basic(map()) :: map()
-  def basic(overrides \\ %{}) do
+  @spec meter_error_report_json(map()) :: map()
+  def meter_error_report_json(overrides \\ %{}) do
     %{
       # The published example reads "There is 1 invalid event" against its
       # single error. This fixture carries 902, so the summary is restated to
@@ -92,7 +92,7 @@ defmodule LatticeStripe.Testing.Fixtures.MeterErrorReport do
   end
 
   @doc """
-  The fully-fetched `v2.core.event` wrapping `basic/1`.
+  The fully-fetched `v2.core.event` wrapping `meter_error_report_json/1`.
 
   This is the shape `LatticeStripe.Webhook.fetch_event/3` returns — **not**
   the delivered webhook body, which carries no `data` at all. `related_object`
@@ -104,14 +104,14 @@ defmodule LatticeStripe.Testing.Fixtures.MeterErrorReport do
   `LatticeStripe.Billing.MeterErrorReport.SampleError` on the two
   near-identically named idempotency keys this event carries.
   """
-  @spec event(map()) :: map()
-  def event(overrides \\ %{}) do
+  @spec meter_error_report_event_json(map()) :: map()
+  def meter_error_report_event_json(overrides \\ %{}) do
     %{
       "id" => @event_id,
       "object" => "v2.core.event",
       "context" => nil,
       "created" => "2024-09-26T17:46:22.134Z",
-      "data" => basic(),
+      "data" => meter_error_report_json(),
       "livemode" => false,
       "reason" => nil,
       "related_object" => %{
@@ -127,21 +127,21 @@ defmodule LatticeStripe.Testing.Fixtures.MeterErrorReport do
   @doc """
   The sibling `v1.billing.meter.no_meter_found` event.
 
-  Its `data` tree is identical field-for-field to `event/1`'s — the two events
+  Its `data` tree is identical field-for-field to `meter_error_report_event_json/1`'s — the two events
   share this payload byte-for-byte. The difference is that this one carries
   **no `related_object` key at all**, so there is no meter id to lift and
   `from_event/1` must leave `:meter` nil rather than raising.
   """
-  @spec no_meter_found_event(map()) :: map()
-  def no_meter_found_event(overrides \\ %{}) do
-    event()
+  @spec no_meter_found_meter_error_report_event_json(map()) :: map()
+  def no_meter_found_meter_error_report_event_json(overrides \\ %{}) do
+    meter_error_report_event_json()
     |> Map.delete("related_object")
     |> Map.put("type", "v1.billing.meter.no_meter_found")
     |> Map.merge(overrides)
   end
 
   @doc """
-  The meter id carried by `event/1`'s related object.
+  The meter id carried by `meter_error_report_event_json/1`'s related object.
 
   Exposed so a test can assert `from_event/1` lifted *this* value rather than
   re-stating the literal and proving nothing.

@@ -60,16 +60,18 @@ defmodule LatticeStripe.TestingTest do
     test "promoted meter builders are callable at arity 0 (OBJ-02 empty-input edge)" do
       # Q1 = flat-three: exactly these three meter fixtures are public, and they are flat
       # (Testing.Fixtures.MeterEvent), never nested under a Metering namespace.
-      assert is_map(Fixtures.MeterEvent.basic())
-      assert is_map(Fixtures.MeterEventSummary.basic())
-      assert is_map(Fixtures.MeterEventSummary.list_response())
-      assert is_map(Fixtures.MeterErrorReport.basic())
-      assert is_map(Fixtures.MeterErrorReport.event())
-      assert is_map(Fixtures.MeterErrorReport.no_meter_found_event())
+      assert is_map(Fixtures.MeterEvent.meter_event_json())
+      assert is_map(Fixtures.MeterEventSummary.meter_event_summary_json())
+      assert is_map(Fixtures.MeterEventSummary.meter_event_summary_list_json())
+      assert is_map(Fixtures.MeterErrorReport.meter_error_report_json())
+      assert is_map(Fixtures.MeterErrorReport.meter_error_report_event_json())
+      assert is_map(Fixtures.MeterErrorReport.no_meter_found_meter_error_report_event_json())
     end
 
     test "meter builder overrides win over the canonical value" do
-      overridden = Fixtures.MeterEventSummary.basic(%{"aggregated_value" => 99.0})
+      overridden =
+        Fixtures.MeterEventSummary.meter_event_summary_json(%{"aggregated_value" => 99.0})
+
       assert overridden["aggregated_value"] == 99.0
       assert overridden["object"] == "billing.meter_event_summary"
     end
@@ -81,9 +83,9 @@ defmodule LatticeStripe.TestingTest do
       assert is_map(Fixtures.Customer.customer_json())
       assert is_map(Fixtures.PaymentIntent.payment_intent_json())
       assert is_map(Fixtures.Subscription.subscription_json())
-      assert is_map(Fixtures.Subscription.with_items())
-      assert is_map(Fixtures.Subscription.paused())
-      assert is_map(Fixtures.Subscription.canceled())
+      assert is_map(Fixtures.Subscription.subscription_with_items_json())
+      assert is_map(Fixtures.Subscription.paused_subscription_json())
+      assert is_map(Fixtures.Subscription.canceled_subscription_json())
     end
 
     test "core-billing builder overrides win over the canonical value" do
@@ -101,7 +103,7 @@ defmodule LatticeStripe.TestingTest do
       # If either assertion flips, the composition chain has been reordered and callers
       # silently lose the ability to override.
       overridden =
-        Fixtures.Subscription.with_items(%{
+        Fixtures.Subscription.subscription_with_items_json(%{
           "items" => %{"object" => "list", "data" => [], "has_more" => false},
           "status" => "past_due"
         })
@@ -111,7 +113,9 @@ defmodule LatticeStripe.TestingTest do
 
       # Un-overridden keys from both layers still come through.
       assert overridden["object"] == "subscription"
-      assert Fixtures.Subscription.with_items()["items"]["data"] |> length() == 2
+
+      assert Fixtures.Subscription.subscription_with_items_json()["items"]["data"] |> length() ==
+               2
     end
 
     test "the authored invoice builder is callable at arity 0 (OBJ-03 empty-input edge)" do
@@ -379,10 +383,33 @@ defmodule LatticeStripe.TestingTest do
       # Match on :event_name, NOT :object — %Billing.MeterEvent{} has no :object field
       # (EVENT-05 minimal struct), so result.object would raise KeyError.
       assert %Billing.MeterEvent{event_name: "api_call"} =
-               Testing.meter_event(Fixtures.MeterEvent.basic())
+               Testing.meter_event(Fixtures.MeterEvent.meter_event_json())
 
       assert %Billing.MeterEventSummary{id: "mtrusg_123"} =
-               Testing.meter_event_summary(Fixtures.MeterEventSummary.basic())
+               Testing.meter_event_summary(Fixtures.MeterEventSummary.meter_event_summary_json())
+    end
+
+    test "return a typed Feature struct from the promoted public fixture" do
+      # OBJ-02: `entitlements.feature` is deliberately absent from @object_map (it is
+      # not a webhook data.object payload), so this wrapper is the only typed decode
+      # path the public surface offers for it.
+      assert %Entitlements.Feature{id: "feat_123", lookup_key: "premium_support"} =
+               Testing.feature(Fixtures.Entitlements.feature_json())
+    end
+
+    test "return a typed MeterErrorReport struct, with :meter always nil (from_map contract)" do
+      report =
+        Testing.meter_error_report(Fixtures.MeterErrorReport.meter_error_report_json())
+
+      assert %Billing.MeterErrorReport{
+               developer_message_summary: "There are 902 invalid events"
+             } = report
+
+      assert report.reason.error_count == 902
+
+      # F-13 / D-14: `data` never names the meter. from_map/1 structurally cannot fill
+      # :meter — only from_event/1 can. The wrapper must not paper over that.
+      assert report.meter == nil
     end
 
     test "return typed core-billing structs from the promoted public fixtures" do

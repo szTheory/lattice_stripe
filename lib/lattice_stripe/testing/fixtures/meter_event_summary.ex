@@ -16,8 +16,8 @@ defmodule LatticeStripe.Testing.Fixtures.MeterEventSummary do
   rather than a whole number so a test can prove the value is never rounded
   or coerced to an integer.
   """
-  @spec basic(map()) :: map()
-  def basic(overrides \\ %{}) do
+  @spec meter_event_summary_json(map()) :: map()
+  def meter_event_summary_json(overrides \\ %{}) do
     %{
       "id" => "mtrusg_123",
       "object" => "billing.meter_event_summary",
@@ -33,10 +33,10 @@ defmodule LatticeStripe.Testing.Fixtures.MeterEventSummary do
   @doc """
   Stripe list response wrapping one or more MeterEventSummary fixtures.
 
-  Defaults to a single `basic/1` item. Pass a custom list to override.
+  Defaults to a single `meter_event_summary_json/1` item. Pass a custom list to override.
   """
-  @spec list_response(list()) :: map()
-  def list_response(items \\ [basic()]) do
+  @spec meter_event_summary_list_json(list()) :: map()
+  def meter_event_summary_list_json(items \\ [meter_event_summary_json()]) do
     %{
       "object" => "list",
       "data" => items,

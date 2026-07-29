@@ -675,8 +675,10 @@ defmodule LatticeStripe.DocsTruthTest do
     for wrapper <- [
           "active_entitlement/1",
           "active_entitlement_summary/1",
+          "feature/1",
           "meter_event/1",
           "meter_event_summary/1",
+          "meter_error_report/1",
           "customer/1",
           "payment_intent/1",
           "subscription/1",

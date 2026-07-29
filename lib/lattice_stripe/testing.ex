@@ -145,6 +145,17 @@ defmodule LatticeStripe.Testing do
     do: Entitlements.ActiveEntitlementSummary.from_map(raw_map)
 
   @doc """
+  Converts a canonical Feature fixture map into
+  `%LatticeStripe.Entitlements.Feature{}`.
+
+  `entitlements.feature` is deliberately absent from `LatticeStripe.ObjectTypes`'
+  dispatch registry (it is not a webhook `data.object` payload), so this wrapper is
+  the only typed decode path the public surface offers for it.
+  """
+  @spec feature(map()) :: Entitlements.Feature.t()
+  def feature(raw_map), do: Entitlements.Feature.from_map(raw_map)
+
+  @doc """
   Converts a canonical MeterEvent fixture map into
   `%LatticeStripe.Billing.MeterEvent{}`.
   """
@@ -157,6 +168,20 @@ defmodule LatticeStripe.Testing do
   """
   @spec meter_event_summary(map()) :: Billing.MeterEventSummary.t()
   def meter_event_summary(raw_map), do: Billing.MeterEventSummary.from_map(raw_map)
+
+  @doc """
+  Converts a canonical MeterErrorReport `data` map into
+  `%LatticeStripe.Billing.MeterErrorReport{}`.
+
+  Wraps `from_map/1`, the low-level constructor: `:meter` is **always** `nil` here
+  because the meter id lives in the event envelope, not in `data`. When you have the
+  whole `v2.core.event` (see
+  `LatticeStripe.Testing.Fixtures.MeterErrorReport.meter_error_report_event_json/1`),
+  call `LatticeStripe.Billing.MeterErrorReport.from_event/1` instead — it is the only
+  path that can populate `:meter`.
+  """
+  @spec meter_error_report(map()) :: Billing.MeterErrorReport.t()
+  def meter_error_report(raw_map), do: Billing.MeterErrorReport.from_map(raw_map)
 
   @doc """
   Converts a canonical Customer fixture map into `%LatticeStripe.Customer{}`.

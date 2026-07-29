@@ -33,8 +33,8 @@ defmodule LatticeStripe.Testing.Fixtures.Subscription do
   end
 
   @doc "Subscription with two items, each carrying an id (stripity_stripe regression guard)."
-  @spec with_items(map()) :: map()
-  def with_items(overrides \\ %{}) do
+  @spec subscription_with_items_json(map()) :: map()
+  def subscription_with_items_json(overrides \\ %{}) do
     item1 = %{
       "id" => "si_test1",
       "object" => "subscription_item",
@@ -71,8 +71,8 @@ defmodule LatticeStripe.Testing.Fixtures.Subscription do
   end
 
   @doc "Paused subscription (collection paused with keep_as_draft)."
-  @spec paused(map()) :: map()
-  def paused(overrides \\ %{}) do
+  @spec paused_subscription_json(map()) :: map()
+  def paused_subscription_json(overrides \\ %{}) do
     subscription_json(
       Map.merge(
         %{
@@ -87,8 +87,8 @@ defmodule LatticeStripe.Testing.Fixtures.Subscription do
   end
 
   @doc "Canceled subscription with cancellation_details."
-  @spec canceled(map()) :: map()
-  def canceled(overrides \\ %{}) do
+  @spec canceled_subscription_json(map()) :: map()
+  def canceled_subscription_json(overrides \\ %{}) do
     subscription_json(
       Map.merge(
         %{

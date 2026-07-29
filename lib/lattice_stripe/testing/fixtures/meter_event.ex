@@ -11,8 +11,8 @@ defmodule LatticeStripe.Testing.Fixtures.MeterEvent do
   masking should assert that `:payload` is hidden in the string
   representation of `%LatticeStripe.Billing.MeterEvent{}`.
   """
-  @spec basic(map()) :: map()
-  def basic(overrides \\ %{}) do
+  @spec meter_event_json(map()) :: map()
+  def meter_event_json(overrides \\ %{}) do
     %{
       "object" => "billing.meter_event",
       "event_name" => "api_call",
