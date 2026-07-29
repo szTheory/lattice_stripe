@@ -27,12 +27,13 @@ payloads in downstream application tests:
 - `LatticeStripe.Testing.Fixtures.TaxCalculation`
 - `LatticeStripe.Testing.Fixtures.TaxTransaction`
 - `LatticeStripe.Testing.Fixtures.TaxId`
+- `LatticeStripe.Testing.Fixtures.Entitlements`
 
 The raw map is the canonical test shape. Build other forms explicitly on top:
 
 - `LatticeStripe.Testing.generate_webhook_event/3` for `%LatticeStripe.Event{}`
 - `LatticeStripe.Testing.generate_webhook_payload/3` for signed raw webhook payloads
-- `LatticeStripe.Testing.quote/1`, `dispute/1`, `credit_note/1`, `tax_calculation/1`, `tax_transaction/1`, `tax_id/1`, and friends for typed structs
+- `LatticeStripe.Testing.quote/1`, `dispute/1`, `credit_note/1`, `tax_calculation/1`, `tax_transaction/1`, `tax_id/1`, `active_entitlement/1`, and friends for typed structs
 
 ## Tax
 

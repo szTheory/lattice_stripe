@@ -49,6 +49,7 @@ defmodule LatticeStripe.Testing do
   alias LatticeStripe.{
     CreditNote,
     Dispute,
+    Entitlements,
     Event,
     EventNotification,
     File,
@@ -122,6 +123,21 @@ defmodule LatticeStripe.Testing do
   """
   @spec tax_id(map()) :: TaxId.t()
   def tax_id(raw_map), do: TaxId.from_map(raw_map)
+
+  @doc """
+  Converts a canonical ActiveEntitlement fixture map into
+  `%LatticeStripe.Entitlements.ActiveEntitlement{}`.
+  """
+  @spec active_entitlement(map()) :: Entitlements.ActiveEntitlement.t()
+  def active_entitlement(raw_map), do: Entitlements.ActiveEntitlement.from_map(raw_map)
+
+  @doc """
+  Converts a canonical ActiveEntitlementSummary fixture map into
+  `%LatticeStripe.Entitlements.ActiveEntitlementSummary{}`.
+  """
+  @spec active_entitlement_summary(map()) :: Entitlements.ActiveEntitlementSummary.t()
+  def active_entitlement_summary(raw_map),
+    do: Entitlements.ActiveEntitlementSummary.from_map(raw_map)
 
   @doc """
   Converts a canonical thin-event notification fixture map into

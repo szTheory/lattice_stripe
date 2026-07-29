@@ -1,11 +1,7 @@
-# PROMOTION TARGET (Phase 65 / OBJ-02): move this file to
-# lib/lattice_stripe/testing/fixtures/entitlements.ex AND rename the module to
-# LatticeStripe.Testing.Fixtures.Entitlements. The private test-support namespace is
-# LatticeStripe.Test.Fixtures.*; the public one is LatticeStripe.Testing.Fixtures.* — the
-# promotion is a move PLUS a module rename, and skipping the rename is a compile error.
-# Function names and bodies transfer unchanged — do not re-author.
-defmodule LatticeStripe.Test.Fixtures.Entitlements do
-  @moduledoc false
+defmodule LatticeStripe.Testing.Fixtures.Entitlements do
+  @moduledoc """
+  Canonical raw fixtures for Stripe entitlement objects.
+  """
 
   @doc """
   Wire-shaped `entitlements.active_entitlement` fixture.
@@ -14,6 +10,7 @@ defmodule LatticeStripe.Test.Fixtures.Entitlements do
   unexpanded bare `feat_` id string; pass `%{"feature" => feature_json()}` to exercise
   the expanded form.
   """
+  @spec active_entitlement_json(map()) :: map()
   def active_entitlement_json(overrides \\ %{}) do
     %{
       "id" => "ent_123",
@@ -28,6 +25,7 @@ defmodule LatticeStripe.Test.Fixtures.Entitlements do
   @doc """
   Wire-shaped `entitlements.feature` fixture.
   """
+  @spec feature_json(map()) :: map()
   def feature_json(overrides \\ %{}) do
     %{
       "id" => "feat_123",
@@ -49,6 +47,7 @@ defmodule LatticeStripe.Test.Fixtures.Entitlements do
   The summary module rewrites it to the canonical list path, so the fixture must carry the
   original for that rewrite to be provable.
   """
+  @spec active_entitlement_summary_json(map()) :: map()
   def active_entitlement_summary_json(overrides \\ %{}) do
     %{
       "object" => "entitlements.active_entitlement_summary",
@@ -67,6 +66,7 @@ defmodule LatticeStripe.Test.Fixtures.Entitlements do
   @doc """
   Stripe list envelope wrapping one or more active entitlement fixtures.
   """
+  @spec active_entitlement_list_json(list(), boolean()) :: map()
   def active_entitlement_list_json(items \\ [active_entitlement_json()], has_more \\ false) do
     %{
       "object" => "list",

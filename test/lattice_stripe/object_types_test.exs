@@ -3,6 +3,7 @@ defmodule LatticeStripe.ObjectTypesTest do
 
   alias LatticeStripe.ObjectTypes
   alias LatticeStripe.Test.Fixtures.Metering.MeterErrorReport, as: MeterErrorReportFixture
+  alias LatticeStripe.Testing.Fixtures.Entitlements, as: EntitlementsFixture
 
   describe "maybe_deserialize/1" do
     test "returns nil for nil input" do
@@ -30,6 +31,15 @@ defmodule LatticeStripe.ObjectTypesTest do
 
       result = ObjectTypes.maybe_deserialize(map)
       assert %LatticeStripe.PaymentIntent{id: "pi_123"} = result
+    end
+
+    test "dispatches the public entitlement fixture to ActiveEntitlement.from_map/1" do
+      # End-to-end tracer: the map comes from the PUBLIC fixture module that ships in the
+      # Hex tarball, so this single assertion crosses both the registry row and the newly
+      # published surface.
+      map = EntitlementsFixture.active_entitlement_json()
+      result = ObjectTypes.maybe_deserialize(map)
+      assert %LatticeStripe.Entitlements.ActiveEntitlement{id: "ent_123"} = result
     end
 
     test "dispatches invoice map to Invoice.from_map/1" do

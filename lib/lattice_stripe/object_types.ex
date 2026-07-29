@@ -49,7 +49,8 @@ defmodule LatticeStripe.ObjectTypes do
     "billing_portal.session" => LatticeStripe.BillingPortal.Session,
     "checkout.session" => LatticeStripe.Checkout.Session,
     "test_helpers.test_clock" => LatticeStripe.TestHelpers.TestClock,
-    "line_item" => LatticeStripe.Invoice.LineItem
+    "line_item" => LatticeStripe.Invoice.LineItem,
+    "entitlements.active_entitlement" => LatticeStripe.Entitlements.ActiveEntitlement
   }
 
   @doc false

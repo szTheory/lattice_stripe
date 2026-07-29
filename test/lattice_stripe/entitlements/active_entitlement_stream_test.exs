@@ -16,7 +16,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementStreamTest do
   import LatticeStripe.TestHelpers
 
   alias LatticeStripe.Entitlements.ActiveEntitlement
-  alias LatticeStripe.Test.Fixtures.Entitlements
+  alias LatticeStripe.Testing.Fixtures.Entitlements
 
   setup :verify_on_exit!
 
