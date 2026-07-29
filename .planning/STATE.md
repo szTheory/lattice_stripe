@@ -4,15 +4,15 @@ milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 65
 current_phase_name: Webhook ObjectTypes & Testing Fixtures
-status: complete
-stopped_at: Phase 64 complete (10/10 plans, gate green, operator approved)
+status: planned
+stopped_at: Phase 65 planned (6 plans / 5 waves, plan-checker PASSED 0 blockers 0 warnings)
 last_updated: "2026-07-28T23:50:24.165Z"
 last_activity: 2026-07-28
 last_activity_desc: "Phase 64 COMPLETE — 10/10 plans across 6 waves. D-29 differential gate green on all five steps (2305 tests / 0 failures; mix docs exit 0 at 38 warnings; zero warnings matching 'meter'); integration suite explicitly run against stripe-mock (10 tests, 0 excluded); mix.lock and object_types.ex verified unchanged against the PRE-PHASE commit a22e197. Operator sign-off approved, no issues. Shipped on PR #46 (draft) with all 12 CI checks green. ExDoc warning baseline moved 42 -> 40 -> 38, downward both times and required by plan criteria — later phases must gate against 38, not 42."
 progress:
   total_phases: 7
   completed_phases: 3
-  total_plans: 19
+  total_plans: 25
   completed_plans: 19
   percent: 43
 ---
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 65 — webhook-objecttypes-and-testing-fixtures (not yet planned)
+**Current focus:** Phase 65 — webhook-objecttypes-and-testing-fixtures (planned, 6 plans across 5 waves)
 
 ## Current Position
 
-Phase: 65 (webhook-objecttypes-and-testing-fixtures) — NOT STARTED
-Plan: 0 of ? — Phase 64 closed at 10/10
-Status: Ready to plan (`/gsd-plan-phase 65`). Phase 64 shipped on PR #46 (draft, all 12 CI checks green).
-Last activity: 2026-07-28 — **Phase 64 closed.** 10/10 plans across 6 waves, each executed in an isolated worktree and merged `--no-ff`. D-29 differential gate green on all five steps; operator sign-off approved with no issues; PR #46 (draft) green on all 12 CI checks.
+Phase: 65 (webhook-objecttypes-and-testing-fixtures) — PLANNED
+Plan: 0 of 6 — Phase 64 closed at 10/10
+Status: Ready to execute (`/gsd-execute-phase 65`). Plans passed the checker with 0 blockers / 0 warnings (issue count 4 → 3 → 0 across two revision iterations). **Execution will halt at two blocking operator checkpoints** — Q1 at the top of 65-02 (metering fixture shape) and Q2 at the top of 65-03 (move-vs-duplicate + the `Subscription.basic/1` rename); both are one-way public-API doors that lock on the Hex 1.8.0 tag.
+Last activity: 2026-07-28 — **Phase 65 planned.** 6 plans / 5 waves, research + patterns + validation strategy written, plan-checker PASSED. No CONTEXT.md was captured (discuss-phase was not run); plans were grounded on the ROADMAP build constraints plus Phase 63/64 CONTEXT.
 
 **Carry-forward for Phase 65 and later:**
 

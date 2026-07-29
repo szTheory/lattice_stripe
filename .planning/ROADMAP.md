@@ -166,12 +166,30 @@
 **Plans**: 6 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 65-01-PLAN.md — TRACER: `entitlements.active_entitlement` end-to-end (registry row + fixture promotion + typed wrapper + ExDoc + guide) (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 65-02-PLAN.md — meter fixture promotion; opens with the Q1 one-way `checkpoint:decision` on flat-vs-nested shape (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 65-03-PLAN.md — core-billing fixture promotion (customer, payment_intent, subscription); opens with the Q2 one-way `checkpoint:decision` on move-vs-duplicate (Wave 3)
 - [ ] 65-04-PLAN.md — remaining three `@object_map` rows + OBJ-01 completion; verifies the two Phase 64 locks (Wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 65-05-PLAN.md — the new `Testing.Fixtures.Invoice` module, lifted verbatim from `invoice_test.exs` (Wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 65-06-PLAN.md — housekeeping ("five" → "four", stale v1.3 prose) + the five-step differential phase gate (Wave 5)
+
+**Cross-cutting constraints:**
+
+- MIX_ENV=prod mix compile succeeds.
 
 ### Phase 66: Product ↔ Feature Attachment
 
