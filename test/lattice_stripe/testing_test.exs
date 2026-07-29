@@ -2,6 +2,7 @@ defmodule LatticeStripe.TestingTest do
   use ExUnit.Case, async: true
 
   alias LatticeStripe.{
+    Billing,
     CreditNote,
     Dispute,
     Entitlements,
@@ -50,6 +51,23 @@ defmodule LatticeStripe.TestingTest do
       envelope = Fixtures.Entitlements.active_entitlement_list_json()
       assert envelope["object"] == "list"
       assert length(envelope["data"]) == 1
+    end
+
+    test "promoted meter builders are callable at arity 0 (OBJ-02 empty-input edge)" do
+      # Q1 = flat-three: exactly these three meter fixtures are public, and they are flat
+      # (Testing.Fixtures.MeterEvent), never nested under a Metering namespace.
+      assert is_map(Fixtures.MeterEvent.basic())
+      assert is_map(Fixtures.MeterEventSummary.basic())
+      assert is_map(Fixtures.MeterEventSummary.list_response())
+      assert is_map(Fixtures.MeterErrorReport.basic())
+      assert is_map(Fixtures.MeterErrorReport.event())
+      assert is_map(Fixtures.MeterErrorReport.no_meter_found_event())
+    end
+
+    test "meter builder overrides win over the canonical value" do
+      overridden = Fixtures.MeterEventSummary.basic(%{"aggregated_value" => 99.0})
+      assert overridden["aggregated_value"] == 99.0
+      assert overridden["object"] == "billing.meter_event_summary"
     end
   end
 
@@ -288,6 +306,16 @@ defmodule LatticeStripe.TestingTest do
       # ENT-05 / Phase 63 F-02: the Stripe object has no id property, so the struct has
       # no :id field. The public wrapper must not reintroduce one.
       refute Map.has_key?(summary, :id)
+    end
+
+    test "return typed meter structs from the promoted public fixtures" do
+      # Match on :event_name, NOT :object — %Billing.MeterEvent{} has no :object field
+      # (EVENT-05 minimal struct), so result.object would raise KeyError.
+      assert %Billing.MeterEvent{event_name: "api_call"} =
+               Testing.meter_event(Fixtures.MeterEvent.basic())
+
+      assert %Billing.MeterEventSummary{id: "mtrusg_123"} =
+               Testing.meter_event_summary(Fixtures.MeterEventSummary.basic())
     end
 
     test "keep wrapper shapes explicit instead of option-driven" do

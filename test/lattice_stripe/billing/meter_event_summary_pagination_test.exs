@@ -25,7 +25,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
   import LatticeStripe.TestHelpers
 
   alias LatticeStripe.Billing.MeterEventSummary
-  alias LatticeStripe.Test.Fixtures.Metering
+  alias LatticeStripe.Testing.Fixtures.MeterEventSummary, as: MeterEventSummaryFixture
 
   setup :verify_on_exit!
 
@@ -77,7 +77,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
   # Ids carry the real `mtrusg_` prefix because the prefix is load-bearing for the
   # cursor-derivation assertion below.
   defp summary(id, overrides \\ %{}) do
-    Metering.MeterEventSummary.basic(Map.merge(%{"id" => id}, overrides))
+    MeterEventSummaryFixture.basic(Map.merge(%{"id" => id}, overrides))
   end
 
   defp query_params(%{url: url}) do

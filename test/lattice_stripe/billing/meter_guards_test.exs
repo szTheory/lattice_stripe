@@ -5,7 +5,7 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
   import LatticeStripe.TestHelpers
   alias LatticeStripe.Billing.Guards
   alias LatticeStripe.Billing.MeterEventSummary
-  alias LatticeStripe.Test.Fixtures.Metering
+  alias LatticeStripe.Testing.Fixtures.MeterEventSummary, as: MeterEventSummaryFixture
 
   setup :verify_on_exit!
 
@@ -414,7 +414,7 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
 
     test "an aligned window still reaches the transport through list/4" do
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(Metering.MeterEventSummary.list_response())
+        ok_response(MeterEventSummaryFixture.list_response())
       end)
 
       params = Map.put(@aligned_window, "value_grouping_window", "day")
@@ -425,7 +425,7 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
 
     test "an aligned window still reaches the transport through stream!/4" do
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(Metering.MeterEventSummary.list_response())
+        ok_response(MeterEventSummaryFixture.list_response())
       end)
 
       params = Map.put(@aligned_window, "value_grouping_window", "day")

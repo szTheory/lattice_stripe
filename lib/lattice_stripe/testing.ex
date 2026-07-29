@@ -47,6 +47,7 @@ defmodule LatticeStripe.Testing do
   """
 
   alias LatticeStripe.{
+    Billing,
     CreditNote,
     Dispute,
     Entitlements,
@@ -138,6 +139,20 @@ defmodule LatticeStripe.Testing do
   @spec active_entitlement_summary(map()) :: Entitlements.ActiveEntitlementSummary.t()
   def active_entitlement_summary(raw_map),
     do: Entitlements.ActiveEntitlementSummary.from_map(raw_map)
+
+  @doc """
+  Converts a canonical MeterEvent fixture map into
+  `%LatticeStripe.Billing.MeterEvent{}`.
+  """
+  @spec meter_event(map()) :: Billing.MeterEvent.t()
+  def meter_event(raw_map), do: Billing.MeterEvent.from_map(raw_map)
+
+  @doc """
+  Converts a canonical MeterEventSummary fixture map into
+  `%LatticeStripe.Billing.MeterEventSummary{}`.
+  """
+  @spec meter_event_summary(map()) :: Billing.MeterEventSummary.t()
+  def meter_event_summary(raw_map), do: Billing.MeterEventSummary.from_map(raw_map)
 
   @doc """
   Converts a canonical thin-event notification fixture map into

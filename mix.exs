@@ -250,6 +250,9 @@ defmodule LatticeStripe.MixProject do
             LatticeStripe.Testing.Fixtures.TaxTransaction,
             LatticeStripe.Testing.Fixtures.TaxId,
             LatticeStripe.Testing.Fixtures.Entitlements,
+            LatticeStripe.Testing.Fixtures.MeterEvent,
+            LatticeStripe.Testing.Fixtures.MeterEventSummary,
+            LatticeStripe.Testing.Fixtures.MeterErrorReport,
             LatticeStripe.Testing.TestClock,
             LatticeStripe.Testing.TestClock.Owner,
             LatticeStripe.Testing.TestClock.Error

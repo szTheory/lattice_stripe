@@ -4,7 +4,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
   alias LatticeStripe.Billing.MeterErrorReport
   alias LatticeStripe.Billing.MeterErrorReport.{ErrorType, Reason, SampleError}
   alias LatticeStripe.Event
-  alias LatticeStripe.Test.Fixtures.Metering.MeterErrorReport, as: Fixture
+  alias LatticeStripe.Testing.Fixtures.MeterErrorReport, as: Fixture
 
   # ---------------------------------------------------------------------------
   # SampleError — the leaf, and the module's whole point: `request_identifier`

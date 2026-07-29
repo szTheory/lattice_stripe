@@ -5,11 +5,11 @@ defmodule LatticeStripe.Billing.MeterEventTest do
   import LatticeStripe.TestHelpers
 
   alias LatticeStripe.Billing.MeterEvent
-  alias LatticeStripe.Test.Fixtures.Metering
+  alias LatticeStripe.Testing.Fixtures.MeterEvent, as: MeterEventFixture
 
   describe "from_map/1 (EVENT-05 minimal struct)" do
     test "round-trips all 6 known fields" do
-      m = Metering.MeterEvent.basic()
+      m = MeterEventFixture.basic()
 
       assert %MeterEvent{
                event_name: "api_call",
@@ -66,7 +66,7 @@ defmodule LatticeStripe.Billing.MeterEventTest do
         assert req.body =~ "payload[tenant_tier]=enterprise"
         assert req.body =~ "payload[value]=0.000001"
 
-        ok_response(Metering.MeterEvent.basic())
+        ok_response(MeterEventFixture.basic())
       end)
 
       assert {:ok, %MeterEvent{}} =
@@ -84,7 +84,7 @@ defmodule LatticeStripe.Billing.MeterEventTest do
 
   describe "Inspect masking (PII-01 / T-20-04 payload masking)" do
     setup do
-      event = MeterEvent.from_map(Metering.MeterEvent.basic())
+      event = MeterEvent.from_map(MeterEventFixture.basic())
       %{event: event, rendered: inspect(event)}
     end
 

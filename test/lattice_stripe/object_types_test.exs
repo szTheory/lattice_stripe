@@ -2,8 +2,8 @@ defmodule LatticeStripe.ObjectTypesTest do
   use ExUnit.Case, async: true
 
   alias LatticeStripe.ObjectTypes
-  alias LatticeStripe.Test.Fixtures.Metering.MeterErrorReport, as: MeterErrorReportFixture
   alias LatticeStripe.Testing.Fixtures.Entitlements, as: EntitlementsFixture
+  alias LatticeStripe.Testing.Fixtures.MeterErrorReport, as: MeterErrorReportFixture
 
   describe "maybe_deserialize/1" do
     test "returns nil for nil input" do
