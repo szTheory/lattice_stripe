@@ -12,16 +12,20 @@ defmodule LatticeStripe.Billing.MeterEventStream do
 
   1. Create a session (uses your API key, returns a 15-minute token):
 
-      {:ok, session} = MeterEventStream.create_session(client)
+     ```elixir
+     {:ok, session} = MeterEventStream.create_session(client)
+     ```
 
   2. Send event batches within the session (uses the session token):
 
-      events = [
-        %{"event_name" => "api_call", "payload" => %{"stripe_customer_id" => "cus_123", "value" => "1"}},
-        %{"event_name" => "api_call", "payload" => %{"stripe_customer_id" => "cus_456", "value" => "3"}}
-      ]
+     ```elixir
+     events = [
+       %{"event_name" => "api_call", "payload" => %{"stripe_customer_id" => "cus_123", "value" => "1"}},
+       %{"event_name" => "api_call", "payload" => %{"stripe_customer_id" => "cus_456", "value" => "3"}}
+     ]
 
-      {:ok, %{}} = MeterEventStream.send_events(client, session, events)
+     {:ok, %{}} = MeterEventStream.send_events(client, session, events)
+     ```
 
   ## Session Expiry
 

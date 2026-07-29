@@ -17,10 +17,10 @@ Source: verified accrue gap brief (`.planning/research/accrue-gap-brief-2026-07-
 
 ### Metering Reads
 
-- [ ] **MTR-01**: Developer can read meter event summaries via `LatticeStripe.Billing.MeterEventSummary.list/4` (`GET /v1/billing/meters/:id/event_summaries`; params customer, start_time, end_time, value_grouping_window)
+- [x] **MTR-01**: Developer can read meter event summaries via `LatticeStripe.Billing.MeterEventSummary.list/4` (`GET /v1/billing/meters/:id/event_summaries`; params customer, start_time, end_time, value_grouping_window)
 - [ ] **MTR-02**: Developer can auto-paginate meter event summaries via `Billing.MeterEventSummary.stream!`
 - [x] **MTR-03**: `LatticeStripe.Billing.MeterErrorReport` is a typed struct (exposing `reason.error_types`), deserialized from the `v1.billing.meter.error_report_triggered` v2 thin event via `from_event/1`
-- [ ] **MTR-04**: Docs confirm `Billing.MeterEvent.create/3` accepts arbitrary custom `payload` dimensions and decimal-string `value`s
+- [x] **MTR-04**: Docs confirm `Billing.MeterEvent.create/3` accepts arbitrary custom `payload` dimensions and decimal-string `value`s
 
 ### Object Types & Fixtures
 
@@ -75,10 +75,10 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 | ENT-03 | Phase 63 | Complete |
 | ENT-04 | Phase 63 | Complete |
 | ENT-05 | Phase 63 | Complete |
-| MTR-01 | Phase 64 | Pending |
+| MTR-01 | Phase 64 | Complete |
 | MTR-02 | Phase 64 | Pending |
 | MTR-03 | Phase 64 | Complete |
-| MTR-04 | Phase 64 | Pending |
+| MTR-04 | Phase 64 | Complete |
 | OBJ-01 | Phase 65 | Pending |
 | OBJ-02 | Phase 65 | Pending |
 | OBJ-03 | Phase 65 | Pending |
