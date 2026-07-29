@@ -46,7 +46,7 @@ later `retrieve/3`) as the source of truth for status changes.
 
 1. **Retrieve** the dispute (`Dispute.retrieve/3`) when you learn the `dp_*` id from a
    webhook or support tooling.
-2. **Upload** each evidence file with `File.create/3` (`purpose: "dispute_evidence"`).
+2. **Upload** each evidence file with `LatticeStripe.File.create/3` (`purpose: "dispute_evidence"`).
    Files upload to Stripe's Files API (`client.files_base_url`, default
    `https://files.stripe.com`) — the same `Client` struct handles API and file uploads.
 3. **Stage** text and file references with `Dispute.update_evidence/4` (always sends
@@ -93,7 +93,7 @@ evidence_bytes = File.read!("priv/support/receipt.pdf")
 
 Use Stripe's [dispute evidence fields](https://docs.stripe.com/disputes/evidence) to pick
 the right keys (`receipt`, `shipping_documentation`, `customer_communication`, etc.).
-File-backed fields take a `file_*` id from `File.create/3`, not a raw path string.
+File-backed fields take a `file_*` id from `LatticeStripe.File.create/3`, not a raw path string.
 
 ### Webhook confirmation point
 

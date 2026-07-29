@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 Phase: 66 — Product ↔ Feature Attachment
 Plan: Not started
 Status: Ready to plan
-Last activity: 2026-07-29 — Phase 65 complete, transitioned to Phase 66
+Last activity: 2026-07-29 — Completed quick task 260729-h47: mix ci green again (ExDoc warnings fixed, CI docs lane now gated)
 
 **Carry-forward for Phase 65 and later:**
 
@@ -154,6 +154,7 @@ Last activity: 2026-07-29 — Phase 65 complete, transitioned to Phase 66
 | 260527-tm1 | Wedge B disputes/files evidence narrative in recipes.md | 2026-05-28 | b5a78dc | [260527-tm1-wedge-b-disputes-files-evidence-narrativ](./quick/260527-tm1-wedge-b-disputes-files-evidence-narrativ/) |
 | 260527-tp8 | Gap 2 Product/Price catalog + mandate/SetupAttempt narratives | 2026-05-28 | 4c636f4 | [260527-tp8-gap-2-narrative-product-price-catalog-st](./quick/260527-tp8-gap-2-narrative-product-price-catalog-st/) |
 | 260527-tqf | PLAN-01 backfill 54-VERIFICATION.md | 2026-05-28 | 69c0134 | [260527-tqf-plan-01-backfill-54-verification-md-from](./quick/260527-tqf-plan-01-backfill-54-verification-md-from/) |
+| 260729-h47 | Fix 9 ExDoc reference warnings; CI quality lane now runs docs --warnings-as-errors | 2026-07-29 | 90298e8 | [260729-h47-fix-exdoc-warnings](./quick/260729-h47-fix-exdoc-warnings/) |
 | Phase 61 P01 | 5min | 2 tasks | 7 files |
 | Phase 61 P02 | 10m | 2 tasks | 3 files |
 

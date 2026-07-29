@@ -372,11 +372,11 @@ defmodule LatticeStripe.Webhook do
   Retrieves the typed underlying resource referenced by a thin-event notification's
   `related_object`.
 
-  Looks up the LatticeStripe module for `notification.related_object.type` via
-  `LatticeStripe.ObjectTypes.fetch_module/1` **before** issuing any HTTP request
-  (Phase 47 D-05 fail-fast contract). On a known type, issues a GET against the
+  Looks up the LatticeStripe module for `notification.related_object.type` in the
+  internal object-type registry **before** issuing any HTTP request (Phase 47 D-05
+  fail-fast contract). On a known type, issues a GET against the
   `notification.related_object.url` (Stripe ships the path verbatim) and decodes
-  the response through `ObjectTypes.maybe_deserialize/1`.
+  the response into the corresponding struct.
 
   ## Typed-error contract (Phase 47 D-05 + D-07)
 

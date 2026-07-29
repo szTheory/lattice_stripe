@@ -257,7 +257,10 @@ jobs:
         run: mix credo --strict
 
       - name: Build docs
-        run: mix docs
+        # --warnings-as-errors matches the local `mix ci` alias. Without it this
+        # lane exited 0 on broken references, so `mix ci` was strictly stronger
+        # than the required ci-gate and doc warnings could never fail a PR.
+        run: mix docs --warnings-as-errors
 
       - name: Build Hex package
         run: mix hex.build

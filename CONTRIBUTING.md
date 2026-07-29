@@ -123,6 +123,24 @@ mix lattice_stripe.api_surface --check
 Exit codes are distinct so CI can tell the two failure kinds apart: `0` clean, `100` the
 surface changed, `101` the check itself could not run.
 
+## Documentation Warnings
+
+`mix docs --warnings-as-errors` runs in both `mix ci` and the CI **Quality** lane, so a broken
+documentation reference fails the build.
+
+The one non-obvious rule: **do not backtick a reference to something ExDoc cannot link.** That
+means `@moduledoc false` modules, `@doc false` functions, and `defp` functions. Backticks are what
+make ExDoc attempt the link, so naming an internal in prose is fine — ``LatticeStripe.ObjectTypes``
+is not. Write it unbackticked, or describe the behaviour instead of naming the module.
+
+Two other cases that bite:
+
+- **Relative links only resolve to files listed in `extras:`.** `README.md` and
+  `notebooks/*.livemd` are not extras, so link them by absolute GitHub URL. `CHANGELOG.md` is an
+  extra and can be linked relatively.
+- **Guides have no alias context.** Inside a guide, `` `File.create/3` `` resolves to Elixir's
+  stdlib `File`, not ours. Fully qualify as `` `LatticeStripe.File.create/3` ``.
+
 ## Pull Request Process
 
 1. Create a branch from `main` using the naming convention:

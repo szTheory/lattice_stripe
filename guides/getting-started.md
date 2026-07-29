@@ -17,7 +17,7 @@ defp deps do
 end
 ```
 
-> **Current Hex line:** **`2.0.x`** published on Hex — see [README](../README.md) and [CHANGELOG](../CHANGELOG.md#200).
+> **Current Hex line:** **`2.0.x`** published on Hex — see [README](https://github.com/szTheory/lattice_stripe#readme) and [CHANGELOG](../CHANGELOG.md#200).
 
 Then fetch your dependencies:
 
