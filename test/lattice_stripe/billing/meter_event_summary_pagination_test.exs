@@ -77,7 +77,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
   # Ids carry the real `mtrusg_` prefix because the prefix is load-bearing for the
   # cursor-derivation assertion below.
   defp summary(id, overrides \\ %{}) do
-    MeterEventSummaryFixture.basic(Map.merge(%{"id" => id}, overrides))
+    MeterEventSummaryFixture.meter_event_summary_json(Map.merge(%{"id" => id}, overrides))
   end
 
   defp query_params(%{url: url}) do

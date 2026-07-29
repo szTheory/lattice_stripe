@@ -30,7 +30,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
         assert req.method == :get
         assert req.url =~ "/v1/billing/meters/mtr_123/event_summaries"
 
-        ok_response(MeterEventSummaryFixture.list_response())
+        ok_response(MeterEventSummaryFixture.meter_event_summary_list_json())
       end)
 
       assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{} = list}} =
@@ -45,7 +45,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
         assert req.url =~ "start_time=1753620000"
         assert req.url =~ "end_time=1753706400"
 
-        ok_response(MeterEventSummaryFixture.list_response())
+        ok_response(MeterEventSummaryFixture.meter_event_summary_list_json())
       end)
 
       assert {:ok, %LatticeStripe.Response{}} =
@@ -59,7 +59,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.url =~ "value_grouping_window=day"
 
-        ok_response(MeterEventSummaryFixture.list_response())
+        ok_response(MeterEventSummaryFixture.meter_event_summary_list_json())
       end)
 
       params = %{
@@ -78,7 +78,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     # `[]`, never `nil`, or every caller has to nil-guard a list.
     test "decodes an empty data array to an empty list, never nil" do
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(MeterEventSummaryFixture.list_response([]))
+        ok_response(MeterEventSummaryFixture.meter_event_summary_list_json([]))
       end)
 
       assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{} = list}} =
@@ -92,13 +92,22 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     # them client-side would silently reorder a chart's buckets.
     test "preserves Stripe's wire ordering exactly" do
       items = [
-        MeterEventSummaryFixture.basic(%{"id" => "mtrusg_a", "start_time" => 1_753_620_000}),
-        MeterEventSummaryFixture.basic(%{"id" => "mtrusg_b", "start_time" => 1_753_706_400}),
-        MeterEventSummaryFixture.basic(%{"id" => "mtrusg_c", "start_time" => 1_753_792_800})
+        MeterEventSummaryFixture.meter_event_summary_json(%{
+          "id" => "mtrusg_a",
+          "start_time" => 1_753_620_000
+        }),
+        MeterEventSummaryFixture.meter_event_summary_json(%{
+          "id" => "mtrusg_b",
+          "start_time" => 1_753_706_400
+        }),
+        MeterEventSummaryFixture.meter_event_summary_json(%{
+          "id" => "mtrusg_c",
+          "start_time" => 1_753_792_800
+        })
       ]
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(MeterEventSummaryFixture.list_response(items))
+        ok_response(MeterEventSummaryFixture.meter_event_summary_list_json(items))
       end)
 
       assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{} = list}} =
@@ -121,13 +130,13 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
                end_time: 1_753_706_400,
                meter: "mtr_123",
                livemode: false
-             } = MeterEventSummary.from_map(MeterEventSummaryFixture.basic())
+             } = MeterEventSummary.from_map(MeterEventSummaryFixture.meter_event_summary_json())
     end
 
     # F-05: `aggregated_value` is a JSON number. Rounding or coercing it to an
     # integer here would silently change a bill.
     test "keeps aggregated_value a float — never rounded, never coerced" do
-      summary = MeterEventSummary.from_map(MeterEventSummaryFixture.basic())
+      summary = MeterEventSummary.from_map(MeterEventSummaryFixture.meter_event_summary_json())
 
       assert is_float(summary.aggregated_value)
       assert summary.aggregated_value == 42.5
@@ -139,7 +148,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
 
     # D-07 idempotency clause.
     test "is idempotent — an already-decoded struct passes through unchanged" do
-      once = MeterEventSummary.from_map(MeterEventSummaryFixture.basic())
+      once = MeterEventSummary.from_map(MeterEventSummaryFixture.meter_event_summary_json())
 
       assert MeterEventSummary.from_map(once) == once
     end
@@ -147,7 +156,9 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     test "captures unrecognised wire keys in :extra rather than dropping them" do
       summary =
         MeterEventSummary.from_map(
-          MeterEventSummaryFixture.basic(%{"refreshed_at" => "2026-07-28T00:00:00Z"})
+          MeterEventSummaryFixture.meter_event_summary_json(%{
+            "refreshed_at" => "2026-07-28T00:00:00Z"
+          })
         )
 
       assert summary.extra == %{"refreshed_at" => "2026-07-28T00:00:00Z"}
@@ -241,7 +252,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     # fails at Stripe instead.
     test "the param guards check presence, not emptiness" do
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(MeterEventSummaryFixture.list_response())
+        ok_response(MeterEventSummaryFixture.meter_event_summary_list_json())
       end)
 
       params = %{"customer" => "", "start_time" => nil, "end_time" => nil}
@@ -309,7 +320,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
   describe "MeterEventSummary.list!/4" do
     test "returns the %Response{} directly rather than an {:ok, _} tuple" do
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(MeterEventSummaryFixture.list_response())
+        ok_response(MeterEventSummaryFixture.meter_event_summary_list_json())
       end)
 
       assert %LatticeStripe.Response{data: %LatticeStripe.List{} = list} =
@@ -337,15 +348,15 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
   describe "MeterEventSummary.stream!/4" do
     test "yields decoded %MeterEventSummary{} structs across a single page" do
       items = [
-        MeterEventSummaryFixture.basic(%{"id" => "mtrusg_a"}),
-        MeterEventSummaryFixture.basic(%{"id" => "mtrusg_b"})
+        MeterEventSummaryFixture.meter_event_summary_json(%{"id" => "mtrusg_a"}),
+        MeterEventSummaryFixture.meter_event_summary_json(%{"id" => "mtrusg_b"})
       ]
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert req.url =~ "/v1/billing/meters/mtr_123/event_summaries"
 
-        ok_response(MeterEventSummaryFixture.list_response(items))
+        ok_response(MeterEventSummaryFixture.meter_event_summary_list_json(items))
       end)
 
       summaries =

@@ -60,7 +60,7 @@ defmodule LatticeStripe.ObjectTypesTest do
     end
 
     test "dispatches the public meter event fixture to MeterEvent.from_map/1" do
-      map = MeterEventFixture.basic()
+      map = MeterEventFixture.meter_event_json()
       result = ObjectTypes.maybe_deserialize(map)
 
       # Asserted on :event_name, NEVER on the object field — %MeterEvent{} is the EVENT-05
@@ -76,7 +76,7 @@ defmodule LatticeStripe.ObjectTypesTest do
       # carries the customer-mapping key plus the metered value. The custom
       # `defimpl Inspect` in lib/lattice_stripe/billing/meter_event.ex allowlists
       # structural fields only; deleting it would silently start leaking both.
-      result = ObjectTypes.maybe_deserialize(MeterEventFixture.basic())
+      result = ObjectTypes.maybe_deserialize(MeterEventFixture.meter_event_json())
       rendered = inspect(result)
 
       refute rendered =~ "cus_test_123"
@@ -89,7 +89,7 @@ defmodule LatticeStripe.ObjectTypesTest do
     end
 
     test "dispatches the public meter event summary fixture to MeterEventSummary.from_map/1" do
-      map = MeterEventSummaryFixture.basic()
+      map = MeterEventSummaryFixture.meter_event_summary_json()
       result = ObjectTypes.maybe_deserialize(map)
 
       # 42.5 in the pattern pins the FLOAT: `42.5 = 42` does not match, so a silent
@@ -252,7 +252,7 @@ defmodule LatticeStripe.ObjectTypesTest do
       # The structural reason the registry can never deserialize this payload:
       # it is event `data`, not an object, so it carries no "object" key for the
       # dispatch head to match. It comes back as the raw map it went in as.
-      data = MeterErrorReportFixture.basic()
+      data = MeterErrorReportFixture.meter_error_report_json()
 
       result = ObjectTypes.maybe_deserialize(data)
 
@@ -329,6 +329,123 @@ defmodule LatticeStripe.ObjectTypesTest do
       assert ObjectTypes.fetch_module(" billing.meter_event") == :error
       assert ObjectTypes.fetch_module("billing.meter_event ") == :error
       assert ObjectTypes.fetch_module("Entitlements.active_entitlement_summary") == :error
+    end
+
+    test "every registered object type is triaged as individually retrievable or not" do
+      # TRIAGE INVARIANT (Phase 65 UAT checkpoint 3). @object_map has TWO consumers:
+      #
+      #   1. maybe_deserialize/1 -- decode a %{"object" => _} payload  (the obvious one)
+      #   2. Webhook.fetch_related_object/3 -- the D-05 fail-fast HTTP gate (easy to miss)
+      #
+      # Adding a row for consumer 1 silently changes consumer 2's behaviour for that type:
+      # it stops returning {:error, {:unknown_object_type, _}} with zero HTTP and starts
+      # issuing GET related_object.url. For a type with no `id` and no single-object
+      # endpoint that GET is doomed (404). This partition forces the trade-off to be an
+      # EXPLICIT decision instead of a side effect. See the paired characterization tests
+      # in test/lattice_stripe/webhook/fetch_test.exs.
+      #
+      # Deliberately NOT `map_size(object_map()) == 52`. A bare count was rejected as
+      # brittle (65-RESEARCH pitfall 7), and it teaches nothing: "expected 52, got 53"
+      # names no key. This partition fails by NAMING the new key and stating which list it
+      # belongs in. The failure message IS the decision record.
+      #
+      # This list lives in test/, NOT lib/: @object_map encodes object-type -> module and
+      # nothing else. It carries no URL (RelatedObject.url comes verbatim off the wire) and
+      # no retrievability flag. Retrievability is a review-time fact about Stripe's REST
+      # surface, so asserting it here beats shipping a lib attribute that nothing in lib/
+      # reads -- the "decorative attribute is a worse trap" anti-pattern COVERAGE.md
+      # invoked against @known_fields on meter_event.ex. Promote to lib/ only if
+      # fetch_related_object/3 ever consumes it (deferred-items.md item 2).
+
+      # No `id` and/or no single-object retrieve endpoint. A v2 related_object delivery of
+      # one of these would issue a doomed GET rather than failing fast.
+      not_individually_retrievable = [
+        "account_link",
+        "balance",
+        "billing.meter_event_summary",
+        "credit_note_line_item",
+        "entitlements.active_entitlement_summary",
+        "line_item",
+        "login_link",
+        "quote_line_item",
+        "tax.calculation_line_item",
+        "tax.settings",
+        "tax.transaction_line_item"
+      ]
+
+      # GET <related_object.url> returns the object.
+      individually_retrievable = [
+        "account",
+        "balance_transaction",
+        "bank_account",
+        "billing.meter",
+        "billing.meter_event",
+        "billing_portal.configuration",
+        "billing_portal.session",
+        "card",
+        "charge",
+        "checkout.session",
+        "coupon",
+        "credit_note",
+        "customer",
+        "dispute",
+        "entitlements.active_entitlement",
+        "event",
+        "file",
+        "file_link",
+        "invoice",
+        "invoiceitem",
+        "mandate",
+        "payment_intent",
+        "payment_method",
+        "payout",
+        "price",
+        "product",
+        "promotion_code",
+        "quote",
+        "refund",
+        "setup_attempt",
+        "setup_intent",
+        "subscription",
+        "subscription_item",
+        "subscription_schedule",
+        "tax.calculation",
+        "tax.registration",
+        "tax.transaction",
+        "tax_id",
+        "test_helpers.test_clock",
+        "transfer",
+        "transfer_reversal"
+      ]
+
+      retrievable = MapSet.new(individually_retrievable)
+      not_retrievable = MapSet.new(not_individually_retrievable)
+      registered = ObjectTypes.object_map() |> Map.keys() |> MapSet.new()
+
+      overlap = MapSet.intersection(retrievable, not_retrievable)
+
+      assert MapSet.size(overlap) == 0,
+             "A key is in BOTH triage lists: " <> inspect(Enum.sort(overlap))
+
+      untriaged = MapSet.difference(registered, MapSet.union(retrievable, not_retrievable))
+
+      assert MapSet.size(untriaged) == 0, """
+      New @object_map row(s) with no retrievability decision:
+
+        #{untriaged |> Enum.sort() |> Enum.map_join("\n  ", &inspect/1)}
+
+      Add each to `individually_retrievable` (GET <related_object.url> returns the object)
+      or to `not_individually_retrievable` (no `id` and/or no single-object endpoint — a v2
+      related_object delivery would issue a doomed GET; see the characterization test
+      "a REGISTERED but non-retrievable type passes the D-05 gate" in
+      test/lattice_stripe/webhook/fetch_test.exs).
+      """
+
+      dangling = MapSet.difference(MapSet.union(retrievable, not_retrievable), registered)
+
+      assert MapSet.size(dangling) == 0,
+             "Triaged keys no longer present in @object_map: " <>
+               inspect(Enum.sort(dangling)) <> " — delete the rows."
     end
   end
 end

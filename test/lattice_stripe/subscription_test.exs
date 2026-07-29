@@ -43,14 +43,14 @@ defmodule LatticeStripe.SubscriptionTest do
     end
 
     test "decodes pause_collection into a typed struct" do
-      sub = Subscription.from_map(Fixtures.paused())
+      sub = Subscription.from_map(Fixtures.paused_subscription_json())
 
       assert %PauseCollection{behavior: "keep_as_draft", resumes_at: 1_730_000_000} =
                sub.pause_collection
     end
 
     test "decodes cancellation_details into a typed struct" do
-      sub = Subscription.from_map(Fixtures.canceled())
+      sub = Subscription.from_map(Fixtures.canceled_subscription_json())
 
       assert %CancellationDetails{reason: "cancellation_requested", feedback: "too_expensive"} =
                sub.cancellation_details
@@ -72,7 +72,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
 
     test "items list data decodes preserving id (stripity_stripe regression guard)" do
-      sub = Subscription.from_map(Fixtures.with_items())
+      sub = Subscription.from_map(Fixtures.subscription_with_items_json())
 
       assert %{"object" => "list", "data" => [item1, item2]} = sub.items
 
@@ -296,7 +296,7 @@ defmodule LatticeStripe.SubscriptionTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :delete
         assert String.ends_with?(req.url, "/v1/subscriptions/sub_test1234567890")
-        ok_response(Fixtures.canceled())
+        ok_response(Fixtures.canceled_subscription_json())
       end)
 
       assert {:ok, %Subscription{status: :canceled}} =
@@ -310,7 +310,7 @@ defmodule LatticeStripe.SubscriptionTest do
         assert req.method == :delete
         # DELETE requests encode params in the query string, not the body.
         assert req.url =~ "prorate"
-        ok_response(Fixtures.canceled())
+        ok_response(Fixtures.canceled_subscription_json())
       end)
 
       assert {:ok, %Subscription{}} =
@@ -325,7 +325,7 @@ defmodule LatticeStripe.SubscriptionTest do
                  String.downcase(k) == "idempotency-key" and v == "ik-cancel"
                end)
 
-        ok_response(Fixtures.canceled())
+        ok_response(Fixtures.canceled_subscription_json())
       end)
 
       assert {:ok, %Subscription{}} =
@@ -379,7 +379,7 @@ defmodule LatticeStripe.SubscriptionTest do
         assert String.ends_with?(req.url, "/v1/subscriptions/sub_test1234567890")
         assert req.body =~ "pause_collection"
         assert req.body =~ "keep_as_draft"
-        ok_response(Fixtures.paused())
+        ok_response(Fixtures.paused_subscription_json())
       end)
 
       assert {:ok, %Subscription{pause_collection: %PauseCollection{behavior: "keep_as_draft"}}} =
@@ -391,7 +391,7 @@ defmodule LatticeStripe.SubscriptionTest do
 
       expect(LatticeStripe.MockTransport, :request, 2, fn req ->
         assert req.body =~ "pause_collection"
-        ok_response(Fixtures.paused())
+        ok_response(Fixtures.paused_subscription_json())
       end)
 
       assert {:ok, %Subscription{}} =
@@ -495,7 +495,7 @@ defmodule LatticeStripe.SubscriptionTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(Fixtures.paused())
+        ok_response(Fixtures.paused_subscription_json())
       end)
 
       assert %Subscription{pause_collection: %PauseCollection{behavior: "keep_as_draft"}} =
@@ -581,7 +581,7 @@ defmodule LatticeStripe.SubscriptionTest do
       client = test_client()
 
       expect(LatticeStripe.MockTransport, :request, fn _req ->
-        ok_response(Fixtures.canceled())
+        ok_response(Fixtures.canceled_subscription_json())
       end)
 
       assert %Subscription{status: :canceled} =

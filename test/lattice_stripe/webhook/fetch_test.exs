@@ -295,6 +295,77 @@ defmodule LatticeStripe.Webhook.FetchTest do
 
       assert {:error, %Error{}} = Webhook.fetch_related_object(client, notif)
     end
+
+    test "a REGISTERED but non-retrievable type passes the D-05 gate and issues the doomed GET" do
+      # CHARACTERIZATION TEST — this locks CURRENT behaviour, not desired behaviour.
+      #
+      # Phase 65 registered `entitlements.active_entitlement_summary` in @object_map so
+      # ObjectTypes.maybe_deserialize/1 can decode it from v1 snapshot events. @object_map
+      # has a SECOND consumer: it is the fail-fast gate in fetch_related_object/3 (Phase 47
+      # D-05). Registration therefore flipped this type from
+      # {:error, {:unknown_object_type, _}} with zero HTTP, to "issue GET related_object.url"
+      # — which 404s, because the object has no `id` and no single-object endpoint.
+      #
+      # Inert today: Stripe delivers entitlement summaries as v1 snapshot events, not v2
+      # thin events (Assumption A4). Locked anyway, because it is a behaviour change on a
+      # PUBLIC error shape and nothing else covers it.
+      #
+      # IF YOU ARE HERE BECAUSE THIS TEST FAILED: you are changing a published error
+      # contract. Widening the {:error, _} union (e.g. adding {:not_retrievable, type})
+      # breaks adopters whose `case` is exhaustive over the three documented variants —
+      # and Elixir does not warn on a non-exhaustive `case`. See deferred-items.md item 2
+      # and the typed-error contract at webhook.ex:371-408.
+      client = test_client()
+
+      notif =
+        EventNotification.from_map(
+          event_notification_map(%{
+            "related_object" => %{
+              "id" => nil,
+              "type" => "entitlements.active_entitlement_summary",
+              "url" => "/v1/customers/cus_ABC123customer/entitlements"
+            }
+          })
+        )
+
+      # The gate PASSES — that is the whole point of the lock.
+      assert {:ok, LatticeStripe.Entitlements.ActiveEntitlementSummary} =
+               LatticeStripe.ObjectTypes.fetch_module("entitlements.active_entitlement_summary")
+
+      # Exactly ONE transport call. :verify_on_exit! makes both the count and the absence
+      # of any extra call an assertion.
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        assert req.method == :get
+        # The URL is taken VERBATIM from RelatedObject.url — the registry encodes no URL.
+        assert String.contains?(req.url, "/v1/customers/cus_ABC123customer/entitlements")
+        error_response()
+      end)
+
+      # Today: a plain %Error{} from the doomed GET, NOT {:error, {:unknown_object_type, _}}.
+      assert {:error, %Error{}} = Webhook.fetch_related_object(client, notif)
+    end
+
+    test "an UNregistered non-retrievable type still short-circuits with zero HTTP" do
+      # The control for the test above. Pairing them is what makes this a characterization
+      # of the REGISTRY's dual role rather than a fact about one object type: the D-05
+      # fail-fast path is unchanged for types genuinely absent from @object_map.
+      client = test_client()
+
+      notif =
+        EventNotification.from_map(
+          event_notification_map(%{
+            "related_object" => %{
+              "id" => "sum_1",
+              "type" => "entitlements.feature_summary_that_does_not_exist",
+              "url" => "/v1/nope"
+            }
+          })
+        )
+
+      # No expect/3 — :verify_on_exit! enforces zero transport requests.
+      assert {:error, {:unknown_object_type, "entitlements.feature_summary_that_does_not_exist"}} =
+               Webhook.fetch_related_object(client, notif)
+    end
   end
 
   # ---------------------------------------------------------------------------

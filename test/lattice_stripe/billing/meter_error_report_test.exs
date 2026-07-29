@@ -152,7 +152,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
 
   describe "from_map/1" do
     test "decodes all four data fields from the published payload" do
-      report = MeterErrorReport.from_map(Fixture.basic())
+      report = MeterErrorReport.from_map(Fixture.meter_error_report_json())
 
       assert %MeterErrorReport{} = report
       assert report.developer_message_summary == "There are 902 invalid events"
@@ -162,7 +162,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
     end
 
     test "validation timestamps round-trip as binaries, not Unix integers" do
-      report = MeterErrorReport.from_map(Fixture.basic())
+      report = MeterErrorReport.from_map(Fixture.meter_error_report_json())
 
       # v2 event timestamps are RFC3339 strings. One official SDK types them as
       # integers; that is wrong and is deliberately not copied here.
@@ -175,7 +175,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
     end
 
     test "is idempotent on an already-decoded struct" do
-      report = MeterErrorReport.from_map(Fixture.basic())
+      report = MeterErrorReport.from_map(Fixture.meter_error_report_json())
 
       assert MeterErrorReport.from_map(report) == report
     end
@@ -184,18 +184,20 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
       # Not an incidental. `data` never names the meter; only the event
       # envelope's related_object does. from_map/1 therefore cannot know it,
       # and inventing a lookup here would be a lie.
-      assert MeterErrorReport.from_map(Fixture.basic()).meter == nil
+      assert MeterErrorReport.from_map(Fixture.meter_error_report_json()).meter == nil
     end
 
     test "puts unrecognised top-level keys in :extra rather than dropping them" do
       report =
-        MeterErrorReport.from_map(Fixture.basic(%{"future_field" => "surprise"}))
+        MeterErrorReport.from_map(
+          Fixture.meter_error_report_json(%{"future_field" => "surprise"})
+        )
 
       assert report.extra == %{"future_field" => "surprise"}
     end
 
     test "navigates fully typed all the way down to a request identifier" do
-      report = MeterErrorReport.from_map(Fixture.basic())
+      report = MeterErrorReport.from_map(Fixture.meter_error_report_json())
 
       assert [%ErrorType{} = first | _rest] = report.reason.error_types
       assert [%SampleError{} = sample | _] = first.sample_errors
@@ -205,14 +207,14 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
     test "code decodes as a String — the enum is open and must never be atomized" do
       # A closed union would fail to deserialize the next code Stripe adds, and
       # Stripe has already retired one value this repository still documents.
-      report = MeterErrorReport.from_map(Fixture.basic())
+      report = MeterErrorReport.from_map(Fixture.meter_error_report_json())
       [%ErrorType{code: code} | _] = report.reason.error_types
 
       assert is_binary(code)
     end
 
     test "tolerates a nil reason" do
-      report = MeterErrorReport.from_map(Fixture.basic(%{"reason" => nil}))
+      report = MeterErrorReport.from_map(Fixture.meter_error_report_json(%{"reason" => nil}))
 
       assert report.reason == nil
     end
@@ -225,17 +227,17 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
 
   describe "from_event/1" do
     test "lifts the meter id from the event's related object" do
-      event = Event.from_map(Fixture.event())
+      event = Event.from_map(Fixture.meter_error_report_event_json())
       report = MeterErrorReport.from_event(event)
 
       assert report.meter == Fixture.meter_id()
     end
 
     test "differs from from_map/1 in :meter and nothing else" do
-      event = Event.from_map(Fixture.event())
+      event = Event.from_map(Fixture.meter_error_report_event_json())
 
       from_event = MeterErrorReport.from_event(event)
-      from_map = MeterErrorReport.from_map(Fixture.basic())
+      from_map = MeterErrorReport.from_map(Fixture.meter_error_report_json())
 
       assert %{from_event | meter: nil} == from_map
     end
@@ -243,7 +245,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
     test "tolerates a wholly absent related_object — the no_meter_found shape" do
       # v1.billing.meter.no_meter_found shares this payload byte-for-byte and
       # carries no related_object at all (F-17, N-06).
-      event = Event.from_map(Fixture.no_meter_found_event())
+      event = Event.from_map(Fixture.no_meter_found_meter_error_report_event_json())
 
       assert event.related_object == nil
 
@@ -258,7 +260,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
       # a fetched event — the documented trap. Without this clause the caller
       # gets a bare BadMapError from a struct update, which names neither the
       # cause nor the fix.
-      event = Event.from_map(Map.delete(Fixture.event(), "data"))
+      event = Event.from_map(Map.delete(Fixture.meter_error_report_event_json(), "data"))
 
       assert_raise ArgumentError, ~r/fetch_event/, fn ->
         MeterErrorReport.from_event(event)
