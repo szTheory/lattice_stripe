@@ -2,15 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
+current_phase: 65
+current_phase_name: webhook-objecttypes-testing-fixtures
 status: executing
-stopped_at: Completed 65-03-PLAN.md
-last_updated: "2026-07-29T02:52:02.192Z"
-last_activity: 2026-07-29
+stopped_at: Completed 65-05-PLAN.md
+last_updated: "2026-07-29T02:58:56.140Z"
+last_activity: 2026-07-28
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 25
-  completed_plans: 23
+  completed_plans: 24
   percent: 75
 ---
 
@@ -26,9 +28,9 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 65 (webhook-objecttypes-testing-fixtures) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
-Last activity: 2026-07-29
+Last activity: 2026-07-28
 
 **Carry-forward for Phase 65 and later:**
 
@@ -67,6 +69,7 @@ Last activity: 2026-07-29
 | Phase 65 P02 | 7min | 2 tasks | 15 files |
 | Phase 65 P04 | 4min | 2 tasks | 2 files |
 | Phase 65 P03 | 6min | 2 tasks | 14 files |
+| Phase 65 P05 | 4min | 1 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -123,6 +126,8 @@ Last activity: 2026-07-29
 - [Phase ?]: Open question Q3 resolved NO: meter_event.ex gets no @known_fields, since from_map/1 never consults it and a decorative attribute would read as load-bearing
 - [Phase ?]: **[65-03]** Q2 = `move-and-rename` (operator decision, one-way door): the three private core-billing fixtures (customer, payment_intent, subscription) are MOVED into lib/lattice_stripe/testing/fixtures/ — no private twin remains, so drift is structurally impossible and no drift lock is needed; `Subscription.basic/1` is renamed to `subscription_json/1` on promotion, joining the dominant `<object>_json` convention (11 of 14 public fixture modules, ~30 functions) rather than the 3 meter modules' `basic/1`, which are artifacts of 65-02's verbatim-movement rule. Follow-up for a later phase (NOT this one): the three meter `basic/1` builders are now the public-surface outliers and are worth aligning before the Hex 1.8.0 tag.
 - [Phase ?]: **[65-03]** Q2 rename cost measured at 31 edits, not the 4 the plan implies — one `alias ..., as: Fixtures` line fronting 28 `Fixtures.basic(` call sites in subscription_test.exs, plus 3 internal composition call sites at subscription.ex :54/:71/:86 (the plan says :85; that line is the `def canceled` head). Also: the 65-02 `as: <Object>Fixture` caller-alias lesson is CONDITIONAL — it applies only when a caller aliases the fixture by its bare last segment; a caller already using a generic or `as:`-renamed alias needs no rewrite.
+- [Phase ?]: [65-05] Invoice fixture caller uses import, not 'alias as: InvoiceFixture' — imports cannot collide with the LatticeStripe.Invoice alias, so all ~40 call sites stayed byte-identical
+- [Phase ?]: [65-05] Verbatim lift verified by diffing the extracted body against the pre-delete source, not by a passing suite alone — catches drift in fields no assertion covers
 
 ### Blockers/Concerns
 
@@ -147,8 +152,8 @@ Last activity: 2026-07-29
 
 ## Session Continuity
 
-**Last session:** 2026-07-29T02:51:52.781Z
-**Stopped at:** Completed 65-03-PLAN.md
+**Last session:** 2026-07-29T02:58:56.129Z
+**Stopped at:** Completed 65-05-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
