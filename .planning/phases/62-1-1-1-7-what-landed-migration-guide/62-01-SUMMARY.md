@@ -91,7 +91,15 @@ status: complete
 - `mix test test/lattice_stripe/docs_truth_test.exs` — PASS (57 tests, 0 failures)
 - `mix docs --warnings-as-errors` — PASS
 - `mix ci` — PASS (2392 tests, 0 failures, 1 skipped, 214 excluded)
-- D-15 committed/staged/unstaged allowlist audit and protected audit fingerprint — PASS; recorded in `62-VALIDATION.md`.
+- D-15 executor-range committed/staged/unstaged allowlist audit and protected audit fingerprint — PASS; recorded in `62-VALIDATION.md`.
+
+### D-15 Boundary Clarification
+
+This summary's exact four-path audit proves the immutable executor boundary
+through `9d111dfb4c251d544570aebcce951094ba4161f4`. Required later review,
+verification, and closure records are intentionally outside that historical
+range; the separate lifecycle/corrective audit in `62-VALIDATION.md` supplies
+the final whole-phase scope proof without rewriting this task history.
 
 ## Decisions Made
 
