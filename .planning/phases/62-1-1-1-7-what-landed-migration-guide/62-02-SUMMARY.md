@@ -27,9 +27,9 @@ coverage:
     requirement: DOC-01
     verification:
       - kind: other
-        ref: 62-VALIDATION.md#d-15-lifecycle--corrective-scope-model
-        status: pending
-    human_judgment: true
+        ref: 62-VALIDATION.md#d-15-final-lifecycle-scope-audit (closure endpoint ddadd4f563984db50ec9757e7c1f9597c312d3a4)
+        status: pass
+    human_judgment: false
   - id: DOC-01
     description: Migration guide semantic contract and publication health remain green
     requirement: DOC-01
@@ -75,10 +75,14 @@ separate audit against this summary's immutable closure endpoint.
 
 ## Scope Coverage Status
 
-The D-15 lifecycle scope audit is deliberately **pending** at this content
-commit. The summary retains `human_judgment: true` until Task 3 observes the
-committed/staged/unstaged category checks, full-porcelain symmetric delta, and
-protected-file fingerprints against this commit's SHA.
+The final D-15 lifecycle scope audit passed after observing the committed,
+staged, unstaged, and full-porcelain category checks against the immutable
+closure endpoint `ddadd4f563984db50ec9757e7c1f9597c312d3a4`. The recorded audit
+also proves exact equality for the user-owned milestone-audit and research-cache
+status/content fingerprints and rejects every forbidden production, dependency,
+schema/migration, and API-lock path. Its named executable evidence, together
+with the already-observed docs-truth, warnings-strict docs, and full-CI results,
+supports `human_judgment: false` under the project verification policy.
 
 ## Deviations from Plan
 

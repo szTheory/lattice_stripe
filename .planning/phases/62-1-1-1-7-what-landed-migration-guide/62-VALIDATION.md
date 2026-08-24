@@ -134,6 +134,36 @@ closure endpoint is recorded only after the 62-02 summary content commit.
 The lifecycle audit will compare committed, staged, unstaged, and full-porcelain
 surfaces against this model and re-check the preserved baseline fingerprints.
 
+## D-15 Final Lifecycle Scope Audit
+
+- **Immutable gap-closure endpoint:** `ddadd4f563984db50ec9757e7c1f9597c312d3a4`
+- **Executor range audited:**
+  `cc87e3a0963f0e9bf7341bb009d80f12cae7f3d3..ddadd4f563984db50ec9757e7c1f9597c312d3a4`
+- **Lifecycle range audited:**
+  `9d111dfb4c251d544570aebcce951094ba4161f4..ddadd4f563984db50ec9757e7c1f9597c312d3a4`
+
+Both committed ranges were checked with `git diff --name-status`; the status
+letters below are retained so additions and modifications stay reviewable.
+
+| Audit surface | Observed result | Result |
+| --- | --- | --- |
+| Executor base → closure endpoint | `A 62-01-SUMMARY.md`; `A 62-02-PLAN.md`; `A 62-02-SUMMARY.md`; `A 62-REVIEW-FIX.md`; `A 62-REVIEW.md`; `M 62-VALIDATION.md`; `A 62-VERIFICATION.md`; `M guides/upgrading-1-1-to-1-7.md`; `M test/lattice_stripe/docs_truth_test.exs` | allowed categories only |
+| Executor endpoint → closure endpoint | `M 62-01-SUMMARY.md`; `A 62-02-PLAN.md`; `A 62-02-SUMMARY.md`; `A 62-REVIEW-FIX.md`; `A 62-REVIEW.md`; `M 62-VALIDATION.md`; `A 62-VERIFICATION.md`; `M guides/upgrading-1-1-to-1-7.md`; `M test/lattice_stripe/docs_truth_test.exs` | allowed categories only |
+| `git diff --cached --name-status` | *(empty)* | pass |
+| `git diff --name-status` | *(empty)* | pass |
+| Full-porcelain symmetric delta from the recorded pre-edit baseline | *(empty)* | pass |
+| Milestone-audit status and blob | exact baseline equality | pass |
+| Research-cache status and deterministic per-file content fingerprint | exact baseline equality | pass |
+| Forbidden-path scan | no `lib/**`, `mix.exs`, `mix.lock`, dependency/lock, schema/migration, or `priv/api/current.txt` path | pass |
+
+The category predicate rejects any path outside the two product deliverables and
+the named Phase 62 workflow records. It was applied to committed, staged,
+unstaged, and full-porcelain delta surfaces. The evidence commit that records
+this audit intentionally follows the closure endpoint: a commit cannot contain
+its own SHA. Re-verification must independently rerun this same category,
+full-status-delta, protected-fingerprint, and forbidden-path audit through its
+then-current HEAD.
+
 ## Manual-Only Verifications
 
 None. This headless library phase has no UI, click-path, or performance-feel
