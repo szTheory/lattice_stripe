@@ -1246,7 +1246,7 @@ defmodule LatticeStripe.DocsTruthTest do
 
     assert evidence_row =~ "LatticeStripe.File"
     assert evidence_row =~ "LatticeStripe.Dispute"
-    assert evidence_row =~ "File.create/3"
+    assert evidence_row =~ "LatticeStripe.File.create/3"
     assert evidence_row =~ "purpose: \"dispute_evidence\""
     assert evidence_row =~ "Dispute.update_evidence/4"
     assert evidence_row =~ "Dispute.submit_evidence/3"
