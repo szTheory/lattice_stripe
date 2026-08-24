@@ -10,18 +10,18 @@ changes you must check, then the large additive surface you now get for free.
 > every version reference in it — including the `~> 1.7` pin below — is deliberate
 > history, not a recommendation to pin there.
 >
-> Going all the way to 2.x? Do this leg first, then read the
-> [CHANGELOG](CHANGELOG.md) entry for **2.0.0**. There is exactly one breaking
-> change in 2.0, and it is confined to the testing surface: public test-fixture
-> builders were renamed to the `<object>_json` convention (for example
-> `MeterEvent.basic/1` became `meter_event_json/1`). It affects your test suite,
-> never your production code paths.
+> Going all the way to 2.x? Complete this historical leg, then read the
+> [2.0.0 CHANGELOG entry](../CHANGELOG.md#200) and the current
+> [Getting Started](getting-started.md) and
+> [Client Configuration](client-configuration.md) guides. Those current guides
+> own setup advice after this 1.7 boundary.
 
 > #### Do I need to change anything? {: .info}
 >
 > **Almost certainly not.** If your code only ever compared a resource's finite
 > `status` field as a string, or pattern-matched an `expand:`-ed association as
-> a raw map, read Part 2 — there are exactly **three** things to check.
+> a raw map, read [Are you affected?](#are-you-affected-behavior-changes) —
+> there are exactly **three** things to check.
 > Everything else since 1.1 is *new surface*: your existing code keeps working
 > unchanged.
 
@@ -33,20 +33,11 @@ Bump the version in your `mix.exs` and run `mix deps.get`:
 {:lattice_stripe, "~> 1.7"}
 ```
 
-Adopters pinned to `~> 1.1` resolve to `1.7`.
-
-**You no longer need to wire a Finch pool.** LatticeStripe now ships an optional
-application that starts a default Finch pool (`LatticeStripe.Finch`) at boot,
-and the `:finch` option defaults to it — so you can call Stripe without
-configuring a pool yourself. This is additive and backwards-compatible: if you
-already pass `:finch` or start your own pool, nothing changes. BYO-supervision
-users who run their own pool can disable the default to avoid a duplicate idle
-pool:
-
-```elixir
-# config/config.exs
-config :lattice_stripe, start_default_finch: false
-```
+Adopters pinned to `~> 1.1` resolve to `1.7`. This historical leg does not
+change how you configure your client or Finch; retain your existing 1.1 client
+setup while you complete the checks below. For setup guidance after this leg,
+use the current [Getting Started](getting-started.md) and
+[Client Configuration](client-configuration.md) guides.
 
 ## Are you affected? (Behavior changes)
 
@@ -347,7 +338,7 @@ and 1.7. Full detail lives in the [CHANGELOG](../CHANGELOG.md#170).
 | **1.3** | Expanded fields return typed structs; finite `status` fields return atoms (status_atom/1 deprecated) | Disputes, Credit Notes, Quotes, Mandates, SetupAttempts, File/FileLink, testing fixtures |
 | **1.5** | `tolerance: 0` disables the staleness check (was: always errored) — test-only | Thin-event webhooks (parse_event_notification/4, EventNotification) |
 | **1.6** | — | Stripe Tax family (Tax.Calculation, Tax.Transaction, Tax.Settings, Tax.Registration, TaxId) |
-| **1.7** | — | Charge list / search / update / capture; operator playbooks; default Finch pool |
+| **1.7** | — | Charge list / search / update / capture; operator playbooks |
 
-The three **Broke** rows are the three behavior changes covered in Part 2;
-everything in the **Added** columns is net-new surface from Part 3.
+The three **Broke** rows are the behavior checks above; everything in the
+**Added** columns is net-new surface to explore after those checks.

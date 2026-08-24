@@ -1167,11 +1167,11 @@ defmodule LatticeStripe.DocsTruthTest do
     assert "guides/upgrading-1-1-to-1-7.md" in groups["Upgrading"]
     assert guide =~ "1.1 → 1.7"
     assert guide =~ "{:lattice_stripe, \"~> 1.7\"}"
-    assert guide =~ "[CHANGELOG](../CHANGELOG.md#200)"
+    assert guide =~ "[2.0.0 CHANGELOG entry](../CHANGELOG.md#200)"
     assert guide =~ "[Getting Started](getting-started.md)"
     assert guide =~ "[Client Configuration](client-configuration.md)"
 
-    assert length(Regex.scan(~r/Affected if:/, guide)) == 3
+    assert length(Regex.scan(~r/\*\*Affected if:\*\*/, guide)) == 3
     assert length(Regex.scan(~r/Before \(1\.1\)/, guide)) == 3
     assert length(Regex.scan(~r/After \(1\.7\)/, guide)) == 3
     assert guide =~ "Never set `tolerance: 0` in production"
