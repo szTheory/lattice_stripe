@@ -112,7 +112,8 @@ dependency in your own configuration.
 | Need | Surface | Minimum call | Canonical next step |
 |---|---|---|---|
 | Resolve a chargeback | `LatticeStripe.Dispute` | `Dispute.retrieve/3` | `m:LatticeStripe.Dispute` |
-| Upload dispute evidence | `LatticeStripe.File` and `LatticeStripe.FileLink` | `LatticeStripe.File.create/3`, then `LatticeStripe.FileLink.create/3` | [Recipes](recipes.md) |
+| Upload and submit dispute evidence | `LatticeStripe.File` and `LatticeStripe.Dispute` | `File.create/3` with `purpose: "dispute_evidence"`, then `Dispute.update_evidence/4` and explicit `Dispute.submit_evidence/3` | [Recipes](recipes.md) |
+| Create a public, expiring link to a Stripe file | `LatticeStripe.FileLink` | `FileLink.create/3` with `expires_at` | `m:LatticeStripe.FileLink` |
 | Inspect a payment mandate | `LatticeStripe.Mandate` | `Mandate.retrieve/3` | `m:LatticeStripe.Mandate` |
 | Audit SetupIntent attempts | `LatticeStripe.SetupAttempt` | `SetupAttempt.list/3` | `m:LatticeStripe.SetupAttempt` |
 | Search or reconcile charges | `LatticeStripe.Charge` | `Charge.list/3` or `Charge.search/3` | [Payments](payments.md) |

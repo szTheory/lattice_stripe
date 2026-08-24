@@ -1174,7 +1174,12 @@ defmodule LatticeStripe.DocsTruthTest do
     assert length(Regex.scan(~r/\*\*Affected if:\*\*/, guide)) == 3
     assert length(Regex.scan(~r/Before \(1\.1\)/, guide)) == 3
     assert length(Regex.scan(~r/After \(1\.7\)/, guide)) == 3
-    assert guide =~ "Never set `tolerance: 0` in production"
+
+    [tolerance_callout | _] = String.split(guide, "### If none apply", parts: 2)
+
+    assert tolerance_callout =~ "tolerance: 0` disables the staleness check"
+    assert tolerance_callout =~ "This is a test-only escape hatch"
+    assert tolerance_callout =~ "Never set `tolerance: 0` in production"
     refute guide =~ "default Finch pool"
 
     {mandatory_idx, _} = :binary.match(guide, "## Two-minute mandatory migration checklist")
@@ -1226,6 +1231,28 @@ defmodule LatticeStripe.DocsTruthTest do
 
     assert guide =~ "\"configuration\" => config.id"
     assert guide =~ "Webhook.fetch_event(client, notification, [])"
+
+    [evidence_row] =
+      guide
+      |> String.split("\n")
+      |> Enum.filter(&String.contains?(&1, "Upload and submit dispute evidence"))
+
+    assert evidence_row =~ "LatticeStripe.File"
+    assert evidence_row =~ "LatticeStripe.Dispute"
+    assert evidence_row =~ "File.create/3"
+    assert evidence_row =~ "purpose: \"dispute_evidence\""
+    assert evidence_row =~ "Dispute.update_evidence/4"
+    assert evidence_row =~ "Dispute.submit_evidence/3"
+    refute evidence_row =~ "FileLink.create/3"
+
+    [file_link_row] =
+      guide
+      |> String.split("\n")
+      |> Enum.filter(&String.contains?(&1, "Create a public, expiring link to a Stripe file"))
+
+    assert file_link_row =~ "LatticeStripe.FileLink"
+    assert file_link_row =~ "FileLink.create/3"
+    assert file_link_row =~ "expires_at"
     refute guide =~ "Part 2"
     refute guide =~ "Part 3"
   end
