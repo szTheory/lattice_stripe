@@ -50,6 +50,15 @@ created: 2026-08-24
 
 - [ ] Extend `test/lattice_stripe/docs_truth_test.exs` with the focused historical-guide contract specified by D-13 and D-14 before relying on task-level semantic sampling.
 
+## Phase-start Scope Baseline
+
+- **Phase-start SHA:** `cc87e3a0963f0e9bf7341bb009d80f12cae7f3d3`
+- **Protected audit status:** `?? .planning/v1.10-MILESTONE-AUDIT.md`
+- **Protected audit blob:** `cfa87dc36c3e6af085e8a5bb6da1caa2bb77fc42`
+
+The protected milestone audit existed before Phase 62 and is intentionally untracked.
+Its final status and blob must match these exact values.
+
 ---
 
 ## Manual-Only Verifications

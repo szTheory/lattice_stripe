@@ -1157,4 +1157,24 @@ defmodule LatticeStripe.DocsTruthTest do
     source = File.read!("lib/lattice_stripe/webhook/plug.ex")
     assert source =~ ~r/@moduledoc.*tolerance.*0.*testing only/s
   end
+
+  test "1.1-to-1.7 guide remains historically scoped and discoverable" do
+    guide = File.read!("guides/upgrading-1-1-to-1-7.md")
+    docs = docs_config()
+    groups = Map.new(docs[:groups_for_extras])
+
+    assert "guides/upgrading-1-1-to-1-7.md" in docs[:extras]
+    assert "guides/upgrading-1-1-to-1-7.md" in groups["Upgrading"]
+    assert guide =~ "1.1 → 1.7"
+    assert guide =~ "{:lattice_stripe, \"~> 1.7\"}"
+    assert guide =~ "[CHANGELOG](../CHANGELOG.md#200)"
+    assert guide =~ "[Getting Started](getting-started.md)"
+    assert guide =~ "[Client Configuration](client-configuration.md)"
+
+    assert length(Regex.scan(~r/Affected if:/, guide)) == 3
+    assert length(Regex.scan(~r/Before \(1\.1\)/, guide)) == 3
+    assert length(Regex.scan(~r/After \(1\.7\)/, guide)) == 3
+    assert guide =~ "Never set `tolerance: 0` in production"
+    refute guide =~ "default Finch pool"
+  end
 end
