@@ -1176,5 +1176,57 @@ defmodule LatticeStripe.DocsTruthTest do
     assert length(Regex.scan(~r/After \(1\.7\)/, guide)) == 3
     assert guide =~ "Never set `tolerance: 0` in production"
     refute guide =~ "default Finch pool"
+
+    {mandatory_idx, _} = :binary.match(guide, "## Two-minute mandatory migration checklist")
+    {optional_idx, _} = :binary.match(guide, "## Optional additions by job")
+    {appendix_idx, _} = :binary.match(guide, "## Version-by-version appendix")
+    assert mandatory_idx < optional_idx and optional_idx < appendix_idx
+    assert guide =~ "You have **no code migration**"
+    assert guide =~ "run your application test suite"
+
+    for anchor <- [
+          "| Need | Surface | Minimum call | Canonical next step |",
+          "BillingPortal.Configuration",
+          "Charge.list/3",
+          "Charge.search/3",
+          "TestHelpers.TestClock",
+          "Testing.TestClock",
+          "Testing.Fixtures",
+          "LatticeStripe.Dispute",
+          "LatticeStripe.File",
+          "LatticeStripe.FileLink",
+          "LatticeStripe.Mandate",
+          "LatticeStripe.SetupAttempt",
+          "Tax.Calculation",
+          "Tax.Transaction",
+          "Tax.Settings",
+          "Tax.Registration",
+          "TaxId.create/4",
+          "LatticeStripe.CreditNote",
+          "LatticeStripe.Payout",
+          "LatticeStripe.Quote",
+          "LatticeStripe.BalanceTransaction",
+          "LatticeStripe.EventNotification",
+          "parse_event_notification/4",
+          "fetch_event/3"
+        ] do
+      assert guide =~ anchor, "missing upgrade inventory anchor #{inspect(anchor)}"
+    end
+
+    for route <- [
+          "customer-portal.md#wire-a-configuration-into-sessions",
+          "tax.md",
+          "webhooks-thin-events.md",
+          "testing.md",
+          "credit_notes.md",
+          "quote-to-billing-operator.md"
+        ] do
+      assert guide =~ route, "missing canonical route #{inspect(route)}"
+    end
+
+    assert guide =~ "\"configuration\" => config.id"
+    assert guide =~ "Webhook.fetch_event(client, notification, [])"
+    refute guide =~ "Part 2"
+    refute guide =~ "Part 3"
   end
 end
