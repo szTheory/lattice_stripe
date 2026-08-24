@@ -70,8 +70,9 @@ if pi.status == "succeeded" do ...
 if pi.status == :succeeded do ...
 ```
 
-Affected finite-status resources include PaymentIntent, Subscription, Charge,
-Refund, SetupIntent, Payout, BalanceTransaction, and Checkout.Session.
+Affected finite-status resources include PaymentIntent, Subscription,
+SubscriptionSchedule, Charge, Refund, SetupIntent, Payout, BalanceTransaction,
+Checkout.Session, BankAccount, Billing.Meter, and Account.Capability.
 
 > #### Breaking change: `tolerance: 0` disables the staleness check {: .warning}
 >
