@@ -5,16 +5,16 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 66
 current_phase_name: Product ↔ Feature Attachment
 status: planning
-stopped_at: Completed 65-05-PLAN.md
-last_updated: "2026-07-29T04:53:32.373Z"
+stopped_at: Phase 62 context gathered
+last_updated: "2026-08-24T19:28:57.750Z"
 last_activity: 2026-07-29
-last_activity_desc: Phase 65 complete, transitioned to Phase 66
+last_activity_desc: "Completed quick task 260729-h48: shipped the orphaned 1.1→1.7 upgrading guide"
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
   total_plans: 25
   completed_plans: 25
-  percent: 100
+  percent: 80
 ---
 
 # Project State
@@ -161,9 +161,9 @@ Last activity: 2026-07-29 — Completed quick task 260729-h48: shipped the orpha
 
 ## Session Continuity
 
-**Last session:** 2026-07-29T02:58:56.129Z
-**Stopped at:** Completed 65-05-PLAN.md
-**Resume file:** None
+**Last session:** 2026-08-24T19:28:57.724Z
+**Stopped at:** Phase 62 context gathered
+**Resume file:** .planning/phases/62-1-1-1-7-what-landed-migration-guide/62-CONTEXT.md
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
 Gap brief: `.planning/research/accrue-gap-brief-2026-07-27.txt`
