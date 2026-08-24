@@ -10,6 +10,11 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
+**v1.10 progress (2026-08-24):** Phases 61–65 are complete. Phase 62's
+historical 1.1 → 1.7 migration guide is verified with semantic docs-truth and
+warnings-strict ExDoc coverage; Phase 66 (Product ↔ Feature Attachment) is the
+next incomplete phase.
+
 **Active milestone:** Maintenance mode (v1.9 shipped 2026-05-27).
 
 **Latest shipped milestone:** v1.9 CI & Doc Honesty — checkout/README docs_truth locks; CI-01 paths-ignore fix; JTBD-MAP post-v1.9 truth.
@@ -193,6 +198,7 @@ option.
 - ✓ README error taxonomy canonical atoms + docs_truth lock (README-01, README-02) — Phase 59, v1.9
 - ✓ docs_truth checkout.md content locks alongside payments (VERIFY-05) — Phase 59, v1.9
 - ✓ Stripe-native entitlements read surface: `ActiveEntitlement` list/retrieve/`stream!`, `Feature` CRUDL, `ActiveEntitlementSummary` webhook decode + `stream_entitlements!/3` (ENT-01..05) — Phase 63, v1.10
+- ✓ Historical 1.1 → 1.7 migration guide: action-first breaking-change triage, complete capability inventory, and semantic ExDoc regression contract (DOC-01) — Phase 62, v1.10
 
 ### Active
 
@@ -267,4 +273,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-28 after Phase 63 — Stripe-native entitlements read surface validated (ENT-01..05); the per-request `entitled?` gate helper recorded as a durable refusal (D-19)*
+*Last updated: 2026-08-24 after Phase 62 — historical 1.1 → 1.7 migration guide and DOC-01 verified; Phase 66 is the next incomplete phase.*
