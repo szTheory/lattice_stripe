@@ -4,15 +4,15 @@ milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 66
 current_phase_name: Product ↔ Feature Attachment
-status: planning
+status: executing
 stopped_at: Phase 62 context gathered
-last_updated: "2026-08-24T19:28:57.750Z"
+last_updated: "2026-08-24T19:49:40.933Z"
 last_activity: 2026-07-29
 last_activity_desc: "Completed quick task 260729-h48: shipped the orphaned 1.1→1.7 upgrading guide"
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 25
+  total_plans: 26
   completed_plans: 25
   percent: 80
 ---
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 Phase: 66 — Product ↔ Feature Attachment
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-07-29 — Completed quick task 260729-h48: shipped the orphaned 1.1→1.7 upgrading guide
 
 **Carry-forward for Phase 65 and later:**
