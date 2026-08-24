@@ -41,7 +41,7 @@ Source: verified accrue gap brief (`.planning/research/accrue-gap-brief-2026-07-
 
 ### Docs
 
-- [ ] **DOC-01**: A "1.1 → 1.7: what landed" migration guide is published in HexDocs, enumerating every surface that shipped since 1.1 with before/after examples
+- [x] **DOC-01**: A "1.1 → 1.7: what landed" migration guide is published in HexDocs, enumerating every surface that shipped since 1.1 with before/after examples
 - [ ] **DOC-02**: Docs state permanently that `Charge.create` is absent by design and `PaymentIntent.create(confirm: true)` is the sanctioned path
 
 ## v2 Requirements (deferred to SEED-006)
@@ -87,7 +87,7 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 | DX-01 | Phase 61 | Complete |
 | DX-02 | Phase 67 | Pending |
 | DX-03 | Phase 67 | Pending |
-| DOC-01 | Phase 62 | Pending |
+| DOC-01 | Phase 62 | Complete |
 | DOC-02 | Phase 67 | Pending |
 
 **Coverage:**

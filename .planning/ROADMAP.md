@@ -69,10 +69,12 @@
   3. `mix ci` passes (`docs --warnings-as-errors`, `credo --strict`).
 
 **Build constraints**: Zero library code — docs only. ExDoc group registration in `mix.exs` is mandatory or `mix ci` fails. Highlight BillingPortal.Configuration (unblocks an accrue portal-cancel dunning-bypass threat mitigation).
-**Plans**: 1 plan
+**Plans**: 2 plans
 
 Plans:
-- [ ] 62-01-PLAN.md — Correct and complete the historical guide, lock its semantic contract, and run the strict docs/CI gate
+
+- [x] 62-01-PLAN.md — Correct and complete the historical guide, lock its semantic contract, and run the strict docs/CI gate
+- [x] 62-02-PLAN.md — Close the verification-boundary contradiction with immutable executor and lifecycle scope audits
 
 ### Phase 63: Stripe-Native Entitlements
 
@@ -227,7 +229,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 61. Default Finch Pool & Optional Application | v1.10 | 2/2 | Complete    | 2026-07-27 |
-| 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 0/? | Not started | - |
+| 62. "1.1 → 1.7 What Landed" Migration Guide | v1.10 | 2/2 | Complete    | 2026-08-24 |
 | 63. Stripe-Native Entitlements | v1.10 | 7/7 | Complete    | 2026-07-28 |
 | 64. Meter Event-Summary Reads | v1.10 | 10/10 | Complete    | 2026-07-28 |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 6/6 | Complete    | 2026-07-29 |

@@ -4,17 +4,17 @@ milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 66
 current_phase_name: Product ↔ Feature Attachment
-status: executing
-stopped_at: Phase 62 context gathered
-last_updated: "2026-08-24T19:49:40.933Z"
-last_activity: 2026-07-29
-last_activity_desc: "Completed quick task 260729-h48: shipped the orphaned 1.1→1.7 upgrading guide"
+status: planning
+stopped_at: Phase 62 complete; Phase 66 ready to plan
+last_updated: "2026-08-24T20:41:11.023Z"
+last_activity: 2026-08-24
+last_activity_desc: Phase 62 complete; next incomplete phase is 66
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 26
-  completed_plans: 25
-  percent: 80
+  completed_phases: 5
+  total_plans: 27
+  completed_plans: 27
+  percent: 100
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 65 — webhook-objecttypes-testing-fixtures
+**Current focus:** Phase 66 — Product ↔ Feature Attachment
 
 ## Current Position
 
 Phase: 66 — Product ↔ Feature Attachment
 Plan: Not started
-Status: Ready to execute
-Last activity: 2026-07-29 — Completed quick task 260729-h48: shipped the orphaned 1.1→1.7 upgrading guide
+Status: Ready to plan
+Last activity: 2026-08-24 — Phase 62 complete; next incomplete phase is 66
 
 **Carry-forward for Phase 65 and later:**
 

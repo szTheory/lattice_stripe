@@ -1,29 +1,25 @@
 ---
 phase: 62-1-1-1-7-what-landed-migration-guide
-verified: 2026-08-24T20:18:53Z
-status: gaps_found
-score: 6/7 must-haves verified
+verified: 2026-08-24T20:38:08Z
+status: passed
+score: 7/7 must-haves verified
 behavior_unverified: 0
 overrides_applied: 0
-gaps:
-  - truth: "D-15: the committed range from the recorded phase-start SHA contains only the guide, docs-truth test, validation record, and required summary workflow artifact."
-    status: failed
-    reason: "The final committed range also contains two post-plan review workflow artifacts. They are documentation-only and no production/public-API path changed, but they are outside the plan's exact four-path allowlist."
-    artifacts:
-      - path: ".planning/phases/62-1-1-1-7-what-landed-migration-guide/62-REVIEW.md"
-        issue: "Added after the recorded D-15 audit; not included in the literal allowlist."
-      - path: ".planning/phases/62-1-1-1-7-what-landed-migration-guide/62-REVIEW-FIX.md"
-        issue: "Added after the recorded D-15 audit; not included in the literal allowlist."
-    missing:
-      - "Reconcile the D-15 allowlist with required post-execution review artifacts, then rerun and record the final scope audit."
+re_verification:
+  previous_status: gaps_found
+  previous_score: 6/7
+  gaps_closed:
+    - "D-15 exact final scope audit"
+  gaps_remaining: []
+  regressions: []
 ---
 
 # Phase 62: 1.1 → 1.7 What Landed Migration Guide Verification Report
 
 **Phase Goal:** Adopters pinned to 1.1 can discover every surface that shipped since 1.1 with before/after examples.
-**Verified:** 2026-08-24T20:18:53Z
-**Status:** gaps_found
-**Re-verification:** No — initial verification
+**Verified:** 2026-08-24T20:38:08Z
+**Status:** passed
+**Re-verification:** Yes — after D-15 gap closure
 
 ## Goal Achievement
 
@@ -31,84 +27,71 @@ gaps:
 
 | # | Truth | Status | Evidence |
 | --- | --- | --- | --- |
-| 1 | Historical 1.1 → 1.7 scope, setup, and safety boundary are correct. | ✓ VERIFIED | The guide retains `{:lattice_stripe, "~> 1.7"}`, a visible historical-scope callout, current-doc handoff, three before/after migrations, and the local `tolerance: 0` production warning. `v1.7.13` `config.ex` has `finch required: true` and `client.ex` enforces `:finch`; the guide has no `default Finch pool` claim. The named semantic test passed. |
-| 2 | Required migration work is action-first, with a safe exit before optional capability discovery. | ✓ VERIFIED | Guide lines 30–101 place the three `Affected if` checks and before/after Elixir before the optional inventory, state “no code migration” for unaffected adopters, and require an application test run before deployment. The named semantic test asserts ordering and all anchors. |
-| 3 | The optional catalogue covers every roadmap and plan surface with correct minimum calls and canonical routes. | ✓ VERIFIED | Guide lines 111–188 cover the roadmap set plus File/FileLink, Mandate, SetupAttempt, all Tax entries, and the complete finite-status list. Direct source checks confirm `Webhook.parse_event_notification/4`, `fetch_event/3`, `LatticeStripe.File.create/3`, `Dispute.update_evidence/4`, `Dispute.submit_evidence/3`, and `FileLink.create/3`. The focused contract passed. |
-| 4 | ExDoc publication/discoverability and render contract work. | ✓ VERIFIED | `mix.exs` retains the extra and `Upgrading` group membership; the focused test asserts both. Fresh `mix docs --warnings-as-errors` exited 0. |
-| 5 | Docs-truth protection is semantic and maintainable rather than snapshot/network/tag based. | ✓ VERIFIED | One named ExUnit test reads the guide once and asserts scoped anchors, ordering, inventory/routes, evidence/FileLink separation, and obsolete-navigation absence. It contains no guide snapshot, rendered-HTML, network, or tag-dependent mechanism; it passed (57 tests, 0 failures). |
-| 6 | DOC-01 has automated end-to-end evidence and no remaining human-only category. | ✓ VERIFIED | Fresh `mix ci` exited 0: Credo clean; 2392 tests, 0 failures, 1 skipped, 214 excluded; API lock 3427 entries; version prose 2.1.0; docs generated. Per the project verification policy, UI, click-path, real-time, and performance-feel checks are structurally inapplicable to this headless library; Stripe wire claims here are backed by local public code and existing test/CI seams. |
-| 7 | D-15 exact final scope audit is true. | ✗ FAILED | `git diff --name-status cc87e3a..HEAD` includes the four allowed deliverables **and** `62-REVIEW.md` and `62-REVIEW-FIX.md`. No `lib/**`, dependency, schema, API-lock, or `mix.exs` path changed, but the exact allowlist assertion is no longer true. |
+| 1 | Historical guide scope and safe migration content remain correct. | ✓ VERIFIED | Quick regression: guide retains the historical `~> 1.7` boundary, action-first examples, complete inventory, correct dispute evidence/FileLink separation, and no default-Finch claim. The named `DocsTruthTest` contract passes inside fresh full CI. |
+| 2 | The guide remains published in HexDocs and its semantic contract is executable. | ✓ VERIFIED | `mix.exs` extra/group wiring remains unchanged; fresh `mix ci` passes `LatticeStripe.DocsTruthTest`, API lock, version-prose checks, and warning-strict documentation generation. |
+| 3 | The immutable executor implementation range is exactly four permitted paths. | ✓ VERIFIED | `git diff --name-status cc87e3a0963f0e9bf7341bb009d80f12cae7f3d3..9d111dfb4c251d544570aebcce951094ba4161f4` contains only `62-01-SUMMARY.md` (A), `62-VALIDATION.md` (M), the guide (M), and docs-truth test (M). |
+| 4 | Later lifecycle records are audited separately without being attributed to the executor range. | ✓ VERIFIED | Immutable closure endpoint `ddadd4f563984db50ec9757e7c1f9597c312d3a4` is recorded. Its range adds only phase-local plan/summary/review/verification records and modifies the two product documentation deliverables; the later evidence commit `9efb421` modifies only `62-02-SUMMARY.md` and `62-VALIDATION.md`. |
+| 5 | The whole phase through current HEAD changes only two product deliverables and named Phase 62 workflow categories. | ✓ VERIFIED | Independent category audit through `9efb421b620260101a75021b9ac748f8ca6c082e` accepted all nine committed paths; staged and unstaged path sets were empty before this report update. |
+| 6 | Pre-existing untracked state is preserved and cannot bypass the audit. | ✓ VERIFIED | Full porcelain symmetric delta from the recorded baseline was empty before this report update. The milestone audit remains `??` with blob `cfa87dc36c3e6af085e8a5bb6da1caa2bb77fc42`; the sole research-cache file remains `??` with deterministic fingerprint `e6f22a0f9abbaf0822b178c301fc2a4bae22ff67fc8cb6faa33340393e54c1c4`. |
+| 7 | DOC-01 has current mechanical evidence and no residual human-only verification category. | ✓ VERIFIED | Fresh `mix ci` exited 0: Credo clean; 2392 tests, 0 failures, 1 skipped, 214 excluded; API surface lock 3427 entries; version prose 2.1.0; docs generated. The headless-library policy makes UI, click-path, real-time, and performance-feel categories inapplicable; no new public API or unsourced Stripe wire claim was introduced. |
 
-**Score:** 6/7 truths verified (0 present, behavior-unverified)
+**Score:** 7/7 truths verified (0 present, behavior-unverified)
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 | --- | --- | --- | --- |
-| `guides/upgrading-1-1-to-1-7.md` | Historical, action-first, complete migration guide | ✓ VERIFIED | 202 substantive lines; required headings, examples, routes, and correct File/FileLink semantics are present. |
-| `test/lattice_stripe/docs_truth_test.exs` | Named semantic documentation contract | ✓ VERIFIED | Test at lines 1161–1265 is wired into ExUnit and passed in both focused and full CI runs. |
-| `62-VALIDATION.md` | Executable gate and initial scope evidence | ✓ VERIFIED | Records phase-start SHA, protected-audit fingerprint, and passing focused/docs/CI gates. Its pre-review D-15 audit is accurate at the time recorded. |
-| `62-01-SUMMARY.md` | Required execution workflow record | ✓ VERIFIED | Exists, identifies DOC-01 coverage, and its claimed commands were independently rerun. |
+| `guides/upgrading-1-1-to-1-7.md` | Historically correct action-first migration guide | ✓ VERIFIED | Semantic contract remains green; no product change occurred during gap closure. |
+| `test/lattice_stripe/docs_truth_test.exs` | Focused semantic guide regression contract | ✓ VERIFIED | Still executed by the full CI run; 57-test focused suite remains part of the recorded green evidence. |
+| `62-VALIDATION.md` | Two immutable boundaries and scope proof | ✓ VERIFIED | Preserves the original four-path executor audit and separately records closure endpoint, category audit, full-status delta, and protected fingerprints. |
+| `62-02-SUMMARY.md` | Gap-closure workflow evidence | ✓ VERIFIED | Coverage now cites actual final scope evidence and uses `human_judgment: false` only after passing checks. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 | --- | --- | --- | --- | --- |
-| `mix.exs` docs config | Upgrade guide | `extras` plus `groups_for_extras["Upgrading"]` | ✓ WIRED | Static config and named ExUnit assertions agree; docs build succeeds. |
-| `CHANGELOG.md` / `v1.7.13` source | Historical guide claims | 1.3–1.7 release facts and final 1.7 Finch requirement | ✓ WIRED | The guide’s finite-status list exactly matches the 1.3 affected-module list; 1.5 thin-event calls and 1.6/1.7 additions agree with source/release records. |
-| Guide semantic anchors | `LatticeStripe.DocsTruthTest` | Named ExUnit test in required suite | ✓ WIRED | The test directly reads the guide and asserts each high-risk anchor; focused run passed. |
-| Inventory rows | Canonical guides | `.md` routes for portal, Tax, thin events, testing, Credit Notes, and Quote | ✓ WIRED | All six canonical routes occur in the guide; `mix docs --warnings-as-errors` validates documentation references. |
+| Executor start SHA | Executor endpoint | exact `git diff --name-status` | ✓ WIRED | Four-path audit is immutable and historically truthful. |
+| Closure endpoint | Current HEAD | category-based path audit | ✓ WIRED | Allowed product paths plus Phase 62 workflow records only; no production/dependency/schema/API-lock path. |
+| Full porcelain baseline | Current porcelain state | symmetric-delta plus blob/fingerprint equality | ✓ WIRED | No pre-existing untracked path changed or bypassed the audit. |
+| Guide/test | Required CI lane | ExUnit → docs build → full CI | ✓ WIRED | Fresh full CI succeeded. |
 
 ### Data-Flow Trace (Level 4)
 
-Not applicable: this phase produces static documentation and an ExUnit contract, not a dynamic rendered-data artifact.
+Not applicable: Phase 62 ships static documentation and deterministic documentation tests, not a dynamic data-rendering artifact.
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 | --- | --- | --- | --- |
-| Semantic historical/discoverability contract | `mix test test/lattice_stripe/docs_truth_test.exs` | 57 tests, 0 failures | ✓ PASS |
-| ExDoc render/reference contract | `mix docs --warnings-as-errors` | Docs generated with no warnings | ✓ PASS |
-| Full project quality and regression gate | `mix ci` | Credo clean; 2392 tests, 0 failures, 1 skipped, 214 excluded; API lock and version prose checks passed; docs generated | ✓ PASS |
+| Final quality, test, API-lock, and docs gate | `mix ci` | Credo clean; 2392 tests, 0 failures, 1 skipped, 214 excluded; API lock 3427 entries; docs generated | ✓ PASS |
+| Immutable executor boundary | `git diff --name-status cc87e3a..9d111df` | Exact four allowed paths | ✓ PASS |
+| Lifecycle/category and untracked-state audit | category predicate across committed/staged/unstaged/full porcelain | Only allowed categories; protected status/content fingerprints equal baseline | ✓ PASS |
 
 ### Probe Execution
 
-No phase-declared or conventional `probe-*.sh` scripts exist; this documentation-only migration phase uses its named ExUnit and Mix contracts instead.
+No phase-declared or conventional probe script exists. The phase’s executable evidence is the focused DocsTruth test, Mix docs build, full CI, and deterministic Git audits.
 
 ### Requirements Coverage
 
 | Requirement | Source Plan | Description | Status | Evidence |
 | --- | --- | --- | --- |
-| DOC-01 | `62-01-PLAN.md` | Published HexDocs migration guide enumerates each surface since 1.1 with before/after examples. | ✓ SATISFIED | Guide content, ExDoc registration, focused semantic contract, docs build, and fresh full CI prove the requirement. No Phase 62 requirement is orphaned. |
-
-### Post-Plan Corrective Evidence
-
-The requested corrective commits are present and their actual source effects hold:
-
-| Commit | Verified result |
-| --- | --- |
-| `5e1c4f8` | Dispute-evidence row uses `LatticeStripe.File.create/3` → `Dispute.update_evidence/4` → `Dispute.submit_evidence/3`; FileLink remains a separate expiring-link job. |
-| `c1e1409` | The docs test bounds tolerance safety assertions to the local `tolerance: 0` callout. |
-| `6745e38` | Guide and test include `SubscriptionSchedule`, `BankAccount`, `Billing.Meter`, and `Account.Capability`, completing the CHANGELOG’s finite-status list. |
-| `09a488c` | The File creation call is qualified as `LatticeStripe.File.create/3`, preventing the `Elixir.File` ExDoc ambiguity. |
-
-`62-REVIEW.md` is clean and `62-REVIEW-FIX.md` records all six findings resolved; source inspection confirms the six corrections rather than relying on those reports.
+| DOC-01 | `62-01-PLAN.md`, `62-02-PLAN.md` | HexDocs guide enumerates the caller-visible surfaces shipped since 1.1 with before/after examples. | ✓ SATISFIED | Guide/test regression evidence remains green; registration and full CI verified; gap-closure metadata made no product change. |
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 | --- | --- | --- | --- |
-| — | — | No `TBD`, `FIXME`, `XXX`, placeholder, hardcoded-output, snapshot, or network/tag-CI mechanism in Phase 62 implementation artifacts. | — | None |
+| — | — | No unresolved marker, placeholder, snapshot/network/tag-CI mechanism, or forbidden product path found in the Phase 62 closure. | — | None |
 
 ### Human Verification Required
 
-None. The project verification policy’s only live categories are already mechanically resolved: no new one-way public API was introduced (API lock passed), no unsourced Stripe wire-format claim was added, and code/recorded decisions agree. The library has no UI, click-path, real-time UX, or performance-feel surface.
+None. The repository verification policy permits this result: UI/user-flow/real-time/performance-feel categories are structurally absent, the API lock covers public surface, and all remaining claims have named passing executable evidence.
 
 ### Gaps Summary
 
-The adopter-facing goal and DOC-01 are substantively achieved, and all executable checks are green. The phase cannot receive a fully passing verification verdict because the plan made its D-15 scope audit an exact four-path claim. Two later, non-production review records are now in that committed range. Reconcile that audit contract (or remove/rehome those records under an accepted workflow rule) and rerun the final scope check; no implementation change is indicated.
+The prior D-15 gap is closed. The exact four-path assertion is retained only for the immutable executor range, while later workflow records are independently constrained by a fail-closed category audit through current HEAD. No production-library, dependency, lockfile, schema/migration, `mix.exs`, or API-lock path changed.
 
 ---
 
-_Verified: 2026-08-24T20:18:53Z_
+_Verified: 2026-08-24T20:38:08Z_
 _Verifier: the agent (gsd-verifier)_
