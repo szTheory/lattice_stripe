@@ -69,7 +69,10 @@
   3. `mix ci` passes (`docs --warnings-as-errors`, `credo --strict`).
 
 **Build constraints**: Zero library code — docs only. ExDoc group registration in `mix.exs` is mandatory or `mix ci` fails. Highlight BillingPortal.Configuration (unblocks an accrue portal-cancel dunning-bypass threat mitigation).
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 62-01-PLAN.md — Correct and complete the historical guide, lock its semantic contract, and run the strict docs/CI gate
 
 ### Phase 63: Stripe-Native Entitlements
 
