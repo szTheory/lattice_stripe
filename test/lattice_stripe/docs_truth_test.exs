@@ -1175,9 +1175,12 @@ defmodule LatticeStripe.DocsTruthTest do
     assert length(Regex.scan(~r/Before \(1\.1\)/, guide)) == 3
     assert length(Regex.scan(~r/After \(1\.7\)/, guide)) == 3
 
-    [tolerance_callout | _] = String.split(guide, "### If none apply", parts: 2)
+    [_, tolerance_callout] =
+      String.split(guide, "> #### Breaking change: `tolerance: 0`", parts: 2)
 
-    assert tolerance_callout =~ "tolerance: 0` disables the staleness check"
+    [tolerance_callout | _] = String.split(tolerance_callout, "### If none apply", parts: 2)
+
+    assert tolerance_callout =~ "disables the staleness check"
     assert tolerance_callout =~ "This is a test-only escape hatch"
     assert tolerance_callout =~ "Never set `tolerance: 0` in production"
     refute guide =~ "default Finch pool"
