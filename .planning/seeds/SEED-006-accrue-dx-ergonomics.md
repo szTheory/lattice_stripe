@@ -1,3 +1,12 @@
+---
+id: SEED-006
+status: deferred
+planted: 2026-07-27
+deferred_at: v1.10
+trigger_when: after Hex 1.8.0 ships or accrue pulls on a specific item
+scope: future milestone
+---
+
 # SEED-006 — Accrue-driven DX / ergonomics (deferred from v1.8.0)
 
 Status: **CAPTURED — PARKED.** Lower-priority DX split out of SEED-005 so v1.8.0
