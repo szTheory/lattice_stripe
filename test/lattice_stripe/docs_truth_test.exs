@@ -34,6 +34,20 @@ defmodule LatticeStripe.ChargePolicyDocsTruthTest do
     end
   end
 
+  test "PaymentIntent docs distinguish server confirmation from client next-action handling" do
+    payments = File.read!(@payments_path)
+
+    assert payments =~ "`confirmation_method` selects who is allowed to call `confirm`"
+
+    assert payments =~
+             "\"confirm\" => true` asks Stripe to make the initial confirmation on the server"
+
+    assert payments =~ "%{\"type\" => \"use_stripe_sdk\"}"
+    assert payments =~ "Stripe.js to handle the returned\n`next_action`"
+    refute payments =~ "confirmed.next_action[\"redirect_to_url\"][\"url\"]"
+    refute payments =~ "then confirm it with Stripe.js"
+  end
+
   test "only the canonical regions own the complete Charge policy" do
     readme = File.read!("README.md")
 
