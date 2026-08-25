@@ -171,11 +171,7 @@ defmodule LatticeStripe.PromotionCode do
       code: map["code"],
       coupon: decode_coupon(map["coupon"]),
       created: map["created"],
-      customer:
-        if(is_map(map["customer"]),
-          do: ObjectTypes.maybe_deserialize(map["customer"]),
-          else: map["customer"]
-        ),
+      customer: ObjectTypes.maybe_deserialize(map["customer"]),
       expires_at: map["expires_at"],
       livemode: map["livemode"],
       max_redemptions: map["max_redemptions"],

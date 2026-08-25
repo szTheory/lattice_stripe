@@ -582,30 +582,18 @@ defmodule LatticeStripe.PaymentIntent do
       confirmation_method: known["confirmation_method"],
       created: known["created"],
       currency: known["currency"],
-      customer:
-        if(is_map(known["customer"]),
-          do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]
-        ),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       customer_account: known["customer_account"],
       description: known["description"],
       excluded_payment_method_types: known["excluded_payment_method_types"],
       hooks: known["hooks"],
       last_payment_error: known["last_payment_error"],
-      latest_charge:
-        if(is_map(known["latest_charge"]),
-          do: ObjectTypes.maybe_deserialize(known["latest_charge"]),
-          else: known["latest_charge"]
-        ),
+      latest_charge: ObjectTypes.maybe_deserialize(known["latest_charge"]),
       livemode: known["livemode"],
       metadata: known["metadata"],
       next_action: known["next_action"],
       on_behalf_of: known["on_behalf_of"],
-      payment_method:
-        if(is_map(known["payment_method"]),
-          do: ObjectTypes.maybe_deserialize(known["payment_method"]),
-          else: known["payment_method"]
-        ),
+      payment_method: ObjectTypes.maybe_deserialize(known["payment_method"]),
       payment_method_configuration_details: known["payment_method_configuration_details"],
       payment_method_options: known["payment_method_options"],
       payment_method_types: known["payment_method_types"],

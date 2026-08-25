@@ -403,24 +403,13 @@ defmodule LatticeStripe.Payout do
       application_fee_amount: known["application_fee_amount"],
       arrival_date: known["arrival_date"],
       automatic: known["automatic"],
-      balance_transaction:
-        if(is_map(known["balance_transaction"]),
-          do: ObjectTypes.maybe_deserialize(known["balance_transaction"]),
-          else: known["balance_transaction"]
-        ),
+      balance_transaction: ObjectTypes.maybe_deserialize(known["balance_transaction"]),
       created: known["created"],
       currency: known["currency"],
       description: known["description"],
-      destination:
-        if(is_map(known["destination"]),
-          do: ObjectTypes.maybe_deserialize(known["destination"]),
-          else: known["destination"]
-        ),
+      destination: ObjectTypes.maybe_deserialize(known["destination"]),
       failure_balance_transaction:
-        if(is_map(known["failure_balance_transaction"]),
-          do: ObjectTypes.maybe_deserialize(known["failure_balance_transaction"]),
-          else: known["failure_balance_transaction"]
-        ),
+        ObjectTypes.maybe_deserialize(known["failure_balance_transaction"]),
       failure_code: known["failure_code"],
       failure_message: known["failure_message"],
       livemode: known["livemode"],

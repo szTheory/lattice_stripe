@@ -289,29 +289,14 @@ defmodule LatticeStripe.TransferReversal do
       id: map["id"],
       object: map["object"] || "transfer_reversal",
       amount: map["amount"],
-      balance_transaction:
-        if(is_map(map["balance_transaction"]),
-          do: ObjectTypes.maybe_deserialize(map["balance_transaction"]),
-          else: map["balance_transaction"]
-        ),
+      balance_transaction: ObjectTypes.maybe_deserialize(map["balance_transaction"]),
       created: map["created"],
       currency: map["currency"],
       destination_payment_refund:
-        if(is_map(map["destination_payment_refund"]),
-          do: ObjectTypes.maybe_deserialize(map["destination_payment_refund"]),
-          else: map["destination_payment_refund"]
-        ),
+        ObjectTypes.maybe_deserialize(map["destination_payment_refund"]),
       metadata: map["metadata"],
-      source_refund:
-        if(is_map(map["source_refund"]),
-          do: ObjectTypes.maybe_deserialize(map["source_refund"]),
-          else: map["source_refund"]
-        ),
-      transfer:
-        if(is_map(map["transfer"]),
-          do: ObjectTypes.maybe_deserialize(map["transfer"]),
-          else: map["transfer"]
-        ),
+      source_refund: ObjectTypes.maybe_deserialize(map["source_refund"]),
+      transfer: ObjectTypes.maybe_deserialize(map["transfer"]),
       extra: Map.drop(map, @known_fields)
     }
   end

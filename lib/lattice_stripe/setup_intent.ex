@@ -475,11 +475,7 @@ defmodule LatticeStripe.SetupIntent do
       cancellation_reason: known["cancellation_reason"],
       client_secret: known["client_secret"],
       created: known["created"],
-      customer:
-        if(is_map(known["customer"]),
-          do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]
-        ),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       customer_account: known["customer_account"],
       description: known["description"],
       excluded_payment_method_types: known["excluded_payment_method_types"],
@@ -491,11 +487,7 @@ defmodule LatticeStripe.SetupIntent do
       metadata: known["metadata"],
       next_action: known["next_action"],
       on_behalf_of: known["on_behalf_of"],
-      payment_method:
-        if(is_map(known["payment_method"]),
-          do: ObjectTypes.maybe_deserialize(known["payment_method"]),
-          else: known["payment_method"]
-        ),
+      payment_method: ObjectTypes.maybe_deserialize(known["payment_method"]),
       payment_method_configuration_details: known["payment_method_configuration_details"],
       payment_method_options: known["payment_method_options"],
       payment_method_types: known["payment_method_types"],

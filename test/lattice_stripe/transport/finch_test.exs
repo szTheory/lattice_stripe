@@ -83,8 +83,10 @@ defmodule LatticeStripe.Transport.FinchTest do
 
     server =
       Task.async(fn ->
-        {:ok, socket} = :gen_tcp.accept(listener, 1_000)
-        {:ok, request} = :gen_tcp.recv(socket, 0, 1_000)
+        # Keep the local test server tolerant of scheduler contention while parallel
+        # CI lanes or local audit agents are compiling and testing concurrently.
+        {:ok, socket} = :gen_tcp.accept(listener, 5_000)
+        {:ok, request} = :gen_tcp.recv(socket, 0, 5_000)
         send(test_pid, {:adapter_request, request})
 
         :ok =

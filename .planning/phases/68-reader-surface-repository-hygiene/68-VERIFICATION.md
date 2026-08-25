@@ -7,6 +7,8 @@ verified: 2026-08-25
 
 # Phase 68 Verification
 
+Close-time audit reconfirmed this evidence after the phase summary was recorded.
+
 Reader-facing repository hygiene is complete.
 
 - Decorative separator banners and historical Plan/Phase/test-number labels were removed from `lib/` and `test/`; present-tense invariants and safety rationale remain.
@@ -15,4 +17,3 @@ Reader-facing repository hygiene is complete.
 - Generated debris was moved to Trash and obsolete temporary worktrees were removed without discarding user branches.
 
 Evidence: commits `4bffa4f`, `65f4d25`; `mix ci` (2,449 tests, 0 failures, 1 documented skip); `git diff --check`.
-

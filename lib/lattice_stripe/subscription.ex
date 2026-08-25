@@ -466,17 +466,9 @@ defmodule LatticeStripe.Subscription do
       currency: known["currency"],
       current_period_end: known["current_period_end"],
       current_period_start: known["current_period_start"],
-      customer:
-        if(is_map(known["customer"]),
-          do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]
-        ),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       days_until_due: known["days_until_due"],
-      default_payment_method:
-        if(is_map(known["default_payment_method"]),
-          do: ObjectTypes.maybe_deserialize(known["default_payment_method"]),
-          else: known["default_payment_method"]
-        ),
+      default_payment_method: ObjectTypes.maybe_deserialize(known["default_payment_method"]),
       default_source: known["default_source"],
       default_tax_rates: known["default_tax_rates"],
       description: known["description"],
@@ -485,11 +477,7 @@ defmodule LatticeStripe.Subscription do
       ended_at: known["ended_at"],
       invoice_settings: known["invoice_settings"],
       items: decode_items(known["items"]),
-      latest_invoice:
-        if(is_map(known["latest_invoice"]),
-          do: ObjectTypes.maybe_deserialize(known["latest_invoice"]),
-          else: known["latest_invoice"]
-        ),
+      latest_invoice: ObjectTypes.maybe_deserialize(known["latest_invoice"]),
       livemode: known["livemode"],
       metadata: known["metadata"],
       next_pending_invoice_item_interval: known["next_pending_invoice_item_interval"],
@@ -497,19 +485,11 @@ defmodule LatticeStripe.Subscription do
       pause_collection: PauseCollection.from_map(known["pause_collection"]),
       payment_settings: known["payment_settings"],
       pending_invoice_item_interval: known["pending_invoice_item_interval"],
-      pending_setup_intent:
-        if(is_map(known["pending_setup_intent"]),
-          do: ObjectTypes.maybe_deserialize(known["pending_setup_intent"]),
-          else: known["pending_setup_intent"]
-        ),
+      pending_setup_intent: ObjectTypes.maybe_deserialize(known["pending_setup_intent"]),
       pending_update: known["pending_update"],
       plan: known["plan"],
       quantity: known["quantity"],
-      schedule:
-        if(is_map(known["schedule"]),
-          do: ObjectTypes.maybe_deserialize(known["schedule"]),
-          else: known["schedule"]
-        ),
+      schedule: ObjectTypes.maybe_deserialize(known["schedule"]),
       start_date: known["start_date"],
       status: atomize_status(known["status"]),
       test_clock: known["test_clock"],

@@ -368,11 +368,7 @@ defmodule LatticeStripe.Refund do
       object: known["object"] || "refund",
       amount: known["amount"],
       balance_transaction: known["balance_transaction"],
-      charge:
-        if(is_map(known["charge"]),
-          do: ObjectTypes.maybe_deserialize(known["charge"]),
-          else: known["charge"]
-        ),
+      charge: ObjectTypes.maybe_deserialize(known["charge"]),
       created: known["created"],
       currency: known["currency"],
       destination_details: known["destination_details"],
@@ -381,11 +377,7 @@ defmodule LatticeStripe.Refund do
       instructions_email: known["instructions_email"],
       metadata: known["metadata"],
       next_action: known["next_action"],
-      payment_intent:
-        if(is_map(known["payment_intent"]),
-          do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
-          else: known["payment_intent"]
-        ),
+      payment_intent: ObjectTypes.maybe_deserialize(known["payment_intent"]),
       reason: known["reason"],
       receipt_number: known["receipt_number"],
       source_transfer_reversal: known["source_transfer_reversal"],

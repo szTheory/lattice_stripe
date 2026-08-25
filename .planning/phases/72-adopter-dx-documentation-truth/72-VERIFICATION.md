@@ -7,6 +7,8 @@ verified: 2026-08-25
 
 # Phase 72 Verification
 
+Close-time audit reconfirmed this evidence after the phase summary was recorded.
+
 Adopter documentation now leads with stable contracts and operational decisions.
 
 - Current public surfaces agree on the shipped 2.2.0 baseline and compatibility-preserving 2.2.1 quality patch.
@@ -16,4 +18,3 @@ Adopter documentation now leads with stable contracts and operational decisions.
 - JTBD routes, Entitlements/Product Feature guidance, issue forms, navigation, examples, and release prose are current.
 
 Evidence: commits `5157a0c`, `fd0a0f8`, `65f4d25`; version-prose tests, docs-truth tests, warning-free ExDoc, link/YAML checks, and exact API lock pass.
-

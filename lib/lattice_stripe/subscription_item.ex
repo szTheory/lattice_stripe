@@ -246,11 +246,7 @@ defmodule LatticeStripe.SubscriptionItem do
       price: known["price"],
       proration_behavior: known["proration_behavior"],
       quantity: known["quantity"],
-      subscription:
-        if(is_map(known["subscription"]),
-          do: ObjectTypes.maybe_deserialize(known["subscription"]),
-          else: known["subscription"]
-        ),
+      subscription: ObjectTypes.maybe_deserialize(known["subscription"]),
       tax_rates: known["tax_rates"],
       extra: extra
     }
