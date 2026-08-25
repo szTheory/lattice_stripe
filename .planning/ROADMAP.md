@@ -208,14 +208,14 @@ Plans:
   3. Existing `Product.retrieve`/`list` continue to return correctly with the newly-typed `features` field (no break for current callers).
 
 **Build constraints**: Follow the parent-scoped path pattern (`tax_id.ex`, `transfer_reversal.ex`). Type the existing raw `[map()]` fields in `lib/lattice_stripe/product.ex` (`features` L67/L100/L408; `marketing_features` L70/L103/L411). New module needs `@moduledoc`/`@doc` + ExDoc group registration.
-**Plans**: 1/5 plans executed
+**Plans**: 2/5 plans executed
 **Wave 1**
 
 - [x] 66-01-PLAN.md
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 66-02-PLAN.md
+- [x] 66-02-PLAN.md
 - [ ] 66-03-PLAN.md
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -249,7 +249,7 @@ Plans:
 | 63. Stripe-Native Entitlements | v1.10 | 7/7 | Complete    | 2026-07-28 |
 | 64. Meter Event-Summary Reads | v1.10 | 10/10 | Complete    | 2026-07-28 |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 6/6 | Complete    | 2026-07-29 |
-| 66. Product ↔ Feature Attachment | v1.10 | 1/5 | In Progress|  |
+| 66. Product ↔ Feature Attachment | v1.10 | 2/5 | In Progress|  |
 | 67. DX Hardening & Milestone Doc Close | v1.10 | 0/? | Not started | - |
 
 ## Next Step
