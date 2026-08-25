@@ -384,6 +384,19 @@ defmodule LatticeStripe.ErrorTest do
   end
 
   describe "fuzzy param suggestions" do
+    test "from_response/3 preserves a nil message when an invalid request includes a param" do
+      body = %{
+        "error" => %{
+          "type" => "invalid_request_error",
+          "message" => nil,
+          "param" => "payment_method_type"
+        }
+      }
+
+      assert %Error{type: :invalid_request_error, message: nil, param: "payment_method_type"} =
+               Error.from_response(400, body, "req_nil_message")
+    end
+
     test "from_response/3 appends did-you-mean for near-miss param on invalid_request_error" do
       body = %{
         "error" => %{

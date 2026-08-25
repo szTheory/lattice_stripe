@@ -222,7 +222,7 @@ defmodule LatticeStripe.Error do
   # Only fires when type is :invalid_request_error and param is a non-nil binary.
   # Guard clause + catch-all mirrors parse_type/1 multi-clause style.
   defp maybe_enrich_message(:invalid_request_error, message, param)
-       when is_binary(param) and byte_size(param) > 0 do
+       when is_binary(message) and is_binary(param) and byte_size(param) > 0 do
     case suggest_param(param) do
       nil -> message
       match -> message <> "; did you mean :#{match}?"
