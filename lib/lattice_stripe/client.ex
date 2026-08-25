@@ -778,7 +778,7 @@ defmodule LatticeStripe.Client do
 
       {:ok, %Response{data: data, status: status, headers: resp_headers, request_id: request_id}}
     else
-      {:error, Error.from_response(status, decoded, request_id), resp_headers}
+      {:error, Error.from_response(status, decoded, request_id, resp_headers), resp_headers}
     end
   end
 
@@ -792,7 +792,9 @@ defmodule LatticeStripe.Client do
       message: "Non-JSON response from Stripe API (HTTP #{status})",
       status: status,
       request_id: request_id,
-      raw_body: %{"_raw" => truncated}
+      raw_body: %{"_raw" => truncated},
+      headers: resp_headers,
+      retry_after: Error.from_response(status, %{}, request_id, resp_headers).retry_after
     }
 
     {:error, error, resp_headers}

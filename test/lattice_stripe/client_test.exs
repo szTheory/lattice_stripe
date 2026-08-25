@@ -653,9 +653,10 @@ defmodule LatticeStripe.ClientTest do
     test "returns final-attempt response evidence and passes that same list to retry strategy" do
       client = retry_client(max_retries: 1)
 
-      first_headers = [{"request-id", "req_first"}, {"retry-after", "5"}]
+      first_headers = [{"request-id", "req_err_456"}, {"retry-after", "5"}]
+
       final_headers = [
-        {"Request-Id", "req_final"},
+        {"request-id", "req_err_456"},
         {"Retry-After", "60"},
         {"retry-after", "120"}
       ]
