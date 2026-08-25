@@ -37,7 +37,7 @@ Source: verified accrue gap brief (`.planning/research/accrue-gap-brief-2026-07-
 
 - [x] **DX-01**: Developer can make live Stripe calls without manually starting a Finch pool — an optional `LatticeStripe.Application` starts a default `LatticeStripe.Finch` pool and the `:finch` option defaults to it (relax `required: true`; drop from `@enforce_keys`). Existing callers that pass `:finch` keep working (backwards-compatible)
 - [x] **DX-02**: `LatticeStripe.Error` exposes response `headers` (and/or a parsed `retry_after`) so consumers can honor Stripe's `Retry-After`
-- [ ] **DX-03**: `LatticeStripe.Webhook.CacheBodyReader` is public and covered by the semver contract (promoted out of `@moduledoc false`)
+- [x] **DX-03**: `LatticeStripe.Webhook.CacheBodyReader` is public and covered by the semver contract (promoted out of `@moduledoc false`)
 
 ### Docs
 
@@ -86,7 +86,7 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 | PROD-02 | Phase 66 | Complete |
 | DX-01 | Phase 61 | Complete |
 | DX-02 | Phase 67 | Complete |
-| DX-03 | Phase 67 | Pending |
+| DX-03 | Phase 67 | Complete |
 | DOC-01 | Phase 62 | Complete |
 | DOC-02 | Phase 67 | Complete |
 
