@@ -1299,13 +1299,17 @@ LatticeStripe.Error field charge
 LatticeStripe.Error field code
 LatticeStripe.Error field decline_code
 LatticeStripe.Error field doc_url
+LatticeStripe.Error field headers
 LatticeStripe.Error field message
 LatticeStripe.Error field param
 LatticeStripe.Error field raw_body
 LatticeStripe.Error field request_id
+LatticeStripe.Error field retry_after
 LatticeStripe.Error field status
 LatticeStripe.Error field type
 LatticeStripe.Error function from_response/3
+LatticeStripe.Error function from_response/4
+LatticeStripe.Error function get_header/2
 LatticeStripe.Error impl String.Chars
 LatticeStripe.Error module
 LatticeStripe.Error type error_type/0
@@ -3458,6 +3462,8 @@ LatticeStripe.Webhook function verify_signature/4
 LatticeStripe.Webhook module
 LatticeStripe.Webhook type secret/0
 LatticeStripe.Webhook type verify_error/0
+LatticeStripe.Webhook.CacheBodyReader function read_body/2
+LatticeStripe.Webhook.CacheBodyReader module
 LatticeStripe.Webhook.Handler callback handle_event/1
 LatticeStripe.Webhook.Handler module
 LatticeStripe.Webhook.Plug function call/2
