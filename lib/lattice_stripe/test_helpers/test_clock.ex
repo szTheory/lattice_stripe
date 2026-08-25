@@ -253,27 +253,27 @@ defmodule LatticeStripe.TestHelpers.TestClock do
 
   # NOTE: NO update/3,4 and NO search/2,3 — Stripe Test Clock API absence.
 
-  # ---------------------------------------------------------------------------
-  # cleanup_tagged/2 — shared deletion core (Plan 13-05)
-  # ---------------------------------------------------------------------------
-
   @default_older_than_ms 3_600_000
 
   @doc """
   Lists and optionally deletes test clocks older than a threshold.
+
+  Despite its historical name, `cleanup_tagged/2` does not inspect tags or
+  metadata. Stripe test clocks do not support metadata, so candidates are
+  selected by age and, when provided, a clock-name prefix.
 
   This is the shared deletion core used by both
   the `Owner` GenServer's cleanup callback (per-test) and
   `mix lattice_stripe.test_clock.cleanup` (backstop). See those callers
   for the user-facing entry points.
 
-  ## Metadata limitation (A-13g)
+  ## Metadata limitation
 
   Stripe's Test Clock API does **not** support `metadata`, so this
-  function cannot filter by a LatticeStripe-specific marker. It filters
-  by age only. This means the Mix task cannot distinguish
-  LatticeStripe-managed clocks from user-created ones. The primary
-  cleanup path (Owner + `on_exit`) is unaffected.
+  function cannot filter by a LatticeStripe-specific marker. Without
+  `:name_prefix`, the Mix task cannot distinguish LatticeStripe-managed clocks
+  from user-created ones. The primary cleanup path (`Owner` + `on_exit`) is
+  unaffected.
 
   ## Options
 

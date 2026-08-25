@@ -217,9 +217,12 @@ defmodule LatticeStripe.Testing do
 
   ## Example
 
-      import LatticeStripe.Test.Fixtures.EventNotification
+      notif = LatticeStripe.Testing.event_notification(%{
+        "id" => "evt_test_account_updated",
+        "object" => "v2.core.event",
+        "type" => "v2.core.account.updated"
+      })
 
-      notif = LatticeStripe.Testing.event_notification(event_notification_map())
       assert notif.type == "v2.core.account.updated"
 
   When you need a signed wire-format payload (for example to exercise a Phoenix
