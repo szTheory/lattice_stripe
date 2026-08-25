@@ -429,8 +429,11 @@ jobs:
         # than the required ci-gate and doc warnings could never fail a PR.
         run: mix docs --warnings-as-errors
 
-      - name: Dry-run Hex package publish
-        run: mix hex.publish --dry-run --yes
+      # `mix hex.publish --dry-run` still requires a logged-in Hex user, so it is
+      # not a truthful fork-safe PR gate. The authenticated release workflow owns
+      # that dry run; PR CI proves the same package manifest can be assembled.
+      - name: Build Hex package
+        run: mix hex.build
 
   ci-gate:
     name: ci-gate
