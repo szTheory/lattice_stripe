@@ -94,9 +94,7 @@ defmodule LatticeStripe.Webhook do
   # Default replay attack protection window in seconds (matches Stripe's default).
   @default_tolerance 300
 
-  # ---------------------------------------------------------------------------
   # Public API
-  # ---------------------------------------------------------------------------
 
   @doc """
   Verifies a Stripe webhook signature and, if valid, constructs a typed `%Event{}`.
@@ -585,9 +583,7 @@ defmodule LatticeStripe.Webhook do
     "t=#{timestamp_str},v1=#{signature}"
   end
 
-  # ---------------------------------------------------------------------------
   # Private helpers
-  # ---------------------------------------------------------------------------
 
   # Parses the Stripe-Signature header value.
   #

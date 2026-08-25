@@ -143,9 +143,7 @@ defmodule LatticeStripe.SubscriptionSchedule do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Subscription Schedule.
@@ -252,9 +250,7 @@ defmodule LatticeStripe.SubscriptionSchedule do
     LatticeStripe.List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Action verbs (cancel/release)
-  # ---------------------------------------------------------------------------
 
   @doc """
   Cancels a Subscription Schedule.
@@ -362,9 +358,7 @@ defmodule LatticeStripe.SubscriptionSchedule do
       when is_binary(id) and is_map(params) and is_list(opts),
       do: client |> release(id, params, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%SubscriptionSchedule{}` struct.
@@ -415,9 +409,7 @@ defmodule LatticeStripe.SubscriptionSchedule do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("not_started"), do: :not_started
   defp atomize_status("active"), do: :active

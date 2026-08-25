@@ -108,9 +108,7 @@ defmodule LatticeStripe.Price do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD operations (no delete — D-05)
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Price.
@@ -214,9 +212,7 @@ defmodule LatticeStripe.Price do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Bang variants (no delete! — D-05)
-  # ---------------------------------------------------------------------------
 
   @doc "Like `create/3` but raises on failure."
   @spec create!(Client.t(), map(), keyword()) :: t()
@@ -251,9 +247,7 @@ defmodule LatticeStripe.Price do
   # NOTE: NO delete/2,3 and NO delete!/2,3 — D-05 forbidden op.
   # Prices cannot be deleted via the Stripe API; archive with `update(active: false)`.
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Price{}` struct.

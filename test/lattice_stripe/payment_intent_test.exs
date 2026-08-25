@@ -9,9 +9,7 @@ defmodule LatticeStripe.PaymentIntentTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/payment_intents and returns {:ok, %PaymentIntent{}}" do
@@ -40,9 +38,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/payment_intents/:id and returns {:ok, %PaymentIntent{}}" do
@@ -69,9 +65,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/payment_intents/:id and returns {:ok, %PaymentIntent{}}" do
@@ -92,9 +86,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # confirm/4
-  # ---------------------------------------------------------------------------
 
   describe "confirm/4" do
     test "sends POST /v1/payment_intents/:id/confirm and returns {:ok, %PaymentIntent{}}" do
@@ -126,9 +118,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # capture/4
-  # ---------------------------------------------------------------------------
 
   describe "capture/4" do
     test "sends POST /v1/payment_intents/:id/capture and returns {:ok, %PaymentIntent{}}" do
@@ -161,9 +151,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # cancel/4
-  # ---------------------------------------------------------------------------
 
   describe "cancel/4" do
     test "sends POST /v1/payment_intents/:id/cancel and returns {:ok, %PaymentIntent{}}" do
@@ -202,9 +190,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/payment_intents and returns {:ok, %Response{data: %List{}}} with typed items" do
@@ -231,9 +217,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create!/3 (bang)
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns %PaymentIntent{} on success" do
@@ -260,9 +244,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list!/3 (bang)
-  # ---------------------------------------------------------------------------
 
   describe "list!/3" do
     test "returns %Response{} on success" do
@@ -276,9 +258,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "maps known fields to struct fields" do
@@ -369,9 +349,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # search/3
-  # ---------------------------------------------------------------------------
 
   describe "search/3" do
     test "sends GET /v1/payment_intents/search with query param and returns typed items" do
@@ -395,9 +373,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # search!/3
-  # ---------------------------------------------------------------------------
 
   describe "search!/3" do
     test "returns %Response{} directly on success" do
@@ -417,9 +393,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # search_stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "search_stream!/3" do
     test "streams %PaymentIntent{} structs from search results" do
@@ -442,9 +416,7 @@ defmodule LatticeStripe.PaymentIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "inspect output contains id and amount" do

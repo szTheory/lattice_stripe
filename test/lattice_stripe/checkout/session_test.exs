@@ -11,9 +11,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/checkout/sessions in payment mode and returns {:ok, %Session{}}" do
@@ -122,9 +120,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/checkout/sessions/:id and returns {:ok, %Session{}}" do
@@ -151,9 +147,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/checkout/sessions and returns {:ok, %Response{data: %List{}}} with typed items" do
@@ -193,9 +187,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # expire/4
-  # ---------------------------------------------------------------------------
 
   describe "expire/4" do
     test "sends POST /v1/checkout/sessions/:id/expire and returns {:ok, %Session{}}" do
@@ -222,9 +214,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # search/3
-  # ---------------------------------------------------------------------------
 
   describe "search/3" do
     test "sends GET /v1/checkout/sessions/search with query and returns {:ok, %Response{}}" do
@@ -252,9 +242,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "stream!/3" do
     test "returns a Stream of %Session{} structs with auto-pagination" do
@@ -285,9 +273,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # search_stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "search_stream!/3" do
     test "returns a Stream of %Session{} structs from search" do
@@ -304,9 +290,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list_line_items/4
-  # ---------------------------------------------------------------------------
 
   describe "list_line_items/4" do
     test "sends GET /v1/checkout/sessions/:id/line_items and returns {:ok, %Response{data: %List{data: [%LineItem{}]}}}" do
@@ -338,9 +322,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream_line_items!/4
-  # ---------------------------------------------------------------------------
 
   describe "stream_line_items!/4" do
     test "returns a Stream of %LineItem{} structs" do
@@ -360,9 +342,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns %Session{} on success" do
@@ -473,9 +453,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "maps known fields to struct fields" do
@@ -519,9 +497,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "inspect output contains id, object, mode, status, payment_status, amount_total, currency" do
@@ -583,9 +559,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1 — atomization
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1 status atomization" do
     test "atomizes 'open' to :open" do
@@ -699,9 +673,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # LineItem.from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "LineItem.from_map/1" do
     test "maps known fields to struct fields" do
@@ -733,9 +705,7 @@ defmodule LatticeStripe.Checkout.SessionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # LineItem Inspect
-  # ---------------------------------------------------------------------------
 
   describe "LineItem Inspect" do
     test "inspect output contains id, object, description, quantity, amount_total" do

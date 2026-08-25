@@ -24,9 +24,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
     {:ok, client: test_integration_client()}
   end
 
-  # ---------------------------------------------------------------------------
   # Helpers
-  # ---------------------------------------------------------------------------
 
   defp fresh_recurring_price!(client) do
     {:ok, product} = Product.create(client, %{"name" => "Phase15 Test Product"})
@@ -47,9 +45,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
     customer
   end
 
-  # ---------------------------------------------------------------------------
   # Lifecycle round-trip
-  # ---------------------------------------------------------------------------
 
   test "CRUD + lifecycle round-trip", %{client: client} do
     price = fresh_recurring_price!(client)
@@ -115,9 +111,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
     assert %Subscription{} = canceled
   end
 
-  # ---------------------------------------------------------------------------
   # list + stream!
-  # ---------------------------------------------------------------------------
 
   test "list + stream! paginate", %{client: client} do
     {:ok, resp} = Subscription.list(client)
@@ -129,9 +123,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
     assert count >= 0
   end
 
-  # ---------------------------------------------------------------------------
   # search_stream!
-  # ---------------------------------------------------------------------------
 
   test "search_stream! paginates search results", %{client: client} do
     # stripe-mock returns empty or sample data for search endpoints — the key
@@ -143,9 +135,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
     assert is_list(result)
   end
 
-  # ---------------------------------------------------------------------------
   # Form encoder (T-15-05) — items[0][...] nested params
-  # ---------------------------------------------------------------------------
 
   test "form encoder encodes items[0][...] nested params correctly", %{client: client} do
     price = fresh_recurring_price!(client)
@@ -169,9 +159,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
     assert %Subscription{} = sub
   end
 
-  # ---------------------------------------------------------------------------
   # Proration guard (T-15-03)
-  # ---------------------------------------------------------------------------
 
   test "strict client rejects items[] update without proration_behavior" do
     strict_client = test_integration_client(require_explicit_proration: true)
@@ -183,9 +171,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
              })
   end
 
-  # ---------------------------------------------------------------------------
   # Idempotency (T-15-02)
-  # ---------------------------------------------------------------------------
 
   test "idempotency_key is forwarded", %{client: client} do
     price = fresh_recurring_price!(client)

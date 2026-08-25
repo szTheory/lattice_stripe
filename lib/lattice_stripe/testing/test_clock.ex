@@ -101,9 +101,7 @@ defmodule LatticeStripe.Testing.TestClock do
   @doc false
   def cleanup_marker, do: @cleanup_marker
 
-  # -------------------------------------------------------------------
   # __using__ macro
-  # -------------------------------------------------------------------
 
   @doc false
   defmacro __using__(opts) do
@@ -139,9 +137,7 @@ defmodule LatticeStripe.Testing.TestClock do
     end
   end
 
-  # -------------------------------------------------------------------
   # Public helpers
-  # -------------------------------------------------------------------
 
   @doc """
   Creates a test clock and registers it for automatic cleanup.
@@ -251,9 +247,7 @@ defmodule LatticeStripe.Testing.TestClock do
     {:ok, Map.put(context, :test_clock, clock)}
   end
 
-  # -------------------------------------------------------------------
   # Private: unit parsing, client resolution, owner management
-  # -------------------------------------------------------------------
 
   defp compute_frozen_time!(clock, unit_opts) do
     cond do

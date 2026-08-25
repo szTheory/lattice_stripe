@@ -65,9 +65,7 @@ defmodule LatticeStripe.ExternalAccount do
   """
   @type ea :: BankAccount.t() | Card.t() | Unknown.t()
 
-  # ---------------------------------------------------------------------------
   # cast/1 — polymorphic dispatch on the `object` discriminator
-  # ---------------------------------------------------------------------------
 
   @doc """
   Dispatches a decoded Stripe external-account map to the correct struct.
@@ -83,9 +81,7 @@ defmodule LatticeStripe.ExternalAccount do
   def cast(%{"object" => "card"} = raw), do: Card.cast(raw)
   def cast(%{"object" => _other} = raw), do: Unknown.cast(raw)
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUDL
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new external account on a Connect connected account.
@@ -230,9 +226,7 @@ defmodule LatticeStripe.ExternalAccount do
     List.stream!(client, req) |> Stream.map(&cast/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   @doc "Like `create/4` but raises `LatticeStripe.Error` on failure."
   @spec create!(Client.t(), String.t(), map(), keyword()) :: ea()
@@ -264,9 +258,7 @@ defmodule LatticeStripe.ExternalAccount do
     list(client, account_id, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Private helpers
-  # ---------------------------------------------------------------------------
 
   # Pre-network guard: raise ArgumentError immediately on empty / nil / non-binary.
   defp validate_id!(value, _name) when is_binary(value) and value != "", do: :ok

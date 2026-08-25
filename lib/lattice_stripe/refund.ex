@@ -123,9 +123,7 @@ defmodule LatticeStripe.Refund do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD operations
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Refund for a PaymentIntent.
@@ -301,9 +299,7 @@ defmodule LatticeStripe.Refund do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Bang variants
-  # ---------------------------------------------------------------------------
 
   @doc """
   Like `create/3` but raises `LatticeStripe.Error` on failure.
@@ -346,9 +342,7 @@ defmodule LatticeStripe.Refund do
     list(client, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Refund{}` struct.
@@ -401,9 +395,7 @@ defmodule LatticeStripe.Refund do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("pending"), do: :pending
   defp atomize_status("requires_action"), do: :requires_action

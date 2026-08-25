@@ -25,9 +25,7 @@ defmodule LatticeStripe.Testing.TestClockMixTaskTest do
     )
   end
 
-  # ---------------------------------------------------------------
   # cleanup_tagged/2 on TestHelpers.TestClock
-  # ---------------------------------------------------------------
 
   describe "cleanup_tagged/2" do
     test "returns matching candidates in delete: false mode (age filter)" do
@@ -120,9 +118,7 @@ defmodule LatticeStripe.Testing.TestClockMixTaskTest do
     end
   end
 
-  # ---------------------------------------------------------------
   # Mix task unit functions
-  # ---------------------------------------------------------------
 
   describe "parse_duration!/1" do
     test "parses seconds" do
@@ -165,9 +161,7 @@ defmodule LatticeStripe.Testing.TestClockMixTaskTest do
     end
   end
 
-  # ---------------------------------------------------------------
   # Mix task run/1 (integration-level)
-  # ---------------------------------------------------------------
 
   describe "Mix task run/1" do
     test "requires --client" do

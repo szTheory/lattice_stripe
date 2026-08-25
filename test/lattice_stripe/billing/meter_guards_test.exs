@@ -85,14 +85,12 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # GUARD-04 — check_summary_window!/2 alignment matrix (CONTEXT D-10)
   #
   # Stripe requires minute-aligned start_time/end_time on EVERY query, UTC-hour
   # alignment when value_grouping_window is "hour", and UTC-day alignment (00:00
   # UTC) when it is "day". Its error code for a violation is undocumented, so the
   # resulting 400 cannot be improved after the fact — only prevented.
-  # ---------------------------------------------------------------------------
 
   # 60 * 29_227_000 and 60 * 29_228_440. Minute-aligned and deliberately NOT hour-
   # or day-aligned, so the hour and day cases below have something to catch.
@@ -319,13 +317,11 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # GUARD-04 wiring — the guard as MeterEventSummary.list/4 and stream!/4 use it.
   #
   # No Mox expectation is set anywhere in the raising tests below. `verify_on_exit!`
   # therefore proves the raise happened pre-network: had the request escaped,
   # MockTransport would have raised "no expectation defined" instead.
-  # ---------------------------------------------------------------------------
 
   @meter_id "mtr_123"
 

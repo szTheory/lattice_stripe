@@ -286,9 +286,7 @@ defmodule LatticeStripe.Telemetry do
   @default_logger_id :lattice_stripe_default_logger
   @auto_advance_logger_id :lattice_stripe_auto_advance_logger
 
-  # ---------------------------------------------------------------------------
   # Public API
-  # ---------------------------------------------------------------------------
 
   # Wraps the request function in a telemetry span (emitting start/stop/exception events).
   # @doc false — implementation detail; event catalog documented in @moduledoc.
@@ -458,9 +456,7 @@ defmodule LatticeStripe.Telemetry do
     end)
   end
 
-  # ---------------------------------------------------------------------------
   # Private helpers
-  # ---------------------------------------------------------------------------
 
   # Build start metadata map for the request span.
   # Includes enriched fields: resource and operation parsed from the URL path,

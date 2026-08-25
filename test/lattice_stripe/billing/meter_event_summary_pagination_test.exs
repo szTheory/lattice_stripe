@@ -46,9 +46,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
   # flips page 2 from per-day rows to a single whole-range aggregate.
   @bucketed_window Map.put(@window, "value_grouping_window", "day")
 
-  # ---------------------------------------------------------------------------
   # Test Helpers
-  # ---------------------------------------------------------------------------
 
   # Raw transport tuple, modelled on test/lattice_stripe/list_test.exs:26-45. The envelope
   # comes from `TestHelpers.list_json/3` rather than hand-built JSON — its third argument
@@ -89,9 +87,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
 
   defp request_path(%{url: url}), do: URI.parse(url).path
 
-  # ---------------------------------------------------------------------------
   # MTR-02 — cursor derivation across the page seam (D-30 assertions 1, 7, 9)
-  # ---------------------------------------------------------------------------
 
   describe "stream!/4 cursor derivation across the page seam" do
     test "page 2 request uses starting_after from the LAST id of page 1" do
@@ -175,10 +171,8 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # MTR-02 — completeness, call counts, laziness and ordering
   # (D-30 assertions 3 and 4, plus the MTR-01 ordering edge)
-  # ---------------------------------------------------------------------------
 
   describe "stream!/4 enumeration, call counts and laziness" do
     test "a two-page response yields every item from both pages as typed structs" do
@@ -292,10 +286,8 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # MTR-02 — request scoping on pages the caller never constructs
   # (D-30 assertions 2, 5, 6 / T-64-02, T-64-03, T-64-04)
-  # ---------------------------------------------------------------------------
 
   describe "stream!/4 request scoping on pages the caller never constructs" do
     # D-30 assertion 2 / T-64-03 — the phase's highest-value assertion, MUTATION-CHECKED.
@@ -413,10 +405,8 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # MTR-02 — enumeration is complete or it fails loudly, never partial
   # (D-30 assertion 8)
-  # ---------------------------------------------------------------------------
 
   describe "stream!/4 error propagation" do
     test "a 500 on page 2 raises LatticeStripe.Error out of the stream" do

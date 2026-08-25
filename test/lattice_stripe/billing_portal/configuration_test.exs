@@ -12,9 +12,7 @@ defmodule LatticeStripe.BillingPortal.ConfigurationTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "returns {:ok, %Configuration{id: \"bpc_123\"}} on success" do
@@ -47,9 +45,7 @@ defmodule LatticeStripe.BillingPortal.ConfigurationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "returns {:ok, %Configuration{id: \"bpc_123\"}} on success" do
@@ -78,9 +74,7 @@ defmodule LatticeStripe.BillingPortal.ConfigurationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "returns {:ok, %Configuration{}} on success" do
@@ -109,9 +103,7 @@ defmodule LatticeStripe.BillingPortal.ConfigurationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "returns {:ok, %Response{}} with list data" do
@@ -144,9 +136,7 @@ defmodule LatticeStripe.BillingPortal.ConfigurationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create!/3
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns %Configuration{} directly on success" do
@@ -174,9 +164,7 @@ defmodule LatticeStripe.BillingPortal.ConfigurationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "decodes features into %Features{}" do

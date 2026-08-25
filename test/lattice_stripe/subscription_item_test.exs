@@ -9,9 +9,7 @@ defmodule LatticeStripe.SubscriptionItemTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "returns nil when given nil" do
@@ -45,9 +43,7 @@ defmodule LatticeStripe.SubscriptionItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/subscription_items and returns {:ok, %SubscriptionItem{}}" do
@@ -97,9 +93,7 @@ defmodule LatticeStripe.SubscriptionItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/subscription_items/:id" do
@@ -116,9 +110,7 @@ defmodule LatticeStripe.SubscriptionItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/subscription_items/:id" do
@@ -173,9 +165,7 @@ defmodule LatticeStripe.SubscriptionItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # delete/3 and delete/4
-  # ---------------------------------------------------------------------------
 
   describe "delete/3 and delete/4" do
     test "delete/3 (no params) sends DELETE with empty query" do
@@ -250,9 +240,7 @@ defmodule LatticeStripe.SubscriptionItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "list/3 raises when subscription param is missing" do
@@ -280,9 +268,7 @@ defmodule LatticeStripe.SubscriptionItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/2
-  # ---------------------------------------------------------------------------
 
   describe "stream!/2" do
     test "raises when subscription param is missing" do
@@ -294,9 +280,7 @@ defmodule LatticeStripe.SubscriptionItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   describe "bang variants" do
     test "create! returns struct on success" do
@@ -329,9 +313,7 @@ defmodule LatticeStripe.SubscriptionItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "masks metadata and billing_thresholds values" do

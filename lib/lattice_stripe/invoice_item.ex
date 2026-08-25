@@ -127,9 +127,7 @@ defmodule LatticeStripe.InvoiceItem do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD operations
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new InvoiceItem.
@@ -281,9 +279,7 @@ defmodule LatticeStripe.InvoiceItem do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Bang variants
-  # ---------------------------------------------------------------------------
 
   @doc "Like `create/3` but raises `LatticeStripe.Error` on failure."
   @spec create!(Client.t(), map(), keyword()) :: t()
@@ -315,9 +311,7 @@ defmodule LatticeStripe.InvoiceItem do
     list(client, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%InvoiceItem{}` struct.

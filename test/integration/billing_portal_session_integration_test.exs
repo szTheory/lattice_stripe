@@ -6,7 +6,6 @@ defmodule LatticeStripe.BillingPortal.SessionIntegrationTest do
   @moduletag :integration
   @moduletag :billing_portal
 
-  # ---------------------------------------------------------------------------
   # TEST-05 (portal portion) — Full portal flow against stripe-mock
   #
   # NOT covered here (intentional):
@@ -15,7 +14,6 @@ defmodule LatticeStripe.BillingPortal.SessionIntegrationTest do
   #   - RESEARCH Finding 2 (unknown flow type 422) — already covered in unit
   #     tests as a Guards.check_flow_data!/1 case; stripe-mock accepts it as
   #     400, not 422.
-  # ---------------------------------------------------------------------------
 
   alias LatticeStripe.BillingPortal.Session
   alias LatticeStripe.BillingPortal.Session.FlowData

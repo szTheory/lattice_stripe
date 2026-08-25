@@ -12,9 +12,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # fetch_event/3 (THIN-02)
-  # ---------------------------------------------------------------------------
 
   describe "fetch_event/3" do
     test "sends GET /v2/core/events/{id} and returns {:ok, %Event{}}" do
@@ -128,9 +126,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # fetch_event!/3 (THIN-02 bang variant)
-  # ---------------------------------------------------------------------------
 
   describe "fetch_event!/3" do
     test "returns %Event{} on happy path" do
@@ -167,9 +163,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # fetch_related_object/3 (THIN-03)
-  # ---------------------------------------------------------------------------
 
   describe "fetch_related_object/3" do
     test "returns {:ok, %Customer{}} for known related_object.type" do
@@ -368,9 +362,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # fetch_related_object!/3 (THIN-03 bang variant)
-  # ---------------------------------------------------------------------------
 
   describe "fetch_related_object!/3" do
     test "raises %Error{type: :invalid_request_error} on {:error, {:unknown_object_type, _}}" do

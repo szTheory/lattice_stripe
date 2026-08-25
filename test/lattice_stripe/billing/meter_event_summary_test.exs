@@ -20,9 +20,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     "end_time" => 1_753_706_400
   }
 
-  # ---------------------------------------------------------------------------
   # MTR-01 — list/4
-  # ---------------------------------------------------------------------------
 
   describe "MeterEventSummary.list/4" do
     test "GETs the parent-scoped /v1/billing/meters/:id/event_summaries path" do
@@ -117,9 +115,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # MTR-01 — from_map/1 (decode)
-  # ---------------------------------------------------------------------------
 
   describe "MeterEventSummary.from_map/1" do
     test "populates all seven wire fields" do
@@ -166,9 +162,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # F-02 — the deliberate absence, encoded as design rather than accident
-  # ---------------------------------------------------------------------------
 
   describe "struct shape" do
     test "has no :customer key — the customer is an input, never an output" do
@@ -176,13 +170,11 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # D-08 / D-09 — every guard fires BEFORE any transport call.
   #
   # No Mox expectation is set anywhere in this block. `verify_on_exit!` therefore
   # proves each raise happened pre-network: had the request escaped, MockTransport
   # would have raised "no expectation defined" instead of the ArgumentError asserted.
-  # ---------------------------------------------------------------------------
 
   describe "pre-network guards" do
     test "list/4 raises on a nil meter id" do
@@ -313,9 +305,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # MTR-01 — list!/4
-  # ---------------------------------------------------------------------------
 
   describe "MeterEventSummary.list!/4" do
     test "returns the %Response{} directly rather than an {:ok, _} tuple" do
@@ -338,12 +328,10 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # MTR-02 — stream!/4
   #
   # Multi-page cursor behaviour is proven separately against the transport; this
   # block proves only that the delegation is wired and yields decoded structs.
-  # ---------------------------------------------------------------------------
 
   describe "MeterEventSummary.stream!/4" do
     test "yields decoded %MeterEventSummary{} structs across a single page" do
@@ -368,11 +356,9 @@ defmodule LatticeStripe.Billing.MeterEventSummaryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # D-31 — structural surface lock. With no Dialyzer and documentation-only
   # typespecs, `refute function_exported?` is the ONLY enforcement of public
   # surface shape in this project.
-  # ---------------------------------------------------------------------------
 
   describe "module surface" do
     # F-04: there is exactly one path, `GET /v1/billing/meters/:id/event_summaries`.

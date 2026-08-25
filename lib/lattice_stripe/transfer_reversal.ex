@@ -99,9 +99,7 @@ defmodule LatticeStripe.TransferReversal do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUDL
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new TransferReversal for the given transfer.
@@ -273,9 +271,7 @@ defmodule LatticeStripe.TransferReversal do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%TransferReversal{}` struct.

@@ -88,9 +88,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementSummary do
     extra: %{}
   ]
 
-  # ---------------------------------------------------------------------------
   # RECONCILE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Returns a lazy stream of **all** of the summarized customer's active entitlements.
@@ -116,9 +114,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementSummary do
     ActiveEntitlement.stream!(client, %{"customer" => customer, "limit" => "100"}, opts)
   end
 
-  # ---------------------------------------------------------------------------
   # DECODE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Decode a Stripe-shaped string-keyed map into an `%ActiveEntitlementSummary{}`.

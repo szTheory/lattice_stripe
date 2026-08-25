@@ -9,9 +9,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
   @secret "whsec_plug_test_secret"
   @payload Jason.encode!(EventFixture.event_map())
 
-  # ---------------------------------------------------------------------------
   # Test handler modules
-  # ---------------------------------------------------------------------------
 
   defmodule OkHandler do
     @behaviour LatticeStripe.Webhook.Handler
@@ -80,9 +78,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Helpers
-  # ---------------------------------------------------------------------------
 
   defp valid_sig_header do
     Webhook.generate_test_signature(@payload, @secret)
@@ -103,9 +99,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     WebhookPlug.call(conn, plug_opts)
   end
 
-  # ---------------------------------------------------------------------------
   # describe "init/1"
-  # ---------------------------------------------------------------------------
 
   describe "init/1" do
     test "raises when secret is missing" do
@@ -151,9 +145,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # describe "no handler mode"
-  # ---------------------------------------------------------------------------
 
   describe "no handler mode" do
     test "valid POST assigns stripe_event and does not halt" do
@@ -186,9 +178,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # describe "handler mode"
-  # ---------------------------------------------------------------------------
 
   describe "handler mode" do
     test "handler returning :ok sends 200 and halts" do
@@ -251,9 +241,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # describe "path matching (at: option)"
-  # ---------------------------------------------------------------------------
 
   describe "path matching (at: option)" do
     test "POST to matching path processes webhook" do
@@ -319,9 +307,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # describe "secret resolution"
-  # ---------------------------------------------------------------------------
 
   describe "secret resolution" do
     test "MFA tuple is resolved at call time" do
@@ -367,9 +353,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # describe "tolerance: 0 end-to-end (WEBFIX-01)"
-  # ---------------------------------------------------------------------------
 
   describe "tolerance: 0 end-to-end (WEBFIX-01)" do
     test "Webhook.Plug end-to-end with tolerance: 0 and an old timestamp returns 200, not 400" do
@@ -388,9 +372,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # describe "CacheBodyReader"
-  # ---------------------------------------------------------------------------
 
   describe "CacheBodyReader" do
     test "accumulates every read chunk in order while preserving Plug return tuples" do

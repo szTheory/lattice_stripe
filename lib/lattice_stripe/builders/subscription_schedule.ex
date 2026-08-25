@@ -111,9 +111,7 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
     phases: []
   ]
 
-  # ---------------------------------------------------------------------------
   # Top-level accumulator setters
-  # ---------------------------------------------------------------------------
 
   @doc "Create a new empty SubscriptionSchedule builder accumulator."
   @spec new() :: t()
@@ -179,9 +177,7 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
     |> Map.reject(fn {_k, v} -> is_nil(v) end)
   end
 
-  # ---------------------------------------------------------------------------
   # Phase sub-builder functions
-  # ---------------------------------------------------------------------------
 
   @doc "Create a new empty Phase accumulator."
   @spec phase_new() :: Phase.t()
@@ -336,9 +332,7 @@ defmodule LatticeStripe.Builders.SubscriptionSchedule do
     |> Map.reject(fn {_k, v} -> is_nil(v) end)
   end
 
-  # ---------------------------------------------------------------------------
   # Private helpers
-  # ---------------------------------------------------------------------------
 
   defp to_string_if_atom(v) when is_atom(v) and not is_nil(v), do: Atom.to_string(v)
   defp to_string_if_atom(v), do: v

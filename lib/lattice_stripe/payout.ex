@@ -175,9 +175,7 @@ defmodule LatticeStripe.Payout do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUDL
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Payout.
@@ -271,9 +269,7 @@ defmodule LatticeStripe.Payout do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: cancel / reverse — D-03 canonical shape
-  # ---------------------------------------------------------------------------
 
   @doc """
   Cancels a pending Payout.
@@ -340,9 +336,7 @@ defmodule LatticeStripe.Payout do
     |> Resource.unwrap_singular(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Bang variants
-  # ---------------------------------------------------------------------------
 
   @doc "Like `create/3` but raises `LatticeStripe.Error` on failure."
   @spec create!(Client.t(), map(), keyword()) :: t()
@@ -386,9 +380,7 @@ defmodule LatticeStripe.Payout do
     reverse(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Payout{}` struct.
@@ -446,9 +438,7 @@ defmodule LatticeStripe.Payout do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("paid"), do: :paid
   defp atomize_status("pending"), do: :pending

@@ -92,9 +92,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryIntegrationTest do
     })
   end
 
-  # ---------------------------------------------------------------------------
   # The path is served, and a served body decodes (MTR-01)
-  # ---------------------------------------------------------------------------
 
   test "SERVER: GET /v1/billing/meters/:meter_id/event_summaries is a served route",
        %{client: client} do
@@ -126,12 +124,10 @@ defmodule LatticeStripe.Billing.MeterEventSummaryIntegrationTest do
     refute Map.has_key?(summary.extra, "customer")
   end
 
-  # ---------------------------------------------------------------------------
   # Required-param enforcement, server side (MTR-01)
   #
   # One filter omitted per case. Omitting more than one makes the named property
   # nondeterministic — see the moduledoc.
-  # ---------------------------------------------------------------------------
 
   test "SERVER: omitting only customer is rejected by Stripe, naming the customer param",
        %{client: client} do
@@ -185,9 +181,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryIntegrationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Enum validation (MTR-01)
-  # ---------------------------------------------------------------------------
 
   test "SERVER: an unrecognised value_grouping_window is rejected by the enum validator",
        %{client: client} do
@@ -214,9 +208,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryIntegrationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # MTR-04 — the Stripe-side half of the payload contract (D-33, F-20.2)
-  # ---------------------------------------------------------------------------
 
   test "SERVER: a flat payload with several custom dimensions and a decimal-string value is accepted",
        %{client: client} do

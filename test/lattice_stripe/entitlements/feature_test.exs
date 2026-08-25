@@ -25,9 +25,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
 
   defp create_params, do: %{"lookup_key" => "premium_support", "name" => "Premium Support"}
 
-  # ---------------------------------------------------------------------------
   # ENT-04 — create/3
-  # ---------------------------------------------------------------------------
 
   describe "Feature.create/3" do
     test "POSTs /v1/entitlements/features and returns a typed struct" do
@@ -84,9 +82,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # D-10 / T-63-08 — both required params are guarded BEFORE any transport call
-  # ---------------------------------------------------------------------------
 
   describe "Feature.create/3 pre-network required-param guards" do
     # No Mox expectation is set in either test below. `verify_on_exit!` is therefore itself
@@ -111,9 +107,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # ENT-04 — retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "Feature.retrieve/3" do
     test "GETs /v1/entitlements/features/{id} and returns a typed struct" do
@@ -147,10 +141,8 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # ENT-04 — update/4. Archiving IS update/4 with active: false (D-08); there is no
   # archive verb, so this test is the only proof the archive operation is reachable.
-  # ---------------------------------------------------------------------------
 
   describe "Feature.update/4" do
     test "POSTs /v1/entitlements/features/{id} with active: false and decodes the archived feature" do
@@ -178,9 +170,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # ENT-04 — list/3
-  # ---------------------------------------------------------------------------
 
   describe "Feature.list/3" do
     test "GETs /v1/entitlements/features and returns typed structs" do
@@ -273,10 +263,8 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # D-13 — stream!/3. Full pagination mechanics are proven once, for the shared
   # LatticeStripe.List cursor machine, in active_entitlement_stream_test.exs.
-  # ---------------------------------------------------------------------------
 
   describe "Feature.stream!/3" do
     test "emits typed %Feature{} values over a single page" do
@@ -312,9 +300,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # ENT-04 — from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "Feature.from_map/1" do
     test "decodes the wire object into a %Feature{}" do
@@ -347,10 +333,8 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # D-23 L1 — structural surface lock. With no Dialyzer and documentation-only
   # typespecs, this is the ONLY enforcement of public surface shape.
-  # ---------------------------------------------------------------------------
 
   describe "module surface" do
     test "exports the complete shipped verb surface" do

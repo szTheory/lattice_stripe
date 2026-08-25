@@ -215,9 +215,7 @@ if Code.ensure_loaded?(Plug) do
     # Path doesn't match → pass through
     def call(conn, _opts), do: conn
 
-    # ---------------------------------------------------------------------------
     # Private helpers
-    # ---------------------------------------------------------------------------
 
     # Reads the raw body, verifies the signature, and either assigns the event
     # or dispatches to the configured handler.

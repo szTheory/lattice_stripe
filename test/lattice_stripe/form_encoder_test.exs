@@ -193,13 +193,11 @@ defmodule LatticeStripe.FormEncoderTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # These two describe blocks back published prose in `guides/metering.md`
   # ("The payload contract"). Each assertion below is a sentence the guide
   # states as fact. Breaking one of these tests does not merely change library
   # behavior — it makes a shipped, published sentence false. If you change the
   # encoder, update the guide in the same commit.
-  # ---------------------------------------------------------------------------
 
   describe "encode/1 payload contract (backs guides/metering.md)" do
     test "arbitrary custom dimension keys survive byte-exact — there is no allowlist" do

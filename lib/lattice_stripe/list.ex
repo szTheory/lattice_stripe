@@ -195,9 +195,7 @@ defmodule LatticeStripe.List do
     )
   end
 
-  # ---------------------------------------------------------------------------
   # Private: stream state machine
-  # ---------------------------------------------------------------------------
 
   # Halt when buffer is empty and no more pages.
   defp next_item(%__MODULE__{data: [], has_more: false}, _client) do
@@ -217,9 +215,7 @@ defmodule LatticeStripe.List do
     {[item], %{list | data: rest}}
   end
 
-  # ---------------------------------------------------------------------------
   # Private: page fetching
-  # ---------------------------------------------------------------------------
 
   # Fetches the initial page from Client.request/2.
   # Raises LatticeStripe.Error on failure (bang semantics).
@@ -283,9 +279,7 @@ defmodule LatticeStripe.List do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: ID extraction helpers
-  # ---------------------------------------------------------------------------
 
   # Extract ID from the first item in the list.
   # Called once during from_json/3 before the buffer can be consumed.

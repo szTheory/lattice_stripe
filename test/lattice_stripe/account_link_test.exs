@@ -9,9 +9,7 @@ defmodule LatticeStripe.AccountLinkTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "returns nil when given nil" do
@@ -34,9 +32,7 @@ defmodule LatticeStripe.AccountLinkTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/account_links and returns {:ok, %AccountLink{}}" do
@@ -91,9 +87,7 @@ defmodule LatticeStripe.AccountLinkTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create!/3
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns struct directly on success" do
@@ -120,9 +114,7 @@ defmodule LatticeStripe.AccountLinkTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # D-04c: no positional type arg — regression guard
-  # ---------------------------------------------------------------------------
 
   describe "D-04c: no positional type arg" do
     test "create/4 does not exist — SDK-wide create(client, params, opts) shape preserved" do
@@ -134,9 +126,7 @@ defmodule LatticeStripe.AccountLinkTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Create-only: no retrieve/update/delete/list
-  # ---------------------------------------------------------------------------
 
   describe "create-only: no retrieve/update/delete/list" do
     test "retrieve/3, update/4, delete/3, list/3 are not exported — Stripe API constraint" do

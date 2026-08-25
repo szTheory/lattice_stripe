@@ -6,10 +6,8 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
   alias LatticeStripe.Event
   alias LatticeStripe.Testing.Fixtures.MeterErrorReport, as: Fixture
 
-  # ---------------------------------------------------------------------------
   # SampleError — the leaf, and the module's whole point: `request_identifier`
   # is the idempotency key of the failing MeterEvent.create/3 call (F-15, N-04).
-  # ---------------------------------------------------------------------------
 
   describe "SampleError.from_map/1" do
     test "resolves error_message and the join key from request.identifier" do
@@ -60,10 +58,8 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # ErrorType — one row per failing error code, with a sampled subset of the
   # failures underneath it.
-  # ---------------------------------------------------------------------------
 
   describe "ErrorType.from_map/1" do
     test "fans sample_errors out into typed SampleError structs" do
@@ -111,10 +107,8 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Reason — the grouping level. Stripe supplies error_count here AND on each
   # error type, which is why this library ships no counting helpers.
-  # ---------------------------------------------------------------------------
 
   describe "Reason.from_map/1" do
     test "fans error_types out into typed ErrorType structs" do
@@ -145,10 +139,8 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # MeterErrorReport.from_map/1 — the low-level constructor. It sees only
   # `data`, so it structurally cannot know which meter failed.
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "decodes all four data fields from the published payload" do
@@ -220,10 +212,8 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_event/1 — the primary constructor, and the ONLY one that can populate
   # :meter, because the meter id lives in the event envelope (D-16, F-14).
-  # ---------------------------------------------------------------------------
 
   describe "from_event/1" do
     test "lifts the meter id from the event's related object" do
@@ -268,11 +258,9 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Public surface shape. With no Dialyzer in this project and typespecs
   # documentation-only, a refutation block is the ONLY enforcement of public
   # surface shape available (D-31).
-  # ---------------------------------------------------------------------------
 
   describe "module surface" do
     test "ships no read or write verbs — no endpoint serves this payload" do

@@ -9,9 +9,7 @@ defmodule LatticeStripe.RefundTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/refunds with payment_intent param and returns {:ok, %Refund{}}" do
@@ -72,9 +70,7 @@ defmodule LatticeStripe.RefundTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/refunds/:id and returns {:ok, %Refund{}}" do
@@ -101,9 +97,7 @@ defmodule LatticeStripe.RefundTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/refunds/:id with metadata and returns {:ok, %Refund{}}" do
@@ -136,9 +130,7 @@ defmodule LatticeStripe.RefundTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # cancel/4
-  # ---------------------------------------------------------------------------
 
   describe "cancel/4" do
     test "sends POST /v1/refunds/:id/cancel and returns {:ok, %Refund{status: 'canceled'}}" do
@@ -178,9 +170,7 @@ defmodule LatticeStripe.RefundTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/refunds and returns {:ok, %Response{data: %List{}}} with typed items" do
@@ -232,9 +222,7 @@ defmodule LatticeStripe.RefundTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "stream!/3" do
     test "streams %Refund{} structs with auto-pagination" do
@@ -266,9 +254,7 @@ defmodule LatticeStripe.RefundTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns %Refund{} on success" do
@@ -365,9 +351,7 @@ defmodule LatticeStripe.RefundTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "maps known fields to struct fields" do
@@ -435,9 +419,7 @@ defmodule LatticeStripe.RefundTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "inspect output contains id, object, amount, currency, status" do

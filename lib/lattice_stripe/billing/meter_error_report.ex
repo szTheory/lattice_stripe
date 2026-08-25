@@ -155,9 +155,7 @@ defmodule LatticeStripe.Billing.MeterErrorReport do
     extra: %{}
   ]
 
-  # ---------------------------------------------------------------------------
   # DECODE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Decode a fetched `%LatticeStripe.Event{}` into a `%MeterErrorReport{}`.

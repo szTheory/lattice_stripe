@@ -162,9 +162,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
   defp atomize_status(other) when is_binary(other), do: other
   defp atomize_status(other), do: other
 
-  # ---------------------------------------------------------------------------
   # CRUD
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Stripe Test Clock.
@@ -235,9 +233,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     |> Resource.unwrap_singular(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   def create!(%Client{} = c, p \\ %{}, o \\ []),
     do: create(c, p, o) |> Resource.unwrap_bang!()
@@ -335,9 +331,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     end)
   end
 
-  # ---------------------------------------------------------------------------
   # advance/4 (Plan 13-04)
-  # ---------------------------------------------------------------------------
 
   @doc """
   Advances a Test Clock to a new `frozen_time`.
@@ -387,9 +381,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     advance(client, id, frozen_time, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # advance_and_wait/4 (Plan 13-04)
-  # ---------------------------------------------------------------------------
 
   @default_timeout 60_000
   @default_initial_interval 500
@@ -507,9 +499,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Internal poll loop
-  # ---------------------------------------------------------------------------
 
   # Always poll FIRST — even on attempt 0 there is no sleep. This catches
   # already-ready clocks and stripe-mock's instant fixture (D-13b).

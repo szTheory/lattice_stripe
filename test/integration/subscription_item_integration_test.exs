@@ -45,9 +45,7 @@ defmodule LatticeStripe.Integration.SubscriptionItemTest do
     %{price: price, customer: customer, subscription: sub}
   end
 
-  # ---------------------------------------------------------------------------
   # CRUD round-trip
-  # ---------------------------------------------------------------------------
 
   test "create -> retrieve -> update -> delete round-trip", %{client: client} do
     %{subscription: sub, price: price} =
@@ -84,9 +82,7 @@ defmodule LatticeStripe.Integration.SubscriptionItemTest do
     assert %SubscriptionItem{} = deleted
   end
 
-  # ---------------------------------------------------------------------------
   # list requires subscription param
-  # ---------------------------------------------------------------------------
 
   test "list/3 requires subscription param", %{client: client} do
     assert_raise ArgumentError, ~r/subscription/, fn ->
@@ -94,9 +90,7 @@ defmodule LatticeStripe.Integration.SubscriptionItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list + stream! filtered by subscription
-  # ---------------------------------------------------------------------------
 
   test "list + stream! filtered by subscription", %{client: client} do
     %{subscription: sub} = setup_subscription!(client, "si-list@example.com")
@@ -112,9 +106,7 @@ defmodule LatticeStripe.Integration.SubscriptionItemTest do
     assert is_list(streamed)
   end
 
-  # ---------------------------------------------------------------------------
   # Strict client + explicit proration
-  # ---------------------------------------------------------------------------
 
   test "update with proration_behavior succeeds against strict client" do
     strict_client = test_integration_client(require_explicit_proration: true)
@@ -141,9 +133,7 @@ defmodule LatticeStripe.Integration.SubscriptionItemTest do
     assert %SubscriptionItem{} = updated
   end
 
-  # ---------------------------------------------------------------------------
   # Idempotency (T-15-02)
-  # ---------------------------------------------------------------------------
 
   test "idempotency_key is forwarded on create", %{client: client} do
     %{subscription: sub, price: price} =

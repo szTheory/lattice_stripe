@@ -9,9 +9,7 @@ defmodule LatticeStripe.ChargeTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/charges/:id and returns {:ok, %Charge{}} with full field surface" do
@@ -98,9 +96,7 @@ defmodule LatticeStripe.ChargeTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve!/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve!/3" do
     test "returns %Charge{} on success" do
@@ -139,9 +135,7 @@ defmodule LatticeStripe.ChargeTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "maps every known field explicitly" do
@@ -232,9 +226,7 @@ defmodule LatticeStripe.ChargeTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect — PII hide-list
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     setup do
@@ -294,9 +286,7 @@ defmodule LatticeStripe.ChargeTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Module surface
-  # ---------------------------------------------------------------------------
 
   describe "module surface" do
     test "exports expanded Charge surface (retrieve, list, search, update, capture)" do

@@ -99,9 +99,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
   @doc false
   def list_path, do: @list_path
 
-  # ---------------------------------------------------------------------------
   # RETRIEVE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Retrieve a single active entitlement by id.
@@ -122,9 +120,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
   def retrieve!(client, id, opts \\ []),
     do: client |> retrieve(id, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # LIST + STREAM
-  # ---------------------------------------------------------------------------
 
   @doc """
   List a customer's active entitlements.
@@ -194,9 +190,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
     LatticeStripe.List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # DECODE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Decode a Stripe-shaped string-keyed map into an `%ActiveEntitlement{}`.

@@ -16,9 +16,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
 
   @secret "whsec_test_thinevent"
 
-  # ---------------------------------------------------------------------------
   # DB1: verify happy path (Testing → parse)
-  # ---------------------------------------------------------------------------
 
   describe "verify happy path (Testing → parse)" do
     test "generate_thin_event_payload + parse_event_notification returns typed EventNotification" do
@@ -53,9 +51,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # DB2: fetch-after-verify roundtrip — Event branch (parse → fetch_event)
-  # ---------------------------------------------------------------------------
 
   describe "fetch-after-verify roundtrip — Event branch (parse → fetch_event)" do
     test "chained generate → parse → fetch_event/3 returns typed %Event{}" do
@@ -87,9 +83,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # DB3: fetch-after-verify roundtrip — RelatedObject branch (parse → fetch_related_object)
-  # ---------------------------------------------------------------------------
 
   describe "fetch-after-verify roundtrip — RelatedObject branch (parse → fetch_related_object)" do
     test "chained generate → parse → fetch_related_object/3 returns typed %Customer{}" do
@@ -118,9 +112,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # DB4: malformed-payload failure boundary
-  # ---------------------------------------------------------------------------
 
   describe "malformed-payload failure boundary" do
     test "wrong secret returns {:error, :no_matching_signature}" do
@@ -163,9 +155,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # DB5: tolerance: 0 reconciled semantics on the thin-event surface
-  # ---------------------------------------------------------------------------
 
   describe "tolerance: 0 reconciled semantics on the thin-event surface" do
     test "stale timestamp + tolerance: 0 returns {:ok, notif} (WEBFIX-01 extends to thin events)" do

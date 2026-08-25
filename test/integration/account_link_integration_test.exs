@@ -38,9 +38,7 @@ defmodule LatticeStripe.AccountLinkIntegrationTest do
     {:ok, client: test_integration_client()}
   end
 
-  # ---------------------------------------------------------------------------
   # create/3 — happy path
-  # ---------------------------------------------------------------------------
 
   test "create/3 with all required params returns %AccountLink{} with url and expires_at", %{
     client: client
@@ -77,9 +75,7 @@ defmodule LatticeStripe.AccountLinkIntegrationTest do
     assert is_integer(link.created)
   end
 
-  # ---------------------------------------------------------------------------
   # create!/3 — bang variant
-  # ---------------------------------------------------------------------------
 
   test "create!/3 happy path returns %AccountLink{} directly", %{client: client} do
     {:ok, %Account{id: account_id}} =
@@ -97,9 +93,7 @@ defmodule LatticeStripe.AccountLinkIntegrationTest do
     assert is_binary(link.url)
   end
 
-  # ---------------------------------------------------------------------------
   # D-04c: missing `type` param — let Stripe 400 flow through
-  # ---------------------------------------------------------------------------
 
   test "create/3 missing required type param surfaces Stripe error or succeeds (stripe-mock validation varies)",
        %{client: client} do

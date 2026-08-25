@@ -36,9 +36,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     {:ok, client: test_integration_client()}
   end
 
-  # ---------------------------------------------------------------------------
   # Helpers
-  # ---------------------------------------------------------------------------
 
   defp fresh_recurring_price!(client) do
     {:ok, product} = Product.create(client, %{"name" => "Phase16 Test Product"})
@@ -81,9 +79,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     {sched, price}
   end
 
-  # ---------------------------------------------------------------------------
   # create — Mode 2: customer + phases
-  # ---------------------------------------------------------------------------
 
   test "create (customer + phases mode) returns shape-valid %SubscriptionSchedule{}", %{
     client: client
@@ -97,9 +93,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     assert %SubscriptionSchedule.Phase{} = hd(sched.phases)
   end
 
-  # ---------------------------------------------------------------------------
   # create — Mode 1: from_subscription
-  # ---------------------------------------------------------------------------
 
   test "create (from_subscription mode) returns shape-valid %SubscriptionSchedule{}", %{
     client: client
@@ -124,9 +118,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     assert is_binary(sched.id)
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve
-  # ---------------------------------------------------------------------------
 
   test "retrieve/3 returns shape-valid %SubscriptionSchedule{}", %{client: client} do
     {sched, _price} = create_basic_schedule!(client)
@@ -136,9 +128,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     assert is_binary(retrieved.id)
   end
 
-  # ---------------------------------------------------------------------------
   # update — exercises form encoder for phases[].items[] nested params
-  # ---------------------------------------------------------------------------
 
   test "update/4 with phases[].proration_behavior succeeds (T-16-05 form-encoder guard)",
        %{client: client} do
@@ -161,9 +151,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     assert %SubscriptionSchedule{} = updated
   end
 
-  # ---------------------------------------------------------------------------
   # cancel — POST sub-path (T-16-04 wire-verb regression guard)
-  # ---------------------------------------------------------------------------
 
   test "cancel/4 uses POST and returns %SubscriptionSchedule{}", %{client: client} do
     {sched, _price} = create_basic_schedule!(client)
@@ -179,9 +167,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     assert %SubscriptionSchedule{} = canceled
   end
 
-  # ---------------------------------------------------------------------------
   # release — POST sub-path (T-16-04 wire-verb regression guard)
-  # ---------------------------------------------------------------------------
 
   test "release/4 uses POST and returns %SubscriptionSchedule{}", %{client: client} do
     {sched, _price} = create_basic_schedule!(client)
@@ -194,9 +180,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     assert %SubscriptionSchedule{} = released
   end
 
-  # ---------------------------------------------------------------------------
   # list
-  # ---------------------------------------------------------------------------
 
   test "list/3 returns a paginated response of %SubscriptionSchedule{} structs", %{client: client} do
     {:ok, resp} = SubscriptionSchedule.list(client, %{"limit" => 3})
@@ -209,9 +193,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!
-  # ---------------------------------------------------------------------------
 
   test "stream!/3 yields %SubscriptionSchedule{} items", %{client: client} do
     items =
@@ -225,9 +207,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Proration guard (T-16-03) — fires pre-network even in integration context
-  # ---------------------------------------------------------------------------
 
   test "strict client rejects update with phases[] missing proration_behavior (pre-network)" do
     strict_client = test_integration_client(require_explicit_proration: true)
@@ -239,9 +219,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
              })
   end
 
-  # ---------------------------------------------------------------------------
   # Idempotency (T-16-02) — opts[:idempotency_key] forwarding
-  # ---------------------------------------------------------------------------
 
   test "idempotency_key is forwarded on create", %{client: client} do
     price = fresh_recurring_price!(client)

@@ -10,9 +10,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "returns nil when given nil" do
@@ -119,9 +117,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/subscription_schedules and returns {:ok, %SubscriptionSchedule{}}" do
@@ -195,9 +191,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/subscription_schedules/:id and returns {:ok, struct}" do
@@ -225,9 +219,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/subscription_schedules/:id" do
@@ -336,9 +328,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # cancel/4
-  # ---------------------------------------------------------------------------
 
   describe "cancel/4" do
     test "uses POST to /cancel sub-path (NOT DELETE)" do
@@ -422,9 +412,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # release/4
-  # ---------------------------------------------------------------------------
 
   describe "release/4" do
     test "uses POST to /release sub-path" do
@@ -502,9 +490,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3 + stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/subscription_schedules and returns typed items" do
@@ -549,9 +535,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect — PII safety (T-16-01)
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "hides PII fields and surfaces only safe presence booleans + counts" do

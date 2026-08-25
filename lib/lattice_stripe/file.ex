@@ -169,10 +169,8 @@ defmodule LatticeStripe.File do
     list(client, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Private: nested links deserialization
   # Mirrors Invoice.parse_lines/1 pattern -- see lib/lattice_stripe/invoice.ex
-  # ---------------------------------------------------------------------------
 
   defp parse_links(nil), do: nil
 

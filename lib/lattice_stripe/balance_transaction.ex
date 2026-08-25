@@ -89,9 +89,7 @@ defmodule LatticeStripe.BalanceTransaction do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API
-  # ---------------------------------------------------------------------------
 
   @doc """
   Retrieves a BalanceTransaction by ID.
@@ -162,9 +160,7 @@ defmodule LatticeStripe.BalanceTransaction do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%BalanceTransaction{}` struct.
@@ -210,9 +206,7 @@ defmodule LatticeStripe.BalanceTransaction do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("available"), do: :available
   defp atomize_status("pending"), do: :pending

@@ -178,9 +178,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     extra: %{}
   ]
 
-  # ---------------------------------------------------------------------------
   # LIST
-  # ---------------------------------------------------------------------------
 
   @doc """
   List one page of usage summaries for a meter.
@@ -250,9 +248,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     client |> list(meter_id, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # STREAM
-  # ---------------------------------------------------------------------------
 
   @doc """
   Returns a lazy stream of **every** usage summary in the window (auto-pagination).
@@ -325,9 +321,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     LatticeStripe.List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # DECODE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Decode a Stripe-shaped string-keyed map into a `%MeterEventSummary{}`.
@@ -361,9 +355,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private helpers
-  # ---------------------------------------------------------------------------
 
   # The canonical path lives here once. `list/4` and the streaming variant both
   # read it, so they physically cannot diverge.

@@ -136,9 +136,7 @@ defmodule LatticeStripe.Billing.MeterEventStream do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Private — session create implementation
-  # ---------------------------------------------------------------------------
 
   defp do_create_session(client, opts) do
     headers = [
@@ -173,9 +171,7 @@ defmodule LatticeStripe.Billing.MeterEventStream do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Private — send events implementation
-  # ---------------------------------------------------------------------------
 
   defp do_send_events(client, session, events, opts) do
     headers = [
@@ -215,9 +211,7 @@ defmodule LatticeStripe.Billing.MeterEventStream do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Private helpers
-  # ---------------------------------------------------------------------------
 
   defp validate_events([]) do
     {:error, %Error{type: :invalid_request_error, message: "events list cannot be empty"}}

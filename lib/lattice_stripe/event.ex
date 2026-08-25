@@ -108,9 +108,7 @@ defmodule LatticeStripe.Event do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: Read-only resource operations (Events are immutable)
-  # ---------------------------------------------------------------------------
 
   @doc """
   Retrieves an Event by ID.
@@ -197,9 +195,7 @@ defmodule LatticeStripe.Event do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Event{}` struct.

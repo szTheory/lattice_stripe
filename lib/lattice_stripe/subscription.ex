@@ -186,9 +186,7 @@ defmodule LatticeStripe.Subscription do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Subscription.
@@ -431,9 +429,7 @@ defmodule LatticeStripe.Subscription do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Subscription{}` struct.
@@ -525,9 +521,7 @@ defmodule LatticeStripe.Subscription do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("incomplete"), do: :incomplete
   defp atomize_status("incomplete_expired"), do: :incomplete_expired

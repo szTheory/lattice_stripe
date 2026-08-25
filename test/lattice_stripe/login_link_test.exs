@@ -9,9 +9,7 @@ defmodule LatticeStripe.LoginLinkTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "returns nil when given nil" do
@@ -33,9 +31,7 @@ defmodule LatticeStripe.LoginLinkTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/4 — account_id as second positional arg
-  # ---------------------------------------------------------------------------
 
   describe "create/4" do
     test "sends POST /v1/accounts/:account_id/login_links and returns {:ok, %LoginLink{}}" do
@@ -87,9 +83,7 @@ defmodule LatticeStripe.LoginLinkTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/4 signature deviation — account_id must be binary
-  # ---------------------------------------------------------------------------
 
   describe "create/4 signature deviation" do
     test "create(client, account_id) works with default params and opts" do
@@ -116,9 +110,7 @@ defmodule LatticeStripe.LoginLinkTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create!/4
-  # ---------------------------------------------------------------------------
 
   describe "create!/4" do
     test "returns struct directly on success" do
@@ -145,9 +137,7 @@ defmodule LatticeStripe.LoginLinkTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Create-only: no retrieve/update/delete/list
-  # ---------------------------------------------------------------------------
 
   describe "create-only: no retrieve/update/delete/list" do
     test "retrieve/3, update/4, delete/3, list/3 are not exported — Stripe API constraint" do

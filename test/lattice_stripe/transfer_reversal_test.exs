@@ -12,9 +12,7 @@ defmodule LatticeStripe.TransferReversalTest do
   @transfer_id "tr_1OoMnpJ2eZvKYlo21fGhIjKl"
   @reversal_id "trr_1OoMpqJ2eZvKYlo20wxYzAbC"
 
-  # ---------------------------------------------------------------------------
   # create/4
-  # ---------------------------------------------------------------------------
 
   describe "create/4" do
     test "sends POST /v1/transfers/:transfer_id/reversals and returns {:ok, %TransferReversal{}}" do
@@ -56,9 +54,7 @@ defmodule LatticeStripe.TransferReversalTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/4
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/4" do
     test "sends GET /v1/transfers/:transfer_id/reversals/:id" do
@@ -104,9 +100,7 @@ defmodule LatticeStripe.TransferReversalTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/5
-  # ---------------------------------------------------------------------------
 
   describe "update/5" do
     test "sends POST /v1/transfers/:transfer_id/reversals/:id with metadata" do
@@ -143,9 +137,7 @@ defmodule LatticeStripe.TransferReversalTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/4
-  # ---------------------------------------------------------------------------
 
   describe "list/4" do
     test "returns wrapped %Response{data: %List{}} with typed items" do
@@ -170,9 +162,7 @@ defmodule LatticeStripe.TransferReversalTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/4
-  # ---------------------------------------------------------------------------
 
   describe "stream!/4" do
     test "yields %TransferReversal{} structs lazily" do
@@ -196,9 +186,7 @@ defmodule LatticeStripe.TransferReversalTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   describe "bang variants" do
     test "create! raises on error" do
@@ -242,9 +230,7 @@ defmodule LatticeStripe.TransferReversalTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "maps known fields explicitly" do
