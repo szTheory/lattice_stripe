@@ -352,13 +352,15 @@ defmodule LatticeStripe.ErrorTest do
       assert %Error{retry_after: 600_000} = Error.from_response(429, body, nil, headers)
     end
 
-    test "rejects missing, malformed, negative, suffixed, and HTTP-date retry values" do
+    test "rejects missing, signed, malformed, suffixed, and HTTP-date retry values" do
       body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
 
       for headers <- [
             [],
             [{"retry-after", "nope"}],
             [{"retry-after", "-1"}],
+            [{"retry-after", "+5"}],
+            [{"retry-after", "-0"}],
             [{"retry-after", "3seconds"}],
             [{"retry-after", "Wed, 21 Oct 2015 07:28:00 GMT"}]
           ] do

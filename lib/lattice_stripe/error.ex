@@ -203,9 +203,12 @@ defmodule LatticeStripe.Error do
   end
 
   defp parse_retry_after(value) do
-    case Integer.parse(String.trim(value)) do
-      {seconds, ""} when seconds >= 0 -> seconds
-      _ -> nil
+    value = String.trim(value)
+
+    if Regex.match?(~r/^\d+$/, value) do
+      String.to_integer(value)
+    else
+      nil
     end
   end
 
