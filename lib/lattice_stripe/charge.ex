@@ -70,10 +70,21 @@ defmodule LatticeStripe.Charge do
 
   ## SDK surface (intentionally omitted)
 
-  There is no `create/3` or `cancel/3` — this module does not initiate payments.
-  Charges are created as a side effect of PaymentIntent confirmation (or legacy
-  direct-charge flows outside this SDK). See Phase 18 decision D-06 for the
-  payment-initiation rationale.
+  `LatticeStripe.Charge.create` at arity `3` will not be added. Charge is a
+  read/reconciliation resource, not a payment-initiation API. For direct server-side
+  payment initiation, use `LatticeStripe.PaymentIntent.create/3`:
+
+      {:ok, intent} =
+        LatticeStripe.PaymentIntent.create(client, %{
+          "amount" => 4_999,
+          "currency" => "usd",
+          "payment_method" => "pm_card_visa",
+          "confirm" => true
+        })
+
+  A successful PaymentIntent creates the resulting Charge for reconciliation. Browser
+  and other client-SDK flows create the PaymentIntent server-side but confirm it with
+  Stripe.js or an equivalent client SDK; customer action or SCA may still be required.
 
   ## Security and Inspect
 

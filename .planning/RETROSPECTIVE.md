@@ -2,6 +2,56 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.10 — Accrue Surface Closure
+
+**Shipped:** 2026-08-25
+**Phases:** 7 (61-67) | **Plans:** 37 | **Tasks:** 71
+
+### What Was Built
+
+- Optional application startup and a default Finch pool with explicit-pool compatibility and an opt-out.
+- Typed Stripe-native Entitlements reads, streaming, Feature management, summary decoding, and fail-closed local authorization guidance.
+- Meter event-summary reads/streaming, typed meter error reports, exact webhook object dispatch, and public test fixtures.
+- Typed Product Feature attachment CRUD/streaming without retyping Product marketing display fields.
+- Historical migration guidance plus faithful `Retry-After`, public multi-chunk-safe `CacheBodyReader`, and permanent PaymentIntent-first Charge guidance.
+
+### What Worked
+
+- **Adopter-pull scope gate:** Accrue evidence kept the reopen narrow and prevented broad resource-family expansion.
+- **Guard and cursor proofs:** Pre-network validation, Mox page-two assertions, mutation checks, and stripe-mock contract probes separated SDK-owned behavior from Stripe-owned uncertainty.
+- **Docs as executable contracts:** The milestone reduced ExDoc from a warning baseline to zero and locked migration, authorization, metering, Product Feature, and Charge guidance in tests.
+- **Compatibility discipline:** The Product marketing-field split and fixture rename were treated as SemVer decisions rather than incidental implementation details.
+
+### What Was Inefficient
+
+- **Milestone bookkeeping lagged implementation:** The generic ROADMAP phase-details heading broke `init.manager`, one Phase 65 plan checkbox stayed stale, and the original audit remained beside its post-Phase-67 replacement.
+- **Summary extraction was noisy:** Several checkpoint summaries lacked clean one-liners, so automatic milestone completion emitted option IDs and stale blocking text that required curation.
+- **Version intent drifted:** Planning continued to call the target Hex 1.8.0 after the fixture rename correctly forced package 2.0.0 and release metadata advanced to 2.1.0.
+- **Nyquist reconciliation lagged:** Phases 61 and 63 passed canonical verification but retained draft VALIDATION artifacts.
+
+### Patterns Established
+
+- Keep GSD milestone versions separate from package SemVer and record both explicitly at close.
+- Give every plan summary a clean `one-liner` so automated milestone records remain trustworthy.
+- Keep current-milestone ROADMAP headings version-bearing so manager projections scope correctly.
+- Preserve raw compatibility fields when Stripe introduces a distinct typed relationship resource.
+
+### Key Lessons
+
+1. A bounded `tech_debt` audit can close honestly when all product requirements, phases, joins, and adopter flows pass and the remaining uncertainty is explicitly classified.
+2. Planning metadata is part of the control plane: stale headings and checkboxes can break readiness even when implementation is complete.
+3. Public testing helpers are adopter API; renaming them deserves the same SemVer discipline as runtime functions.
+4. External service limitations should be named at the exact proof boundary instead of being hidden behind skipped tests.
+
+### Cost Observations
+
+- Timeline: 30 calendar days (2026-07-27 → 2026-08-25).
+- Diff: 291 files, +47,548/-603 lines across implementation, tests, docs, and planning evidence.
+- Final gate: 2,440 tests, zero ExDoc warnings, API lock passing.
+- Notable: Late Phase 62, 66, and 67 closure work converted an earlier 13/19 audit into 19/19 without broadening the milestone.
+
+---
+
 ## Milestone: v1.9 — CI & Doc Honesty
 
 **Shipped:** 2026-05-27
@@ -269,6 +319,8 @@
 | v1.4 | 4 | 8 | Adoption Closure: docs/truth/discovery, four flagship recipes, planning-truth reconciliation. First non-code milestone — verification artifact discipline lagged because of it |
 | v1.5 | 2 | 11 | Thin-Event Webhooks: net-new `parse_event_notification`/`fetch_event`/`fetch_related_object` surface, `tolerance: 0` four-surface reconciliation (WEBFIX-01), canonical Phoenix guide, integration + docs-truth coverage. Fastest milestone by wall-clock (~6 hours single-day). Source-truth verification rule codified |
 | v1.8 | 3 | 10 | Adopter truth & doc routing polish: describe-per-guide docs_truth, Charge reconciliation routing, planning-truth close at milestone end |
+| v1.9 | 2 | 4 | CI and doc honesty: checkout/README truth locks, guide-sensitive CI, and JTBD refresh |
+| v1.10 | 7 | 37 | Accrue-driven surface closure: default Finch, Entitlements, metering reads, object fixtures, Product Feature attachments, and DX/docs hardening. First milestone to explicitly separate GSD version from package SemVer at close |
 
 ### Top Lessons (Verified Across Milestones)
 

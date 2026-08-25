@@ -155,29 +155,41 @@ Use this when your endpoint architecture requires `Plug.Parsers` to run before t
 webhook route or when you want to keep webhook routing in `router.ex`.
 
 Plug's docs describe `:body_reader` as the hook for preserving the raw body before it
-is parsed and discarded. LatticeStripe ships a ready-made cache-body reader module
-for that pattern.
-
-```elixir
-# lib/my_app_web/endpoint.ex
-
-plug Plug.Parsers,
-  parsers: [:urlencoded, :multipart, :json],
-  pass: ["*/*"],
-  json_decoder: Jason,
-  body_reader: {LatticeStripe.Webhook.CacheBodyReader, :read_body, []}
-```
+is parsed and discarded. LatticeStripe ships `LatticeStripe.Webhook.CacheBodyReader`
+for that pattern when Plug is installed. It is conditionally available because the
+library keeps Plug optional.
 
 ```elixir
 # lib/my_app_web/router.ex
 
-forward "/webhooks/stripe", LatticeStripe.Webhook.Plug,
-  secret: fn -> System.fetch_env!("STRIPE_WEBHOOK_SECRET") end,
-  handler: MyApp.StripeWebhookHandler
+pipeline :stripe_webhook do
+  plug Plug.Parsers,
+    parsers: [:json],
+    pass: [],
+    json_decoder: Jason,
+    body_reader: {LatticeStripe.Webhook.CacheBodyReader, :read_body, []}
+end
+
+scope "/webhooks" do
+  pipe_through :stripe_webhook
+
+  forward "/stripe", LatticeStripe.Webhook.Plug,
+    secret: fn -> System.fetch_env!("STRIPE_WEBHOOK_SECRET") end,
+    handler: MyApp.StripeWebhookHandler
+end
 ```
 
 This path remains fully supported, but it is an advanced alternative, not the
-primary quickstart.
+primary quickstart. `CacheBodyReader.read_body/2` preserves each current chunk's native
+`Plug.Conn.read_body/2` return tuple and, after the terminal `:ok` read,
+`conn.private[:raw_body]` contains the exact complete body under the fixed `:raw_body`
+key.
+
+The `:stripe_webhook` pipeline applies only to `/webhooks/stripe` and accepts JSON only:
+keep it separate from your normal endpoint parser pipeline. It retains another request-body
+copy for the connection lifetime, which can retain PII; never log
+the raw body wholesale. It is not intended for multipart parsing. Do not configure it
+globally as a general raw-body retention mechanism.
 
 ## Troubleshooting
 

@@ -314,9 +314,91 @@ defmodule LatticeStripe.ErrorTest do
       assert error.type == :api_error
       assert error.raw_body == body
     end
+
+    test "remains a compatibility delegate with empty response metadata" do
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+
+      assert %Error{headers: [], retry_after: nil} = Error.from_response(429, body, "req_compat")
+    end
+  end
+
+  describe "Error response metadata" do
+    test "preserves ordered duplicate headers and exposes all matching values" do
+      headers = [
+        {"Request-Id", "req_429"},
+        {"Retry-After", "60"},
+        {"retry-after", "120"},
+        {"X-Trace", "first"}
+      ]
+
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+      error = Error.from_response(429, body, "req_429", headers)
+
+      assert error.headers == headers
+      assert error.retry_after == 60
+      assert Error.get_header(error, "retry-after") == ["60", "120"]
+    end
+
+    test "uses the first valid trimmed non-negative decimal Retry-After value without a cap" do
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+
+      headers = [
+        {"retry-after", "not-a-delay"},
+        {"Retry-After", " -1 "},
+        {"retry-after", " 600000 "},
+        {"retry-after", "1x"}
+      ]
+
+      assert %Error{retry_after: 600_000} = Error.from_response(429, body, nil, headers)
+    end
+
+    test "rejects missing, signed, malformed, suffixed, and HTTP-date retry values" do
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+
+      for headers <- [
+            [],
+            [{"retry-after", "nope"}],
+            [{"retry-after", "-1"}],
+            [{"retry-after", "+5"}],
+            [{"retry-after", "-0"}],
+            [{"retry-after", "3seconds"}],
+            [{"retry-after", "Wed, 21 Oct 2015 07:28:00 GMT"}]
+          ] do
+        assert %Error{retry_after: nil} = Error.from_response(429, body, nil, headers)
+      end
+    end
+
+    test "is repeatable and parallel-pure without changing the caller-owned header list" do
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+      headers = [{"Retry-After", " 0 "}, {"X-Request-Id", "req_parallel"}]
+
+      expected = Error.from_response(429, body, "req_parallel", headers)
+      assert Error.from_response(429, body, "req_parallel", headers) == expected
+      assert headers == [{"Retry-After", " 0 "}, {"X-Request-Id", "req_parallel"}]
+
+      results =
+        1..20
+        |> Task.async_stream(fn _ -> Error.from_response(429, body, "req_parallel", headers) end)
+        |> Enum.map(fn {:ok, error} -> error end)
+
+      assert Enum.all?(results, &(&1 == expected))
+    end
   end
 
   describe "fuzzy param suggestions" do
+    test "from_response/3 preserves a nil message when an invalid request includes a param" do
+      body = %{
+        "error" => %{
+          "type" => "invalid_request_error",
+          "message" => nil,
+          "param" => "payment_method_type"
+        }
+      }
+
+      assert %Error{type: :invalid_request_error, message: nil, param: "payment_method_type"} =
+               Error.from_response(400, body, "req_nil_message")
+    end
+
     test "from_response/3 appends did-you-mean for near-miss param on invalid_request_error" do
       body = %{
         "error" => %{

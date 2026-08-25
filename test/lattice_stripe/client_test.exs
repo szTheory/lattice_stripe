@@ -339,7 +339,7 @@ defmodule LatticeStripe.ClientTest do
         {:error, :timeout}
       end)
 
-      assert {:error, %Error{type: :connection_error}} =
+      assert {:error, %Error{type: :connection_error, headers: [], retry_after: nil}} =
                Client.request(client, get_request())
     end
   end
@@ -649,6 +649,36 @@ defmodule LatticeStripe.ClientTest do
       assert {:ok, %Response{data: %{"id" => "cus_success"}}} =
                Client.request(client, get_request())
     end
+
+    test "returns final-attempt response evidence and passes that same list to retry strategy" do
+      client = retry_client(max_retries: 1)
+
+      first_headers = [{"request-id", "req_err_456"}, {"retry-after", "5"}]
+
+      final_headers = [
+        {"request-id", "req_err_456"},
+        {"Retry-After", "60"},
+        {"retry-after", "120"}
+      ]
+
+      expect(LatticeStripe.MockRetryStrategy, :retry?, fn 1, context ->
+        assert context.headers == first_headers
+        {:retry, 0}
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        error_response(429, "rate_limit_error", "Too many requests", tl(first_headers))
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        error_response(429, "rate_limit_error", "Still limited", tl(final_headers))
+      end)
+
+      assert {:error, %Error{headers: ^final_headers, retry_after: 60} = error} =
+               Client.request(client, get_request())
+
+      assert Error.get_header(error, "RETRY-AFTER") == ["60", "120"]
+    end
   end
 
   describe "request/2 idempotency keys" do
@@ -755,6 +785,23 @@ defmodule LatticeStripe.ClientTest do
 
       assert is_binary(raw)
       assert String.contains?(raw, "maintenance")
+    end
+
+    test "non-JSON errors preserve their response headers and Retry-After evidence" do
+      client = test_client(max_retries: 0)
+
+      headers = [
+        {"Request-Id", "req_non_json"},
+        {"Retry-After", " 60 "},
+        {"retry-after", "120"}
+      ]
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        {:ok, %{status: 503, headers: headers, body: "<html>maintenance</html>"}}
+      end)
+
+      assert {:error, %Error{headers: ^headers, retry_after: 60}} =
+               Client.request(client, get_request())
     end
 
     # Test 41: Empty response body returns structured api_error
@@ -1392,6 +1439,29 @@ defmodule LatticeStripe.ClientTest do
                Client.download(client, "/v1/quotes/qt_123/pdf")
     end
 
+    test "retries a transient download failure through the binary response pipeline" do
+      client = retry_client()
+
+      expect(LatticeStripe.MockRetryStrategy, :retry?, fn 1, _context -> {:retry, 0} end)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response(500, "api_error", "Temporary failure")
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        {:ok,
+         %{
+           status: 200,
+           headers: [{"content-type", "application/pdf"}, {"request-id", "req_retried_dl"}],
+           body: "retried-pdf-binary"
+         }}
+      end)
+
+      assert {:ok,
+              %Response{data: "retried-pdf-binary", status: 200, request_id: "req_retried_dl"}} =
+               Client.download(client, "/v1/quotes/qt_123/pdf")
+    end
+
     test "JSON-decodes error responses on 4xx" do
       client = test_client()
 
@@ -1408,6 +1478,26 @@ defmodule LatticeStripe.ClientTest do
       end)
 
       assert {:error, %Error{type: :invalid_request_error}} =
+               Client.download(client, "/v1/files/file_xxx/contents")
+    end
+
+    test "preserves response evidence on download errors" do
+      client = test_client(max_retries: 0)
+      headers = [{"Request-Id", "req_download"}, {"Retry-After", "60"}]
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        {:ok,
+         %{
+           status: 429,
+           headers: headers,
+           body:
+             Jason.encode!(%{
+               "error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}
+             })
+         }}
+      end)
+
+      assert {:error, %Error{headers: ^headers, retry_after: 60}} =
                Client.download(client, "/v1/files/file_xxx/contents")
     end
 
@@ -1469,7 +1559,7 @@ defmodule LatticeStripe.ClientTest do
         {:error, %Mint.TransportError{reason: :timeout}}
       end)
 
-      assert {:error, %Error{type: :connection_error}} =
+      assert {:error, %Error{type: :connection_error, headers: [], retry_after: nil}} =
                Client.download(client, "/v1/files/file_x/contents")
     end
   end

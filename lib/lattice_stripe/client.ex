@@ -492,14 +492,14 @@ defmodule LatticeStripe.Client do
           total_attempts: total_attempts
         }
 
-        maybe_retry(client, transport_request, retry_state, error, resp_headers)
+        maybe_retry(client, transport_request, retry_state, error, resp_headers, :request)
     end
   end
 
   # Handle retry decision after a failed request attempt.
   # retry_state bundles {method, idempotency_key, max_retries, attempt, total_attempts}
   # to keep arity within Credo limits.
-  defp maybe_retry(client, transport_request, retry_state, error, resp_headers) do
+  defp maybe_retry(client, transport_request, retry_state, error, resp_headers, retry_kind) do
     %{attempt: attempt, total_attempts: total_attempts} = retry_state
 
     if attempt <= retry_state.max_retries do
@@ -515,14 +515,14 @@ defmodule LatticeStripe.Client do
         idempotency_key: retry_state.idempotency_key
       }
 
-      apply_retry_decision(client, transport_request, retry_state, error, context)
+      apply_retry_decision(client, transport_request, retry_state, error, context, retry_kind)
     else
       {{:error, error}, total_attempts, resp_headers}
     end
   end
 
   # Apply the retry strategy decision: sleep and recurse, or stop.
-  defp apply_retry_decision(client, transport_request, retry_state, error, context) do
+  defp apply_retry_decision(client, transport_request, retry_state, error, context, retry_kind) do
     %{
       method: method,
       idempotency_key: idk,
@@ -545,7 +545,8 @@ defmodule LatticeStripe.Client do
         # D-15: Process.sleep for retry delays; BEAM handles thousands of sleeping processes
         Process.sleep(delay_ms)
 
-        do_request_with_retries(
+        retry_request(
+          retry_kind,
           client,
           transport_request,
           method,
@@ -558,6 +559,14 @@ defmodule LatticeStripe.Client do
       :stop ->
         {{:error, error}, total, context.headers}
     end
+  end
+
+  defp retry_request(:request, client, transport_request, method, idk, max, attempt, total) do
+    do_request_with_retries(client, transport_request, method, idk, max, attempt, total)
+  end
+
+  defp retry_request(:download, client, transport_request, method, idk, max, attempt, total) do
+    do_download_with_retries(client, transport_request, method, idk, max, attempt, total)
   end
 
   # Resolve effective timeout for upload/download operations.
@@ -619,7 +628,7 @@ defmodule LatticeStripe.Client do
           total_attempts: total_attempts
         }
 
-        maybe_retry(client, transport_request, retry_state, error, resp_headers)
+        maybe_retry(client, transport_request, retry_state, error, resp_headers, :download)
     end
   end
 
@@ -778,7 +787,7 @@ defmodule LatticeStripe.Client do
 
       {:ok, %Response{data: data, status: status, headers: resp_headers, request_id: request_id}}
     else
-      {:error, Error.from_response(status, decoded, request_id), resp_headers}
+      {:error, Error.from_response(status, decoded, request_id, resp_headers), resp_headers}
     end
   end
 
@@ -792,7 +801,9 @@ defmodule LatticeStripe.Client do
       message: "Non-JSON response from Stripe API (HTTP #{status})",
       status: status,
       request_id: request_id,
-      raw_body: %{"_raw" => truncated}
+      raw_body: %{"_raw" => truncated},
+      headers: resp_headers,
+      retry_after: Error.from_response(status, %{}, request_id, resp_headers).retry_after
     }
 
     {:error, error, resp_headers}

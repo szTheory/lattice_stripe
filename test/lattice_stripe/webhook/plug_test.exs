@@ -47,6 +47,39 @@ defmodule LatticeStripe.Webhook.PlugTest do
     def get_secret, do: "whsec_plug_test_secret"
   end
 
+  defmodule ErrorReadAdapter do
+    def read_req_body(_payload, _opts), do: {:error, :closed}
+  end
+
+  defmodule ChunkedReadAdapter do
+    def read_req_body([chunk], _opts), do: {:ok, chunk, []}
+    def read_req_body([chunk | rest], _opts), do: {:more, chunk, rest}
+  end
+
+  defmodule RouteScopedCacheBodyReader do
+    use Plug.Router
+
+    @parser_opts Plug.Parsers.init(
+                   parsers: [:json],
+                   pass: [],
+                   json_decoder: Jason,
+                   body_reader: {LatticeStripe.Webhook.CacheBodyReader, :read_body, []}
+                 )
+
+    plug(:match)
+    plug(:dispatch)
+
+    post "/webhooks/stripe" do
+      conn
+      |> Plug.Parsers.call(@parser_opts)
+      |> Plug.Conn.send_resp(204, "")
+    end
+
+    match _ do
+      conn
+    end
+  end
+
   # ---------------------------------------------------------------------------
   # Helpers
   # ---------------------------------------------------------------------------
@@ -360,6 +393,16 @@ defmodule LatticeStripe.Webhook.PlugTest do
   # ---------------------------------------------------------------------------
 
   describe "CacheBodyReader" do
+    test "accumulates every read chunk in order while preserving Plug return tuples" do
+      conn = Plug.Test.conn(:post, "/webhook", "abcdef")
+
+      assert {:more, "abc", conn} = CacheBodyReader.read_body(conn, length: 3)
+      assert conn.private[:raw_body] == "abc"
+
+      assert {:ok, "def", conn} = CacheBodyReader.read_body(conn, length: 3)
+      assert conn.private[:raw_body] == "abcdef"
+    end
+
     test "read_body/2 sets conn.private[:raw_body]" do
       conn = Plug.Test.conn(:post, "/webhook", @payload)
       {:ok, body, conn} = CacheBodyReader.read_body(conn, [])
@@ -375,17 +418,68 @@ defmodule LatticeStripe.Webhook.PlugTest do
       assert body == @payload
     end
 
-    test "Plug reads from conn.private[:raw_body] when available (CacheBodyReader scenario)" do
-      # Simulate CacheBodyReader having already read and stashed the body
+    test "preserves Plug read errors unchanged" do
+      conn = %Plug.Conn{adapter: {ErrorReadAdapter, :ignored}, private: %{}}
+
+      assert CacheBodyReader.read_body(conn, []) == {:error, :closed}
+    end
+
+    test "Webhook.Plug verifies the complete CacheBodyReader body" do
       conn =
         Plug.Test.conn(:post, "/webhook", @payload)
-        |> Plug.Conn.put_private(:raw_body, @payload)
         |> Plug.Conn.put_req_header("stripe-signature", valid_sig_header())
+
+      chunk_length = byte_size(@payload) - 1
+      {:more, first_chunk, conn} = CacheBodyReader.read_body(conn, length: chunk_length)
+      {:ok, second_chunk, conn} = CacheBodyReader.read_body(conn, length: chunk_length)
+
+      assert conn.private[:raw_body] == first_chunk <> second_chunk
 
       plug_opts = WebhookPlug.init(secret: @secret)
       result = WebhookPlug.call(conn, plug_opts)
 
       assert %LatticeStripe.Event{} = result.assigns.stripe_event
+    end
+  end
+
+  describe "route-scoped CacheBodyReader topology" do
+    test "only the JSON webhook route invokes the body reader" do
+      json_conn =
+        Plug.Test.conn(:post, "/webhooks/stripe", @payload)
+        |> Plug.Conn.put_req_header("content-type", "application/json")
+        |> RouteScopedCacheBodyReader.call([])
+
+      assert json_conn.private[:raw_body] == @payload
+
+      non_webhook_conn =
+        Plug.Test.conn(:post, "/uploads", @payload)
+        |> Plug.Conn.put_req_header("content-type", "application/json")
+        |> RouteScopedCacheBodyReader.call([])
+
+      refute Map.has_key?(non_webhook_conn.private, :raw_body)
+
+      multipart_conn =
+        Plug.Test.conn(:post, "/webhooks/stripe", "untrusted-upload")
+        |> Plug.Conn.put_req_header("content-type", "multipart/form-data; boundary=boundary")
+
+      assert_raise Plug.Conn.WrapperError, fn ->
+        RouteScopedCacheBodyReader.call(multipart_conn, [])
+      end
+    end
+  end
+
+  describe "mount-before-parsers raw body reads" do
+    test "verifies a signature when Plug returns the body in multiple chunks" do
+      split_at = byte_size(@payload) - 1
+      first_chunk = binary_part(@payload, 0, split_at)
+      last_chunk = binary_part(@payload, split_at, 1)
+
+      conn =
+        build_conn(:post, "/webhooks/stripe", @payload, valid_sig_header())
+        |> Map.put(:adapter, {ChunkedReadAdapter, [first_chunk, last_chunk]})
+        |> call_plug(secret: @secret, at: "/webhooks/stripe")
+
+      assert %LatticeStripe.Event{} = conn.assigns.stripe_event
     end
   end
 end

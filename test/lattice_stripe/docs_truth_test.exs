@@ -1,3 +1,82 @@
+defmodule LatticeStripe.ChargePolicyDocsTruthTest do
+  use ExUnit.Case, async: true
+
+  @charge_path "lib/lattice_stripe/charge.ex"
+  @payments_path "guides/payments.md"
+
+  test "Charge policy is complete in its two canonical documentation regions" do
+    charge = charge_moduledoc()
+    reconciliation = charge_reconciliation()
+
+    for policy <- [charge, reconciliation] do
+      assert policy =~ "LatticeStripe.Charge.create"
+      assert policy =~ "arity `3` will not be added"
+      assert policy =~ "will not be added"
+      assert policy =~ "LatticeStripe.PaymentIntent.create/3"
+      assert policy =~ "\"amount\" => 4_999"
+      assert policy =~ "\"currency\" => \"usd\""
+      assert policy =~ "\"payment_method\" => \"pm_card_visa\""
+      assert policy =~ "\"confirm\" => true"
+      assert policy =~ ~r/successful PaymentIntent creates the resulting Charge/
+      assert String.downcase(policy) =~ "customer action or sca"
+    end
+  end
+
+  test "canonical Charge policy extraction is repeatable and parallel-reader stable" do
+    for reader <- [&charge_moduledoc/0, &charge_reconciliation/0] do
+      expected = reader.()
+
+      assert Enum.uniq(Enum.map(1..3, fn _ -> reader.() end)) == [expected]
+
+      assert 1..8
+             |> Task.async_stream(fn _ -> reader.() end, ordered: true)
+             |> Enum.all?(&match?({:ok, ^expected}, &1))
+    end
+  end
+
+  test "PaymentIntent docs distinguish server confirmation from client next-action handling" do
+    payments = File.read!(@payments_path)
+
+    assert payments =~ "`confirmation_method` selects who is allowed to call `confirm`"
+
+    assert payments =~
+             "\"confirm\" => true` asks Stripe to make the initial confirmation on the server"
+
+    assert payments =~ "%{\"type\" => \"use_stripe_sdk\"}"
+    assert payments =~ "Stripe.js to handle the returned\n`next_action`"
+    refute payments =~ "confirmed.next_action[\"redirect_to_url\"][\"url\"]"
+    refute payments =~ "then confirm it with Stripe.js"
+  end
+
+  test "only the canonical regions own the complete Charge policy" do
+    readme = File.read!("README.md")
+
+    assert @charge_path == "lib/lattice_stripe/charge.ex"
+    assert @payments_path == "guides/payments.md"
+    assert readme =~ "PI-first; no `create`"
+    refute readme =~ "\"amount\" => 4_999"
+    refute readme =~ "customer action or SCA"
+  end
+
+  defp charge_moduledoc do
+    @charge_path
+    |> File.read!()
+    |> String.split("  @moduledoc \"\"\"", parts: 2)
+    |> List.last()
+    |> String.split("  \"\"\"", parts: 2)
+    |> List.first()
+  end
+
+  defp charge_reconciliation do
+    @payments_path
+    |> File.read!()
+    |> String.split("## Charge reconciliation", parts: 2)
+    |> List.last()
+    |> String.split("\n## ", parts: 2)
+    |> List.first()
+  end
+end
+
 defmodule LatticeStripe.DocsTruthTest do
   use ExUnit.Case, async: true
 
@@ -111,6 +190,15 @@ defmodule LatticeStripe.DocsTruthTest do
     end)
   end
 
+  defp advanced_cache_body_reader_section do
+    "guides/webhooks.md"
+    |> File.read!()
+    |> String.split("## Advanced alternative: `CacheBodyReader` + router `forward`", parts: 2)
+    |> List.last()
+    |> String.split("\n## ", parts: 2)
+    |> List.first()
+  end
+
   test "every public module lands in exactly one documented ExDoc group" do
     # TOTALITY GUARD. ExDoc performs NO validation of groups_for_modules
     # (deps/ex_doc/lib/ex_doc/config.ex:240-268): a phantom entry naming a module that does
@@ -171,6 +259,41 @@ defmodule LatticeStripe.DocsTruthTest do
 
     Check for a typo in the module name, or drop the entry if the module was removed.
     """
+  end
+
+  test "CacheBodyReader is conditionally public and grouped with Webhooks" do
+    assert Code.ensure_loaded?(LatticeStripe.Webhook.CacheBodyReader)
+    assert docs_group_of(LatticeStripe.Webhook.CacheBodyReader) == :Webhooks
+
+    assert {:docs_v1, _, _, _, %{"en" => moduledoc}, _, docs} =
+             Code.fetch_docs(LatticeStripe.Webhook.CacheBodyReader)
+
+    assert moduledoc =~ "available only when your application includes `:plug`"
+    assert moduledoc =~ "terminal `{:ok, body, conn}`"
+
+    assert Enum.any?(docs, fn
+             {{:function, :read_body, 2}, _, _, doc, _} when doc != :hidden -> true
+             _ -> false
+           end)
+  end
+
+  test "advanced CacheBodyReader guide keeps the retention contract bounded" do
+    guide = advanced_cache_body_reader_section()
+
+    assert guide =~ "advanced alternative, not the\nprimary quickstart"
+    assert guide =~ "terminal `:ok` read"
+    assert guide =~ "exact complete body"
+    assert guide =~ "fixed `:raw_body`\nkey"
+    assert guide =~ "connection lifetime"
+    assert guide =~ "PII"
+    assert guide =~ "never log\nthe raw body wholesale"
+    assert guide =~ "not intended for multipart parsing"
+    assert guide =~ "Do not configure it\nglobally"
+    assert guide =~ "pipeline :stripe_webhook"
+    assert guide =~ "parsers: [:json]"
+    assert guide =~ "scope \"/webhooks\""
+    refute guide =~ "parsers: [:urlencoded, :multipart, :json]"
+    refute guide =~ "pass: [\"*/*\"]"
   end
 
   test "exdoc keeps the primary public truth surfaces published" do
@@ -622,6 +745,7 @@ defmodule LatticeStripe.DocsTruthTest do
     assert docs_group_of(LatticeStripe.Entitlements.ActiveEntitlement) == :Entitlements
     assert docs_group_of(LatticeStripe.Entitlements.ActiveEntitlementSummary) == :Entitlements
     assert docs_group_of(LatticeStripe.Entitlements.Feature) == :Entitlements
+    assert docs_group_of(LatticeStripe.Product.Feature) == :Entitlements
 
     assert guide =~ "Scope boundary"
     assert guide =~ "entitled?"
@@ -665,6 +789,76 @@ defmodule LatticeStripe.DocsTruthTest do
     # The archiving vocabulary split: field `active`, filter `archived`, sense inverted.
     assert feature =~ "## Archiving"
     assert feature =~ "immutable"
+
+    product_feature = File.read!(Path.join(root, "lib/lattice_stripe/product/feature.ex"))
+    product = File.read!(Path.join(root, "lib/lattice_stripe/product.ex"))
+
+    assert product_feature =~ "LatticeStripe.Entitlements.Feature"
+    assert product_feature =~ "guides/entitlements.md"
+    assert product =~ "LatticeStripe.Product.Feature"
+    assert product =~ "Product.Feature.list/4"
+  end
+
+  test "entitlements guide teaches the complete catalog to local access journey" do
+    guide = File.read!("guides/entitlements.md")
+
+    for anchor <- [
+          "feat_",
+          "prod_",
+          "prodft_",
+          "ent_",
+          "ProductFeature.create",
+          "ProductFeature.retrieve",
+          "ProductFeature.list",
+          "ProductFeature.stream!",
+          "ProductFeature.delete",
+          "marketing_features",
+          "pricing-table display",
+          "summary webhook",
+          "full canonical customer refetch",
+          "local snapshot",
+          "fail closed"
+        ] do
+      assert guide =~ anchor, "entitlements catalog-to-access guide is missing #{inspect(anchor)}"
+    end
+
+    refute guide =~ "not yet part of the typed surface"
+    refute guide =~ "arrives in a later release"
+  end
+
+  test "entitlements reconciliation guide does not overpromise pagination consistency" do
+    guide = File.read!("guides/entitlements.md")
+
+    assert guide =~ "canonical re-fetch avoids"
+    assert guide =~ "not a\ntransactional point-in-time snapshot"
+    assert guide =~ "Make reconciliation idempotent"
+
+    assert guide =~
+             "only\nreplace the complete local snapshot after the full enumeration succeeds"
+
+    assert guide =~ "retry/reconcile again or process the\nsubsequent summary event"
+    assert guide =~ "fail-closed\nstaleness policy"
+
+    refute guide =~ "One call means one point in time"
+  end
+
+  test "Product.Feature is discoverable beside Entitlements.Feature" do
+    guide = File.read!("guides/entitlements.md")
+
+    assert docs_group_of(LatticeStripe.Product.Feature) == :Entitlements
+    assert guide =~ "LatticeStripe.Product.Feature"
+    assert guide =~ "LatticeStripe.Entitlements.Feature"
+  end
+
+  test "JTBD routes entitlement catalog and access across canonical guides" do
+    jtbd = File.read!("guides/user-flows-and-jtbd.md")
+
+    assert jtbd =~ "Entitlement catalog and access"
+    assert jtbd =~ "[Entitlements](entitlements.md)"
+    assert jtbd =~ "[Subscriptions](subscriptions.md)"
+    assert jtbd =~ "[Checkout](checkout.md)"
+    assert jtbd =~ "[Webhooks](webhooks.md)"
+    assert jtbd =~ "[Testing](testing.md)"
   end
 
   test "the promoted entitlements fixture keeps its ExDoc placement and guide mention" do
@@ -807,6 +1001,16 @@ defmodule LatticeStripe.DocsTruthTest do
     refute source =~ "retrieve-only"
     refute source =~ "Only three public functions"
     refute source =~ "never directly manipulated"
+  end
+
+  test "error handling guide keeps Retry-After evidence policy bounded and non-blocking" do
+    guide = File.read!("guides/error-handling.md")
+
+    assert guide =~ "## Consuming final response evidence"
+    assert guide =~ "Error.get_header/2"
+    assert guide =~ "uncapped"
+    assert guide =~ "do not sleep in a Phoenix request process"
+    assert guide =~ "Avoid logging response headers or `raw_body` wholesale"
   end
 
   test "flagship guides are published and cross-linked through the docs graph" do
@@ -1156,5 +1360,111 @@ defmodule LatticeStripe.DocsTruthTest do
     # four must be silenced simultaneously for the contract to silently regress.
     source = File.read!("lib/lattice_stripe/webhook/plug.ex")
     assert source =~ ~r/@moduledoc.*tolerance.*0.*testing only/s
+  end
+
+  test "1.1-to-1.7 guide remains historically scoped and discoverable" do
+    guide = File.read!("guides/upgrading-1-1-to-1-7.md")
+    docs = docs_config()
+    groups = Map.new(docs[:groups_for_extras])
+
+    assert "guides/upgrading-1-1-to-1-7.md" in docs[:extras]
+    assert "guides/upgrading-1-1-to-1-7.md" in groups["Upgrading"]
+    assert guide =~ "1.1 → 1.7"
+    assert guide =~ "{:lattice_stripe, \"~> 1.7\"}"
+    assert guide =~ "[2.0.0 CHANGELOG entry](../CHANGELOG.md#200)"
+    assert guide =~ "[Getting Started](getting-started.md)"
+    assert guide =~ "[Client Configuration](client-configuration.md)"
+
+    assert length(Regex.scan(~r/\*\*Affected if:\*\*/, guide)) == 3
+    assert length(Regex.scan(~r/Before \(1\.1\)/, guide)) == 3
+    assert length(Regex.scan(~r/After \(1\.7\)/, guide)) == 3
+
+    [_, tolerance_callout] =
+      String.split(guide, "> #### Breaking change: `tolerance: 0`", parts: 2)
+
+    [tolerance_callout | _] = String.split(tolerance_callout, "### If none apply", parts: 2)
+
+    assert tolerance_callout =~ "disables the staleness check"
+    assert tolerance_callout =~ "This is a test-only escape hatch"
+    assert tolerance_callout =~ "Never set `tolerance: 0` in production"
+    refute guide =~ "default Finch pool"
+
+    {mandatory_idx, _} = :binary.match(guide, "## Two-minute mandatory migration checklist")
+    {optional_idx, _} = :binary.match(guide, "## Optional additions by job")
+    {appendix_idx, _} = :binary.match(guide, "## Version-by-version appendix")
+    assert mandatory_idx < optional_idx and optional_idx < appendix_idx
+    assert guide =~ "You have **no code migration**"
+    assert guide =~ "run your application test suite"
+
+    for anchor <- [
+          "| Need | Surface | Minimum call | Canonical next step |",
+          "BillingPortal.Configuration",
+          "Charge.list/3",
+          "Charge.search/3",
+          "TestHelpers.TestClock",
+          "Testing.TestClock",
+          "Testing.Fixtures",
+          "LatticeStripe.Dispute",
+          "LatticeStripe.File",
+          "LatticeStripe.FileLink",
+          "LatticeStripe.Mandate",
+          "LatticeStripe.SetupAttempt",
+          "SubscriptionSchedule",
+          "BankAccount",
+          "Billing.Meter",
+          "Account.Capability",
+          "Tax.Calculation",
+          "Tax.Transaction",
+          "Tax.Settings",
+          "Tax.Registration",
+          "TaxId.create/4",
+          "LatticeStripe.CreditNote",
+          "LatticeStripe.Payout",
+          "LatticeStripe.Quote",
+          "LatticeStripe.BalanceTransaction",
+          "LatticeStripe.EventNotification",
+          "parse_event_notification/4",
+          "fetch_event/3"
+        ] do
+      assert guide =~ anchor, "missing upgrade inventory anchor #{inspect(anchor)}"
+    end
+
+    for route <- [
+          "customer-portal.md#wire-a-configuration-into-sessions",
+          "tax.md",
+          "webhooks-thin-events.md",
+          "testing.md",
+          "credit_notes.md",
+          "quote-to-billing-operator.md"
+        ] do
+      assert guide =~ route, "missing canonical route #{inspect(route)}"
+    end
+
+    assert guide =~ "\"configuration\" => config.id"
+    assert guide =~ "Webhook.fetch_event(client, notification, [])"
+
+    [evidence_row] =
+      guide
+      |> String.split("\n")
+      |> Enum.filter(&String.contains?(&1, "Upload and submit dispute evidence"))
+
+    assert evidence_row =~ "LatticeStripe.File"
+    assert evidence_row =~ "LatticeStripe.Dispute"
+    assert evidence_row =~ "LatticeStripe.File.create/3"
+    assert evidence_row =~ "purpose: \"dispute_evidence\""
+    assert evidence_row =~ "Dispute.update_evidence/4"
+    assert evidence_row =~ "Dispute.submit_evidence/3"
+    refute evidence_row =~ "FileLink.create/3"
+
+    [file_link_row] =
+      guide
+      |> String.split("\n")
+      |> Enum.filter(&String.contains?(&1, "Create a public, expiring link to a Stripe file"))
+
+    assert file_link_row =~ "LatticeStripe.FileLink"
+    assert file_link_row =~ "FileLink.create/3"
+    assert file_link_row =~ "expires_at"
+    refute guide =~ "Part 2"
+    refute guide =~ "Part 3"
   end
 end

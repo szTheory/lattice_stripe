@@ -84,6 +84,11 @@ Use this guide as a routing layer, not as the final source of API truth.
 - **Usage-based billing and reconciliation**:
   [Metering Runtime and Reconciliation](metering-runtime-and-reconciliation.md),
   [Metering](metering.md), [Webhooks](webhooks.md), [Testing](testing.md)
+- **Entitlement catalog and access**:
+  [Entitlements](entitlements.md) for Product Feature attachments and complete catalog
+  reads, then [Subscriptions](subscriptions.md) or [Checkout](checkout.md) for purchases,
+  [Webhooks](webhooks.md) for reconciliation, and [Testing](testing.md) for local snapshot
+  coverage.
 - **Custom payment flows with standalone Stripe Tax (not only Checkout/Invoices)**:
   [Tax](tax.md), [Payments](payments.md), [Testing](testing.md)
 - **Marketplace or platform work**:

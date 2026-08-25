@@ -25,6 +25,8 @@ defmodule LatticeStripe.Error do
   - `charge` - Stripe charge ID associated with the error, or `nil`
   - `doc_url` - URL to Stripe documentation for this error, or `nil`
   - `raw_body` - Full decoded error body map — escape hatch for fields not yet in the struct, or `nil`
+  - `headers` - Ordered response header tuples, including duplicates, or `[]` for connection errors
+  - `retry_after` - Parsed `Retry-After` delay in seconds when available, or `nil`
   """
 
   defexception [
@@ -37,7 +39,9 @@ defmodule LatticeStripe.Error do
     :decline_code,
     :charge,
     :doc_url,
-    :raw_body
+    :raw_body,
+    headers: [],
+    retry_after: nil
   ]
 
   @typedoc """
@@ -87,6 +91,8 @@ defmodule LatticeStripe.Error do
   - `charge` - Stripe charge ID associated with the error, or `nil`
   - `doc_url` - Stripe documentation URL for this specific error, or `nil`
   - `raw_body` - Full decoded error body — escape hatch for fields not in the struct, or `nil`
+  - `headers` - Ordered response header tuples, including duplicates, or `[]` for connection errors
+  - `retry_after` - Parsed `Retry-After` delay in seconds when available, or `nil`
   """
   @type t :: %__MODULE__{
           type: error_type(),
@@ -98,7 +104,9 @@ defmodule LatticeStripe.Error do
           decline_code: String.t() | nil,
           charge: String.t() | nil,
           doc_url: String.t() | nil,
-          raw_body: map() | nil
+          raw_body: map() | nil,
+          headers: [{String.t(), String.t()}],
+          retry_after: non_neg_integer() | nil
         }
 
   @impl true
@@ -124,6 +132,16 @@ defmodule LatticeStripe.Error do
   """
   @spec from_response(pos_integer(), map(), String.t() | nil) :: t()
   def from_response(status, decoded_body, request_id) do
+    from_response(status, decoded_body, request_id, [])
+  end
+
+  @doc """
+  Build an `Error` struct from a Stripe API response, retaining response metadata.
+
+  `headers` remain in transport order, including duplicate names and original casing.
+  """
+  @spec from_response(pos_integer(), map(), String.t() | nil, [{String.t(), String.t()}]) :: t()
+  def from_response(status, decoded_body, request_id, headers) do
     case decoded_body do
       %{"error" => %{"type" => type_str} = error_map} ->
         parsed_type = parse_type(type_str)
@@ -143,7 +161,9 @@ defmodule LatticeStripe.Error do
           doc_url: Map.get(error_map, "doc_url"),
           status: status,
           request_id: request_id,
-          raw_body: decoded_body
+          raw_body: decoded_body,
+          headers: headers,
+          retry_after: retry_after(headers)
         }
 
       _ ->
@@ -153,8 +173,42 @@ defmodule LatticeStripe.Error do
           message: "An unexpected error occurred",
           status: status,
           request_id: request_id,
-          raw_body: decoded_body
+          raw_body: decoded_body,
+          headers: headers,
+          retry_after: retry_after(headers)
         }
+    end
+  end
+
+  @doc """
+  Returns every value for a response header, matched case-insensitively.
+  """
+  @spec get_header(t(), String.t()) :: [String.t()]
+  def get_header(%__MODULE__{headers: headers}, name) do
+    downcased = String.downcase(name)
+    for {key, value} <- headers, String.downcase(key) == downcased, do: value
+  end
+
+  defp retry_after(headers) do
+    headers
+    |> Enum.find_value(fn
+      {name, value} when is_binary(name) and is_binary(value) ->
+        if String.downcase(name) == "retry-after" do
+          parse_retry_after(value)
+        end
+
+      _ ->
+        nil
+    end)
+  end
+
+  defp parse_retry_after(value) do
+    value = String.trim(value)
+
+    if Regex.match?(~r/^\d+$/, value) do
+      String.to_integer(value)
+    else
+      nil
     end
   end
 
@@ -171,7 +225,7 @@ defmodule LatticeStripe.Error do
   # Only fires when type is :invalid_request_error and param is a non-nil binary.
   # Guard clause + catch-all mirrors parse_type/1 multi-clause style.
   defp maybe_enrich_message(:invalid_request_error, message, param)
-       when is_binary(param) and byte_size(param) > 0 do
+       when is_binary(message) and is_binary(param) and byte_size(param) > 0 do
     case suggest_param(param) do
       nil -> message
       match -> message <> "; did you mean :#{match}?"

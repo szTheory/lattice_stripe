@@ -2,27 +2,40 @@
 
 ## What This Is
 
-A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. **Shipped v1.7.0 to Hex.pm on 2026-05-27** — feature-complete for intended v1.x scope covering Payments, Billing, Connect, Tax, thin-event webhooks, Charge reconciliation, and operator diagnostics. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
+A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. GSD milestone v1.10 is complete, and the package release line has advanced to 2.1.0 while retaining broad Payments, Billing, Connect, Tax, webhook, Entitlements, and operator coverage. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
 
 ## Core Value
 
-Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated by four shipped milestones and a downstream consumer (Accrue) already building on top.
+Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated across eleven completed GSD milestones and by downstream adopter pull from Accrue.
 
 ## Current State
 
-**Active milestone:** Maintenance mode (v1.9 shipped 2026-05-27).
+**Shipped milestone:** v1.10 Accrue Surface Closure completed and archived on
+2026-08-25: 19/19 requirements, 7/7 verified phases, 19/19 integration joins,
+and 6/6 adopter flows. The close accepted bounded external-confidence, Nyquist,
+and known-flake debt; none is a product-behavior blocker.
 
-**Latest shipped milestone:** v1.9 CI & Doc Honesty — checkout/README docs_truth locks; CI-01 paths-ignore fix; JTBD-MAP post-v1.9 truth.
+**Active milestone:** None — returned to reactive maintenance.
 
-**Done estimate:** ~98% for intended v1.x scope (May 28 doc quicks + maintenance capstone: docs_truth clusters, JTBD close, drift hygiene).
+**Latest shipped milestone:** v1.10 Accrue Surface Closure — Entitlements, metering reads, webhook fixtures, Product Feature attachments, default Finch operation, and DX hardening.
 
-**Post-v1.x posture (2026-05-28):** **Reactive maintenance only** — no active build track. Assessment wedges and Gap 2 doc polish closed (quick tasks 260527-tkc, tm1, tp8, tqf). No v1.10 milestone; no marketing website.
+**Done estimate:** 100% of v1.10 requirements implemented, verified, and archived.
+
+**Post-v1.x posture:** Reactive maintenance after the narrowly scoped, adopter-pulled v1.10 milestone; no broad resource-family expansion and no marketing website.
 
 **Public surface:** [README.md](README.md) + [HexDocs](https://hexdocs.pm/lattice_stripe) + [guides/scope.md](guides/scope.md) — sufficient for an SDK; do not duplicate in a standalone site.
 
 **Adoption:** Pure maintenance until external pull (no scheduled launch post). See `.planning/threads/post-v1x-maintenance-posture.md`.
 
-**Latest archived milestone:** v1.9 CI & Doc Honesty (archived 2026-05-27)
+**Latest archived milestone:** v1.10 Accrue Surface Closure (archived 2026-08-25)
+
+**What shipped in v1.10:**
+
+- **Runtime defaults** — optional `LatticeStripe.Application`, default Finch pool, explicit-pool compatibility, and opt-out behavior (DX-01, Phase 61).
+- **Entitlements** — typed active-entitlement reads/streaming, Feature management, summary decoding, and fail-closed local authorization guidance (ENT-01..05, Phase 63).
+- **Metering and webhook support** — event-summary reads/streaming, typed meter error reports, four exact object-type registrations, and public entitlement/meter/core-billing fixtures (MTR-01..04, OBJ-01..03, Phases 64-65).
+- **Product Feature attachments** — typed create/retrieve/list/stream/delete with exact dispatch and raw Product marketing-field compatibility (PROD-01..02, Phase 66).
+- **Adopter DX and truth** — historical migration guide, faithful error headers/`Retry-After`, public multi-chunk-safe `CacheBodyReader`, and permanent PaymentIntent-first Charge guidance (DOC-01..02, DX-02..03, Phases 62 and 67).
 
 **What shipped in v1.8:**
 
@@ -59,21 +72,24 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 - None — Phase `41.1` retired as `accepted-external-verification` in v1.7 (Phase 55).
 
-## v1.x Status (post–1.7.0)
+## v1.x Status (historical post–1.7.0)
 
 The library is **done for v1.x scope** — intended mainstream SaaS Stripe coverage is shipped and documented. Identity, Treasury, Issuing, Terminal, Financial Connections, Climate, Sigma, and Reporting remain deferred unless adopter pull justifies a future milestone.
 
 **Forward posture:** Maintenance mode — bugfixes, Stripe API drift, adopter-driven narrow additions. No planned new resource-family breadth in v1.x absent fresh adopter pull.
 
-## Maintenance Mode (post–v1.9)
+## Maintenance Mode (post–v1.10)
 
-**Latest shipped milestone:** v1.9 CI & Doc Honesty (archived 2026-05-27)
+**Latest shipped milestone:** v1.10 Accrue Surface Closure (archived 2026-08-25)
 
 **Forward posture:** Maintenance mode — Stripe API drift, adopter-driven narrow additions, bugfixes. No planned new resource-family breadth absent fresh adopter pull.
 
-**Do not rewrite:** v1.x stop signal (already at Hex 1.7.0); no Hex 1.8.0 or 1.9.0 bump (doc-only milestones).
+**Release truth:** The v1.10 plan targeted Hex 1.8.0, but a public fixture rename correctly forced package 2.0.0; release metadata is now at 2.1.0. Do not collapse GSD milestone numbers into package versions.
 
-See `.planning/milestones/v1.9-MILESTONE-AUDIT.md` for close-time audit evidence.
+See `.planning/milestones/v1.10-MILESTONE-AUDIT.md` for close-time audit evidence.
+
+<details>
+<summary>Archived v1.10 milestone context and original Hex 1.8.0 plan</summary>
 
 ## Reopen for Adopter Pull (2026-07-27) — v1.8.0 "Accrue Surface Closure"
 
@@ -108,8 +124,9 @@ current release. All additive → Hex minor bump to 1.8.0.
 - Billing.Meter event-summary reads (accrue's entire usage-read surface today is zero)
 - 5 webhook ObjectTypes + typed fixtures (entitlement/meter/core-billing; summary has no `id`)
 - Optional `LatticeStripe.Application` + default Finch pool (fixes a live consumer footgun)
-- Product↔Feature attach + typed `Product.features` (lets consumers derive the entitlement catalog from Stripe)
+- Product↔Feature typed attachment CRUD/enumeration, while preserving raw Product marketing-display fields (lets consumers derive the entitlement catalog from the dedicated Stripe attachment endpoint)
 - "1.1 → 1.7 what landed" migration guide (zero-code; unblocks four accrue deferrals)
+- Retry-After response evidence, a public semver-locked webhook `CacheBodyReader`, and permanent PaymentIntent-first Charge initiation guidance
 
 **Key context:** Driven by the verified accrue gap brief
 (`.planning/research/accrue-gap-brief-2026-07-27.txt`, SEED-005). Lower-priority DX
@@ -117,13 +134,19 @@ current release. All additive → Hex minor bump to 1.8.0.
 not break. Finch fix approach locked to the optional-Application + default-pool
 option.
 
+</details>
+
+## Next Milestone Goals
+
+No next milestone is selected. Maintain the package reactively and open a fresh milestone only for concrete adopter pull, Stripe API drift, or a production defect. SEED-006 preserves the lower-priority Accrue DX candidates without committing them to scope.
+
 ## Context
 
 **Ecosystem gap:** At project start, the Elixir ecosystem lacked a modern, maintained Stripe SDK. `stripity_stripe` was outdated, with known issues around nested encoding and stale API coverage. LatticeStripe fills that gap with a production-minded Elixir-first surface.
 
 **Target users:** Elixir developers building SaaS products who need Stripe integrations that are correct, documented, and unsurprising. Early adopter signal remains strong: Accrue already consumes LatticeStripe as a downstream billing layer.
 
-**Codebase scale (post-v1.7):** v1.7 added ~7,527 lines across 138 files in a single-day milestone (2026-05-27) on top of seven prior milestones. Charge reconciliation, operator guides, and release truth are now first-class surfaces with docs-truth regression locks. The library is publicly declared done for v1.x scope at Hex 1.7.0.
+**Codebase scale (post-v1.10):** `lib/` + `test/` contain 71,101 lines of Elixir source. The v1.10 range changed 291 files (+47,548/-603, including planning evidence) and closed with 2,440 tests, zero ExDoc warnings, and the public API lock passing.
 
 **Design philosophy:**
 
@@ -193,11 +216,19 @@ option.
 - ✓ README error taxonomy canonical atoms + docs_truth lock (README-01, README-02) — Phase 59, v1.9
 - ✓ docs_truth checkout.md content locks alongside payments (VERIFY-05) — Phase 59, v1.9
 - ✓ Stripe-native entitlements read surface: `ActiveEntitlement` list/retrieve/`stream!`, `Feature` CRUDL, `ActiveEntitlementSummary` webhook decode + `stream_entitlements!/3` (ENT-01..05) — Phase 63, v1.10
+- ✓ Historical 1.1 → 1.7 migration guide: action-first breaking-change triage, complete capability inventory, and semantic ExDoc regression contract (DOC-01) — Phase 62, v1.10
+- ✓ Product Feature attachment surface: create/retrieve/list/`stream!`/delete, exact `product_feature` dispatch, raw Product marketing-field compatibility, and catalog-to-local-access guidance (PROD-01, PROD-02) — Phase 66, v1.10
+- ✓ Default Finch pool and optional application startup with explicit-pool compatibility and opt-out (DX-01) — Phase 61, v1.10
+- ✓ Meter event-summary reads/streaming, typed error reports, and payload-contract documentation (MTR-01..04) — Phase 64, v1.10
+- ✓ Exact entitlement/meter webhook object dispatch and public entitlement/meter/core-billing fixtures (OBJ-01..03) — Phase 65, v1.10
+- ✓ Faithful error response headers and strict `Retry-After` parsing (DX-02) — Phase 67, v1.10
+- ✓ Public, semver-locked, multi-chunk-safe `Webhook.CacheBodyReader` (DX-03) — Phase 67, v1.10
+- ✓ Permanent PaymentIntent-first Charge initiation guidance (DOC-02) — Phase 67, v1.10
+- ✓ Guide-only changes run docs-truth CI; JTBD hosted-checkout truth refreshed (CI-01, JTBD-01) — Phase 60, v1.9
 
 ### Active
 
-- CI-01: Guide-only PRs run docs_truth (CI gate)
-- JTBD-01: Hosted checkout rating honesty in JTBD-MAP
+(None — the next milestone defines a fresh requirements set.)
 
 ### Out of Scope
 
@@ -248,6 +279,9 @@ option.
 | Post-v1.x: reactive maintenance only | v1.x scope complete at Hex 1.7.0; act on bugs, Stripe drift, adopter pull — not proactive milestones | ✓ Post-v1.x posture (2026-05-28) |
 | Adoption: pure silence default | No Forum/blog launch required for "done"; optional cross-link from Accrue when convenient | ✓ Post-v1.x posture (2026-05-28) |
 | Reopen maintenance mode for v1.8.0 "Accrue Surface Closure" | The adopter-pull gate fired: Accrue has a verified, blocking need for Stripe-native Entitlements + a narrow set of surface gaps (SEED-005); scope is additive and Accrue-driven, not broad breadth | ✓ Reopen decision (2026-07-27) |
+| Keep Product marketing display fields separate from typed entitlement attachments | Stripe's legacy `Product.features` and current `Product.marketing_features` contain pricing-table copy, not `product_feature` resources; typing those raw maps in a minor release would be semantically wrong and compatibility-breaking | ✓ Good (Phase 66) |
+| Treat public fixture renames as breaking changes | Fixture builders are called from adopter test suites; aligning names required a major package bump rather than the planned 1.8.0 minor | ✓ Good (2.0.0 release) |
+| Keep GSD milestone versions distinct from package versions | Planning advanced through doc-only v1.8/v1.9 while package releases followed SemVer; forcing them into lockstep obscures release truth | ✓ Good (v1.10 close) |
 
 ## Evolution
 
@@ -267,4 +301,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-28 after Phase 63 — Stripe-native entitlements read surface validated (ENT-01..05); the per-request `entitled?` gate helper recorded as a durable refusal (D-19)*
+*Last updated: 2026-08-25 after v1.10 milestone completion and archive.*

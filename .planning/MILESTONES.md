@@ -1,5 +1,34 @@
 # Milestones
 
+## v1.10 Accrue Surface Closure (Hex 1.8.0) (Shipped: 2026-08-25)
+
+**Delivered:** The Accrue-driven surface closure: zero-config Finch operation, Stripe-native Entitlements, metering reads, typed webhook fixtures, Product Feature attachments, and hardened consumer guidance.
+
+**Phases completed:** 61-67 (7 phases, 37 plans, 71 tasks)
+
+**Key accomplishments:**
+
+- Added an optional `LatticeStripe.Application` and default Finch pool while preserving explicit-pool and opt-out behavior.
+- Shipped typed, paginated Entitlements reads and Feature management, with fail-closed local authorization guidance instead of a network-calling gate helper.
+- Added meter event-summary reads, typed meter error reports, exact webhook object dispatch, and public entitlement/meter/core-billing fixtures.
+- Added typed Product Feature attachment CRUD and complete streaming while preserving existing Product marketing fields as raw maps.
+- Published the 1.1→1.7 migration guide and hardened `Retry-After`, `CacheBodyReader`, multi-chunk webhook bodies, and PaymentIntent-first Charge guidance.
+- Closed at 19/19 requirements, 7/7 verified phases, 19/19 integration joins, 6/6 adopter flows, zero ExDoc warnings, and a passing 2,440-test CI run.
+
+**Audit:** No completion blockers; bounded tech debt accepted. See [v1.10-MILESTONE-AUDIT.md](milestones/v1.10-MILESTONE-AUDIT.md).
+
+**Stats:** 291 files changed, +47,548/-603 lines; current `lib/` + `test/` Elixir source is 71,101 lines.
+
+**Git range:** `fce2907` → `003a959`
+
+**Timeline:** 30 calendar days (2026-07-27 → 2026-08-25)
+
+**Release truth:** The milestone was planned as Hex 1.8.0; a fixture API rename made the package release 2.0.0, followed by 2.1.0. Later Phase 66-67 work remains on `main` pending the next package release.
+
+**What's next:** Reactive maintenance. Start a new milestone only on concrete adopter pull or Stripe drift; SEED-006 retains deferred Accrue DX candidates.
+
+---
+
 ## v1.9 CI & Doc Honesty (Shipped: 2026-05-27)
 
 **Phases completed:** 2 phases (59–60), 4 plans

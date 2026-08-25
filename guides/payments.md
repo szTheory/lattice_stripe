@@ -68,9 +68,10 @@ For JPY (zero-decimal currency), `4999` = ¥4,999.
 
 ### Automatic vs. Manual Confirmation
 
-By default, Stripe expects you to confirm the PaymentIntent from your client-side
-(frontend) code using Stripe.js. For server-side confirmation (e.g., backend-only flows
-or Stripe Connect), use `confirmation_method: "manual"`:
+`confirmation_method` selects who is allowed to call `confirm`; it does not itself attempt
+a payment. The default `"automatic"` flow has your client-side code call Stripe.js to
+confirm. For a server-owned confirmation flow (for example, backend-only flows or Stripe
+Connect), create the intent with `confirmation_method: "manual"`, then call `confirm/3`:
 
 ```elixir
 {:ok, intent} = LatticeStripe.PaymentIntent.create(client, %{
@@ -83,7 +84,9 @@ or Stripe Connect), use `confirmation_method: "manual"`:
 
 ## Confirming a PaymentIntent
 
-For manually-confirmed PaymentIntents, call `confirm/3` to attempt payment:
+For a manually confirmed PaymentIntent, `confirm/3` attempts the payment. If it returns
+`:requires_action`, branch on the action type: Stripe.js handles `use_stripe_sdk` with the
+client secret, while redirect actions provide a URL. Do not assume every SCA flow redirects.
 
 ```elixir
 case LatticeStripe.PaymentIntent.confirm(client, intent.id, %{
@@ -95,7 +98,18 @@ case LatticeStripe.PaymentIntent.confirm(client, intent.id, %{
         IO.puts("Payment succeeded!")
 
       :requires_action ->
-        IO.puts("3D Secure required — redirect to: #{confirmed.next_action["redirect_to_url"]["url"]}")
+        case confirmed.next_action do
+          %{"type" => "use_stripe_sdk"} ->
+            # Return confirmed.client_secret to your authenticated client and let
+            # Stripe.js handle the required next action there.
+            IO.puts("3D Secure required — handle the next action with Stripe.js")
+
+          %{"type" => "redirect_to_url", "redirect_to_url" => %{"url" => url}} ->
+            IO.puts("Customer action required — redirect to: #{url}")
+
+          _ ->
+            IO.puts("Customer action required — inspect next_action before continuing")
+        end
 
       other ->
         IO.puts("Unexpected status: #{other}")
@@ -225,8 +239,26 @@ results = resp.data.data
 When a PaymentIntent succeeds, Stripe creates a **Charge** — the settled payment result
 record. New integrations should use `LatticeStripe.PaymentIntent` to accept payments;
 use `LatticeStripe.Charge` to read and reconcile those result records after the fact.
-There is no `Charge.create/3` — charges are created as a side effect of PaymentIntent
-confirmation.
+`LatticeStripe.Charge.create` at arity `3` will not be added: Charge is a read/reconciliation
+resource, not a payment-initiation API. For direct server-side payment initiation, use
+`LatticeStripe.PaymentIntent.create/3`:
+
+```elixir
+{:ok, intent} =
+  LatticeStripe.PaymentIntent.create(client, %{
+    "amount" => 4_999,
+    "currency" => "usd",
+    "payment_method" => "pm_card_visa",
+    "confirm" => true
+  })
+```
+
+A successful PaymentIntent creates the resulting Charge for reconciliation. Here
+`"confirm" => true` asks Stripe to make the initial confirmation on the server; do not then
+call Stripe.js to confirm that same PaymentIntent. If it returns `:requires_action`, send the
+client secret to the authenticated client and use Stripe.js to handle the returned
+`next_action` (or redirect only when the action explicitly supplies a redirect URL).
+Customer action or SCA may still be required.
 
 | Goal | Function | Notes |
 |------|----------|-------|
@@ -388,10 +420,11 @@ different keys (e.g., include a line item ID). Reusing a key with different para
 a 409 conflict, not a new payment.
 
 **Automatic confirmation vs. manual confirmation.**
-By default, Stripe uses "automatic" confirmation, which expects your frontend (Stripe.js)
-to confirm the payment. If you're building a server-side-only flow, set
-`confirmation_method: "manual"` so you can confirm from your backend. Getting this wrong
-leads to `requires_confirmation` status that never resolves.
+With "automatic" confirmation, your frontend calls Stripe.js to confirm the payment. With
+`confirmation_method: "manual"`, your backend must call `confirm/3`; setting that field
+alone does not confirm anything. In either flow, a `:requires_action` response may require
+Stripe.js to handle a `use_stripe_sdk` next action or a browser redirect when Stripe supplies
+`redirect_to_url`.
 
 **Search API has eventual consistency.**
 Newly created objects may not appear in search results for up to a few seconds. Don't use

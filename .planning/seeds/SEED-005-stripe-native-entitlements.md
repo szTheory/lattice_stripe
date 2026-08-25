@@ -1,6 +1,14 @@
+---
+id: SEED-005
+status: implemented
+planted: 2026-07-27
+implemented_in: v1.10
+scope: milestone
+---
+
 # SEED-005 — Accrue Surface Closure (Entitlements + verified gaps)
 
-Status: **CAPTURED — VERIFIED.** Ready to feed `/gsd-new-milestone` (v1.8.0).
+Status: **IMPLEMENTED — v1.10.** Delivered by Phases 61-67 for Hex 1.8.0.
 Captured: 2026-07-27
 Target: **Hex 1.8.0** (GSD milestone v1.10 — numbering diverges because v1.8/v1.9
 were doc-only, no Hex bump). All work additive → minor bump.
@@ -154,9 +162,10 @@ pursues general coverage.)
 
 ---
 
-## Next action
-`/gsd-new-milestone` v1.8.0 "Accrue Surface Closure" using this seed as input →
-REQUIREMENTS + ROADMAP → discuss→plan→execute. Recommended start: **Wave 0**
-(migration guide + finch fix), then Entitlements (Wave 1). Post-tag: bump accrue's
-`~> 1.1` pin, delete its Charge.list 501 shim + finch footgun, wire the reconciler
-to the new `stream!`. Deferred DX (brief §3.2, 3.5–3.9, 3.11) → **SEED-006**.
+## Outcome
+
+Implemented in GSD milestone v1.10 across Phases 61-67. The post-Phase-67 audit
+records 19/19 requirements, 7/7 phases, 19/19 integration joins, and 6/6 adopter
+flows passing. Post-release adopter work remains downstream: bump accrue's pin,
+remove its Charge.list shim and Finch workaround, and wire the entitlement
+reconciler to `stream!`. Deferred DX remains preserved in **SEED-006**.
