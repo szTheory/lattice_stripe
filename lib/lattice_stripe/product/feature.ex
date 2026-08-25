@@ -9,7 +9,7 @@ defmodule LatticeStripe.Product.Feature do
   lifecycle.
   """
 
-  alias LatticeStripe.{Client, Request, Resource, Response}
+  alias LatticeStripe.{Client, List, Request, Resource, Response}
   alias LatticeStripe.Entitlements.Feature, as: EntitlementsFeature
 
   @known_fields ~w(id object livemode entitlement_feature deleted)
@@ -23,7 +23,14 @@ defmodule LatticeStripe.Product.Feature do
           extra: map()
         }
 
-  defstruct [:id, :livemode, :entitlement_feature, object: "product_feature", deleted: false, extra: %{}]
+  defstruct [
+    :id,
+    :livemode,
+    :entitlement_feature,
+    object: "product_feature",
+    deleted: false,
+    extra: %{}
+  ]
 
   @doc """
   Attach an entitlement feature definition to a Product.
@@ -31,7 +38,8 @@ defmodule LatticeStripe.Product.Feature do
   `params` must contain the string key `"entitlement_feature"`; it has no
   default because Stripe's attachment endpoint requires that definition ID.
   """
-  @spec create(Client.t(), String.t(), map(), keyword()) :: {:ok, t()} | {:error, LatticeStripe.Error.t()}
+  @spec create(Client.t(), String.t(), map(), keyword()) ::
+          {:ok, t()} | {:error, LatticeStripe.Error.t()}
   def create(client, product_id, params, opts \\ [])
 
   def create(%Client{}, product_id, _params, _opts) when product_id in [nil, ""] do
@@ -72,7 +80,12 @@ defmodule LatticeStripe.Product.Feature do
 
   def retrieve(%Client{} = client, product_id, product_feature_id, opts)
       when is_binary(product_id) and is_binary(product_feature_id) do
-    %Request{method: :get, path: item_path(product_id, product_feature_id), params: %{}, opts: opts}
+    %Request{
+      method: :get,
+      path: item_path(product_id, product_feature_id),
+      params: %{},
+      opts: opts
+    }
     |> then(&Client.request(client, &1))
     |> Resource.unwrap_singular(&from_map/1)
   end
@@ -91,7 +104,8 @@ defmodule LatticeStripe.Product.Feature do
     validate_product_id!(product_id, :list)
   end
 
-  def list(%Client{} = client, product_id, params, opts) when is_binary(product_id) and is_map(params) do
+  def list(%Client{} = client, product_id, params, opts)
+      when is_binary(product_id) and is_map(params) do
     %Request{method: :get, path: collection_path(product_id), params: params, opts: opts}
     |> then(&Client.request(client, &1))
     |> Resource.unwrap_list(&from_map/1)
@@ -101,6 +115,27 @@ defmodule LatticeStripe.Product.Feature do
   @spec list!(Client.t(), String.t(), map(), keyword()) :: Response.t()
   def list!(client, product_id, params \\ %{}, opts \\ []),
     do: client |> list(product_id, params, opts) |> Resource.unwrap_bang!()
+
+  @doc """
+  Lazily enumerate every Product Feature attachment for a Product.
+
+  Pagination mechanics are delegated to `LatticeStripe.List.stream!/2`; each
+  attachment is decoded as it is emitted. There is intentionally no non-bang
+  stream variant because later-page failures raise while a stream is consumed.
+  """
+  @spec stream!(Client.t(), String.t(), map(), keyword()) :: Enumerable.t()
+  def stream!(client, product_id, params \\ %{}, opts \\ [])
+
+  def stream!(%Client{}, product_id, _params, _opts) when product_id in [nil, ""] do
+    validate_product_id!(product_id, :stream!)
+  end
+
+  def stream!(%Client{} = client, product_id, params, opts)
+      when is_binary(product_id) and is_map(params) do
+    %Request{method: :get, path: collection_path(product_id), params: params, opts: opts}
+    |> then(&List.stream!(client, &1))
+    |> Stream.map(&from_map/1)
+  end
 
   @doc "Delete one Product Feature attachment by its `prodft_` id."
   @spec delete(Client.t(), String.t(), String.t(), keyword()) ::
@@ -123,7 +158,12 @@ defmodule LatticeStripe.Product.Feature do
 
   def delete(%Client{} = client, product_id, product_feature_id, opts)
       when is_binary(product_id) and is_binary(product_feature_id) do
-    %Request{method: :delete, path: item_path(product_id, product_feature_id), params: %{}, opts: opts}
+    %Request{
+      method: :delete,
+      path: item_path(product_id, product_feature_id),
+      params: %{},
+      opts: opts
+    }
     |> then(&Client.request(client, &1))
     |> Resource.unwrap_singular(&from_map/1)
   end
@@ -152,7 +192,9 @@ defmodule LatticeStripe.Product.Feature do
   end
 
   defp collection_path(product_id), do: "/v1/products/#{product_id}/features"
-  defp item_path(product_id, product_feature_id), do: "#{collection_path(product_id)}/#{product_feature_id}"
+
+  defp item_path(product_id, product_feature_id),
+    do: "#{collection_path(product_id)}/#{product_feature_id}"
 
   defp validate_product_id!(_product_id, operation) do
     raise ArgumentError,
