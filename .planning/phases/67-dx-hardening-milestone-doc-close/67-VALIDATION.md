@@ -57,7 +57,7 @@ created: 2026-08-25
 
 | Obligation | Trigger / Precondition | Requirement | Threat Ref | Verification Class | Machine-Verifiable Evidence | Output | Status |
 |------------|------------------------|-------------|------------|--------------------|-----------------------------|--------|--------|
-| D-17 milestone re-audit | Root auto-advance receives `PHASE COMPLETE`; `67-VERIFICATION.md` exists with `status: passed` | DX-02, DX-03, DOC-02 | T-67-08 | machine-verifiable workflow evidence after phase seal | Follow `67-POST-VERIFICATION.md`; require fresh/current Phase 67 audit status `passed` or `tech_debt`, identical source/destination hashes, fixed historical SHA-256, clean supported workspace removal | `.planning/v1.10-POST-PHASE-67-MILESTONE-AUDIT.md` | ⬜ pending |
+| D-17 milestone re-audit | Root auto-advance receives `PHASE COMPLETE`; `67-VERIFICATION.md` exists with `status: passed` | DX-02, DX-03, DOC-02 | T-67-08 | machine-verifiable workflow evidence after phase seal | Follow `67-POST-PHASE-SEAL.md`; require fresh/current Phase 67 audit status `passed` or `tech_debt`, identical source/destination hashes, fixed historical SHA-256, clean supported workspace removal | `.planning/v1.10-POST-PHASE-67-MILESTONE-AUDIT.md` | ⬜ pending |
 
 Under `.agents/skills/lattice-verification-policy/SKILL.md`, this obligation does not require subjective human judgment: every acceptance fact has a named executable check. The supported workspace removal confirmation is an orchestration safety gate, not evidence replacing those checks.
 

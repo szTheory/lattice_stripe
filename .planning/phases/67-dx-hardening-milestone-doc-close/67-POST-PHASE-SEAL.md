@@ -1,4 +1,4 @@
-# Phase 67 Post-Verification Orchestration
+# Phase 67 Post-Phase-Seal Orchestration
 
 This planning-time artifact is consumed by the root auto-advance orchestrator after `$gsd-execute-phase 67 --auto --no-transition` returns `PHASE COMPLETE`. It is not an execute-plan task and is not an input to the Phase 67 verifier.
 

@@ -131,7 +131,7 @@ None.
 
 ## Next Phase Readiness
 
-Phase verification can now evaluate current Phase 67 evidence. After it writes a passing `67-VERIFICATION.md`, the root auto-advance orchestrator must execute `67-POST-VERIFICATION.md` to create fresh milestone audit evidence; this executor intentionally did not run it.
+Phase verification can now evaluate current Phase 67 evidence. After it writes a passing `67-VERIFICATION.md`, the root auto-advance orchestrator must execute `67-POST-PHASE-SEAL.md` to create fresh milestone audit evidence; this executor intentionally did not run it.
 
 ## Self-Check: PASSED
 
