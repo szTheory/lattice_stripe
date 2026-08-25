@@ -34,7 +34,7 @@
 - [x] **Phase 63: Stripe-Native Entitlements** - Pull/paginate active entitlements + manage entitlement features (Wave 1, flagship) (completed 2026-07-28)
 - [x] **Phase 64: Meter Event-Summary Reads** - Read metered usage totals back from Stripe (Wave 2) (completed 2026-07-28)
 - [x] **Phase 65: Webhook ObjectTypes & Testing Fixtures** - Four entitlement/meter object types deserialize; public fixtures (Wave 2) (completed 2026-07-29)
-- [ ] **Phase 66: Product ↔ Feature Attachment** - Typed attachment CRUD/enumeration with legacy Product marketing-field compatibility (Wave 3)
+- [x] **Phase 66: Product ↔ Feature Attachment** - Typed attachment CRUD/enumeration with legacy Product marketing-field compatibility (Wave 3) (completed 2026-08-25)
 - [ ] **Phase 67: DX Hardening & Milestone Doc Close** - Error `retry_after`, public `CacheBodyReader`, `Charge.create`-by-design docs (Wave 3)
 
 ## Phase Details
@@ -249,7 +249,7 @@ Plans:
 | 63. Stripe-Native Entitlements | v1.10 | 7/7 | Complete    | 2026-07-28 |
 | 64. Meter Event-Summary Reads | v1.10 | 10/10 | Complete    | 2026-07-28 |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 6/6 | Complete    | 2026-07-29 |
-| 66. Product ↔ Feature Attachment | v1.10 | 5/5 | In Progress|  |
+| 66. Product ↔ Feature Attachment | v1.10 | 5/5 | Complete    | 2026-08-25 |
 | 67. DX Hardening & Milestone Doc Close | v1.10 | 0/? | Not started | - |
 
 ## Next Step

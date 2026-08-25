@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
-current_phase: 66
-current_phase_name: Product ↔ Feature Attachment
-status: verifying
-stopped_at: Completed 66-05-PLAN.md
-last_updated: "2026-08-25T14:43:02.146Z"
+current_phase: 67
+current_phase_name: DX Hardening & Milestone Doc Close
+status: planning
+stopped_at: Phase 66 verified and complete
+last_updated: "2026-08-25T14:56:44.417Z"
 last_activity: 2026-08-25
-last_activity_desc: Phase 66 execution started
+last_activity_desc: Phase 66 complete, transitioned to Phase 67
 progress:
   total_phases: 6
   completed_phases: 6
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 66 — Product ↔ Feature Attachment
+**Current focus:** Phase 67 — DX Hardening & Milestone Doc Close
 
 ## Current Position
 
-Phase: 66 (Product ↔ Feature Attachment) — EXECUTING
-Plan: 5 of 5
-Status: Phase complete — ready for verification
-Last activity: 2026-08-25 — Phase 66 execution started
+Phase: 67 — DX Hardening & Milestone Doc Close
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-25 — Phase 66 complete, transitioned to Phase 67
 
 **Carry-forward for Phase 65 and later:**
 
