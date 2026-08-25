@@ -23,7 +23,7 @@
 
 **Timeline:** 30 calendar days (2026-07-27 → 2026-08-25)
 
-**Release truth:** The milestone was planned as Hex 1.8.0; a fixture API rename made the package release 2.0.0, followed by 2.1.0. Later Phase 66-67 work remains on `main` pending the next package release.
+**Release truth:** The milestone was planned as Hex 1.8.0; a fixture API rename made the package release 2.0.0, followed by 2.1.0. The completed Phase 66-67 surface shipped in package 2.2.0 from release commit `984fa7c`.
 
 **What's next:** Reactive maintenance. Start a new milestone only on concrete adopter pull or Stripe drift; SEED-006 retains deferred Accrue DX candidates.
 

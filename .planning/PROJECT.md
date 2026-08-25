@@ -105,7 +105,7 @@ The library is **done for v1.x scope** — intended mainstream SaaS Stripe cover
 
 **Forward posture:** Maintenance mode — Stripe API drift, adopter-driven narrow additions, bugfixes. No planned new resource-family breadth absent fresh adopter pull.
 
-**Release truth:** The v1.10 plan targeted Hex 1.8.0, but a public fixture rename correctly forced package 2.0.0; release metadata is now at 2.1.0. Do not collapse GSD milestone numbers into package versions.
+**Release truth:** The v1.10 plan targeted Hex 1.8.0, but a public fixture rename correctly forced package 2.0.0; the completed v1.10 surface is published as package 2.2.0. v1.11 targets the compatibility-preserving 2.2.1 quality patch. Do not collapse GSD milestone numbers into package versions.
 
 See `.planning/milestones/v1.10-MILESTONE-AUDIT.md` for close-time audit evidence.
 
