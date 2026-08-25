@@ -28,16 +28,13 @@ defmodule LatticeStripe.TelemetryTest do
   end
 
   defp attach_handler(events) do
-    test_pid = self()
     handler_id = "telemetry-test-#{:erlang.unique_integer([:positive])}"
 
     :telemetry.attach_many(
       handler_id,
       events,
-      fn event, measurements, metadata, _config ->
-        send(test_pid, {:telemetry, event, measurements, metadata})
-      end,
-      nil
+      &LatticeStripe.TestTelemetryHandler.handle_event/4,
+      {self(), :telemetry}
     )
 
     on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -425,16 +422,13 @@ defmodule LatticeStripe.TelemetryTest do
 
   describe "resource and operation parsing" do
     defp get_start_metadata(path, method) do
-      test_pid = self()
       handler_id = "parse-test-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach_many(
         handler_id,
         [[:lattice_stripe, :request, :start]],
-        fn _event, _measurements, metadata, _config ->
-          send(test_pid, {:meta, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), :meta}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -446,7 +440,7 @@ defmodule LatticeStripe.TelemetryTest do
       req = %Request{method: method, path: path}
       Client.request(client, req)
 
-      assert_receive {:meta, metadata}
+      assert_receive {:meta, _event, _measurements, metadata}
       metadata
     end
 
@@ -814,16 +808,13 @@ defmodule LatticeStripe.TelemetryTest do
     end
 
     defp attach_auto_advance_handler do
-      test_pid = self()
       handler_id = "auto-advance-test-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach(
         handler_id,
         [:lattice_stripe, :invoice, :auto_advance_scheduled],
-        fn event, measurements, metadata, _config ->
-          send(test_pid, {:telemetry, event, measurements, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), :telemetry}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)

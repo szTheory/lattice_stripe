@@ -200,16 +200,13 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
     # Test 26: Telemetry events emitted when telemetry_enabled: true
     test "emits telemetry start and stop events" do
       client = test_client(telemetry_enabled: true)
-      test_pid = self()
       handler_id = "test-telemetry-handler-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach_many(
         handler_id,
         [[:lattice_stripe, :request, :start], [:lattice_stripe, :request, :stop]],
-        fn event, _measurements, metadata, _config ->
-          send(test_pid, {:telemetry_event, event, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), :telemetry_event}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -220,25 +217,20 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
 
       Client.request(client, get_request())
 
-      assert_receive {:telemetry_event, [:lattice_stripe, :request, :start], _meta}
-      assert_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _meta}
+      assert_receive {:telemetry_event, [:lattice_stripe, :request, :start], _, _meta}
+      assert_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _, _meta}
     end
 
     # Test 27: No telemetry events when telemetry_enabled: false
     test "does NOT emit telemetry events when telemetry_enabled is false" do
       client = test_client(telemetry_enabled: false)
-      test_pid = self()
       handler_id = "test-no-telemetry-handler-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach_many(
         handler_id,
         [[:lattice_stripe, :request, :start], [:lattice_stripe, :request, :stop]],
-        fn event, _measurements, metadata, _config ->
-          if metadata[:path] == "/v1/customers/cus_123" do
-            send(test_pid, {:telemetry_event, event, metadata})
-          end
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), :telemetry_event}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -249,8 +241,8 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
 
       Client.request(client, get_request())
 
-      refute_receive {:telemetry_event, [:lattice_stripe, :request, :start], _}, 100
-      refute_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _}, 100
+      refute_receive {:telemetry_event, [:lattice_stripe, :request, :start], _, _}, 100
+      refute_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _, _}, 100
     end
   end
 

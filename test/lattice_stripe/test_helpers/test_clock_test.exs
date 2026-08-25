@@ -672,7 +672,6 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
 
       handler_id = "advance-and-wait-ok-#{System.unique_integer()}"
       ref = make_ref()
-      test_pid = self()
 
       :telemetry.attach_many(
         handler_id,
@@ -680,10 +679,8 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
           [:lattice_stripe, :test_clock, :advance_and_wait, :start],
           [:lattice_stripe, :test_clock, :advance_and_wait, :stop]
         ],
-        fn name, measurements, metadata, _ ->
-          send(test_pid, {ref, name, measurements, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), ref}
       )
 
       assert {:ok, _} =
@@ -716,15 +713,12 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
 
       handler_id = "advance-and-wait-err-#{System.unique_integer()}"
       ref = make_ref()
-      test_pid = self()
 
       :telemetry.attach(
         handler_id,
         [:lattice_stripe, :test_clock, :advance_and_wait, :stop],
-        fn name, measurements, metadata, _ ->
-          send(test_pid, {ref, name, measurements, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), ref}
       )
 
       assert {:error, %Error{type: :test_clock_timeout}} =
@@ -751,15 +745,12 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
 
       handler_id = "advance-and-wait-off-#{System.unique_integer()}"
       ref = make_ref()
-      test_pid = self()
 
       :telemetry.attach(
         handler_id,
         [:lattice_stripe, :test_clock, :advance_and_wait, :start],
-        fn name, measurements, metadata, _ ->
-          send(test_pid, {ref, name, measurements, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), ref}
       )
 
       assert {:ok, _} =

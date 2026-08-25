@@ -151,16 +151,13 @@ defmodule LatticeStripe.Client.RetryTest do
           max_retries: 1
         )
 
-      test_pid = self()
       handler_id = "test-retry-telemetry-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach(
         handler_id,
         [:lattice_stripe, :request, :retry],
-        fn _event, measurements, metadata, _config ->
-          send(test_pid, {:retry_event, measurements, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), :retry_event}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -175,7 +172,7 @@ defmodule LatticeStripe.Client.RetryTest do
 
       Client.request(client, get_request())
 
-      assert_receive {:retry_event, measurements, metadata}
+      assert_receive {:retry_event, [:lattice_stripe, :request, :retry], measurements, metadata}
       assert Map.has_key?(measurements, :attempt)
       assert Map.has_key?(measurements, :delay_ms)
       assert Map.has_key?(metadata, :method)
@@ -191,16 +188,13 @@ defmodule LatticeStripe.Client.RetryTest do
           max_retries: 1
         )
 
-      test_pid = self()
       handler_id = "test-stop-metadata-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach(
         handler_id,
         [:lattice_stripe, :request, :stop],
-        fn _event, _measurements, metadata, _config ->
-          send(test_pid, {:stop_event, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), :stop_event}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -216,7 +210,7 @@ defmodule LatticeStripe.Client.RetryTest do
 
       Client.request(client, get_request())
 
-      assert_receive {:stop_event, metadata}
+      assert_receive {:stop_event, [:lattice_stripe, :request, :stop], _, metadata}
       assert metadata.attempts == 2
       assert metadata.retries == 1
     end
@@ -230,16 +224,13 @@ defmodule LatticeStripe.Client.RetryTest do
           max_retries: 2
         )
 
-      test_pid = self()
       handler_id = "test-success-retry-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach(
         handler_id,
         [:lattice_stripe, :request, :stop],
-        fn _event, _measurements, metadata, _config ->
-          send(test_pid, {:stop_event, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), :stop_event}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -259,7 +250,7 @@ defmodule LatticeStripe.Client.RetryTest do
 
       assert {:ok, _} = Client.request(client, get_request())
 
-      assert_receive {:stop_event, metadata}
+      assert_receive {:stop_event, [:lattice_stripe, :request, :stop], _, metadata}
       assert metadata.attempts == 2
       assert metadata.retries == 1
       assert metadata.status == :ok
