@@ -360,6 +360,16 @@ defmodule LatticeStripe.Webhook.PlugTest do
   # ---------------------------------------------------------------------------
 
   describe "CacheBodyReader" do
+    test "accumulates every read chunk in order while preserving Plug return tuples" do
+      conn = Plug.Test.conn(:post, "/webhook", "abcdef")
+
+      assert {:more, "abc", conn} = CacheBodyReader.read_body(conn, length: 3)
+      assert conn.private[:raw_body] == "abc"
+
+      assert {:ok, "def", conn} = CacheBodyReader.read_body(conn, length: 3)
+      assert conn.private[:raw_body] == "abcdef"
+    end
+
     test "read_body/2 sets conn.private[:raw_body]" do
       conn = Plug.Test.conn(:post, "/webhook", @payload)
       {:ok, body, conn} = CacheBodyReader.read_body(conn, [])
