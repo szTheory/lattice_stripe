@@ -11,6 +11,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 > documentation truth, and release hygiene. Until it is published, Hex continues to resolve
 > the install line above to `2.2.0`.
 
+## [2.2.1](https://github.com/szTheory/lattice_stripe/compare/v2.2.0...v2.2.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* complete reader-first quality closure ([#57](https://github.com/szTheory/lattice_stripe/issues/57)) ([8586473](https://github.com/szTheory/lattice_stripe/commit/858647336962e70b9c01295f903d5efb4f0ac9b9))
+
 ## [2.2.0](https://github.com/szTheory/lattice_stripe/compare/v2.1.0...v2.2.0) (2026-08-25)
 
 ### Highlights for adopters
