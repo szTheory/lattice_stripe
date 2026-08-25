@@ -1,6 +1,42 @@
 defmodule LatticeStripe.Client.RequestBuildingTest do
   use LatticeStripe.ClientCase, async: true
 
+  defp assert_stripe_account_telemetry(client, request_opts, expected_account) do
+    unique_id = :erlang.unique_integer([:positive])
+    handler_id = "stripe-account-telemetry-#{unique_id}"
+    path = "/v1/customers/stripe-account-telemetry-#{unique_id}"
+
+    :telemetry.attach_many(
+      handler_id,
+      [[:lattice_stripe, :request, :start], [:lattice_stripe, :request, :stop]],
+      &LatticeStripe.TestTelemetryHandler.handle_request_path/4,
+      {self(), :stripe_account_telemetry, path}
+    )
+
+    on_exit(fn -> :telemetry.detach(handler_id) end)
+
+    expected_header =
+      case expected_account do
+        nil -> nil
+        account -> {"stripe-account", account}
+      end
+
+    expect(LatticeStripe.MockTransport, :request, fn req_map ->
+      assert List.keyfind(req_map.headers, "stripe-account", 0) ==
+               expected_header
+
+      ok_response()
+    end)
+
+    assert {:ok, _response} = Client.request(client, get_request(path, request_opts))
+
+    assert_receive {:stripe_account_telemetry, [:lattice_stripe, :request, :start], _,
+                    %{stripe_account: ^expected_account}}
+
+    assert_receive {:stripe_account_telemetry, [:lattice_stripe, :request, :stop], _,
+                    %{stripe_account: ^expected_account}}
+  end
+
   describe "request/2 headers" do
     test "sends Authorization Bearer header" do
       client = test_client()
@@ -230,6 +266,28 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
 
       refute_receive {:telemetry_event, [:lattice_stripe, :request, :start], _, _}, 100
       refute_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _, _}, 100
+    end
+
+    test "attributes telemetry to the client stripe_account by default" do
+      client = test_client(telemetry_enabled: true, stripe_account: "acct_client")
+
+      assert_stripe_account_telemetry(client, [], "acct_client")
+    end
+
+    test "attributes telemetry to the per-request stripe_account override" do
+      client = test_client(telemetry_enabled: true, stripe_account: "acct_client")
+
+      assert_stripe_account_telemetry(
+        client,
+        [stripe_account: "acct_request"],
+        "acct_request"
+      )
+    end
+
+    test "attributes telemetry to nil when a request suppresses the client stripe_account" do
+      client = test_client(telemetry_enabled: true, stripe_account: "acct_client")
+
+      assert_stripe_account_telemetry(client, [stripe_account: nil], nil)
     end
   end
 
