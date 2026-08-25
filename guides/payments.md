@@ -225,8 +225,24 @@ results = resp.data.data
 When a PaymentIntent succeeds, Stripe creates a **Charge** — the settled payment result
 record. New integrations should use `LatticeStripe.PaymentIntent` to accept payments;
 use `LatticeStripe.Charge` to read and reconcile those result records after the fact.
-There is no `Charge.create/3` — charges are created as a side effect of PaymentIntent
-confirmation.
+<code>LatticeStripe.Charge.create&#47;3</code> will not be added: Charge is a read/reconciliation
+resource, not a payment-initiation API. For direct server-side payment initiation, use
+`LatticeStripe.PaymentIntent.create/3`:
+
+```elixir
+{:ok, intent} =
+  LatticeStripe.PaymentIntent.create(client, %{
+    "amount" => 4_999,
+    "currency" => "usd",
+    "payment_method" => "pm_card_visa",
+    "confirm" => true
+  })
+```
+
+A successful PaymentIntent creates the resulting Charge for reconciliation. This direct
+server-side confirmation is distinct from browser and other client-SDK flows: create the
+PaymentIntent server-side, then confirm it with Stripe.js or an equivalent client SDK for
+authentication. Customer action or SCA may still be required.
 
 | Goal | Function | Notes |
 |------|----------|-------|

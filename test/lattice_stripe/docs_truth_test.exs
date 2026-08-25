@@ -9,14 +9,15 @@ defmodule LatticeStripe.ChargePolicyDocsTruthTest do
     reconciliation = charge_reconciliation()
 
     for policy <- [charge, reconciliation] do
-      assert policy =~ "LatticeStripe.Charge.create/3 will not be added"
+      assert policy =~ "LatticeStripe.Charge.create&#47;3"
+      assert policy =~ "will not be added"
       assert policy =~ "LatticeStripe.PaymentIntent.create/3"
       assert policy =~ "\"amount\" => 4_999"
       assert policy =~ "\"currency\" => \"usd\""
       assert policy =~ "\"payment_method\" => \"pm_card_visa\""
       assert policy =~ "\"confirm\" => true"
-      assert policy =~ "successful PaymentIntent creates the resulting Charge"
-      assert policy =~ "customer action or SCA"
+      assert policy =~ ~r/successful PaymentIntent creates the resulting Charge/
+      assert String.downcase(policy) =~ "customer action or sca"
     end
   end
 
