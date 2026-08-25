@@ -10,18 +10,19 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
-**v1.10 progress (2026-08-25):** Phases 61–66 are complete. Phase 66 ships the
-typed Product Feature attachment resource and full catalog enumeration while
-preserving legacy/current Product marketing fields as raw display maps. Phase 67
-(DX Hardening & Milestone Doc Close) is the next and only incomplete phase.
+**v1.10 progress (2026-08-25):** All seven phases and all 19 requirements are
+complete and independently verified. The fresh post-Phase-67 audit reports
+`tech_debt` with no blockers: 19/19 requirements, 7/7 phases, 19/19 integration
+joins, and 6/6 adopter flows. The remaining decision is whether to reconcile the
+bounded Nyquist/external-confidence debt before archiving the milestone.
 
-**Active milestone:** Maintenance mode (v1.9 shipped 2026-05-27).
+**Active milestone:** v1.10 Accrue Surface Closure (Hex 1.8.0) — implementation complete, audited, awaiting milestone completion.
 
 **Latest shipped milestone:** v1.9 CI & Doc Honesty — checkout/README docs_truth locks; CI-01 paths-ignore fix; JTBD-MAP post-v1.9 truth.
 
-**Done estimate:** ~98% for intended v1.x scope (May 28 doc quicks + maintenance capstone: docs_truth clusters, JTBD close, drift hygiene).
+**Done estimate:** 100% of v1.10 requirements implemented and verified; archival/release disposition remains.
 
-**Post-v1.x posture (2026-05-28):** **Reactive maintenance only** — no active build track. Assessment wedges and Gap 2 doc polish closed (quick tasks 260527-tkc, tm1, tp8, tqf). No v1.10 milestone; no marketing website.
+**Post-v1.x posture:** Return to reactive maintenance after the narrowly scoped, adopter-pulled v1.10 milestone is archived; no broad resource-family expansion and no marketing website.
 
 **Public surface:** [README.md](README.md) + [HexDocs](https://hexdocs.pm/lattice_stripe) + [guides/scope.md](guides/scope.md) — sufficient for an SDK; do not duplicate in a standalone site.
 
@@ -115,6 +116,7 @@ current release. All additive → Hex minor bump to 1.8.0.
 - Optional `LatticeStripe.Application` + default Finch pool (fixes a live consumer footgun)
 - Product↔Feature typed attachment CRUD/enumeration, while preserving raw Product marketing-display fields (lets consumers derive the entitlement catalog from the dedicated Stripe attachment endpoint)
 - "1.1 → 1.7 what landed" migration guide (zero-code; unblocks four accrue deferrals)
+- Retry-After response evidence, a public semver-locked webhook `CacheBodyReader`, and permanent PaymentIntent-first Charge initiation guidance
 
 **Key context:** Driven by the verified accrue gap brief
 (`.planning/research/accrue-gap-brief-2026-07-27.txt`, SEED-005). Lower-priority DX
@@ -275,4 +277,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-25 after Phase 66 — typed Product Feature attachments verified; legacy/current Product marketing-field compatibility preserved; Phase 67 is next.*
+*Last updated: 2026-08-25 after Phase 67 verification and the fresh v1.10 post-phase audit — all requirements complete; bounded tech debt remains for milestone-close disposition.*

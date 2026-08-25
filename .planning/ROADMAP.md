@@ -30,12 +30,12 @@
 ## Phases
 
 - [x] **Phase 61: Default Finch Pool & Optional Application** - Live Stripe calls work without a manually-started Finch pool (Wave 0) (completed 2026-07-27)
-- [ ] **Phase 62: "1.1 → 1.7 What Landed" Migration Guide** - Zero-code HexDocs guide enumerating every surface shipped since 1.1 (Wave 0)
+- [x] **Phase 62: "1.1 → 1.7 What Landed" Migration Guide** - Zero-code HexDocs guide enumerating every surface shipped since 1.1 (Wave 0) (completed 2026-08-24)
 - [x] **Phase 63: Stripe-Native Entitlements** - Pull/paginate active entitlements + manage entitlement features (Wave 1, flagship) (completed 2026-07-28)
 - [x] **Phase 64: Meter Event-Summary Reads** - Read metered usage totals back from Stripe (Wave 2) (completed 2026-07-28)
 - [x] **Phase 65: Webhook ObjectTypes & Testing Fixtures** - Four entitlement/meter object types deserialize; public fixtures (Wave 2) (completed 2026-07-29)
 - [x] **Phase 66: Product ↔ Feature Attachment** - Typed attachment CRUD/enumeration with legacy Product marketing-field compatibility (Wave 3) (completed 2026-08-25)
-- [ ] **Phase 67: DX Hardening & Milestone Doc Close** - Error `retry_after`, public `CacheBodyReader`, `Charge.create`-by-design docs (Wave 3)
+- [x] **Phase 67: DX Hardening & Milestone Doc Close** - Error `retry_after`, public `CacheBodyReader`, `Charge.create`-by-design docs (Wave 3) (completed 2026-08-25)
 
 ## Phase Details
 
@@ -269,4 +269,4 @@ Plans:
 
 ## Next Step
 
-**`/gsd-plan-phase 65`** — Webhook ObjectTypes & Testing Fixtures. Phase 64 deliberately left `lib/lattice_stripe/object_types.ex` byte-identical (verified at gate time), and 64-04 locked the absence of a `billing.meter_error_report` key by test, so Phase 65 owns every registry row. Phase 62 (migration guide, Wave 0, zero-code) remains unstarted and is parallelizable with it.
+**`$gsd-complete-milestone v1.10`** — All 19 requirements and all seven phases are verified. The fresh post-Phase-67 audit reports `tech_debt` with no blockers; accept the bounded debt at completion or reconcile the two draft Nyquist artifacts first.

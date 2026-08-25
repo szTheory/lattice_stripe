@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
-current_phase: 62
-current_phase_name: "\"1.1 → 1.7 What Landed\" Migration Guide"
-status: planning
+current_phase: 67
+current_phase_name: DX Hardening & Milestone Doc Close
+status: complete
 stopped_at: Completed 67-05-PLAN.md
-last_updated: "2026-08-25T18:37:06.760Z"
+last_updated: "2026-08-25T18:41:24.666Z"
 last_activity: 2026-08-25
-last_activity_desc: Phase 67 complete, transitioned to Phase 62
+last_activity_desc: Phase 67 complete; v1.10 milestone audit found bounded tech debt and no blockers
 progress:
   total_phases: 7
   completed_phases: 7
@@ -24,27 +24,22 @@ progress:
 See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure" under adopter-pull gate, SEED-005)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 67 — DX Hardening & Milestone Doc Close
+**Current focus:** Review bounded v1.10 audit debt, then complete the milestone
 
 ## Current Position
 
-Phase: 62 — "1.1 → 1.7 What Landed" Migration Guide
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-08-25 — Phase 67 complete, transitioned to Phase 62
+Phase: 67 — DX Hardening & Milestone Doc Close
+Plan: 5 of 5 complete
+Status: Milestone audited — `tech_debt`, no blockers
+Last activity: 2026-08-25 — Phase 67 verified; fresh v1.10 audit completed
 
-**Carry-forward for Phase 65 and later:**
+**Milestone-close carry-forward:**
 
-- **Gate against an ExDoc baseline of 38**, not the 42 that still appears in older planning prose. It moved 42 → 40 (64-09 cleared the two `meter_event_stream.ex` IAL warnings, cause pinned as a code-block line beginning `{:`) → 38 (64-08's `scope.md` `../README.md` repair). Both decrements were downward and required by plan acceptance criteria; the baseline was never raised to make a step pass.
-- **`lib/lattice_stripe/object_types.ex` is byte-identical to its pre-phase state** and 64-04 locked the absence of a `billing.meter_error_report` key by test — Phase 65 owns every registry row.
-- **TWO pre-existing flakes, neither introduced here nor fixed here.** Both logged in `.planning/phases/64-meter-event-summary-reads/deferred-items.md`:
-  1. `test/lattice_stripe/client_test.exs:912` — retry telemetry asserts `metadata.attempts == 2`, intermittently reads `1` (~1 in 20). Suspected globally-attached `:telemetry` handler in an `async: true` test catching another test's stop event.
-  2. `test/lattice_stripe/batch_test.exs:72` — error-isolation test asserts one `{:ok, _}` slot, intermittently gets 2 (~1 in 30): the task meant to fail succeeds. **Proven pre-existing** by reproducing it on the pre-phase commit `a22e197` in a clean worktree with none of Phase 64's code present, and by `git diff` showing Phase 64 touched no Batch file.
-  Combined, the suite has roughly a 1-in-12 chance of a spurious red on any given full run. Worth fixing before it erodes trust in CI.
-
-- **`guides/getting-started.md` carries the same broken `../README.md` link** 64-08 repaired in `scope.md` (2 of the remaining 38 warnings). One-line follow-up.
-- **Anchor form correction:** the metering guide's Rule 4 heading renders `rule-4-dimensions-are-write-only-on-the-generally-available-api` — **single** hyphen. Earmark collapses the em-dash separator; a double-hyphen form does not exist.
-- **`mix ci` remains RED at clean HEAD** on the surviving 38 warnings (its final step is `docs --warnings-as-errors`, while CI's Quality lane runs plain `mix docs`, `ci.yml:254`). Clearing them is Phase 67-shaped work. Do not use `mix ci` as a phase gate until then.
+- Phase 67's fresh full `mix ci` passed 2,440 tests with 0 failures; strict ExDoc is at zero warnings and the public API lock contains 3,463 entries.
+- The current post-Phase-67 audit is `.planning/v1.10-POST-PHASE-67-MILESTONE-AUDIT.md`: `tech_debt`, 19/19 requirements, 7/7 phases, 19/19 integrations, 6/6 flows, no blockers.
+- Phases 61 and 63 retain `status: draft` Nyquist artifacts. Run `$gsd-validate-phase 61` and `$gsd-validate-phase 63` if current-form Nyquist reconciliation is desired before archival.
+- Stripe-mock cannot prove live Stripe pagination for a customer with more than ten active entitlements. SDK-owned cursor, tenant-filter, laziness, and failure semantics are mechanically covered; the earlier maintainer checkpoint accepted this external-confidence boundary.
+- Two known low-frequency tests remain explicitly outside Phase 67: client retry telemetry and Batch error isolation. Both are documented in `.planning/phases/64-meter-event-summary-reads/deferred-items.md`; the current full suite is green.
 
 ## Performance Metrics
 
