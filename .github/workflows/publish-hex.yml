@@ -41,7 +41,7 @@ jobs:
       checkout_ref: ${{ steps.validate.outputs.checkout_ref }}
       sha: ${{ steps.validate.outputs.sha }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -65,7 +65,7 @@ jobs:
           fi
 
       - name: Verify CI is green on release SHA
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const sha = '${{ steps.validate.outputs.sha }}';
@@ -174,17 +174,17 @@ jobs:
     env:
       RELEASE_VERSION: ${{ github.event.inputs.release_version }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ needs.gate-ci-green.outputs.checkout_ref }}
 
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
           version-file: .tool-versions
           version-type: strict
 
       - name: Cache library deps
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
             deps

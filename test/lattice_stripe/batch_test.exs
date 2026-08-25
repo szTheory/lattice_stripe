@@ -71,11 +71,10 @@ defmodule LatticeStripe.BatchTest do
   describe "run/3 — error isolation" do
     test "one failing task returns {:error, %Error{}} in its slot, others succeed" do
       client = test_client()
-      call_count = :counters.new(1, [])
+      {:ok, call_count} = Agent.start_link(fn -> 0 end)
 
       stub(LatticeStripe.MockTransport, :request, fn _req ->
-        idx = :counters.get(call_count, 1)
-        :counters.add(call_count, 1, 1)
+        idx = Agent.get_and_update(call_count, fn count -> {count, count + 1} end)
 
         if idx == 0 do
           ok_response(%{"id" => "cus_123", "object" => "customer"})
