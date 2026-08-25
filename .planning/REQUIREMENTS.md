@@ -30,8 +30,8 @@ Source: verified accrue gap brief (`.planning/research/accrue-gap-brief-2026-07-
 
 ### Product ↔ Feature
 
-- [x] **PROD-01**: Developer can attach, list, and delete product features via `LatticeStripe.Product.Feature` (`POST`/`GET`/`DELETE /v1/products/:id/features`)
-- [x] **PROD-02**: `Product.features` deserializes into a typed struct instead of a raw `[map()]`
+- [x] **PROD-01**: Developer can create, retrieve, list, completely enumerate, and delete typed product-feature attachments via `LatticeStripe.Product.Feature` (`/v1/products/:product/features` and `/v1/products/:product/features/:attachment`)
+- [x] **PROD-02**: `product_feature` payloads deserialize as typed `%LatticeStripe.Product.Feature{}` attachments, while the legacy `Product.features` and current `Product.marketing_features` pricing-table display fields preserve their existing raw `[map()]` compatibility shape; authoritative catalog reads use `Product.Feature.list/4` or `stream!/4`
 
 ### Developer Experience
 
@@ -108,4 +108,4 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 
 ---
 *Requirements defined: 2026-07-27*
-*Last updated: 2026-07-27 after milestone v1.10 roadmap creation (traceability filled, 19/19 mapped)*
+*Last updated: 2026-08-25 after Phase 66 corrected the obsolete Product marketing-field premise (traceability remains 19/19 mapped)*

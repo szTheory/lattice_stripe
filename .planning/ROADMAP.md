@@ -34,7 +34,7 @@
 - [x] **Phase 63: Stripe-Native Entitlements** - Pull/paginate active entitlements + manage entitlement features (Wave 1, flagship) (completed 2026-07-28)
 - [x] **Phase 64: Meter Event-Summary Reads** - Read metered usage totals back from Stripe (Wave 2) (completed 2026-07-28)
 - [x] **Phase 65: Webhook ObjectTypes & Testing Fixtures** - Four entitlement/meter object types deserialize; public fixtures (Wave 2) (completed 2026-07-29)
-- [ ] **Phase 66: Product ↔ Feature Attachment** - Attach/list/delete product features + typed `Product.features` (Wave 3)
+- [ ] **Phase 66: Product ↔ Feature Attachment** - Typed attachment CRUD/enumeration with legacy Product marketing-field compatibility (Wave 3)
 - [ ] **Phase 67: DX Hardening & Milestone Doc Close** - Error `retry_after`, public `CacheBodyReader`, `Charge.create`-by-design docs (Wave 3)
 
 ## Phase Details
@@ -198,16 +198,16 @@ Plans:
 
 ### Phase 66: Product ↔ Feature Attachment
 
-**Goal**: Developers can manage product feature attachments and read a typed `Product.features`, so consumers can derive an entitlement catalog from Stripe.
+**Goal**: Developers can manage and completely enumerate typed Product Feature attachments, so consumers can derive an entitlement catalog from Stripe without misreading Product marketing display fields as access configuration.
 **Depends on**: Phase 63 (entitlement `Feature` objects are what product features reference)
 **Requirements**: PROD-01, PROD-02
 **Success Criteria** (what must be TRUE):
 
-  1. `LatticeStripe.Product.Feature` supports attach/list/delete over `POST`/`GET`/`DELETE /v1/products/:id/features`.
-  2. `Product.features` deserializes into a typed struct instead of a raw `[map()]`.
-  3. Existing `Product.retrieve`/`list` continue to return correctly with the newly-typed `features` field (no break for current callers).
+  1. `LatticeStripe.Product.Feature` supports create/retrieve/list/stream/delete over the parent-scoped `/v1/products/:product/features` collection and `/v1/products/:product/features/:attachment` item paths.
+  2. Exact `product_feature` wire objects deserialize into typed `%LatticeStripe.Product.Feature{}` attachments, including their nested `Entitlements.Feature` definition.
+  3. Existing `Product.retrieve`/`list` preserve the independent raw-map shapes of legacy `Product.features` and current `Product.marketing_features`; catalog reads use `Product.Feature.list/4` or `stream!/4` (no break for current callers).
 
-**Build constraints**: Follow the parent-scoped path pattern (`tax_id.ex`, `transfer_reversal.ex`). Type the existing raw `[map()]` fields in `lib/lattice_stripe/product.ex` (`features` L67/L100/L408; `marketing_features` L70/L103/L411). New module needs `@moduledoc`/`@doc` + ExDoc group registration.
+**Build constraints**: Follow the parent-scoped path pattern (`tax_id.ex`, `transfer_reversal.ex`). Preserve the existing raw `[map()]` Product marketing fields because they are display copy, not entitlement attachments. Type only the dedicated `product_feature` resource. New module needs `@moduledoc`/`@doc` + ExDoc group registration.
 **Plans**: 5/5 plans executed
 **Wave 1**
 

@@ -113,7 +113,7 @@ current release. All additive → Hex minor bump to 1.8.0.
 - Billing.Meter event-summary reads (accrue's entire usage-read surface today is zero)
 - 5 webhook ObjectTypes + typed fixtures (entitlement/meter/core-billing; summary has no `id`)
 - Optional `LatticeStripe.Application` + default Finch pool (fixes a live consumer footgun)
-- Product↔Feature attach + typed `Product.features` (lets consumers derive the entitlement catalog from Stripe)
+- Product↔Feature typed attachment CRUD/enumeration, while preserving raw Product marketing-display fields (lets consumers derive the entitlement catalog from the dedicated Stripe attachment endpoint)
 - "1.1 → 1.7 what landed" migration guide (zero-code; unblocks four accrue deferrals)
 
 **Key context:** Driven by the verified accrue gap brief
