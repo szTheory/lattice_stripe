@@ -9,8 +9,10 @@ feature work.
 - Latest released version: `2.2.2`.
 - GitHub Release [`v2.2.2`](https://github.com/szTheory/lattice_stripe/releases/tag/v2.2.2),
   tag `v2.2.2`, and Hex 2.2.2 resolve to the release completed on 2026-08-25
-  from commit `7f290b11ddc5dcdefc9e6e0aa5cad43e9d734440`. HexDocs is refreshed from the
-  final green archive SHA under accepted risk `R73-01`.
+  from commit `7f290b11ddc5dcdefc9e6e0aa5cad43e9d734440`. HexDocs was refreshed by
+  [docs-only run 32900456977](https://github.com/szTheory/lattice_stripe/actions/runs/32900456977)
+  from exact-green archive SHA `10baf33770bdeebd94b5a04754c83740046326f6`
+  under accepted risk `R73-01`.
 - Latest completed GSD milestone: **v1.11 Reader-First Quality Closure**.
 - `milestone: none` is the default GSD state after v1.11; no later
   feature milestone starts without clear adopter pull.
@@ -36,10 +38,11 @@ Audited against the public remotes on 2026-08-25:
 | Release PR | [#62](https://github.com/szTheory/lattice_stripe/pull/62) produced release commit/tag `7f290b1` | verified |
 | CI and release | [run 32899071873](https://github.com/szTheory/lattice_stripe/actions/runs/32899071873) passed exact-SHA `ci-gate`, authenticated dry-run, publish, and registry verification on `7f290b1` | verified |
 | Hex | [lattice_stripe 2.2.2](https://hex.pm/packages/lattice_stripe/2.2.2) published with checksum `0d990ceaeb2794a24de200e7f7cff769491cb284350c148abdc02946fb66fed8` | verified |
-| HexDocs | [2.2.2 docs](https://hexdocs.pm/lattice_stripe/2.2.2/) resolve publicly; final prose refresh follows the archive PR | verified with split provenance |
+| HexDocs | [2.2.2 docs](https://hexdocs.pm/lattice_stripe/2.2.2/) resolve publicly with final prose from exact-green archive SHA `10baf33770bdeebd94b5a04754c83740046326f6`; [docs-only run 32900456977](https://github.com/szTheory/lattice_stripe/actions/runs/32900456977) succeeded | verified with split provenance |
 
-The package tag remains the immutable release commit. A docs-only milestone
-closure may refresh HexDocs from final `main` without changing the package.
+The package tag remains the immutable release commit. The docs-only milestone
+closure refreshed HexDocs from an exact-green same-version source without
+changing the package.
 
 ## v1.11 release stop gates
 
