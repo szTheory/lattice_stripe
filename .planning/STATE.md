@@ -2,19 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
-current_phase: 66
-current_phase_name: Product ↔ Feature Attachment
 status: planning
-stopped_at: Phase 62 complete; Phase 66 ready to plan
-last_updated: "2026-08-24T20:41:11.023Z"
-last_activity: 2026-08-24
-last_activity_desc: Phase 62 complete; next incomplete phase is 66
+stopped_at: Phase 66 context gathered
+last_updated: "2026-08-25T13:48:10.666Z"
+last_activity: 2026-08-24 — Phase 62 complete; next incomplete phase is 66
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 5
   total_plans: 27
   completed_plans: 27
-  percent: 100
+  percent: 83
 ---
 
 # Project State
@@ -161,9 +158,9 @@ Last activity: 2026-08-24 — Phase 62 complete; next incomplete phase is 66
 
 ## Session Continuity
 
-**Last session:** 2026-08-24T19:28:57.724Z
-**Stopped at:** Phase 62 context gathered
-**Resume file:** .planning/phases/62-1-1-1-7-what-landed-migration-guide/62-CONTEXT.md
+**Last session:** 2026-08-25T13:48:10.658Z
+**Stopped at:** Phase 66 context gathered
+**Resume file:** .planning/phases/66-product-feature-attachment/66-CONTEXT.md
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
 Gap brief: `.planning/research/accrue-gap-brief-2026-07-27.txt`
