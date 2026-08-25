@@ -195,9 +195,7 @@ defmodule LatticeStripe.List do
     )
   end
 
-  # ---------------------------------------------------------------------------
   # Private: stream state machine
-  # ---------------------------------------------------------------------------
 
   # Halt when buffer is empty and no more pages.
   defp next_item(%__MODULE__{data: [], has_more: false}, _client) do
@@ -217,9 +215,7 @@ defmodule LatticeStripe.List do
     {[item], %{list | data: rest}}
   end
 
-  # ---------------------------------------------------------------------------
   # Private: page fetching
-  # ---------------------------------------------------------------------------
 
   # Fetches the initial page from Client.request/2.
   # Raises LatticeStripe.Error on failure (bang semantics).
@@ -250,17 +246,17 @@ defmodule LatticeStripe.List do
   # Strips starting_after/ending_before/page from base params to avoid conflicts,
   # then merges in the appropriate pagination param.
   #
-  # Per-request opts carry forward (D-31) except idempotency_key (GET pages don't need it).
+  # Per-request opts carry forward except idempotency_key; page fetches are GET requests.
   defp build_next_page_request(%__MODULE__{} = list) do
     base_params = Map.drop(list._params, ["starting_after", "ending_before", "page"])
 
     pagination_params =
       cond do
-        # Search pagination (D-16): use page token from response
+        # Search pagination uses the page token from the response.
         list.object == "search_result" && list.next_page ->
           %{"page" => list.next_page}
 
-        # Backward cursor pagination (D-06): use first item ID from original page
+        # Backward cursor pagination uses the first item ID from the original page.
         Map.has_key?(list._params, "ending_before") && list._first_id != nil ->
           %{"ending_before" => list._first_id}
 
@@ -272,7 +268,7 @@ defmodule LatticeStripe.List do
           %{}
       end
 
-    # Strip idempotency_key from opts — page fetches are GET (D-31)
+    # Strip idempotency_key from opts because page fetches are GET requests.
     opts = Keyword.delete(list._opts, :idempotency_key)
 
     %Request{
@@ -283,9 +279,7 @@ defmodule LatticeStripe.List do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: ID extraction helpers
-  # ---------------------------------------------------------------------------
 
   # Extract ID from the first item in the list.
   # Called once during from_json/3 before the buffer can be consumed.

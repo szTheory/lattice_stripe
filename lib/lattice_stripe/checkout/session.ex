@@ -214,9 +214,7 @@ defmodule LatticeStripe.Checkout.Session do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: Core operations
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Checkout Session.
@@ -518,9 +516,7 @@ defmodule LatticeStripe.Checkout.Session do
     List.stream!(client, req) |> Stream.map(&LineItem.from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Bang variants
-  # ---------------------------------------------------------------------------
 
   @doc """
   Like `create/3` but raises `LatticeStripe.Error` on failure.
@@ -572,9 +568,7 @@ defmodule LatticeStripe.Checkout.Session do
     list_line_items(client, session_id, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Checkout.Session{}` struct.
@@ -676,9 +670,7 @@ defmodule LatticeStripe.Checkout.Session do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("open"), do: :open
   defp atomize_status("complete"), do: :complete

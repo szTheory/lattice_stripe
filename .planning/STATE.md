@@ -1,66 +1,58 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.10
-milestone_name: Accrue Surface Closure (Hex 1.8.0)
-status: Awaiting next milestone
-stopped_at: Milestone v1.10 completed and archived
-last_updated: "2026-08-25T18:54:20.981Z"
+milestone: v1.11
+milestone_name: Reader-First Quality Closure
+status: executing
+last_updated: "2026-08-25T20:17:00.000Z"
 last_activity: 2026-08-25
-last_activity_desc: Milestone v1.10 completed and archived
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 37
-  completed_plans: 37
-  percent: 100
+  total_phases: 6
+  completed_phases: 5
+  total_plans: 6
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-08-25 after v1.10 completion)
+See: `.planning/PROJECT.md` (updated 2026-08-25 for v1.11)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Reactive maintenance; plan the next milestone only on concrete adopter pull, Stripe drift, or a production defect.
+**Current focus:** Reader-first quality closure on the 2.2.x line, with an exact public API freeze and a verified 2.2.1 maintenance handoff.
 
 ## Current Position
 
-Phase: Milestone v1.10 complete
-Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-25 — Milestone v1.10 completed and archived
+Phase: 73 — Release & Maintenance Pause
+Plan: Final remote merge, 2.2.1 publish, and maintenance handoff
+Status: Executing release closure
+Last activity: 2026-08-25 — Phases 68-72 verified; local release candidate gates pass
 
 ## Milestone Metrics
 
-- Phases: 7 (61-67)
-- Plans: 37
-- Tasks: 71
-- Requirements: 19/19 complete
-- Verification: 7/7 phases passed; 19/19 integration joins; 6/6 adopter flows
-- Git range: `fce2907` → `003a959`
-- Timeline: 2026-07-27 → 2026-08-25
-- Diff: 291 files, +47,548/-603 lines
-- Current Elixir source: 71,101 lines across `lib/` and `test/`
-- Final quality gate: 2,440 tests, zero ExDoc warnings, API lock passing
+- Phases: 6 (68-73)
+- Plans: 5/6 complete
+- Requirements: 23/27 complete; 4 release-closure requirements pending
+- Package baseline: 2.2.0
+- Target package: 2.2.1
+- Public API contract: exact 3,463-entry snapshot frozen
 
 ## Accumulated Context
 
 ### Decisions
 
-- GSD milestone v1.10 and package releases are distinct: the milestone was planned as Hex 1.8.0, but the public fixture rename required package 2.0.0; release metadata later advanced to 2.1.0.
-- Entitlements remain a pull/pagination surface; no per-request network-calling `entitled?` gate helper ships.
-- Product Feature attachments are typed separately; legacy/current Product marketing fields remain raw maps for compatibility.
-- Metering scope adds reads, not more write APIs.
-- Explicit Finch pools, per-request override precedence, nil `stripe_account` omission, API-version defaults, and keyword-list `Client.new!/1` remain frozen compatibility contracts.
-- Broad Stripe resource-family expansion stays out of scope absent adopter pull.
+- This is a bounded quality milestone, not a resource-expansion milestone; the public API snapshot must remain exactly unchanged.
+- Code comments retain invariants and non-obvious tradeoffs, but decorative and planning-history-only noise is removed.
+- Internal decomposition remains private: `LatticeStripe.Client` stays the public façade.
+- CI and coverage are ratcheted only where their signal is truthful; no Dialyzer or vanity coverage target is introduced.
+- HexDocs and public API documentation are the adopter-facing interface; no standalone UI or marketing surface is in scope.
+- DateTime conversion, deep `to_map`, a second account-header option, idempotency hooks, fake transports, registries, webhook-error unification, macro/DSL/code generation, and new Stripe resources remain deferred.
 
 ### Deferred / Accepted Debt
 
-- Live Stripe cannot be mechanically proven to return a multi-page active-entitlement response under stripe-mock; SDK cursor behavior and tenant-filter preservation are covered at the Mox layer.
-- Archived Phase 61 and 63 Nyquist artifacts remain `status: draft` under the current validation contract despite passing canonical verification reports.
-- Two known low-frequency retry-telemetry and Batch error-isolation flakes remain outside v1.10 scope; the final full CI run passed.
-- SEED-006 preserves lower-priority Accrue DX candidates for a future adopter-driven milestone.
+- Live Stripe behavior that stripe-mock cannot truthfully provide remains documented and covered at the appropriate Mox or sandbox boundary.
+- SEED-006 remains the candidate inventory; only its compatibility-preserving guidance is admitted to v1.11.
 
 ### Blockers
 
@@ -69,9 +61,9 @@ None.
 ## Session Continuity
 
 **Last session:** 2026-08-25
-**Stopped at:** Milestone v1.10 archive complete
+**Stopped at:** Phase 73 release closure in progress
 **Resume file:** None
 
 ## Operator Next Steps
 
-Run `$gsd-new-milestone` when new work is justified. That workflow creates a fresh `REQUIREMENTS.md` and roadmap scope.
+Merge the milestone PR after remote CI, verify the automated 2.2.1 release on GitHub/Hex/HexDocs, then record the clean maintenance handoff.

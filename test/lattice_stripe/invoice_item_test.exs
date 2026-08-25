@@ -9,9 +9,7 @@ defmodule LatticeStripe.InvoiceItemTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # Fixture helpers
-  # ---------------------------------------------------------------------------
 
   defp invoice_item_json(overrides \\ %{}) do
     Map.merge(
@@ -40,9 +38,7 @@ defmodule LatticeStripe.InvoiceItemTest do
     )
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "returns nil when given nil" do
@@ -125,9 +121,7 @@ defmodule LatticeStripe.InvoiceItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/invoiceitems and returns {:ok, %InvoiceItem{}}" do
@@ -158,9 +152,7 @@ defmodule LatticeStripe.InvoiceItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/invoiceitems/:id and returns {:ok, %InvoiceItem{}}" do
@@ -187,9 +179,7 @@ defmodule LatticeStripe.InvoiceItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/invoiceitems/:id and returns {:ok, %InvoiceItem{}}" do
@@ -207,9 +197,7 @@ defmodule LatticeStripe.InvoiceItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # delete/3
-  # ---------------------------------------------------------------------------
 
   describe "delete/3" do
     test "sends DELETE /v1/invoiceitems/:id and returns {:ok, %InvoiceItem{}}" do
@@ -231,9 +219,7 @@ defmodule LatticeStripe.InvoiceItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/invoiceitems and returns {:ok, %Response{data: %List{}}} with typed items" do
@@ -260,9 +246,7 @@ defmodule LatticeStripe.InvoiceItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create!/3 (bang)
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns %InvoiceItem{} on success" do
@@ -288,9 +272,7 @@ defmodule LatticeStripe.InvoiceItemTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "inspect output contains id and object" do

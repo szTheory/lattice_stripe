@@ -144,7 +144,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
   # Exactly the seven fields Stripe's spec marks required — the object has no
   # others. String sigil (no `a`) matches Jason's default string-key output, and
   # square brackets rather than parens because `Drift`'s @known_fields regex only
-  # matches the bracket form (D-20).
+  # matches the bracket form.
   @known_fields ~w[
     id object aggregated_value start_time end_time meter livemode
   ]
@@ -162,7 +162,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
 
   # There is deliberately NO `:customer` field. You filter *by* customer, but
   # Stripe's response never says which customer a summary belongs to — the object
-  # has exactly the seven fields below and no more (F-02). This is an omission in
+  # has exactly the seven fields below and no more. This is an omission in
   # Stripe's wire format, not an oversight here: do not "fix" it by inventing a
   # field, because a struct that carries a customer the API never sent is a lie a
   # reconciler will trust. Callers that need the association must keep it out of
@@ -178,9 +178,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     extra: %{}
   ]
 
-  # ---------------------------------------------------------------------------
   # LIST
-  # ---------------------------------------------------------------------------
 
   @doc """
   List one page of usage summaries for a meter.
@@ -234,7 +232,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
       "LatticeStripe.Billing.MeterEventSummary.list/4 requires an end_time param"
     )
 
-    # GUARD-04, last of the five and deliberately after the require_param! block:
+    # Validate window alignment last, deliberately after the require_param! block:
     # a missing timestamp must produce the missing-param message rather than being
     # silently skipped by the alignment guard's non-integer hatch.
     Billing.Guards.check_summary_window!(params, "list/4")
@@ -250,9 +248,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     client |> list(meter_id, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # STREAM
-  # ---------------------------------------------------------------------------
 
   @doc """
   Returns a lazy stream of **every** usage summary in the window (auto-pagination).
@@ -311,7 +307,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
       "LatticeStripe.Billing.MeterEventSummary.stream!/4 requires an end_time param"
     )
 
-    # GUARD-04, still ahead of the stream's construction for the reason above: a
+    # Validate alignment before constructing the stream for the reason above: a
     # raise built lazily would surface at the first `Enum` step instead of here.
     Billing.Guards.check_summary_window!(params, "stream!/4")
 
@@ -320,14 +316,12 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     # The cursor state machine — base_params preservation, the starting_after cursor,
     # and the idempotency-key strip on page fetches — belongs to LatticeStripe.List and
     # is not re-grown here. This function's only job is to hand it correctly-shaped
-    # state. It works unmodified because the summary carries a required top-level `id`
-    # (F-01), which is what `List` matches on to derive its cursor.
+    # state. It works unmodified because the summary carries a required top-level `id`,
+    # which is what `List` matches on to derive its cursor.
     LatticeStripe.List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # DECODE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Decode a Stripe-shaped string-keyed map into a `%MeterEventSummary{}`.
@@ -361,9 +355,7 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private helpers
-  # ---------------------------------------------------------------------------
 
   # The canonical path lives here once. `list/4` and the streaming variant both
   # read it, so they physically cannot diverge.
@@ -375,9 +367,9 @@ defmodule LatticeStripe.Billing.MeterEventSummary do
   # was the problem.
   #
   # The second argument keeps the external_account.ex helper shape and carries the
-  # caller's own `fun/arity` spelling, because D-09 locks the message to name the
-  # arity so all four ArgumentErrors from one call site share a single grammar —
-  # and D-08 specifies two message sets, `list/4`'s and `stream!/4`'s. A `stream!/4`
+  # caller's own `fun/arity` spelling because the message names the arity. All four
+  # ArgumentErrors from one call site share a single grammar, with separate message sets
+  # for `list/4` and `stream!/4`. A `stream!/4`
   # call that reported `list/4` would send the reader to the wrong doc page.
   defp validate_id!(value, _fun) when is_binary(value) and value != "", do: :ok
 

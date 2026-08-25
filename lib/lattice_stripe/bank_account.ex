@@ -123,9 +123,7 @@ defmodule LatticeStripe.BankAccount do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("new"), do: :new
   defp atomize_status("validated"), do: :validated

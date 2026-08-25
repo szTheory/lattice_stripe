@@ -65,7 +65,7 @@ defmodule LatticeStripe.Tax.Transaction.LineItem do
       livemode: known["livemode"],
       metadata: known["metadata"],
       performance_location: known["performance_location"],
-      product: parse_product(known["product"]),
+      product: ObjectTypes.maybe_deserialize(known["product"]),
       quantity: known["quantity"],
       reference: known["reference"],
       reversal: known["reversal"],
@@ -76,9 +76,6 @@ defmodule LatticeStripe.Tax.Transaction.LineItem do
       extra: extra
     }
   end
-
-  defp parse_product(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_product(value), do: value
 
   defp atomize_tax_behavior("exclusive"), do: :exclusive
   defp atomize_tax_behavior("inclusive"), do: :inclusive

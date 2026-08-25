@@ -7,7 +7,8 @@ identification numbers.
 
 This guide covers SDK primitives for custom payment flows (calculate → record →
 reverse), account configuration (settings and registrations), and Tax ID
-management. Code examples reflect function signatures shipped in v1.6.
+management. HexDocs is versioned with the package; use the guide that matches
+the release installed by your application.
 
 ## Scope boundary
 
@@ -166,7 +167,7 @@ many jurisdictions (`list/3` returns `%LatticeStripe.List{}`, not `Enumerable`).
 
 ## Primary spine: calculate → record → reverse
 
-Aligned with `test/lattice_stripe/tax/calculation_transaction_test.exs`.
+This flow keeps calculation, recording, and reversal under one application-owned reference.
 
 ### Step 1 — Calculate
 
@@ -318,10 +319,12 @@ assert {:ok, %Transaction{reference: ^reference}} =
 **Public helpers:** `tax_calculation_json/1`, `tax_transaction_json/1`,
 `tax_id_json/1` → `Testing.tax_calculation/1`, `tax_transaction/1`, `tax_id/1`.
 
-`Tax.Settings` / `Tax.Registration` fixtures stay internal in `test/support/`.
+The public fixture catalog covers Calculations, Transactions, and Tax IDs. For
+Settings or Registration request tests, assert the request at the transport
+boundary and return the smallest Stripe-shaped response your application uses.
 
-Full Mox setup and fixture catalog: [testing.md](testing.md#tax).
-Canonical flow test: `test/lattice_stripe/tax/calculation_transaction_test.exs`.
+Full Mox setup, fixture layering, and provider-test boundaries:
+[Testing](testing.md#tax).
 
 ## Error handling
 

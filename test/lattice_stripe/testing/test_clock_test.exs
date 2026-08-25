@@ -105,9 +105,7 @@ defmodule LatticeStripe.Testing.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------
   # Testing.TestClock module-level
-  # ---------------------------------------------------------------
 
   describe "cleanup_marker/0" do
     test "returns the documented marker tuple" do
@@ -116,9 +114,7 @@ defmodule LatticeStripe.Testing.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------
   # use-macro compile-time validation
-  # ---------------------------------------------------------------
 
   describe "use-macro compile-time validation" do
     test "raises KeyError on missing :client option" do
@@ -163,9 +159,7 @@ defmodule LatticeStripe.Testing.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------
   # Helper function tests (with process dict client binding)
-  # ---------------------------------------------------------------
 
   # We bind the client in process dict for these tests, simulating
   # what the use-macro setup would do in a real CaseTemplate.

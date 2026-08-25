@@ -11,9 +11,7 @@ defmodule LatticeStripe.BillingPortal.Session.FlowDataTest do
   alias LatticeStripe.BillingPortal.Session.FlowData.SubscriptionUpdate
   alias LatticeStripe.BillingPortal.Session.FlowData.SubscriptionUpdateConfirm
 
-  # ---------------------------------------------------------------------------
-  # PORTAL-03 — FlowData sub-struct decode cases (Task 1: sub-modules)
-  # ---------------------------------------------------------------------------
+  # FlowData sub-struct decode cases (Task 1: sub-modules)
 
   describe "AfterCompletion.from_map/1" do
     test "returns nil when given nil" do
@@ -111,9 +109,7 @@ defmodule LatticeStripe.BillingPortal.Session.FlowDataTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # PORTAL-03 — FlowData.from_map/1 decode cases (Task 2: parent module)
-  # ---------------------------------------------------------------------------
+  # FlowData.from_map/1 decode cases (Task 2: parent module)
 
   describe "from_map/1" do
     test "returns nil when given nil" do

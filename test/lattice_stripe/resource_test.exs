@@ -3,9 +3,7 @@ defmodule LatticeStripe.ResourceTest do
 
   alias LatticeStripe.{Error, List, Resource, Response}
 
-  # ---------------------------------------------------------------------------
   # unwrap_singular/2
-  # ---------------------------------------------------------------------------
 
   describe "unwrap_singular/2" do
     test "returns {:ok, struct} when given {:ok, %Response{}} with map data" do
@@ -34,9 +32,7 @@ defmodule LatticeStripe.ResourceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # unwrap_list/2
-  # ---------------------------------------------------------------------------
 
   describe "unwrap_list/2" do
     test "returns {:ok, %Response{data: %List{data: typed_items}}} with typed items" do
@@ -79,9 +75,7 @@ defmodule LatticeStripe.ResourceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # unwrap_bang!/1
-  # ---------------------------------------------------------------------------
 
   describe "unwrap_bang!/1" do
     test "returns the inner value for {:ok, result}" do
@@ -114,9 +108,7 @@ defmodule LatticeStripe.ResourceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # require_param!/3
-  # ---------------------------------------------------------------------------
 
   describe "require_param!/3" do
     test "returns :ok when key is present in params" do

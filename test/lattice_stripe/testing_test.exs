@@ -119,7 +119,7 @@ defmodule LatticeStripe.TestingTest do
     end
 
     test "the authored invoice builder is callable at arity 0 (OBJ-03 empty-input edge)" do
-      # Invoice is the one OBJ-03 fixture with no prior source anywhere — it was authored,
+      # Invoice is the one fixture with no prior source anywhere — it was authored,
       # not promoted. Q2 = move-and-rename fixes the builder name as `invoice_json/1`.
       assert is_map(Fixtures.Invoice.invoice_json())
     end
@@ -213,7 +213,7 @@ defmodule LatticeStripe.TestingTest do
     end
 
     test "still produces 'object' => 'event' (NOT 'v2.core.event') — D-06 backwards-compat" do
-      # Backwards-compat regression: D-06 explicitly requires the snapshot helper to
+      # Backwards-compat regression: explicitly requires the snapshot helper to
       # remain unchanged. A future contributor adding a :shape opt overload that
       # retargets behavior to thin-event shape would break this assertion.
       {payload, _sig} =
@@ -229,9 +229,8 @@ defmodule LatticeStripe.TestingTest do
 
   describe "generate_thin_event_payload/3" do
     test "produces a payload that round-trips through Webhook.parse_event_notification/4" do
-      # The load-bearing end-to-end assertion for Phase 47: this proves plans 01
-      # (EventNotification types), 02 (parse_event_notification/4 decode + verify),
-      # and 05 (Testing helper signed-payload builder) are mutually consistent.
+      # This load-bearing end-to-end assertion proves the EventNotification types,
+      # signature verification/decoding, and signed-payload builder are mutually consistent.
       secret = "whsec_test_roundtrip"
 
       {payload, sig_header} =
@@ -263,7 +262,7 @@ defmodule LatticeStripe.TestingTest do
     end
 
     test "accepts nil for related_object_data (snapshot-style v2 events)" do
-      # D-06: nil related_object_data must produce a notification with
+      # nil related_object_data must produce a notification with
       # related_object: nil. Adopters dispatch these to fetch_event/3.
       secret = "whsec_test_nil"
 
@@ -374,14 +373,14 @@ defmodule LatticeStripe.TestingTest do
 
       assert %Entitlements.ActiveEntitlementSummary{customer: "cus_ABC123customer"} = summary
 
-      # ENT-05 / Phase 63 F-02: the Stripe object has no id property, so the struct has
+      # The Stripe object has no id property, so the struct has
       # no :id field. The public wrapper must not reintroduce one.
       refute Map.has_key?(summary, :id)
     end
 
     test "return typed meter structs from the promoted public fixtures" do
       # Match on :event_name, NOT :object — %Billing.MeterEvent{} has no :object field
-      # (EVENT-05 minimal struct), so result.object would raise KeyError.
+      # (minimal struct), so result.object would raise KeyError.
       assert %Billing.MeterEvent{event_name: "api_call"} =
                Testing.meter_event(Fixtures.MeterEvent.meter_event_json())
 
@@ -390,7 +389,7 @@ defmodule LatticeStripe.TestingTest do
     end
 
     test "return a typed Feature struct from the promoted public fixture" do
-      # OBJ-02: `entitlements.feature` is deliberately absent from @object_map (it is
+      # `entitlements.feature` is deliberately absent from @object_map (it is
       # not a webhook data.object payload), so this wrapper is the only typed decode
       # path the public surface offers for it.
       assert %Entitlements.Feature{id: "feat_123", lookup_key: "premium_support"} =
@@ -407,7 +406,7 @@ defmodule LatticeStripe.TestingTest do
 
       assert report.reason.error_count == 902
 
-      # F-13 / D-14: `data` never names the meter. from_map/1 structurally cannot fill
+      # `data` never names the meter. from_map/1 structurally cannot fill
       # :meter — only from_event/1 can. The wrapper must not paper over that.
       assert report.meter == nil
     end
@@ -431,7 +430,7 @@ defmodule LatticeStripe.TestingTest do
     test "keep wrapper shapes explicit instead of option-driven" do
       refute function_exported?(Testing, :generate_webhook_event, 4)
       refute function_exported?(Testing, :generate_webhook_payload, 4)
-      # D-06: snapshot and thin-event paths stay separate — no :shape opt overload
+      # snapshot and thin-event paths stay separate — no :shape opt overload
       # that would push the thin helper to a higher arity.
       refute function_exported?(Testing, :generate_thin_event_payload, 4)
     end

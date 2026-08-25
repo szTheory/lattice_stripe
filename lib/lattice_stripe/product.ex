@@ -128,9 +128,7 @@ defmodule LatticeStripe.Product do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD operations
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Product.
@@ -349,9 +347,7 @@ defmodule LatticeStripe.Product do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Bang variants
-  # ---------------------------------------------------------------------------
 
   @doc """
   Like `create/3` but raises `LatticeStripe.Error` on failure.
@@ -393,9 +389,7 @@ defmodule LatticeStripe.Product do
     search(client, query, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Product{}` struct.
@@ -437,7 +431,7 @@ defmodule LatticeStripe.Product do
     }
   end
 
-  # D-03 whitelist atomization — unknown values pass through as raw strings.
+  # Whitelist atomization keeps unknown values as raw strings for forward compatibility.
   defp atomize_type("good"), do: :good
   defp atomize_type("service"), do: :service
   defp atomize_type(nil), do: nil

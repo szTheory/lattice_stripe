@@ -40,9 +40,7 @@ defmodule LatticeStripe.LoginLinkIntegrationTest do
     {:ok, client: test_integration_client()}
   end
 
-  # ---------------------------------------------------------------------------
   # create/4 — Express account path
-  # ---------------------------------------------------------------------------
 
   test "create/4 hits POST /v1/accounts/:id/login_links and returns url", %{client: client} do
     # Create an Express account first. stripe-mock may not model the full Express
@@ -72,9 +70,7 @@ defmodule LatticeStripe.LoginLinkIntegrationTest do
              match?({:error, %LatticeStripe.Error{}}, result)
   end
 
-  # ---------------------------------------------------------------------------
   # create!/4 — bang variant
-  # ---------------------------------------------------------------------------
 
   test "create!/4 happy path returns %LoginLink{} or raises on error", %{client: client} do
     {:ok, %Account{id: account_id}} =
@@ -89,9 +85,7 @@ defmodule LatticeStripe.LoginLinkIntegrationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # is_binary(account_id) guard — locks in signature deviation (Plan 17-04)
-  # ---------------------------------------------------------------------------
+  # The binary guard keeps invalid account identifiers out of the transport.
 
   test "create/4 with non-binary account_id raises FunctionClauseError", %{client: client} do
     assert_raise FunctionClauseError, fn ->

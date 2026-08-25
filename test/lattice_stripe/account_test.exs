@@ -20,9 +20,7 @@ defmodule LatticeStripe.AccountTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "returns nil when given nil" do
@@ -62,7 +60,7 @@ defmodule LatticeStripe.AccountTest do
       account = Account.from_map(Fixtures.basic())
 
       assert %Requirements{currently_due: []} = account.future_requirements
-      # Both fields are the same struct module — D-01 reuse
+      # Both fields are the same struct module — reuse
       assert account.requirements.__struct__ == Requirements
       assert account.future_requirements.__struct__ == Requirements
     end
@@ -172,9 +170,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/accounts and returns {:ok, %Account{}}" do
@@ -237,9 +233,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/accounts/:id and returns {:ok, %Account{}}" do
@@ -287,9 +281,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/accounts/:id and returns {:ok, %Account{}}" do
@@ -358,9 +350,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # delete/3
-  # ---------------------------------------------------------------------------
 
   describe "delete/3" do
     test "sends DELETE /v1/accounts/:id and returns {:ok, %Account{extra: %{deleted: true}}}" do
@@ -410,9 +400,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # reject/4
-  # ---------------------------------------------------------------------------
 
   describe "reject/4" do
     test "sends POST /v1/accounts/:id/reject with reason=fraud" do
@@ -500,9 +488,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/accounts and returns {:ok, %Response{data: %List{data: [%Account{}]}}}" do
@@ -549,9 +535,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "stream!/3" do
     test "yields %Account{} structs from auto-paginated stream" do
@@ -578,9 +562,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # D-04b: request_capability/4 is rejected as fake ergonomics
-  # ---------------------------------------------------------------------------
+  # request_capability/4 is rejected as fake ergonomics
 
   describe "D-04b: request_capability/4 is rejected as fake ergonomics" do
     test "LatticeStripe.Account does NOT export request_capability/4 per Phase 17 D-04b" do
@@ -589,9 +571,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect PII smoke test
-  # ---------------------------------------------------------------------------
 
   describe "Inspect PII smoke test" do
     test "inspect(%Account{}) does NOT leak PII from any nested struct" do

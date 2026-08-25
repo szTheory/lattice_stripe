@@ -108,9 +108,7 @@ defmodule LatticeStripe.Price do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
-  # Public API: CRUD operations (no delete — D-05)
-  # ---------------------------------------------------------------------------
+  # Public API: CRUD operations. Stripe does not expose delete for prices.
 
   @doc """
   Creates a new Price.
@@ -214,9 +212,7 @@ defmodule LatticeStripe.Price do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
-  # Public API: Bang variants (no delete! — D-05)
-  # ---------------------------------------------------------------------------
+  # Public API: bang variants. There is no delete variant.
 
   @doc "Like `create/3` but raises on failure."
   @spec create!(Client.t(), map(), keyword()) :: t()
@@ -248,12 +244,10 @@ defmodule LatticeStripe.Price do
     search(client, query, opts) |> Resource.unwrap_bang!()
   end
 
-  # NOTE: NO delete/2,3 and NO delete!/2,3 — D-05 forbidden op.
+  # No delete functions: Stripe does not expose a delete endpoint for prices.
   # Prices cannot be deleted via the Stripe API; archive with `update(active: false)`.
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Price{}` struct.
@@ -299,7 +293,7 @@ defmodule LatticeStripe.Price do
   defp decode_tiers(list) when is_list(list),
     do: Enum.map(list, &Tier.from_map/1)
 
-  # D-03 atomization helpers — whitelist only; unknown values pass through as strings.
+  # Whitelist atomization keeps unknown values as strings for forward compatibility.
   defp atomize_type("one_time"), do: :one_time
   defp atomize_type("recurring"), do: :recurring
   defp atomize_type(nil), do: nil

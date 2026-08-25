@@ -273,9 +273,7 @@ defmodule LatticeStripe.Invoice do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD operations
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Invoice.
@@ -432,9 +430,7 @@ defmodule LatticeStripe.Invoice do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Action verbs
-  # ---------------------------------------------------------------------------
 
   @doc """
   Finalizes a draft invoice, transitioning it to `open` status.
@@ -587,9 +583,7 @@ defmodule LatticeStripe.Invoice do
   def mark_uncollectible!(%Client{} = client, id, params \\ %{}, opts \\ []) when is_binary(id),
     do: client |> mark_uncollectible(id, params, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # Public API: Search
-  # ---------------------------------------------------------------------------
 
   @doc """
   Searches for invoices matching a query.
@@ -657,9 +651,7 @@ defmodule LatticeStripe.Invoice do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Preview endpoints
-  # ---------------------------------------------------------------------------
 
   @doc """
   Retrieves an upcoming invoice preview.
@@ -797,9 +789,7 @@ defmodule LatticeStripe.Invoice do
     |> Resource.unwrap_list(&LineItem.from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Line item access
-  # ---------------------------------------------------------------------------
 
   @doc """
   Lists line items for a specific invoice.
@@ -875,9 +865,7 @@ defmodule LatticeStripe.Invoice do
     List.stream!(client, req) |> Stream.map(&LineItem.from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Bang variants
-  # ---------------------------------------------------------------------------
 
   @doc "Like `create/3` but raises `LatticeStripe.Error` on failure."
   @spec create!(Client.t(), map(), keyword()) :: t()
@@ -909,9 +897,7 @@ defmodule LatticeStripe.Invoice do
     list(client, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Invoice{}` struct.
@@ -1048,9 +1034,7 @@ defmodule LatticeStripe.Invoice do
     }
   end
 
-  # ---------------------------------------------------------------------------
-  # Private: atomization helpers (whitelist per D-14g)
-  # ---------------------------------------------------------------------------
+  # Private whitelist-based atomization helpers.
 
   # Invoice status values
   defp atomize_status("draft"), do: :draft
@@ -1081,9 +1065,7 @@ defmodule LatticeStripe.Invoice do
   defp atomize_customer_tax_exempt("reverse"), do: :reverse
   defp atomize_customer_tax_exempt(other), do: other
 
-  # ---------------------------------------------------------------------------
   # Private: nested struct parsers
-  # ---------------------------------------------------------------------------
 
   # Parse lines: Stripe returns lines as an embedded List object with
   # "object" => "list". Parse it into a %List{} with typed %LineItem{} data.

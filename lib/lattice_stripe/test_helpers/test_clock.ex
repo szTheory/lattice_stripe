@@ -154,7 +154,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     }
   end
 
-  # D-03 whitelist atomization — unknown values pass through as raw strings.
+  # Whitelist atomization keeps unknown values as raw strings for forward compatibility.
   defp atomize_status("ready"), do: :ready
   defp atomize_status("advancing"), do: :advancing
   defp atomize_status("internal_failure"), do: :internal_failure
@@ -162,9 +162,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
   defp atomize_status(other) when is_binary(other), do: other
   defp atomize_status(other), do: other
 
-  # ---------------------------------------------------------------------------
   # CRUD
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new Stripe Test Clock.
@@ -235,9 +233,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     |> Resource.unwrap_singular(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   def create!(%Client{} = c, p \\ %{}, o \\ []),
     do: create(c, p, o) |> Resource.unwrap_bang!()
@@ -253,27 +249,27 @@ defmodule LatticeStripe.TestHelpers.TestClock do
 
   # NOTE: NO update/3,4 and NO search/2,3 — Stripe Test Clock API absence.
 
-  # ---------------------------------------------------------------------------
-  # cleanup_tagged/2 — shared deletion core (Plan 13-05)
-  # ---------------------------------------------------------------------------
-
   @default_older_than_ms 3_600_000
 
   @doc """
   Lists and optionally deletes test clocks older than a threshold.
+
+  Despite its historical name, `cleanup_tagged/2` does not inspect tags or
+  metadata. Stripe test clocks do not support metadata, so candidates are
+  selected by age and, when provided, a clock-name prefix.
 
   This is the shared deletion core used by both
   the `Owner` GenServer's cleanup callback (per-test) and
   `mix lattice_stripe.test_clock.cleanup` (backstop). See those callers
   for the user-facing entry points.
 
-  ## Metadata limitation (A-13g)
+  ## Metadata limitation
 
   Stripe's Test Clock API does **not** support `metadata`, so this
-  function cannot filter by a LatticeStripe-specific marker. It filters
-  by age only. This means the Mix task cannot distinguish
-  LatticeStripe-managed clocks from user-created ones. The primary
-  cleanup path (Owner + `on_exit`) is unaffected.
+  function cannot filter by a LatticeStripe-specific marker. Without
+  `:name_prefix`, the Mix task cannot distinguish LatticeStripe-managed clocks
+  from user-created ones. The primary cleanup path (`Owner` + `on_exit`) is
+  unaffected.
 
   ## Options
 
@@ -335,10 +331,6 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     end)
   end
 
-  # ---------------------------------------------------------------------------
-  # advance/4 (Plan 13-04)
-  # ---------------------------------------------------------------------------
-
   @doc """
   Advances a Test Clock to a new `frozen_time`.
 
@@ -386,10 +378,6 @@ defmodule LatticeStripe.TestHelpers.TestClock do
       when is_binary(id) and is_integer(frozen_time) do
     advance(client, id, frozen_time, opts) |> Resource.unwrap_bang!()
   end
-
-  # ---------------------------------------------------------------------------
-  # advance_and_wait/4 (Plan 13-04)
-  # ---------------------------------------------------------------------------
 
   @default_timeout 60_000
   @default_initial_interval 500
@@ -507,12 +495,10 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Internal poll loop
-  # ---------------------------------------------------------------------------
 
   # Always poll FIRST — even on attempt 0 there is no sleep. This catches
-  # already-ready clocks and stripe-mock's instant fixture (D-13b).
+  # already-ready clocks and stripe-mock's instant fixture.
   #
   # `backoff` is a map with keys: :delay, :max_interval, :multiplier,
   # :deadline, :started_at — bundled to keep arity within Credo limits.

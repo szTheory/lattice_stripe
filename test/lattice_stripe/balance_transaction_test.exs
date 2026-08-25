@@ -10,9 +10,7 @@ defmodule LatticeStripe.BalanceTransactionTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/balance_transactions/:id and returns {:ok, %BalanceTransaction{}}" do
@@ -63,9 +61,7 @@ defmodule LatticeStripe.BalanceTransactionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/balance_transactions with payout filter" do
@@ -137,9 +133,7 @@ defmodule LatticeStripe.BalanceTransactionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "stream!/3" do
     test "yields BalanceTransaction structs lazily, honoring filters" do
@@ -159,9 +153,7 @@ defmodule LatticeStripe.BalanceTransactionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1 fee_details decoding" do
     test "decodes fee_details into [%FeeDetail{}]" do
@@ -281,9 +273,7 @@ defmodule LatticeStripe.BalanceTransactionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Module surface
-  # ---------------------------------------------------------------------------
 
   describe "module surface" do
     test "no create/update/delete exported (Stripe-managed, server-side only)" do

@@ -78,7 +78,7 @@ defmodule LatticeStripe.Entitlements.Feature do
 
   alias LatticeStripe.{Client, Request, Resource}
 
-  # D-06: the canonical path lives here once. `create/3`, `retrieve/3`, `update/4`, `list/3`
+  # The canonical path lives here once. `create/3`, `retrieve/3`, `update/4`, and `list/3`
   # and `stream!/3` all read it, so they physically cannot diverge. Item paths compose as
   # `@list_path <> "/#{id}"` rather than re-declaring the string.
   @list_path "/v1/entitlements/features"
@@ -107,9 +107,7 @@ defmodule LatticeStripe.Entitlements.Feature do
     extra: %{}
   ]
 
-  # ---------------------------------------------------------------------------
   # CREATE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Create an entitlement feature.
@@ -157,9 +155,7 @@ defmodule LatticeStripe.Entitlements.Feature do
   def create!(client, params, opts \\ []),
     do: client |> create(params, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # RETRIEVE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Retrieve an entitlement feature by ID.
@@ -181,9 +177,7 @@ defmodule LatticeStripe.Entitlements.Feature do
   def retrieve!(client, id, opts \\ []),
     do: client |> retrieve(id, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # UPDATE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Update an entitlement feature.
@@ -213,9 +207,7 @@ defmodule LatticeStripe.Entitlements.Feature do
   def update!(client, id, params, opts \\ []),
     do: client |> update(id, params, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # LIST + STREAM
-  # ---------------------------------------------------------------------------
 
   @doc """
   List entitlement features.
@@ -275,9 +267,7 @@ defmodule LatticeStripe.Entitlements.Feature do
     LatticeStripe.List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # DECODE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Decode a Stripe-shaped string-keyed map into a `%Feature{}`.

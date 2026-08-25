@@ -3,7 +3,7 @@ defmodule LatticeStripe.SetupAttemptTest do
 
   import Mox
   import LatticeStripe.TestHelpers
-  import LatticeStripe.Test.Fixtures.SetupAttempt
+  import LatticeStripe.Testing.Fixtures.SetupAttempt
 
   alias LatticeStripe.{Error, List, PaymentMethod, Response, SetupAttempt}
 

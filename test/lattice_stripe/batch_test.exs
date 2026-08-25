@@ -8,9 +8,7 @@ defmodule LatticeStripe.BatchTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # run/3 — happy path
-  # ---------------------------------------------------------------------------
 
   describe "run/3 — happy path" do
     test "returns {:ok, results} with one {:ok, _} per task, order preserved" do
@@ -64,9 +62,7 @@ defmodule LatticeStripe.BatchTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # run/3 — error isolation
-  # ---------------------------------------------------------------------------
 
   describe "run/3 — error isolation" do
     test "one failing task returns {:error, %Error{}} in its slot, others succeed" do
@@ -108,9 +104,7 @@ defmodule LatticeStripe.BatchTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # run/3 — validation
-  # ---------------------------------------------------------------------------
 
   describe "run/3 — validation" do
     test "empty task list returns {:error, %Error{type: :invalid_request_error}}" do
@@ -128,9 +122,7 @@ defmodule LatticeStripe.BatchTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # run/3 — options
-  # ---------------------------------------------------------------------------
 
   describe "run/3 — options" do
     test "accepts max_concurrency option" do

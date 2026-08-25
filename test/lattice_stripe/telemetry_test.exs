@@ -8,9 +8,7 @@ defmodule LatticeStripe.TelemetryTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # Test helpers
-  # ---------------------------------------------------------------------------
 
   defp test_client(opts \\ []) do
     Client.new!(
@@ -28,16 +26,13 @@ defmodule LatticeStripe.TelemetryTest do
   end
 
   defp attach_handler(events) do
-    test_pid = self()
     handler_id = "telemetry-test-#{:erlang.unique_integer([:positive])}"
 
     :telemetry.attach_many(
       handler_id,
       events,
-      fn event, measurements, metadata, _config ->
-        send(test_pid, {:telemetry, event, measurements, metadata})
-      end,
-      nil
+      &LatticeStripe.TestTelemetryHandler.handle_event/4,
+      {self(), :telemetry}
     )
 
     on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -83,9 +78,7 @@ defmodule LatticeStripe.TelemetryTest do
     %Request{method: :post, path: path, params: params}
   end
 
-  # ---------------------------------------------------------------------------
   # 1. Request start metadata
-  # ---------------------------------------------------------------------------
 
   describe "request start metadata" do
     test "start event has :method key with atom value" do
@@ -151,9 +144,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 2. Request stop metadata — success
-  # ---------------------------------------------------------------------------
 
   describe "request stop metadata - success" do
     test "stop event has all start metadata keys" do
@@ -212,9 +203,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 3. Request stop metadata — error
-  # ---------------------------------------------------------------------------
 
   describe "request stop metadata - error" do
     test "stop event has :status => :error for API error response" do
@@ -274,9 +263,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 4. Request exception metadata
-  # ---------------------------------------------------------------------------
 
   describe "request exception metadata" do
     test "exception event fires on uncaught raise with :kind, :reason, :stacktrace" do
@@ -321,9 +308,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 5. Retry event metadata
-  # ---------------------------------------------------------------------------
 
   describe "retry event metadata" do
     test "retry event measurements have :attempt and :delay_ms" do
@@ -380,9 +365,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 6. Telemetry disabled
-  # ---------------------------------------------------------------------------
 
   describe "telemetry disabled" do
     test "telemetry_enabled: false suppresses start/stop/retry events" do
@@ -419,22 +402,17 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 7. Resource and operation parsing
-  # ---------------------------------------------------------------------------
 
   describe "resource and operation parsing" do
     defp get_start_metadata(path, method) do
-      test_pid = self()
       handler_id = "parse-test-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach_many(
         handler_id,
         [[:lattice_stripe, :request, :start]],
-        fn _event, _measurements, metadata, _config ->
-          send(test_pid, {:meta, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), :meta}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -446,7 +424,7 @@ defmodule LatticeStripe.TelemetryTest do
       req = %Request{method: method, path: path}
       Client.request(client, req)
 
-      assert_receive {:meta, metadata}
+      assert_receive {:meta, _event, _measurements, metadata}
       metadata
     end
 
@@ -487,9 +465,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 8. Webhook verify telemetry
-  # ---------------------------------------------------------------------------
 
   describe "webhook verify telemetry" do
     @secret "whsec_test_secret_key_for_telemetry"
@@ -559,7 +535,7 @@ defmodule LatticeStripe.TelemetryTest do
 
     test "verify span always fires regardless of telemetry_enabled on client" do
       # Webhook telemetry is NOT gated by client.telemetry_enabled --
-      # it's infrastructure-level (D-02), always on.
+      # it's infrastructure-level, always on.
       attach_handler([[:lattice_stripe, :webhook, :verify, :stop]])
 
       payload = valid_webhook_payload()
@@ -572,9 +548,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 9a. Metadata field exhaustiveness
-  # ---------------------------------------------------------------------------
 
   describe "start event metadata exhaustiveness" do
     test "start event has :telemetry_span_context injected by :telemetry.span/3" do
@@ -770,9 +744,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 9. Invoice auto_advance_scheduled event
-  # ---------------------------------------------------------------------------
 
   describe "invoice auto_advance_scheduled event" do
     alias LatticeStripe.{Error, Invoice}
@@ -814,16 +786,13 @@ defmodule LatticeStripe.TelemetryTest do
     end
 
     defp attach_auto_advance_handler do
-      test_pid = self()
       handler_id = "auto-advance-test-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach(
         handler_id,
         [:lattice_stripe, :invoice, :auto_advance_scheduled],
-        fn event, measurements, metadata, _config ->
-          send(test_pid, {:telemetry, event, measurements, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), :telemetry}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -933,9 +902,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 10. Default logger
-  # ---------------------------------------------------------------------------
 
   describe "default logger" do
     setup do
@@ -1038,9 +1005,7 @@ defmodule LatticeStripe.TelemetryTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # 11. Rate-limit telemetry
-  # ---------------------------------------------------------------------------
 
   describe "rate-limit telemetry" do
     setup do

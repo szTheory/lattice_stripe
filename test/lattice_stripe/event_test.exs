@@ -10,9 +10,7 @@ defmodule LatticeStripe.EventTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "maps all known fields correctly" do
@@ -95,9 +93,7 @@ defmodule LatticeStripe.EventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "shows id, type, object, created, livemode" do
@@ -137,9 +133,7 @@ defmodule LatticeStripe.EventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/events/:id and returns {:ok, %Event{}}" do
@@ -166,9 +160,7 @@ defmodule LatticeStripe.EventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve!/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve!/3" do
     test "raises %Error{} on error response" do
@@ -184,9 +176,7 @@ defmodule LatticeStripe.EventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/events and returns {:ok, %Response{data: %List{}}} with typed items" do
@@ -213,9 +203,7 @@ defmodule LatticeStripe.EventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list!/3 (bang)
-  # ---------------------------------------------------------------------------
 
   describe "list!/3" do
     test "returns %Response{} on success" do

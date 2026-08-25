@@ -4,9 +4,7 @@ defmodule LatticeStripe.DriftTest do
   alias LatticeStripe.Drift
   alias LatticeStripe.Test.Fixtures.OpenApiSpec
 
-  # ---------------------------------------------------------------
   # resource_schemas/1
-  # ---------------------------------------------------------------
 
   describe "resource_schemas/1" do
     test "extracts first-class schemas keyed by object type enum value" do
@@ -76,9 +74,7 @@ defmodule LatticeStripe.DriftTest do
     end
   end
 
-  # ---------------------------------------------------------------
   # known_fields_for/1
-  # ---------------------------------------------------------------
 
   describe "known_fields_for/1" do
     test "extracts @known_fields from a real module" do
@@ -102,7 +98,7 @@ defmodule LatticeStripe.DriftTest do
       assert MapSet.member?(fields, "customer")
     end
 
-    # LOAD-BEARING (D-20): Drift.parse_known_fields/1 must accept BOTH word-sigil
+    # LOAD-BEARING: Drift.parse_known_fields/1 must accept both word-sigil
     # delimiter pairs. 18 files in lib/ use the parenthesised form; before the regex
     # was widened they all parsed to an empty MapSet and produced a spurious drift
     # entry claiming every field on the object was a new addition. Narrowing the
@@ -132,9 +128,7 @@ defmodule LatticeStripe.DriftTest do
     end
   end
 
-  # ---------------------------------------------------------------
   # compare/2
-  # ---------------------------------------------------------------
 
   describe "compare/2" do
     test "reports additions (in spec, not in known)" do
@@ -188,9 +182,7 @@ defmodule LatticeStripe.DriftTest do
     end
   end
 
-  # ---------------------------------------------------------------
   # format_report/1
-  # ---------------------------------------------------------------
 
   describe "format_report/1" do
     test "returns clean message when no drift" do

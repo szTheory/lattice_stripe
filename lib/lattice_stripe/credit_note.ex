@@ -326,10 +326,11 @@ defmodule LatticeStripe.CreditNote do
       amount_shipping: known["amount_shipping"],
       created: known["created"],
       currency: known["currency"],
-      customer: parse_expandable(known["customer"]),
-      customer_balance_transaction: parse_expandable(known["customer_balance_transaction"]),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
+      customer_balance_transaction:
+        ObjectTypes.maybe_deserialize(known["customer_balance_transaction"]),
       effective_at: known["effective_at"],
-      invoice: parse_expandable(known["invoice"]),
+      invoice: ObjectTypes.maybe_deserialize(known["invoice"]),
       lines: parse_lines(known["lines"]),
       livemode: known["livemode"],
       memo: known["memo"],
@@ -353,9 +354,6 @@ defmodule LatticeStripe.CreditNote do
       extra: extra
     }
   end
-
-  defp parse_expandable(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_expandable(value), do: value
 
   defp do_list_line_items(%Client{} = client, path, params, opts) do
     %Request{method: :get, path: path, params: params, opts: opts}

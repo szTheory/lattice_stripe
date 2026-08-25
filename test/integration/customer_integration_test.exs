@@ -5,7 +5,7 @@ defmodule LatticeStripe.CustomerIntegrationTest do
 
   @moduletag :integration
 
-  alias LatticeStripe.{Customer, Error}
+  alias LatticeStripe.Customer
 
   # Guard: check stripe-mock connectivity before running any tests in this module.
   # If stripe-mock is not running on localhost:12111, all tests are skipped via
@@ -69,13 +69,5 @@ defmodule LatticeStripe.CustomerIntegrationTest do
 
     assert %LatticeStripe.Response{} = resp
     assert %LatticeStripe.List{} = resp.data
-  end
-
-  # stripe-mock returns a stub for any ID — invalid ID errors can only be tested against real Stripe
-  @tag :skip
-  test "retrieve/3 with invalid id returns error", %{client: client} do
-    {:error, error} = Customer.retrieve(client, "nonexistent_id_999")
-
-    assert %Error{type: :invalid_request_error} = error
   end
 end

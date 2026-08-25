@@ -6,9 +6,7 @@ defmodule LatticeStripe.EventNotificationTest do
   alias LatticeStripe.EventNotification
   alias LatticeStripe.EventNotification.RelatedObject
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "maps all known fields correctly" do
@@ -74,9 +72,7 @@ defmodule LatticeStripe.EventNotificationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "shows id, type, object, created, livemode, related_object" do
@@ -139,9 +135,7 @@ defmodule LatticeStripe.EventNotificationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # RelatedObject.from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "RelatedObject.from_map/1" do
     test "returns nil for nil input" do

@@ -172,9 +172,7 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/test_helpers/test_clocks and returns {:ok, %TestClock{}}" do
@@ -204,9 +202,7 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/test_helpers/test_clocks/:id and decodes the response" do
@@ -233,9 +229,7 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/test_helpers/test_clocks and returns typed %Response+List+TestClock{}" do
@@ -262,9 +256,7 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # delete/3
-  # ---------------------------------------------------------------------------
 
   describe "delete/3" do
     test "sends DELETE /v1/test_helpers/test_clocks/:id and returns {:ok, %TestClock{deleted: true}}" do
@@ -286,9 +278,7 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "stream!/3" do
     test "lazily paginates and yields typed %TestClock{} items" do
@@ -313,9 +303,7 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns %TestClock{} on success" do
@@ -383,9 +371,7 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # Absent operations (D-05 pattern — absence is the interface)
-  # ---------------------------------------------------------------------------
+  # Absent operations (pattern — absence is the interface)
 
   describe "absent operations" do
     test "update/3 is NOT exported (Stripe Test Clock API has no update)" do
@@ -415,10 +401,6 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
       assert function_exported?(TestClock, :advance!, 4)
     end
   end
-
-  # ---------------------------------------------------------------------------
-  # advance/4 (Plan 13-04)
-  # ---------------------------------------------------------------------------
 
   describe "advance/4" do
     test "POSTs /v1/test_helpers/test_clocks/:id/advance with frozen_time param" do
@@ -487,10 +469,6 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
       end
     end
   end
-
-  # ---------------------------------------------------------------------------
-  # advance_and_wait/4 (Plan 13-04)
-  # ---------------------------------------------------------------------------
 
   # Helper: build the canned advance response (status: advancing).
   defp advancing_response(id \\ "clock_a") do
@@ -672,7 +650,6 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
 
       handler_id = "advance-and-wait-ok-#{System.unique_integer()}"
       ref = make_ref()
-      test_pid = self()
 
       :telemetry.attach_many(
         handler_id,
@@ -680,10 +657,8 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
           [:lattice_stripe, :test_clock, :advance_and_wait, :start],
           [:lattice_stripe, :test_clock, :advance_and_wait, :stop]
         ],
-        fn name, measurements, metadata, _ ->
-          send(test_pid, {ref, name, measurements, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), ref}
       )
 
       assert {:ok, _} =
@@ -716,15 +691,12 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
 
       handler_id = "advance-and-wait-err-#{System.unique_integer()}"
       ref = make_ref()
-      test_pid = self()
 
       :telemetry.attach(
         handler_id,
         [:lattice_stripe, :test_clock, :advance_and_wait, :stop],
-        fn name, measurements, metadata, _ ->
-          send(test_pid, {ref, name, measurements, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), ref}
       )
 
       assert {:error, %Error{type: :test_clock_timeout}} =
@@ -751,15 +723,12 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
 
       handler_id = "advance-and-wait-off-#{System.unique_integer()}"
       ref = make_ref()
-      test_pid = self()
 
       :telemetry.attach(
         handler_id,
         [:lattice_stripe, :test_clock, :advance_and_wait, :start],
-        fn name, measurements, metadata, _ ->
-          send(test_pid, {ref, name, measurements, metadata})
-        end,
-        nil
+        &LatticeStripe.TestTelemetryHandler.handle_event/4,
+        {self(), ref}
       )
 
       assert {:ok, _} =

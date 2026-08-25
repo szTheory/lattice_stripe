@@ -3,7 +3,7 @@ defmodule LatticeStripe.CreditNoteTest do
 
   import Mox
   import LatticeStripe.TestHelpers
-  import LatticeStripe.Test.Fixtures.CreditNote
+  import LatticeStripe.Testing.Fixtures.CreditNote
 
   alias LatticeStripe.{BalanceTransaction, CreditNote, Error, List, Response}
   alias LatticeStripe.CreditNote.LineItem

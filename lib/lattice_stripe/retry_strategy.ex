@@ -47,7 +47,7 @@ defmodule LatticeStripe.RetryStrategy.Default do
   @impl true
   def retry?(attempt, context) do
     # stripe_should_retry is pre-parsed from the Stripe-Should-Retry response header.
-    # It takes precedence over all other signals per D-09.
+    # Stripe-Should-Retry takes precedence over all other signals.
     case Map.get(context, :stripe_should_retry) do
       true -> {:retry, backoff_delay(attempt)}
       false -> :stop
@@ -59,11 +59,11 @@ defmodule LatticeStripe.RetryStrategy.Default do
   # Called only when stripe_should_retry header is absent (nil).
   defp retry_by_status(attempt, context) do
     cond do
-      # 409 idempotency conflict is never retriable (D-12)
+      # A 409 idempotency conflict is never retriable.
       context.status == 409 ->
         :stop
 
-      # Connection errors (nil status with connection_error type) are retriable (D-11)
+      # Connection errors (nil status with connection_error type) are retriable.
       is_nil(context.status) and connection_error?(context.error) ->
         {:retry, backoff_delay(attempt)}
 

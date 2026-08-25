@@ -2,11 +2,32 @@
 
 ## What This Is
 
-A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. GSD milestone v1.10 is complete, and the package release line has advanced to 2.1.0 while retaining broad Payments, Billing, Connect, Tax, webhook, Entitlements, and operator coverage. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
+A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. GSD milestone v1.11 is a reader-first quality closure cycle on the 2.2.x package line, preserving the complete Payments, Billing, Connect, Tax, webhook, Entitlements, and operator surface while making the repository easier to trust and maintain. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
 
 ## Core Value
 
 Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated across eleven completed GSD milestones and by downstream adopter pull from Accrue.
+
+## Current Milestone: v1.11 Reader-First Quality Closure
+
+**Goal:** Turn the already-complete SDK into a clean, trustworthy maintenance
+pause: reader-first internals, an exactly preserved public API, honest CI/security
+and coverage signals, current adopter documentation, and a fully verified 2.2.x
+release line.
+
+**Target outcomes:**
+
+- Remove decorative source noise, stale scaffolding, generated debris, and unclear repository entry points while preserving useful rationale.
+- Consolidate safe internal mechanics and test fixtures where duplication obscures intent.
+- Decompose the oversized client core and its characterization suite into cohesive private units without changing any public call shape or result.
+- Ratchet CI, security, concurrency, optional-feature, packaging, and coverage checks only where the signal is truthful and maintainable.
+- Make SemVer, tenant-header suppression, idempotency, pagination/streaming, testing, and release guidance explicit from the adopter's point of view.
+- Close with green remote `main`, a stable 3,463-entry public API snapshot, triaged issues and PRs, clean worktrees, and package 2.2.1 published and verified.
+
+**Scope boundary:** This is a quality milestone, not a feature milestone. No new
+Stripe resource families, public convenience hooks, DSL/code generation,
+provider-shaped abstractions, or speculative API changes are allowed. HexDocs and
+the public Elixir API are the user interface; there is no web UI scope.
 
 ## Current State
 
@@ -15,13 +36,13 @@ Elixir developers can integrate Stripe payments into their applications with con
 and 6/6 adopter flows. The close accepted bounded external-confidence, Nyquist,
 and known-flake debt; none is a product-behavior blocker.
 
-**Active milestone:** None — returned to reactive maintenance.
+**Active milestone:** v1.11 Reader-First Quality Closure.
 
-**Latest shipped milestone:** v1.10 Accrue Surface Closure — Entitlements, metering reads, webhook fixtures, Product Feature attachments, default Finch operation, and DX hardening.
+**Latest shipped milestone:** v1.10 Accrue Surface Closure — Entitlements, metering reads, webhook fixtures, Product Feature attachments, default Finch operation, and DX hardening. Package baseline: 2.2.0.
 
-**Done estimate:** 100% of v1.10 requirements implemented, verified, and archived.
+**Done estimate:** v1.10 is complete; v1.11 execution has started from the synchronized 2.2.0 release baseline.
 
-**Post-v1.x posture:** Reactive maintenance after the narrowly scoped, adopter-pulled v1.10 milestone; no broad resource-family expansion and no marketing website.
+**Post-v1.x posture:** One bounded quality-closure milestone, then reactive maintenance; no broad resource-family expansion and no marketing website.
 
 **Public surface:** [README.md](README.md) + [HexDocs](https://hexdocs.pm/lattice_stripe) + [guides/scope.md](guides/scope.md) — sufficient for an SDK; do not duplicate in a standalone site.
 
@@ -84,7 +105,7 @@ The library is **done for v1.x scope** — intended mainstream SaaS Stripe cover
 
 **Forward posture:** Maintenance mode — Stripe API drift, adopter-driven narrow additions, bugfixes. No planned new resource-family breadth absent fresh adopter pull.
 
-**Release truth:** The v1.10 plan targeted Hex 1.8.0, but a public fixture rename correctly forced package 2.0.0; release metadata is now at 2.1.0. Do not collapse GSD milestone numbers into package versions.
+**Release truth:** The v1.10 plan targeted Hex 1.8.0, but a public fixture rename correctly forced package 2.0.0; the completed v1.10 surface is published as package 2.2.0. v1.11 targets the compatibility-preserving 2.2.1 quality patch. Do not collapse GSD milestone numbers into package versions.
 
 See `.planning/milestones/v1.10-MILESTONE-AUDIT.md` for close-time audit evidence.
 
@@ -138,7 +159,7 @@ option.
 
 ## Next Milestone Goals
 
-No next milestone is selected. Maintain the package reactively and open a fresh milestone only for concrete adopter pull, Stripe API drift, or a production defect. SEED-006 preserves the lower-priority Accrue DX candidates without committing them to scope.
+Complete v1.11 at the point of diminishing returns: the code and docs are a joy to read, automation tells the truth, the public API is unchanged, package 2.2.1 is verified on every public surface, and the repository can return to reactive maintenance without a cleanup tail. SEED-006 remains a candidate inventory; only its documentation-only, compatibility-preserving guidance is in scope.
 
 ## Context
 
@@ -228,7 +249,11 @@ No next milestone is selected. Maintain the package reactively and open a fresh 
 
 ### Active
 
-(None — the next milestone defines a fresh requirements set.)
+- Reader-first source, test, prompt, and repository organization with useful invariants preserved
+- Cohesive private client internals and behavior-organized characterization coverage under an exact public API freeze
+- Truthful CI/security/coverage/package gates, including optional-feature paths and known concurrency flakes
+- Adopter-first SemVer, tenancy, idempotency, streaming, testing, and release documentation
+- Verified 2.2.1 release and a clean maintenance handoff
 
 ### Out of Scope
 
@@ -237,6 +262,8 @@ No next milestone is selected. Maintain the package reactively and open a fresh 
 - New Stripe resource families in v1.x — v1.7 is the planned stop signal; Identity, Treasury, Issuing, Terminal, Financial Connections, Climate, Sigma, and Reporting deferred unless adopter pull justifies a future milestone
 - Marketing / landing website — README + HexDocs are the public surface for this SDK; a separate site duplicates ExDoc and has low adoption ROI
 - Per-request `entitled?(customer, feature)` gate helper — an authorization gate that makes a network call fails **open** under partition; the SDK ships the reconciler plus a local fail-closed recipe instead (D-19, Phase 63)
+- Speculative DX surface from SEED-006: DateTime conversion, deep `to_map`, a second account-suppression option, function-valued idempotency keys, a fake/stub transport, named client registries, or webhook error unification — each expands compatibility burden without solving the reader-first closure goal
+- Macro/DSL/code-generation rewrites, Dialyzer adoption, and vanity coverage targets — disproportionate migration/maintenance cost for this mature handwritten SDK
 
 ## Key Decisions
 
@@ -282,6 +309,8 @@ No next milestone is selected. Maintain the package reactively and open a fresh 
 | Keep Product marketing display fields separate from typed entitlement attachments | Stripe's legacy `Product.features` and current `Product.marketing_features` contain pricing-table copy, not `product_feature` resources; typing those raw maps in a minor release would be semantically wrong and compatibility-breaking | ✓ Good (Phase 66) |
 | Treat public fixture renames as breaking changes | Fixture builders are called from adopter test suites; aligning names required a major package bump rather than the planned 1.8.0 minor | ✓ Good (2.0.0 release) |
 | Keep GSD milestone versions distinct from package versions | Planning advanced through doc-only v1.8/v1.9 while package releases followed SemVer; forcing them into lockstep obscures release truth | ✓ Good (v1.10 close) |
+| Freeze the exact public API during v1.11 quality closure | A maintenance cleanup should reduce reader and operator cost without transferring migration cost to adopters; the existing 3,463-entry snapshot is the hard boundary | Active (v1.11) |
+| Ratchet quality only where the signal is truthful | Stable 80% coverage, explicit optional-feature lanes, immutable CI inputs, and meaningful adapter tests are more valuable than vanity percentages or redundant tools | Active (v1.11) |
 
 ## Evolution
 
@@ -301,4 +330,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-25 after v1.10 milestone completion and archive.*
+*Last updated: 2026-08-25 for v1.11 Reader-First Quality Closure.*

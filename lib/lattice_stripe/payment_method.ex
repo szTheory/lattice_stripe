@@ -199,9 +199,7 @@ defmodule LatticeStripe.PaymentMethod do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD operations
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new PaymentMethod.
@@ -443,9 +441,7 @@ defmodule LatticeStripe.PaymentMethod do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Bang variants
-  # ---------------------------------------------------------------------------
 
   @doc """
   Like `create/3` but raises `LatticeStripe.Error` on failure.
@@ -495,9 +491,7 @@ defmodule LatticeStripe.PaymentMethod do
     detach(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%PaymentMethod{}` struct.

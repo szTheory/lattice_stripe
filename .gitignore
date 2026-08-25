@@ -32,5 +32,8 @@ lattice_stripe-*.tar
 .claude/
 .claire/
 
+# Local research fetch cache (generated, never project evidence).
+.planning/research/.cache/
+
 # Cursor IDE (local-only)
 .cursor/

@@ -101,9 +101,7 @@ defmodule LatticeStripe.BillingPortal.Configuration do
     extra: %{}
   ]
 
-  # ---------------------------------------------------------------------------
   # CREATE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Create a customer portal configuration.
@@ -124,9 +122,7 @@ defmodule LatticeStripe.BillingPortal.Configuration do
   def create!(client, params \\ %{}, opts \\ []),
     do: client |> create(params, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # RETRIEVE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Retrieve a customer portal configuration by ID.
@@ -148,9 +144,7 @@ defmodule LatticeStripe.BillingPortal.Configuration do
   def retrieve!(client, id, opts \\ []),
     do: client |> retrieve(id, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # UPDATE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Update a customer portal configuration.
@@ -176,9 +170,7 @@ defmodule LatticeStripe.BillingPortal.Configuration do
   def update!(client, id, params, opts \\ []),
     do: client |> update(id, params, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # LIST + STREAM
-  # ---------------------------------------------------------------------------
 
   @doc """
   List customer portal configurations. Supports cursor-based pagination via
@@ -221,9 +213,7 @@ defmodule LatticeStripe.BillingPortal.Configuration do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # DECODE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Decode a Stripe-shaped string-keyed map into a `%Configuration{}`.

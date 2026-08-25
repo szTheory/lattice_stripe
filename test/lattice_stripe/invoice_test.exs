@@ -14,9 +14,7 @@ defmodule LatticeStripe.InvoiceTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "returns nil when given nil" do
@@ -250,16 +248,14 @@ defmodule LatticeStripe.InvoiceTest do
       result = LatticeStripe.Invoice.from_map(invoice_map)
 
       # The is_map guard in from_map/1 detects the expanded map and dispatches
-      # through ObjectTypes.maybe_deserialize/1 -- this is the EXPD-02 mechanism.
+      # through ObjectTypes.maybe_deserialize/1 -- this is the mechanism.
       assert %LatticeStripe.Customer{} = result.customer
       assert result.customer.id == "cus_expanded_via_dot_path"
       assert result.customer.email == "dotpath@example.com"
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/invoices and returns {:ok, %Invoice{}}" do
@@ -286,9 +282,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/invoices/:id and returns {:ok, %Invoice{}}" do
@@ -315,9 +309,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/invoices/:id and returns {:ok, %Invoice{}}" do
@@ -335,9 +327,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # delete/3
-  # ---------------------------------------------------------------------------
 
   describe "delete/3" do
     test "sends DELETE /v1/invoices/:id and returns {:ok, %Invoice{}}" do
@@ -354,9 +344,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/invoices and returns {:ok, %Response{data: %List{}}} with typed items" do
@@ -383,9 +371,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create!/3 (bang)
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns %Invoice{} on success" do
@@ -411,9 +397,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # finalize/4
-  # ---------------------------------------------------------------------------
 
   describe "finalize/4" do
     test "sends POST /v1/invoices/:id/finalize and returns {:ok, %Invoice{}}" do
@@ -468,9 +452,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # void/4
-  # ---------------------------------------------------------------------------
 
   describe "void/4" do
     test "sends POST /v1/invoices/:id/void and returns {:ok, %Invoice{}}" do
@@ -499,9 +481,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # pay/4
-  # ---------------------------------------------------------------------------
 
   describe "pay/4" do
     test "sends POST /v1/invoices/:id/pay and returns {:ok, %Invoice{}}" do
@@ -544,9 +524,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # send_invoice/4
-  # ---------------------------------------------------------------------------
 
   describe "send_invoice/4" do
     test "sends POST /v1/invoices/:id/send and returns {:ok, %Invoice{}}" do
@@ -575,9 +553,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # mark_uncollectible/4
-  # ---------------------------------------------------------------------------
 
   describe "mark_uncollectible/4" do
     test "sends POST /v1/invoices/:id/mark_uncollectible and returns {:ok, %Invoice{}}" do
@@ -607,9 +583,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # search/3
-  # ---------------------------------------------------------------------------
 
   describe "search/3" do
     test "sends GET /v1/invoices/search with query param" do
@@ -637,9 +611,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # upcoming/3
-  # ---------------------------------------------------------------------------
 
   describe "upcoming/3" do
     test "sends GET /v1/invoices/upcoming and returns {:ok, %Invoice{}}" do
@@ -691,9 +663,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create_preview/3
-  # ---------------------------------------------------------------------------
 
   describe "create_preview/3" do
     test "sends POST /v1/invoices/create_preview and returns {:ok, %Invoice{}}" do
@@ -745,9 +715,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # upcoming_lines/3
-  # ---------------------------------------------------------------------------
 
   describe "upcoming_lines/3" do
     test "sends GET /v1/invoices/upcoming/lines and returns {:ok, %Response{}}" do
@@ -764,9 +732,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create_preview_lines/3
-  # ---------------------------------------------------------------------------
 
   describe "create_preview_lines/3" do
     test "sends GET /v1/invoices/create_preview/lines and returns {:ok, %Response{}}" do
@@ -783,9 +749,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list_line_items/4
-  # ---------------------------------------------------------------------------
 
   describe "list_line_items/4" do
     test "sends GET /v1/invoices/:id/lines and returns {:ok, %Response{}}" do
@@ -825,9 +789,7 @@ defmodule LatticeStripe.InvoiceTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "inspect output contains id and status" do

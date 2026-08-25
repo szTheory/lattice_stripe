@@ -9,9 +9,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
-  # ENT-01 — list/3
-  # ---------------------------------------------------------------------------
+  # list/3
 
   describe "ActiveEntitlement.list/3" do
     test "GETs /v1/entitlements/active_entitlements with the customer filter" do
@@ -72,9 +70,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # ENT-03 — retrieve/3
-  # ---------------------------------------------------------------------------
+  # retrieve/3
 
   describe "ActiveEntitlement.retrieve/3" do
     test "GETs /v1/entitlements/active_entitlements/{id} and returns a typed struct" do
@@ -109,9 +105,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # ENT-01 — from_map/1 (decode, including the expandable feature field)
-  # ---------------------------------------------------------------------------
+  # from_map/1 (decode, including the expandable feature field)
 
   describe "ActiveEntitlement.from_map/1" do
     test "decodes an expanded feature into a %Feature{}" do
@@ -168,9 +162,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # T-63-01 — the customer filter is enforced BEFORE any transport call (C-07)
-  # ---------------------------------------------------------------------------
+  # the customer filter is enforced BEFORE any transport call
 
   describe "pre-network customer guard" do
     # No Mox expectation is set in either test below. `verify_on_exit!` therefore proves
@@ -206,10 +198,8 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # D-23 L1 — structural surface lock. With no Dialyzer and documentation-only
+  # L1 — structural surface lock. With no Dialyzer and documentation-only
   # typespecs, this is the ONLY enforcement of public surface shape.
-  # ---------------------------------------------------------------------------
 
   describe "module surface" do
     test "does not export a per-request network gate helper" do

@@ -16,9 +16,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
 
   @secret "whsec_test_thinevent"
 
-  # ---------------------------------------------------------------------------
   # DB1: verify happy path (Testing → parse)
-  # ---------------------------------------------------------------------------
 
   describe "verify happy path (Testing → parse)" do
     test "generate_thin_event_payload + parse_event_notification returns typed EventNotification" do
@@ -53,9 +51,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # DB2: fetch-after-verify roundtrip — Event branch (parse → fetch_event)
-  # ---------------------------------------------------------------------------
 
   describe "fetch-after-verify roundtrip — Event branch (parse → fetch_event)" do
     test "chained generate → parse → fetch_event/3 returns typed %Event{}" do
@@ -87,9 +83,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # DB3: fetch-after-verify roundtrip — RelatedObject branch (parse → fetch_related_object)
-  # ---------------------------------------------------------------------------
 
   describe "fetch-after-verify roundtrip — RelatedObject branch (parse → fetch_related_object)" do
     test "chained generate → parse → fetch_related_object/3 returns typed %Customer{}" do
@@ -118,9 +112,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # DB4: malformed-payload failure boundary
-  # ---------------------------------------------------------------------------
 
   describe "malformed-payload failure boundary" do
     test "wrong secret returns {:error, :no_matching_signature}" do
@@ -149,11 +141,10 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     end
 
     test "bad JSON post-verify currently raises Jason.DecodeError (Phase 47 contract)" do
-      # This test documents the Phase 47 contract honestly: when the HMAC signature
+      # This test documents the current contract: when the HMAC signature
       # is valid but the payload body is not valid JSON, Jason.decode! raises.
-      # This is WR-02 — the v1 surface (`construct_event/4`) has the same behaviour.
-      # WR-02 is intentionally deferred to v1.5.x / v1.6 with its own discuss-phase;
-      # if WR-02 is resolved, this test gets rewritten in lockstep with the fix.
+      # The snapshot surface (`construct_event/4`) has the same behavior. If that
+      # contract changes, rewrite this characterization test with the implementation.
       bad_payload = "not-json-at-all"
       sig_header = Webhook.generate_test_signature(bad_payload, @secret)
 
@@ -163,15 +154,13 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # DB5: tolerance: 0 reconciled semantics on the thin-event surface
-  # ---------------------------------------------------------------------------
 
   describe "tolerance: 0 reconciled semantics on the thin-event surface" do
     test "stale timestamp + tolerance: 0 returns {:ok, notif} (WEBFIX-01 extends to thin events)" do
-      # Phase 47 D-03 / WEBFIX-01: tolerance: 0 disables the timestamp staleness
+      # tolerance: 0 disables the timestamp staleness
       # check entirely (returns :ok regardless of age). This test extends the
-      # WEBFIX-01 regression net to parse_event_notification/4 specifically —
+      # regression net to parse_event_notification/4 specifically —
       # proving that the fix applies equally to both webhook surfaces (construct_event/4
       # and parse_event_notification/4).
       # Zero HTTP — parse-only path; :verify_on_exit! enforces no transport calls.
@@ -192,7 +181,7 @@ defmodule LatticeStripe.Webhook.ThinEventTest do
     test "stale timestamp + default tolerance still returns {:error, :timestamp_expired}" do
       # Counterpart to the tolerance: 0 test above — confirms that without the opt,
       # the default tolerance (300 seconds) correctly rejects a 24-hour-old timestamp.
-      # This is the other branch of WEBFIX-01: opt-in disables the check; default
+      # Opting in with zero disables the check; the default
       # still enforces it. Zero HTTP — fails at verify before any decode/fetch.
       old_ts = System.system_time(:second) - 86_400
 

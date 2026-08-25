@@ -47,7 +47,6 @@ defmodule LatticeStripe.Testing.WrapperCompletenessTest do
      LatticeStripe.Entitlements.ActiveEntitlement},
     {"entitlements.active_entitlement_summary", :active_entitlement_summary,
      LatticeStripe.Entitlements.ActiveEntitlementSummary},
-    # Phase 65 UAT checkpoint 2 — one of the two wrappers that was missing.
     {"entitlements.feature", :feature, LatticeStripe.Entitlements.Feature},
     {"file", :file, LatticeStripe.File},
     {"file_link", :file_link, LatticeStripe.FileLink},
@@ -85,7 +84,7 @@ defmodule LatticeStripe.Testing.WrapperCompletenessTest do
   # rejoins the derived population.
   #   {fixture module, arity-0 builder, :wrapped | :fragment, wrapper fun, struct module}
   @objectless [
-    # Phase 65 UAT checkpoint 2 — the other missing wrapper. `data` carries no "object".
+    # `data` carries no "object", so this wrapper cannot use object-type dispatch.
     {LatticeStripe.Testing.Fixtures.MeterErrorReport, :meter_error_report_json, :wrapped,
      :meter_error_report, LatticeStripe.Billing.MeterErrorReport},
     # Embedded fragments of a parent payload — never decoded standalone.

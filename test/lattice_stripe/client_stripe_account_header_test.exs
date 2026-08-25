@@ -1,8 +1,7 @@
-# Regression guard for Phase 17 T-17-03 (tenant confusion).
-# Claim: lib/lattice_stripe/client.ex:174-199 + 423-427 thread per-request
-# :stripe_account opts ahead of %Client{}.stripe_account AND omit the header
-# entirely when both are nil. Phase 17 resource modules (Account, AccountLink,
-# LoginLink) depend on this claim — if this test ever goes red, the Connect
+# Regression guard against connected-account tenant confusion.
+# Per-request :stripe_account options take precedence over the client default, and the
+# header is omitted when both are nil. Account, AccountLink, and LoginLink depend on
+# this behavior; if this test ever goes red, the Connect
 # integration is silently acting on the wrong connected account.
 defmodule LatticeStripe.ClientStripeAccountHeaderTest do
   use ExUnit.Case, async: true
@@ -56,6 +55,17 @@ defmodule LatticeStripe.ClientStripeAccountHeaderTest do
     end)
 
     assert {:ok, _} = Client.request(client, get_req(stripe_account: "acct_request"))
+  end
+
+  test "per-request nil stripe_account suppresses the client-level header" do
+    client = test_client(stripe_account: "acct_client")
+
+    expect(LatticeStripe.MockTransport, :request, fn req_map ->
+      refute Enum.any?(req_map.headers, fn {name, _value} -> name == "stripe-account" end)
+      ok_response()
+    end)
+
+    assert {:ok, _} = Client.request(client, get_req(stripe_account: nil))
   end
 
   # Test C: nil client stripe_account AND no per-request opt — header MUST NOT be present

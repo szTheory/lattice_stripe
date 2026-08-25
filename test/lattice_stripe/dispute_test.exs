@@ -3,7 +3,7 @@ defmodule LatticeStripe.DisputeTest do
 
   import Mox
   import LatticeStripe.TestHelpers
-  import LatticeStripe.Test.Fixtures.Dispute
+  import LatticeStripe.Testing.Fixtures.Dispute
 
   alias LatticeStripe.{BalanceTransaction, Charge, Dispute, Error, List, Response}
   alias LatticeStripe.Dispute.{Evidence, EvidenceDetails, PaymentMethodDetails}

@@ -9,9 +9,7 @@ defmodule LatticeStripe.SetupIntentTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/setup_intents and returns {:ok, %SetupIntent{}}" do
@@ -37,9 +35,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create!/3
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns %SetupIntent{} directly on success" do
@@ -65,9 +61,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/setup_intents/:id and returns {:ok, %SetupIntent{}}" do
@@ -94,9 +88,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/setup_intents/:id and returns {:ok, %SetupIntent{}}" do
@@ -116,9 +108,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # confirm/4
-  # ---------------------------------------------------------------------------
 
   describe "confirm/4" do
     test "sends POST /v1/setup_intents/:id/confirm and returns {:ok, %SetupIntent{}}" do
@@ -150,9 +140,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # cancel/4
-  # ---------------------------------------------------------------------------
 
   describe "cancel/4" do
     test "sends POST /v1/setup_intents/:id/cancel and returns {:ok, %SetupIntent{status: 'canceled'}}" do
@@ -191,9 +179,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # verify_microdeposits/4
-  # ---------------------------------------------------------------------------
 
   describe "verify_microdeposits/4" do
     test "sends POST /v1/setup_intents/:id/verify_microdeposits and returns {:ok, %SetupIntent{}}" do
@@ -217,9 +203,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/setup_intents and returns {:ok, %Response{data: %List{}}} with typed items" do
@@ -246,9 +230,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list!/3 (bang)
-  # ---------------------------------------------------------------------------
 
   describe "list!/3" do
     test "returns %Response{} on success" do
@@ -262,9 +244,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "stream!/3" do
     test "streams %SetupIntent{} structs with auto-pagination" do
@@ -283,9 +263,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "maps known fields to struct fields" do
@@ -379,9 +357,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Error handling
-  # ---------------------------------------------------------------------------
 
   describe "error handling" do
     test "retrieve returns {:error, %Error{}} on API error" do
@@ -396,9 +372,7 @@ defmodule LatticeStripe.SetupIntentTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "inspect output contains id and status" do

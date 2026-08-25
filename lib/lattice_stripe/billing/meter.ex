@@ -76,9 +76,7 @@ defmodule LatticeStripe.Billing.Meter do
     extra: %{}
   ]
 
-  # ---------------------------------------------------------------------------
   # CREATE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Create a billing meter.
@@ -120,9 +118,7 @@ defmodule LatticeStripe.Billing.Meter do
   def create!(client, params, opts \\ []),
     do: client |> create(params, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # RETRIEVE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Retrieve a billing meter by ID.
@@ -140,9 +136,7 @@ defmodule LatticeStripe.Billing.Meter do
   def retrieve!(client, id, opts \\ []),
     do: client |> retrieve(id, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # UPDATE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Update a billing meter.
@@ -166,9 +160,7 @@ defmodule LatticeStripe.Billing.Meter do
   def update!(client, id, params, opts \\ []),
     do: client |> update(id, params, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # LIST + STREAM
-  # ---------------------------------------------------------------------------
 
   @doc """
   List billing meters. Supports cursor-based pagination via `starting_after`
@@ -199,9 +191,7 @@ defmodule LatticeStripe.Billing.Meter do
     LatticeStripe.List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # LIFECYCLE VERBS
-  # ---------------------------------------------------------------------------
 
   @doc """
   Deactivate a meter — POST `/v1/billing/meters/{id}/deactivate`.
@@ -239,9 +229,7 @@ defmodule LatticeStripe.Billing.Meter do
   def reactivate!(client, id, opts \\ []),
     do: client |> reactivate(id, opts) |> Resource.unwrap_bang!()
 
-  # ---------------------------------------------------------------------------
   # DECODE + STATUS HELPER
-  # ---------------------------------------------------------------------------
 
   @doc """
   Decode a Stripe-shaped string-keyed map into a `%Meter{}`.
@@ -271,9 +259,7 @@ defmodule LatticeStripe.Billing.Meter do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("active"), do: :active
   defp atomize_status("inactive"), do: :inactive

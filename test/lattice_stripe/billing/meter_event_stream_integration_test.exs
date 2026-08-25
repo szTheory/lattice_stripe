@@ -1,14 +1,8 @@
 defmodule LatticeStripe.Billing.MeterEventStreamIntegrationTest do
   use ExUnit.Case, async: false
 
-  @moduletag :skip
-  # stripe-mock does not support v2 billing endpoints (meter_event_session,
-  # meter_event_stream). Both POST /v2/billing/meter_event_session and
-  # POST /v2/billing/meter_event_stream return 404 "Unrecognized request URL"
-  # from stripe-mock v0.197.0 (which serves v1 OpenAPI spec only).
-  #
-  # Test shape is verified via Mox in meter_event_stream_test.exs.
-  # Unskip when stripe-mock adds v2 endpoint support.
+  @moduletag skip:
+               "stripe-mock v0.202.0 has no Stripe v2 billing endpoints; request shape is covered by Mox"
 
   alias LatticeStripe.Billing.MeterEventStream
   alias LatticeStripe.Billing.MeterEventStream.Session

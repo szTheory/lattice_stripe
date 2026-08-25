@@ -85,14 +85,12 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # GUARD-04 — check_summary_window!/2 alignment matrix (CONTEXT D-10)
+  # check_summary_window!/2 alignment matrix.
   #
   # Stripe requires minute-aligned start_time/end_time on EVERY query, UTC-hour
   # alignment when value_grouping_window is "hour", and UTC-day alignment (00:00
   # UTC) when it is "day". Its error code for a violation is undocumented, so the
   # resulting 400 cannot be improved after the fact — only prevented.
-  # ---------------------------------------------------------------------------
 
   # 60 * 29_227_000 and 60 * 29_228_440. Minute-aligned and deliberately NOT hour-
   # or day-aligned, so the hour and day cases below have something to catch.
@@ -278,7 +276,7 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
       assert err.message =~ "ceil"
     end
 
-    # D-08's two message sets, from one arity-2 helper: the second argument carries
+    # The two message sets come from one arity-2 helper; the second argument carries
     # the caller's own fun/arity spelling.
     test "14. the message names whichever function the caller invoked" do
       err =
@@ -306,7 +304,7 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
       refute err.message =~ "end_time #{@minute_end + 1}"
     end
 
-    # D-10/D-11 refute set. No Dialyzer here, so `refute function_exported?` is the
+    # Without Dialyzer, `refute function_exported?` is the
     # only enforcement that no snapping helper was quietly added alongside the guard.
     test "16. the guard exists at arity 2 and no aligning helper exists at any arity" do
       Code.ensure_loaded!(Guards)
@@ -319,13 +317,11 @@ defmodule LatticeStripe.Billing.MeterGuardsTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # GUARD-04 wiring — the guard as MeterEventSummary.list/4 and stream!/4 use it.
+  # wiring — the guard as MeterEventSummary.list/4 and stream!/4 use it.
   #
   # No Mox expectation is set anywhere in the raising tests below. `verify_on_exit!`
   # therefore proves the raise happened pre-network: had the request escaped,
   # MockTransport would have raised "no expectation defined" instead.
-  # ---------------------------------------------------------------------------
 
   @meter_id "mtr_123"
 

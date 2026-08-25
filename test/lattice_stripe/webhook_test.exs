@@ -26,9 +26,7 @@ defmodule LatticeStripe.WebhookTest do
   # Helper: produce a fresh valid header for @payload/@secret
   defp valid_header, do: Webhook.generate_test_signature(@payload, @secret)
 
-  # ---------------------------------------------------------------------------
   # verify_signature/3 — ok cases
-  # ---------------------------------------------------------------------------
 
   describe "verify_signature/3 — success" do
     test "returns {:ok, timestamp} when signature matches" do
@@ -44,9 +42,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # verify_signature/3 — error: missing header
-  # ---------------------------------------------------------------------------
 
   describe "verify_signature/3 — :missing_header" do
     test "returns {:error, :missing_header} when sig_header is nil" do
@@ -58,9 +54,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # verify_signature/3 — error: invalid header
-  # ---------------------------------------------------------------------------
 
   describe "verify_signature/3 — :invalid_header" do
     test "returns {:error, :invalid_header} when t= part is missing" do
@@ -83,9 +77,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # verify_signature/3 — error: no matching signature
-  # ---------------------------------------------------------------------------
 
   describe "verify_signature/3 — :no_matching_signature" do
     test "returns {:error, :no_matching_signature} when secret is wrong" do
@@ -104,9 +96,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # verify_signature/4 — tolerance
-  # ---------------------------------------------------------------------------
 
   describe "verify_signature/4 — :timestamp_expired" do
     test "returns {:error, :timestamp_expired} when timestamp is older than tolerance" do
@@ -123,7 +113,7 @@ defmodule LatticeStripe.WebhookTest do
     end
 
     test "tolerance: 0 disables the staleness check (any age accepted)" do
-      # WEBFIX-01: reconciled with docstring intent — `tolerance: 0` skips the
+      # reconciled with docstring intent — `tolerance: 0` skips the
       # staleness check entirely (matches stripe-node / stripe-go behavior).
       ancient_ts = System.system_time(:second) - 100_000
       header = Webhook.generate_test_signature(@payload, @secret, timestamp: ancient_ts)
@@ -133,9 +123,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # multi-secret support
-  # ---------------------------------------------------------------------------
 
   describe "verify_signature/3 — multi-secret" do
     test "returns {:ok, ts} when second secret in list matches" do
@@ -160,9 +148,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # verify_signature!/3 — bang variant
-  # ---------------------------------------------------------------------------
 
   describe "verify_signature!/3" do
     test "returns timestamp integer on success" do
@@ -208,9 +194,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # construct_event/3
-  # ---------------------------------------------------------------------------
 
   describe "construct_event/3" do
     test "returns {:ok, %Event{}} with valid signature" do
@@ -240,9 +224,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # construct_event!/3 — bang variant
-  # ---------------------------------------------------------------------------
 
   describe "construct_event!/3" do
     test "returns %Event{} struct with valid signature" do
@@ -264,9 +246,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # generate_test_signature/2 and /3
-  # ---------------------------------------------------------------------------
 
   describe "generate_test_signature/2" do
     test "produces a header string that passes verify_signature/3" do
@@ -294,9 +274,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # parse_event_notification/4 (THIN-01)
-  # ---------------------------------------------------------------------------
+  # parse_event_notification/4
 
   describe "parse_event_notification/4" do
     setup do
@@ -359,7 +337,7 @@ defmodule LatticeStripe.WebhookTest do
 
     test "returns {:error, :timestamp_expired} with default tolerance on an ancient timestamp",
          %{payload: payload} do
-      # NB: this uses default tolerance: 300; plan 47-03 (WEBFIX-01) handles
+      # This uses the default tolerance of 300 seconds; the zero-tolerance cases cover
       # the tolerance: 0 disables-staleness-check case separately.
       old_ts = System.system_time(:second) - 86_400
       old_header = Webhook.generate_test_signature(payload, @secret, timestamp: old_ts)
@@ -369,9 +347,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # parse_event_notification!/4 (THIN-01 bang variant)
-  # ---------------------------------------------------------------------------
+  # parse_event_notification!/4 (bang variant)
 
   describe "parse_event_notification!/4" do
     setup do

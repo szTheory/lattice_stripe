@@ -14,9 +14,7 @@ defmodule LatticeStripe.ExternalAccountTest do
   @ba_id "ba_1OoKqrJ2eZvKYlo2C9hXqGtR"
   @card_id "card_1OoKqrJ2eZvKYlo2C9hXqGtR"
 
-  # ---------------------------------------------------------------------------
   # cast/1 polymorphic dispatch
-  # ---------------------------------------------------------------------------
 
   describe "cast/1" do
     test ~S[dispatches %{"object" => "bank_account"} -> %BankAccount{}] do
@@ -42,9 +40,7 @@ defmodule LatticeStripe.ExternalAccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/4
-  # ---------------------------------------------------------------------------
 
   describe "create/4" do
     test "sends POST /v1/accounts/:account/external_accounts and returns {:ok, %BankAccount{}}" do
@@ -100,9 +96,7 @@ defmodule LatticeStripe.ExternalAccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/4
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/4" do
     test "sends GET /v1/accounts/:account/external_accounts/:id" do
@@ -127,9 +121,7 @@ defmodule LatticeStripe.ExternalAccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/5
-  # ---------------------------------------------------------------------------
 
   describe "update/5" do
     test "sends POST /v1/accounts/:account/external_accounts/:id and returns sum type" do
@@ -152,9 +144,7 @@ defmodule LatticeStripe.ExternalAccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # delete/4
-  # ---------------------------------------------------------------------------
 
   describe "delete/4" do
     test "sends DELETE; deleted=true flows into :extra on returned %BankAccount{}" do
@@ -182,9 +172,7 @@ defmodule LatticeStripe.ExternalAccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/4
-  # ---------------------------------------------------------------------------
 
   describe "list/4" do
     test "sends GET; returns %Response{data: %List{}} with mixed sum-type items" do
@@ -213,9 +201,7 @@ defmodule LatticeStripe.ExternalAccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/4
-  # ---------------------------------------------------------------------------
 
   describe "stream!/4" do
     test "yields mixed BankAccount / Card / Unknown structs lazily" do
@@ -233,9 +219,7 @@ defmodule LatticeStripe.ExternalAccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   describe "create!/4" do
     test "returns the sum-type value on success" do
@@ -313,9 +297,7 @@ defmodule LatticeStripe.ExternalAccountTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Unknown fallback module
-  # ---------------------------------------------------------------------------
 
   describe "ExternalAccount.Unknown" do
     test "cast/1 returns nil on nil" do

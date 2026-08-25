@@ -6,8 +6,22 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 2.2"}`.
 
+> **Development status:** `2.2.0` is the published baseline. The next planned release is
+> `2.2.1`, a compatibility-preserving quality patch for reliability, internal consistency,
+> documentation truth, and release hygiene. Until it is published, Hex continues to resolve
+> the install line above to `2.2.0`.
+
 ## [2.2.0](https://github.com/szTheory/lattice_stripe/compare/v2.1.0...v2.2.0) (2026-08-25)
 
+### Highlights for adopters
+
+- Product Feature attachments complete the typed Entitlements catalog-to-access path.
+- Final error responses retain ordered headers and parsed `Retry-After` evidence for
+  application retry and support policy.
+- Phoenix webhook body caching handles chunked request bodies without weakening signature
+  verification boundaries.
+- PaymentIntent-first guidance makes Charge a reconciliation surface and keeps server
+  confirmation distinct from browser-side customer action.
 
 ### Features
 

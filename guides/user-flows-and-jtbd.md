@@ -417,6 +417,8 @@ These are the rules most likely to save you from subtle bugs:
 - subscription lifecycle management
 - customer self-service portal sessions
 - usage-based billing primitives
+- entitlement catalog and local-access reconciliation
+- standalone Tax for custom payment flows
 - invoice lifecycle
 - Connect account and money-movement foundations
 - operational glue: webhooks, retries, telemetry, testing
@@ -468,7 +470,7 @@ LatticeStripe is already strong where most SaaS teams spend the bulk of their St
 payments, subscriptions, invoices, portal-driven self-service, metering, Connect, tax,
 webhooks (including thin events), and production operator mechanics. The library's center of
 gravity is "typed, idiomatic Elixir access to Stripe, with guards around expensive mistakes."
-For v1.x scope the remaining delta is adopter-owned product depth on secondary flows
-(reason-specific dispute fields, catalog policy choices) — not missing mainstream payment
-or billing primitives. Use [Recipes](recipes.md) and the flagship guides when you need
-multi-module stories.
+For the current 2.2 scope, the remaining depth is application-owned policy on secondary
+flows (reason-specific dispute fields, catalog decisions, authorization storage) — not
+missing mainstream payment or billing primitives. Use [Recipes](recipes.md),
+[Entitlements](entitlements.md), and the flagship guides when you need multi-module stories.

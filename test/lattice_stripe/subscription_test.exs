@@ -11,9 +11,7 @@ defmodule LatticeStripe.SubscriptionTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "returns nil when given nil" do
@@ -79,9 +77,7 @@ defmodule LatticeStripe.SubscriptionTest do
       # The decoded items MUST retain their id. stripity_stripe's nested
       # item decoder dropped id (issue #208), making programmatic updates
       # impossible. Assert id preservation without pattern-matching on
-      # %SubscriptionItem{} so this unit test compiles under Plan 15-01
-      # (SubscriptionItem module ships in Plan 15-02, and Subscription
-      # still round-trips items via SubscriptionItem.from_map/1 at runtime).
+      # %SubscriptionItem{} so the assertion also proves the concrete decoder module.
       assert item1.__struct__ == LatticeStripe.SubscriptionItem
       assert item2.__struct__ == LatticeStripe.SubscriptionItem
       assert item1.id == "si_test1"
@@ -143,9 +139,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/subscriptions and returns {:ok, %Subscription{}}" do
@@ -221,9 +215,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/subscriptions/:id and returns {:ok, %Subscription{}}" do
@@ -240,9 +232,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/subscriptions/:id" do
@@ -285,9 +275,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # cancel/3 and cancel/4
-  # ---------------------------------------------------------------------------
 
   describe "cancel/3 and cancel/4" do
     test "cancel/3 delegates to cancel/4 with empty params" do
@@ -333,9 +321,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # resume/3
-  # ---------------------------------------------------------------------------
 
   describe "resume/3" do
     test "sends POST /v1/subscriptions/:id/resume" do
@@ -366,9 +352,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # pause_collection/5
-  # ---------------------------------------------------------------------------
 
   describe "pause_collection/5" do
     test "merges pause_collection.behavior and dispatches to update" do
@@ -410,9 +394,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/subscriptions and returns typed items" do
@@ -429,9 +411,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # search/3
-  # ---------------------------------------------------------------------------
 
   describe "search/3" do
     test "raises ArgumentError when query is missing" do
@@ -466,9 +446,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   describe "bang variants" do
     test "create! returns %Subscription{} on success" do
@@ -599,9 +577,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "hides customer and payment_settings raw values" do
@@ -631,9 +607,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # Form encoder sanity (T-15-05)
-  # ---------------------------------------------------------------------------
+  # Form encoder sanity
 
   describe "form encoder (T-15-05 sanity)" do
     test "nested metadata with bracket/ampersand keys encodes without breaking request" do

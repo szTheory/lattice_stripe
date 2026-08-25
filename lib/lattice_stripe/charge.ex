@@ -218,9 +218,7 @@ defmodule LatticeStripe.Charge do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: retrieve
-  # ---------------------------------------------------------------------------
 
   @doc """
   Retrieves a Charge by ID.
@@ -282,9 +280,7 @@ defmodule LatticeStripe.Charge do
     client |> retrieve(id, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: list, search, update, capture
-  # ---------------------------------------------------------------------------
 
   @doc """
   Lists Charges with optional filters.
@@ -494,9 +490,7 @@ defmodule LatticeStripe.Charge do
     capture(client, id, params, opts) |> Resource.unwrap_bang!()
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%Charge{}` struct.
@@ -586,9 +580,7 @@ defmodule LatticeStripe.Charge do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("succeeded"), do: :succeeded
   defp atomize_status("pending"), do: :pending

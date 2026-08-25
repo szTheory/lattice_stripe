@@ -5,13 +5,11 @@ defmodule LatticeStripe.BillingPortal.GuardsTest do
 
   @moduletag :billing_portal
 
-  # ---------------------------------------------------------------------------
-  # PORTAL-04 — check_flow_data!/1 guard matrix (D-01 CONTEXT.md test matrix)
+  # check_flow_data!/1 guard matrix (CONTEXT.md test matrix)
   # 10 cases: 3 happy paths, 6 missing-field raises, 1 unknown-type raise.
   # Plus 2 extras: malformed flow_data and non-map flow_data value.
   # All cases are unit-testable without network calls — stripe-mock does NOT
   # enforce sub-field validation (RESEARCH Finding 1).
-  # ---------------------------------------------------------------------------
 
   describe "check_flow_data!/1" do
     test "case 1: no flow_data key → :ok" do

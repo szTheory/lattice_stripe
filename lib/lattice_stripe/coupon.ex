@@ -17,7 +17,7 @@ defmodule LatticeStripe.Coupon do
         "duration" => "once"
       })
 
-      # Custom ID (D-07 pass-through)
+      # Custom IDs pass through to Stripe.
       {:ok, coupon} = LatticeStripe.Coupon.create(client, %{
         "id" => "SUMMER25",
         "percent_off" => 25,
@@ -145,7 +145,7 @@ defmodule LatticeStripe.Coupon do
 
   def list!(%Client{} = c, p \\ %{}, o \\ []), do: list(c, p, o) |> Resource.unwrap_bang!()
 
-  # NOTE: NO update/3,4 and NO search/2,3 — D-05 forbidden ops. Absence is the interface.
+  # No update or search functions: Stripe does not expose those Coupon operations.
 
   @spec from_map(map()) :: t()
   def from_map(map) when is_map(map) do
@@ -175,7 +175,7 @@ defmodule LatticeStripe.Coupon do
   defp decode_applies_to(nil), do: nil
   defp decode_applies_to(%{} = m), do: AppliesTo.from_map(m)
 
-  # D-03 whitelist atomization
+  # Whitelist atomization keeps unknown values forward compatible.
   defp atomize_duration("forever"), do: :forever
   defp atomize_duration("once"), do: :once
   defp atomize_duration("repeating"), do: :repeating

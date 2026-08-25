@@ -4,7 +4,7 @@ defmodule LatticeStripe.Drift do
   # Implements the core drift detection logic for comparing the Stripe OpenAPI spec
   # against the @known_fields registered in each LatticeStripe resource module.
   #
-  # Used by Mix.Tasks.LatticeStripe.CheckDrift (Plan 02).
+  # Used by Mix.Tasks.LatticeStripe.CheckDrift.
 
   alias LatticeStripe.ObjectTypes
 

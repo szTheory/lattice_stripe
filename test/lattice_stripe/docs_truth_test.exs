@@ -199,6 +199,106 @@ defmodule LatticeStripe.DocsTruthTest do
     |> List.first()
   end
 
+  test "API stability guide protects 2.x public value shapes" do
+    guide = File.read!("guides/api_stability.md")
+
+    assert guide =~ "Semantic Versioning 2.0.0"
+    assert guide =~ "2.x"
+    refute guide =~ "1.x line"
+    refute guide =~ "~> 1.0"
+
+    for contract_term <- [
+          "field names",
+          "field types",
+          "value representations",
+          "Unix",
+          "DateTime",
+          "atom",
+          "string",
+          "typed struct",
+          "raw map"
+        ] do
+      assert guide =~ contract_term
+    end
+
+    assert guide =~ ~r/Adding an\s+optional field is additive/
+    assert guide =~ "breaking"
+  end
+
+  test "client guide documents connected-account suppression and durable operation identity" do
+    guide = File.read!("guides/client-configuration.md")
+
+    assert guide =~ "stripe_account: nil"
+    assert guide =~ "suppress"
+    assert guide =~ "omit the `Stripe-Account` header"
+    assert guide =~ "inherit the client default"
+    refute guide =~ "connected_account: nil"
+    refute guide =~ "stripe_account: :none"
+
+    for durable_term <- [
+          "business operation",
+          "job that can restart",
+          "message that can be redelivered",
+          "process crash",
+          "same operation with the same parameters",
+          "Webhooks",
+          "retrieve"
+        ] do
+      assert guide =~ durable_term
+    end
+
+    refute guide =~ "idempotency_key_generator"
+    refute guide =~ "idempotency_key_fn"
+  end
+
+  test "large-list guidance preserves lazy memory and partial-failure semantics" do
+    payments = File.read!("guides/payments.md")
+    cheatsheet = File.read!("guides/cheatsheet.cheatmd")
+
+    for term <- ["large collection", "size is unknown", "prefer `stream!/2`", "lazily"] do
+      assert payments =~ term
+    end
+
+    for term <- ["Enum.to_list/1", "materializes", "not a transaction", "later page fails"] do
+      assert payments =~ term
+    end
+
+    assert payments =~ ~r/earlier items\s+have already been yielded/
+    assert payments =~ "side effects idempotent"
+    assert cheatsheet =~ "large or unknown collections"
+    assert cheatsheet =~ "later page can fail"
+    assert cheatsheet =~ "fits in memory"
+  end
+
+  test "testing guide assigns each provider behavior to a truthful test layer" do
+    guide = File.read!("guides/testing.md")
+
+    assert guide =~ "Testing pyramid: choose the smallest truthful test"
+
+    for layer <- [
+          "Shipped fixtures and pure tests",
+          "Mox at `LatticeStripe.Transport`",
+          "`Plug.Test` with signed payload helpers",
+          "stripe-mock",
+          "Stripe test mode, Stripe CLI, and Test Clocks"
+        ] do
+      assert guide =~ layer
+    end
+
+    for limitation <- [
+          "stateless",
+          "hard-coded",
+          "lifecycle transitions",
+          "asynchronous webhook delivery",
+          "not proof"
+        ] do
+      assert guide =~ limitation
+    end
+
+    assert guide =~ ~r/created object is not\s+persisted/
+    refute guide =~ "if stripe-mock accepts your request, the real Stripe API will too"
+  end
+
   test "every public module lands in exactly one documented ExDoc group" do
     # TOTALITY GUARD. ExDoc performs NO validation of groups_for_modules
     # (deps/ex_doc/lib/ex_doc/config.ex:240-268): a phantom entry naming a module that does
@@ -330,7 +430,7 @@ defmodule LatticeStripe.DocsTruthTest do
     assert "guides/tax.md" in groups["Canonical Guides"]
     assert "guides/connect.md" in groups["Canonical Guides"]
     assert "guides/webhooks.md" in groups["Operations & DX"]
-    # D-03 sub-decision 3C — new v1.5 trust rail extension to Operations & DX
+    # sub-decision 3C — new v1.5 trust rail extension to Operations & DX
     assert "guides/webhooks-thin-events.md" in extras
     assert "guides/webhooks-thin-events.md" in groups["Operations & DX"]
     assert "guides/production-checklist.md" in extras
@@ -532,15 +632,16 @@ defmodule LatticeStripe.DocsTruthTest do
     refute readme =~ "What's new in v1.1"
   end
 
-  describe "v1.x stop signal and scope boundaries" do
-    test "readme publishes stop signal and deferred scope anchors" do
+  describe "2.2 maintenance posture and scope boundaries" do
+    test "readme publishes the quality-patch posture and deferred scope anchors" do
       readme = File.read!("README.md")
 
-      assert readme =~ "feature-complete for its intended v1.x scope"
-      assert readme =~ "maintenance mode" or readme =~ "maintenance and adoption-driven"
+      assert readme =~ "2.2 baseline is feature-complete"
+      assert readme =~ "`2.2.1` quality patch"
+      assert readme =~ "maintenance- and adoption-driven"
       assert readme =~ "hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html"
       assert readme =~ "hexdocs.pm/lattice_stripe/api_stability.html"
-      assert readme =~ "## v1.x scope"
+      assert readme =~ "## Current scope and maintenance posture"
       assert readme =~ "Identity"
       assert readme =~ "Reporting"
 
@@ -757,13 +858,11 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ "error-handling.md"
     assert guide =~ "metering.md" or guide =~ "customer-portal.md"
 
-    # An adopter who reads "shipped in vX" searches hex.pm for exactly that
-    # string. GSD milestone labels are two-part (v1.10) and are not Hex
-    # releases; published versions are three-part semver. The label leaked into
-    # this line once already, so lock the shape rather than the literal — the
-    # version legitimately changes, the number of parts does not.
-    [[_, claimed_version]] = Regex.scan(~r/shipped in v(\d+(?:\.\d+)*)/, guide)
-    assert claimed_version =~ ~r/^\d+\.\d+\.\d+$/
+    # A timeless guide should not claim that a planning milestone or unreleased
+    # surface was published. HexDocs already carries the package version.
+    assert guide =~ "HexDocs is versioned with the package"
+    assert guide =~ "release you installed"
+    refute guide =~ ~r/(?:shipped|published) in v\d+/
 
     entitlements_lib = Path.join(root, "lib/lattice_stripe/entitlements")
     active_entitlement = File.read!(Path.join(entitlements_lib, "active_entitlement.ex"))
@@ -918,7 +1017,7 @@ defmodule LatticeStripe.DocsTruthTest do
   test "guides/testing.md names every public fixture module Phase 65 published" do
     # The per-plan tests above each lock their own bullet, so dropping ONE bullet
     # fails one narrow test that a reader may not connect to the guide as a whole.
-    # This is the consolidated lock: the full Phase 65 set asserted in one place,
+    # This is the consolidated lock: the full public fixture set asserted in one place,
     # so a bulk edit to the bullet list cannot silently shrink the published
     # surface. Structural, not decorative — a module missing from this list is a
     # module an adopter never discovers.
@@ -1109,29 +1208,29 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ ":no_related_object"
     assert guide =~ ":unknown_object_type"
 
-    # Rate-limit phrasing — both substrings required (REQUIREMENTS.md GUIDE-03)
+    # Rate-limit phrasing requires both substrings.
     assert guide =~ "100 req/s"
     assert guide =~ "90/s"
 
-    # Idempotency anchor (GUIDE-03)
+    # Idempotency anchor
     assert guide =~ "event.id"
 
-    # Connect routing anchor (GUIDE-03)
+    # Connect routing anchor
     assert guide =~ "event.context"
 
-    # Canonical truth anchor (Phase 44 D-14)
+    # Canonical truth anchor.
     assert guide =~ "Webhooks confirm"
 
     # Canonical surface name
     assert guide =~ "/v2/events"
 
-    # Verification-vs-payload-shape failure boundary phrasing (GUIDE-03)
+    # Verification-vs-payload-shape failure boundary phrasing
     assert guide =~ "verification"
     assert guide =~ "payload shape"
   end
 
   test "webhooks-thin-events guide is cross-linked from README/JTBD/webhooks.md" do
-    # D-03 sub-decision 3D cross-link graph: the new v1.5 guide must be
+    # sub-decision 3D cross-link graph: the new v1.5 guide must be
     # reachable from README hardening-ops route, JTBD Start Here Runtime
     # route + Job 7 Read next, AND linked back from the parent webhooks.md
     # guide. Forward edges from the new guide (webhooks.md / testing.md /
@@ -1350,13 +1449,12 @@ defmodule LatticeStripe.DocsTruthTest do
   end
 
   test "Webhook.Plug @moduledoc documents tolerance: 0 testing-only semantics" do
-    # WR-04 closure (Phase 47 deferred → Phase 48 D-03 3E): the Plug
-    # @moduledoc Configuration Options section must surface the tolerance: 0
+    # The Plug @moduledoc Configuration Options section must surface the tolerance: 0
     # testing-only escape hatch. HexDocs renders this @moduledoc as the
     # landing page for the Plug; without this lock, drift here would silently
     # stop showing the contract on the page adopters actually read first.
     # Four-surface triangulation: inline check_tolerance/2 comment + Plug
-    # schema doc: string + CHANGELOG WEBFIX-01 entry + this @moduledoc — all
+    # schema doc: string + CHANGELOG entry + this @moduledoc — all
     # four must be silenced simultaneously for the contract to silently regress.
     source = File.read!("lib/lattice_stripe/webhook/plug.ex")
     assert source =~ ~r/@moduledoc.*tolerance.*0.*testing only/s

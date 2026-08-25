@@ -51,7 +51,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryIntegrationTest do
   alias LatticeStripe.{Client, Error, Request}
 
   # 2025-07-28 00:00 UTC and 2025-07-29 00:00 UTC. Both are exact multiples of
-  # 86_400, and therefore also of 3_600 and 60, so they satisfy GUARD-04 for
+  # 86_400, and therefore also of 3_600 and 60, so they satisfy every supported window.
   # every grouping window. This matters: the alignment guard raises before the
   # request leaves the process, so an unaligned literal here would mean the
   # server was never reached and the test proved nothing about Stripe.
@@ -92,9 +92,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryIntegrationTest do
     })
   end
 
-  # ---------------------------------------------------------------------------
-  # The path is served, and a served body decodes (MTR-01)
-  # ---------------------------------------------------------------------------
+  # The path is served, and a served body decodes
 
   test "SERVER: GET /v1/billing/meters/:meter_id/event_summaries is a served route",
        %{client: client} do
@@ -126,12 +124,10 @@ defmodule LatticeStripe.Billing.MeterEventSummaryIntegrationTest do
     refute Map.has_key?(summary.extra, "customer")
   end
 
-  # ---------------------------------------------------------------------------
-  # Required-param enforcement, server side (MTR-01)
+  # Required-param enforcement, server side
   #
   # One filter omitted per case. Omitting more than one makes the named property
   # nondeterministic — see the moduledoc.
-  # ---------------------------------------------------------------------------
 
   test "SERVER: omitting only customer is rejected by Stripe, naming the customer param",
        %{client: client} do
@@ -185,13 +181,11 @@ defmodule LatticeStripe.Billing.MeterEventSummaryIntegrationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # Enum validation (MTR-01)
-  # ---------------------------------------------------------------------------
+  # Enum validation
 
   test "SERVER: an unrecognised value_grouping_window is rejected by the enum validator",
        %{client: client} do
-    # No guard bypass needed. GUARD-04 deliberately skips alignment checking for
+    # No guard bypass is needed: alignment checking deliberately skips
     # an unrecognised window (forward compatibility — Stripe added "day" to this
     # enum mid-2024), so the value reaches Stripe and Stripe is what rejects it.
     params = Map.put(full_params(), "value_grouping_window", "fortnight")
@@ -214,9 +208,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryIntegrationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # MTR-04 — the Stripe-side half of the payload contract (D-33, F-20.2)
-  # ---------------------------------------------------------------------------
+  # the Stripe-side half of the payload contract
 
   test "SERVER: a flat payload with several custom dimensions and a decimal-string value is accepted",
        %{client: client} do

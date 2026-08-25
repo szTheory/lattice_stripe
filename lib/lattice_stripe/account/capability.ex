@@ -47,9 +47,7 @@ defmodule LatticeStripe.Account.Capability do
     )
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("active"), do: :active
   defp atomize_status("inactive"), do: :inactive

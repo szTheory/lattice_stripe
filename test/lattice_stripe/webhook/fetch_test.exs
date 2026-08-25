@@ -12,9 +12,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
-  # fetch_event/3 (THIN-02)
-  # ---------------------------------------------------------------------------
+  # fetch_event/3
 
   describe "fetch_event/3" do
     test "sends GET /v2/core/events/{id} and returns {:ok, %Event{}}" do
@@ -50,7 +48,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
     test "returns {:error, :no_event_id} for %EventNotification{id: nil} (no HTTP)" do
       client = test_client()
 
-      # No expect(LatticeStripe.MockTransport, ...) call — :verify_on_exit!
+      # No expect(LatticeStripe.MockTransport,...) call — :verify_on_exit!
       # enforces that zero transport requests are made on this code path.
       assert {:error, :no_event_id} =
                Webhook.fetch_event(client, %EventNotification{id: nil})
@@ -128,9 +126,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # fetch_event!/3 (THIN-02 bang variant)
-  # ---------------------------------------------------------------------------
+  # fetch_event!/3 (bang variant)
 
   describe "fetch_event!/3" do
     test "returns %Event{} on happy path" do
@@ -167,9 +163,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # fetch_related_object/3 (THIN-03)
-  # ---------------------------------------------------------------------------
+  # fetch_related_object/3
 
   describe "fetch_related_object/3" do
     test "returns {:ok, %Customer{}} for known related_object.type" do
@@ -212,7 +206,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
           })
         )
 
-      # No expect(LatticeStripe.MockTransport, ...) — :verify_on_exit! enforces
+      # No expect(LatticeStripe.MockTransport,...) — :verify_on_exit! enforces
       # zero transport requests on this typed-error fail-fast path.
       assert {:error, {:unknown_object_type, "v2.core.account"}} =
                Webhook.fetch_related_object(client, notif)
@@ -299,10 +293,10 @@ defmodule LatticeStripe.Webhook.FetchTest do
     test "a REGISTERED but non-retrievable type passes the D-05 gate and issues the doomed GET" do
       # CHARACTERIZATION TEST — this locks CURRENT behaviour, not desired behaviour.
       #
-      # Phase 65 registered `entitlements.active_entitlement_summary` in @object_map so
+      # `entitlements.active_entitlement_summary` is registered in @object_map so
       # ObjectTypes.maybe_deserialize/1 can decode it from v1 snapshot events. @object_map
-      # has a SECOND consumer: it is the fail-fast gate in fetch_related_object/3 (Phase 47
-      # D-05). Registration therefore flipped this type from
+      # has a second consumer: it is the fail-fast gate in fetch_related_object/3.
+      # Registration therefore changed this type from
       # {:error, {:unknown_object_type, _}} with zero HTTP, to "issue GET related_object.url"
       # — which 404s, because the object has no `id` and no single-object endpoint.
       #
@@ -347,7 +341,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
 
     test "an UNregistered non-retrievable type still short-circuits with zero HTTP" do
       # The control for the test above. Pairing them is what makes this a characterization
-      # of the REGISTRY's dual role rather than a fact about one object type: the D-05
+      # of the REGISTRY's dual role rather than a fact about one object type: the
       # fail-fast path is unchanged for types genuinely absent from @object_map.
       client = test_client()
 
@@ -368,9 +362,7 @@ defmodule LatticeStripe.Webhook.FetchTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # fetch_related_object!/3 (THIN-03 bang variant)
-  # ---------------------------------------------------------------------------
+  # fetch_related_object!/3 (bang variant)
 
   describe "fetch_related_object!/3" do
     test "raises %Error{type: :invalid_request_error} on {:error, {:unknown_object_type, _}}" do

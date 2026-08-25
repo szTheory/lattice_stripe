@@ -363,7 +363,7 @@ defmodule LatticeStripe.Quote do
       computed: Computed.from_map(known["computed"]),
       created: known["created"],
       currency: known["currency"],
-      customer: parse_expandable(known["customer"]),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       default_tax_rates: known["default_tax_rates"],
       description: known["description"],
       discounts: known["discounts"],
@@ -371,7 +371,7 @@ defmodule LatticeStripe.Quote do
       footer: known["footer"],
       from_quote: known["from_quote"],
       header: known["header"],
-      invoice: parse_expandable(known["invoice"]),
+      invoice: ObjectTypes.maybe_deserialize(known["invoice"]),
       invoice_settings: known["invoice_settings"],
       line_items: parse_line_items(known["line_items"]),
       livemode: known["livemode"],
@@ -380,9 +380,9 @@ defmodule LatticeStripe.Quote do
       on_behalf_of: known["on_behalf_of"],
       status: atomize_status(known["status"]),
       status_transitions: StatusTransitions.from_map(known["status_transitions"]),
-      subscription: parse_expandable(known["subscription"]),
+      subscription: ObjectTypes.maybe_deserialize(known["subscription"]),
       subscription_data: known["subscription_data"],
-      subscription_schedule: parse_expandable(known["subscription_schedule"]),
+      subscription_schedule: ObjectTypes.maybe_deserialize(known["subscription_schedule"]),
       test_clock: known["test_clock"],
       total_details: known["total_details"],
       transfer_data: known["transfer_data"],
@@ -400,9 +400,6 @@ defmodule LatticeStripe.Quote do
     req = %Request{method: :get, path: path, params: params, opts: opts}
     List.stream!(client, req) |> Stream.map(&LineItem.from_map/1)
   end
-
-  defp parse_expandable(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_expandable(value), do: value
 
   defp parse_line_items(nil), do: nil
 

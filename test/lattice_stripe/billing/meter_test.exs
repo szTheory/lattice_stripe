@@ -17,10 +17,6 @@ defmodule LatticeStripe.Billing.MeterTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
-  # Nested struct tests from Plan 20-02 (preserved)
-  # ---------------------------------------------------------------------------
-
   describe "DefaultAggregation.from_map/1" do
     test "round-trips formula string" do
       assert %DefaultAggregation{formula: "sum"} =
@@ -100,9 +96,7 @@ defmodule LatticeStripe.Billing.MeterTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Billing.Meter.from_map/1 — full round-trip from fixture
-  # ---------------------------------------------------------------------------
 
   describe "Meter.from_map/1" do
     test "decodes basic fixture into %Meter{} with all nested structs populated" do
@@ -135,9 +129,7 @@ defmodule LatticeStripe.Billing.MeterTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # Billing.Meter.from_map/1 — auto-atomization (EXPD-03)
-  # ---------------------------------------------------------------------------
+  # Billing.Meter.from_map/1 — auto-atomization
 
   describe "Meter.from_map/1 auto-atomizes status" do
     test "from_map/1 auto-atomizes status to :active" do
@@ -165,9 +157,7 @@ defmodule LatticeStripe.Billing.MeterTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Billing.Meter.status_atom/1 — deprecated backward compat
-  # ---------------------------------------------------------------------------
 
   describe "Meter.status_atom/1 (deprecated — backward compat)" do
     @compile {:no_warn_deprecated, true}
@@ -191,9 +181,7 @@ defmodule LatticeStripe.Billing.MeterTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Meter.create/3 — require_param! validation (no network hit)
-  # ---------------------------------------------------------------------------
 
   describe "Meter.create/3 require_param!" do
     test "raises ArgumentError when display_name missing" do
@@ -230,9 +218,7 @@ defmodule LatticeStripe.Billing.MeterTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Meter.create/3 — guard integration (guard fires before network)
-  # ---------------------------------------------------------------------------
 
   describe "Meter.create/3 guard integration" do
     test "raises ArgumentError when sum formula + empty value_settings (guard fires before network)" do
@@ -250,9 +236,7 @@ defmodule LatticeStripe.Billing.MeterTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Meter.create/3 — happy path via MockTransport
-  # ---------------------------------------------------------------------------
 
   describe "Meter.create/3" do
     test "sends POST /v1/billing/meters and returns {:ok, %Meter{}}" do
@@ -273,9 +257,7 @@ defmodule LatticeStripe.Billing.MeterTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Meter.retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "Meter.retrieve/3" do
     test "sends GET /v1/billing/meters/:id and returns {:ok, %Meter{}}" do
@@ -291,9 +273,7 @@ defmodule LatticeStripe.Billing.MeterTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Meter.deactivate/3 + reactivate/3
-  # ---------------------------------------------------------------------------
 
   describe "Meter.deactivate/3" do
     test "sends POST /v1/billing/meters/:id/deactivate and returns {:ok, %Meter{}}" do
@@ -325,7 +305,7 @@ defmodule LatticeStripe.Billing.MeterTest do
   end
 
   describe "module surface" do
-    # Stripe's own Java SDK documentation advertised a `Meter.getEventSummaries()`
+    # Stripe's own Java SDK documentation advertised a `Meter.getEventSummaries`
     # for years. It never existed; Stripe's reply on stripe-java#1852 was that
     # "the docs is wrong". Event summaries are read through their own module, and
     # Meter deliberately ships no convenience delegator to them — coherent with

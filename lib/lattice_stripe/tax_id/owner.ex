@@ -32,17 +32,14 @@ defmodule LatticeStripe.TaxId.Owner do
     {known, extra} = Map.split(map, @known_fields)
 
     %__MODULE__{
-      account: parse_expandable(known["account"]),
-      application: parse_expandable(known["application"]),
-      customer: parse_expandable(known["customer"]),
+      account: ObjectTypes.maybe_deserialize(known["account"]),
+      application: ObjectTypes.maybe_deserialize(known["application"]),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       customer_account: known["customer_account"],
       type: atomize_type(known["type"]),
       extra: extra
     }
   end
-
-  defp parse_expandable(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_expandable(value), do: value
 
   defp atomize_type("account"), do: :account
   defp atomize_type("application"), do: :application

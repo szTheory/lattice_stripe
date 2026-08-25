@@ -5,13 +5,13 @@ defmodule LatticeStripe.FileTest do
   import LatticeStripe.TestHelpers
 
   alias LatticeStripe.{Error, File, FileLink, Response}
-  alias LatticeStripe.Test.Fixtures
+  alias LatticeStripe.Testing.Fixtures.File, as: FileFixture
 
   setup :verify_on_exit!
 
   describe "from_map/1" do
     test "builds struct from known fields" do
-      file = File.from_map(Fixtures.File.basic())
+      file = File.from_map(FileFixture.file_json())
       assert file.id == "file_test123"
       assert file.object == "file"
       assert file.purpose == "dispute_evidence"
@@ -22,18 +22,18 @@ defmodule LatticeStripe.FileTest do
     end
 
     test "stores unknown fields in extra" do
-      file = File.from_map(Fixtures.File.basic())
+      file = File.from_map(FileFixture.file_json())
       assert file.extra["zzz_forward_compat_field"] == "extra_value"
     end
 
     test "parses nested links as %List{data: [%FileLink{}, ...]}" do
-      file = File.from_map(Fixtures.File.with_links())
+      file = File.from_map(FileFixture.file_with_links_json())
       assert %LatticeStripe.List{} = file.links
       assert [%FileLink{id: "link_test456"}] = file.links.data
     end
 
     test "handles nil links" do
-      file = File.from_map(Fixtures.File.basic(%{"links" => nil}))
+      file = File.from_map(FileFixture.file_json(%{"links" => nil}))
       assert is_nil(file.links)
     end
   end
@@ -45,7 +45,7 @@ defmodule LatticeStripe.FileTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
         assert String.contains?(req.url, "/v1/files")
-        ok_response(Fixtures.File.basic())
+        ok_response(FileFixture.file_json())
       end)
 
       assert {:ok, %File{id: "file_test123", purpose: "dispute_evidence"}} =
@@ -85,7 +85,7 @@ defmodule LatticeStripe.FileTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert String.ends_with?(req.url, "/v1/files/file_test123")
-        ok_response(Fixtures.File.basic())
+        ok_response(FileFixture.file_json())
       end)
 
       assert {:ok, %File{id: "file_test123"}} = File.retrieve(client, "file_test123")
@@ -102,7 +102,7 @@ defmodule LatticeStripe.FileTest do
 
         ok_response(%{
           "object" => "list",
-          "data" => [Fixtures.File.basic()],
+          "data" => [FileFixture.file_json()],
           "has_more" => false,
           "url" => "/v1/files"
         })
@@ -125,7 +125,7 @@ defmodule LatticeStripe.FileTest do
 
   describe "Inspect" do
     test "masks url field" do
-      file = File.from_map(Fixtures.File.basic())
+      file = File.from_map(FileFixture.file_json())
       inspected = inspect(file)
       assert inspected =~ "LatticeStripe.File"
       assert inspected =~ "file_test123"

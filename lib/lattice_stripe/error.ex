@@ -221,7 +221,7 @@ defmodule LatticeStripe.Error do
   defp parse_type("idempotency_error"), do: :idempotency_error
   defp parse_type(_), do: :api_error
 
-  # Append fuzzy param suggestion to invalid_request_error messages (D-03).
+  # Append fuzzy parameter suggestions to invalid-request messages.
   # Only fires when type is :invalid_request_error and param is a non-nil binary.
   # Guard clause + catch-all mirrors parse_type/1 multi-clause style.
   defp maybe_enrich_message(:invalid_request_error, message, param)
@@ -234,12 +234,12 @@ defmodule LatticeStripe.Error do
 
   defp maybe_enrich_message(_type, message, _param), do: message
 
-  # Response-only fields that should never appear as param suggestions (D-02).
+  # Response-only fields must never appear as parameter suggestions.
   # These are read-only fields returned by Stripe, never sent as request params.
   @response_only_fields ~w[id object created livemode url deleted has_more
                            total_count next_page previous_page data]
 
-  # Find the closest matching field name for a param string (D-02).
+  # Find the closest matching field name for a parameter string.
   # Uses String.jaro_distance/2 (Elixir stdlib) with 0.8 threshold and
   # minimum length 4 to avoid noisy short-name matches.
   defp suggest_param(param) do
@@ -277,8 +277,8 @@ defmodule LatticeStripe.Error do
 
   # All resource modules whose struct keys serve as the global param candidate pool.
   # Struct keys mirror @known_fields in every resource module.
-  # When a new resource module is added to ObjectTypes, add it here too.
-  # (Phase 30 drift detection can automate this check.)
+  # When a new resource module is added to ObjectTypes, add it here too; the drift
+  # check verifies that the two registries remain aligned.
   @all_resource_modules [
     LatticeStripe.Account,
     LatticeStripe.AccountLink,

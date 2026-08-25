@@ -33,7 +33,7 @@ defmodule LatticeStripe.Billing.MeterIntegrationTest do
     %{client: client}
   end
 
-  # TEST-05: Full lifecycle against stripe-mock.
+  # Full lifecycle against stripe-mock.
   # stripe-mock is stateless — state transitions (active→inactive) are NOT
   # asserted. Only the return shape (%Meter{}) is checked for each verb.
   test "full lifecycle: create → retrieve → update → list → deactivate → reactivate", %{
@@ -55,7 +55,7 @@ defmodule LatticeStripe.Billing.MeterIntegrationTest do
 
     assert is_binary(id)
 
-    # TEST-05 (metering side) — report an event through the meter we just created.
+    # (metering side) — report an event through the meter we just created.
     # stripe-mock is stateless: we assert {:ok, %MeterEvent{}} shape only, NOT
     # that the event was persisted against any customer. The point of this test
     # is that the HTTP call round-trips through LatticeStripe.Billing.MeterEvent
@@ -69,7 +69,7 @@ defmodule LatticeStripe.Billing.MeterIntegrationTest do
                "identifier" => event_identifier
              })
 
-    # TEST-05 continued — adjust the event we just reported, using the exact
+    # continued — adjust the event we just reported, using the exact
     # cancel.identifier nested shape enforced by Guards.check_adjustment_cancel_shape!/1.
     # Shape-only assertion: stripe-mock does not enforce the 24-hour window or
     # verify the identifier exists.

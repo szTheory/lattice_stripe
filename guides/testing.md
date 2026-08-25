@@ -1,13 +1,28 @@
 # Testing
 
-This guide covers how to test application code that uses LatticeStripe. LatticeStripe is designed
-to be testable: the `Transport` behaviour is mockable with [Mox](https://github.com/dashbitco/mox),
-webhook helpers are included in the library itself, and
-[stripe-mock](https://github.com/stripe/stripe-mock) provides a real HTTP server for integration
-tests validated against Stripe's OpenAPI spec.
+This guide helps you choose the smallest test that can truthfully prove each Stripe integration
+behavior. LatticeStripe provides raw and typed fixtures, a mockable `Transport` behaviour, signed
+webhook helpers, and integration points for Stripe's own test tools.
 
 For Stripe's official testing documentation (test card numbers, bank accounts, etc.), see
 [Stripe Testing docs](https://docs.stripe.com/testing).
+
+## Testing pyramid: choose the smallest truthful test
+
+Not every behavior needs a network test, and no single test double proves everything. Start at
+the lowest useful layer and add a higher layer only for behavior the lower layer cannot model.
+
+| Layer | Best for | What it does not prove |
+|-------|----------|------------------------|
+| Shipped fixtures and pure tests | Business rules, resource decoding, and application state transitions | Request encoding, signatures, or Stripe behavior |
+| Mox at `LatticeStripe.Transport` | Request method/path/body, retry decisions, response decoding, and error handling | Real HTTP or Stripe's server-side state machine |
+| `Plug.Test` with signed payload helpers | Webhook routing, signature verification, and handler responses | Stripe delivery timing or redelivery behavior |
+| [stripe-mock](https://github.com/stripe/stripe-mock) | Real HTTP plumbing plus basic route, parameter, and response-shape compatibility | Persistence, lifecycle transitions, asynchronous events, or complete Stripe validation |
+| Stripe test mode, Stripe CLI, and Test Clocks | Provider validation, object lifecycles, webhook delivery, and time-dependent billing behavior | Live-mode account configuration and production operations |
+
+Most application tests should use fixtures or Mox. Keep a smaller integration suite for the
+provider behaviors your application actually depends on. A green stripe-mock test is useful
+evidence, but it is not proof that Stripe test mode will accept or behave like the scenario.
 
 ## Public fixture builders
 
@@ -72,12 +87,7 @@ txn_map =
 txn = Testing.tax_transaction(txn_map)
 ```
 
-For Mox-at-Transport tests that exercise the calculate → record chain, see
-`test/lattice_stripe/tax/calculation_transaction_test.exs` in this repository.
-
-`Tax.Settings` and `Tax.Registration` wire fixtures remain internal under
-`test/support/fixtures/tax_settings.ex` and `tax_registration.ex` — they are not
-part of the public `LatticeStripe.Testing.Fixtures.*` surface.
+### Other resource fixtures
 
 ```elixir
 alias LatticeStripe.Testing
@@ -371,9 +381,14 @@ will accept it.
 
 ## Using stripe-mock
 
-For integration tests that verify real request/response shapes against Stripe's actual API spec,
-use [stripe-mock](https://github.com/stripe/stripe-mock). It's an official Stripe server powered
-by Stripe's OpenAPI spec — if stripe-mock accepts your request, the real Stripe API will too.
+Use [stripe-mock](https://github.com/stripe/stripe-mock) for fast integration tests that need a
+real HTTP boundary and basic compatibility with routes and shapes from Stripe's OpenAPI spec.
+
+stripe-mock is stateless and returns generated or hard-coded examples. A created object is not
+persisted for a later retrieve, and the server does not reproduce lifecycle transitions,
+asynchronous webhook delivery, timing behavior, or every validation performed by Stripe. Use
+Stripe test mode for those behaviors; add the Stripe CLI when the test depends on webhook
+delivery, and use Test Clocks for time-dependent billing transitions.
 
 ### Starting stripe-mock
 
@@ -580,15 +595,17 @@ Without it, a test that expects 2 calls but only makes 1 will silently pass:
 setup :verify_on_exit!  # catches: "expected 2 calls, got 1"
 ```
 
-**Don't use ExVCR or cassette recording**
+**Do not make long-lived cassettes your contract**
 
-Stripe's API evolves frequently. Cassettes become stale and hide real behavior. Use Mox for unit
-tests (control the response) and stripe-mock for integration tests (validates against real spec).
+Stripe's API evolves frequently. Recorded responses become stale and can hide changed behavior.
+Prefer shipped fixtures for application logic, Mox when a test owns the response, stripe-mock for
+HTTP and basic schema compatibility, and Stripe test mode for provider behavior.
 
-**stripe-mock validates against Stripe's OpenAPI spec**
+**Treat stripe-mock failures as signals, not final verdicts**
 
-If stripe-mock rejects a request with a 400 or 422, it means your request shape doesn't match
-Stripe's API contract — that's a real bug. stripe-mock is more strict than just passing tests.
+A stripe-mock rejection may expose a route or shape bug and is worth investigating. Its model is
+not complete, however, so confirm disputed behavior in Stripe test mode. Likewise, acceptance by
+stripe-mock does not prove server-side validation, persistence, or lifecycle behavior.
 
 **Test keys must use `sk_test_` prefix**
 
@@ -600,6 +617,8 @@ anti-pattern, see [metering.md](metering.md#what-not-to-do-nightly-batch-flush).
 
 ## See also
 
+- [API Stability](api_stability.md) — compatibility guarantees for public testing helpers
+- [Client Configuration](client-configuration.md) — explicit clients and per-request overrides
 - [Checkout Signup and Portal Follow-Through](checkout-signup-and-portal.md)
 - [Metering Runtime and Reconciliation](metering-runtime-and-reconciliation.md)
 - [Webhooks](webhooks.md) — signed payload helpers and end-to-end handler verification

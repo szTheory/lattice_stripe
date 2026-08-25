@@ -6,26 +6,28 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a feature! Please describe what you'd like.
+        Thanks for helping shape LatticeStripe. Start with the application job and adopter impact;
+        a Stripe endpoint alone does not establish that a new typed surface belongs in the SDK.
   - type: textarea
     id: problem
     attributes:
-      label: Problem
-      description: "What problem does this feature solve? Is it related to a frustration?"
+      label: Job to be done
+      description: "Who needs to accomplish what, in which workflow, and what blocks them today?"
+      placeholder: "As a marketplace operator, I need to ... so that ..."
     validations:
       required: true
   - type: textarea
     id: solution
     attributes:
-      label: Proposed Solution
-      description: "Describe the solution you'd like."
+      label: Expected adopter experience
+      description: "Show the Elixir call or workflow you expect to write and the result your application needs. Focus on the caller-facing contract, not the SDK internals."
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives Considered
-      description: "Any alternative solutions or features you've considered."
+      label: Current workaround and tradeoffs
+      description: "Can Client.request/2 or existing resource modules complete the job? What safety, maintenance, or ergonomics cost remains?"
     validations:
       required: false
   - type: input
@@ -34,5 +36,13 @@ body:
       label: Related Stripe API
       description: "If this relates to a specific Stripe API resource or endpoint."
       placeholder: "e.g., Subscriptions, Invoices, /v1/billing_portal/sessions"
+    validations:
+      required: false
+  - type: input
+    id: stripe-docs
+    attributes:
+      label: Stripe documentation
+      description: "Link the relevant Stripe API or guide page, including any preview/version constraint."
+      placeholder: "https://docs.stripe.com/api/..."
     validations:
       required: false

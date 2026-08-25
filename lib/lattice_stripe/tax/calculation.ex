@@ -169,7 +169,7 @@ defmodule LatticeStripe.Tax.Calculation do
       object: known["object"] || "tax.calculation",
       amount_total: known["amount_total"],
       currency: known["currency"],
-      customer: parse_expandable(known["customer"]),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       customer_details: CustomerDetails.from_map(known["customer_details"]),
       expires_at: known["expires_at"],
       line_items: parse_line_items(known["line_items"]),
@@ -183,9 +183,6 @@ defmodule LatticeStripe.Tax.Calculation do
       extra: extra
     }
   end
-
-  defp parse_expandable(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_expandable(value), do: value
 
   defp parse_line_items(nil), do: nil
 

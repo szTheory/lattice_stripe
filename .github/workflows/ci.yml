@@ -23,6 +23,19 @@ permissions:
   contents: read
 
 jobs:
+  actionlint:
+    name: Actionlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Validate GitHub Actions workflows
+        uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2
+        with:
+          version: 1.7.12
+          pyflakes: false
+
   format:
     name: Format
     runs-on: ubuntu-latest
@@ -91,12 +104,58 @@ jobs:
       - name: Compile with warnings-as-errors
         run: mix compile --warnings-as-errors
 
+  no_optional_deps:
+    name: "Compile without optional deps (Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MIX_ENV: prod
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - elixir: '1.15'
+            otp: '26'
+          - elixir: '1.17'
+            otp: '27'
+          - elixir: '1.19'
+            otp: '28'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+
+      - name: Cache deps
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: deps
+          key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-prod-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-prod-mix-
+
+      - name: Cache _build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: _build
+          key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-prod-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-prod-build-
+
+      - name: Install production dependencies
+        run: mix deps.get --only prod --check-locked
+
+      - name: Compile without optional dependencies
+        run: mix compile --no-optional-deps --warnings-as-errors
+
   test:
     name: "Test (Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }})"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
           - elixir: '1.15'
@@ -138,6 +197,40 @@ jobs:
       - name: Tax adoption contract
         if: matrix.elixir == '1.19' && matrix.otp == '28'
         run: mix test test/lattice_stripe/tax/adoption_contract_test.exs --warnings-as-errors
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Cache deps
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: deps
+          key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-mix-
+
+      - name: Cache _build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: _build
+          key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-build-
+
+      - name: Install dependencies
+        run: mix deps.get --check-locked
+
+      - name: Enforce coverage floor
+        run: mix test --cover
 
   integration:
     name: Integration Tests
@@ -181,6 +274,74 @@ jobs:
 
       - name: Run integration tests
         run: mix test --include integration
+
+  fuse_integration:
+    name: Fuse Integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Cache deps
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: deps
+          key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-mix-
+
+      - name: Cache _build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: _build
+          key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-build-
+
+      - name: Install dependencies
+        run: mix deps.get --check-locked
+
+      - name: Run Fuse integration tests
+        run: mix test test/integration/circuit_breaker_integration_test.exs --include fuse_integration --warnings-as-errors
+
+  otel_integration:
+    name: OpenTelemetry Integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Cache deps
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: deps
+          key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-mix-
+
+      - name: Cache _build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: _build
+          key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-1.19-28-build-
+
+      - name: Install dependencies
+        run: mix deps.get --check-locked
+
+      - name: Run OpenTelemetry integration tests
+        run: mix test test/integration/opentelemetry_integration_test.exs --include otel_integration --warnings-as-errors
 
   docs_truth:
     name: Docs Truth
@@ -256,6 +417,9 @@ jobs:
       - name: Check for unused dependencies
         run: mix deps.unlock --check-unused
 
+      - name: Audit Hex dependencies
+        run: mix hex.audit
+
       - name: Run Credo
         run: mix credo --strict
 
@@ -265,30 +429,48 @@ jobs:
         # than the required ci-gate and doc warnings could never fail a PR.
         run: mix docs --warnings-as-errors
 
+      # `mix hex.publish --dry-run` still requires a logged-in Hex user, so it is
+      # not a truthful fork-safe PR gate. The authenticated release workflow owns
+      # that dry run; PR CI proves the same package manifest can be assembled.
       - name: Build Hex package
         run: mix hex.build
-
-      - name: Audit dependencies
-        run: mix deps.audit
 
   ci-gate:
     name: ci-gate
     runs-on: ubuntu-latest
-    needs: [format, compile, test, integration, docs_truth, quality]
+    needs:
+      [
+        actionlint,
+        format,
+        compile,
+        no_optional_deps,
+        test,
+        coverage,
+        integration,
+        fuse_integration,
+        otel_integration,
+        docs_truth,
+        quality,
+      ]
     if: always()
     steps:
       - name: Verify required CI lanes
         env:
+          ACTIONLINT: ${{ needs.actionlint.result }}
           FORMAT: ${{ needs.format.result }}
           COMPILE: ${{ needs.compile.result }}
+          NO_OPTIONAL_DEPS: ${{ needs.no_optional_deps.result }}
           TEST: ${{ needs.test.result }}
+          COVERAGE: ${{ needs.coverage.result }}
           INTEGRATION: ${{ needs.integration.result }}
+          FUSE_INTEGRATION: ${{ needs.fuse_integration.result }}
+          OTEL_INTEGRATION: ${{ needs.otel_integration.result }}
           DOCS_TRUTH: ${{ needs.docs_truth.result }}
           QUALITY: ${{ needs.quality.result }}
         run: |
           set -euo pipefail
           failed=0
-          for lane in FORMAT COMPILE TEST INTEGRATION DOCS_TRUTH QUALITY; do
+          for lane in ACTIONLINT FORMAT COMPILE NO_OPTIONAL_DEPS TEST COVERAGE INTEGRATION FUSE_INTEGRATION OTEL_INTEGRATION DOCS_TRUTH QUALITY; do
             result="${!lane}"
             if [[ "$result" != "success" ]]; then
               echo "Required lane $lane: $result"

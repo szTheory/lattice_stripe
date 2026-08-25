@@ -1,117 +1,103 @@
 # API Stability
 
-> LatticeStripe 1.0.0 commits to API stability under standard semantic
-> versioning. This guide documents exactly what is covered by that contract
-> and what is explicitly excluded.
+LatticeStripe follows [Semantic Versioning 2.0.0](https://semver.org). The 2.x
+release line may add capabilities, but it does not silently change documented
+calls or values that existing applications depend on. A breaking public change
+requires a new major release and an upgrade path.
 
-LatticeStripe follows [Semantic Versioning 2.0.0](https://semver.org) from
-v1.0.0 forward. Once you pin to `~> 1.0`, you can expect additive changes
-within the 1.x line and never a silent break. The contract applies to
-the surface described below — anything outside it is an implementation
-detail and may change without a major bump.
+This guide defines that boundary. It is for application authors deciding what
+they can safely depend on and extension authors deciding where customization is
+supported.
 
 ## What is public API
 
-Every module documented in HexDocs (that is, every module *without*
-`@moduledoc false`) is public API. The semver contract covers:
+Every module rendered in HexDocs is public API. The compatibility contract
+covers:
 
-- **Public module names and aliases** — renaming or removing a public
-  module is a major bump.
-- **Public function signatures** — name, arity, parameter shape, and
-  return type of every `@doc`-annotated function.
-- **Public struct field names** — *adding* fields to a public struct is
-  non-breaking; *removing* or *renaming* a field is breaking.
-- **Error reason atoms** in `LatticeStripe.Error` — the `:type` field's
-  documented atom set is stable. New atoms may be added (minor bump);
-  existing ones will not silently change meaning.
-- **Telemetry event names and metadata keys** in
-  `LatticeStripe.Telemetry` — the documented event list and measurement
-  keys are stable for the 1.x line.
-- **NimbleOptions schema keys** in `LatticeStripe.Config` — options
-  accepted by `LatticeStripe.Client.new!/1` and `new/1` are stable
-  within 1.x. Adding options is non-breaking; removing them is a major
-  bump.
+- **Public module names and aliases.** Renaming or removing one is breaking.
+- **Public functions.** Names, arities, accepted parameter shapes, return
+  shapes, raised exceptions, and documented behavior are stable within 2.x.
+- **Public structs.** Documented field names, field types, and value
+  representations are stable. For example, changing a timestamp from a Unix
+  integer to a `DateTime`, a documented status from an atom to a string, or an
+  expanded field from a typed struct to a raw map is breaking. Adding an
+  optional field is additive; removing or renaming a field is breaking.
+- **Errors.** Documented `LatticeStripe.Error` types, field meanings, and error
+  tuple shapes are stable. New error types may be added without changing the
+  meaning of existing ones.
+- **Configuration.** Options accepted by `LatticeStripe.Client.new/1` and
+  `new!/1`, their documented types, defaults, and precedence rules are stable.
+- **Telemetry.** Documented event names, measurements, and metadata keys are
+  stable. New metadata may be added, so handlers should read the keys they need
+  instead of asserting exact map equality.
+- **Public testing helpers and fixtures.** Function names and documented output
+  shapes are application-facing contracts because adopter test suites compile
+  against them.
 
-## What is NOT public API
+Stripe can add fields and enum values without notice. LatticeStripe preserves
+unknown resource fields in each struct's `extra` map and leaves unknown finite
+values unchanged. Match the values you handle and provide a fallback instead of
+assuming today's set is exhaustive.
 
-Modules with `@moduledoc false` are internal implementation details.
-They are visible in the source tree — this is Elixir, there is no
-privacy enforcement — but they are explicitly excluded from the semver
-contract. These modules may change in any patch release without notice:
+## What is not public API
 
-- LatticeStripe.FormEncoder
-- LatticeStripe.Resource
-- LatticeStripe.Transport.Finch
-- LatticeStripe.Json.Jason
-- LatticeStripe.RetryStrategy.Default
-- LatticeStripe.Billing.Guards
+Modules marked `@moduledoc false` are implementation details. Elixir does not
+enforce module privacy, but calling those modules opts out of the compatibility
+contract. They can change in a patch release when an internal refactor requires
+it.
 
-Note: `LatticeStripe.Request` was previously documented as internal but is
-retained as public API in 1.0 because `LatticeStripe.Client.request/2`
-accepts a `Request.t()` struct, so `Request` remains part of the public API
-in 1.0.
+This includes internal encoders, concrete default adapters, resource decoding
+helpers, default retry policy implementation, and billing guard helpers. Use
+the documented resource modules and public behaviours instead.
 
-If your application depends on any of these modules, you are relying on
-an implementation detail and should expect breakage. Prefer the public
-behaviours listed below as extension points.
+`LatticeStripe.Request` is public because `LatticeStripe.Client.request/2`
+accepts it. The concrete modules used behind public behaviours are not public
+merely because their source is visible.
 
-## Extension points (public behaviours)
+## Supported extension points
 
-Three behaviours are public API precisely because they are designed for
-user implementation. Custom implementations of these behaviours are
-supported and will continue to be supported for the 1.x lifetime:
+Three behaviours are designed for application implementations:
 
-- **`LatticeStripe.Transport`** — swap the HTTP client. LatticeStripe
-  ships a Finch adapter by default, but any module implementing this
-  behaviour can be plugged in via the `:transport` config.
-- **`LatticeStripe.Json`** — swap the JSON codec. Jason is the default;
-  any codec implementing `encode/1` and `decode/1` works.
-- **`LatticeStripe.RetryStrategy`** — customize retry logic. The default
-  strategy honours Stripe's `Stripe-Should-Retry` header and the
-  `idempotency-replayed` response header, but platforms with exotic
-  retry budgets can supply their own module.
+- **`LatticeStripe.Transport`** — replace the HTTP transport or provide a test
+  transport.
+- **`LatticeStripe.Json`** — replace the JSON codec.
+- **`LatticeStripe.RetryStrategy`** — customize retry decisions and backoff.
 
-These are the designed-in extension points. Building on top of them is
-safe across the 1.x line.
+Implementations of these behaviours may rely on their documented callbacks and
+types throughout 2.x. Other internal modules are not extension points.
 
-## Versioning policy
+## Release meanings
 
-After v1.0.0, LatticeStripe follows post-1.0 semver strictly:
+- **Patch (2.x.y)** — compatible bug fixes, documentation corrections,
+  security fixes, dependency updates, and internal refactors.
+- **Minor (2.y.0)** — additive modules, functions, optional fields, options,
+  error types, or telemetry metadata. Existing documented calls and value
+  representations continue to work.
+- **Major (x.0.0)** — removals, renames, changed parameter or result shapes,
+  changed struct field types or value representations, changed error semantics,
+  or dropped Elixir/OTP support.
 
-- **Patch** (1.0.x) — bug fixes, documentation corrections, internal
-  refactors, dependency version bumps that do not change the public
-  surface. No behaviour changes that a working application would notice.
-- **Minor** (1.x.0) — additive features only: new resource modules, new
-  function arities, new optional fields on existing structs, new
-  NimbleOptions schema keys, new Telemetry metadata keys, new
-  `LatticeStripe.Error` reason atoms. Nothing that would break an
-  existing correctly-typed call site.
-- **Major** (x.0.0) — breaking changes to the public API: removed or
-  renamed functions, changed function signatures, removed struct
-  fields, changed error type semantics, dropped Elixir/OTP version
-  support.
-
-**Pre-1.0:** while the library was in 0.x, breaking changes were allowed in
-minor bumps. **From v1.0.0 forward**, a breaking change requires a major bump,
-full stop. Pin to `~> 1.0` with confidence.
+A fix that would change documented runtime behavior is not hidden in a patch.
+It is either implemented compatibly, deprecated first, or reserved for a major
+release.
 
 ## Deprecation policy
 
-When a public API is scheduled for removal, LatticeStripe will mark the
-affected function or module with `@deprecated` in a minor release,
-accompanied by a CHANGELOG entry explaining the migration path. The
-deprecated surface continues to work normally until the next major
-release, at which point it may be removed.
+When a public API is scheduled for removal, a compatible release marks it with
+`@deprecated` and the changelog identifies the replacement. The deprecated
+surface keeps working for the rest of the current major line. Removal can occur
+in the next major release.
 
-Deprecation warnings are emitted by the Elixir compiler at call sites
-during `mix compile`. Treat them as a heads-up to plan migration before
-the next major — the deprecated call will not suddenly stop working
-inside the current major line.
+Treat compiler deprecation warnings as migration notice, not an immediate
+runtime failure. New code should use the replacement so the eventual major
+upgrade remains mechanical.
 
 ## See also
 
-- [CHANGELOG](../CHANGELOG.md) — every release's changes, with
-  Highlights narratives for major versions
-- [Extending LatticeStripe](extending-lattice-stripe.md) — concrete
-  recipes for the three public behaviours
-- [Getting Started](getting-started.md) — first steps for new users
+- [Client Configuration](client-configuration.md) — client options and
+  per-request precedence
+- [Testing](testing.md) — public fixtures and supported transport mocking
+- [Extending LatticeStripe](extending-lattice-stripe.md) — examples for the
+  three supported behaviours
+- [Changelog](../CHANGELOG.md) — release-by-release additions, fixes, and
+  migrations

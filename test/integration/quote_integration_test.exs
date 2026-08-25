@@ -10,11 +10,9 @@ defmodule LatticeStripe.QuoteIntegrationTest do
   use ExUnit.Case, async: false
 
   import LatticeStripe.TestHelpers
-  import LatticeStripe.Test.Fixtures.Quote
-
   @moduletag :integration
 
-  alias LatticeStripe.{Invoice, Quote, Subscription, SubscriptionSchedule}
+  alias LatticeStripe.{Customer, Invoice, Product, Quote, Subscription, SubscriptionSchedule}
 
   setup_all do
     case :gen_tcp.connect(~c"localhost", 12_111, [], 1000) do
@@ -123,6 +121,49 @@ defmodule LatticeStripe.QuoteIntegrationTest do
     assert [%Quote.LineItem{} | _] =
              Quote.stream_line_items!(client, quote.id, %{"limit" => "5"})
              |> Enum.take(1)
+  end
+
+  defp create_quote_customer!(client, attrs) do
+    {:ok, customer} =
+      Customer.create(client, %{
+        "email" => Map.get(attrs, "customer_email", "quote-test@example.com")
+      })
+
+    customer
+  end
+
+  defp create_quote_product!(client, attrs) do
+    {:ok, product} =
+      Product.create(client, %{
+        "name" => Map.get(attrs, "product_name", "Quote fixture product")
+      })
+
+    product
+  end
+
+  defp create_quote!(client, attrs) do
+    customer = create_quote_customer!(client, attrs)
+    product = create_quote_product!(client, attrs)
+
+    params =
+      %{
+        "customer" => customer.id,
+        "line_items" => [
+          %{
+            "price_data" => %{
+              "currency" => "usd",
+              "product" => product.id,
+              "unit_amount" => 2_000,
+              "recurring" => %{"interval" => "month"}
+            },
+            "quantity" => 1
+          }
+        ]
+      }
+      |> Map.merge(Map.get(attrs, "quote", %{}))
+
+    {:ok, quote} = Quote.create(client, params)
+    quote
   end
 
   defp assert_downstream_follow_through(client, accepted_quote) do

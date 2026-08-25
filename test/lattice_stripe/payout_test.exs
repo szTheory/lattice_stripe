@@ -9,9 +9,7 @@ defmodule LatticeStripe.PayoutTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/payouts and returns {:ok, %Payout{}}" do
@@ -57,9 +55,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/payouts/:id" do
@@ -92,9 +88,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/payouts/:id with metadata" do
@@ -114,9 +108,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/payouts and returns typed items" do
@@ -144,9 +136,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "stream!/3" do
     test "yields Payout structs lazily" do
@@ -161,9 +151,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # cancel/4 — D-03 canonical shape
-  # ---------------------------------------------------------------------------
+  # cancel/4 — canonical shape
 
   describe "cancel/4 default params" do
     test "Payout.cancel(client, id) works without explicit params" do
@@ -218,9 +206,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # reverse/4 — D-03 canonical shape
-  # ---------------------------------------------------------------------------
+  # reverse/4 — canonical shape
 
   describe "reverse/4 default params" do
     test "Payout.reverse(client, id) works without explicit params" do
@@ -275,9 +261,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1 — trace_id decoding
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1 trace_id decoding" do
     test "decodes trace_id map into %Payout.TraceId{} struct" do
@@ -349,9 +333,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1 — atomization
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1 status atomization" do
     test "atomizes 'paid' to :paid" do
@@ -474,9 +456,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # Module surface — D-03 / D-04 guards
-  # ---------------------------------------------------------------------------
+  # Module surface — guards
 
   describe "module surface" do
     test "cancel is exported at arity 2 AND arity 4 (default params)" do
@@ -503,9 +483,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   describe "bang variants" do
     test "create! raises on error" do

@@ -42,9 +42,7 @@ defmodule LatticeStripe.AccountIntegrationTest do
     {:ok, client: test_integration_client()}
   end
 
-  # ---------------------------------------------------------------------------
   # create
-  # ---------------------------------------------------------------------------
 
   test "create/3 with minimal params returns %Account{} with populated id", %{client: client} do
     assert {:ok, %Account{id: id} = account} =
@@ -59,9 +57,7 @@ defmodule LatticeStripe.AccountIntegrationTest do
     assert %Account{} = account
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve
-  # ---------------------------------------------------------------------------
 
   test "retrieve/3 by id returns %Account{} with matching id", %{client: client} do
     {:ok, %Account{id: id}} =
@@ -73,9 +69,7 @@ defmodule LatticeStripe.AccountIntegrationTest do
     assert {:ok, %Account{id: ^id}} = Account.retrieve(client, id)
   end
 
-  # ---------------------------------------------------------------------------
   # update
-  # ---------------------------------------------------------------------------
 
   test "update/4 with metadata returns %Account{}", %{client: client} do
     {:ok, %Account{id: id}} =
@@ -90,9 +84,7 @@ defmodule LatticeStripe.AccountIntegrationTest do
              })
   end
 
-  # ---------------------------------------------------------------------------
   # list + stream!
-  # ---------------------------------------------------------------------------
 
   test "list/3 with limit returns %Response{data: %List{data: [%Account{}]}}", %{client: client} do
     assert {:ok, %LatticeStripe.Response{data: %LatticeStripe.List{data: data}}} =
@@ -108,9 +100,7 @@ defmodule LatticeStripe.AccountIntegrationTest do
     Enum.each(accounts, fn account -> assert %Account{} = account end)
   end
 
-  # ---------------------------------------------------------------------------
   # reject — REJECT_SUPPORTED=true per 17-VALIDATION.md (scripts/verify_stripe_mock_reject.exs)
-  # ---------------------------------------------------------------------------
 
   test "reject/4 with :fraud hits POST /v1/accounts/:id/reject", %{client: client} do
     {:ok, %Account{id: id}} =
@@ -129,9 +119,7 @@ defmodule LatticeStripe.AccountIntegrationTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # delete
-  # ---------------------------------------------------------------------------
 
   test "delete/3 returns %Account{} with extra[\"deleted\"] == true", %{client: client} do
     {:ok, %Account{id: id}} =
@@ -144,9 +132,7 @@ defmodule LatticeStripe.AccountIntegrationTest do
     assert extra["deleted"] == true
   end
 
-  # ---------------------------------------------------------------------------
   # nested struct casting via live fetch
-  # ---------------------------------------------------------------------------
 
   test "business_profile and capabilities are typed structs after retrieve", %{client: client} do
     {:ok, %Account{id: id}} =

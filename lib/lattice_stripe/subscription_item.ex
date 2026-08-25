@@ -77,9 +77,7 @@ defmodule LatticeStripe.SubscriptionItem do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new SubscriptionItem.
@@ -219,9 +217,7 @@ defmodule LatticeStripe.SubscriptionItem do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%SubscriptionItem{}` struct.

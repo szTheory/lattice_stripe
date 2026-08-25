@@ -6,16 +6,14 @@ defmodule LatticeStripe.BillingPortal.SessionIntegrationTest do
   @moduletag :integration
   @moduletag :billing_portal
 
-  # ---------------------------------------------------------------------------
-  # TEST-05 (portal portion) — Full portal flow against stripe-mock
+  # (portal portion) — Full portal flow against stripe-mock
   #
   # NOT covered here (intentional):
-  #   - PORTAL-04 guard matrix — stripe-mock does NOT enforce sub-field
+  #   - guard matrix — stripe-mock does NOT enforce sub-field
   #     validation (RESEARCH Finding 1); guards live in guards_test.exs.
   #   - RESEARCH Finding 2 (unknown flow type 422) — already covered in unit
   #     tests as a Guards.check_flow_data!/1 case; stripe-mock accepts it as
   #     400, not 422.
-  # ---------------------------------------------------------------------------
 
   alias LatticeStripe.BillingPortal.Session
   alias LatticeStripe.BillingPortal.Session.FlowData
@@ -106,7 +104,7 @@ defmodule LatticeStripe.BillingPortal.SessionIntegrationTest do
 
   test "create/3 with stripe_account: opt threads header through",
        %{client: client, customer_id: customer_id} do
-    # PORTAL-06 integration check — stripe-mock accepts any acct_* value
+    # integration check — stripe-mock accepts any acct_* value
     result =
       Session.create(
         client,

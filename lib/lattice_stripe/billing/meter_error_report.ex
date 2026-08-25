@@ -123,7 +123,7 @@ defmodule LatticeStripe.Billing.MeterErrorReport do
 
   # Exactly the four fields the published `data` tree carries. String sigil
   # (no `a`) matches Jason's default string-key output, and square brackets
-  # rather than parens to match the surrounding convention (D-19/D-20).
+  # rather than parentheses to match the surrounding convention.
   @known_fields ~w[
     developer_message_summary reason validation_start validation_end
   ]
@@ -155,9 +155,7 @@ defmodule LatticeStripe.Billing.MeterErrorReport do
     extra: %{}
   ]
 
-  # ---------------------------------------------------------------------------
   # DECODE
-  # ---------------------------------------------------------------------------
 
   @doc """
   Decode a fetched `%LatticeStripe.Event{}` into a `%MeterErrorReport{}`.

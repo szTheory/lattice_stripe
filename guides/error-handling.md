@@ -354,9 +354,11 @@ before retrying.
 **Connection errors may mean Stripe was reached**
 
 A `:connection_error` means the TCP connection failed or timed out. The request may or may not have
-reached Stripe. If you sent a POST without an idempotency key, you can't safely retry — you might
-create duplicate records. LatticeStripe auto-generates idempotency keys for POST requests to make
-safe retries possible.
+reached Stripe. LatticeStripe's automatic POST key protects retries inside one library call, but it
+is not available to a new process after that call returns. For jobs, redelivered messages, and
+other durable operations, pass an operation-derived `idempotency_key` explicitly. After an
+indeterminate result, reconcile through the corresponding webhook or retrieve the resource before
+starting a different operation. See [Client Configuration](client-configuration.md#idempotency-keys-that-survive-application-retries).
 
 ## See also
 

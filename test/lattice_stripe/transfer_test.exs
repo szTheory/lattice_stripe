@@ -12,9 +12,7 @@ defmodule LatticeStripe.TransferTest do
   @transfer_id "tr_1OoMnpJ2eZvKYlo21fGhIjKl"
   @destination "acct_1Nv0FGQ9RKHgCVdK"
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/transfers and returns {:ok, %Transfer{}}" do
@@ -53,9 +51,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/transfers/:id" do
@@ -83,9 +79,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/transfers/:id with metadata" do
@@ -109,9 +103,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "returns wrapped %Response{data: %List{data: [%Transfer{}]}}" do
@@ -138,9 +130,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/3
-  # ---------------------------------------------------------------------------
 
   describe "stream!/3" do
     test "yields %Transfer{} structs lazily" do
@@ -157,9 +147,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Bang variants
-  # ---------------------------------------------------------------------------
 
   describe "bang variants" do
     test "create! raises on error" do
@@ -195,9 +183,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # D-02: no reverse/3 or reverse/4 delegator
-  # ---------------------------------------------------------------------------
+  # no reverse/3 or reverse/4 delegator
 
   describe "module surface (D-02)" do
     test "Transfer does NOT define reverse/3" do
@@ -209,9 +195,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1 — embedded reversals sublist decoding
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1 reversals decoding" do
     test "decodes reversals.data into [%TransferReversal{}] and preserves sublist metadata" do
@@ -251,9 +235,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
-  # from_map/1 — F-001 forward compat
-  # ---------------------------------------------------------------------------
+  # from_map/1 — forward compat
 
   describe "from_map/1 F-001" do
     test "unknown future field survives in :extra" do

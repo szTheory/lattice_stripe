@@ -7,9 +7,7 @@ defmodule LatticeStripe.ListTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # Test Helpers
-  # ---------------------------------------------------------------------------
 
   defp test_client(overrides \\ []) do
     defaults = [
@@ -66,9 +64,7 @@ defmodule LatticeStripe.ListTest do
     %Request{method: :get, path: "/v1/customers", params: params}
   end
 
-  # ---------------------------------------------------------------------------
   # Struct
-  # ---------------------------------------------------------------------------
 
   describe "struct" do
     test "has correct default fields" do
@@ -106,9 +102,7 @@ defmodule LatticeStripe.ListTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_json/1 - cursor-based list
-  # ---------------------------------------------------------------------------
 
   describe "from_json/1 - cursor-based list" do
     test "populates data, has_more, url, and object" do
@@ -219,9 +213,7 @@ defmodule LatticeStripe.ListTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_json/1 - search result
-  # ---------------------------------------------------------------------------
 
   describe "from_json/1 - search result" do
     test "populates next_page and object: search_result" do
@@ -247,9 +239,7 @@ defmodule LatticeStripe.ListTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_json/3 - with params and opts
-  # ---------------------------------------------------------------------------
 
   describe "from_json/3 - with params and opts" do
     test "stores params in _params field" do
@@ -277,9 +267,7 @@ defmodule LatticeStripe.ListTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect protocol
-  # ---------------------------------------------------------------------------
 
   describe "Inspect protocol" do
     test "shows item count for non-empty list" do
@@ -331,9 +319,7 @@ defmodule LatticeStripe.ListTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # api_version/0
-  # ---------------------------------------------------------------------------
 
   describe "api_version/0" do
     test "LatticeStripe.api_version/0 returns pinned API version string" do
@@ -341,9 +327,7 @@ defmodule LatticeStripe.ListTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/2 - from-scratch pagination
-  # ---------------------------------------------------------------------------
 
   describe "stream!/2 - single-page list" do
     test "emits all items and halts when has_more is false" do
@@ -695,13 +679,9 @@ defmodule LatticeStripe.ListTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream/2 - from-existing-list
-  # ---------------------------------------------------------------------------
 
-  # ---------------------------------------------------------------------------
   # from_json/1 - cursor edge cases
-  # ---------------------------------------------------------------------------
 
   describe "from_json/1 cursor edge cases" do
     test "items with string ID containing special characters: _last_id preserves the full value" do

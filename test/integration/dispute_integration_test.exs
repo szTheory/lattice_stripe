@@ -64,7 +64,7 @@ defmodule LatticeStripe.DisputeIntegrationTest do
     client: client,
     upload_client: upload_client
   } do
-    # Phase 38 closes the milestone audit gap for File.create -> dispute evidence flow.
+    # Exercise the complete File.create -> dispute evidence flow.
     assert {:ok, %File{id: file_id, purpose: "dispute_evidence"}} =
              File.create(upload_client, %{
                "file" => "phase-38 dispute evidence",

@@ -9,9 +9,7 @@ defmodule LatticeStripe.PaymentMethodTest do
 
   setup :verify_on_exit!
 
-  # ---------------------------------------------------------------------------
   # create/3
-  # ---------------------------------------------------------------------------
 
   describe "create/3" do
     test "sends POST /v1/payment_methods and returns {:ok, %PaymentMethod{}}" do
@@ -38,9 +36,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # create!/3
-  # ---------------------------------------------------------------------------
 
   describe "create!/3" do
     test "returns %PaymentMethod{} directly on success" do
@@ -54,9 +50,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # retrieve/3
-  # ---------------------------------------------------------------------------
 
   describe "retrieve/3" do
     test "sends GET /v1/payment_methods/:id and returns {:ok, %PaymentMethod{}}" do
@@ -83,9 +77,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # update/4
-  # ---------------------------------------------------------------------------
 
   describe "update/4" do
     test "sends POST /v1/payment_methods/:id and returns {:ok, %PaymentMethod{}}" do
@@ -105,9 +97,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # attach/4
-  # ---------------------------------------------------------------------------
 
   describe "attach/4" do
     test "sends POST /v1/payment_methods/:id/attach and returns {:ok, %PaymentMethod{customer: ...}}" do
@@ -138,9 +128,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # detach/4
-  # ---------------------------------------------------------------------------
 
   describe "detach/4" do
     test "sends POST /v1/payment_methods/:id/detach and returns {:ok, %PaymentMethod{customer: nil}}" do
@@ -167,9 +155,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list/3 with validation
-  # ---------------------------------------------------------------------------
 
   describe "list/3" do
     test "sends GET /v1/payment_methods and returns {:ok, %Response{data: %List{}}} with typed items" do
@@ -212,9 +198,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # list!/3 (bang)
-  # ---------------------------------------------------------------------------
 
   describe "list!/3" do
     test "returns %Response{} on success" do
@@ -229,9 +213,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # stream!/3 with validation
-  # ---------------------------------------------------------------------------
 
   describe "stream!/3" do
     test "streams %PaymentMethod{} structs with auto-pagination" do
@@ -257,9 +239,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # from_map/1
-  # ---------------------------------------------------------------------------
 
   describe "from_map/1" do
     test "maps known fields to struct fields" do
@@ -330,9 +310,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Error handling
-  # ---------------------------------------------------------------------------
 
   describe "error handling" do
     test "retrieve returns {:error, %Error{}} on API error" do
@@ -347,9 +325,7 @@ defmodule LatticeStripe.PaymentMethodTest do
     end
   end
 
-  # ---------------------------------------------------------------------------
   # Inspect
-  # ---------------------------------------------------------------------------
 
   describe "Inspect" do
     test "card type shows id, type, card_brand, card_last4 but hides billing_details and fingerprint" do

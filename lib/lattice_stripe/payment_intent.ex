@@ -174,9 +174,7 @@ defmodule LatticeStripe.PaymentIntent do
           extra: map()
         }
 
-  # ---------------------------------------------------------------------------
   # Public API: CRUD operations
-  # ---------------------------------------------------------------------------
 
   @doc """
   Creates a new PaymentIntent.
@@ -418,9 +416,7 @@ defmodule LatticeStripe.PaymentIntent do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public API: Bang variants
-  # ---------------------------------------------------------------------------
 
   @doc """
   Like `create/3` but raises `LatticeStripe.Error` on failure.
@@ -548,9 +544,7 @@ defmodule LatticeStripe.PaymentIntent do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # ---------------------------------------------------------------------------
   # Public: from_map/1
-  # ---------------------------------------------------------------------------
 
   @doc """
   Converts a decoded Stripe API map to a `%PaymentIntent{}` struct.
@@ -630,9 +624,7 @@ defmodule LatticeStripe.PaymentIntent do
     }
   end
 
-  # ---------------------------------------------------------------------------
   # Private: atomization helpers
-  # ---------------------------------------------------------------------------
 
   defp atomize_status("requires_payment_method"), do: :requires_payment_method
   defp atomize_status("requires_confirmation"), do: :requires_confirmation

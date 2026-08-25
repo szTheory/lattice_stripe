@@ -94,9 +94,7 @@ defmodule LatticeStripe.Webhook do
   # Default replay attack protection window in seconds (matches Stripe's default).
   @default_tolerance 300
 
-  # ---------------------------------------------------------------------------
   # Public API
-  # ---------------------------------------------------------------------------
 
   @doc """
   Verifies a Stripe webhook signature and, if valid, constructs a typed `%Event{}`.
@@ -319,7 +317,7 @@ defmodule LatticeStripe.Webhook do
   """
   @spec fetch_event(Client.t(), EventNotification.t() | String.t(), keyword()) ::
           {:ok, Event.t()} | {:error, Error.t() | :no_event_id}
-  # Defensive clause for malformed notifications (Phase 47 D-07 `:no_event_id`).
+  # Defensive clause for malformed notifications.
   # Returns the typed error WITHOUT issuing an HTTP request.
   def fetch_event(%Client{} = _client, %EventNotification{id: nil}, _opts),
     do: {:error, :no_event_id}
@@ -429,12 +427,12 @@ defmodule LatticeStripe.Webhook do
   @spec fetch_related_object(Client.t(), EventNotification.t(), keyword()) ::
           {:ok, struct() | map()}
           | {:error, Error.t() | {:unknown_object_type, String.t()} | :no_related_object}
-  # D-07: nil-related-object case returns typed error WITHOUT calling
+  # A missing related object returns a typed error without calling
   # ObjectTypes.fetch_module/1 or Client.request/2.
   def fetch_related_object(%Client{} = _client, %EventNotification{related_object: nil}, _opts),
     do: {:error, :no_related_object}
 
-  # D-05: typed-error gate BEFORE any HTTP request. Unknown types short-circuit
+  # Gate unknown types before any HTTP request so they short-circuit
   # to {:error, {:unknown_object_type, type}} — Mox expectation count = 0.
   def fetch_related_object(
         %Client{} = client,
@@ -585,9 +583,7 @@ defmodule LatticeStripe.Webhook do
     "t=#{timestamp_str},v1=#{signature}"
   end
 
-  # ---------------------------------------------------------------------------
   # Private helpers
-  # ---------------------------------------------------------------------------
 
   # Parses the Stripe-Signature header value.
   #
@@ -638,12 +634,12 @@ defmodule LatticeStripe.Webhook do
   end
 
   # Checks that the webhook timestamp is within the tolerance window.
-  # Reconciled per WEBFIX-01 (CHANGELOG v1.5): `tolerance: 0` now disables the
-  # staleness check entirely, matching the docstring at `:tolerance` and every
+  # `tolerance: 0` disables the staleness check entirely, matching the docstring at
+  # `:tolerance` and every
   # canonical Stripe SDK — stripe-node's `if (tolerance > 0 && ...)` gate and
   # stripe-go's `IgnoreTolerance` flag. Use this in tests (with `:timestamp`
   # overrides via `generate_test_signature/3`); never in production traffic —
-  # the canonical Phoenix guide will state this explicitly.
+  # the canonical Phoenix guide states this explicitly.
   # Inline comment is load-bearing for the four-surface regression contract.
   defp check_tolerance(_timestamp, 0), do: :ok
 
