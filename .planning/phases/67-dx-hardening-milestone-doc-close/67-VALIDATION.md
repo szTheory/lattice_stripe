@@ -29,7 +29,7 @@ created: 2026-08-25
 
 - **After every task commit:** Run the task's targeted ExUnit command plus `mix format --check-formatted`.
 - **After every plan wave:** Run `mix test test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/api_surface_lock_test.exs --warnings-as-errors` and `mix docs --warnings-as-errors`.
-- **Before `$gsd-verify-work`:** `mix ci` must be green, then rerun the normal milestone audit.
+- **Before `$gsd-verify-work`:** `mix ci` must be green. The milestone audit is a separate post-verification orchestration step and cannot run until `67-VERIFICATION.md` is present and passing.
 - **Max feedback latency:** 30 seconds for targeted task feedback; the full gate runs at wave/phase boundaries.
 
 ---
@@ -50,9 +50,16 @@ created: 2026-08-25
 | 67-04-02 | 04 | 1 | DOC-02 | T-67-07 | Canonical policy ownership remains deterministic under repeated and parallel reads | docs truth + structural unit | `mix test test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/charge_test.exs --warnings-as-errors` | ✅ extend | ⬜ pending |
 | 67-05-01 | 05 | 3 | DX-02, DX-03, DOC-02 | T-67-01, T-67-02, T-67-03, T-67-04 | Focused behavior, strict ExDoc, and API evidence is sampled before the long gate | focused phase gate | `mix test test/lattice_stripe/error_test.exs test/lattice_stripe/client_test.exs test/lattice_stripe/retry_strategy_test.exs test/lattice_stripe/webhook/plug_test.exs test/lattice_stripe/charge_test.exs test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/api_surface_lock_test.exs --warnings-as-errors && mix docs --warnings-as-errors && mix lattice_stripe.api_surface --check` | ✅ existing/extend | ⬜ pending |
 | 67-05-02 | 05 | 3 | DX-02, DX-03, DOC-02 | T-67-08 | Full CI, API-coverage disposition, commit-aware D-18 blocks/cache evidence, persisted phase base, and historical-audit hash converge | full/scope gate | `mix ci` plus Task 2's exact base derivation, `git diff --name-only <base>..HEAD`, protected named-block/source comparisons, cache status/fingerprint, detector, and hash command | ⬜ create base evidence | ⬜ pending |
-| 67-05-03 | 05 | 3 | DX-02, DX-03, DOC-02 | T-67-08 | Supported workspace workflow isolates the normal audit's standard path, transfers current Phase 67 evidence, preserves the historical file, and removes only the named clean workspace | blocking workflow checkpoint | `$gsd-workspace --new ... --auto` → detached member cwd → `$gsd-audit-milestone v1.10` → exact-path copy/hash/freshness checks → `$gsd-workspace --remove lattice-stripe-phase67-audit`; then Task 3 automated primary-tree gate | ⬜ create | ⬜ pending |
 
-*The 13 rows above map every current task in the five submitted plans. Plan 67-03 is Wave 2 and Plan 67-05 is Wave 3; Task 67-05-03 is a blocking workflow action because the supported GSD audit and workspace skills must be invoked from their exact working directories.*
+*The 12 rows above map every executable task in the five submitted plans. Plan 67-03 is Wave 2 and Plan 67-05 is Wave 3. Milestone re-audit is deliberately excluded because execute-plan does not create the Phase 67 verification artifact that the audit requires.*
+
+## Post-verification orchestration
+
+| Obligation | Trigger / Precondition | Requirement | Threat Ref | Verification Class | Machine-Verifiable Evidence | Output | Status |
+|------------|------------------------|-------------|------------|--------------------|-----------------------------|--------|--------|
+| D-17 milestone re-audit | Root auto-advance receives `PHASE COMPLETE`; `67-VERIFICATION.md` exists with `status: passed` | DX-02, DX-03, DOC-02 | T-67-08 | machine-verifiable workflow evidence after phase seal | Follow `67-POST-VERIFICATION.md`; require fresh/current Phase 67 audit status `passed` or `tech_debt`, identical source/destination hashes, fixed historical SHA-256, clean supported workspace removal | `.planning/v1.10-POST-PHASE-67-MILESTONE-AUDIT.md` | ⬜ pending |
+
+Under `.agents/skills/lattice-verification-policy/SKILL.md`, this obligation does not require subjective human judgment: every acceptance fact has a named executable check. The supported workspace removal confirmation is an orchestration safety gate, not evidence replacing those checks.
 
 ---
 
@@ -67,7 +74,7 @@ created: 2026-08-25
 
 ## Manual-Only Verifications
 
-All phase behaviors have automated verification. The milestone audit rerun is a blocking workflow evidence step with automated freshness, status, Phase 67 marker, path, workspace-removal, and historical-hash assertions; it is not a substitute for behavior checks.
+All phase behaviors have automated verification. There are no manual-only phase-verifier items. The milestone audit rerun occurs only after the phase seal and has separate machine-verifiable freshness, status, Phase 67 marker, path, workspace-removal, and historical-hash assertions.
 
 ---
 
