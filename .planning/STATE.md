@@ -4,17 +4,17 @@ milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 66
 current_phase_name: Product ↔ Feature Attachment
-status: executing
-stopped_at: Completed 66-04-PLAN.md
-last_updated: "2026-08-25T14:36:21.814Z"
+status: verifying
+stopped_at: Completed 66-05-PLAN.md
+last_updated: "2026-08-25T14:43:02.146Z"
 last_activity: 2026-08-25
 last_activity_desc: Phase 66 execution started
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 32
-  completed_plans: 31
-  percent: 83
+  completed_plans: 32
+  percent: 100
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 Phase: 66 (Product ↔ Feature Attachment) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-25 — Phase 66 execution started
 
 **Carry-forward for Phase 65 and later:**
@@ -76,6 +76,7 @@ Last activity: 2026-08-25 — Phase 66 execution started
 | Phase 66-product-feature-attachment P02 | 4min | 1 tasks | 1 files |
 | Phase 66-product-feature-attachment P03 | 3min | 2 tasks | 3 files |
 | Phase 66-product-feature-attachment P04 | 3min | 2 tasks | 4 files |
+| Phase 66 P05 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -146,6 +147,8 @@ Last activity: 2026-08-25 — Phase 66 execution started
 - [Phase ?]: [66-04] Product.Feature is placed under Entitlements by an exact ExDoc matcher; Product remains under Billing.
 - [Phase ?]: [66-04] Product features and marketing_features remain raw marketing maps; Product.Feature list/4 and stream!/4 are authoritative attachment reads.
 - [Phase ?]: [66-04] API lock admits only the accepted Product.Feature module, type, fields, canonical verbs, default arities, and decoder.
+- [Phase ?]: [66-05] Catalog reads use Product.Feature.list/4 or stream!/4; Product marketing fields remain display copy.
+- [Phase ?]: [66-05] Entitlement authorization remains local and fail-closed from a complete persisted webhook-reconciled snapshot; no entitled? helper ships.
 
 ### Blockers/Concerns
 
@@ -172,8 +175,8 @@ Last activity: 2026-08-25 — Phase 66 execution started
 
 ## Session Continuity
 
-**Last session:** 2026-08-25T14:36:21.806Z
-**Stopped at:** Completed 66-04-PLAN.md
+**Last session:** 2026-08-25T14:43:02.139Z
+**Stopped at:** Completed 66-05-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
