@@ -30,7 +30,7 @@ Source: verified accrue gap brief (`.planning/research/accrue-gap-brief-2026-07-
 
 ### Product ↔ Feature
 
-- [ ] **PROD-01**: Developer can attach, list, and delete product features via `LatticeStripe.Product.Feature` (`POST`/`GET`/`DELETE /v1/products/:id/features`)
+- [x] **PROD-01**: Developer can attach, list, and delete product features via `LatticeStripe.Product.Feature` (`POST`/`GET`/`DELETE /v1/products/:id/features`)
 - [ ] **PROD-02**: `Product.features` deserializes into a typed struct instead of a raw `[map()]`
 
 ### Developer Experience
@@ -82,7 +82,7 @@ Lower-priority DX from brief §3.2, 3.5–3.9, 3.11 — real but non-blocking. T
 | OBJ-01 | Phase 65 | Complete |
 | OBJ-02 | Phase 65 | Complete |
 | OBJ-03 | Phase 65 | Complete |
-| PROD-01 | Phase 66 | Pending |
+| PROD-01 | Phase 66 | Complete |
 | PROD-02 | Phase 66 | Pending |
 | DX-01 | Phase 61 | Complete |
 | DX-02 | Phase 67 | Pending |
