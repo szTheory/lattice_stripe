@@ -8,7 +8,7 @@
 > **Current release:** **`2.2.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see
 > [CHANGELOG](CHANGELOG.md#221) for what shipped since 2.1.0.
 >
-> The published release is **`2.2.1`**, a compatibility-preserving quality patch.
+> The published release is **`2.2.2`**, the final compatibility-preserving quality patch.
 > Evaluating fit? Start with
 > [User Flows & JTBD][user-flows-and-jtbd].
 
@@ -25,7 +25,7 @@ The **2.2 baseline is feature-complete for the library's intended mainstream Saa
 payments, billing, metering, Connect, tax on custom flows, entitlement catalog and access
 reconciliation, webhooks (including thin events), and production operator guides.
 
-The 2.2 line is maintenance- and adoption-driven. Version 2.2.1 tightened reliability,
+The 2.2 line is maintenance- and adoption-driven. Versions 2.2.1–2.2.2 tightened reliability,
 internal consistency, documentation truth, and release hygiene without changing the public
 API. New resource families remain driven by demonstrated adopter need.
 

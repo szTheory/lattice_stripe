@@ -6,8 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 2.2"}`.
 
-> **Development status:** `2.2.1` is published. It is a compatibility-preserving quality
-> patch for reliability, internal consistency, documentation truth, and release hygiene.
+> **Development status:** `2.2.2` is published. The 2.2.1–2.2.2 closure patches improve
+> reliability, internal consistency, documentation truth, and release hygiene.
 > The project is now in reactive maintenance; new API breadth remains adopter-driven.
 
 ## [2.2.2](https://github.com/szTheory/lattice_stripe/compare/v2.2.1...v2.2.2) (2026-08-25)

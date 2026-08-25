@@ -13,7 +13,7 @@
 - Consolidated expandable decoding and canonical fixtures, then decomposed the public `Client` façade behind cohesive private request, execution, and decode units.
 - Eliminated concurrency flakes, added explicit optional-feature lanes, pinned immutable CI inputs, enforced meaningful 80% coverage, and hardened protected `main`.
 - Rewrote adopter guidance around SemVer, tenant-header suppression, idempotency, streaming, test boundaries, scope, and maintenance posture.
-- Published package 2.2.1 with the exact 3,463-entry public API unchanged and verified GitHub, Hex, HexDocs, CI, and release provenance.
+- Published closure patches 2.2.1–2.2.2 with the exact 3,463-entry public API unchanged and verified GitHub, Hex, HexDocs, CI, and release provenance.
 
 ### What Worked
 
@@ -45,7 +45,7 @@
 ### Cost Observations
 
 - Final local gate: 2,449 tests, zero failures, one documented stripe-mock limitation, 80.57% line coverage, zero ExDoc warnings, and exact API-lock parity.
-- Release: milestone PR #57, release PR #58, package/tag commit `058f64b`, release run `32895251954`, and verified Hex checksum `8eafac9fb365c6309ed145e6945addf3096549266c23c027d366c921e0e459bf`.
+- Release: milestone PR #57 and audit PR #61; final release PR #62, package/tag commit `7f290b1`, release run `32899071873`, and verified Hex checksum `0d990ceaeb2794a24de200e7f7cff769491cb284350c148abdc02946fb66fed8`.
 - Result: a clean stopping point with no scheduled feature milestone and no compatibility burden transferred to adopters.
 
 ---
@@ -369,7 +369,7 @@
 | v1.8 | 3 | 10 | Adopter truth & doc routing polish: describe-per-guide docs_truth, Charge reconciliation routing, planning-truth close at milestone end |
 | v1.9 | 2 | 4 | CI and doc honesty: checkout/README truth locks, guide-sensitive CI, and JTBD refresh |
 | v1.10 | 7 | 37 | Accrue-driven surface closure: default Finch, Entitlements, metering reads, object fixtures, Product Feature attachments, and DX/docs hardening. First milestone to explicitly separate GSD version from package SemVer at close |
-| v1.11 | 6 | 6 | Reader-first quality closure: private client decomposition, exact API freeze, concurrency/CI/security hardening, adopter documentation truth, and verified package 2.2.1 maintenance handoff |
+| v1.11 | 6 | 6 | Reader-first quality closure: private client decomposition, exact API freeze, concurrency/CI/security hardening, adopter documentation truth, and verified final package 2.2.2 maintenance handoff |
 
 ### Top Lessons (Verified Across Milestones)
 
