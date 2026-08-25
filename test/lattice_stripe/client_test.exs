@@ -649,6 +649,35 @@ defmodule LatticeStripe.ClientTest do
       assert {:ok, %Response{data: %{"id" => "cus_success"}}} =
                Client.request(client, get_request())
     end
+
+    test "returns final-attempt response evidence and passes that same list to retry strategy" do
+      client = retry_client(max_retries: 1)
+
+      first_headers = [{"request-id", "req_first"}, {"retry-after", "5"}]
+      final_headers = [
+        {"Request-Id", "req_final"},
+        {"Retry-After", "60"},
+        {"retry-after", "120"}
+      ]
+
+      expect(LatticeStripe.MockRetryStrategy, :retry?, fn 1, context ->
+        assert context.headers == first_headers
+        {:retry, 0}
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        error_response(429, "rate_limit_error", "Too many requests", tl(first_headers))
+      end)
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        error_response(429, "rate_limit_error", "Still limited", tl(final_headers))
+      end)
+
+      assert {:error, %Error{headers: ^final_headers, retry_after: 60} = error} =
+               Client.request(client, get_request())
+
+      assert Error.get_header(error, "RETRY-AFTER") == ["60", "120"]
+    end
   end
 
   describe "request/2 idempotency keys" do

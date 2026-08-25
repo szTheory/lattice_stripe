@@ -314,6 +314,30 @@ defmodule LatticeStripe.ErrorTest do
       assert error.type == :api_error
       assert error.raw_body == body
     end
+
+    test "remains a compatibility delegate with empty response metadata" do
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+
+      assert %Error{headers: [], retry_after: nil} = Error.from_response(429, body, "req_compat")
+    end
+  end
+
+  describe "Error response metadata" do
+    test "preserves ordered duplicate headers and exposes all matching values" do
+      headers = [
+        {"Request-Id", "req_429"},
+        {"Retry-After", "60"},
+        {"retry-after", "120"},
+        {"X-Trace", "first"}
+      ]
+
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+      error = Error.from_response(429, body, "req_429", headers)
+
+      assert error.headers == headers
+      assert error.retry_after == 60
+      assert Error.get_header(error, "retry-after") == ["60", "120"]
+    end
   end
 
   describe "fuzzy param suggestions" do
