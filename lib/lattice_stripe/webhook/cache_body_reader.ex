@@ -18,16 +18,21 @@ if Code.ensure_loaded?(Plug) do
     def read_body(conn, opts) do
       case Plug.Conn.read_body(conn, opts) do
         {:ok, body, conn} ->
-          conn = Plug.Conn.put_private(conn, :raw_body, body)
+          conn = cache_body(conn, body)
           {:ok, body, conn}
 
         {:more, body, conn} ->
-          conn = Plug.Conn.put_private(conn, :raw_body, body)
+          conn = cache_body(conn, body)
           {:more, body, conn}
 
         {:error, reason} ->
           {:error, reason}
       end
+    end
+
+    defp cache_body(conn, body) do
+      raw_body = Map.get(conn.private, :raw_body, "") <> body
+      Plug.Conn.put_private(conn, :raw_body, raw_body)
     end
   end
 end
