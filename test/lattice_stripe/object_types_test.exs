@@ -23,6 +23,19 @@ defmodule LatticeStripe.ObjectTypesTest do
       assert Enum.map(values, &ObjectTypes.maybe_deserialize/1) == values
     end
 
+    test "resource decoders call the total decoder without redundant map guards" do
+      decoder_guard =
+        ~r/if\(\s*is_map\([^)]*\),\s*do:\s*(?:LatticeStripe\.)?ObjectTypes\.maybe_deserialize/s
+
+      guarded_decoders =
+        Path.expand("../../lib/lattice_stripe", __DIR__)
+        |> Path.join("**/*.ex")
+        |> Path.wildcard()
+        |> Enum.filter(&(File.read!(&1) =~ decoder_guard))
+
+      assert guarded_decoders == []
+    end
+
     test "returns an already-deserialized struct unchanged" do
       customer = %LatticeStripe.Customer{id: "cus_123"}
 

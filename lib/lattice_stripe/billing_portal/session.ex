@@ -246,11 +246,7 @@ defmodule LatticeStripe.BillingPortal.Session do
       created: map["created"],
       livemode: map["livemode"],
       locale: map["locale"],
-      configuration:
-        if(is_map(map["configuration"]),
-          do: ObjectTypes.maybe_deserialize(map["configuration"]),
-          else: map["configuration"]
-        ),
+      configuration: ObjectTypes.maybe_deserialize(map["configuration"]),
       on_behalf_of: map["on_behalf_of"],
       flow: FlowData.from_map(map["flow"]),
       extra: Map.drop(map, @known_fields)

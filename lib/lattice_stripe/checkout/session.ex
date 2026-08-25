@@ -609,32 +609,20 @@ defmodule LatticeStripe.Checkout.Session do
       currency_conversion: known["currency_conversion"],
       custom_fields: known["custom_fields"],
       custom_text: known["custom_text"],
-      customer:
-        if(is_map(known["customer"]),
-          do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]
-        ),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       customer_creation: known["customer_creation"],
       customer_details: known["customer_details"],
       customer_email: known["customer_email"],
       discounts: known["discounts"],
       expires_at: known["expires_at"],
-      invoice:
-        if(is_map(known["invoice"]),
-          do: ObjectTypes.maybe_deserialize(known["invoice"]),
-          else: known["invoice"]
-        ),
+      invoice: ObjectTypes.maybe_deserialize(known["invoice"]),
       invoice_creation: known["invoice_creation"],
       line_items: known["line_items"],
       livemode: known["livemode"],
       locale: known["locale"],
       metadata: known["metadata"],
       mode: atomize_mode(known["mode"]),
-      payment_intent:
-        if(is_map(known["payment_intent"]),
-          do: ObjectTypes.maybe_deserialize(known["payment_intent"]),
-          else: known["payment_intent"]
-        ),
+      payment_intent: ObjectTypes.maybe_deserialize(known["payment_intent"]),
       payment_link: known["payment_link"],
       payment_method_collection: known["payment_method_collection"],
       payment_method_configuration_details: known["payment_method_configuration_details"],
@@ -645,22 +633,14 @@ defmodule LatticeStripe.Checkout.Session do
       recovered_from: known["recovered_from"],
       redirect_on_completion: known["redirect_on_completion"],
       return_url: known["return_url"],
-      setup_intent:
-        if(is_map(known["setup_intent"]),
-          do: ObjectTypes.maybe_deserialize(known["setup_intent"]),
-          else: known["setup_intent"]
-        ),
+      setup_intent: ObjectTypes.maybe_deserialize(known["setup_intent"]),
       shipping_address_collection: known["shipping_address_collection"],
       shipping_cost: known["shipping_cost"],
       shipping_details: known["shipping_details"],
       shipping_options: known["shipping_options"],
       status: atomize_status(known["status"]),
       submit_type: known["submit_type"],
-      subscription:
-        if(is_map(known["subscription"]),
-          do: ObjectTypes.maybe_deserialize(known["subscription"]),
-          else: known["subscription"]
-        ),
+      subscription: ObjectTypes.maybe_deserialize(known["subscription"]),
       success_url: known["success_url"],
       tax_id_collection: known["tax_id_collection"],
       total_details: known["total_details"],

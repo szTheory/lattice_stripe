@@ -128,11 +128,7 @@ defmodule LatticeStripe.Card do
       brand: map["brand"],
       country: map["country"],
       currency: map["currency"],
-      customer:
-        if(is_map(map["customer"]),
-          do: ObjectTypes.maybe_deserialize(map["customer"]),
-          else: map["customer"]
-        ),
+      customer: ObjectTypes.maybe_deserialize(map["customer"]),
       cvc_check: map["cvc_check"],
       default_for_currency: map["default_for_currency"],
       dynamic_last4: map["dynamic_last4"],

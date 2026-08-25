@@ -385,11 +385,7 @@ defmodule LatticeStripe.SubscriptionSchedule do
       completed_at: known["completed_at"],
       created: known["created"],
       current_phase: CurrentPhase.from_map(known["current_phase"]),
-      customer:
-        if(is_map(known["customer"]),
-          do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]
-        ),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       customer_account: known["customer_account"],
       default_settings: Phase.from_map(known["default_settings"]),
       end_behavior: atomize_end_behavior(known["end_behavior"]),
@@ -399,11 +395,7 @@ defmodule LatticeStripe.SubscriptionSchedule do
       released_at: known["released_at"],
       released_subscription: known["released_subscription"],
       status: atomize_status(known["status"]),
-      subscription:
-        if(is_map(known["subscription"]),
-          do: ObjectTypes.maybe_deserialize(known["subscription"]),
-          else: known["subscription"]
-        ),
+      subscription: ObjectTypes.maybe_deserialize(known["subscription"]),
       test_clock: known["test_clock"],
       extra: extra
     }

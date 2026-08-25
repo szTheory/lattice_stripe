@@ -342,20 +342,12 @@ defmodule LatticeStripe.InvoiceItem do
       object: known["object"] || "invoiceitem",
       amount: known["amount"],
       currency: known["currency"],
-      customer:
-        if(is_map(known["customer"]),
-          do: ObjectTypes.maybe_deserialize(known["customer"]),
-          else: known["customer"]
-        ),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       date: known["date"],
       description: known["description"],
       discountable: known["discountable"],
       discounts: known["discounts"],
-      invoice:
-        if(is_map(known["invoice"]),
-          do: ObjectTypes.maybe_deserialize(known["invoice"]),
-          else: known["invoice"]
-        ),
+      invoice: ObjectTypes.maybe_deserialize(known["invoice"]),
       livemode: known["livemode"],
       metadata: known["metadata"],
       period: Period.from_map(known["period"]),
@@ -364,11 +356,7 @@ defmodule LatticeStripe.InvoiceItem do
       proration: known["proration"],
       proration_details: known["proration_details"],
       quantity: known["quantity"],
-      subscription:
-        if(is_map(known["subscription"]),
-          do: ObjectTypes.maybe_deserialize(known["subscription"]),
-          else: known["subscription"]
-        ),
+      subscription: ObjectTypes.maybe_deserialize(known["subscription"]),
       subscription_item: known["subscription_item"],
       tax_rates: known["tax_rates"],
       test_clock: known["test_clock"],
