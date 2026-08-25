@@ -47,6 +47,10 @@ defmodule LatticeStripe.Webhook.PlugTest do
     def get_secret, do: "whsec_plug_test_secret"
   end
 
+  defmodule ErrorReadAdapter do
+    def read_req_body(_payload, _opts), do: {:error, :closed}
+  end
+
   # ---------------------------------------------------------------------------
   # Helpers
   # ---------------------------------------------------------------------------
@@ -385,12 +389,22 @@ defmodule LatticeStripe.Webhook.PlugTest do
       assert body == @payload
     end
 
-    test "Plug reads from conn.private[:raw_body] when available (CacheBodyReader scenario)" do
-      # Simulate CacheBodyReader having already read and stashed the body
+    test "preserves Plug read errors unchanged" do
+      conn = %Plug.Conn{adapter: {ErrorReadAdapter, :ignored}, private: %{}}
+
+      assert CacheBodyReader.read_body(conn, []) == {:error, :closed}
+    end
+
+    test "Webhook.Plug verifies the complete CacheBodyReader body" do
       conn =
         Plug.Test.conn(:post, "/webhook", @payload)
-        |> Plug.Conn.put_private(:raw_body, @payload)
         |> Plug.Conn.put_req_header("stripe-signature", valid_sig_header())
+
+      chunk_length = byte_size(@payload) - 1
+      {:more, first_chunk, conn} = CacheBodyReader.read_body(conn, length: chunk_length)
+      {:ok, second_chunk, conn} = CacheBodyReader.read_body(conn, length: chunk_length)
+
+      assert conn.private[:raw_body] == first_chunk <> second_chunk
 
       plug_opts = WebhookPlug.init(secret: @secret)
       result = WebhookPlug.call(conn, plug_opts)
