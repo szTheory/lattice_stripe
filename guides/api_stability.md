@@ -44,7 +44,6 @@ contract. These modules may change in any patch release without notice:
 - LatticeStripe.Transport.Finch
 - LatticeStripe.Json.Jason
 - LatticeStripe.RetryStrategy.Default
-- LatticeStripe.Webhook.CacheBodyReader
 - LatticeStripe.Billing.Guards
 
 Note: `LatticeStripe.Request` was previously documented as internal but is

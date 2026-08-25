@@ -155,8 +155,9 @@ Use this when your endpoint architecture requires `Plug.Parsers` to run before t
 webhook route or when you want to keep webhook routing in `router.ex`.
 
 Plug's docs describe `:body_reader` as the hook for preserving the raw body before it
-is parsed and discarded. LatticeStripe ships a ready-made cache-body reader module
-for that pattern.
+is parsed and discarded. LatticeStripe ships `LatticeStripe.Webhook.CacheBodyReader`
+for that pattern when Plug is installed. It is conditionally available because the
+library keeps Plug optional.
 
 ```elixir
 # lib/my_app_web/endpoint.ex
@@ -177,7 +178,15 @@ forward "/webhooks/stripe", LatticeStripe.Webhook.Plug,
 ```
 
 This path remains fully supported, but it is an advanced alternative, not the
-primary quickstart.
+primary quickstart. `CacheBodyReader.read_body/2` preserves each current chunk's native
+`Plug.Conn.read_body/2` return tuple and, after the terminal `:ok` read,
+`conn.private[:raw_body]` contains the exact complete body under the fixed `:raw_body`
+key.
+
+Use this parser-level route only for the narrowly scoped webhook path. It retains
+another request-body copy for the connection lifetime, which can retain PII; never log
+the raw body wholesale. It is not intended for multipart parsing. Do not configure it
+globally as a general raw-body retention mechanism.
 
 ## Troubleshooting
 

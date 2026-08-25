@@ -26,10 +26,13 @@ if Code.ensure_loaded?(Plug) do
           pass: ["application/json"],
           json_decoder: Jason
 
-    ### Option B: Router-level via `forward` (with CacheBodyReader)
+    ### Option B: Router-level via `forward` (advanced CacheBodyReader route)
 
-    Mount after `Plug.Parsers` using `Plug.Parsers` + `CacheBodyReader` so the raw
-    body is preserved. Then forward in your router:
+    When endpoint ordering cannot change, use `Plug.Parsers` + `CacheBodyReader` so
+    the raw body is preserved, then forward in your router. This advanced route retains
+    another request-body copy for the connection lifetime; scope it narrowly, do not log
+    raw bodies wholesale because they can contain PII, and do not use it for multipart
+    parsing. `CacheBodyReader` is available only when Plug is installed.
 
         # endpoint.ex
         plug Plug.Parsers,
@@ -83,11 +86,11 @@ if Code.ensure_loaded?(Plug) do
 
     1. **Mount before `Plug.Parsers`** using `at:` — the plug reads the body
        directly before parsers consume it.
-    2. **Use a cache-body reader** — configure `Plug.Parsers` with a
+    2. **Use a cache-body reader (advanced)** — only when endpoint ordering cannot
+       change, configure `Plug.Parsers` with a
        `:body_reader` hook that caches the raw bytes in
-       `conn.private[:raw_body]`. LatticeStripe ships a ready-made reader
-       at LatticeStripe.Webhook.CacheBodyReader (hidden internal) that you
-       can wire into your endpoint.
+       `conn.private[:raw_body]`. LatticeStripe ships the conditionally available
+       `LatticeStripe.Webhook.CacheBodyReader` for this non-multipart route.
 
     ## Secret Resolution
 
