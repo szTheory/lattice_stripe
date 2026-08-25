@@ -2205,6 +2205,36 @@ LatticeStripe.Product function update/3
 LatticeStripe.Product function update/4
 LatticeStripe.Product module
 LatticeStripe.Product type t/0
+LatticeStripe.Product.Feature field deleted
+LatticeStripe.Product.Feature field entitlement_feature
+LatticeStripe.Product.Feature field extra
+LatticeStripe.Product.Feature field id
+LatticeStripe.Product.Feature field livemode
+LatticeStripe.Product.Feature field object
+LatticeStripe.Product.Feature function create!/3
+LatticeStripe.Product.Feature function create!/4
+LatticeStripe.Product.Feature function create/3
+LatticeStripe.Product.Feature function create/4
+LatticeStripe.Product.Feature function delete!/3
+LatticeStripe.Product.Feature function delete!/4
+LatticeStripe.Product.Feature function delete/3
+LatticeStripe.Product.Feature function delete/4
+LatticeStripe.Product.Feature function from_map/1
+LatticeStripe.Product.Feature function list!/2
+LatticeStripe.Product.Feature function list!/3
+LatticeStripe.Product.Feature function list!/4
+LatticeStripe.Product.Feature function list/2
+LatticeStripe.Product.Feature function list/3
+LatticeStripe.Product.Feature function list/4
+LatticeStripe.Product.Feature function retrieve!/3
+LatticeStripe.Product.Feature function retrieve!/4
+LatticeStripe.Product.Feature function retrieve/3
+LatticeStripe.Product.Feature function retrieve/4
+LatticeStripe.Product.Feature function stream!/2
+LatticeStripe.Product.Feature function stream!/3
+LatticeStripe.Product.Feature function stream!/4
+LatticeStripe.Product.Feature module
+LatticeStripe.Product.Feature type t/0
 LatticeStripe.PromotionCode field active
 LatticeStripe.PromotionCode field code
 LatticeStripe.PromotionCode field coupon
