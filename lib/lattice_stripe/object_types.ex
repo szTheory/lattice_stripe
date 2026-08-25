@@ -26,6 +26,7 @@ defmodule LatticeStripe.ObjectTypes do
     "payout" => LatticeStripe.Payout,
     "price" => LatticeStripe.Price,
     "product" => LatticeStripe.Product,
+    "product_feature" => LatticeStripe.Product.Feature,
     "promotion_code" => LatticeStripe.PromotionCode,
     "quote" => LatticeStripe.Quote,
     "quote_line_item" => LatticeStripe.Quote.LineItem,
