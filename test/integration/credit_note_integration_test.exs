@@ -2,11 +2,9 @@ defmodule LatticeStripe.CreditNoteIntegrationTest do
   use ExUnit.Case, async: false
 
   import LatticeStripe.TestHelpers
-  import LatticeStripe.Test.Fixtures.CreditNote
-
   @moduletag :integration
 
-  alias LatticeStripe.{CreditNote, Error}
+  alias LatticeStripe.{CreditNote, Customer, Error, Invoice, InvoiceItem}
 
   setup_all do
     case :gen_tcp.connect(~c"localhost", 12_111, [], 1000) do
@@ -147,5 +145,58 @@ defmodule LatticeStripe.CreditNoteIntegrationTest do
 
     # stripe-mock may allow or reject this inconsistently; real Stripe requires an open invoice.
     assert match?({:ok, %CreditNote{}}, result) or match?({:error, %Error{}}, result)
+  end
+
+  defp create_creditable_invoice!(client, attrs) do
+    {:ok, customer} =
+      Customer.create(client, %{
+        "email" => Map.get(attrs, "customer_email", "credit-note-test@example.com")
+      })
+
+    invoice_params =
+      %{
+        "customer" => customer.id,
+        "auto_advance" => false,
+        "collection_method" => "send_invoice",
+        "days_until_due" => 30
+      }
+      |> Map.merge(Map.drop(attrs, ["customer_email", "invoice_item"]))
+
+    {:ok, invoice} = Invoice.create(client, invoice_params)
+
+    invoice_item_params =
+      %{
+        "customer" => customer.id,
+        "invoice" => invoice.id,
+        "amount" => 500,
+        "currency" => "usd",
+        "description" => "Creditable line item"
+      }
+      |> Map.merge(Map.get(attrs, "invoice_item", %{}))
+
+    {:ok, _item} = InvoiceItem.create(client, invoice_item_params)
+    {:ok, finalized_invoice} = Invoice.finalize(client, invoice.id)
+    finalized_invoice
+  end
+
+  defp create_open_invoice_credit_note!(client, attrs) do
+    invoice = create_creditable_invoice!(client, attrs)
+
+    params =
+      %{
+        "invoice" => invoice.id,
+        "lines" => [
+          %{
+            "type" => "custom_line_item",
+            "description" => "Open invoice credit",
+            "quantity" => 1,
+            "unit_amount" => 500
+          }
+        ]
+      }
+      |> Map.merge(Map.get(attrs, "credit_note", %{}))
+
+    {:ok, credit_note} = CreditNote.create(client, params)
+    credit_note
   end
 end

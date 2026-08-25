@@ -3,7 +3,7 @@ defmodule LatticeStripe.QuoteTest do
 
   import Mox
   import LatticeStripe.TestHelpers
-  import LatticeStripe.Test.Fixtures.Quote
+  import LatticeStripe.Testing.Fixtures.Quote
 
   alias LatticeStripe.{
     Customer,

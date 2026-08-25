@@ -5,13 +5,13 @@ defmodule LatticeStripe.FileLinkTest do
   import LatticeStripe.TestHelpers
 
   alias LatticeStripe.{File, FileLink, Response}
-  alias LatticeStripe.Test.Fixtures
+  alias LatticeStripe.Testing.Fixtures.FileLink, as: FileLinkFixture
 
   setup :verify_on_exit!
 
   describe "from_map/1" do
     test "builds struct from known fields" do
-      link = FileLink.from_map(Fixtures.FileLink.basic())
+      link = FileLink.from_map(FileLinkFixture.file_link_json())
       assert link.id == "link_test123"
       assert link.object == "file_link"
       assert link.expired == false
@@ -20,17 +20,17 @@ defmodule LatticeStripe.FileLinkTest do
     end
 
     test "stores unknown fields in extra" do
-      link = FileLink.from_map(Fixtures.FileLink.basic())
+      link = FileLink.from_map(FileLinkFixture.file_link_json())
       assert link.extra["zzz_forward_compat_field"] == "extra_value"
     end
 
     test "deserializes expanded file to %File{}" do
-      link = FileLink.from_map(Fixtures.FileLink.with_expanded_file())
+      link = FileLink.from_map(FileLinkFixture.file_link_with_expanded_file_json())
       assert %File{id: "file_test123", purpose: "dispute_evidence"} = link.file
     end
 
     test "keeps file as string ID when not expanded" do
-      link = FileLink.from_map(Fixtures.FileLink.basic())
+      link = FileLink.from_map(FileLinkFixture.file_link_json())
       assert link.file == "file_test123"
     end
   end
@@ -42,7 +42,7 @@ defmodule LatticeStripe.FileLinkTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
         assert String.ends_with?(req.url, "/v1/file_links")
-        ok_response(Fixtures.FileLink.basic())
+        ok_response(FileLinkFixture.file_link_json())
       end)
 
       assert {:ok, %FileLink{id: "link_test123"}} =
@@ -57,7 +57,7 @@ defmodule LatticeStripe.FileLinkTest do
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :get
         assert String.ends_with?(req.url, "/v1/file_links/link_test123")
-        ok_response(Fixtures.FileLink.basic())
+        ok_response(FileLinkFixture.file_link_json())
       end)
 
       assert {:ok, %FileLink{id: "link_test123"}} =
@@ -68,7 +68,7 @@ defmodule LatticeStripe.FileLinkTest do
   describe "update/4" do
     test "sends POST to /v1/file_links/:id and returns {:ok, %FileLink{}}" do
       client = test_client()
-      updated = Fixtures.FileLink.basic(%{"expires_at" => 1_800_000_000})
+      updated = FileLinkFixture.file_link_json(%{"expires_at" => 1_800_000_000})
 
       expect(LatticeStripe.MockTransport, :request, fn req ->
         assert req.method == :post
@@ -91,7 +91,7 @@ defmodule LatticeStripe.FileLinkTest do
 
         ok_response(%{
           "object" => "list",
-          "data" => [Fixtures.FileLink.basic()],
+          "data" => [FileLinkFixture.file_link_json()],
           "has_more" => false,
           "url" => "/v1/file_links"
         })
@@ -110,7 +110,7 @@ defmodule LatticeStripe.FileLinkTest do
 
   describe "Inspect" do
     test "masks url field" do
-      link = FileLink.from_map(Fixtures.FileLink.basic())
+      link = FileLink.from_map(FileLinkFixture.file_link_json())
       inspected = inspect(link)
       assert inspected =~ "LatticeStripe.FileLink"
       assert inspected =~ "link_test123"

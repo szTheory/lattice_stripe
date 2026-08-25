@@ -3,7 +3,7 @@ defmodule LatticeStripe.MandateTest do
 
   import Mox
   import LatticeStripe.TestHelpers
-  import LatticeStripe.Test.Fixtures.Mandate
+  import LatticeStripe.Testing.Fixtures.Mandate
 
   alias LatticeStripe.{Error, Mandate, PaymentMethod}
 
