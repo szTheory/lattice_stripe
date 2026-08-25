@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. GSD milestone v1.11 completed a reader-first quality closure on the published 2.2.1 package line, preserving the complete Payments, Billing, Connect, Tax, webhook, Entitlements, and operator surface while making the repository easier to trust and maintain. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
+A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. GSD milestone v1.11 completed a reader-first quality closure on the published 2.2.2 package line, preserving the complete Payments, Billing, Connect, Tax, webhook, Entitlements, and operator surface while making the repository easier to trust and maintain. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
 
 ## Core Value
 
@@ -22,7 +22,7 @@ release line.
 - Decompose the oversized client core and its characterization suite into cohesive private units without changing any public call shape or result.
 - Ratchet CI, security, concurrency, optional-feature, packaging, and coverage checks only where the signal is truthful and maintainable.
 - Make SemVer, tenant-header suppression, idempotency, pagination/streaming, testing, and release guidance explicit from the adopter's point of view.
-- Close with green remote `main`, a stable 3,463-entry public API snapshot, triaged issues and PRs, clean worktrees, and package 2.2.1 published and verified.
+- Close with green remote `main`, a stable 3,463-entry public API snapshot, triaged issues and PRs, clean worktrees, and the final 2.2.x quality patch published and verified.
 
 **Scope boundary:** This is a quality milestone, not a feature milestone. No new
 Stripe resource families, public convenience hooks, DSL/code generation,
@@ -33,7 +33,7 @@ the public Elixir API are the user interface; there is no web UI scope.
 
 **Latest shipped milestone:** v1.11 Reader-First Quality Closure completed on
 2026-08-25: 27/27 requirements, 6/6 verified phases, an unchanged 3,463-entry
-public API, and package 2.2.1 verified on GitHub Releases, Hex, and HexDocs.
+public API, and package 2.2.2 verified on GitHub Releases, Hex, and HexDocs.
 
 **Active milestone:** None.
 
@@ -102,7 +102,7 @@ The library is **done for v1.x scope** — intended mainstream SaaS Stripe cover
 
 **Forward posture:** Maintenance mode — Stripe API drift, adopter-driven narrow additions, bugfixes. No planned new resource-family breadth absent fresh adopter pull.
 
-**Release truth:** The v1.10 plan targeted Hex 1.8.0, but a public fixture rename correctly forced package 2.0.0; the synchronized v1.10 baseline became package 2.2.0. The compatibility-preserving v1.11 quality closure is published as package 2.2.1. Do not collapse GSD milestone numbers into package versions.
+**Release truth:** The v1.10 plan targeted Hex 1.8.0, but a public fixture rename correctly forced package 2.0.0; the synchronized v1.10 baseline became package 2.2.0. The compatibility-preserving v1.11 quality closure shipped as 2.2.1, with audit remediation published as the final 2.2.2 patch. Do not collapse GSD milestone numbers into package versions.
 
 See `.planning/milestones/v1.11-MILESTONE-AUDIT.md` for close-time audit evidence.
 
@@ -250,7 +250,7 @@ None scheduled. Stay in reactive maintenance and open a bounded milestone only f
 - ✓ Cohesive private client internals and behavior-organized characterization coverage under an exact public API freeze
 - ✓ Truthful CI/security/coverage/package gates, including optional-feature paths and known concurrency flakes
 - ✓ Adopter-first SemVer, tenancy, idempotency, streaming, testing, and release documentation
-- ✓ Verified 2.2.1 release and a clean maintenance handoff
+- ✓ Verified 2.2.2 release and a clean maintenance handoff
 
 ### Out of Scope
 

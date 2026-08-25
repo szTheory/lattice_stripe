@@ -161,6 +161,10 @@ defmodule LatticeStripe.DocsTruthTest do
     "#{major}.#{minor}.x"
   end
 
+  defp current_exact_release do
+    LatticeStripe.MixProject.project()[:version]
+  end
+
   defp docs_config do
     LatticeStripe.MixProject.project()[:docs]
   end
@@ -637,7 +641,7 @@ defmodule LatticeStripe.DocsTruthTest do
       readme = File.read!("README.md")
 
       assert readme =~ "2.2 baseline is feature-complete"
-      assert readme =~ "published release is **`2.2.1`**"
+      assert readme =~ "published release is **`#{current_exact_release()}`**"
       assert readme =~ "compatibility-preserving quality patch"
       assert readme =~ "maintenance- and adoption-driven"
       assert readme =~ "hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html"

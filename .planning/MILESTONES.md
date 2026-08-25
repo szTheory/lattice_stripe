@@ -1,5 +1,26 @@
 # Milestones
 
+## v1.11 Reader-First Quality Closure (Shipped: 2026-08-25)
+
+**Phases completed:** 6 phases, 6 plans, 0 tasks
+
+**Key accomplishments:**
+
+- Made repository entry points, comments, prompts, source modules, and test organization reader-first while preserving useful rationale.
+- Consolidated expandable decoding and canonical fixtures; removed every redundant total-decoder wrapper with a structural regression lock.
+- Decomposed the public Client façade into cohesive private request, execution, and decoding units without changing the exact 3,463-entry public API.
+- Hardened concurrency, telemetry attribution, CI matrices, optional integrations, coverage, supply-chain pins, package checks, release provenance, and protected `main`.
+- Published adopter-first SemVer, tenancy, idempotency, streaming, testing, JTBD, and maintenance guidance with executable docs truth.
+- Shipped final package 2.2.2, closed 27/27 requirements and all security threats, and returned the project to reactive maintenance.
+
+**Audit:** PASSED — 27/27 requirements, 6/6 phases, exact public API parity, and zero blocking threats. See [v1.11-MILESTONE-AUDIT.md](milestones/v1.11-MILESTONE-AUDIT.md).
+
+**Release:** package/tag 2.2.2 at `7f290b1`; release run `32899071873`; Hex checksum `0d990ceaeb2794a24de200e7f7cff769491cb284350c148abdc02946fb66fed8`.
+
+**What's next:** Reactive maintenance. No automatic successor milestone.
+
+---
+
 ## v1.10 Accrue Surface Closure (Hex 1.8.0) (Shipped: 2026-08-25)
 
 **Delivered:** The Accrue-driven surface closure: zero-config Finch operation, Stripe-native Entitlements, metering reads, typed webhook fixtures, Product Feature attachments, and hardened consumer guidance.

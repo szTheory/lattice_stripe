@@ -67,7 +67,7 @@ remain useful across different Elixir architectures.
 
 ## Maintenance and adopter pull
 
-The published release is 2.2.1, a compatibility-preserving quality patch focused on
+The published release is 2.2.2, the final compatibility-preserving quality patch focused on
 reliability, internal consistency, documentation truth, and release hygiene. It does not
 expand the public resource surface. Further work is reactive and adopter-driven.
 
