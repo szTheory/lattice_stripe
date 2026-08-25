@@ -338,6 +338,49 @@ defmodule LatticeStripe.ErrorTest do
       assert error.retry_after == 60
       assert Error.get_header(error, "retry-after") == ["60", "120"]
     end
+
+    test "uses the first valid trimmed non-negative decimal Retry-After value without a cap" do
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+
+      headers = [
+        {"retry-after", "not-a-delay"},
+        {"Retry-After", " -1 "},
+        {"retry-after", " 600000 "},
+        {"retry-after", "1x"}
+      ]
+
+      assert %Error{retry_after: 600_000} = Error.from_response(429, body, nil, headers)
+    end
+
+    test "rejects missing, malformed, negative, suffixed, and HTTP-date retry values" do
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+
+      for headers <- [
+            [],
+            [{"retry-after", "nope"}],
+            [{"retry-after", "-1"}],
+            [{"retry-after", "3seconds"}],
+            [{"retry-after", "Wed, 21 Oct 2015 07:28:00 GMT"}]
+          ] do
+        assert %Error{retry_after: nil} = Error.from_response(429, body, nil, headers)
+      end
+    end
+
+    test "is repeatable and parallel-pure without changing the caller-owned header list" do
+      body = %{"error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}}
+      headers = [{"Retry-After", " 0 "}, {"X-Request-Id", "req_parallel"}]
+
+      expected = Error.from_response(429, body, "req_parallel", headers)
+      assert Error.from_response(429, body, "req_parallel", headers) == expected
+      assert headers == [{"Retry-After", " 0 "}, {"X-Request-Id", "req_parallel"}]
+
+      results =
+        1..20
+        |> Task.async_stream(fn _ -> Error.from_response(429, body, "req_parallel", headers) end)
+        |> Enum.map(fn {:ok, error} -> error end)
+
+      assert Enum.all?(results, &(&1 == expected))
+    end
   end
 
   describe "fuzzy param suggestions" do
