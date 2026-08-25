@@ -5,15 +5,15 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 67
 current_phase_name: DX Hardening & Milestone Doc Close
 status: executing
-stopped_at: Completed 67-01-PLAN.md
-last_updated: "2026-08-25T17:52:51.637Z"
+stopped_at: Completed 67-02-PLAN.md
+last_updated: "2026-08-25T17:56:41.558Z"
 last_activity: 2026-08-25
 last_activity_desc: Phase 67 execution started
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 37
-  completed_plans: 33
+  completed_plans: 34
   percent: 86
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 67 (DX Hardening & Milestone Doc Close) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-08-25 — Phase 67 execution started
 
@@ -78,6 +78,7 @@ Last activity: 2026-08-25 — Phase 67 execution started
 | Phase 66-product-feature-attachment P04 | 3min | 2 tasks | 4 files |
 | Phase 66 P05 | 4min | 2 tasks | 4 files |
 | Phase 67 P01 | 5min | 3 tasks | 6 files |
+| Phase 67 P02 | 3min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -151,6 +152,7 @@ Last activity: 2026-08-25 — Phase 67 execution started
 - [Phase ?]: [66-05] Catalog reads use Product.Feature.list/4 or stream!/4; Product marketing fields remain display copy.
 - [Phase ?]: [66-05] Entitlement authorization remains local and fail-closed from a complete persisted webhook-reconciled snapshot; no entitled? helper ships.
 - [Phase ?]: [67-01] Error response evidence preserves ordered duplicate headers and strict uncapped decimal Retry-After; scheduling remains adopter-owned.
+- [Phase ?]: [67-02] CacheBodyReader appends every Plug :more/:ok chunk under the fixed raw_body key while preserving native tuples and error passthrough.
 
 ### Blockers/Concerns
 
@@ -177,8 +179,8 @@ Last activity: 2026-08-25 — Phase 67 execution started
 
 ## Session Continuity
 
-**Last session:** 2026-08-25T17:52:51.625Z
-**Stopped at:** Completed 67-01-PLAN.md
+**Last session:** 2026-08-25T17:56:41.538Z
+**Stopped at:** Completed 67-02-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
