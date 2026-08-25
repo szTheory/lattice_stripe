@@ -703,6 +703,19 @@ defmodule LatticeStripe.DocsTruthTest do
     refute guide =~ "arrives in a later release"
   end
 
+  test "entitlements reconciliation guide does not overpromise pagination consistency" do
+    guide = File.read!("guides/entitlements.md")
+
+    assert guide =~ "canonical re-fetch avoids"
+    assert guide =~ "not a\ntransactional point-in-time snapshot"
+    assert guide =~ "Make reconciliation idempotent"
+    assert guide =~ "only\nreplace the complete local snapshot after the full enumeration succeeds"
+    assert guide =~ "retry/reconcile again or process the\nsubsequent summary event"
+    assert guide =~ "fail-closed\nstaleness policy"
+
+    refute guide =~ "One call means one point in time"
+  end
+
   test "Product.Feature is discoverable beside Entitlements.Feature" do
     guide = File.read!("guides/entitlements.md")
 

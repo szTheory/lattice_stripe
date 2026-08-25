@@ -132,7 +132,7 @@ common reconciliation read needs no `expand` param at all.
 
 ## The reconciler pattern
 
-This is the shape to copy. One call, no cursor bookkeeping:
+This is the shape to copy. One library call, no cursor bookkeeping:
 
 ```elixir
 alias LatticeStripe.Entitlements.ActiveEntitlementSummary
@@ -155,10 +155,18 @@ the summary's inlined page entirely.
 
 That is deliberate, and it is why there is no `has_more` branch above. Resuming
 from the inline page's cursor would stitch a head-of-list captured when the
-webhook fired to a tail queried moments later — a hybrid snapshot whose ordering
-assumption spans two points in time. One call means one point in time, which is
-the only version of this that is simple to reason about during an incident. The
-consumer never has to learn how many entitlements Stripe inlines.
+webhook fired to a tail queried moments later — a hybrid result whose ordering
+assumption spans two sources and points in time. The canonical re-fetch avoids
+that particular mismatch, and the consumer never has to learn how many
+entitlements Stripe inlines.
+
+Pagination can still make multiple HTTP requests, so the enumeration is **not a
+transactional point-in-time snapshot**. Make reconciliation idempotent and only
+replace the complete local snapshot after the full enumeration succeeds. If an
+entitlement change races the scan, retry/reconcile again or process the
+subsequent summary event; do not promote a partial scan to authorization truth.
+Until a complete, fresh replacement exists, keep the existing fail-closed
+staleness policy: deny access when the local snapshot is missing or stale.
 
 ## The active entitlement summary
 
