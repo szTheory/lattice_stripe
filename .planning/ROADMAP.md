@@ -238,7 +238,15 @@ Plans:
   3. Docs state permanently that `Charge.create` is absent by design and `PaymentIntent.create(confirm: true)` is the sanctioned path, with a docs-truth regression lock.
 
 **Build constraints**: `lib/lattice_stripe/error.ex` currently has no `headers`/`retry_after` (Stripe sends `Retry-After` as a header). `lib/lattice_stripe/webhook/cache_body_reader.ex` is `@moduledoc false` at L3 — promotion is a semver contract, so ExDoc registration in `mix.exs` is required. Do not regress SEED-005 §6 contracts.
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+
+- [ ] 67-01-PLAN.md — Trace faithful final-response headers and strict Retry-After metadata through `LatticeStripe.Error`
+- [ ] 67-02-PLAN.md — Fix exact multi-chunk webhook raw-body accumulation before publication
+- [ ] 67-03-PLAN.md — Publish, document, group, and semver-lock `CacheBodyReader`
+- [ ] 67-04-PLAN.md — Lock the permanent PaymentIntent-first Charge creation policy
+- [ ] 67-05-PLAN.md — Run strict docs/API/CI convergence and hand off the milestone re-audit
 
 ## Progress (v1.10 — active)
 
