@@ -40,11 +40,15 @@ created: 2026-08-25
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 66-01-01 | 01 | 1 | PROD-01 | T-66-01, T-66-03 | Parent and attachment IDs are validated before transport; exact scoped paths are used. | unit/Mox | `mix test test/lattice_stripe/product/feature_test.exs` | ❌ W0 | ⬜ pending |
-| 66-01-02 | 01 | 1 | PROD-01 | T-66-02 | Complete enumeration preserves scope/options and raises instead of returning a partial catalog. | unit/Mox | `mix test test/lattice_stripe/product/feature_stream_test.exs` | ❌ W0 | ⬜ pending |
-| 66-02-01 | 02 | 2 | PROD-01 | T-66-04 | Exact `product_feature` dispatch retains unknown fields and rejects the typo key. | unit | `mix test test/lattice_stripe/object_types_test.exs` | ✅ extend | ⬜ pending |
-| 66-02-02 | 02 | 2 | PROD-02 | T-66-02 | Marketing data remains separate from authorization-bearing attachments. | unit | `mix test test/lattice_stripe/product_test.exs` | ✅ extend | ⬜ pending |
-| 66-03-01 | 03 | 2 | PROD-01, PROD-02 | T-66-02, T-66-03 | Docs preserve the reconciliation/fail-closed boundary and identifier distinction. | docs/API regression | `mix test test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/api_surface_lock_test.exs` | ✅ extend | ⬜ pending |
+| 66-01-01 | 01 | 1 | PROD-01 | T-66-03, T-66-04 | Create validates the Product and required attachment definition before transport, uses the scoped collection path, and preserves future response fields. | unit/Mox tracer | `mix test test/lattice_stripe/product/feature_test.exs --only tracer && MIX_ENV=prod mix compile` | ❌ Wave 0 | ⬜ pending |
+| 66-01-02 | 01 | 1 | PROD-01 | T-66-03, T-66-04 | Retrieve/list/delete preserve explicit `prod_`/`prodft_` identity, reject a `feat_` delete target, and retain unknown response fields. | unit/Mox + surface regression | `mix test test/lattice_stripe/product/feature_test.exs && mix format --check-formatted && mix compile --warnings-as-errors && mix credo --strict` | ❌ Wave 0 | ⬜ pending |
+| 66-02-01 | 02 | 2 | PROD-01 | T-66-01, T-66-02, T-66-04 | Complete enumeration preserves Product/Connect scope, filters, cursor identity, order, laziness, and loud later-page failure. | unit/Mox pagination | `mix test test/lattice_stripe/product/feature_stream_test.exs && git diff --quiet lib/lattice_stripe/list.ex && mix format --check-formatted` | ❌ Wave 0 | ⬜ pending |
+| 66-03-01 | 03 | 2 | PROD-01, PROD-02 | T-66-02 | Legacy/current Product marketing fields remain raw, independent, and separate from authorization-bearing attachments. | unit regression | `mix test test/lattice_stripe/product_test.exs && git diff --quiet lib/lattice_stripe/product.ex` | ✅ extend | ⬜ pending |
+| 66-03-02 | 03 | 2 | PROD-01, PROD-02 | T-66-04 | Exact `product_feature` dispatch types the attachment and rejects the dotted typo without a brittle registry-size lock. | unit dispatch regression | `mix test test/lattice_stripe/object_types_test.exs test/lattice_stripe/product_test.exs && mix compile --warnings-as-errors && mix format --check-formatted` | ✅ extend | ⬜ pending |
+| 66-04-01 | 04 | 3 | PROD-01, PROD-02 | T-66-02, T-66-03 | HexDocs distinguishes marketing data, `feat_` definitions, and `prodft_` attachments while preserving the local authorization boundary. | production compile/ExDoc | `MIX_ENV=prod mix compile && mix docs` | mixed: ✅ existing + ❌ from 66-01 | ⬜ pending |
+| 66-04-02 | 04 | 3 | PROD-01, PROD-02 | T-66-04 | The generated API lock admits only the accepted Product.Feature module, struct/type, canonical verbs, arities, and decoder. | API surface regression | `mix lattice_stripe.api_surface && mix lattice_stripe.api_surface --check && mix test test/lattice_stripe/api_surface_lock_test.exs test/lattice_stripe/product/feature_test.exs` | ✅ extend | ⬜ pending |
+| 66-05-01 | 05 | 4 | PROD-01, PROD-02 | T-66-02, T-66-03, T-66-04 | Guides lock complete catalog enumeration, explicit attachment identity, webhook reconciliation, and local fail-closed authorization without public-surface drift. | docs/API regression | `mix test test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/product/feature_test.exs test/lattice_stripe/product_test.exs && mix docs` | ✅ extend | ⬜ pending |
+| 66-05-02 | 05 | 4 | PROD-01, PROD-02 | T-66-02, T-66-03, T-66-04 | The phase-close differential gate measures every task, the inherited test floor, the warning ceiling, and the absence of Phase 66 warning names before validation flags change. | full-suite differential gate | Plan 05 Task 2 `<verify><automated>` exact failure-propagating command | ✅ existing | ⬜ pending |
 
 Threat references:
 
@@ -64,6 +68,18 @@ Threat references:
 - [ ] Extend `test/lattice_stripe/docs_truth_test.exs` and `priv/api/current.txt` — semantic guide and public-surface locks.
 
 The ExUnit/Mox infrastructure already exists; Wave 0 creates only Phase 66 test files and fixtures.
+
+---
+
+## Differential Gate Evidence
+
+| Measurement | Required | Observed |
+|-------------|----------|----------|
+| `mix test` exit and parsed total | exit 0 and at least 2,332 tests | pending execution |
+| `mix docs` exit and parsed warning count | exit 0 and no more than 38 warnings | pending execution |
+| Phase 66 docs-output name scan | zero matches for `LatticeStripe.Product.Feature`, `guides/entitlements.md`, and `guides/user-flows-and-jtbd.md` | pending execution |
+
+Plan 05 Task 2 replaces each pending value with captured output before changing `status`, `nyquist_compliant`, or `wave_0_complete`.
 
 ---
 
