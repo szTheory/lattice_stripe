@@ -176,6 +176,15 @@ defmodule LatticeStripe.DocsTruthTest do
     end)
   end
 
+  defp advanced_cache_body_reader_section do
+    "guides/webhooks.md"
+    |> File.read!()
+    |> String.split("## Advanced alternative: `CacheBodyReader` + router `forward`", parts: 2)
+    |> List.last()
+    |> String.split("\n## ", parts: 2)
+    |> List.first()
+  end
+
   test "every public module lands in exactly one documented ExDoc group" do
     # TOTALITY GUARD. ExDoc performs NO validation of groups_for_modules
     # (deps/ex_doc/lib/ex_doc/config.ex:240-268): a phantom entry naming a module that does
@@ -236,6 +245,36 @@ defmodule LatticeStripe.DocsTruthTest do
 
     Check for a typo in the module name, or drop the entry if the module was removed.
     """
+  end
+
+  test "CacheBodyReader is conditionally public and grouped with Webhooks" do
+    assert Code.ensure_loaded?(LatticeStripe.Webhook.CacheBodyReader)
+    assert docs_group_of(LatticeStripe.Webhook.CacheBodyReader) == :Webhooks
+
+    assert {:docs_v1, _, _, _, %{"en" => moduledoc}, _, docs} =
+             Code.fetch_docs(LatticeStripe.Webhook.CacheBodyReader)
+
+    assert moduledoc =~ "available only when your application includes `:plug`"
+    assert moduledoc =~ "terminal `{:ok, body, conn}`"
+
+    assert Enum.any?(docs, fn
+             {{:function, :read_body, 2}, _, _, doc, _} when doc != :hidden -> true
+             _ -> false
+           end)
+  end
+
+  test "advanced CacheBodyReader guide keeps the retention contract bounded" do
+    guide = advanced_cache_body_reader_section()
+
+    assert guide =~ "advanced alternative, not the\nprimary quickstart"
+    assert guide =~ "terminal `:ok` read"
+    assert guide =~ "exact complete body"
+    assert guide =~ "fixed `:raw_body`\nkey"
+    assert guide =~ "connection lifetime"
+    assert guide =~ "PII"
+    assert guide =~ "never log\nthe raw body wholesale"
+    assert guide =~ "not intended for multipart parsing"
+    assert guide =~ "Do not configure it\nglobally"
   end
 
   test "exdoc keeps the primary public truth surfaces published" do
