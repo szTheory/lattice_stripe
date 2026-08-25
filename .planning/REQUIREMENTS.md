@@ -70,12 +70,33 @@ These ideas remain deliberately outside v1.11. They require independent adopter 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| READ-01..03 | Phase 68 — Reader Surface & Repository Hygiene | Pending |
-| INT-01..02 | Phase 69 — Internal Consistency | Pending |
-| ARCH-01..04 | Phase 70 — Client Core & Test Architecture | Pending |
-| REL-01..06, SEC-01 | Phase 71 — Reliability, CI & Security | Pending |
-| DOC-01..07 | Phase 72 — Adopter DX & Documentation Truth | Pending |
-| CLOSE-01..04 | Phase 73 — Release & Maintenance Pause | Pending |
+| READ-01 | Phase 68 — Reader Surface & Repository Hygiene | Pending |
+| READ-02 | Phase 68 — Reader Surface & Repository Hygiene | Pending |
+| READ-03 | Phase 68 — Reader Surface & Repository Hygiene | Pending |
+| INT-01 | Phase 69 — Internal Consistency | Pending |
+| INT-02 | Phase 69 — Internal Consistency | Pending |
+| ARCH-01 | Phase 70 — Client Core & Test Architecture | Pending |
+| ARCH-02 | Phase 70 — Client Core & Test Architecture | Pending |
+| ARCH-03 | Phase 70 — Client Core & Test Architecture | Pending |
+| ARCH-04 | Phase 70 — Client Core & Test Architecture | Pending |
+| REL-01 | Phase 71 — Reliability, CI & Security | Pending |
+| REL-02 | Phase 71 — Reliability, CI & Security | Pending |
+| REL-03 | Phase 71 — Reliability, CI & Security | Pending |
+| REL-04 | Phase 71 — Reliability, CI & Security | Pending |
+| REL-05 | Phase 71 — Reliability, CI & Security | Pending |
+| REL-06 | Phase 71 — Reliability, CI & Security | Pending |
+| SEC-01 | Phase 71 — Reliability, CI & Security | Pending |
+| DOC-01 | Phase 72 — Adopter DX & Documentation Truth | Pending |
+| DOC-02 | Phase 72 — Adopter DX & Documentation Truth | Pending |
+| DOC-03 | Phase 72 — Adopter DX & Documentation Truth | Pending |
+| DOC-04 | Phase 72 — Adopter DX & Documentation Truth | Pending |
+| DOC-05 | Phase 72 — Adopter DX & Documentation Truth | Pending |
+| DOC-06 | Phase 72 — Adopter DX & Documentation Truth | Pending |
+| DOC-07 | Phase 72 — Adopter DX & Documentation Truth | Pending |
+| CLOSE-01 | Phase 73 — Release & Maintenance Pause | Pending |
+| CLOSE-02 | Phase 73 — Release & Maintenance Pause | Pending |
+| CLOSE-03 | Phase 73 — Release & Maintenance Pause | Pending |
+| CLOSE-04 | Phase 73 — Release & Maintenance Pause | Pending |
 
 **Coverage:** 27 requirements mapped; 27 total; 0 unmapped.
 
