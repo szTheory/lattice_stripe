@@ -1444,17 +1444,17 @@ defmodule LatticeStripe.ClientTest do
 
       expect(LatticeStripe.MockRetryStrategy, :retry?, fn 1, _context -> {:retry, 0} end)
 
-      expect(LatticeStripe.MockTransport, :request, 2, fn
-        _req ->
-          error_response(500, "api_error", "Temporary failure")
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        error_response(500, "api_error", "Temporary failure")
+      end)
 
-        _req ->
-          {:ok,
-           %{
-             status: 200,
-             headers: [{"content-type", "application/pdf"}, {"request-id", "req_retried_dl"}],
-             body: "retried-pdf-binary"
-           }}
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        {:ok,
+         %{
+           status: 200,
+           headers: [{"content-type", "application/pdf"}, {"request-id", "req_retried_dl"}],
+           body: "retried-pdf-binary"
+         }}
       end)
 
       assert {:ok,
