@@ -622,6 +622,7 @@ defmodule LatticeStripe.DocsTruthTest do
     assert docs_group_of(LatticeStripe.Entitlements.ActiveEntitlement) == :Entitlements
     assert docs_group_of(LatticeStripe.Entitlements.ActiveEntitlementSummary) == :Entitlements
     assert docs_group_of(LatticeStripe.Entitlements.Feature) == :Entitlements
+    assert docs_group_of(LatticeStripe.Product.Feature) == :Entitlements
 
     assert guide =~ "Scope boundary"
     assert guide =~ "entitled?"
@@ -665,6 +666,60 @@ defmodule LatticeStripe.DocsTruthTest do
     # The archiving vocabulary split: field `active`, filter `archived`, sense inverted.
     assert feature =~ "## Archiving"
     assert feature =~ "immutable"
+
+    product_feature = File.read!(Path.join(root, "lib/lattice_stripe/product/feature.ex"))
+    product = File.read!(Path.join(root, "lib/lattice_stripe/product.ex"))
+
+    assert product_feature =~ "LatticeStripe.Entitlements.Feature"
+    assert product_feature =~ "guides/entitlements.md"
+    assert product =~ "LatticeStripe.Product.Feature"
+    assert product =~ "Product.Feature.list/4"
+  end
+
+  test "entitlements guide teaches the complete catalog to local access journey" do
+    guide = File.read!("guides/entitlements.md")
+
+    for anchor <- [
+          "feat_",
+          "prod_",
+          "prodft_",
+          "ent_",
+          "ProductFeature.create",
+          "ProductFeature.retrieve",
+          "ProductFeature.list",
+          "ProductFeature.stream!",
+          "ProductFeature.delete",
+          "marketing_features",
+          "pricing-table display",
+          "summary webhook",
+          "full canonical customer refetch",
+          "local snapshot",
+          "fail closed"
+        ] do
+      assert guide =~ anchor, "entitlements catalog-to-access guide is missing #{inspect(anchor)}"
+    end
+
+    refute guide =~ "not yet part of the typed surface"
+    refute guide =~ "arrives in a later release"
+  end
+
+  test "Product.Feature is discoverable beside Entitlements.Feature" do
+    guide = File.read!("guides/entitlements.md")
+
+    assert docs_group_of(LatticeStripe.Product.Feature) == :Entitlements
+    assert guide =~ "LatticeStripe.Product.Feature"
+    assert guide =~ "LatticeStripe.Entitlements.Feature"
+  end
+
+  test "JTBD routes entitlement catalog and access across canonical guides" do
+    jtbd = File.read!("guides/user-flows-and-jtbd.md")
+
+    assert jtbd =~ "Entitlement catalog and access"
+    assert jtbd =~ "[Entitlements](entitlements.md)"
+    assert jtbd =~ "[Subscriptions](subscriptions.md)"
+    assert jtbd =~ "[Checkout](checkout.md)"
+    assert jtbd =~ "[Webhooks](webhooks.md)"
+    assert jtbd =~ "[Testing](testing.md)"
   end
 
   test "the promoted entitlements fixture keeps its ExDoc placement and guide mention" do

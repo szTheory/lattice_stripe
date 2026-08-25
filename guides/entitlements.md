@@ -59,7 +59,7 @@ Entitlements.Feature (catalog definition, feat_…)
   ├── lookup_key — immutable, your system's identifier
   └── active — false means archived
           │
-          │  attached to a Product   (Product.Feature, prodft_… — a later phase)
+          │  attached to a Product   (Product.Feature, prodft_…)
           ▼
 Product / Price
           │
@@ -75,11 +75,10 @@ Entitlements.ActiveEntitlementSummary (webhook only, no id)
   └── entitlements — an inlined %LatticeStripe.List{} page
 ```
 
-LatticeStripe covers the **definition** end (`Feature`) and the **result** end
-(`ActiveEntitlement`, `ActiveEntitlementSummary`) today. The *attachment* in the
-middle — the `product_feature` object that records "this Product grants this
-feature" — arrives in a later release; until then, attach features in the Stripe
-Dashboard or via `LatticeStripe.Client.request/2`.
+LatticeStripe covers every link in this journey: the definition end (`Feature`),
+the Product attachment in the middle (`Product.Feature`), and the result end
+(`ActiveEntitlement`, `ActiveEntitlementSummary`). The attachment is its own
+access-bearing `product_feature` object, not display copy on the Product.
 
 ## Reading a customer's entitlements
 
@@ -240,32 +239,79 @@ key rather than on the generated `feat_` id.
 
 ## Attaching features to products
 
-Attaching an entitlement feature to a Product is what causes purchases to
-produce active entitlements. The `product_feature` attachment object
-(`LatticeStripe.Product.Feature`, ids prefixed `prodft_`) is not yet part of the
-typed surface; this section will cover creating, listing, and removing
-attachments when it lands. Until then, attach features in the Stripe Dashboard
-or through `LatticeStripe.Client.request/2`.
+Attaching an entitlement feature definition to a Product is what makes a
+purchase capable of producing an active entitlement. The attachment is a
+`LatticeStripe.Product.Feature` with its own `prodft_` id — it is distinct from
+both the `feat_` definition and the `prod_` Product.
+
+```elixir
+alias LatticeStripe.{Entitlements.Feature, Product}
+alias LatticeStripe.Product.Feature, as: ProductFeature
+
+{:ok, definition} =
+  Feature.create(client, %{
+    "lookup_key" => "premium_support",
+    "name" => "Premium Support"
+  })
+
+{:ok, product} = Product.retrieve(client, "prod_premium")
+
+{:ok, attachment} =
+  ProductFeature.create(client, product.id, %{
+    "entitlement_feature" => definition.id
+  })
+
+# Retrieve or remove an attachment with BOTH its Product and attachment ids.
+{:ok, ^attachment} = ProductFeature.retrieve(client, product.id, attachment.id)
+{:ok, _deleted} = ProductFeature.delete(client, product.id, attachment.id)
+```
+
+The resource verbs are `create/4`, `retrieve/4`, `list/4`, `stream!/4`, and
+`delete/4`. In application prose, you *attach* a definition and *remove* its
+attachment; the SDK deliberately does not publish parallel `attach` or `remove`
+functions. Deleting a `feat_` definition is neither supported nor the operation
+you want: removal targets the `prodft_` attachment.
+
+`Product.features` and `Product.marketing_features` are pricing-table display
+maps from different Stripe API versions. They are marketing copy, not a list of
+attachments and never authorization truth. Read the authoritative catalog with
+`ProductFeature.list/4` for an inspection page or `ProductFeature.stream!/4` to
+enumerate it completely:
+
+```elixir
+catalog =
+  client
+  |> ProductFeature.stream!("prod_premium")
+  |> Enum.to_list()
+```
+
+Do not treat Checkout success or a browser redirect as proof that access changed.
+Stripe can update entitlement state asynchronously. The summary webhook starts
+the same full canonical customer refetch shown in [The reconciler
+pattern](#the-reconciler-pattern); persist that complete local snapshot, authorize
+from it locally, and fail closed when it is missing or stale.
 
 ## Testing
 
 Entitlements are unit-tested the way every other resource family is: Mox at the
 Transport boundary, with wire-shaped fixture maps. Public
-`LatticeStripe.Testing` fixtures for the entitlement objects are not yet
-exported; this section will document them, and the object-type registry entries
-that make webhook payloads deserialize automatically, when they ship. See
-[testing.md](testing.md) for the Mox setup this family will follow.
+`LatticeStripe.Testing.Fixtures.Entitlements` builders provide active entitlement,
+feature, and active-entitlement-summary payloads, while `LatticeStripe.Testing`
+wraps them into typed structs. `product_feature` is registered for typed webhook
+object dispatch; use the normal [testing.md](testing.md) Mox setup for request
+and reconciliation tests.
 
 ## Webhooks
 
 The event to subscribe to is
 `entitlements.active_entitlement_summary.updated`, dispatched from your
-`LatticeStripe.Webhook.Handler` implementation. Today, decode its payload
-explicitly with `ActiveEntitlementSummary.from_map/1` as shown in
-[The reconciler pattern](#the-reconciler-pattern); this section will cover
-automatic deserialization and the full handler wiring when the registry entries
-land. See [webhooks.md](webhooks.md) for signature verification and handler
-setup.
+`LatticeStripe.Webhook.Handler` implementation. Decode its payload with
+`ActiveEntitlementSummary.from_map/1` as shown in [The reconciler
+pattern](#the-reconciler-pattern), then perform the full canonical refetch before
+replacing your local snapshot. The summary itself is a webhook-only shape; the
+`product_feature` registry entry is useful for typed related objects but does not
+turn a partial summary page into authorization truth. See [webhooks.md](webhooks.md)
+for signature verification and handler setup.
 
 ## Error handling
 
