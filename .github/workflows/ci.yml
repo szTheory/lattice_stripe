@@ -28,15 +28,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
           elixir-version: '1.19'
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -52,7 +52,7 @@ jobs:
             ${{ runner.os }}-1.19-28-build-
 
       - name: Install dependencies
-        run: mix deps.get
+        run: mix deps.get --check-locked
 
       - name: Check formatting
         run: mix format --check-formatted
@@ -62,15 +62,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
           elixir-version: '1.19'
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -78,7 +78,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -86,7 +86,7 @@ jobs:
             ${{ runner.os }}-1.19-28-build-
 
       - name: Install dependencies
-        run: mix deps.get
+        run: mix deps.get --check-locked
 
       - name: Compile with warnings-as-errors
         run: mix compile --warnings-as-errors
@@ -106,15 +106,15 @@ jobs:
           - elixir: '1.19'
             otp: '28'
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Cache deps
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: deps
           key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-${{ hashFiles('**/mix.lock') }}
@@ -122,7 +122,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-mix-
 
       - name: Cache _build
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build
           key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-build-${{ hashFiles('**/mix.lock') }}
@@ -130,7 +130,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-build-
 
       - name: Install dependencies
-        run: mix deps.get
+        run: mix deps.get --check-locked
 
       - name: Run tests
         run: mix test
@@ -145,7 +145,7 @@ jobs:
     timeout-minutes: 15
     services:
       stripe-mock:
-        image: stripe/stripe-mock:latest
+        image: stripe/stripe-mock:v0.202.0@sha256:24f145e3dfffda8b55c09ca3babf5dcd117e49138a93590c7dd617f03be41117
         ports:
           - '12111:12111'
           - '12112:12112'
@@ -153,15 +153,15 @@ jobs:
       STRIPE_MOCK_HOST: localhost
       STRIPE_MOCK_PORT: '12111'
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
           elixir-version: '1.19'
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -169,7 +169,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -177,7 +177,7 @@ jobs:
             ${{ runner.os }}-1.19-28-build-
 
       - name: Install dependencies
-        run: mix deps.get
+        run: mix deps.get --check-locked
 
       - name: Run integration tests
         run: mix test --include integration
@@ -187,15 +187,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
           elixir-version: '1.19'
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -203,7 +203,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -211,7 +211,7 @@ jobs:
             ${{ runner.os }}-1.19-28-build-
 
       - name: Install dependencies
-        run: mix deps.get
+        run: mix deps.get --check-locked
 
       - name: Run docs_truth regression suite
         run: mix test test/lattice_stripe/docs_truth_test.exs
@@ -227,15 +227,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
           elixir-version: '1.19'
           otp-version: '28'
 
       - name: Cache deps
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: deps
           key: ${{ runner.os }}-1.19-28-mix-${{ hashFiles('**/mix.lock') }}
@@ -243,7 +243,7 @@ jobs:
             ${{ runner.os }}-1.19-28-mix-
 
       - name: Cache _build
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: _build
           key: ${{ runner.os }}-1.19-28-build-${{ hashFiles('**/mix.lock') }}
@@ -251,7 +251,10 @@ jobs:
             ${{ runner.os }}-1.19-28-build-
 
       - name: Install dependencies
-        run: mix deps.get
+        run: mix deps.get --check-locked
+
+      - name: Check for unused dependencies
+        run: mix deps.unlock --check-unused
 
       - name: Run Credo
         run: mix credo --strict
