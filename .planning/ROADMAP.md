@@ -238,7 +238,7 @@ Plans:
   3. Docs state permanently that `Charge.create` is absent by design and `PaymentIntent.create(confirm: true)` is the sanctioned path, with a docs-truth regression lock.
 
 **Build constraints**: `lib/lattice_stripe/error.ex` currently has no `headers`/`retry_after` (Stripe sends `Retry-After` as a header). `lib/lattice_stripe/webhook/cache_body_reader.ex` is `@moduledoc false` at L3 — promotion is a semver contract, so ExDoc registration in `mix.exs` is required. Do not regress SEED-005 §6 contracts.
-**Plans**: 4/5 plans executed
+**Plans**: 5/5 plans executed
 
 Plans:
 **Wave 1**
@@ -253,7 +253,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 67-05-PLAN.md — Run strict docs/API/CI convergence and hand off the milestone re-audit
+- [x] 67-05-PLAN.md — Run strict docs/API/CI convergence and hand off the milestone re-audit
 
 ## Progress (v1.10 — active)
 
@@ -265,7 +265,7 @@ Plans:
 | 64. Meter Event-Summary Reads | v1.10 | 10/10 | Complete    | 2026-07-28 |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 6/6 | Complete    | 2026-07-29 |
 | 66. Product ↔ Feature Attachment | v1.10 | 5/5 | Complete    | 2026-08-25 |
-| 67. DX Hardening & Milestone Doc Close | v1.10 | 4/5 | In Progress|  |
+| 67. DX Hardening & Milestone Doc Close | v1.10 | 5/5 | In Progress|  |
 
 ## Next Step
 

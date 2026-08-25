@@ -4,17 +4,17 @@ milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 67
 current_phase_name: DX Hardening & Milestone Doc Close
-status: executing
-stopped_at: Completed 67-03-PLAN.md
-last_updated: "2026-08-25T18:07:23.126Z"
+status: verifying
+stopped_at: Completed 67-05-PLAN.md
+last_updated: "2026-08-25T18:13:49.474Z"
 last_activity: 2026-08-25
 last_activity_desc: Phase 67 execution started
 progress:
   total_phases: 7
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 37
-  completed_plans: 36
-  percent: 86
+  completed_plans: 37
+  percent: 100
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 Phase: 67 (DX Hardening & Milestone Doc Close) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-25 — Phase 67 execution started
 
 **Carry-forward for Phase 65 and later:**
@@ -81,6 +81,7 @@ Last activity: 2026-08-25 — Phase 67 execution started
 | Phase 67 P02 | 3min | 2 tasks | 2 files |
 | Phase 67-dx-hardening-milestone-doc-close P04 | 6min | 2 tasks | 3 files |
 | Phase 67-dx-hardening-milestone-doc-close P03 | 3min | 3 tasks | 6 files |
+| Phase 67 P05 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -159,6 +160,8 @@ Last activity: 2026-08-25 — Phase 67 execution started
 - [Phase ?]: Describe the absent Charge API as its function name plus arity so ExDoc stays warning-free while the rendered guidance remains explicit.
 - [Phase ?]: Confirmed the pre-approved conditional CacheBodyReader.read_body/2 contract; no storage, key, availability, or return-shape alternative was reopened.
 - [Phase ?]: CacheBodyReader is public only with Plug; endpoint ordering remains canonical and parser-level retention stays a narrow non-multipart alternative.
+- [Phase ?]: Phase 67 uses zero-warning ExDoc plus full CI as the documentation closure gate; no differential baseline.
+- [Phase ?]: Phase 67 D-18 audits use the oldest 67 task commit parent as the immutable scope base; D-17 remains post-verification orchestration.
 
 ### Blockers/Concerns
 
@@ -185,8 +188,8 @@ Last activity: 2026-08-25 — Phase 67 execution started
 
 ## Session Continuity
 
-**Last session:** 2026-08-25T18:07:23.114Z
-**Stopped at:** Completed 67-03-PLAN.md
+**Last session:** 2026-08-25T18:13:49.455Z
+**Stopped at:** Completed 67-05-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
