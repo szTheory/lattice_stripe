@@ -70,7 +70,7 @@ defmodule LatticeStripe.Charge do
 
   ## SDK surface (intentionally omitted)
 
-  <code>LatticeStripe.Charge.create&#47;3</code> will not be added. Charge is a
+  `LatticeStripe.Charge.create` at arity `3` will not be added. Charge is a
   read/reconciliation resource, not a payment-initiation API. For direct server-side
   payment initiation, use `LatticeStripe.PaymentIntent.create/3`:
 

@@ -225,7 +225,7 @@ results = resp.data.data
 When a PaymentIntent succeeds, Stripe creates a **Charge** — the settled payment result
 record. New integrations should use `LatticeStripe.PaymentIntent` to accept payments;
 use `LatticeStripe.Charge` to read and reconcile those result records after the fact.
-<code>LatticeStripe.Charge.create&#47;3</code> will not be added: Charge is a read/reconciliation
+`LatticeStripe.Charge.create` at arity `3` will not be added: Charge is a read/reconciliation
 resource, not a payment-initiation API. For direct server-side payment initiation, use
 `LatticeStripe.PaymentIntent.create/3`:
 

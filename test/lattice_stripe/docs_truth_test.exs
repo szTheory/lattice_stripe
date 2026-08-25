@@ -9,7 +9,8 @@ defmodule LatticeStripe.ChargePolicyDocsTruthTest do
     reconciliation = charge_reconciliation()
 
     for policy <- [charge, reconciliation] do
-      assert policy =~ "LatticeStripe.Charge.create&#47;3"
+      assert policy =~ "LatticeStripe.Charge.create"
+      assert policy =~ "arity `3` will not be added"
       assert policy =~ "will not be added"
       assert policy =~ "LatticeStripe.PaymentIntent.create/3"
       assert policy =~ "\"amount\" => 4_999"
