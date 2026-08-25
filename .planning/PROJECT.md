@@ -10,10 +10,10 @@ Elixir developers can integrate Stripe payments into their applications with con
 
 ## Current State
 
-**v1.10 progress (2026-08-24):** Phases 61–65 are complete. Phase 62's
-historical 1.1 → 1.7 migration guide is verified with semantic docs-truth and
-warnings-strict ExDoc coverage; Phase 66 (Product ↔ Feature Attachment) is the
-next incomplete phase.
+**v1.10 progress (2026-08-25):** Phases 61–66 are complete. Phase 66 ships the
+typed Product Feature attachment resource and full catalog enumeration while
+preserving legacy/current Product marketing fields as raw display maps. Phase 67
+(DX Hardening & Milestone Doc Close) is the next and only incomplete phase.
 
 **Active milestone:** Maintenance mode (v1.9 shipped 2026-05-27).
 
@@ -199,6 +199,7 @@ option.
 - ✓ docs_truth checkout.md content locks alongside payments (VERIFY-05) — Phase 59, v1.9
 - ✓ Stripe-native entitlements read surface: `ActiveEntitlement` list/retrieve/`stream!`, `Feature` CRUDL, `ActiveEntitlementSummary` webhook decode + `stream_entitlements!/3` (ENT-01..05) — Phase 63, v1.10
 - ✓ Historical 1.1 → 1.7 migration guide: action-first breaking-change triage, complete capability inventory, and semantic ExDoc regression contract (DOC-01) — Phase 62, v1.10
+- ✓ Product Feature attachment surface: create/retrieve/list/`stream!`/delete, exact `product_feature` dispatch, raw Product marketing-field compatibility, and catalog-to-local-access guidance (PROD-01, PROD-02) — Phase 66, v1.10
 
 ### Active
 
@@ -254,6 +255,7 @@ option.
 | Post-v1.x: reactive maintenance only | v1.x scope complete at Hex 1.7.0; act on bugs, Stripe drift, adopter pull — not proactive milestones | ✓ Post-v1.x posture (2026-05-28) |
 | Adoption: pure silence default | No Forum/blog launch required for "done"; optional cross-link from Accrue when convenient | ✓ Post-v1.x posture (2026-05-28) |
 | Reopen maintenance mode for v1.8.0 "Accrue Surface Closure" | The adopter-pull gate fired: Accrue has a verified, blocking need for Stripe-native Entitlements + a narrow set of surface gaps (SEED-005); scope is additive and Accrue-driven, not broad breadth | ✓ Reopen decision (2026-07-27) |
+| Keep Product marketing display fields separate from typed entitlement attachments | Stripe's legacy `Product.features` and current `Product.marketing_features` contain pricing-table copy, not `product_feature` resources; typing those raw maps in a minor release would be semantically wrong and compatibility-breaking | ✓ Good (Phase 66) |
 
 ## Evolution
 
@@ -273,4 +275,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-24 after Phase 62 — historical 1.1 → 1.7 migration guide and DOC-01 verified; Phase 66 is the next incomplete phase.*
+*Last updated: 2026-08-25 after Phase 66 — typed Product Feature attachments verified; legacy/current Product marketing-field compatibility preserved; Phase 67 is next.*
