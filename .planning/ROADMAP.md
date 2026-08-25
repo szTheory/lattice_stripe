@@ -265,7 +265,7 @@ Plans:
 | 64. Meter Event-Summary Reads | v1.10 | 10/10 | Complete    | 2026-07-28 |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 6/6 | Complete    | 2026-07-29 |
 | 66. Product ↔ Feature Attachment | v1.10 | 5/5 | Complete    | 2026-08-25 |
-| 67. DX Hardening & Milestone Doc Close | v1.10 | 5/5 | In Progress|  |
+| 67. DX Hardening & Milestone Doc Close | v1.10 | 5/5 | Complete    | 2026-08-25 |
 
 ## Next Step
 

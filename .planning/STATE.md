@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
-current_phase: 67
-current_phase_name: DX Hardening & Milestone Doc Close
-status: verifying
+current_phase: 62
+current_phase_name: "\"1.1 → 1.7 What Landed\" Migration Guide"
+status: planning
 stopped_at: Completed 67-05-PLAN.md
-last_updated: "2026-08-25T18:13:49.474Z"
+last_updated: "2026-08-25T18:37:06.760Z"
 last_activity: 2026-08-25
-last_activity_desc: Phase 67 execution started
+last_activity_desc: Phase 67 complete, transitioned to Phase 62
 progress:
   total_phases: 7
   completed_phases: 7
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 ## Current Position
 
-Phase: 67 (DX Hardening & Milestone Doc Close) — EXECUTING
-Plan: 5 of 5
-Status: Phase complete — ready for verification
-Last activity: 2026-08-25 — Phase 67 execution started
+Phase: 62 — "1.1 → 1.7 What Landed" Migration Guide
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-25 — Phase 67 complete, transitioned to Phase 62
 
 **Carry-forward for Phase 65 and later:**
 
