@@ -31,12 +31,6 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 * **61-01:** use fully-qualified Config.validate!/1 in Client typedoc ([bb39266](https://github.com/szTheory/lattice_stripe/commit/bb392664ffd9fbb8539f6c95ba237ec8b9b56728))
 
-## [Unreleased]
-
-### Features
-
-* **client:** ship an optional `LatticeStripe.Application` that starts a default `LatticeStripe.Finch` pool at boot; `:finch` is no longer required and now defaults to `LatticeStripe.Finch`, so you can call Stripe without wiring a Finch pool yourself. This change is additive and backwards-compatible — existing callers that pass `:finch` or start their own pool are unaffected. BYO-supervision users who already run their own Finch pool can disable the default with `config :lattice_stripe, start_default_finch: false` to avoid a duplicate idle pool.
-
 ## [1.7.13](https://github.com/szTheory/lattice_stripe/compare/v1.7.12...v1.7.13) (2026-05-29)
 
 
@@ -129,10 +123,6 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 * hygiene script version parse and worktree allowlist ([c80de18](https://github.com/szTheory/lattice_stripe/commit/c80de18bc4805e84bca94eccad0cd67bbd787b89))
 * indent Phase moduledoc heredoc for compile warning ([c3f4786](https://github.com/szTheory/lattice_stripe/commit/c3f478652a66c4d675ec3ca79917cb280051a7af))
 * relax RELEASE-TRAIN ledger grep in hygiene script ([2236e6f](https://github.com/szTheory/lattice_stripe/commit/2236e6f2ec094d93ab6b48e1994b04e59dc1457e))
-
-## [Unreleased]
-
-_No unreleased changes._
 
 ## [1.7.1](https://github.com/szTheory/lattice_stripe/compare/v1.7.0...v1.7.1) (2026-05-28)
 
