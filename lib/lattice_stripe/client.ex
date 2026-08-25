@@ -44,8 +44,8 @@ defmodule LatticeStripe.Client do
       }
   """
 
-  alias LatticeStripe.{Config, Error, Request, Response}
   alias LatticeStripe.Client.{Executor, RequestBuilder}
+  alias LatticeStripe.{Config, Error, Request, Response}
 
   @enforce_keys [:api_key]
   defstruct [
