@@ -67,9 +67,9 @@ remain useful across different Elixir architectures.
 
 ## Maintenance and adopter pull
 
-The published baseline is 2.2.0. The next planned release, 2.2.1, is a
-compatibility-preserving quality patch focused on reliability, internal consistency,
-documentation truth, and release hygiene. It does not expand the public resource surface.
+The published release is 2.2.1, a compatibility-preserving quality patch focused on
+reliability, internal consistency, documentation truth, and release hygiene. It does not
+expand the public resource surface. Further work is reactive and adopter-driven.
 
 Beyond that patch, maintenance includes bug fixes, Stripe API drift, security and dependency
 work, and narrow additions supported by a real adopter job. There is no promise of speculative

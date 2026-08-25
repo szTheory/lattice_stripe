@@ -2,6 +2,54 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.11 — Reader-First Quality Closure
+
+**Shipped:** 2026-08-25
+**Phases:** 6 (68-73) | **Requirements:** 27
+
+### What Was Built
+
+- Removed decorative and historical noise while preserving invariants, clarified repository entry points, and organized prompt research into a current field guide plus archive.
+- Consolidated expandable decoding and canonical fixtures, then decomposed the public `Client` façade behind cohesive private request, execution, and decode units.
+- Eliminated concurrency flakes, added explicit optional-feature lanes, pinned immutable CI inputs, enforced meaningful 80% coverage, and hardened protected `main`.
+- Rewrote adopter guidance around SemVer, tenant-header suppression, idempotency, streaming, test boundaries, scope, and maintenance posture.
+- Published package 2.2.1 with the exact 3,463-entry public API unchanged and verified GitHub, Hex, HexDocs, CI, and release provenance.
+
+### What Worked
+
+- **Quality as a bounded product outcome:** Reader navigation, architecture, DX, reliability, security, documentation, and operations were evaluated together while the public API freeze prevented cleanup cost from moving to adopters.
+- **Parallel ecosystem research:** Elixir/Phoenix/Ecto conventions, Stripe SDK precedent, and CI/SRE practice converged on small private modules, explicit contracts, and truthful gates rather than speculative abstractions.
+- **Remote gates as release evidence:** The milestone PR, Release Please PR, release-SHA `ci-gate`, authenticated Hex dry-run, registry verification, and public checksum formed one auditable chain.
+- **Point-of-diminishing-returns discipline:** Deferred ideas stayed deferred unless they solved a demonstrated adopter problem; no DSL, new resource family, vanity coverage target, or standalone UI was invented.
+
+### What Was Inefficient
+
+- Release Please initially exposed package version/prose drift, and the PR package dry-run incorrectly required Hex authentication until the fork-safe lane was changed to `mix hex.build`.
+- Phase summaries and closure ledgers lagged implementation, requiring a final bookkeeping pass after the package had already shipped.
+- Public release-status prose embedded in the published docs needed a docs-only refresh after the immutable package tag, reinforcing that release truth should be generated or flipped in the release PR itself.
+
+### Patterns Established
+
+- Keep `LatticeStripe.Client` as the stable consumer façade and move complexity into private, behavior-named modules.
+- Require current-head aggregate CI on protected `main`; make optional integrations, package construction, coverage, dependency health, and action syntax explicit signals.
+- Treat the public API snapshot as a hard maintenance boundary, including testing helpers and struct/value contracts.
+- End cleanup milestones with a deliberate reactive-maintenance handoff: no implied next feature phase, one triaged drift radar, zero open PRs, and clean worktrees.
+
+### Key Lessons
+
+1. “Beautiful code” is measurable when framed as reader navigation, cohesive ownership, signal-to-noise, explicit contracts, and low operational ambiguity—not aesthetic churn.
+2. A mature SDK benefits more from exact compatibility and honest proof than from adding fashionable tools or abstractions.
+3. Release automation is part of the product surface: fork safety, immutable inputs, provenance, and public registry verification all affect adopter trust.
+4. Closure artifacts should be updated alongside execution; postponing them creates avoidable truth lag even when the code is sound.
+
+### Cost Observations
+
+- Final local gate: 2,449 tests, zero failures, one documented stripe-mock limitation, 80.57% line coverage, zero ExDoc warnings, and exact API-lock parity.
+- Release: milestone PR #57, release PR #58, package/tag commit `058f64b`, release run `32895251954`, and verified Hex checksum `8eafac9fb365c6309ed145e6945addf3096549266c23c027d366c921e0e459bf`.
+- Result: a clean stopping point with no scheduled feature milestone and no compatibility burden transferred to adopters.
+
+---
+
 ## Milestone: v1.10 — Accrue Surface Closure
 
 **Shipped:** 2026-08-25
@@ -321,6 +369,7 @@
 | v1.8 | 3 | 10 | Adopter truth & doc routing polish: describe-per-guide docs_truth, Charge reconciliation routing, planning-truth close at milestone end |
 | v1.9 | 2 | 4 | CI and doc honesty: checkout/README truth locks, guide-sensitive CI, and JTBD refresh |
 | v1.10 | 7 | 37 | Accrue-driven surface closure: default Finch, Entitlements, metering reads, object fixtures, Product Feature attachments, and DX/docs hardening. First milestone to explicitly separate GSD version from package SemVer at close |
+| v1.11 | 6 | 6 | Reader-first quality closure: private client decomposition, exact API freeze, concurrency/CI/security hardening, adopter documentation truth, and verified package 2.2.1 maintenance handoff |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -331,3 +380,4 @@
 5. **Source-truth verification before milestone scope-lock.** v1.5 codified what prior milestones did informally — grep `lib/` against the planned roadmap before locking. Caught the `tolerance: 0` bug and thin `Charge` surface that planning-doc review had missed for four milestones.
 6. **Reuse existing dispatch tables rather than growing new ones.** v1.5 `Webhook.fetch_related_object/2,3` typed-dispatched via the `ObjectTypes` registry already used elsewhere. Same pattern that kept v1.2 expand wiring narrow. Resisting "new table" temptation keeps the SDK surface coherent.
 7. **Fold Hex release into stop milestone — out-of-band publish creates adopter truth lag.** v1.7 assessment (2026-05-27): `mix.exs` stayed at 1.3.0 through v1.5/v1.6 code milestones while README/getting-started locked `~> 1.3`. Install truth became the top adopter friction, not missing Stripe families. Stop milestones must include version bump, CHANGELOG, lockstep docs-truth flip, and Hex publish as capstone work.
+8. **Quality closure needs an explicit stop condition.** v1.11 combined an exact API freeze, truthful gates, public release verification, and reactive-maintenance handoff so cleanup could stop at diminishing returns instead of becoming permanent churn.
