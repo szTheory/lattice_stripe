@@ -239,6 +239,33 @@ Override per-request:
 For custom retry behavior (circuit breakers, custom backoff), see
 [Extending LatticeStripe](extending-lattice-stripe.md).
 
+## Consuming final response evidence
+
+When a request ultimately fails, `LatticeStripe.Error` preserves the final HTTP response
+headers in transport order. `error.retry_after` is the first valid, non-negative
+decimal-seconds `Retry-After` value from that response; it is intentionally uncapped.
+`Error.get_header/2` returns every matching header value without normalizing or
+deduplicating the original evidence.
+
+```elixir
+case LatticeStripe.PaymentIntent.create(client, params) do
+  {:error, %LatticeStripe.Error{retry_after: seconds} = error} when is_integer(seconds) ->
+    retry_values = LatticeStripe.Error.get_header(error, "retry-after")
+
+    # Enqueue delayed background work; do not sleep in a Phoenix request process.
+    MyApp.RetryWorker.schedule(params, delay: seconds, retry_after_values: retry_values)
+
+  {:error, %LatticeStripe.Error{} = error} ->
+    {:error, error}
+end
+```
+
+This is response evidence for your application policy, not an SDK scheduler. The SDK's
+own retry strategy may use a capped delay internally, while `retry_after` remains the
+uncapped public value. Avoid logging response headers or `raw_body` wholesale: they can
+contain sensitive metadata. Log a bounded request identifier and only the specific fields
+your incident process requires.
+
 ## Using request_id for Support
 
 Every successful or failed Stripe API response includes a `request_id` — Stripe's internal
@@ -279,7 +306,9 @@ err = %LatticeStripe.Error{
   status: 402,
   code: "card_declined",
   message: "Your card was declined.",
-  request_id: "req_abc123"
+  request_id: "req_abc123",
+  headers: [{"request-id", "req_abc123"}],
+  retry_after: nil
 }
 
 Exception.message(err)

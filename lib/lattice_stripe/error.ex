@@ -194,7 +194,7 @@ defmodule LatticeStripe.Error do
     |> Enum.find_value(fn
       {name, value} when is_binary(name) and is_binary(value) ->
         if String.downcase(name) == "retry-after" do
-          case Integer.parse(value) do
+          case Integer.parse(String.trim(value)) do
             {seconds, ""} when seconds >= 0 -> seconds
             _ -> nil
           end

@@ -339,7 +339,7 @@ defmodule LatticeStripe.ClientTest do
         {:error, :timeout}
       end)
 
-      assert {:error, %Error{type: :connection_error}} =
+      assert {:error, %Error{type: :connection_error, headers: [], retry_after: nil}} =
                Client.request(client, get_request())
     end
   end
@@ -785,6 +785,23 @@ defmodule LatticeStripe.ClientTest do
 
       assert is_binary(raw)
       assert String.contains?(raw, "maintenance")
+    end
+
+    test "non-JSON errors preserve their response headers and Retry-After evidence" do
+      client = test_client(max_retries: 0)
+
+      headers = [
+        {"Request-Id", "req_non_json"},
+        {"Retry-After", " 60 "},
+        {"retry-after", "120"}
+      ]
+
+      expect(LatticeStripe.MockTransport, :request, fn _req_map ->
+        {:ok, %{status: 503, headers: headers, body: "<html>maintenance</html>"}}
+      end)
+
+      assert {:error, %Error{headers: ^headers, retry_after: 60}} =
+               Client.request(client, get_request())
     end
 
     # Test 41: Empty response body returns structured api_error
@@ -1441,6 +1458,26 @@ defmodule LatticeStripe.ClientTest do
                Client.download(client, "/v1/files/file_xxx/contents")
     end
 
+    test "preserves response evidence on download errors" do
+      client = test_client(max_retries: 0)
+      headers = [{"Request-Id", "req_download"}, {"Retry-After", "60"}]
+
+      expect(LatticeStripe.MockTransport, :request, fn _req ->
+        {:ok,
+         %{
+           status: 429,
+           headers: headers,
+           body:
+             Jason.encode!(%{
+               "error" => %{"type" => "rate_limit_error", "message" => "Too many requests"}
+             })
+         }}
+      end)
+
+      assert {:error, %Error{headers: ^headers, retry_after: 60}} =
+               Client.download(client, "/v1/files/file_xxx/contents")
+    end
+
     test "JSON-decodes error responses on 5xx" do
       client = test_client(max_retries: 0)
 
@@ -1499,7 +1536,7 @@ defmodule LatticeStripe.ClientTest do
         {:error, %Mint.TransportError{reason: :timeout}}
       end)
 
-      assert {:error, %Error{type: :connection_error}} =
+      assert {:error, %Error{type: :connection_error, headers: [], retry_after: nil}} =
                Client.download(client, "/v1/files/file_x/contents")
     end
   end
