@@ -5,16 +5,16 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 67
 current_phase_name: DX Hardening & Milestone Doc Close
 status: planning
-stopped_at: Phase 66 verified and complete
-last_updated: "2026-08-25T14:56:44.417Z"
+stopped_at: Phase 67 context gathered
+last_updated: "2026-08-25T16:58:35.695Z"
 last_activity: 2026-08-25
 last_activity_desc: Phase 66 complete, transitioned to Phase 67
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 6
   total_plans: 32
   completed_plans: 32
-  percent: 100
+  percent: 86
 ---
 
 # Project State
@@ -175,9 +175,9 @@ Last activity: 2026-08-25 — Phase 66 complete, transitioned to Phase 67
 
 ## Session Continuity
 
-**Last session:** 2026-08-25T14:43:02.139Z
-**Stopped at:** Completed 66-05-PLAN.md
-**Resume file:** None
+**Last session:** 2026-08-25T16:58:35.681Z
+**Stopped at:** Phase 67 context gathered
+**Resume file:** .planning/phases/67-dx-hardening-milestone-doc-close/67-CONTEXT.md
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
 Gap brief: `.planning/research/accrue-gap-brief-2026-07-27.txt`
