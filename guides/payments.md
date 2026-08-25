@@ -258,6 +258,7 @@ A successful PaymentIntent creates the resulting Charge for reconciliation. Here
 call Stripe.js to confirm that same PaymentIntent. If it returns `:requires_action`, send the
 client secret to the authenticated client and use Stripe.js to handle the returned
 `next_action` (or redirect only when the action explicitly supplies a redirect URL).
+Customer action or SCA may still be required.
 
 | Goal | Function | Notes |
 |------|----------|-------|
