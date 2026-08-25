@@ -48,7 +48,7 @@ created: 2026-08-25
 | 67-03-03 | 03 | 2 | DX-03 | T-67-02, T-67-03 | Public module is grouped, conditionally documented, exact-byte tested, and semver-locked | API/docs lock | `mix test test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/api_surface_lock_test.exs test/lattice_stripe/webhook/plug_test.exs --warnings-as-errors && mix lattice_stripe.api_surface --check` | ✅ extend | ⬜ pending |
 | 67-04-01 | 04 | 1 | DOC-02 | T-67-06, T-67-07 | Canonical Charge surfaces route initiation to PaymentIntent without obscuring SCA | docs truth + structural unit | `mix test test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/charge_test.exs --warnings-as-errors && mix docs --warnings-as-errors` | ✅ extend | ⬜ pending |
 | 67-04-02 | 04 | 1 | DOC-02 | T-67-07 | Canonical policy ownership remains deterministic under repeated and parallel reads | docs truth + structural unit | `mix test test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/charge_test.exs --warnings-as-errors` | ✅ extend | ⬜ pending |
-| 67-05-01 | 05 | 3 | DX-02, DX-03, DOC-02 | T-67-01, T-67-02, T-67-03, T-67-04 | Focused behavior, strict ExDoc, and API evidence is sampled before the long gate | focused phase gate | `mix test test/lattice_stripe/error_test.exs test/lattice_stripe/client_test.exs test/lattice_stripe/retry_strategy_test.exs test/lattice_stripe/webhook/plug_test.exs test/lattice_stripe/charge_test.exs test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/api_surface_lock_test.exs --warnings-as-errors && mix docs --warnings-as-errors && mix lattice_stripe.api_surface --check` | ✅ existing/extend | ⬜ pending |
+| 67-05-01 | 05 | 3 | DX-02, DX-03, DOC-02 | T-67-01, T-67-02, T-67-03, T-67-04 | Focused behavior, strict ExDoc, and API evidence is sampled before the long gate | focused phase gate | `mix test test/lattice_stripe/error_test.exs test/lattice_stripe/client_test.exs test/lattice_stripe/retry_strategy_test.exs test/lattice_stripe/webhook/plug_test.exs test/lattice_stripe/charge_test.exs test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/api_surface_lock_test.exs --warnings-as-errors && mix docs --warnings-as-errors && mix lattice_stripe.api_surface --check` | ✅ existing/extend | ✅ pass — 292 tests, zero ExDoc warnings, API lock 3463 entries (2026-08-25) |
 | 67-05-02 | 05 | 3 | DX-02, DX-03, DOC-02 | T-67-08 | Full CI, API-coverage disposition, commit-aware D-18 blocks/cache evidence, persisted phase base, and historical-audit hash converge | full/scope gate | `mix ci` plus Task 2's exact base derivation, `git diff --name-only <base>..HEAD`, protected named-block/source comparisons, cache status/fingerprint, detector, and hash command | ⬜ create base evidence | ⬜ pending |
 
 *The 12 rows above map every executable task in the five submitted plans. Plan 67-03 is Wave 2 and Plan 67-05 is Wave 3. Milestone re-audit is deliberately excluded because execute-plan does not create the Phase 67 verification artifact that the audit requires.*
@@ -107,3 +107,17 @@ All phase behaviors have automated verification. There are no manual-only phase-
 - [ ] `nyquist_compliant: true` is set in frontmatter after execution validation.
 
 **Approval:** pending
+
+---
+
+## Observed Execution Evidence
+
+### Task 67-05-01 — focused strict documentation and API sample
+
+Observed 2026-08-25 before the full `mix ci` convergence gate:
+
+- `mix test test/lattice_stripe/error_test.exs test/lattice_stripe/client_test.exs test/lattice_stripe/retry_strategy_test.exs test/lattice_stripe/webhook/plug_test.exs test/lattice_stripe/charge_test.exs test/lattice_stripe/docs_truth_test.exs test/lattice_stripe/api_surface_lock_test.exs --warnings-as-errors` — **PASS**; 292 tests, 0 failures.
+- `mix docs --warnings-as-errors` — **PASS**; documentation generated with zero warnings.
+- `mix lattice_stripe.api_surface --check` — **PASS**; `Public API surface matches priv/api/current.txt (3463 entries).`
+
+Task 2 must still record the full CI result, final-scope disposition, immutable Phase 67 base, protected-block comparisons, cache fingerprint, historical-audit hash, and final Nyquist sign-off.
