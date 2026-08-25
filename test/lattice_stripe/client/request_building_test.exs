@@ -205,8 +205,8 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       :telemetry.attach_many(
         handler_id,
         [[:lattice_stripe, :request, :start], [:lattice_stripe, :request, :stop]],
-        &LatticeStripe.TestTelemetryHandler.handle_event/4,
-        {self(), :telemetry_event}
+        &LatticeStripe.TestTelemetryHandler.handle_request_path/4,
+        {self(), :telemetry_event, "/v1/customers/cus_123"}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -229,8 +229,8 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       :telemetry.attach_many(
         handler_id,
         [[:lattice_stripe, :request, :start], [:lattice_stripe, :request, :stop]],
-        &LatticeStripe.TestTelemetryHandler.handle_event/4,
-        {self(), :telemetry_event}
+        &LatticeStripe.TestTelemetryHandler.handle_request_path/4,
+        {self(), :telemetry_event, "/v1/customers/cus_123"}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
