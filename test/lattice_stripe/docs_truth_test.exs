@@ -1,3 +1,44 @@
+defmodule LatticeStripe.ChargePolicyDocsTruthTest do
+  use ExUnit.Case, async: true
+
+  @charge_path "lib/lattice_stripe/charge.ex"
+  @payments_path "guides/payments.md"
+
+  test "Charge policy is complete in its two canonical documentation regions" do
+    charge = charge_moduledoc()
+    reconciliation = charge_reconciliation()
+
+    for policy <- [charge, reconciliation] do
+      assert policy =~ "LatticeStripe.Charge.create/3 will not be added"
+      assert policy =~ "LatticeStripe.PaymentIntent.create/3"
+      assert policy =~ "\"amount\" => 4_999"
+      assert policy =~ "\"currency\" => \"usd\""
+      assert policy =~ "\"payment_method\" => \"pm_card_visa\""
+      assert policy =~ "\"confirm\" => true"
+      assert policy =~ "successful PaymentIntent creates the resulting Charge"
+      assert policy =~ "customer action or SCA"
+    end
+  end
+
+  defp charge_moduledoc do
+    @charge_path
+    |> File.read!()
+    |> String.split("  @moduledoc \"\"\"", parts: 2)
+    |> List.last()
+    |> String.split("  \"\"\"", parts: 2)
+    |> List.first()
+  end
+
+  defp charge_reconciliation do
+    @payments_path
+    |> File.read!()
+    |> String.split("## Charge reconciliation", parts: 2)
+    |> List.last()
+    |> String.split("\n## ", parts: 2)
+    |> List.first()
+  end
+end
+
 defmodule LatticeStripe.DocsTruthTest do
   use ExUnit.Case, async: true
 
