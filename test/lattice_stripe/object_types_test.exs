@@ -59,6 +59,32 @@ defmodule LatticeStripe.ObjectTypesTest do
       refute Map.has_key?(result, :id)
     end
 
+    test "product_feature resolves and deserializes exactly" do
+      map = %{
+        "object" => "product_feature",
+        "id" => "prodft_123",
+        "livemode" => false,
+        "entitlement_feature" => %{
+          "object" => "entitlements.feature",
+          "id" => "feat_123",
+          "lookup_key" => "advanced_analytics",
+          "name" => "Advanced analytics"
+        },
+        "future_top_level_field" => "retained"
+      }
+
+      assert ObjectTypes.fetch_module("product_feature") == {:ok, LatticeStripe.Product.Feature}
+
+      assert %LatticeStripe.Product.Feature{
+               id: "prodft_123",
+               entitlement_feature: %LatticeStripe.Entitlements.Feature{
+                 id: "feat_123",
+                 lookup_key: "advanced_analytics"
+               },
+               extra: %{"future_top_level_field" => "retained"}
+             } = ObjectTypes.maybe_deserialize(map)
+    end
+
     test "dispatches the public meter event fixture to MeterEvent.from_map/1" do
       map = MeterEventFixture.meter_event_json()
       result = ObjectTypes.maybe_deserialize(map)
@@ -239,6 +265,13 @@ defmodule LatticeStripe.ObjectTypesTest do
       assert ObjectTypes.maybe_deserialize(map) == map
     end
 
+    test "product.feature is rejected byte-for-byte" do
+      dotted_typo = %{"object" => "product.feature", "id" => "prodft_123"}
+
+      assert ObjectTypes.fetch_module("product.feature") == :error
+      assert ObjectTypes.maybe_deserialize(dotted_typo) == dotted_typo
+    end
+
     test "returns maps without 'object' key as raw map" do
       map = %{"id" => "foo_123", "data" => "some_value"}
       assert ObjectTypes.maybe_deserialize(map) == map
@@ -401,6 +434,7 @@ defmodule LatticeStripe.ObjectTypesTest do
         "payout",
         "price",
         "product",
+        "product_feature",
         "promotion_code",
         "quote",
         "refund",
