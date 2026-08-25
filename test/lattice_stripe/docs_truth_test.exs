@@ -21,6 +21,28 @@ defmodule LatticeStripe.ChargePolicyDocsTruthTest do
     end
   end
 
+  test "canonical Charge policy extraction is repeatable and parallel-reader stable" do
+    for reader <- [&charge_moduledoc/0, &charge_reconciliation/0] do
+      expected = reader.()
+
+      assert Enum.uniq(Enum.map(1..3, fn _ -> reader.() end)) == [expected]
+
+      assert 1..8
+             |> Task.async_stream(fn _ -> reader.() end, ordered: true)
+             |> Enum.all?(&match?({:ok, ^expected}, &1))
+    end
+  end
+
+  test "only the canonical regions own the complete Charge policy" do
+    readme = File.read!("README.md")
+
+    assert @charge_path == "lib/lattice_stripe/charge.ex"
+    assert @payments_path == "guides/payments.md"
+    assert readme =~ "PI-first; no `create`"
+    refute readme =~ "\"amount\" => 4_999"
+    refute readme =~ "customer action or SCA"
+  end
+
   defp charge_moduledoc do
     @charge_path
     |> File.read!()
