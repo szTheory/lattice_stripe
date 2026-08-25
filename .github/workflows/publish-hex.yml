@@ -25,6 +25,11 @@ on:
         required: false
         type: boolean
         default: false
+      docs_only:
+        description: 'Refresh HexDocs for an existing release without republishing the package.'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -217,7 +222,7 @@ jobs:
 
       - name: Skip if version already on Hex
         id: idempotency
-        if: ${{ github.event.inputs.dry_run != 'true' }}
+        if: ${{ github.event.inputs.dry_run != 'true' && github.event.inputs.docs_only != 'true' }}
         run: |
           if mix hex.info lattice_stripe "${RELEASE_VERSION}" 2>/dev/null | grep -q "Released:"; then
             echo "Version ${RELEASE_VERSION} of lattice_stripe already on Hex — skipping publish."
@@ -225,16 +230,22 @@ jobs:
           fi
 
       - name: Dry run Hex publish
-        if: github.event.inputs.dry_run == 'true' || steps.idempotency.outputs.skip != 'true'
+        if: github.event.inputs.docs_only != 'true' && (github.event.inputs.dry_run == 'true' || steps.idempotency.outputs.skip != 'true')
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
         run: mix hex.publish --dry-run --yes
 
       - name: Publish to Hex
-        if: github.event.inputs.dry_run != 'true' && steps.idempotency.outputs.skip != 'true'
+        if: github.event.inputs.docs_only != 'true' && github.event.inputs.dry_run != 'true' && steps.idempotency.outputs.skip != 'true'
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
         run: mix hex.publish --yes
+
+      - name: Publish docs to HexDocs
+        if: github.event.inputs.docs_only == 'true' && github.event.inputs.dry_run != 'true'
+        env:
+          HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
+        run: mix hex.publish docs --yes
 
       - name: Verify version on Hex.pm
         if: github.event.inputs.dry_run != 'true'
