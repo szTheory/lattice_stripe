@@ -143,12 +143,15 @@ defmodule LatticeStripe.MixProject do
             ~r/^LatticeStripe\.(PaymentIntent|PaymentMethod|Customer|Mandate|SetupAttempt|SetupIntent|Refund|Dispute|Charge|Card)($|\.)/
           ],
           Checkout: [~r/^LatticeStripe\.Checkout($|\.)/],
+          "Customer Portal": [~r/^LatticeStripe\.BillingPortal($|\.)/],
+          "Billing Metering": [~r/^LatticeStripe\.Billing($|\.)/],
+          Entitlements: [
+            LatticeStripe.Product.Feature,
+            ~r/^LatticeStripe\.Entitlements($|\.)/
+          ],
           Billing: [
             ~r/^LatticeStripe\.(Invoice|InvoiceItem|CreditNote|Quote|Subscription|SubscriptionItem|SubscriptionSchedule|Coupon|Price|Product|PromotionCode)($|\.)/
           ],
-          "Customer Portal": [~r/^LatticeStripe\.BillingPortal($|\.)/],
-          "Billing Metering": [~r/^LatticeStripe\.Billing($|\.)/],
-          Entitlements: [~r/^LatticeStripe\.Entitlements($|\.)/],
           Tax: [~r/^LatticeStripe\.(Tax|TaxId)($|\.)/],
           Connect: [
             ~r/^LatticeStripe\.(Account|AccountLink|LoginLink|BankAccount|ExternalAccount|Transfer|TransferReversal|Payout|Balance|BalanceTransaction)($|\.)/

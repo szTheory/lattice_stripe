@@ -38,6 +38,19 @@ defmodule LatticeStripe.Product do
 
         LatticeStripe.Product.update(client, product_id, %{"active" => "false"})
 
+  ## Marketing display copy and entitlement attachments
+
+  The raw `features` and `marketing_features` fields are pricing-table display copy
+  from different Stripe API versions. They remain raw string-keyed maps for backwards
+  compatibility and are not entitlement attachments.
+
+  An access-bearing attachment is instead a `LatticeStripe.Product.Feature` with its
+  own `prodft_` id, connecting this Product's `prod_` id to an
+  `LatticeStripe.Entitlements.Feature` definition's `feat_` id. Read those attachments
+  from the dedicated endpoint with `LatticeStripe.Product.Feature.list/4` or
+  `LatticeStripe.Product.Feature.stream!/4`; do not infer access from Product marketing
+  copy.
+
   ## Stripe API Reference
 
   See the [Stripe Product API](https://docs.stripe.com/api/products) for the full

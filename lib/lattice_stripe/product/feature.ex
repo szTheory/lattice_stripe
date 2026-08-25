@@ -4,9 +4,18 @@ defmodule LatticeStripe.Product.Feature do
 
   A `%Feature{}` is the `product_feature` attachment (an id prefixed `prodft_`)
   between a Product (`prod_`) and an `LatticeStripe.Entitlements.Feature`
-  definition (`feat_`). It is not the Product's `marketing_features` display
-  copy. See [Entitlements](guides/entitlements.md) for the catalog-to-access
-  lifecycle.
+  definition (`feat_`). It is not the Product's `features` or
+  `marketing_features` display copy.
+
+  Use the canonical `create/4`, `retrieve/4`, `list/4`, `stream!/4`, and
+  `delete/4` resource verbs in code. In domain prose, an attachment is something
+  you *attach* to or *remove* from a Product; this module intentionally publishes
+  no parallel `attach`, `detach`, or `remove` aliases. `list/4` and `stream!/4`
+  are the authoritative catalog reads for access-bearing attachments.
+
+  See `LatticeStripe.Entitlements.Feature` for the definition side of the
+  relationship, and [Entitlements](guides/entitlements.md) for the
+  catalog-to-access lifecycle.
   """
 
   alias LatticeStripe.{Client, List, Request, Resource, Response}
