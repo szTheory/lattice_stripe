@@ -709,7 +709,10 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ "canonical re-fetch avoids"
     assert guide =~ "not a\ntransactional point-in-time snapshot"
     assert guide =~ "Make reconciliation idempotent"
-    assert guide =~ "only\nreplace the complete local snapshot after the full enumeration succeeds"
+
+    assert guide =~
+             "only\nreplace the complete local snapshot after the full enumeration succeeds"
+
     assert guide =~ "retry/reconcile again or process the\nsubsequent summary event"
     assert guide =~ "fail-closed\nstaleness policy"
 
