@@ -187,12 +187,13 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
     test "emits telemetry start and stop events" do
       client = test_client(telemetry_enabled: true)
       handler_id = "test-telemetry-handler-#{:erlang.unique_integer([:positive])}"
+      path = "/v1/customers/telemetry-enabled-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach_many(
         handler_id,
         [[:lattice_stripe, :request, :start], [:lattice_stripe, :request, :stop]],
         &LatticeStripe.TestTelemetryHandler.handle_request_path/4,
-        {self(), :telemetry_event, "/v1/customers/cus_123"}
+        {self(), :telemetry_event, path}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -201,7 +202,7 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
         ok_response()
       end)
 
-      Client.request(client, get_request())
+      Client.request(client, get_request(path))
 
       assert_receive {:telemetry_event, [:lattice_stripe, :request, :start], _, _meta}
       assert_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _, _meta}
@@ -210,12 +211,13 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
     test "does NOT emit telemetry events when telemetry_enabled is false" do
       client = test_client(telemetry_enabled: false)
       handler_id = "test-no-telemetry-handler-#{:erlang.unique_integer([:positive])}"
+      path = "/v1/customers/telemetry-disabled-#{:erlang.unique_integer([:positive])}"
 
       :telemetry.attach_many(
         handler_id,
         [[:lattice_stripe, :request, :start], [:lattice_stripe, :request, :stop]],
         &LatticeStripe.TestTelemetryHandler.handle_request_path/4,
-        {self(), :telemetry_event, "/v1/customers/cus_123"}
+        {self(), :telemetry_event, path}
       )
 
       on_exit(fn -> :telemetry.detach(handler_id) end)
@@ -224,7 +226,7 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
         ok_response()
       end)
 
-      Client.request(client, get_request())
+      Client.request(client, get_request(path))
 
       refute_receive {:telemetry_event, [:lattice_stripe, :request, :start], _, _}, 100
       refute_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _, _}, 100

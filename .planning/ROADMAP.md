@@ -13,7 +13,7 @@
 - ✅ **v1.8 — Adopter Truth & Doc Routing Polish** — Phases 56-58 (shipped 2026-05-27) — [archive](milestones/v1.8-ROADMAP.md)
 - ✅ **v1.9 — CI & Doc Honesty** — Phases 59-60 (shipped 2026-05-27) — [archive](milestones/v1.9-ROADMAP.md)
 - ✅ **v1.10 — Accrue Surface Closure** — Phases 61-67 (shipped 2026-08-25; planned as Hex 1.8.0, synchronized release baseline reached 2.2.0) — [archive](milestones/v1.10-ROADMAP.md)
-- 🚧 **v1.11 — Reader-First Quality Closure** — Phases 68-73 (2.2.0 baseline; targets 2.2.1)
+- ✅ **v1.11 — Reader-First Quality Closure** — Phases 68-73 (shipped 2026-08-25 as package 2.2.1)
 
 ## Phases
 
@@ -22,7 +22,7 @@
 - [x] **Phase 70: Client Core & Test Architecture** - Preserve the public client contract while making its implementation and characterization suite easy to navigate.
 - [x] **Phase 71: Reliability, CI & Security** - Make automated quality and security signals complete, reproducible, and honest.
 - [x] **Phase 72: Adopter DX & Documentation Truth** - Let an Elixir adopter make correct production choices from current, source-backed guidance.
-- [ ] **Phase 73: Release & Maintenance Pause** - Close the release and repository at a verified, low-maintenance stopping point. *(in progress)*
+- [x] **Phase 73: Release & Maintenance Pause** - Close the release and repository at a verified, low-maintenance stopping point.
 
 ## Phase Details
 
@@ -88,7 +88,7 @@
   2. Fresh local and remote validation proves CI, optional features, coverage, package build/dry-run, docs truth, API lock, and repository hygiene from the release candidate.
   3. Version 2.2.1 is published and verifiable on GitHub Releases, Hex.pm, and HexDocs from the exact green release SHA.
   4. `main` is green and protected, PRs and issues are triaged, temporary worktrees are removed, and the repository records its reactive-maintenance handoff.
-**Plans**: In progress — see `phases/73-release-maintenance-pause/73-VERIFICATION.md`
+**Plans**: Complete — see `phases/73-release-maintenance-pause/73-VERIFICATION.md`
 
 ## Progress
 
@@ -99,12 +99,12 @@
 | 70. Client Core & Test Architecture | 1/1 | Complete | 2026-08-25 |
 | 71. Reliability, CI & Security | 1/1 | Complete | 2026-08-25 |
 | 72. Adopter DX & Documentation Truth | 1/1 | Complete | 2026-08-25 |
-| 73. Release & Maintenance Pause | 0/1 | In progress | - |
+| 73. Release & Maintenance Pause | 1/1 | Complete | 2026-08-25 |
 
 ## Current Status
 
-**Active milestone:** v1.11 Reader-First Quality Closure.
+**Latest milestone:** v1.11 Reader-First Quality Closure (complete).
 
-**Current:** Phase 73 — Release & Maintenance Pause.
+**Current:** Milestone complete; reactive maintenance.
 
-**Next:** Merge the green milestone PR, publish and verify 2.2.1, then record the clean reactive-maintenance handoff.
+**Next:** No planned feature milestone. Respond to confirmed bugs, Stripe drift, security updates, and demonstrated adopter pull.

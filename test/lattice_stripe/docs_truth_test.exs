@@ -633,11 +633,12 @@ defmodule LatticeStripe.DocsTruthTest do
   end
 
   describe "2.2 maintenance posture and scope boundaries" do
-    test "readme publishes the quality-patch posture and deferred scope anchors" do
+    test "readme publishes the shipped quality-patch posture and deferred scope anchors" do
       readme = File.read!("README.md")
 
       assert readme =~ "2.2 baseline is feature-complete"
-      assert readme =~ "`2.2.1` quality patch"
+      assert readme =~ "published release is **`2.2.1`**"
+      assert readme =~ "compatibility-preserving quality patch"
       assert readme =~ "maintenance- and adoption-driven"
       assert readme =~ "hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html"
       assert readme =~ "hexdocs.pm/lattice_stripe/api_stability.html"

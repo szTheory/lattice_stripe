@@ -9,7 +9,7 @@ verified: 2026-08-25
 
 Reliability and supply-chain signals are explicit and truthful.
 
-- Batch accounting is atomic; telemetry handlers are module-based and request-path isolated under concurrency.
+- Batch accounting is atomic; telemetry handlers are module-based and request-path isolated under concurrency. The close-time integration audit found that two async client telemetry tests still shared a common path; unique per-test paths removed that false cross-test signal, followed by 100 focused and 10 full-suite stress runs plus a fresh `mix ci`.
 - Required CI lanes cover the full version matrix, no-optional production compilation, Fuse, OpenTelemetry, coverage, actionlint, dependency audit, docs, and fork-safe package assembly with matrix `fail-fast: false`; the authenticated release workflow owns the publish dry-run.
 - Actions use immutable full SHAs and stripe-mock uses a versioned digest.
 - The suite has one documented stripe-mock limitation skip; the 80% floor passes at 80.57%, including real Finch HTTP success/failure coverage.

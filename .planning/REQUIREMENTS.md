@@ -45,10 +45,10 @@
 
 ## Release and Maintenance Pause
 
-- [ ] **CLOSE-01** — Planning, release-train, issue/PR, and external-verification ledgers reflect current truth; obsolete windows and probes are retired or explicitly accepted.
-- [ ] **CLOSE-02** — Fresh local and remote gates pass: full CI, optional-feature lanes, coverage, package build/dry-run, docs truth, API lock, and repository hygiene.
-- [ ] **CLOSE-03** — Package 2.2.1 is published and verified on GitHub Releases, Hex.pm, and HexDocs from the exact green release SHA.
-- [ ] **CLOSE-04** — Remote `main` is green and protected, open PRs are resolved, open issues are triaged, temporary worktrees are removed, and the project records a reactive-maintenance handoff.
+- [x] **CLOSE-01** — Planning, release-train, issue/PR, and external-verification ledgers reflect current truth; obsolete windows and probes are retired or explicitly accepted.
+- [x] **CLOSE-02** — Fresh local and remote gates pass: full CI, optional-feature lanes, coverage, package build/dry-run, docs truth, API lock, and repository hygiene.
+- [x] **CLOSE-03** — Package 2.2.1 is published and verified on GitHub Releases, Hex.pm, and HexDocs from the exact green release SHA.
+- [x] **CLOSE-04** — Remote `main` is green and protected, open PRs are resolved, open issues are triaged, temporary worktrees are removed, and the project records a reactive-maintenance handoff.
 
 ## Future Requirements
 
@@ -93,10 +93,10 @@ These ideas remain deliberately outside v1.11. They require independent adopter 
 | DOC-05 | Phase 72 — Adopter DX & Documentation Truth | Complete |
 | DOC-06 | Phase 72 — Adopter DX & Documentation Truth | Complete |
 | DOC-07 | Phase 72 — Adopter DX & Documentation Truth | Complete |
-| CLOSE-01 | Phase 73 — Release & Maintenance Pause | Pending |
-| CLOSE-02 | Phase 73 — Release & Maintenance Pause | Pending |
-| CLOSE-03 | Phase 73 — Release & Maintenance Pause | Pending |
-| CLOSE-04 | Phase 73 — Release & Maintenance Pause | Pending |
+| CLOSE-01 | Phase 73 — Release & Maintenance Pause | Complete |
+| CLOSE-02 | Phase 73 — Release & Maintenance Pause | Complete |
+| CLOSE-03 | Phase 73 — Release & Maintenance Pause | Complete |
+| CLOSE-04 | Phase 73 — Release & Maintenance Pause | Complete |
 
 **Coverage:** 27 requirements mapped; 27 total; 0 unmapped.
 

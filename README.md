@@ -6,10 +6,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **Current release:** **`2.2.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see
-> [CHANGELOG](CHANGELOG.md#220) for what shipped since 2.1.0.
+> [CHANGELOG](CHANGELOG.md#221) for what shipped since 2.1.0.
 >
-> The published baseline is **`2.2.0`**; the next planned release is the
-> compatibility-preserving **`2.2.1` quality patch**. Evaluating fit? Start with
+> The published release is **`2.2.1`**, a compatibility-preserving quality patch.
+> Evaluating fit? Start with
 > [User Flows & JTBD][user-flows-and-jtbd].
 
 A production-grade, idiomatic Elixir SDK for the Stripe API.
@@ -25,9 +25,9 @@ The **2.2 baseline is feature-complete for the library's intended mainstream Saa
 payments, billing, metering, Connect, tax on custom flows, entitlement catalog and access
 reconciliation, webhooks (including thin events), and production operator guides.
 
-The 2.2 line is maintenance- and adoption-driven. The planned 2.2.1 patch concentrates on
-reliability, internal consistency, documentation truth, and release hygiene without changing
-the public API. New resource families remain driven by demonstrated adopter need.
+The 2.2 line is maintenance- and adoption-driven. Version 2.2.1 tightened reliability,
+internal consistency, documentation truth, and release hygiene without changing the public
+API. New resource families remain driven by demonstrated adopter need.
 
 **Not in the current typed scope:**
 
