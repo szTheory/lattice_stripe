@@ -4,7 +4,49 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-> **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 2.1"}`.
+> **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 2.2"}`.
+
+## [2.2.0](https://github.com/szTheory/lattice_stripe/compare/v2.1.0...v2.2.0) (2026-08-25)
+
+
+### Features
+
+* **66-01:** add product feature attachment create\n\n- post typed entitlement attachments to product-scoped collection\n- validate required IDs and attachment definition before transport\n ([3a17fd3](https://github.com/szTheory/lattice_stripe/commit/3a17fd3c07fa674c6f72823f933e25ffd610dbd5))
+* **66-01:** complete product feature attachment surface\n\n- add retrieve list delete and streaming attachment operations\n- lock identity guards options and canonical public arities\n ([add2b75](https://github.com/szTheory/lattice_stripe/commit/add2b752ff463517f7504796c01ca829bd228405))
+* **66-03:** register exact product feature discriminator ([6822573](https://github.com/szTheory/lattice_stripe/commit/682257373cd5311e5fd61ddba65a83c20fd16dbc))
+* **67-01:** expose final HTTP error response metadata ([dd13608](https://github.com/szTheory/lattice_stripe/commit/dd13608d2313c69808059473b72658db124551c2))
+* **67-01:** harden retry-after response evidence ([824f429](https://github.com/szTheory/lattice_stripe/commit/824f429616ef349ba15498958aec0682f81a2c40))
+* **67-03:** lock CacheBodyReader public API ([9bebd70](https://github.com/szTheory/lattice_stripe/commit/9bebd704052c2b6d1b438cafba8a69f14f799325))
+* **67-03:** publish CacheBodyReader contract ([353b5b9](https://github.com/szTheory/lattice_stripe/commit/353b5b9999b86ef1d953e4a6a1856aa1fe357403))
+* **67-04:** publish PaymentIntent-first Charge policy\n\n- Document the permanent Charge.create/3 exclusion in canonical consumer surfaces\n- Add the confirmed PaymentIntent server example and browser/SCA distinction\n- Keep the policy constrained by section-scoped docs truth tests\n ([faa36ff](https://github.com/szTheory/lattice_stripe/commit/faa36ff75eb4909f60ea6ba416408138aae067fd))
+* synchronize completed v1.10 release history ([c34b1b3](https://github.com/szTheory/lattice_stripe/commit/c34b1b33ff5bb5618c724393f7d6e0754a79c6ba))
+
+
+### Bug Fixes
+
+* **62:** complete finite status migration inventory ([6745e38](https://github.com/szTheory/lattice_stripe/commit/6745e3876c211cdd009c6e15099ff5e51d11646a))
+* **62:** correct dispute evidence migration guide ([5e1c4f8](https://github.com/szTheory/lattice_stripe/commit/5e1c4f8acc6692a52eff03897ba46c419f877084))
+* **62:** qualify dispute evidence file call ([09a488c](https://github.com/szTheory/lattice_stripe/commit/09a488c79b5f1e27702c338bf5856a38c3d19366))
+* **62:** tighten phase scope verification ([aabd032](https://github.com/szTheory/lattice_stripe/commit/aabd032ce2b4fe686f2b396545c25ac13479a1c5))
+* **62:** WR-01 bound tolerance safety contract ([c1e1409](https://github.com/szTheory/lattice_stripe/commit/c1e1409ccefdb9722f72330f6f44baea97397884))
+* **66:** WR-01 correct reconciliation snapshot guidance ([e5bd47a](https://github.com/szTheory/lattice_stripe/commit/e5bd47a5da068d6c0a56c7e5e83c80b494ef7e5b))
+* **67-02:** accumulate webhook body chunks\n\n- Append every Plug :more and :ok body chunk in order\n- Preserve native return tags and error passthrough\n ([df3e32c](https://github.com/szTheory/lattice_stripe/commit/df3e32cd7420af791b51ef2ae8dfcd0eab61cc91))
+* **67-04:** keep Charge policy docs warning-free\n\n- Spell the permanent absent API as function plus arity without an unresolved ExDoc link\n- Preserve bounded policy assertions and rendered consumer guidance\n ([353cf17](https://github.com/szTheory/lattice_stripe/commit/353cf176152bb4056f9ae86845db37cde2c62592))
+* **67-05:** flatten retry-after parsing ([aff17e2](https://github.com/szTheory/lattice_stripe/commit/aff17e2153351cafcfe0fe83c70cce1b2397774a))
+* **67:** CR-01 preserve binary download retry pipeline ([81616c5](https://github.com/szTheory/lattice_stripe/commit/81616c5706e35cdd728ee12e328cc5b5a209dabe))
+* **67:** CR-01 sequence retry regression responses ([59db960](https://github.com/szTheory/lattice_stripe/commit/59db960aa1145996f6491b66a859e186d8268bd9))
+* **67:** CR-02 handle nullable invalid-request messages ([67b3df3](https://github.com/szTheory/lattice_stripe/commit/67b3df3231809d56b9ba73e215dadcd5ec22f2e6))
+* **67:** CR-03 preserve cache-reader scope contract ([4e32362](https://github.com/szTheory/lattice_stripe/commit/4e32362940d6635b01cd780cb442250f9c3d993a))
+* **67:** CR-03 scope cached webhook bodies to JSON route ([be9d105](https://github.com/szTheory/lattice_stripe/commit/be9d105e1309baaa0d0193ff8e611de080caf3fa))
+* **67:** make audit isolation and flake guards executable ([ec4fd67](https://github.com/szTheory/lattice_stripe/commit/ec4fd67c909342f4fba78e9e17a93d7c7d0010a6))
+* **67:** move milestone audit after phase verification ([0f188ed](https://github.com/szTheory/lattice_stripe/commit/0f188ed268247248873a3ee2a5ff1aea39577731))
+* **67:** revise plans based on checker feedback ([5749cf6](https://github.com/szTheory/lattice_stripe/commit/5749cf6a333d68484cc9d9f235286427592f4012))
+* **67:** WR-01 require decimal Retry-After values ([03dc3e3](https://github.com/szTheory/lattice_stripe/commit/03dc3e3b790a9da17637c75b91cc81c7f9976852))
+* **67:** WR-02 retain chunked raw webhook bodies ([95f03b7](https://github.com/szTheory/lattice_stripe/commit/95f03b76125435474b92af009db829733b43827b))
+* **67:** WR-03 clarify confirmation and SCA handoff ([99bdd37](https://github.com/szTheory/lattice_stripe/commit/99bdd37f93fffeeb461e70e13ba8f3dfe6b6f83e))
+* **67:** WR-03 retain Charge SCA policy surface ([45cc39e](https://github.com/szTheory/lattice_stripe/commit/45cc39eab0f030c4b36f740870e08ea1c99ebdb1))
+* **release:** recognize published release PRs before skipping ([#55](https://github.com/szTheory/lattice_stripe/issues/55)) ([33be042](https://github.com/szTheory/lattice_stripe/commit/33be042da12ea256082a121a1dd5d2ad2ab75a72))
+* stabilize batch test and pin CI dependencies ([#52](https://github.com/szTheory/lattice_stripe/issues/52)) ([05f3f9e](https://github.com/szTheory/lattice_stripe/commit/05f3f9eb238c88d0bce6aabe714d5fc0b2c5e699))
 
 ## [2.1.0](https://github.com/szTheory/lattice_stripe/compare/v2.0.0...v2.1.0) (2026-07-29)
 

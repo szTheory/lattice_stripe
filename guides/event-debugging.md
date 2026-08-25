@@ -14,7 +14,7 @@ payload shape → dispatch.
 Add LatticeStripe to your project:
 
 ```elixir
-{:lattice_stripe, "~> 2.1"}
+{:lattice_stripe, "~> 2.2"}
 ```
 
 ## Start here — snapshot vs thin
