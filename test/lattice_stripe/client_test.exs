@@ -1439,6 +1439,29 @@ defmodule LatticeStripe.ClientTest do
                Client.download(client, "/v1/quotes/qt_123/pdf")
     end
 
+    test "retries a transient download failure through the binary response pipeline" do
+      client = retry_client()
+
+      expect(LatticeStripe.MockRetryStrategy, :retry?, fn 1, _context -> {:retry, 0} end)
+
+      expect(LatticeStripe.MockTransport, :request, 2, fn
+        _req ->
+          error_response(500, "api_error", "Temporary failure")
+
+        _req ->
+          {:ok,
+           %{
+             status: 200,
+             headers: [{"content-type", "application/pdf"}, {"request-id", "req_retried_dl"}],
+             body: "retried-pdf-binary"
+           }}
+      end)
+
+      assert {:ok,
+              %Response{data: "retried-pdf-binary", status: 200, request_id: "req_retried_dl"}} =
+               Client.download(client, "/v1/quotes/qt_123/pdf")
+    end
+
     test "JSON-decodes error responses on 4xx" do
       client = test_client()
 
