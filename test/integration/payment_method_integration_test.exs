@@ -89,12 +89,4 @@ defmodule LatticeStripe.PaymentMethodIntegrationTest do
     assert %LatticeStripe.Response{} = resp
     assert %LatticeStripe.List{} = resp.data
   end
-
-  # stripe-mock returns a stub for any ID — invalid ID errors can only be tested against real Stripe
-  @tag :skip
-  test "retrieve/3 with invalid id returns error", %{client: client} do
-    {:error, error} = PaymentMethod.retrieve(client, "nonexistent_id_999")
-
-    assert %Error{type: :invalid_request_error} = error
-  end
 end

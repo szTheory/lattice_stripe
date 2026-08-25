@@ -11,6 +11,7 @@ defmodule LatticeStripe.MixProject do
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
+      test_coverage: [summary: [threshold: 80]],
       deps: deps(),
       name: "LatticeStripe",
       description: "A production-grade, idiomatic Elixir SDK for the Stripe API",
