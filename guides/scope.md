@@ -1,85 +1,91 @@
-# LatticeStripe v1.x Scope
+# LatticeStripe Scope
 
-LatticeStripe is a production-grade HTTP client SDK for the Stripe API. As of **1.7.0**,
-the **v1.x** line targets mainstream SaaS integrations: payments, billing, usage
-metering, Connect, tax on custom flows, webhooks, and operator diagnostics.
+LatticeStripe is a production-grade HTTP client SDK for Stripe. The published **2.2** line
+targets mainstream SaaS integrations: payments, billing, usage metering, Connect, tax on
+custom flows, entitlement reconciliation, webhooks, and operator diagnostics.
 
 ## Intended audience
 
-This SDK fits teams building mainstream SaaS products that need Stripe coverage that is
-correct, documented, and unsurprising in Elixir — without carrying every specialist
-Stripe product family in the typed surface.
+This SDK fits Elixir teams that want correct, documented, unsurprising Stripe primitives
+without carrying every specialist Stripe product family in the typed surface. Applications
+own product policy and durable workflow state; LatticeStripe owns the Stripe HTTP boundary,
+typed resources, retries, errors, telemetry, and testing ergonomics.
 
-## What v1.x includes
+## Current typed coverage
 
-Positive coverage clusters shipped and documented in v1.x:
-
-- **Payments** — PaymentIntents, Charges (list/search/update/capture), Customers, PaymentMethods
-- **Billing** — Subscriptions, Invoices, Quotes, Checkout, Customer Portal, Credit Notes
-- **Metering** — Usage records and billing-meter reconciliation paths
-- **Connect** — Accounts, transfers, and money-movement primitives for platforms
-- **Tax core** — Calculations, Transactions, Settings, Registrations, Tax IDs (v1.6)
-- **Webhooks** — Signature verification, thin events, fetch-after-verify helpers (v1.5)
-- **Operator guides** — Production checklist, event debugging, testing, error handling
+- **Payments** — PaymentIntents, Charges for reconciliation, Customers, PaymentMethods,
+  SetupIntents, Refunds, Disputes, Files, Mandates, and SetupAttempts
+- **Billing** — Subscriptions, Invoices, Quotes, Checkout, Customer Portal, Credit Notes,
+  Products, Prices, coupons, and promotion codes
+- **Metering** — meters, usage events and adjustments, summaries, and asynchronous error
+  reconciliation
+- **Entitlements** — feature catalog management, Product Feature attachments, active
+  entitlement reads, and summary-webhook decoding for local access snapshots
+- **Connect** — accounts, onboarding, transfers, payouts, balances, external accounts, and
+  money-movement reconciliation primitives
+- **Tax** — Calculations, Transactions, Settings, Registrations, and Tax IDs
+- **Webhooks** — snapshot signature verification, thin events, fetch-after-verify helpers,
+  and Phoenix-ready request-body handling
+- **Operations and DX** — structured errors, retry evidence, telemetry, public fixtures,
+  Test Clocks, production checks, and debugging guides
 
 For job-to-primitive routing, see [User Flows & JTBD](user-flows-and-jtbd.md).
 
 ## Deferred by design
 
-v1.x is in **maintenance mode** for scope breadth: new resource families ship only on
-**adopter pull** (real production need), not speculative completeness.
+The 2.2 line is maintenance- and adoption-driven for breadth. New resource families ship
+when an adopter brings a concrete production job, not to chase endpoint-count completeness.
 
 - **Specialist Stripe families:** Identity; Treasury; Issuing; Terminal; Financial
-  Connections; Climate; Sigma; Reporting — specialist products with narrow adopter
-  pull relative to mainstream SaaS billing.
-- **Tax narrow follow-ups:** Tax Code lookup (`/v1/tax_codes`); Tax Transaction list
-  (if Stripe adds the endpoint) — lookup/list gaps only, not missing Tax core.
-- **Per-request entitlement gates:** there is no `entitled?` helper and no
-  authorization predicate that calls Stripe on the request path. A network gate
-  **fails open** under partition — the call times out, and the pragmatic fallback
-  grants access the customer did not buy. Reconcile entitlements from the summary
-  webhook, gate against your own local store, and fail closed on staleness; the
-  full recipe is in [Entitlements](entitlements.md).
-- **Usage reads grouped by a custom dimension:** on the generally available API you
-  cannot read usage back grouped by a custom dimension. Dimensions are **write-only**
-  today — Stripe stores them and offers no way to group by them: the summary object has
-  no dimensions field, a group-by parameter on the read is rejected, declaring dimension
-  keys at meter creation is rejected, and Stripe's canonical meter-configuration
-  documentation does not mention dimensions at all. Dimension grouping exists only in
-  preview surfaces. The workarounds are one meter per dimension value, or your own event
-  store alongside Stripe's; choose before you design the payload. See
+  Connections; Climate; Sigma; Reporting. These are substantial products with narrower
+  pull than the mainstream SaaS billing surface.
+- **Tax narrow follow-ups:** Tax Code lookup (`/v1/tax_codes`) and Tax Transaction list if
+  Stripe adds that endpoint. These are lookup/list gaps, not missing calculate → record →
+  reverse coverage.
+- **Per-request entitlement gates:** there is no `entitled?` helper and no authorization
+  predicate that calls Stripe on the request path. Network authorization can fail open under
+  partition. Reconcile entitlements from the summary webhook, gate against a local store,
+  and fail closed on staleness; see [Entitlements](entitlements.md).
+- **Usage reads grouped by a custom dimension:** on the generally available API,
+  dimensions are write-only. Use one meter per dimension value or retain your own event
+  store alongside Stripe; choose before designing the payload. See
   [The payload contract](metering.md#the-payload-contract).
-
-## Tax note
-
-v1.6 shipped Tax **core** (Calculation, Transaction, Settings, Registration, TaxId).
-The deferred items above are narrow follow-ups. Tax is not incomplete for mainstream
-custom-flow calculate → record → reverse integrations.
 
 ## Escape hatch
 
-Unwrapped Stripe endpoints remain available via `LatticeStripe.Client.request/2`.
-See [Extending LatticeStripe](extending-lattice-stripe.md) for patterns that stay
-compatible with the SDK error and telemetry model.
+Unwrapped Stripe endpoints remain available through `LatticeStripe.Client.request/2`. Use
+the public request, error, and extension contracts rather than copying internal modules. See
+[Extending LatticeStripe](extending-lattice-stripe.md).
 
-## Accrue boundary
+## Product-policy boundary
 
-LatticeStripe stays lower-level than [Accrue](https://github.com/sztheory/accrue).
-Filing, returns preparation, and nexus monitoring belong in your application or
-downstream billing layers — not in this HTTP client.
+LatticeStripe stays lower-level than application billing and tax policy. Filing, returns
+preparation, nexus monitoring, pricing decisions, authorization policy, and durable workflow
+state belong in your application or a downstream layer such as
+[Accrue](https://github.com/sztheory/accrue). Keeping that boundary explicit lets the SDK
+remain useful across different Elixir architectures.
 
 ## Maintenance and adopter pull
 
-After **1.7.0**, v1.x work is **maintenance and adoption-driven**: bugfixes, Stripe API
-drift, and narrow additions when real adopters need them. There is no planned new
-resource-family breadth in v1.x absent fresh adopter pull.
+The published baseline is 2.2.0. The next planned release, 2.2.1, is a
+compatibility-preserving quality patch focused on reliability, internal consistency,
+documentation truth, and release hygiene. It does not expand the public resource surface.
 
-## Public documentation
-
-Adopter-facing docs are **[README](https://github.com/szTheory/lattice_stripe#readme)** and **[HexDocs](https://hexdocs.pm/lattice_stripe)**.
-There is no separate project website — ExDoc already publishes the guides in this repo.
+Beyond that patch, maintenance includes bug fixes, Stripe API drift, security and dependency
+work, and narrow additions supported by a real adopter job. There is no promise of speculative
+endpoint parity.
 
 ## Requesting coverage
 
-Open a GitHub issue to describe your use case. That helps prioritize adopter pull;
-it is not a roadmap commitment to ship a typed module.
+Open a GitHub feature request with the job you need to complete, the Stripe resource or
+endpoint involved, the input and output your application needs, and why
+`LatticeStripe.Client.request/2` is insufficient. That evidence helps prioritize adopter pull;
+an issue is not a roadmap commitment.
+
+## See also
+
+- [User Flows & JTBD](user-flows-and-jtbd.md) — choose a path by application job
+- [API Stability](api_stability.md) — the 2.x compatibility contract
+- [Extending LatticeStripe](extending-lattice-stripe.md) — supported extension points and
+  unwrapped endpoints
+- [Testing](testing.md) — fixtures, transport tests, stripe-mock, and Stripe test mode

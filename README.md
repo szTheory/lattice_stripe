@@ -5,7 +5,12 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Current release:** **`2.2.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see [CHANGELOG](CHANGELOG.md#220) for what shipped since 2.1.0. Evaluating fit? Start with [User Flows & JTBD][user-flows-and-jtbd].
+> **Current release:** **`2.2.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see
+> [CHANGELOG](CHANGELOG.md#220) for what shipped since 2.1.0.
+>
+> The published baseline is **`2.2.0`**; the next planned release is the
+> compatibility-preserving **`2.2.1` quality patch**. Evaluating fit? Start with
+> [User Flows & JTBD][user-flows-and-jtbd].
 
 A production-grade, idiomatic Elixir SDK for the Stripe API.
 
@@ -14,11 +19,17 @@ Full documentation available on [HexDocs](https://hexdocs.pm/lattice_stripe).
 If you are evaluating how this fits into a real SaaS billing architecture, start with
 [Guide: User Flows & JTBD][user-flows-and-jtbd].
 
-## v1.x scope
+## Current scope and maintenance posture
 
-As of **1.7.0**, LatticeStripe is **feature-complete for its intended v1.x scope**: mainstream SaaS integrations — payments, billing, Connect, tax on custom flows, webhooks (including thin events), and production operator guides.
+The **2.2 baseline is feature-complete for the library's intended mainstream SaaS scope**:
+payments, billing, metering, Connect, tax on custom flows, entitlement catalog and access
+reconciliation, webhooks (including thin events), and production operator guides.
 
-**Not in v1.x scope** (maintenance mode; additions only on adopter pull):
+The 2.2 line is maintenance- and adoption-driven. The planned 2.2.1 patch concentrates on
+reliability, internal consistency, documentation truth, and release hygiene without changing
+the public API. New resource families remain driven by demonstrated adopter need.
+
+**Not in the current typed scope:**
 
 - **Specialist Stripe families:** Identity; Treasury; Issuing; Terminal; Financial Connections; Climate; Sigma; Reporting
 - **Tax narrow follow-ups:** Tax Code lookup (`/v1/tax_codes`); Tax Transaction list (if Stripe adds the endpoint)
@@ -33,7 +44,7 @@ Use the docs in this order:
 - **README** for the repo-level surface map and route-by-intent overview
 - **[Getting Started][getting-started]** for first success with a live client and API call
 - **[User Flows & JTBD][user-flows-and-jtbd]** for "which Stripe path fits my SaaS?"
-- **[Scope][scope]** for v1.x boundaries and deferred families
+- **[Scope][scope]** for current boundaries, deliberate exclusions, and escape hatches
 - **Canonical guides** for the surface you will actually ship
 - **[Recipes][recipes]** for compact job-to-primitive bridges
 - **[Webhooks][webhooks]**, **[Production Checklist][production-checklist]**, **[Event Debugging][event-debugging]**, **[Testing][testing]**, and **[Error Handling][error-handling]** for runtime truth and support posture
@@ -46,6 +57,8 @@ Use the docs in this order:
   [User Flows & JTBD][user-flows-and-jtbd], [Subscriptions][subscriptions], [Customer Portal][customer-portal], [Webhooks][webhooks]
 - **I need usage-based billing and reconciliation**:
   [Metering][metering], [Webhooks][webhooks], [Testing][testing]
+- **I manage product features and customer access**:
+  [Entitlements][entitlements], [Subscriptions][subscriptions], [Webhooks][webhooks], [Testing][testing]
 - **I calculate tax on custom payment flows (not only Checkout/Invoices)**:
   [Tax][tax], [Payments][payments], [Testing][testing]
 - **I run a marketplace or platform**:
@@ -112,8 +125,10 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 - Subscriptions with lifecycle verbs (cancel, resume, pause_collection, trial settings)
 - Subscription Schedules for phased billing with proration guards
 - Billing Metering — usage-based billing with `Meter`, `MeterEvent`, and `MeterEventAdjustment`; two-layer idempotency and pre-flight value guards
+- Entitlements — Feature catalog CRUD, Product Feature attachments, active-entitlement reads, and webhook-driven local access reconciliation
 - Customer Portal — `BillingPortal.Session` for self-service portal URLs with 4 flow types (subscription_cancel, subscription_update, subscription_update_confirm, payment_method_update) and Inspect masking
 - [Guide: Subscriptions][subscriptions] · [Guide: Credit Notes][credit-notes] · [Guide: Metering][metering] · [Guide: Tax][tax] · [Guide: Customer Portal][customer-portal]
+- [Guide: Entitlements][entitlements]
 
 ### Operations and diagnostics
 
@@ -136,7 +151,7 @@ IO.puts("PaymentIntent created: #{payment_intent.id}")
 
 - Pluggable `Transport`, `Json`, and `RetryStrategy` behaviours — bring your own HTTP client
 - Automatic retry with exponential backoff, respecting Stripe's `Stripe-Should-Retry` header
-- Automatic idempotency-key generation and safe replay
+- Automatic idempotency keys for retries within one call, plus durable operation-key guidance in [Client Configuration][client-configuration]
 - Telemetry events for every request, compatible with any monitoring stack
 - Phoenix-ready `Webhook.Plug` snapshot path + thin-event (`/v2/events`) helpers for fetch-after-verify integration
 - [Guide: Extending LatticeStripe][extending-lattice-stripe]
@@ -163,7 +178,7 @@ Start here on HexDocs:
 Canonical guide clusters:
 
 - **Payments and billing primitives**:
-  [Payments][payments], [Checkout][checkout], [Invoices][invoices], [Credit Notes][credit-notes], [Subscriptions][subscriptions], [Customer Portal][customer-portal], [Metering][metering], [Tax][tax], [Charge API](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html)
+  [Payments][payments], [Checkout][checkout], [Invoices][invoices], [Credit Notes][credit-notes], [Subscriptions][subscriptions], [Customer Portal][customer-portal], [Entitlements][entitlements], [Metering][metering], [Tax][tax], [Charge API](https://hexdocs.pm/lattice_stripe/LatticeStripe.Charge.html)
 - **Connect**:
   [Connect][connect], [Connect Accounts][connect-accounts], [Connect Money Movement][connect-money-movement]
 - **Operations and DX**:
@@ -187,6 +202,7 @@ MIT — see [LICENSE](LICENSE) for details.
 [checkout]: https://hexdocs.pm/lattice_stripe/checkout.html
 [subscriptions]: https://hexdocs.pm/lattice_stripe/subscriptions.html
 [customer-portal]: https://hexdocs.pm/lattice_stripe/customer-portal.html
+[entitlements]: https://hexdocs.pm/lattice_stripe/entitlements.html
 [metering]: https://hexdocs.pm/lattice_stripe/metering.html
 [tax]: https://hexdocs.pm/lattice_stripe/tax.html
 [connect]: https://hexdocs.pm/lattice_stripe/connect.html

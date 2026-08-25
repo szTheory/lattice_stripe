@@ -186,11 +186,12 @@ end
 
 ## Testing
 
-Stripe's open-source `stripe-mock` server does not currently validate `/v2/` endpoints.
-Test your thin-event handler with `LatticeStripe.Testing.generate_thin_event_payload/3`
-plus `Mox` at the `LatticeStripe.Transport` behaviour boundary. See LatticeStripe's own
-`test/lattice_stripe/webhook/thin_event_test.exs` for the reference pattern, and
-[Testing](testing.md) for the full fixture surface.
+[stripe-mock](https://github.com/stripe/stripe-mock) is a basic request-shape sanity check,
+not a model of Stripe behavior. Do not use it as proof of thin-event `/v2` delivery or fetch
+semantics. Test your handler with
+`LatticeStripe.Testing.generate_thin_event_payload/3` plus `Mox` at the
+`LatticeStripe.Transport` behaviour boundary. The [Testing](testing.md) guide shows the
+fixture layering and which behaviors still require Stripe test mode.
 
 ## See also
 

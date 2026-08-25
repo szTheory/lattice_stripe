@@ -12,9 +12,17 @@ body:
     attributes:
       label: LatticeStripe Version
       description: "Which version of LatticeStripe are you using?"
-      placeholder: "0.1.0"
+      placeholder: "2.2.0"
     validations:
       required: true
+  - type: input
+    id: stripe-api-version
+    attributes:
+      label: Stripe API Version
+      description: "The version configured for the account or request, if known."
+      placeholder: "2026-03-25.dahlia"
+    validations:
+      required: false
   - type: input
     id: elixir-version
     attributes:
@@ -34,7 +42,7 @@ body:
     id: steps
     attributes:
       label: Steps to Reproduce
-      description: "Minimal steps to reproduce the behavior."
+      description: "Provide the smallest runnable call or test that reproduces the behavior, with secrets and customer data removed."
       value: |
         1.
         2.
@@ -52,7 +60,7 @@ body:
     id: actual
     attributes:
       label: Actual Behavior
-      description: "What actually happened. Include error messages and stack traces."
+      description: "What actually happened? Include the LatticeStripe error shape, Stripe request_id, and a redacted stack trace when available."
     validations:
       required: true
   - type: textarea
