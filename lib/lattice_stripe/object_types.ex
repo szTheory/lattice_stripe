@@ -72,10 +72,7 @@ defmodule LatticeStripe.ObjectTypes do
   def fetch_module(nil), do: :error
   def fetch_module(type) when is_binary(type), do: Map.fetch(@object_map, type)
 
-  @spec maybe_deserialize(map() | String.t() | nil) :: struct() | map() | String.t() | nil
-  def maybe_deserialize(nil), do: nil
-  def maybe_deserialize(val) when is_binary(val), do: val
-
+  @spec maybe_deserialize(term()) :: term()
   def maybe_deserialize(%{"object" => object_type} = map) do
     case Map.fetch(@object_map, object_type) do
       {:ok, module} -> module.from_map(map)
@@ -83,5 +80,5 @@ defmodule LatticeStripe.ObjectTypes do
     end
   end
 
-  def maybe_deserialize(map) when is_map(map), do: map
+  def maybe_deserialize(value), do: value
 end

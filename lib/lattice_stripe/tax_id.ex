@@ -341,7 +341,7 @@ defmodule LatticeStripe.TaxId do
       object: known["object"] || "tax_id",
       country: known["country"],
       created: known["created"],
-      customer: parse_expandable(known["customer"]),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       customer_account: known["customer_account"],
       livemode: known["livemode"],
       owner: Owner.from_map(known["owner"]),
@@ -352,9 +352,6 @@ defmodule LatticeStripe.TaxId do
       extra: extra
     }
   end
-
-  defp parse_expandable(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_expandable(value), do: value
 end
 
 defimpl Inspect, for: LatticeStripe.TaxId do

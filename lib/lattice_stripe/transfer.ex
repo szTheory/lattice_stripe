@@ -285,27 +285,23 @@ defmodule LatticeStripe.Transfer do
   defp maybe_put_extra(extra, _key, _value, false), do: extra
   defp maybe_put_extra(extra, key, value, true), do: Map.put(extra, key, value)
 
-  defp maybe_expand(value) do
-    if is_map(value), do: ObjectTypes.maybe_deserialize(value), else: value
-  end
-
   defp build_transfer_struct(map, reversal_structs, extra) do
     %__MODULE__{
       id: map["id"],
       object: map["object"] || "transfer",
       amount: map["amount"],
       amount_reversed: map["amount_reversed"],
-      balance_transaction: maybe_expand(map["balance_transaction"]),
+      balance_transaction: ObjectTypes.maybe_deserialize(map["balance_transaction"]),
       created: map["created"],
       currency: map["currency"],
       description: map["description"],
-      destination: maybe_expand(map["destination"]),
-      destination_payment: maybe_expand(map["destination_payment"]),
+      destination: ObjectTypes.maybe_deserialize(map["destination"]),
+      destination_payment: ObjectTypes.maybe_deserialize(map["destination_payment"]),
       livemode: map["livemode"],
       metadata: map["metadata"],
       reversals: reversal_structs,
       reversed: map["reversed"],
-      source_transaction: maybe_expand(map["source_transaction"]),
+      source_transaction: ObjectTypes.maybe_deserialize(map["source_transaction"]),
       source_type: map["source_type"],
       transfer_group: map["transfer_group"],
       extra: extra

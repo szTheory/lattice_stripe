@@ -226,7 +226,7 @@ defmodule LatticeStripe.Dispute do
       object: known["object"] || "dispute",
       amount: known["amount"],
       balance_transactions: parse_balance_transactions(known["balance_transactions"]),
-      charge: parse_expandable(known["charge"]),
+      charge: ObjectTypes.maybe_deserialize(known["charge"]),
       created: known["created"],
       currency: known["currency"],
       enhanced_eligibility_types: known["enhanced_eligibility_types"],
@@ -235,7 +235,7 @@ defmodule LatticeStripe.Dispute do
       is_charge_refundable: known["is_charge_refundable"],
       livemode: known["livemode"],
       metadata: known["metadata"],
-      payment_intent: parse_expandable(known["payment_intent"]),
+      payment_intent: ObjectTypes.maybe_deserialize(known["payment_intent"]),
       payment_method_details: PaymentMethodDetails.from_map(known["payment_method_details"]),
       reason: atomize_reason(known["reason"]),
       status: atomize_status(known["status"]),
@@ -256,9 +256,6 @@ defmodule LatticeStripe.Dispute do
   end
 
   defp parse_balance_transactions(other), do: other
-
-  defp parse_expandable(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_expandable(value), do: value
 
   defp atomize_status("needs_response"), do: :needs_response
   defp atomize_status("warning_needs_response"), do: :warning_needs_response

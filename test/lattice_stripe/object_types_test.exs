@@ -17,6 +17,18 @@ defmodule LatticeStripe.ObjectTypesTest do
       assert ObjectTypes.maybe_deserialize("pi_abc") == "pi_abc"
     end
 
+    test "returns arbitrary non-map values unchanged" do
+      values = [true, false, :expanded, 42, 42.5, ["cus_123"], {"cus_123", :customer}]
+
+      assert Enum.map(values, &ObjectTypes.maybe_deserialize/1) == values
+    end
+
+    test "returns an already-deserialized struct unchanged" do
+      customer = %LatticeStripe.Customer{id: "cus_123"}
+
+      assert ObjectTypes.maybe_deserialize(customer) === customer
+    end
+
     test "dispatches customer map to Customer.from_map/1" do
       map = %{"object" => "customer", "id" => "cus_123", "email" => "test@example.com"}
       result = ObjectTypes.maybe_deserialize(map)

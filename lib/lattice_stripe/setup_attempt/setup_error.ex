@@ -56,12 +56,9 @@ defmodule LatticeStripe.SetupAttempt.SetupError do
       network_advice_code: known["network_advice_code"],
       network_decline_code: known["network_decline_code"],
       param: known["param"],
-      payment_method: parse_payment_method(known["payment_method"]),
+      payment_method: ObjectTypes.maybe_deserialize(known["payment_method"]),
       type: known["type"],
       extra: extra
     }
   end
-
-  defp parse_payment_method(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_payment_method(value), do: value
 end

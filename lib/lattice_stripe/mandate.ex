@@ -89,7 +89,7 @@ defmodule LatticeStripe.Mandate do
       livemode: known["livemode"],
       multi_use: known["multi_use"],
       on_behalf_of: known["on_behalf_of"],
-      payment_method: parse_expandable(known["payment_method"]),
+      payment_method: ObjectTypes.maybe_deserialize(known["payment_method"]),
       payment_method_details: known["payment_method_details"],
       single_use: SingleUse.from_map(known["single_use"]),
       status: atomize_status(known["status"]),
@@ -97,9 +97,6 @@ defmodule LatticeStripe.Mandate do
       extra: extra
     }
   end
-
-  defp parse_expandable(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_expandable(value), do: value
 
   defp atomize_status("active"), do: :active
   defp atomize_status("inactive"), do: :inactive

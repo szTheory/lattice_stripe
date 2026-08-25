@@ -123,26 +123,23 @@ defmodule LatticeStripe.SetupAttempt do
     %__MODULE__{
       id: known["id"],
       object: known["object"] || "setup_attempt",
-      application: parse_expandable(known["application"]),
+      application: ObjectTypes.maybe_deserialize(known["application"]),
       attach_to_self: known["attach_to_self"],
       created: known["created"],
-      customer: parse_expandable(known["customer"]),
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
       customer_account: known["customer_account"],
       flow_directions: known["flow_directions"],
       livemode: known["livemode"],
-      on_behalf_of: parse_expandable(known["on_behalf_of"]),
-      payment_method: parse_expandable(known["payment_method"]),
+      on_behalf_of: ObjectTypes.maybe_deserialize(known["on_behalf_of"]),
+      payment_method: ObjectTypes.maybe_deserialize(known["payment_method"]),
       payment_method_details: known["payment_method_details"],
       setup_error: SetupError.from_map(known["setup_error"]),
-      setup_intent: parse_expandable(known["setup_intent"]),
+      setup_intent: ObjectTypes.maybe_deserialize(known["setup_intent"]),
       status: atomize_status(known["status"]),
       usage: atomize_usage(known["usage"]),
       extra: extra
     }
   end
-
-  defp parse_expandable(value) when is_map(value), do: ObjectTypes.maybe_deserialize(value)
-  defp parse_expandable(value), do: value
 
   defp atomize_status("requires_confirmation"), do: :requires_confirmation
   defp atomize_status("requires_action"), do: :requires_action
