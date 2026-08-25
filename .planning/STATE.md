@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.11
 milestone_name: Reader-First Quality Closure
-status: planning
-last_updated: "2026-08-25T20:05:00.000Z"
+status: executing
+last_updated: "2026-08-25T20:17:00.000Z"
 last_activity: 2026-08-25
 progress:
   total_phases: 6
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  completed_phases: 5
+  total_plans: 6
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -24,16 +24,16 @@ See: `.planning/PROJECT.md` (updated 2026-08-25 for v1.11)
 
 ## Current Position
 
-Phase: 68 — Reader Surface & Repository Hygiene
-Plan: Not yet planned
-Status: Roadmap ready
-Last activity: 2026-08-25 — v1.11 requirements and six-phase roadmap established
+Phase: 73 — Release & Maintenance Pause
+Plan: Final remote merge, 2.2.1 publish, and maintenance handoff
+Status: Executing release closure
+Last activity: 2026-08-25 — Phases 68-72 verified; local release candidate gates pass
 
 ## Milestone Metrics
 
 - Phases: 6 (68-73)
-- Plans: 0 planned
-- Requirements: 27/27 mapped
+- Plans: 5/6 complete
+- Requirements: 23/27 complete; 4 release-closure requirements pending
 - Package baseline: 2.2.0
 - Target package: 2.2.1
 - Public API contract: exact 3,463-entry snapshot frozen
@@ -61,9 +61,9 @@ None.
 ## Session Continuity
 
 **Last session:** 2026-08-25
-**Stopped at:** v1.11 roadmap established; Phase 68 is next
+**Stopped at:** Phase 73 release closure in progress
 **Resume file:** None
 
 ## Operator Next Steps
 
-Plan Phase 68, preserving the public API lock and executing the roadmap in order through the 2.2.1 release verification.
+Merge the milestone PR after remote CI, verify the automated 2.2.1 release on GitHub/Hex/HexDocs, then record the clean maintenance handoff.

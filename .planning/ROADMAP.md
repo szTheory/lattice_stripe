@@ -17,12 +17,12 @@
 
 ## Phases
 
-- [ ] **Phase 68: Reader Surface & Repository Hygiene** - Make repository entry points and source reading frictionless without removing useful context.
-- [ ] **Phase 69: Internal Consistency** - Give repeated internal mechanics and fixture data one clear, safe home.
-- [ ] **Phase 70: Client Core & Test Architecture** - Preserve the public client contract while making its implementation and characterization suite easy to navigate.
-- [ ] **Phase 71: Reliability, CI & Security** - Make automated quality and security signals complete, reproducible, and honest.
-- [ ] **Phase 72: Adopter DX & Documentation Truth** - Let an Elixir adopter make correct production choices from current, source-backed guidance.
-- [ ] **Phase 73: Release & Maintenance Pause** - Close the release and repository at a verified, low-maintenance stopping point.
+- [x] **Phase 68: Reader Surface & Repository Hygiene** - Make repository entry points and source reading frictionless without removing useful context.
+- [x] **Phase 69: Internal Consistency** - Give repeated internal mechanics and fixture data one clear, safe home.
+- [x] **Phase 70: Client Core & Test Architecture** - Preserve the public client contract while making its implementation and characterization suite easy to navigate.
+- [x] **Phase 71: Reliability, CI & Security** - Make automated quality and security signals complete, reproducible, and honest.
+- [x] **Phase 72: Adopter DX & Documentation Truth** - Let an Elixir adopter make correct production choices from current, source-backed guidance.
+- [ ] **Phase 73: Release & Maintenance Pause** - Close the release and repository at a verified, low-maintenance stopping point. *(in progress)*
 
 ## Phase Details
 
@@ -34,7 +34,7 @@
   1. A reader encounters comments that explain an invariant, constraint, or tradeoff rather than decorative separators or planning-history-only narration.
   2. A contributor can use the repository entry point to understand the present architecture and run the authoritative verification workflow.
   3. A researcher can identify the one current field guide in `prompts/`, distinguish archived research, and avoid generated cache or obsolete artifacts.
-**Plans**: TBD
+**Plans**: Complete — see `phases/68-reader-surface-repository-hygiene/68-VERIFICATION.md`
 
 ### Phase 69: Internal Consistency
 **Goal**: Maintainers can follow expandable-object decoding and test data to one dependable implementation instead of reconciling repeated defensive code or fixture copies.
@@ -44,7 +44,7 @@
   1. Expandable values retain their existing identity behavior for every input while callers use one total internal deserialization contract.
   2. Behavioral tests obtain equivalent canonical fixture data from shared support rather than locally duplicated fixture families.
   3. The full test suite proves the consolidation preserved all supported behavior.
-**Plans**: TBD
+**Plans**: Complete — see `phases/69-internal-consistency/69-VERIFICATION.md`
 
 ### Phase 70: Client Core & Test Architecture
 **Goal**: A maintainer can locate client request building, execution, decoding, and their behavioral proof quickly while adopters receive exactly the same public API.
@@ -55,7 +55,7 @@
   2. A failed client characterization test identifies the responsible behavior group without searching a monolithic test file.
   3. Test-helper docs and examples point adopters to real module paths and lifecycle semantics.
   4. The 3,463-entry public API snapshot is unchanged after the refactor.
-**Plans**: TBD
+**Plans**: Complete — see `phases/70-client-core-test-architecture/70-VERIFICATION.md`
 
 ### Phase 71: Reliability, CI & Security
 **Goal**: Maintainers can rely on CI and security automation to expose real regressions across supported configurations without noisy races, silent skips, or mutable dependencies.
@@ -66,7 +66,7 @@
   2. CI explicitly proves Fuse and OpenTelemetry integrations, reports every supported-version result, and has no unexplained test skips.
   3. CI rejects mutable inputs, dependency, formatting, warning, optional-dependency, action-syntax, vulnerability, packaging, and meaningful-coverage regressions.
   4. Security update automation is enabled and protected `main` requires a current-head `ci-gate`, resolved conversations, and disallows force pushes and deletion.
-**Plans**: TBD
+**Plans**: Complete — see `phases/71-reliability-ci-security/71-VERIFICATION.md`
 
 ### Phase 72: Adopter DX & Documentation Truth
 **Goal**: An Elixir developer can understand the SDK's stable contract and operate it correctly from current documentation without needing to infer backend implementation details.
@@ -77,7 +77,7 @@
   2. An adopter can determine whether a change is SemVer-compatible, omit a connected-account header with `stripe_account: nil`, and create durable operation-derived idempotency keys.
   3. An adopter understands lazy stream timing, bounded memory, partial failures, and the appropriate unit/Mox/stripe-mock/live-sandbox test boundary.
   4. Documentation navigation, examples, links, and microcopy are warning-free and mechanically agree with the source contract.
-**Plans**: TBD
+**Plans**: Complete — see `phases/72-adopter-dx-documentation-truth/72-VERIFICATION.md`
 
 ### Phase 73: Release & Maintenance Pause
 **Goal**: The repository and package line reach a demonstrably clean handoff point where maintainers can return to reactive work with no ambiguous release or operational tail.
@@ -88,21 +88,23 @@
   2. Fresh local and remote validation proves CI, optional features, coverage, package build/dry-run, docs truth, API lock, and repository hygiene from the release candidate.
   3. Version 2.2.1 is published and verifiable on GitHub Releases, Hex.pm, and HexDocs from the exact green release SHA.
   4. `main` is green and protected, PRs and issues are triaged, temporary worktrees are removed, and the repository records its reactive-maintenance handoff.
-**Plans**: TBD
+**Plans**: In progress — see `phases/73-release-maintenance-pause/73-VERIFICATION.md`
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 68. Reader Surface & Repository Hygiene | 0/TBD | Not started | - |
-| 69. Internal Consistency | 0/TBD | Not started | - |
-| 70. Client Core & Test Architecture | 0/TBD | Not started | - |
-| 71. Reliability, CI & Security | 0/TBD | Not started | - |
-| 72. Adopter DX & Documentation Truth | 0/TBD | Not started | - |
-| 73. Release & Maintenance Pause | 0/TBD | Not started | - |
+| 68. Reader Surface & Repository Hygiene | 1/1 | Complete | 2026-08-25 |
+| 69. Internal Consistency | 1/1 | Complete | 2026-08-25 |
+| 70. Client Core & Test Architecture | 1/1 | Complete | 2026-08-25 |
+| 71. Reliability, CI & Security | 1/1 | Complete | 2026-08-25 |
+| 72. Adopter DX & Documentation Truth | 1/1 | Complete | 2026-08-25 |
+| 73. Release & Maintenance Pause | 0/1 | In progress | - |
 
 ## Current Status
 
 **Active milestone:** v1.11 Reader-First Quality Closure.
 
-**Next:** Plan and execute Phase 68, then advance in dependency order through the verified 2.2.1 maintenance handoff.
+**Current:** Phase 73 — Release & Maintenance Pause.
+
+**Next:** Merge the green milestone PR, publish and verify 2.2.1, then record the clean reactive-maintenance handoff.

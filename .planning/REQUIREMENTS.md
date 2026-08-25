@@ -7,41 +7,41 @@
 
 ## Reader Surface and Repository Hygiene
 
-- [ ] **READ-01** — Production and test code contains no decorative separator banners or planning-history-only commentary; comments that explain invariants, constraints, or non-obvious tradeoffs remain.
-- [ ] **READ-02** — The contributor entry point describes the current architecture and verification workflow accurately, without generated or tool-specific scaffolding.
-- [ ] **READ-03** — `prompts/` has one clearly identified current field guide, historical research is explicitly archived, generated research cache is ignored, and obsolete generated debris is absent.
+- [x] **READ-01** — Production and test code contains no decorative separator banners or planning-history-only commentary; comments that explain invariants, constraints, or non-obvious tradeoffs remain.
+- [x] **READ-02** — The contributor entry point describes the current architecture and verification workflow accurately, without generated or tool-specific scaffolding.
+- [x] **READ-03** — `prompts/` has one clearly identified current field guide, historical research is explicitly archived, generated research cache is ignored, and obsolete generated debris is absent.
 
 ## Internal Consistency
 
-- [ ] **INT-01** — Expandable deserialization has one total, identity-preserving internal contract, and callers do not repeat redundant map guards around it.
-- [ ] **INT-02** — Canonical test-support fixtures replace duplicate local fixture families without weakening behavioral assertions.
+- [x] **INT-01** — Expandable deserialization has one total, identity-preserving internal contract, and callers do not repeat redundant map guards around it.
+- [x] **INT-02** — Canonical test-support fixtures replace duplicate local fixture families without weakening behavioral assertions.
 
 ## Client and Test Architecture
 
-- [ ] **ARCH-01** — Request construction, execution, and response decoding are cohesive private modules; `LatticeStripe.Client` remains the stable public façade.
-- [ ] **ARCH-02** — Client characterization tests are organized by behavior so failures lead a maintainer to the responsible contract quickly.
-- [ ] **ARCH-03** — Test helper documentation and examples use real module paths, accurate lifecycle semantics, and adopter-first microcopy.
-- [ ] **ARCH-04** — The exact 3,463-entry public API snapshot remains unchanged across all internal refactors.
+- [x] **ARCH-01** — Request construction, execution, and response decoding are cohesive private modules; `LatticeStripe.Client` remains the stable public façade.
+- [x] **ARCH-02** — Client characterization tests are organized by behavior so failures lead a maintainer to the responsible contract quickly.
+- [x] **ARCH-03** — Test helper documentation and examples use real module paths, accurate lifecycle semantics, and adopter-first microcopy.
+- [x] **ARCH-04** — The exact 3,463-entry public API snapshot remains unchanged across all internal refactors.
 
 ## Reliability, CI, and Security
 
-- [ ] **REL-01** — Batch test accounting is concurrency-safe and the prior low-frequency error-isolation flake survives repeated stress execution.
-- [ ] **REL-02** — Telemetry tests use module-based handlers and remain isolated under concurrent integration execution.
-- [ ] **REL-03** — Fuse and OpenTelemetry integrations have explicit required CI lanes, and the test suite has no unexplained skips.
-- [ ] **REL-04** — CI uses immutable action/container inputs and checks formatting, warnings, locked/unused dependencies, no-optional-dependency compilation, action syntax, retired/vulnerable Hex packages, and package publishability.
-- [ ] **REL-05** — A truthful 80% line-coverage floor is enforced, supported by meaningful Finch adapter success and failure tests rather than incidental assertions.
-- [ ] **REL-06** — Matrix jobs report all supported-version failures instead of stopping at the first one.
-- [ ] **SEC-01** — Dependency vulnerability alerts and automated security updates are enabled; final `main` protection requires the current-head `ci-gate`, resolved conversations, and forbids force pushes/deletion.
+- [x] **REL-01** — Batch test accounting is concurrency-safe and the prior low-frequency error-isolation flake survives repeated stress execution.
+- [x] **REL-02** — Telemetry tests use module-based handlers and remain isolated under concurrent integration execution.
+- [x] **REL-03** — Fuse and OpenTelemetry integrations have explicit required CI lanes, and the test suite has no unexplained skips.
+- [x] **REL-04** — CI uses immutable action/container inputs and checks formatting, warnings, locked/unused dependencies, no-optional-dependency compilation, action syntax, retired/vulnerable Hex packages, and package publishability.
+- [x] **REL-05** — A truthful 80% line-coverage floor is enforced, supported by meaningful Finch adapter success and failure tests rather than incidental assertions.
+- [x] **REL-06** — Matrix jobs report all supported-version failures instead of stopping at the first one.
+- [x] **SEC-01** — Dependency vulnerability alerts and automated security updates are enabled; final `main` protection requires the current-head `ci-gate`, resolved conversations, and forbids force pushes/deletion.
 
 ## Adopter DX and Documentation Truth
 
-- [ ] **DOC-01** — Public and planning surfaces agree on the 2.2.x release line, supported scope, JTBD routes, change history, and maintenance posture.
-- [ ] **DOC-02** — The 2.x SemVer policy distinguishes public callable surface, return/result contracts, and struct value-shape compatibility.
-- [ ] **DOC-03** — Documentation and executable coverage establish that `stripe_account: nil` suppresses the connected-account header.
-- [ ] **DOC-04** — Idempotency guidance derives durable keys from business operations and explains retry boundaries without adding a new hook.
-- [ ] **DOC-05** — Pagination guidance explains lazy streaming, bounded memory, request timing, and partial-failure semantics.
-- [ ] **DOC-06** — Testing guidance presents a practical unit/Mox/stripe-mock/live-sandbox pyramid and states stripe-mock's limits honestly.
-- [ ] **DOC-07** — HexDocs navigation, examples, links, and adopter microcopy are warning-free and verified against source truth.
+- [x] **DOC-01** — Public and planning surfaces agree on the 2.2.x release line, supported scope, JTBD routes, change history, and maintenance posture.
+- [x] **DOC-02** — The 2.x SemVer policy distinguishes public callable surface, return/result contracts, and struct value-shape compatibility.
+- [x] **DOC-03** — Documentation and executable coverage establish that `stripe_account: nil` suppresses the connected-account header.
+- [x] **DOC-04** — Idempotency guidance derives durable keys from business operations and explains retry boundaries without adding a new hook.
+- [x] **DOC-05** — Pagination guidance explains lazy streaming, bounded memory, request timing, and partial-failure semantics.
+- [x] **DOC-06** — Testing guidance presents a practical unit/Mox/stripe-mock/live-sandbox pyramid and states stripe-mock's limits honestly.
+- [x] **DOC-07** — HexDocs navigation, examples, links, and adopter microcopy are warning-free and verified against source truth.
 
 ## Release and Maintenance Pause
 
@@ -70,29 +70,29 @@ These ideas remain deliberately outside v1.11. They require independent adopter 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| READ-01 | Phase 68 — Reader Surface & Repository Hygiene | Pending |
-| READ-02 | Phase 68 — Reader Surface & Repository Hygiene | Pending |
-| READ-03 | Phase 68 — Reader Surface & Repository Hygiene | Pending |
-| INT-01 | Phase 69 — Internal Consistency | Pending |
-| INT-02 | Phase 69 — Internal Consistency | Pending |
-| ARCH-01 | Phase 70 — Client Core & Test Architecture | Pending |
-| ARCH-02 | Phase 70 — Client Core & Test Architecture | Pending |
-| ARCH-03 | Phase 70 — Client Core & Test Architecture | Pending |
-| ARCH-04 | Phase 70 — Client Core & Test Architecture | Pending |
-| REL-01 | Phase 71 — Reliability, CI & Security | Pending |
-| REL-02 | Phase 71 — Reliability, CI & Security | Pending |
-| REL-03 | Phase 71 — Reliability, CI & Security | Pending |
-| REL-04 | Phase 71 — Reliability, CI & Security | Pending |
-| REL-05 | Phase 71 — Reliability, CI & Security | Pending |
-| REL-06 | Phase 71 — Reliability, CI & Security | Pending |
-| SEC-01 | Phase 71 — Reliability, CI & Security | Pending |
-| DOC-01 | Phase 72 — Adopter DX & Documentation Truth | Pending |
-| DOC-02 | Phase 72 — Adopter DX & Documentation Truth | Pending |
-| DOC-03 | Phase 72 — Adopter DX & Documentation Truth | Pending |
-| DOC-04 | Phase 72 — Adopter DX & Documentation Truth | Pending |
-| DOC-05 | Phase 72 — Adopter DX & Documentation Truth | Pending |
-| DOC-06 | Phase 72 — Adopter DX & Documentation Truth | Pending |
-| DOC-07 | Phase 72 — Adopter DX & Documentation Truth | Pending |
+| READ-01 | Phase 68 — Reader Surface & Repository Hygiene | Complete |
+| READ-02 | Phase 68 — Reader Surface & Repository Hygiene | Complete |
+| READ-03 | Phase 68 — Reader Surface & Repository Hygiene | Complete |
+| INT-01 | Phase 69 — Internal Consistency | Complete |
+| INT-02 | Phase 69 — Internal Consistency | Complete |
+| ARCH-01 | Phase 70 — Client Core & Test Architecture | Complete |
+| ARCH-02 | Phase 70 — Client Core & Test Architecture | Complete |
+| ARCH-03 | Phase 70 — Client Core & Test Architecture | Complete |
+| ARCH-04 | Phase 70 — Client Core & Test Architecture | Complete |
+| REL-01 | Phase 71 — Reliability, CI & Security | Complete |
+| REL-02 | Phase 71 — Reliability, CI & Security | Complete |
+| REL-03 | Phase 71 — Reliability, CI & Security | Complete |
+| REL-04 | Phase 71 — Reliability, CI & Security | Complete |
+| REL-05 | Phase 71 — Reliability, CI & Security | Complete |
+| REL-06 | Phase 71 — Reliability, CI & Security | Complete |
+| SEC-01 | Phase 71 — Reliability, CI & Security | Complete |
+| DOC-01 | Phase 72 — Adopter DX & Documentation Truth | Complete |
+| DOC-02 | Phase 72 — Adopter DX & Documentation Truth | Complete |
+| DOC-03 | Phase 72 — Adopter DX & Documentation Truth | Complete |
+| DOC-04 | Phase 72 — Adopter DX & Documentation Truth | Complete |
+| DOC-05 | Phase 72 — Adopter DX & Documentation Truth | Complete |
+| DOC-06 | Phase 72 — Adopter DX & Documentation Truth | Complete |
+| DOC-07 | Phase 72 — Adopter DX & Documentation Truth | Complete |
 | CLOSE-01 | Phase 73 — Release & Maintenance Pause | Pending |
 | CLOSE-02 | Phase 73 — Release & Maintenance Pause | Pending |
 | CLOSE-03 | Phase 73 — Release & Maintenance Pause | Pending |
