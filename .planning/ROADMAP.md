@@ -241,11 +241,18 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 67-01-PLAN.md — Trace faithful final-response headers and strict Retry-After metadata through `LatticeStripe.Error`
 - [ ] 67-02-PLAN.md — Fix exact multi-chunk webhook raw-body accumulation before publication
-- [ ] 67-03-PLAN.md — Publish, document, group, and semver-lock `CacheBodyReader`
 - [ ] 67-04-PLAN.md — Lock the permanent PaymentIntent-first Charge creation policy
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 67-03-PLAN.md — Publish, document, group, and semver-lock `CacheBodyReader`
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 67-05-PLAN.md — Run strict docs/API/CI convergence and hand off the milestone re-audit
 
 ## Progress (v1.10 — active)

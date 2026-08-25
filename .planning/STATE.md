@@ -4,15 +4,15 @@ milestone: v1.10
 milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 67
 current_phase_name: DX Hardening & Milestone Doc Close
-status: planning
+status: executing
 stopped_at: Phase 67 context gathered
-last_updated: "2026-08-25T16:58:35.695Z"
+last_updated: "2026-08-25T17:45:40.893Z"
 last_activity: 2026-08-25
 last_activity_desc: Phase 66 complete, transitioned to Phase 67
 progress:
   total_phases: 7
   completed_phases: 6
-  total_plans: 32
+  total_plans: 37
   completed_plans: 32
   percent: 86
 ---
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 Phase: 67 — DX Hardening & Milestone Doc Close
 Plan: Not started
-Status: Ready to plan
+Status: Ready to execute
 Last activity: 2026-08-25 — Phase 66 complete, transitioned to Phase 67
 
 **Carry-forward for Phase 65 and later:**
