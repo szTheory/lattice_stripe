@@ -10,6 +10,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 > patch for reliability, internal consistency, documentation truth, and release hygiene.
 > The project is now in reactive maintenance; new API breadth remains adopter-driven.
 
+## [2.2.2](https://github.com/szTheory/lattice_stripe/compare/v2.2.1...v2.2.2) (2026-08-25)
+
+
+### Bug Fixes
+
+* complete closure audit remediation ([#61](https://github.com/szTheory/lattice_stripe/issues/61)) ([4640e72](https://github.com/szTheory/lattice_stripe/commit/4640e724ff51bbad5072c88e6058a841bfce6eec))
+
 ## [2.2.1](https://github.com/szTheory/lattice_stripe/compare/v2.2.0...v2.2.1) (2026-08-25)
 
 
