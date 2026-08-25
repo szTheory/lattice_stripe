@@ -53,7 +53,11 @@ defmodule LatticeStripe.ProductTest do
 
       old_version_product = Product.from_map(%{"features" => legacy_features})
       assert old_version_product.features == legacy_features
-      assert old_version_product.features == [%{"name" => "Legacy comparison row", "legacy_only" => true}]
+
+      assert old_version_product.features == [
+               %{"name" => "Legacy comparison row", "legacy_only" => true}
+             ]
+
       assert old_version_product.features |> hd() |> Map.fetch!("name") == "Legacy comparison row"
       assert old_version_product.marketing_features == nil
 
@@ -77,9 +81,15 @@ defmodule LatticeStripe.ProductTest do
       assert both_version_product.marketing_features == current_marketing_features
       refute both_version_product.features == both_version_product.marketing_features
 
-      refute Enum.any?(both_version_product.features, &match?(%LatticeStripe.Product.Feature{}, &1))
+      refute Enum.any?(
+               both_version_product.features,
+               &match?(%LatticeStripe.Product.Feature{}, &1)
+             )
 
-      refute Enum.any?(both_version_product.marketing_features, &match?(%LatticeStripe.Product.Feature{}, &1))
+      refute Enum.any?(
+               both_version_product.marketing_features,
+               &match?(%LatticeStripe.Product.Feature{}, &1)
+             )
 
       refute Code.ensure_loaded?(LatticeStripe.Product.MarketingFeature)
     end
