@@ -8,7 +8,8 @@ customer per feature. LatticeStripe exposes that family as typed modules under
 
 This guide covers reading a customer's entitlements, the webhook-driven
 reconciler pattern that keeps a local copy honest, and managing the feature
-catalog itself. Code examples reflect function signatures shipped in v1.8.0.
+catalog itself. HexDocs is versioned with the package: match this guide to the
+release you installed, because another version may describe a newer surface.
 
 ## Scope boundary
 

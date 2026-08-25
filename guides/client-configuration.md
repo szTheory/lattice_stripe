@@ -190,7 +190,7 @@ Available per-request options:
 | Option | Type | Description |
 |--------|------|-------------|
 | `idempotency_key` | `string` | Custom idempotency key. Auto-generated for POST if not set. |
-| `stripe_account` | `string` | Connected account ID. Overrides client's `stripe_account`. |
+| `stripe_account` | `string \| nil` | Connected account ID, or `nil` to suppress the client's default for this request. |
 | `stripe_version` | `string` | API version for this request only. |
 | `api_key` | `string` | API key for this request only. Useful for Connect platforms. |
 | `timeout` | `integer` | Timeout in ms for this request only. |
@@ -201,24 +201,59 @@ Per-request options **override** (not merge with) client defaults. For example, 
 `stripe_account: "acct_123"` in opts uses that account; the client's `stripe_account` is
 ignored for that call.
 
-### Idempotency Keys
+### Run one platform-scoped request from a connected client
+
+A client-level `stripe_account` is a default, not a permanent binding. Pass
+`stripe_account: nil` when one call must omit the `Stripe-Account` header:
+
+```elixir
+connected_client = LatticeStripe.Client.new!(
+  api_key: "sk_live_platform_key",
+  stripe_account: "acct_1ABCconnected"
+)
+
+{:ok, link} =
+  LatticeStripe.AccountLink.create(
+    connected_client,
+    %{
+      "account" => "acct_1ABCconnected",
+      "type" => "account_onboarding",
+      "return_url" => "https://example.com/return",
+      "refresh_url" => "https://example.com/refresh"
+    },
+    stripe_account: nil
+  )
+```
+
+Omit the option to inherit the client default. Pass another account ID to
+override it. No second client or sentinel option is needed.
+
+### Idempotency keys that survive application retries
 
 LatticeStripe automatically generates an idempotency key for every POST request using a
-UUID v4 with an `idk_ltc_` prefix. This makes retries safe — if a retry hits the same
-endpoint with the same key, Stripe returns the cached response rather than processing twice.
+UUID v4 with an `idk_ltc_` prefix. The generated key is reused by every automatic retry
+inside that one library call.
 
-For operations you want to control explicitly — like "create this specific order" — supply
-your own key:
+That automatic key is intentionally local to the call. It is not a durable identity for a
+job that can restart, a message that can be redelivered, or an operation retried after a
+process crash. For those workflows, derive the key from the business operation and pass it
+explicitly:
 
 ```elixir
 LatticeStripe.PaymentIntent.create(client, params,
-  idempotency_key: "payment-intent-for-order-#{order_id}"
+  idempotency_key: "payment_intent:create:order:#{order.id}:v1"
 )
 ```
 
-Your key must be unique per distinct operation. Don't reuse the same key with different
-parameters — Stripe will return the original response (for that key's operation), not the
-new one.
+Use the same key only for another attempt at the same operation with the same parameters.
+If the intended operation changes, use a new operation identity. Do not generate a fresh
+random key in each job attempt or hide business identity behind a client callback; both make
+duplicate work look new to Stripe.
+
+Automatic retries handle transient transport failures during a call. Durable keys handle
+restarts and redelivery. Webhooks or a direct retrieve reconcile an indeterminate outcome
+when the request may have reached Stripe but the response did not reach your application.
+See [Error Handling](error-handling.md) for that recovery path.
 
 ## Multiple Clients
 
@@ -296,9 +331,8 @@ If you pass a malformed key (wrong prefix, wrong format), you'll get a
 not in the middle of a payment flow.
 
 **Per-request opts override client defaults, not merge.**
-Setting `stripe_account: nil` in per-request opts doesn't "unset" the client's
-`stripe_account`. It explicitly passes `nil` as the account. If you want to use the
-client's default, simply omit that opt.
+Setting `stripe_account: nil` in per-request opts suppresses the client's default and omits
+the header for that call. Omit the option when you want to inherit the default.
 
 **Don't put the API key in source control.**
 Load it from environment variables or a secrets manager:
@@ -312,3 +346,11 @@ client = LatticeStripe.Client.new!(
 
 `System.fetch_env!/1` raises at startup if the variable isn't set, which is better than
 silently using the wrong key in production.
+
+## See also
+
+- [Error Handling](error-handling.md) — retries and indeterminate outcomes
+- [Connect](connect.md) — account scoping and platform flows
+- [Production Checklist](production-checklist.md) — launch-time configuration checks
+- [Testing](testing.md) — explicit test clients and transport mocks
+- [API Stability](api_stability.md) — compatibility guarantees for options and precedence

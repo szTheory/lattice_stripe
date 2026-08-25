@@ -188,16 +188,18 @@ resp.data.has_more  # true if more pages available
 ### Auto-paginate with Stream
 
 ```elixir
-# Stream all customers, fetching pages lazily:
+# Prefer a stream for large or unknown collections; pages are fetched lazily:
 client
 |> LatticeStripe.Customer.stream!(%{"limit" => 100})
 |> Enum.take(50)
 
-# Process all matching customers:
+# Keep side effects idempotent: a later page can fail after earlier items were yielded.
 client
 |> LatticeStripe.Customer.stream!(%{"email" => "jenny@example.com"})
 |> Enum.each(&process_customer/1)
 ```
+
+`Enum.to_list/1` materializes the whole stream; use it only when the complete result fits in memory.
 
 ## Billing
 {: .col-2}

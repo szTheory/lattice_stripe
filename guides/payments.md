@@ -203,8 +203,9 @@ IO.puts("Found #{length(intents)} PaymentIntents")
 
 ### Auto-Pagination with Streams
 
-For large datasets, use `stream!/2` to lazily auto-paginate through all results without
-loading everything into memory at once:
+Use `list/2` when one bounded page is the result you need. For a large collection, or one whose
+size is unknown, prefer `stream!/2`: it auto-paginates lazily instead of loading every item at
+once.
 
 ```elixir
 # Process all succeeded PaymentIntents in the last 30 days
@@ -216,8 +217,13 @@ client
 |> then(fn total -> IO.puts("Total revenue: $#{total / 100}") end)
 ```
 
-`stream!/2` fetches pages lazily — it only makes an HTTP request when the stream needs more
-items. This is memory-efficient for exporting large datasets.
+`stream!/2` fetches a page only when enumeration needs more items. Lazy transforms such as
+`Stream.filter/2` preserve that memory advantage; a terminal operation such as `Enum.to_list/1`
+materializes the entire collection.
+
+A stream is not a transaction. If a later page fails, `stream!/2` raises after any earlier items
+have already been yielded. Make per-item side effects idempotent and checkpoint progress, or stage
+the complete result before committing when the application requires all-or-nothing behavior.
 
 ### Search
 
@@ -372,16 +378,9 @@ refunds = resp.data.data
 
 ## Working with Idempotency Keys
 
-Idempotency keys make retries safe. If a network failure causes you to lose the response
-from a `create` call, you can retry with the same key — Stripe will return the original
-result rather than creating a duplicate.
-
-LatticeStripe automatically generates a UUID-based idempotency key for every POST request.
-The key is reused across all retry attempts for that request, so automatic retries are
-always safe.
-
-For operations tied to your own IDs — where you want to guarantee "this specific payment
-was created exactly once" — provide your own key:
+LatticeStripe generates an idempotency key for every POST and reuses it for automatic retries
+inside that one library call. For durable work that may cross a process crash, job restart, or
+message redelivery, pass an explicit key derived from the business operation:
 
 ```elixir
 {:ok, intent} = LatticeStripe.PaymentIntent.create(client, %{
@@ -389,19 +388,16 @@ was created exactly once" — provide your own key:
   "currency" => "usd",
   "customer" => customer.id
 },
-  idempotency_key: "payment-intent-order-#{order.id}"
+  idempotency_key: "payment_intent:create:order:#{order.id}:v1"
 )
 ```
 
-If you call this again with the same `order.id` (e.g., after a server restart), Stripe
-returns the original PaymentIntent rather than creating a new one — you can't accidentally
-double-charge a customer.
-
-**Key uniqueness rules:**
-- Keys must be unique per API endpoint (not globally)
-- Reusing a key with different parameters returns a 409 error
-- Keys expire after 24 hours — after that, a new request with the same key starts fresh
-- For automatic retries, the same key is reused — don't generate a new key per attempt
+Reuse that key only for another attempt at the same operation with the same parameters. Do not
+create a fresh random key on each job attempt or delegate key generation to a magic callback:
+business identity belongs with the operation. When a timed-out request has an indeterminate
+outcome, reconcile through a webhook or retrieve before deciding what to do next. See
+[Client Configuration](client-configuration.md#idempotency-keys-that-survive-application-retries)
+for the complete policy.
 
 ## Common Pitfalls
 
@@ -416,8 +412,8 @@ intent is in an unexpected state.
 
 **Idempotency keys must be unique per distinct request.**
 If you want to create two different payments for the same customer on the same order, use
-different keys (e.g., include a line item ID). Reusing a key with different params returns
-a 409 conflict, not a new payment.
+different keys (for example, include the operation kind or line-item identity). Reusing a key
+with different parameters produces an idempotency error, not a new payment.
 
 **Automatic confirmation vs. manual confirmation.**
 With "automatic" confirmation, your frontend calls Stripe.js to confirm the payment. With
@@ -436,5 +432,6 @@ search for real-time workflows — use `retrieve/3` or `list/3` with filters ins
 - [Checkout](checkout.md) — Stripe-hosted payment pages for the same flows
 - [Subscriptions](subscriptions.md) — recurring billing on top of the payment primitives
 - [Tax](tax.md) — standalone `Tax.Calculation` → `Tax.Transaction` flow when you own the cart and tax logic
+- [Client Configuration](client-configuration.md) — durable idempotency and request overrides
 - [Error Handling](error-handling.md) — card errors, retries, and idempotency
 - [Webhooks](webhooks.md) — confirm payment completion via `payment_intent.succeeded`

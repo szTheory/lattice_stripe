@@ -58,6 +58,17 @@ defmodule LatticeStripe.ClientStripeAccountHeaderTest do
     assert {:ok, _} = Client.request(client, get_req(stripe_account: "acct_request"))
   end
 
+  test "per-request nil stripe_account suppresses the client-level header" do
+    client = test_client(stripe_account: "acct_client")
+
+    expect(LatticeStripe.MockTransport, :request, fn req_map ->
+      refute Enum.any?(req_map.headers, fn {name, _value} -> name == "stripe-account" end)
+      ok_response()
+    end)
+
+    assert {:ok, _} = Client.request(client, get_req(stripe_account: nil))
+  end
+
   # Test C: nil client stripe_account AND no per-request opt — header MUST NOT be present
   test "nil client stripe_account with no per-request opt omits stripe-account header entirely" do
     client = test_client(stripe_account: nil)

@@ -104,16 +104,17 @@ see [Webhooks: Thin Events](webhooks-thin-events.md).
 
 LatticeStripe attaches idempotency keys to POST requests automatically. For
 money-moving operations (creates, captures, refunds), pass explicit keys tied to
-your domain idempotency token so retries do not double-charge:
+your domain operation so job restarts and message redelivery do not double-charge:
 
 ```elixir
 LatticeStripe.PaymentIntent.create(client, params,
-  idempotency_key: "pi-create-#{order_id}"
+  idempotency_key: "payment_intent:create:order:#{order_id}:v1"
 )
 ```
 
-Combine with [Error Handling](error-handling.md) for retryable status codes and
-[Metering](metering.md) if usage events must not duplicate.
+See [Client Configuration](client-configuration.md#idempotency-keys-that-survive-application-retries)
+for durable-key boundaries, [Error Handling](error-handling.md) for indeterminate outcomes,
+and [Metering](metering.md) if usage events must not duplicate.
 
 ## 7. Error handling and support posture
 

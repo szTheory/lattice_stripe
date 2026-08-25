@@ -199,6 +199,106 @@ defmodule LatticeStripe.DocsTruthTest do
     |> List.first()
   end
 
+  test "API stability guide protects 2.x public value shapes" do
+    guide = File.read!("guides/api_stability.md")
+
+    assert guide =~ "Semantic Versioning 2.0.0"
+    assert guide =~ "2.x"
+    refute guide =~ "1.x line"
+    refute guide =~ "~> 1.0"
+
+    for contract_term <- [
+          "field names",
+          "field types",
+          "value representations",
+          "Unix",
+          "DateTime",
+          "atom",
+          "string",
+          "typed struct",
+          "raw map"
+        ] do
+      assert guide =~ contract_term
+    end
+
+    assert guide =~ ~r/Adding an\s+optional field is additive/
+    assert guide =~ "breaking"
+  end
+
+  test "client guide documents connected-account suppression and durable operation identity" do
+    guide = File.read!("guides/client-configuration.md")
+
+    assert guide =~ "stripe_account: nil"
+    assert guide =~ "suppress"
+    assert guide =~ "omit the `Stripe-Account` header"
+    assert guide =~ "inherit the client default"
+    refute guide =~ "connected_account: nil"
+    refute guide =~ "stripe_account: :none"
+
+    for durable_term <- [
+          "business operation",
+          "job that can restart",
+          "message that can be redelivered",
+          "process crash",
+          "same operation with the same parameters",
+          "Webhooks",
+          "retrieve"
+        ] do
+      assert guide =~ durable_term
+    end
+
+    refute guide =~ "idempotency_key_generator"
+    refute guide =~ "idempotency_key_fn"
+  end
+
+  test "large-list guidance preserves lazy memory and partial-failure semantics" do
+    payments = File.read!("guides/payments.md")
+    cheatsheet = File.read!("guides/cheatsheet.cheatmd")
+
+    for term <- ["large collection", "size is unknown", "prefer `stream!/2`", "lazily"] do
+      assert payments =~ term
+    end
+
+    for term <- ["Enum.to_list/1", "materializes", "not a transaction", "later page fails"] do
+      assert payments =~ term
+    end
+
+    assert payments =~ ~r/earlier items\s+have already been yielded/
+    assert payments =~ "side effects idempotent"
+    assert cheatsheet =~ "large or unknown collections"
+    assert cheatsheet =~ "later page can fail"
+    assert cheatsheet =~ "fits in memory"
+  end
+
+  test "testing guide assigns each provider behavior to a truthful test layer" do
+    guide = File.read!("guides/testing.md")
+
+    assert guide =~ "Testing pyramid: choose the smallest truthful test"
+
+    for layer <- [
+          "Shipped fixtures and pure tests",
+          "Mox at `LatticeStripe.Transport`",
+          "`Plug.Test` with signed payload helpers",
+          "stripe-mock",
+          "Stripe test mode, Stripe CLI, and Test Clocks"
+        ] do
+      assert guide =~ layer
+    end
+
+    for limitation <- [
+          "stateless",
+          "hard-coded",
+          "lifecycle transitions",
+          "asynchronous webhook delivery",
+          "not proof"
+        ] do
+      assert guide =~ limitation
+    end
+
+    assert guide =~ ~r/created object is not\s+persisted/
+    refute guide =~ "if stripe-mock accepts your request, the real Stripe API will too"
+  end
+
   test "every public module lands in exactly one documented ExDoc group" do
     # TOTALITY GUARD. ExDoc performs NO validation of groups_for_modules
     # (deps/ex_doc/lib/ex_doc/config.ex:240-268): a phantom entry naming a module that does
@@ -757,13 +857,11 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ "error-handling.md"
     assert guide =~ "metering.md" or guide =~ "customer-portal.md"
 
-    # An adopter who reads "shipped in vX" searches hex.pm for exactly that
-    # string. GSD milestone labels are two-part (v1.10) and are not Hex
-    # releases; published versions are three-part semver. The label leaked into
-    # this line once already, so lock the shape rather than the literal — the
-    # version legitimately changes, the number of parts does not.
-    [[_, claimed_version]] = Regex.scan(~r/shipped in v(\d+(?:\.\d+)*)/, guide)
-    assert claimed_version =~ ~r/^\d+\.\d+\.\d+$/
+    # A timeless guide should not claim that a planning milestone or unreleased
+    # surface was published. HexDocs already carries the package version.
+    assert guide =~ "HexDocs is versioned with the package"
+    assert guide =~ "release you installed"
+    refute guide =~ ~r/(?:shipped|published) in v\d+/
 
     entitlements_lib = Path.join(root, "lib/lattice_stripe/entitlements")
     active_entitlement = File.read!(Path.join(entitlements_lib, "active_entitlement.ex"))
