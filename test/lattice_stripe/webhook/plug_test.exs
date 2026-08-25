@@ -51,6 +51,30 @@ defmodule LatticeStripe.Webhook.PlugTest do
     def read_req_body(_payload, _opts), do: {:error, :closed}
   end
 
+  defmodule RouteScopedCacheBodyReader do
+    use Plug.Router
+
+    @parser_opts Plug.Parsers.init(
+                   parsers: [:json],
+                   pass: [],
+                   json_decoder: Jason,
+                   body_reader: {LatticeStripe.Webhook.CacheBodyReader, :read_body, []}
+                 )
+
+    plug(:match)
+    plug(:dispatch)
+
+    post "/webhooks/stripe" do
+      conn
+      |> Plug.Parsers.call(@parser_opts)
+      |> Plug.Conn.send_resp(204, "")
+    end
+
+    match _ do
+      conn
+    end
+  end
+
   # ---------------------------------------------------------------------------
   # Helpers
   # ---------------------------------------------------------------------------
@@ -410,6 +434,32 @@ defmodule LatticeStripe.Webhook.PlugTest do
       result = WebhookPlug.call(conn, plug_opts)
 
       assert %LatticeStripe.Event{} = result.assigns.stripe_event
+    end
+  end
+
+  describe "route-scoped CacheBodyReader topology" do
+    test "only the JSON webhook route invokes the body reader" do
+      json_conn =
+        Plug.Test.conn(:post, "/webhooks/stripe", @payload)
+        |> Plug.Conn.put_req_header("content-type", "application/json")
+        |> RouteScopedCacheBodyReader.call([])
+
+      assert json_conn.private[:raw_body] == @payload
+
+      non_webhook_conn =
+        Plug.Test.conn(:post, "/uploads", @payload)
+        |> Plug.Conn.put_req_header("content-type", "application/json")
+        |> RouteScopedCacheBodyReader.call([])
+
+      refute Map.has_key?(non_webhook_conn.private, :raw_body)
+
+      multipart_conn =
+        Plug.Test.conn(:post, "/webhooks/stripe", "untrusted-upload")
+        |> Plug.Conn.put_req_header("content-type", "multipart/form-data; boundary=boundary")
+
+      assert_raise Plug.Conn.WrapperError, fn ->
+        RouteScopedCacheBodyReader.call(multipart_conn, [])
+      end
     end
   end
 end

@@ -275,6 +275,11 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ "never log\nthe raw body wholesale"
     assert guide =~ "not intended for multipart parsing"
     assert guide =~ "Do not configure it\nglobally"
+    assert guide =~ "pipeline :stripe_webhook"
+    assert guide =~ "parsers: [:json]"
+    assert guide =~ "scope \"/webhooks\""
+    refute guide =~ "parsers: [:urlencoded, :multipart, :json]"
+    refute guide =~ "pass: [\"*/*\"]"
   end
 
   test "exdoc keeps the primary public truth surfaces published" do

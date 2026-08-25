@@ -160,21 +160,23 @@ for that pattern when Plug is installed. It is conditionally available because t
 library keeps Plug optional.
 
 ```elixir
-# lib/my_app_web/endpoint.ex
-
-plug Plug.Parsers,
-  parsers: [:urlencoded, :multipart, :json],
-  pass: ["*/*"],
-  json_decoder: Jason,
-  body_reader: {LatticeStripe.Webhook.CacheBodyReader, :read_body, []}
-```
-
-```elixir
 # lib/my_app_web/router.ex
 
-forward "/webhooks/stripe", LatticeStripe.Webhook.Plug,
-  secret: fn -> System.fetch_env!("STRIPE_WEBHOOK_SECRET") end,
-  handler: MyApp.StripeWebhookHandler
+pipeline :stripe_webhook do
+  plug Plug.Parsers,
+    parsers: [:json],
+    pass: [],
+    json_decoder: Jason,
+    body_reader: {LatticeStripe.Webhook.CacheBodyReader, :read_body, []}
+end
+
+scope "/webhooks" do
+  pipe_through :stripe_webhook
+
+  forward "/stripe", LatticeStripe.Webhook.Plug,
+    secret: fn -> System.fetch_env!("STRIPE_WEBHOOK_SECRET") end,
+    handler: MyApp.StripeWebhookHandler
+end
 ```
 
 This path remains fully supported, but it is an advanced alternative, not the
@@ -183,10 +185,11 @@ primary quickstart. `CacheBodyReader.read_body/2` preserves each current chunk's
 `conn.private[:raw_body]` contains the exact complete body under the fixed `:raw_body`
 key.
 
-Use this parser-level route only for the narrowly scoped webhook path. It retains
-another request-body copy for the connection lifetime, which can retain PII; never log
-the raw body wholesale. It is not intended for multipart parsing. Do not configure it
-globally as a general raw-body retention mechanism.
+The `:stripe_webhook` pipeline applies only to `/webhooks/stripe` and accepts JSON only:
+keep it separate from your normal endpoint parser pipeline. It retains another request-body
+copy for the connection lifetime, which can retain PII; never log
+the raw body wholesale. It is not intended for multipart parsing. Do not configure it globally
+as a general raw-body retention mechanism.
 
 ## Troubleshooting
 

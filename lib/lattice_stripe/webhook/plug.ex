@@ -34,17 +34,22 @@ if Code.ensure_loaded?(Plug) do
     raw bodies wholesale because they can contain PII, and do not use it for multipart
     parsing. `CacheBodyReader` is available only when Plug is installed.
 
-        # endpoint.ex
-        plug Plug.Parsers,
-          parsers: [:urlencoded, :multipart, :json],
-          pass: ["*/*"],
-          json_decoder: Jason,
-          body_reader: {LatticeStripe.Webhook.CacheBodyReader, :read_body, []}
-
         # router.ex
-        forward "/webhooks/stripe", LatticeStripe.Webhook.Plug,
-          secret: System.fetch_env!("STRIPE_WEBHOOK_SECRET"),
-          handler: MyApp.StripeHandler
+        pipeline :stripe_webhook do
+          plug Plug.Parsers,
+            parsers: [:json],
+            pass: [],
+            json_decoder: Jason,
+            body_reader: {LatticeStripe.Webhook.CacheBodyReader, :read_body, []}
+        end
+
+        scope "/webhooks" do
+          pipe_through :stripe_webhook
+
+          forward "/stripe", LatticeStripe.Webhook.Plug,
+            secret: System.fetch_env!("STRIPE_WEBHOOK_SECRET"),
+            handler: MyApp.StripeHandler
+        end
 
     ## Operation Modes
 
