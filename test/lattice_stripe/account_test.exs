@@ -60,7 +60,7 @@ defmodule LatticeStripe.AccountTest do
       account = Account.from_map(Fixtures.basic())
 
       assert %Requirements{currently_due: []} = account.future_requirements
-      # Both fields are the same struct module — D-01 reuse
+      # Both fields are the same struct module — reuse
       assert account.requirements.__struct__ == Requirements
       assert account.future_requirements.__struct__ == Requirements
     end
@@ -562,7 +562,7 @@ defmodule LatticeStripe.AccountTest do
     end
   end
 
-  # D-04b: request_capability/4 is rejected as fake ergonomics
+  # request_capability/4 is rejected as fake ergonomics
 
   describe "D-04b: request_capability/4 is rejected as fake ergonomics" do
     test "LatticeStripe.Account does NOT export request_capability/4 per Phase 17 D-04b" do

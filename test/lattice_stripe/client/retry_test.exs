@@ -2,7 +2,6 @@ defmodule LatticeStripe.Client.RetryTest do
   use LatticeStripe.ClientCase, async: true
 
   describe "request/2 retry loop" do
-    # Test 29: Client retries on 500 response up to max_retries times
     test "retries on 500 up to max_retries times" do
       # max_retries: 2 means 3 total attempts (initial + 2 retries)
       client = retry_client(max_retries: 2)
@@ -21,7 +20,6 @@ defmodule LatticeStripe.Client.RetryTest do
                Client.request(client, get_request())
     end
 
-    # Test 30: Client stops retrying when strategy returns :stop
     test "stops retrying when strategy returns :stop" do
       client = retry_client()
 
@@ -39,7 +37,6 @@ defmodule LatticeStripe.Client.RetryTest do
                Client.request(client, post_request())
     end
 
-    # Test 31: Client returns final error after exhausting retries
     test "returns final error after exhausting retries" do
       client = retry_client(max_retries: 1)
 
@@ -55,7 +52,6 @@ defmodule LatticeStripe.Client.RetryTest do
       assert {:error, %Error{status: 503}} = Client.request(client, get_request())
     end
 
-    # Test 32: Per-request max_retries: 0 disables retries (single attempt)
     test "max_retries: 0 disables retries" do
       client = retry_client(max_retries: 0)
 
@@ -71,7 +67,6 @@ defmodule LatticeStripe.Client.RetryTest do
       assert {:error, %Error{status: 500}} = Client.request(client, get_request())
     end
 
-    # Test 33: Per-request max_retries override
     test "per-request max_retries: 5 overrides client default" do
       # Client has default max_retries: 2, but request overrides to 1
       client = retry_client(max_retries: 2)
@@ -89,7 +84,6 @@ defmodule LatticeStripe.Client.RetryTest do
       assert {:error, %Error{status: 500}} = Client.request(client, req)
     end
 
-    # Test 34: Successful request after retries returns {:ok, result}
     test "succeeds after initial failures" do
       client = retry_client(max_retries: 2)
 
@@ -142,7 +136,6 @@ defmodule LatticeStripe.Client.RetryTest do
   end
 
   describe "request/2 retry telemetry" do
-    # Test 48: Per-retry event emitted with attempt and delay_ms measurements
     test "emits per-retry telemetry events with attempt and delay_ms" do
       client =
         test_client(
@@ -179,7 +172,6 @@ defmodule LatticeStripe.Client.RetryTest do
       assert Map.has_key?(metadata, :path)
     end
 
-    # Test 49: Stop event metadata includes attempts and retries
     test "stop event metadata includes attempts and retries counts" do
       client =
         test_client(
@@ -215,7 +207,6 @@ defmodule LatticeStripe.Client.RetryTest do
       assert metadata.retries == 1
     end
 
-    # Test 50: Successful request after retries has correct attempts in stop metadata
     test "successful request after retries has correct attempts count" do
       client =
         test_client(
@@ -258,7 +249,6 @@ defmodule LatticeStripe.Client.RetryTest do
   end
 
   describe "request/2 Stripe-Should-Retry" do
-    # Test 51: Stripe-Should-Retry: true on 400 causes retry
     test "Stripe-Should-Retry: true on 400 causes retry" do
       client = test_client(max_retries: 1)
       # Use default retry strategy which respects Stripe-Should-Retry header
@@ -273,7 +263,6 @@ defmodule LatticeStripe.Client.RetryTest do
       assert {:error, %Error{status: 400}} = Client.request(client, get_request())
     end
 
-    # Test 52: Stripe-Should-Retry: false on 500 prevents retry
     test "Stripe-Should-Retry: false on 500 prevents retry" do
       client = test_client(max_retries: 2)
       # Only 1 attempt — header says don't retry

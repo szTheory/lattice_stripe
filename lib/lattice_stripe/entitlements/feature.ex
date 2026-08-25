@@ -78,7 +78,7 @@ defmodule LatticeStripe.Entitlements.Feature do
 
   alias LatticeStripe.{Client, Request, Resource}
 
-  # D-06: the canonical path lives here once. `create/3`, `retrieve/3`, `update/4`, `list/3`
+  # The canonical path lives here once. `create/3`, `retrieve/3`, `update/4`, and `list/3`
   # and `stream!/3` all read it, so they physically cannot diverge. Item paths compose as
   # `@list_path <> "/#{id}"` rather than re-declaring the string.
   @list_path "/v1/entitlements/features"

@@ -2,9 +2,9 @@ defmodule LatticeStripe.BillingPortal.Guards do
   @moduledoc false
   # Guard numbering scheme (discoverability entry point):
   #
-  #   PORTAL-GUARD-01 — check_flow_data!/1 (flow_data.type dispatch + required sub-fields)
+  #   check_flow_data!/1 — flow_data.type dispatch and required sub-fields
   #
-  # Pre-flight guards live alongside their resource namespace per Phase 20 D-01.
+  # Pre-flight guards live alongside their resource namespace.
   # BillingPortal and Billing are unrelated Stripe surfaces that happen to share
   # the word "billing"; see .planning/v1.1-accrue-context.md.
 

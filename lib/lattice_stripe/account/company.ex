@@ -88,7 +88,7 @@ end
 defimpl Inspect, for: LatticeStripe.Account.Company do
   import Inspect.Algebra
 
-  # PII fields — redacted when non-nil to prevent leakage into logs (T-17-01).
+  # Redact non-nil PII fields to prevent leakage into logs.
   @redacted [:tax_id, :vat_id, :phone, :address, :address_kana, :address_kanji]
 
   def inspect(struct, opts) do

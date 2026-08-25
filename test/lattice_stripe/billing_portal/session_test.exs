@@ -12,9 +12,9 @@ defmodule LatticeStripe.BillingPortal.SessionTest do
 
   setup :verify_on_exit!
 
-  # PORTAL-01 / PORTAL-02 / PORTAL-06
+  #
   # create/3 and create!/3 — dispatches HTTP POST, returns %Session{}
-  # stripe_account: opt threads via Mox (PORTAL-06 Connect header)
+  # stripe_account: opt threads via Mox (Connect header)
 
   describe "create/3" do
     test "returns {:ok, %Session{}} on success" do
@@ -102,7 +102,7 @@ defmodule LatticeStripe.BillingPortal.SessionTest do
     end
   end
 
-  # PORTAL-05
+  #
   # from_map/1 — decodes all 11 struct fields from string-keyed wire map
 
   describe "from_map/1" do
@@ -165,7 +165,7 @@ defmodule LatticeStripe.BillingPortal.SessionTest do
     end
   end
 
-  # D-03 — Inspect allowlist masking
+  # Inspect allowlist masking
   # :url and :flow must NOT appear in inspect output
   # Visible fields: id, object, livemode, customer, configuration,
   #                 on_behalf_of, created, return_url, locale

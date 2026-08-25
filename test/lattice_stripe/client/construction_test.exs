@@ -2,7 +2,6 @@ defmodule LatticeStripe.Client.ConstructionTest do
   use LatticeStripe.ClientCase, async: true
 
   describe "new!/1 and new/1" do
-    # Test 1: new!/1 with valid opts returns a %Client{} struct
     test "new!/1 with valid opts returns a %Client{} struct" do
       client = test_client()
 
@@ -11,14 +10,12 @@ defmodule LatticeStripe.Client.ConstructionTest do
       assert client.finch == :test_finch
     end
 
-    # Test 2: new!/1 without api_key raises NimbleOptions.ValidationError
     test "new!/1 without api_key raises NimbleOptions.ValidationError" do
       assert_raise NimbleOptions.ValidationError, ~r/api_key/, fn ->
         Client.new!(finch: MyApp.Finch)
       end
     end
 
-    # Test 3: new!/1 without finch resolves to the default LatticeStripe.Finch pool (SC-1)
     test "new!/1 without finch defaults to LatticeStripe.Finch without raising" do
       client =
         Client.new!(
@@ -31,7 +28,6 @@ defmodule LatticeStripe.Client.ConstructionTest do
       assert client.finch == LatticeStripe.Finch
     end
 
-    # Test 4: new/1 with valid opts returns {:ok, %Client{}}
     test "new/1 with valid opts returns {:ok, %Client{}}" do
       assert {:ok, %Client{} = client} =
                Client.new(api_key: "sk_test_abc", finch: MyApp.Finch)
@@ -39,12 +35,10 @@ defmodule LatticeStripe.Client.ConstructionTest do
       assert client.api_key == "sk_test_abc"
     end
 
-    # Test 5: new/1 with invalid opts returns {:error, _}
     test "new/1 with invalid opts returns {:error, _}" do
       assert {:error, %NimbleOptions.ValidationError{}} = Client.new(finch: MyApp.Finch)
     end
 
-    # Test 6: Client struct is NOT a GenServer -- it's a plain struct
     test "Client struct is a plain struct, not a GenServer" do
       client = test_client()
 
@@ -62,7 +56,6 @@ defmodule LatticeStripe.Client.ConstructionTest do
       refute GenServer in behaviours
     end
 
-    # Test 7: Multiple clients with different API keys can coexist
     test "multiple clients with different API keys can coexist" do
       client_a =
         Client.new!(
@@ -117,7 +110,6 @@ defmodule LatticeStripe.Client.ConstructionTest do
   end
 
   describe "transport swapping" do
-    # Test 28: Custom transport via Mox mock works
     test "custom transport via Mox mock works" do
       # Explicitly verify MockTransport is used and responds correctly
       client =

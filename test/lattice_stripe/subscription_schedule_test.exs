@@ -535,7 +535,7 @@ defmodule LatticeStripe.SubscriptionScheduleTest do
     end
   end
 
-  # Inspect — PII safety (T-16-01)
+  # Inspect — PII safety
 
   describe "Inspect" do
     test "hides PII fields and surfaces only safe presence booleans + counts" do

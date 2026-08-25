@@ -535,7 +535,7 @@ defmodule LatticeStripe.TelemetryTest do
 
     test "verify span always fires regardless of telemetry_enabled on client" do
       # Webhook telemetry is NOT gated by client.telemetry_enabled --
-      # it's infrastructure-level (D-02), always on.
+      # it's infrastructure-level, always on.
       attach_handler([[:lattice_stripe, :webhook, :verify, :stop]])
 
       payload = valid_webhook_payload()

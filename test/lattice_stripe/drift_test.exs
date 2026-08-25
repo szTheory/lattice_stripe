@@ -98,7 +98,7 @@ defmodule LatticeStripe.DriftTest do
       assert MapSet.member?(fields, "customer")
     end
 
-    # LOAD-BEARING (D-20): Drift.parse_known_fields/1 must accept BOTH word-sigil
+    # LOAD-BEARING: Drift.parse_known_fields/1 must accept both word-sigil
     # delimiter pairs. 18 files in lib/ use the parenthesised form; before the regex
     # was widened they all parsed to an empty MapSet and produced a spurious drift
     # entry claiming every field on the object was a new addition. Narrowing the

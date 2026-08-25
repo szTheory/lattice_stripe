@@ -371,7 +371,7 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
     end
   end
 
-  # Absent operations (D-05 pattern — absence is the interface)
+  # Absent operations (pattern — absence is the interface)
 
   describe "absent operations" do
     test "update/3 is NOT exported (Stripe Test Clock API has no update)" do
@@ -401,8 +401,6 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
       assert function_exported?(TestClock, :advance!, 4)
     end
   end
-
-  # advance/4 (Plan 13-04)
 
   describe "advance/4" do
     test "POSTs /v1/test_helpers/test_clocks/:id/advance with frozen_time param" do
@@ -471,8 +469,6 @@ defmodule LatticeStripe.TestHelpers.TestClockTest do
       end
     end
   end
-
-  # advance_and_wait/4 (Plan 13-04)
 
   # Helper: build the canned advance response (status: advancing).
   defp advancing_response(id \\ "clock_a") do

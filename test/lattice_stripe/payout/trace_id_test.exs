@@ -64,7 +64,7 @@ defmodule LatticeStripe.Payout.TraceIdTest do
 
   describe "module surface" do
     test "does not derive Jason.Encoder" do
-      # Guard: Inspect + F-001 means we don't serialize back to JSON automatically.
+      # Inspect safety means we do not serialize this value back to JSON automatically.
       source = File.read!("lib/lattice_stripe/payout/trace_id.ex")
       refute source =~ "Jason.Encoder"
     end

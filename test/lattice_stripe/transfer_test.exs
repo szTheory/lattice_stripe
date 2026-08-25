@@ -183,7 +183,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # D-02: no reverse/3 or reverse/4 delegator
+  # no reverse/3 or reverse/4 delegator
 
   describe "module surface (D-02)" do
     test "Transfer does NOT define reverse/3" do
@@ -235,7 +235,7 @@ defmodule LatticeStripe.TransferTest do
     end
   end
 
-  # from_map/1 — F-001 forward compat
+  # from_map/1 — forward compat
 
   describe "from_map/1 F-001" do
     test "unknown future field survives in :extra" do

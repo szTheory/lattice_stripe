@@ -114,7 +114,7 @@ defmodule LatticeStripe.AccountLinkTest do
     end
   end
 
-  # D-04c: no positional type arg — regression guard
+  # no positional type arg — regression guard
 
   describe "D-04c: no positional type arg" do
     test "create/4 does not exist — SDK-wide create(client, params, opts) shape preserved" do

@@ -93,7 +93,7 @@ defmodule LatticeStripe.AccountLinkIntegrationTest do
     assert is_binary(link.url)
   end
 
-  # D-04c: missing `type` param — let Stripe 400 flow through
+  # missing `type` param — let Stripe 400 flow through
 
   test "create/3 missing required type param surfaces Stripe error or succeeds (stripe-mock validation varies)",
        %{client: client} do
@@ -108,7 +108,7 @@ defmodule LatticeStripe.AccountLinkIntegrationTest do
         # intentionally omitting "type"
       })
 
-    # D-04c: we do NOT client-side validate. Stripe's own error flows through.
+    # we do NOT client-side validate. Stripe's own error flows through.
     # stripe-mock may or may not enforce this field — both outcomes are valid here.
     assert match?({:ok, %AccountLink{}}, result) or
              match?({:error, %Error{type: :invalid_request_error}}, result)

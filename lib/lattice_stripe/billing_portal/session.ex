@@ -268,7 +268,7 @@ defimpl Inspect, for: LatticeStripe.BillingPortal.Session do
     #           that impersonates the customer for the portal session.
     #           Leaks via Logger, APM, crash dumps, or telemetry handlers
     #           are an account-takeover vector within the TTL window.
-    #           This is the asset Phase 21 SC #4 protects.
+    #           Treat the URL as a short-lived account-takeover credential.
     #
     #   :flow — nested %FlowData{} sub-object. Hidden to keep Inspect
     #           output a structural one-liner (matches Customer /

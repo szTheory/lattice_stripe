@@ -51,7 +51,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementStreamTest do
 
   defp customer_params, do: %{"customer" => "cus_123"}
 
-  # ENT-02 — cursor construction across the page seam
+  # cursor construction across the page seam
 
   describe "stream!/3 cursor construction" do
     test "page 2 request uses starting_after from the last id of page 1" do
@@ -75,7 +75,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementStreamTest do
       assert ids == ["ent_a", "ent_b", "ent_c"]
     end
 
-    # D-22 / T-63-02 — the single highest-value assertion in this phase, and a SECURITY
+    # the single highest-value assertion in this phase, and a SECURITY
     # test rather than merely a pagination test. If `base_params` preservation in
     # `LatticeStripe.List.build_next_page_request/1` regresses, page 2 comes back
     # unfiltered and this stream returns the ENTIRE ACCOUNT's entitlements instead of one
@@ -103,7 +103,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementStreamTest do
     end
   end
 
-  # ENT-02 — completeness, ordering, and laziness
+  # completeness, ordering, and laziness
 
   describe "stream!/3 enumeration" do
     test "streaming N pages makes exactly N transport calls" do
@@ -193,7 +193,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementStreamTest do
     end
   end
 
-  # T-63-03 / T-63-05 — request scoping on pages the caller never constructs
+  # request scoping on pages the caller never constructs
 
   describe "stream!/3 request scoping on page 2" do
     test "the stripe-account header carries to page 2" do
@@ -240,7 +240,7 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlementStreamTest do
     end
   end
 
-  # ENT-02 prohibition — enumeration is complete or it fails loudly, never partial
+  # prohibition — enumeration is complete or it fails loudly, never partial
 
   describe "stream!/3 error propagation" do
     test "a 500 on page 2 raises LatticeStripe.Error" do

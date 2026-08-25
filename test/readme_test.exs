@@ -16,7 +16,7 @@ defmodule LatticeStripe.ReadmeTest do
   @readme Path.join(__DIR__, "../README.md") |> Path.expand()
 
   setup_all do
-    # stripe-mock already running on :12111 per Phase 9 D-02
+    # stripe-mock is already running on port 12111 for the integration suite.
     start_supervised!({Finch, name: ReadmeTest.Finch})
     :ok
   end

@@ -17,8 +17,6 @@ defmodule LatticeStripe.Billing.MeterTest do
 
   setup :verify_on_exit!
 
-  # Nested struct tests from Plan 20-02 (preserved)
-
   describe "DefaultAggregation.from_map/1" do
     test "round-trips formula string" do
       assert %DefaultAggregation{formula: "sum"} =
@@ -131,7 +129,7 @@ defmodule LatticeStripe.Billing.MeterTest do
     end
   end
 
-  # Billing.Meter.from_map/1 — auto-atomization (EXPD-03)
+  # Billing.Meter.from_map/1 — auto-atomization
 
   describe "Meter.from_map/1 auto-atomizes status" do
     test "from_map/1 auto-atomizes status to :active" do
@@ -307,7 +305,7 @@ defmodule LatticeStripe.Billing.MeterTest do
   end
 
   describe "module surface" do
-    # Stripe's own Java SDK documentation advertised a `Meter.getEventSummaries()`
+    # Stripe's own Java SDK documentation advertised a `Meter.getEventSummaries`
     # for years. It never existed; Stripe's reply on stripe-java#1852 was that
     # "the docs is wrong". Event summaries are read through their own module, and
     # Meter deliberately ships no convenience delegator to them — coherent with

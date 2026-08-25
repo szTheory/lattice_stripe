@@ -85,7 +85,7 @@ defmodule LatticeStripe.LoginLinkIntegrationTest do
     end
   end
 
-  # is_binary(account_id) guard — locks in signature deviation (Plan 17-04)
+  # The binary guard keeps invalid account identifiers out of the transport.
 
   test "create/4 with non-binary account_id raises FunctionClauseError", %{client: client} do
     assert_raise FunctionClauseError, fn ->

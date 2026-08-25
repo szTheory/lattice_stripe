@@ -7,7 +7,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
   alias LatticeStripe.Testing.Fixtures.MeterErrorReport, as: Fixture
 
   # SampleError — the leaf, and the module's whole point: `request_identifier`
-  # is the idempotency key of the failing MeterEvent.create/3 call (F-15, N-04).
+  # is the idempotency key of the failing MeterEvent.create/3 call.
 
   describe "SampleError.from_map/1" do
     test "resolves error_message and the join key from request.identifier" do
@@ -80,7 +80,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
       assert second.request_identifier == "idk_2"
 
       # `code` is a String, never an atom — the enum is open and demonstrably
-      # growing, and atoms are never garbage collected on the BEAM (D-18).
+      # growing, and atoms are never garbage collected on the BEAM.
       assert is_binary(error_type.code)
     end
 
@@ -213,7 +213,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
   end
 
   # from_event/1 — the primary constructor, and the ONLY one that can populate
-  # :meter, because the meter id lives in the event envelope (D-16, F-14).
+  # :meter, because the meter id lives in the event envelope.
 
   describe "from_event/1" do
     test "lifts the meter id from the event's related object" do
@@ -234,7 +234,7 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
 
     test "tolerates a wholly absent related_object — the no_meter_found shape" do
       # v1.billing.meter.no_meter_found shares this payload byte-for-byte and
-      # carries no related_object at all (F-17, N-06).
+      # carries no related_object at all.
       event = Event.from_map(Fixture.no_meter_found_meter_error_report_event_json())
 
       assert event.related_object == nil
@@ -260,14 +260,14 @@ defmodule LatticeStripe.Billing.MeterErrorReportTest do
 
   # Public surface shape. With no Dialyzer in this project and typespecs
   # documentation-only, a refutation block is the ONLY enforcement of public
-  # surface shape available (D-31).
+  # surface shape available.
 
   describe "module surface" do
     test "ships no read or write verbs — no endpoint serves this payload" do
       # Not a gap to apologize for. Stripe has no /v1/billing/meter_error_reports
       # collection and no billing.meter_error_report object; this payload arrives
       # only as the `data` of an event, so there is nothing to list, retrieve or
-      # create it from (F-11, D-21).
+      # create it from.
       refute function_exported?(MeterErrorReport, :list, 2)
       refute function_exported?(MeterErrorReport, :list, 3)
       refute function_exported?(MeterErrorReport, :retrieve, 2)

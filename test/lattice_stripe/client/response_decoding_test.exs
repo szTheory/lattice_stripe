@@ -2,7 +2,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
   use LatticeStripe.ClientCase, async: true
 
   describe "request/2 response handling" do
-    # Test 14: request/2 on 200 returns {:ok, %Response{data: decoded_map}}
     test "200 response returns {:ok, %Response{data: decoded_map}}" do
       client = test_client()
 
@@ -14,7 +13,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
                Client.request(client, get_request())
     end
 
-    # Test 15: request/2 on 401 returns {:error, %Error{type: :authentication_error}}
     test "401 response returns authentication_error" do
       client = test_client(max_retries: 0)
 
@@ -26,7 +24,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
                Client.request(client, get_request())
     end
 
-    # Test 16: request/2 on 400 returns {:error, %Error{type: :invalid_request_error}}
     test "400 response returns invalid_request_error" do
       client = test_client(max_retries: 0)
 
@@ -38,7 +35,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
                Client.request(client, post_request())
     end
 
-    # Test 17: request/2 on 429 returns {:error, %Error{type: :rate_limit_error}}
     test "429 response returns rate_limit_error" do
       client = test_client(max_retries: 0)
 
@@ -50,7 +46,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
                Client.request(client, get_request())
     end
 
-    # Test 18: request/2 on transport error returns {:error, %Error{type: :connection_error}}
     test "transport error returns connection_error" do
       client = test_client(max_retries: 0)
 
@@ -64,7 +59,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
   end
 
   describe "request/2 non-JSON responses" do
-    # Test 40: HTML response body returns structured api_error with raw_body
     test "HTML response returns api_error with raw_body containing _raw key" do
       client = test_client(max_retries: 0)
 
@@ -96,7 +90,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
                Client.request(client, get_request())
     end
 
-    # Test 41: Empty response body returns structured api_error
     test "empty response body returns api_error with descriptive message" do
       client = test_client(max_retries: 0)
 
@@ -110,7 +103,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
       assert is_binary(message)
     end
 
-    # Test 42: Non-JSON 503 response flows through retry loop normally
     test "non-JSON 503 response flows through retry loop" do
       client = retry_client(max_retries: 1)
 
@@ -127,7 +119,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
                Client.request(client, get_request())
     end
 
-    # Test 43: Non-JSON body is truncated at 500 bytes in raw_body
     test "long non-JSON body is truncated in raw_body" do
       client = test_client(max_retries: 0)
       long_body = String.duplicate("x", 1000)
@@ -145,7 +136,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
   end
 
   describe "request!/2 bang variant" do
-    # Test 44: request!/2 raises LatticeStripe.Error on failure
     test "raises LatticeStripe.Error on failure" do
       client = test_client(max_retries: 0)
 
@@ -158,7 +148,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
       end
     end
 
-    # Test 45: request!/2 returns %Response{} on success
     test "returns %Response{} on success" do
       client = test_client()
 
@@ -170,7 +159,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
       assert %Response{data: %{"id" => "cus_bang_123"}} = result
     end
 
-    # Test 46: request!/2 retries before raising
     test "retries before raising on final failure" do
       client = retry_client(max_retries: 2)
 
@@ -188,7 +176,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
       end
     end
 
-    # Test 47: request!/2 raises with correct error type
     test "raised error has correct type and status" do
       client = test_client(max_retries: 0)
 
@@ -207,7 +194,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
   end
 
   describe "response wrapping" do
-    # Test 53: Singular resource response is wrapped in %Response{} with metadata
     test "singular resource wrapped in %Response{} with status and request_id" do
       client = test_client()
 
@@ -224,7 +210,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
                Client.request(client, get_request())
     end
 
-    # Test 54: List response auto-detected and wrapped in %LatticeStripe.List{}
     test "list object auto-detected and data wrapped in %List{}" do
       client = test_client()
 
@@ -254,7 +239,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
                Client.request(client, get_request("/v1/customers"))
     end
 
-    # Test 55: Search result auto-detected and wrapped in %LatticeStripe.List{}
     test "search_result object auto-detected and wrapped in %List{}" do
       client = test_client()
 
@@ -280,7 +264,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
                Client.request(client, get_request("/v1/customers/search"))
     end
 
-    # Test 56: List response carries _params from the request
     test "_params and _opts are threaded into %List{} from the original request" do
       client = test_client()
 
@@ -312,7 +295,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
       assert list._opts == [stripe_account: "acct_123"]
     end
 
-    # Test 57: Response headers are accessible on the Response struct
     test "response headers accessible on %Response{} struct" do
       client = test_client()
 
@@ -330,7 +312,6 @@ defmodule LatticeStripe.Client.ResponseDecodingTest do
       assert {"request-id", "req_hdr_111"} in resp.headers
     end
 
-    # Test 58: bang variant returns %Response{} on success
     test "request!/2 returns %Response{} struct on success" do
       client = test_client()
 

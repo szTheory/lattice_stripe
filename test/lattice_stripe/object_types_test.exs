@@ -66,7 +66,7 @@ defmodule LatticeStripe.ObjectTypesTest do
 
       # The refute is the point, not a leftover: Stripe's
       # entitlements.active_entitlement_summary object has NO `id` property — not even an
-      # optional one — so the struct deliberately omits :id (Phase 63 F-02). Asserting on an
+      # optional one — so the struct deliberately omits :id. Asserting on an
       # :id here would raise KeyError. Do not "fix" the struct by adding the field.
       refute Map.has_key?(result, :id)
     end
@@ -101,7 +101,7 @@ defmodule LatticeStripe.ObjectTypesTest do
       map = MeterEventFixture.meter_event_json()
       result = ObjectTypes.maybe_deserialize(map)
 
-      # Asserted on :event_name, NEVER on the object field — %MeterEvent{} is the EVENT-05
+      # Asserted on :event_name, NEVER on the object field — %MeterEvent{} is the
       # minimal shape and has no :object key, so reading that field off the result raises
       # KeyError, even though the wire payload carries "object" => "billing.meter_event"
       # (which is exactly what routed it here).
@@ -109,7 +109,7 @@ defmodule LatticeStripe.ObjectTypesTest do
     end
 
     test "a deserialized meter event keeps its payload masked in inspect/1 output" do
-      # T-65-02. Registering "billing.meter_event" is precisely what lets this struct
+      # Registering "billing.meter_event" is precisely what lets this struct
       # reach adopter Logger output, crash dumps and telemetry handlers, and its payload
       # carries the customer-mapping key plus the metered value. The custom
       # `defimpl Inspect` in lib/lattice_stripe/billing/meter_event.ex allowlists
@@ -131,7 +131,7 @@ defmodule LatticeStripe.ObjectTypesTest do
       result = ObjectTypes.maybe_deserialize(map)
 
       # 42.5 in the pattern pins the FLOAT: `42.5 = 42` does not match, so a silent
-      # integer coercion on the read path would fail this test (F-05).
+      # integer coercion on the read path would fail this test.
       assert %LatticeStripe.Billing.MeterEventSummary{
                id: "mtrusg_123",
                aggregated_value: 42.5
@@ -317,7 +317,7 @@ defmodule LatticeStripe.ObjectTypesTest do
 
     test "returns :error for unknown v2-namespaced type 'v2.core.account'" do
       # This is the v2-namespaced type which is intentionally NOT in @object_map
-      # and will trigger the typed-error gate in fetch_related_object/3 (Phase 47 D-05).
+      # and therefore triggers the typed-error gate in fetch_related_object/3.
       assert ObjectTypes.fetch_module("v2.core.account") == :error
     end
 
@@ -335,7 +335,7 @@ defmodule LatticeStripe.ObjectTypesTest do
       # key at all, so a registry row for it would be a DEAD key — present,
       # never reached, and assumed to work by the next contributor who sees it.
       # LatticeStripe.Billing.MeterErrorReport.from_event/1 must be called
-      # explicitly. Phase 65's OBJ-01 excludes this key for the same reason;
+      # explicitly. The registry excludes this key for the same reason;
       # this test is what keeps the exclusion from being quietly undone.
       refute Map.has_key?(ObjectTypes.object_map(), "billing.meter_error_report")
       assert ObjectTypes.fetch_module("billing.meter_error_report") == :error
@@ -377,10 +377,10 @@ defmodule LatticeStripe.ObjectTypesTest do
     end
 
     test "every registered object type is triaged as individually retrievable or not" do
-      # TRIAGE INVARIANT (Phase 65 UAT checkpoint 3). @object_map has TWO consumers:
+      # TRIAGE INVARIANT: @object_map has two consumers:
       #
       #   1. maybe_deserialize/1 -- decode a %{"object" => _} payload  (the obvious one)
-      #   2. Webhook.fetch_related_object/3 -- the D-05 fail-fast HTTP gate (easy to miss)
+      #   2. Webhook.fetch_related_object/3 -- the fail-fast HTTP gate (easy to miss)
       #
       # Adding a row for consumer 1 silently changes consumer 2's behaviour for that type:
       # it stops returning {:error, {:unknown_object_type, _}} with zero HTTP and starts
@@ -389,7 +389,7 @@ defmodule LatticeStripe.ObjectTypesTest do
       # EXPLICIT decision instead of a side effect. See the paired characterization tests
       # in test/lattice_stripe/webhook/fetch_test.exs.
       #
-      # Deliberately NOT `map_size(object_map()) == 52`. A bare count was rejected as
+      # Deliberately NOT `map_size(object_map) == 52`. A bare count was rejected as
       # brittle (65-RESEARCH pitfall 7), and it teaches nothing: "expected 52, got 53"
       # names no key. This partition fails by NAMING the new key and stating which list it
       # belongs in. The failure message IS the decision record.

@@ -77,9 +77,7 @@ defmodule LatticeStripe.SubscriptionTest do
       # The decoded items MUST retain their id. stripity_stripe's nested
       # item decoder dropped id (issue #208), making programmatic updates
       # impossible. Assert id preservation without pattern-matching on
-      # %SubscriptionItem{} so this unit test compiles under Plan 15-01
-      # (SubscriptionItem module ships in Plan 15-02, and Subscription
-      # still round-trips items via SubscriptionItem.from_map/1 at runtime).
+      # %SubscriptionItem{} so the assertion also proves the concrete decoder module.
       assert item1.__struct__ == LatticeStripe.SubscriptionItem
       assert item2.__struct__ == LatticeStripe.SubscriptionItem
       assert item1.id == "si_test1"
@@ -609,7 +607,7 @@ defmodule LatticeStripe.SubscriptionTest do
     end
   end
 
-  # Form encoder sanity (T-15-05)
+  # Form encoder sanity
 
   describe "form encoder (T-15-05 sanity)" do
     test "nested metadata with bracket/ampersand keys encodes without breaking request" do

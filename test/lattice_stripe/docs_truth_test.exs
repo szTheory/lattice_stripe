@@ -430,7 +430,7 @@ defmodule LatticeStripe.DocsTruthTest do
     assert "guides/tax.md" in groups["Canonical Guides"]
     assert "guides/connect.md" in groups["Canonical Guides"]
     assert "guides/webhooks.md" in groups["Operations & DX"]
-    # D-03 sub-decision 3C — new v1.5 trust rail extension to Operations & DX
+    # sub-decision 3C — new v1.5 trust rail extension to Operations & DX
     assert "guides/webhooks-thin-events.md" in extras
     assert "guides/webhooks-thin-events.md" in groups["Operations & DX"]
     assert "guides/production-checklist.md" in extras
@@ -632,15 +632,16 @@ defmodule LatticeStripe.DocsTruthTest do
     refute readme =~ "What's new in v1.1"
   end
 
-  describe "v1.x stop signal and scope boundaries" do
-    test "readme publishes stop signal and deferred scope anchors" do
+  describe "2.2 maintenance posture and scope boundaries" do
+    test "readme publishes the quality-patch posture and deferred scope anchors" do
       readme = File.read!("README.md")
 
-      assert readme =~ "feature-complete for its intended v1.x scope"
-      assert readme =~ "maintenance mode" or readme =~ "maintenance and adoption-driven"
+      assert readme =~ "2.2 baseline is feature-complete"
+      assert readme =~ "`2.2.1` quality patch"
+      assert readme =~ "maintenance- and adoption-driven"
       assert readme =~ "hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html"
       assert readme =~ "hexdocs.pm/lattice_stripe/api_stability.html"
-      assert readme =~ "## v1.x scope"
+      assert readme =~ "## Current scope and maintenance posture"
       assert readme =~ "Identity"
       assert readme =~ "Reporting"
 
@@ -1016,7 +1017,7 @@ defmodule LatticeStripe.DocsTruthTest do
   test "guides/testing.md names every public fixture module Phase 65 published" do
     # The per-plan tests above each lock their own bullet, so dropping ONE bullet
     # fails one narrow test that a reader may not connect to the guide as a whole.
-    # This is the consolidated lock: the full Phase 65 set asserted in one place,
+    # This is the consolidated lock: the full public fixture set asserted in one place,
     # so a bulk edit to the bullet list cannot silently shrink the published
     # surface. Structural, not decorative — a module missing from this list is a
     # module an adopter never discovers.
@@ -1207,29 +1208,29 @@ defmodule LatticeStripe.DocsTruthTest do
     assert guide =~ ":no_related_object"
     assert guide =~ ":unknown_object_type"
 
-    # Rate-limit phrasing — both substrings required (REQUIREMENTS.md GUIDE-03)
+    # Rate-limit phrasing requires both substrings.
     assert guide =~ "100 req/s"
     assert guide =~ "90/s"
 
-    # Idempotency anchor (GUIDE-03)
+    # Idempotency anchor
     assert guide =~ "event.id"
 
-    # Connect routing anchor (GUIDE-03)
+    # Connect routing anchor
     assert guide =~ "event.context"
 
-    # Canonical truth anchor (Phase 44 D-14)
+    # Canonical truth anchor.
     assert guide =~ "Webhooks confirm"
 
     # Canonical surface name
     assert guide =~ "/v2/events"
 
-    # Verification-vs-payload-shape failure boundary phrasing (GUIDE-03)
+    # Verification-vs-payload-shape failure boundary phrasing
     assert guide =~ "verification"
     assert guide =~ "payload shape"
   end
 
   test "webhooks-thin-events guide is cross-linked from README/JTBD/webhooks.md" do
-    # D-03 sub-decision 3D cross-link graph: the new v1.5 guide must be
+    # sub-decision 3D cross-link graph: the new v1.5 guide must be
     # reachable from README hardening-ops route, JTBD Start Here Runtime
     # route + Job 7 Read next, AND linked back from the parent webhooks.md
     # guide. Forward edges from the new guide (webhooks.md / testing.md /
@@ -1448,13 +1449,12 @@ defmodule LatticeStripe.DocsTruthTest do
   end
 
   test "Webhook.Plug @moduledoc documents tolerance: 0 testing-only semantics" do
-    # WR-04 closure (Phase 47 deferred → Phase 48 D-03 3E): the Plug
-    # @moduledoc Configuration Options section must surface the tolerance: 0
+    # The Plug @moduledoc Configuration Options section must surface the tolerance: 0
     # testing-only escape hatch. HexDocs renders this @moduledoc as the
     # landing page for the Plug; without this lock, drift here would silently
     # stop showing the contract on the page adopters actually read first.
     # Four-surface triangulation: inline check_tolerance/2 comment + Plug
-    # schema doc: string + CHANGELOG WEBFIX-01 entry + this @moduledoc — all
+    # schema doc: string + CHANGELOG entry + this @moduledoc — all
     # four must be silenced simultaneously for the contract to silently regress.
     source = File.read!("lib/lattice_stripe/webhook/plug.ex")
     assert source =~ ~r/@moduledoc.*tolerance.*0.*testing only/s

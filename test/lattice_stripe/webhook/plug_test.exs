@@ -109,7 +109,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
 
     test "Webhook.Plug.init/1 accepts tolerance: 0 (schema :non_neg_integer)" do
-      # WEBFIX-01 (Phase 47 D-03): schema relaxed from :pos_integer to
+      # The schema accepts :non_neg_integer rather than :pos_integer so
       # :non_neg_integer so the documented "Set 0 to disable" semantics are
       # reachable through the public Plug surface.
       opts = WebhookPlug.init(secret: @secret, tolerance: 0)
@@ -117,7 +117,7 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
 
     test "Webhook.Plug.init/1 rejects tolerance: -1 (:non_neg_integer still rejects negatives)" do
-      # WEBFIX-01 / RESEARCH Pitfall 6: relaxing to :non_neg_integer must NOT
+      # Accepting zero must not
       # accidentally accept negative tolerances. Fail fast at init time.
       assert_raise NimbleOptions.ValidationError, fn ->
         WebhookPlug.init(secret: @secret, tolerance: -1)
@@ -353,12 +353,10 @@ defmodule LatticeStripe.Webhook.PlugTest do
     end
   end
 
-  # describe "tolerance: 0 end-to-end (WEBFIX-01)"
-
-  describe "tolerance: 0 end-to-end (WEBFIX-01)" do
+  describe "tolerance: 0 end-to-end" do
     test "Webhook.Plug end-to-end with tolerance: 0 and an old timestamp returns 200, not 400" do
-      # Integration regression for WEBFIX-01: proves the four-surface fix is
-      # reachable via the public Plug surface — schema allows 0, opt flows to
+      # This proves the behavior is reachable through the public Plug surface:
+      # the schema allows 0, the option flows to
       # check_tolerance/2, code clause returns :ok, handler runs, 200 response.
       old_ts = System.system_time(:second) - 86_400
       sig_header = Webhook.generate_test_signature(@payload, @secret, timestamp: old_ts)

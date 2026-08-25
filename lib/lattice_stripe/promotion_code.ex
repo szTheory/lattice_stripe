@@ -159,7 +159,7 @@ defmodule LatticeStripe.PromotionCode do
 
   def list!(%Client{} = c, p \\ %{}, o \\ []), do: list(c, p, o) |> Resource.unwrap_bang!()
 
-  # NOTE: NO search/2,3 (D-05, verified absent). NO delete/2,3 (not in Stripe API).
+  # No search or delete functions: Stripe does not expose those PromotionCode operations.
   # Absence is the interface.
 
   @spec from_map(map()) :: t()

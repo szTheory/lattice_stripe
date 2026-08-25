@@ -135,7 +135,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
     assert is_list(result)
   end
 
-  # Form encoder (T-15-05) — items[0][...] nested params
+  # Form encoder — items[0][...] nested params.
 
   test "form encoder encodes items[0][...] nested params correctly", %{client: client} do
     price = fresh_recurring_price!(client)
@@ -159,7 +159,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
     assert %Subscription{} = sub
   end
 
-  # Proration guard (T-15-03)
+  # Proration guard.
 
   test "strict client rejects items[] update without proration_behavior" do
     strict_client = test_integration_client(require_explicit_proration: true)
@@ -171,7 +171,7 @@ defmodule LatticeStripe.Integration.SubscriptionTest do
              })
   end
 
-  # Idempotency (T-15-02)
+  # Idempotency-key forwarding.
 
   test "idempotency_key is forwarded", %{client: client} do
     price = fresh_recurring_price!(client)

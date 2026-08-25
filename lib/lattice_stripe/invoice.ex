@@ -1034,7 +1034,7 @@ defmodule LatticeStripe.Invoice do
     }
   end
 
-  # Private: atomization helpers (whitelist per D-14g)
+  # Private whitelist-based atomization helpers.
 
   # Invoice status values
   defp atomize_status("draft"), do: :draft

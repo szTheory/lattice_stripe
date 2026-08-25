@@ -70,11 +70,11 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
   alias LatticeStripe.{Client, Request, Resource}
   alias LatticeStripe.Entitlements.Feature
 
-  # D-06: the canonical path lives here once. `list/3`, the streaming variant, and the
+  # The canonical path lives here once. `list/3`, the streaming variant, and the
   # summary module's url rewrite all read it, so they physically cannot diverge.
   @list_path "/v1/entitlements/active_entitlements"
 
-  # Exactly the five fields Stripe's spec marks required (research C-03) — note that
+  # Exactly the five fields Stripe's spec marks required — note that
   # `lookup_key` is on the entitlement itself, not only on the feature.
   @known_fields ~w(id object feature lookup_key livemode)
 
@@ -213,9 +213,8 @@ defmodule LatticeStripe.Entitlements.ActiveEntitlement do
     %__MODULE__{
       id: known["id"],
       object: known["object"] || "entitlements.active_entitlement",
-      # Call Feature.from_map/1 DIRECTLY, not ObjectTypes.maybe_deserialize/1. Routing
-      # through ObjectTypes would create a false dependency on Phase 65 (which owns the
-      # registry rows) and would silently fall through to a raw map until that phase lands.
+      # Call Feature.from_map/1 directly, not ObjectTypes.maybe_deserialize/1. Features are
+      # deliberately absent from object-type dispatch because they are not webhook payloads.
       feature:
         if(is_map(known["feature"]),
           do: Feature.from_map(known["feature"]),

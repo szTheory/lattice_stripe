@@ -45,7 +45,7 @@ defmodule LatticeStripe.Event do
   # String sigil (no `a`) matches Jason's default string-key output.
   # Includes `context` — newer Stripe field (added in the 2022-11-15+ API era).
   # Includes `related_object` — populated on v2-fetched events (`/v2/core/events/{id}`),
-  # `nil` on snapshot v1 events (Phase 47 D-02 / THIN-04).
+  # `nil` on snapshot v1 events.
   @known_fields ~w[
     id object account api_version context created data livemode
     pending_webhooks request type related_object

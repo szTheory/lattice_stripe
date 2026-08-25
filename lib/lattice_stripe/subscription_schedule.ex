@@ -433,14 +433,13 @@ end
 defimpl Inspect, for: LatticeStripe.SubscriptionSchedule do
   import Inspect.Algebra
 
-  # PII-safe Inspect. Mirrors LatticeStripe.Subscription (lib/lattice_stripe/subscription.ex
-  # lines 520-547). This is the ONLY defimpl Inspect block in all of Phase 16.
+  # PII-safe Inspect. Mirrors the masking strategy used by LatticeStripe.Subscription.
   #
   # Masking strategy: never surface nested collections (`phases`, `default_settings`,
   # `customer`, `subscription`, `released_subscription`). Emit presence booleans and a
   # `phase_count` integer instead. This prevents `default_payment_method` from leaking
   # via default derived Inspect on the nested `Phase` struct (which intentionally has
-  # no custom Inspect impl per locked D1).
+  # no custom Inspect implementation).
   def inspect(sched, opts) do
     base = [
       id: sched.id,

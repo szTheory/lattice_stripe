@@ -106,7 +106,7 @@ end
 defimpl Inspect, for: LatticeStripe.Account.Individual do
   import Inspect.Algebra
 
-  # PII fields — redacted when non-nil to prevent leakage into logs (T-17-01).
+  # Redact non-nil PII fields to prevent leakage into logs.
   # Source: stripe-node PII audit for field-level fidelity.
   @redacted [
     :dob,

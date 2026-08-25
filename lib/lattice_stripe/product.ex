@@ -431,7 +431,7 @@ defmodule LatticeStripe.Product do
     }
   end
 
-  # D-03 whitelist atomization — unknown values pass through as raw strings.
+  # Whitelist atomization keeps unknown values as raw strings for forward compatibility.
   defp atomize_type("good"), do: :good
   defp atomize_type("service"), do: :service
   defp atomize_type(nil), do: nil

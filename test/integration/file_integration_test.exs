@@ -33,7 +33,7 @@ defmodule LatticeStripe.FileIntegrationTest do
 
   setup do
     base_client = test_integration_client()
-    # Upload client points files_base_url at stripe-mock (D-23)
+    # Upload client points files_base_url at stripe-mock
     upload_client = %{base_client | files_base_url: "http://localhost:12111"}
     {:ok, client: base_client, upload_client: upload_client}
   end

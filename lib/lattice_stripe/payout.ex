@@ -269,7 +269,7 @@ defmodule LatticeStripe.Payout do
     List.stream!(client, req) |> Stream.map(&from_map/1)
   end
 
-  # Public API: cancel / reverse — D-03 canonical shape
+  # Public API: cancel and reverse use the canonical resource function shape.
 
   @doc """
   Cancels a pending Payout.

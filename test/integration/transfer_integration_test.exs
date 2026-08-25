@@ -78,7 +78,7 @@ defmodule LatticeStripe.TransferIntegrationTest do
   end
 
   test "separate-charge-and-transfer params shape (transfer_group)", %{client: client} do
-    # CNCT-03: exercise the params shape for the separate-charge-and-transfer
+    # exercise the params shape for the separate-charge-and-transfer
     # idiom. stripe-mock ignores `source_transaction` validity but must accept
     # the params shape.
     assert {:ok, %Transfer{}} =

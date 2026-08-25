@@ -136,7 +136,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
 
     # If the form encoder mis-encodes nested phases[][items][], stripe-mock
     # rejects against its OpenAPI spec. A successful update is the
-    # server-side regression guard for T-16-05.
+    # Server-side regression guard for omitted update parameters.
     {:ok, updated} =
       SubscriptionSchedule.update(client, sched.id, %{
         "phases" => [
@@ -151,12 +151,12 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     assert %SubscriptionSchedule{} = updated
   end
 
-  # cancel — POST sub-path (T-16-04 wire-verb regression guard)
+  # cancel — POST sub-path (wire-verb regression guard)
 
   test "cancel/4 uses POST and returns %SubscriptionSchedule{}", %{client: client} do
     {sched, _price} = create_basic_schedule!(client)
 
-    # Wire-verb regression guard (T-16-04): stripe-mock returns 200 only if
+    # Wire-verb regression guard: stripe-mock returns 200 only if
     # POST is used. A DELETE to /cancel would 404 or 405 here.
     {:ok, canceled} =
       SubscriptionSchedule.cancel(client, sched.id, %{
@@ -167,12 +167,12 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     assert %SubscriptionSchedule{} = canceled
   end
 
-  # release — POST sub-path (T-16-04 wire-verb regression guard)
+  # release — POST sub-path (wire-verb regression guard)
 
   test "release/4 uses POST and returns %SubscriptionSchedule{}", %{client: client} do
     {sched, _price} = create_basic_schedule!(client)
 
-    # Wire-verb regression guard (T-16-04): stripe-mock returns 200 only if
+    # Wire-verb regression guard: stripe-mock returns 200 only if
     # POST is used. A DELETE to /release would 404 or 405 here.
     {:ok, released} =
       SubscriptionSchedule.release(client, sched.id, %{"preserve_cancel_date" => false})
@@ -207,7 +207,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
     end
   end
 
-  # Proration guard (T-16-03) — fires pre-network even in integration context
+  # The proration guard fires before network I/O even in integration tests.
 
   test "strict client rejects update with phases[] missing proration_behavior (pre-network)" do
     strict_client = test_integration_client(require_explicit_proration: true)
@@ -219,7 +219,7 @@ defmodule LatticeStripe.Integration.SubscriptionScheduleTest do
              })
   end
 
-  # Idempotency (T-16-02) — opts[:idempotency_key] forwarding
+  # Idempotency-key options are forwarded unchanged.
 
   test "idempotency_key is forwarded on create", %{client: client} do
     price = fresh_recurring_price!(client)

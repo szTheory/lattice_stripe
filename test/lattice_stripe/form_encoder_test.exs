@@ -165,7 +165,7 @@ defmodule LatticeStripe.FormEncoderTest do
     end
 
     test "phases[].items[].price_data nested encoding (Phase 16 regression guard)" do
-      # Phase 16 regression guard: SubscriptionSchedule update accepts deeply
+      # SubscriptionSchedule updates accept deeply
       # nested params at phases[][items][][price_data][recurring][interval].
       # If the form encoder ever drops a level here, stripe-mock would reject
       # the request — but unit-level we want a fast feedback loop too.

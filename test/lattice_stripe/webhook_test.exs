@@ -113,7 +113,7 @@ defmodule LatticeStripe.WebhookTest do
     end
 
     test "tolerance: 0 disables the staleness check (any age accepted)" do
-      # WEBFIX-01: reconciled with docstring intent — `tolerance: 0` skips the
+      # reconciled with docstring intent — `tolerance: 0` skips the
       # staleness check entirely (matches stripe-node / stripe-go behavior).
       ancient_ts = System.system_time(:second) - 100_000
       header = Webhook.generate_test_signature(@payload, @secret, timestamp: ancient_ts)
@@ -274,7 +274,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # parse_event_notification/4 (THIN-01)
+  # parse_event_notification/4
 
   describe "parse_event_notification/4" do
     setup do
@@ -337,7 +337,7 @@ defmodule LatticeStripe.WebhookTest do
 
     test "returns {:error, :timestamp_expired} with default tolerance on an ancient timestamp",
          %{payload: payload} do
-      # NB: this uses default tolerance: 300; plan 47-03 (WEBFIX-01) handles
+      # This uses the default tolerance of 300 seconds; the zero-tolerance cases cover
       # the tolerance: 0 disables-staleness-check case separately.
       old_ts = System.system_time(:second) - 86_400
       old_header = Webhook.generate_test_signature(payload, @secret, timestamp: old_ts)
@@ -347,7 +347,7 @@ defmodule LatticeStripe.WebhookTest do
     end
   end
 
-  # parse_event_notification!/4 (THIN-01 bang variant)
+  # parse_event_notification!/4 (bang variant)
 
   describe "parse_event_notification!/4" do
     setup do

@@ -460,7 +460,7 @@ defmodule LatticeStripe.Telemetry do
 
   # Build start metadata map for the request span.
   # Includes enriched fields: resource and operation parsed from the URL path,
-  # plus api_version and stripe_account from the client config (D-03, D-04, D-05).
+  # plus api_version and stripe_account from the client config.
   defp build_start_metadata(client, req) do
     {resource, operation} = parse_resource_and_operation(req.method, req.path)
 

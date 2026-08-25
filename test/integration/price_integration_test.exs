@@ -23,9 +23,7 @@ defmodule LatticeStripe.Integration.PriceTest do
   setup do
     client = test_integration_client()
 
-    # Product module ships in Plan 12-04 (parallel wave). When available,
-    # create a real Product; otherwise fall back to a hardcoded stripe-mock
-    # product id so Price CRUD tests still exercise the wire path.
+    # Create a real Product so Price CRUD tests exercise the complete wire path.
     product =
       if Code.ensure_loaded?(LatticeStripe.Product) and
            function_exported?(LatticeStripe.Product, :create, 2) do
@@ -97,8 +95,8 @@ defmodule LatticeStripe.Integration.PriceTest do
       #
       # We exercise the form encoder via a Stripe-shaped params map — the
       # receiving endpoints for this deeply-nested shape are
-      # /v1/subscriptions (Plan 15) and /v1/checkout/sessions (Plan 06),
-      # so Phase 12's regression guard is the encoder output itself.
+      # /v1/subscriptions and /v1/checkout/sessions, so the regression guard is
+      # the encoder output itself.
       # The triple nest is items[0][price_data][recurring][interval].
       encoded =
         LatticeStripe.FormEncoder.encode(%{
@@ -128,9 +126,8 @@ defmodule LatticeStripe.Integration.PriceTest do
 
     test "D-09f: percent_off as float round-trips without scientific notation",
          %{client: _client} do
-      # Coupon creation (Plan 06) exercises this live; we test the encoder
-      # output here because this plan owns the float-fix regression guard
-      # for the Phase 12 Price flow (unit_amount_decimal uses the same path).
+      # Coupon creation exercises this live; this encoder assertion protects the
+      # shared float path used by Price unit_amount_decimal.
       encoded = LatticeStripe.FormEncoder.encode(%{"percent_off" => 12.5})
       assert encoded == "percent_off=12.5"
       refute encoded =~ ~r/\d+\.?\d*e[+-]?\d+/i

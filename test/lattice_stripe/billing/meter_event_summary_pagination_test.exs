@@ -32,7 +32,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
   @meter_id "mtr_123"
   @summaries_url "/v1/billing/meters/mtr_123/event_summaries"
 
-  # The three filters Stripe marks required (F-03). Timestamps are UTC day boundaries
+  # The three filters Stripe marks required. Timestamps are UTC day boundaries
   # (1_753_574_400 = 20296 * 86_400), which is what `value_grouping_window: "day"`
   # requires — a misaligned window is a different bug, tested elsewhere.
   @window %{
@@ -50,7 +50,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
 
   # Raw transport tuple, modelled on test/lattice_stripe/list_test.exs:26-45. The envelope
   # comes from `TestHelpers.list_json/3` rather than hand-built JSON — its third argument
-  # exists for exactly this kind of test (Phase 63 D-28).
+  # exists so pagination tests can vary `has_more` without duplicating the envelope.
   defp summaries_response(items, has_more, url \\ @summaries_url) do
     {:ok,
      %{
@@ -87,7 +87,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
 
   defp request_path(%{url: url}), do: URI.parse(url).path
 
-  # MTR-02 — cursor derivation across the page seam (D-30 assertions 1, 7, 9)
+  # cursor derivation across the page seam (assertions 1, 7, 9)
 
   describe "stream!/4 cursor derivation across the page seam" do
     test "page 2 request uses starting_after from the LAST id of page 1" do
@@ -111,7 +111,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
       assert ids == ["mtrusg_a", "mtrusg_b", "mtrusg_c"]
     end
 
-    # D-30 assertion 9 / T-64-14 — MUTATION-CHECKED. Do not rename, do not fold into the
+    # This mutation-checked case must remain separate from the test above and must not
     # test above, and do not weaken to `refute cursor == nil`.
     #
     # `LatticeStripe.List` derives `_last_id` by matching a RAW map on the string key
@@ -120,9 +120,8 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
     # stops early, and NOTHING raises. Asserting the `mtrusg_` prefix rather than mere
     # non-nilness is what distinguishes a correctly-derived cursor from a wrong one.
     #
-    # Phase 63 mutation-checked this identical failure on the entitlements summary
-    # (STATE [63-04]): moving the typing step ahead of `List.from_json/3` failed exactly
-    # one named test. Verified again here — see 64-06-SUMMARY.md.
+    # Keep typing after `List.from_json/3`: moving it earlier loses the raw response
+    # envelope needed to derive the next cursor.
     test "the starting_after cursor is derived from the raw maps before typing" do
       LatticeStripe.MockTransport
       |> expect(:request, fn _req ->
@@ -146,7 +145,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
       assert length(summaries) == 3
     end
 
-    # D-30 assertion 7. The page-1 body advertises a DIFFERENT path than the one the
+    # The page-1 body advertises a different path than the one the
     # resource module would reconstruct, so a page-2 request built from `path(meter_id)`
     # instead of the response's `url` fails here and only here.
     test "page 2 request path is taken from the page-1 response url, not rebuilt" do
@@ -171,8 +170,8 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
     end
   end
 
-  # MTR-02 — completeness, call counts, laziness and ordering
-  # (D-30 assertions 3 and 4, plus the MTR-01 ordering edge)
+  # completeness, call counts, laziness and ordering
+  # (assertions 3 and 4, plus the ordering edge)
 
   describe "stream!/4 enumeration, call counts and laziness" do
     test "a two-page response yields every item from both pages as typed structs" do
@@ -194,7 +193,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
              ] = summaries
     end
 
-    # D-30 assertion 3. `verify_on_exit!` is the call counter — three `expect/3`s and no
+    # `verify_on_exit!` is the call counter — three `expect/3`s and no
     # separate tally. A fourth call fails as "no expectation defined"; a missing third
     # fails on exit.
     test "streaming N pages makes exactly N transport calls" do
@@ -236,7 +235,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
              |> Enum.to_list() == []
     end
 
-    # D-30 assertion 4 / T-64-07. The single `expect/3` IS the assertion: laziness must
+    # The single `expect/3` is the assertion: laziness must
     # survive the `Stream.map(&from_map/1)` composed on top of `List.stream!/2`, so an
     # early-terminating consumer never pays for page 2. A test that merely checked the
     # returned item count would pass even if page 2 had been fetched and discarded —
@@ -255,7 +254,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
       assert [%MeterEventSummary{id: "mtrusg_a"}] = summaries
     end
 
-    # MTR-01 ordering edge. Summaries are a time series; re-sorting or de-duplicating
+    # Ordering edge: summaries are a time series; re-sorting or de-duplicating
     # them client-side would silently reorder a chart's buckets, and the page seam is
     # where an accidental re-sort would hide.
     test "items are emitted in wire order within a page and across the page seam" do
@@ -286,18 +285,16 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
     end
   end
 
-  # MTR-02 — request scoping on pages the caller never constructs
-  # (D-30 assertions 2, 5, 6 / T-64-02, T-64-03, T-64-04)
+  # Request scoping on pages the caller never constructs.
 
   describe "stream!/4 request scoping on pages the caller never constructs" do
-    # D-30 assertion 2 / T-64-03 — the phase's highest-value assertion, MUTATION-CHECKED.
-    # Do not rename it, do not fold it into a generic pagination case, and do not collapse
+    # This security-sensitive, mutation-checked case must remain separate and must not collapse
     # the four checks into one combined comparison.
     #
     # Each filter is asserted SEPARATELY because the failure mode that matters is a
     # PARTIAL drop. A total drop makes Stripe answer 400 loudly. A partial drop is silent
     # and unfalsifiable downstream: the returned summaries carry no `customer` field at
-    # all (F-02), so nothing can compare what came back against what was asked for. And
+    # all, so nothing can compare what came back against what was asked for. And
     # `value_grouping_window` is optional, so losing only that one does not error either —
     # page 2 quietly stops returning per-day rows and returns one whole-range aggregate
     # instead, producing a series with a single absurd outlier and no error anywhere.
@@ -338,7 +335,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
       assert length(summaries) == 2
     end
 
-    # D-30 assertion 5 / T-64-02. This is an ACCESS-CONTROL assertion, not a convenience
+    # This is an access-control assertion, not a convenience
     # one: a dropped `stripe-account` header on page 2 executes that read against the
     # PLATFORM account rather than the connected account, so half the series comes back
     # from the wrong books with nothing to indicate it.
@@ -381,7 +378,7 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
       assert length(summaries) == 2
     end
 
-    # D-30 assertion 6 / T-64-04. Page 1's opts DO supply a key, so this proves the strip
+    # Page 1's opts do supply a key, so this proves the strip
     # at list.ex:267 rather than proving a key was never there in the first place.
     test "no idempotency-key is sent on page 2" do
       LatticeStripe.MockTransport
@@ -405,8 +402,8 @@ defmodule LatticeStripe.Billing.MeterEventSummaryPaginationTest do
     end
   end
 
-  # MTR-02 — enumeration is complete or it fails loudly, never partial
-  # (D-30 assertion 8)
+  # enumeration is complete or it fails loudly, never partial
+  # (assertion 8)
 
   describe "stream!/4 error propagation" do
     test "a 500 on page 2 raises LatticeStripe.Error out of the stream" do

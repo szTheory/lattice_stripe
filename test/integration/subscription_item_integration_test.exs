@@ -133,7 +133,7 @@ defmodule LatticeStripe.Integration.SubscriptionItemTest do
     assert %SubscriptionItem{} = updated
   end
 
-  # Idempotency (T-15-02)
+  # Idempotency-key forwarding.
 
   test "idempotency_key is forwarded on create", %{client: client} do
     %{subscription: sub, price: price} =

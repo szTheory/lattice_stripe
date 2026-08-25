@@ -2,7 +2,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
   use LatticeStripe.ClientCase, async: true
 
   describe "request/2 headers" do
-    # Test 8: request/2 sends GET with Authorization Bearer header
     test "sends Authorization Bearer header" do
       client = test_client()
 
@@ -14,7 +13,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, get_request())
     end
 
-    # Test 9: request/2 sends Stripe-Version header from client config
     test "sends Stripe-Version header from client config" do
       client = test_client()
 
@@ -26,7 +24,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, get_request())
     end
 
-    # Test 10: request/2 sends User-Agent header containing "LatticeStripe"
     test "sends User-Agent header containing LatticeStripe" do
       client = test_client()
 
@@ -42,7 +39,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, get_request())
     end
 
-    # Test 11: request/2 POST sends Content-Type application/x-www-form-urlencoded
     test "POST sends Content-Type application/x-www-form-urlencoded" do
       client = test_client()
 
@@ -56,7 +52,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
   end
 
   describe "request/2 encoding" do
-    # Test 12: request/2 POST encodes params as form body via FormEncoder
     test "POST encodes params as form body" do
       client = test_client()
       params = %{amount: 1000, currency: "usd"}
@@ -73,7 +68,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, post_request("/v1/charges", params))
     end
 
-    # Test 13: request/2 GET appends params as query string
     test "GET appends params as query string" do
       client = test_client()
       params = %{limit: 10}
@@ -91,7 +85,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
   end
 
   describe "request/2 per-request overrides" do
-    # Test 19: Per-request api_key overrides client api_key
     test "per-request api_key overrides client api_key" do
       client = test_client()
 
@@ -104,7 +97,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, req)
     end
 
-    # Test 20: Per-request stripe_account adds Stripe-Account header
     test "per-request stripe_account adds Stripe-Account header" do
       client = test_client()
 
@@ -117,7 +109,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, req)
     end
 
-    # Test 21: Per-request timeout overrides client timeout
     test "per-request timeout overrides client timeout" do
       client = test_client()
 
@@ -130,7 +121,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, req)
     end
 
-    # Test 22: Per-request stripe_version overrides client api_version
     test "per-request stripe_version overrides client api_version" do
       client = test_client()
 
@@ -143,7 +133,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, req)
     end
 
-    # Test 23: Per-request idempotency_key adds Idempotency-Key header (user key takes precedence)
     test "per-request idempotency_key overrides auto-generated key" do
       client = test_client()
 
@@ -156,7 +145,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, req)
     end
 
-    # Test 24: Per-request expand merges into params
     test "per-request expand merges into request params" do
       client = test_client()
 
@@ -175,7 +163,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, req)
     end
 
-    # Test 25: request_id extracted from response headers and included in error structs
     test "request_id from response header is included in error struct" do
       client = test_client(max_retries: 0)
 
@@ -197,7 +184,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
   end
 
   describe "request/2 telemetry" do
-    # Test 26: Telemetry events emitted when telemetry_enabled: true
     test "emits telemetry start and stop events" do
       client = test_client(telemetry_enabled: true)
       handler_id = "test-telemetry-handler-#{:erlang.unique_integer([:positive])}"
@@ -221,7 +207,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert_receive {:telemetry_event, [:lattice_stripe, :request, :stop], _, _meta}
     end
 
-    # Test 27: No telemetry events when telemetry_enabled: false
     test "does NOT emit telemetry events when telemetry_enabled is false" do
       client = test_client(telemetry_enabled: false)
       handler_id = "test-no-telemetry-handler-#{:erlang.unique_integer([:positive])}"
@@ -247,7 +232,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
   end
 
   describe "request/2 idempotency keys" do
-    # Test 35: POST request gets auto-generated idempotency-key header
     test "POST request gets auto-generated idempotency-key header" do
       client = test_client()
 
@@ -267,7 +251,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, post_request())
     end
 
-    # Test 36: GET request does NOT get auto-generated idempotency-key header
     test "GET request does NOT get auto-generated idempotency-key header" do
       client = test_client()
 
@@ -279,7 +262,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, get_request())
     end
 
-    # Test 37: DELETE request does NOT get auto-generated idempotency-key header
     test "DELETE request does NOT get auto-generated idempotency-key header" do
       client = test_client()
 
@@ -291,7 +273,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, delete_request())
     end
 
-    # Test 38: User-provided idempotency_key in opts takes precedence
     test "user-provided idempotency_key takes precedence over auto-generated" do
       client = test_client()
 
@@ -308,7 +289,6 @@ defmodule LatticeStripe.Client.RequestBuildingTest do
       assert {:ok, _} = Client.request(client, req)
     end
 
-    # Test 39: Same idempotency key sent on all retry attempts
     test "same idempotency key reused across all retry attempts" do
       client = retry_client(max_retries: 2)
       seen_keys = Agent.start_link(fn -> [] end) |> elem(1)

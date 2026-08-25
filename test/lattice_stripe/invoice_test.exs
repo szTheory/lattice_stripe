@@ -248,7 +248,7 @@ defmodule LatticeStripe.InvoiceTest do
       result = LatticeStripe.Invoice.from_map(invoice_map)
 
       # The is_map guard in from_map/1 detects the expanded map and dispatches
-      # through ObjectTypes.maybe_deserialize/1 -- this is the EXPD-02 mechanism.
+      # through ObjectTypes.maybe_deserialize/1 -- this is the mechanism.
       assert %LatticeStripe.Customer{} = result.customer
       assert result.customer.id == "cus_expanded_via_dot_path"
       assert result.customer.email == "dotpath@example.com"

@@ -154,7 +154,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     }
   end
 
-  # D-03 whitelist atomization — unknown values pass through as raw strings.
+  # Whitelist atomization keeps unknown values as raw strings for forward compatibility.
   defp atomize_status("ready"), do: :ready
   defp atomize_status("advancing"), do: :advancing
   defp atomize_status("internal_failure"), do: :internal_failure
@@ -331,8 +331,6 @@ defmodule LatticeStripe.TestHelpers.TestClock do
     end)
   end
 
-  # advance/4 (Plan 13-04)
-
   @doc """
   Advances a Test Clock to a new `frozen_time`.
 
@@ -380,8 +378,6 @@ defmodule LatticeStripe.TestHelpers.TestClock do
       when is_binary(id) and is_integer(frozen_time) do
     advance(client, id, frozen_time, opts) |> Resource.unwrap_bang!()
   end
-
-  # advance_and_wait/4 (Plan 13-04)
 
   @default_timeout 60_000
   @default_initial_interval 500
@@ -502,7 +498,7 @@ defmodule LatticeStripe.TestHelpers.TestClock do
   # Internal poll loop
 
   # Always poll FIRST — even on attempt 0 there is no sleep. This catches
-  # already-ready clocks and stripe-mock's instant fixture (D-13b).
+  # already-ready clocks and stripe-mock's instant fixture.
   #
   # `backoff` is a map with keys: :delay, :max_interval, :multiplier,
   # :deadline, :started_at — bundled to keep arity within Credo limits.

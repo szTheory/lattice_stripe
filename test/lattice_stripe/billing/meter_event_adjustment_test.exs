@@ -17,7 +17,7 @@ defmodule LatticeStripe.Billing.MeterEventAdjustmentTest do
                cancel: %Cancel{identifier: "req_abc"}
              } = adj
 
-      # Regression guards — T-20-03 shape trap
+      # Regression guards — shape trap
       refute Map.has_key?(adj, :identifier)
       refute is_map(adj.cancel) and not is_struct(adj.cancel, Cancel)
     end

@@ -25,7 +25,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
 
   defp create_params, do: %{"lookup_key" => "premium_support", "name" => "Premium Support"}
 
-  # ENT-04 — create/3
+  # create/3
 
   describe "Feature.create/3" do
     test "POSTs /v1/entitlements/features and returns a typed struct" do
@@ -48,7 +48,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
               }} = Feature.create(test_client(), create_params())
     end
 
-    # T-63-09. Two calls carrying the same key must send the same header both times, which
+    # Two calls carrying the same key must send the same header both times, which
     # is what makes a retried create de-duplicate at Stripe instead of creating a second
     # feature. A single `expect/3` with a count of 2 asserts it on BOTH attempts.
     test "sends a stable idempotency-key header on both of two identical create attempts" do
@@ -82,7 +82,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # D-10 / T-63-08 — both required params are guarded BEFORE any transport call
+  # both required params are guarded BEFORE any transport call
 
   describe "Feature.create/3 pre-network required-param guards" do
     # No Mox expectation is set in either test below. `verify_on_exit!` is therefore itself
@@ -107,7 +107,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ENT-04 — retrieve/3
+  # retrieve/3
 
   describe "Feature.retrieve/3" do
     test "GETs /v1/entitlements/features/{id} and returns a typed struct" do
@@ -141,7 +141,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ENT-04 — update/4. Archiving IS update/4 with active: false (D-08); there is no
+  # update/4. Archiving IS update/4 with active: false ; there is no
   # archive verb, so this test is the only proof the archive operation is reachable.
 
   describe "Feature.update/4" do
@@ -170,7 +170,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ENT-04 — list/3
+  # list/3
 
   describe "Feature.list/3" do
     test "GETs /v1/entitlements/features and returns typed structs" do
@@ -187,7 +187,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
       assert [%Feature{id: "feat_123"}] = list.data
     end
 
-    # F-07 / T-63-08: the `archived` filter is the caller's only way to see inactive
+    # the `archived` filter is the caller's only way to see inactive
     # features. If it stopped reaching the wire, a reconciler would silently go back to
     # diffing against a filtered view and report archived features as deletions.
     test "passes the archived filter through to the query string unchanged" do
@@ -201,7 +201,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
                Feature.list(test_client(), %{"archived" => "true"})
     end
 
-    # D-12: Stripe defines no unique-lookup retrieval, so the return type is a LIST even
+    # Stripe defines no unique-lookup retrieval, so the return type is a LIST even
     # when exactly one feature matches. This test is what stops a future contributor
     # "helpfully" unwrapping the singleton and inventing >1-result semantics Stripe does
     # not define.
@@ -263,7 +263,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # D-13 — stream!/3. Full pagination mechanics are proven once, for the shared
+  # stream!/3. Full pagination mechanics are proven once, for the shared
   # LatticeStripe.List cursor machine, in active_entitlement_stream_test.exs.
 
   describe "Feature.stream!/3" do
@@ -300,7 +300,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # ENT-04 — from_map/1
+  # from_map/1
 
   describe "Feature.from_map/1" do
     test "decodes the wire object into a %Feature{}" do
@@ -333,7 +333,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
     end
   end
 
-  # D-23 L1 — structural surface lock. With no Dialyzer and documentation-only
+  # L1 — structural surface lock. With no Dialyzer and documentation-only
   # typespecs, this is the ONLY enforcement of public surface shape.
 
   describe "module surface" do
@@ -359,7 +359,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
       assert function_exported?(Feature, :from_map, 1)
     end
 
-    # F-06: Stripe ships no DELETE for features. Locking the *complete* surface — not just
+    # Stripe ships no DELETE for features. Locking the *complete* surface — not just
     # the part that exists — is what stops a future contributor adding a 404-producing
     # delete/3 by analogy with every other resource in this library.
     test "does not export a delete verb — Stripe ships no DELETE for features" do
@@ -367,7 +367,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
       refute function_exported?(Feature, :delete, 3)
     end
 
-    # D-08: archiving is update/4 with active: false. A wrapper would have to be named
+    # archiving is update/4 with active: false. A wrapper would have to be named
     # after the wire field it sets (set_active/4), and the house rule is that explicit
     # verbs mirror explicit Stripe endpoints. Both arities of a defaulted-opts verb are
     # refuted, so a `def archive(client, id, opts \\ [])` cannot slip past this lock.
@@ -380,7 +380,7 @@ defmodule LatticeStripe.Entitlements.FeatureTest do
       refute function_exported?(Feature, :set_active, 4)
     end
 
-    # D-12: Stripe defines no unique-lookup retrieval, so a helper would have to invent
+    # Stripe defines no unique-lookup retrieval, so a helper would have to invent
     # 0-result and >1-result semantics. The recipe lives in the moduledoc instead.
     test "does not export a lookup_key retrieval helper" do
       refute function_exported?(Feature, :retrieve_by_lookup_key, 2)

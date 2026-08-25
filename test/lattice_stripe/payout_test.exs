@@ -151,7 +151,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # cancel/4 — D-03 canonical shape
+  # cancel/4 — canonical shape
 
   describe "cancel/4 default params" do
     test "Payout.cancel(client, id) works without explicit params" do
@@ -206,7 +206,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # reverse/4 — D-03 canonical shape
+  # reverse/4 — canonical shape
 
   describe "reverse/4 default params" do
     test "Payout.reverse(client, id) works without explicit params" do
@@ -456,7 +456,7 @@ defmodule LatticeStripe.PayoutTest do
     end
   end
 
-  # Module surface — D-03 / D-04 guards
+  # Module surface — guards
 
   describe "module surface" do
     test "cancel is exported at arity 2 AND arity 4 (default params)" do

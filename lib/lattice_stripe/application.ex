@@ -56,7 +56,7 @@ defmodule LatticeStripe.Application do
     end
   end
 
-  # D-06: sensible default, overridable via app config. Finch's own defaults
+  # This sensible default is overridable via app config. Finch's own defaults
   # (%{default: [size: 50, count: 1]}) apply when this is unset.
   defp default_pools do
     Application.get_env(:lattice_stripe, :default_finch_pools, %{})

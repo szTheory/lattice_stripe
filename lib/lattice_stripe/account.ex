@@ -253,7 +253,7 @@ defmodule LatticeStripe.Account do
   def delete!(%Client{} = client, id, opts \\ []) when is_binary(id),
     do: client |> delete(id, opts) |> Resource.unwrap_bang!()
 
-  # reject/4 — D-04a atom guard (LOCKED per 17-CONTEXT.md §D-04a)
+  # reject/4 accepts only the two reasons supported by Stripe.
 
   @reject_reasons [:fraud, :terms_of_service, :other]
 
