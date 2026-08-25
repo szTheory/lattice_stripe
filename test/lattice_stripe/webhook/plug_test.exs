@@ -51,6 +51,11 @@ defmodule LatticeStripe.Webhook.PlugTest do
     def read_req_body(_payload, _opts), do: {:error, :closed}
   end
 
+  defmodule ChunkedReadAdapter do
+    def read_req_body([chunk], _opts), do: {:ok, chunk, []}
+    def read_req_body([chunk | rest], _opts), do: {:more, chunk, rest}
+  end
+
   defmodule RouteScopedCacheBodyReader do
     use Plug.Router
 
@@ -460,6 +465,21 @@ defmodule LatticeStripe.Webhook.PlugTest do
       assert_raise Plug.Conn.WrapperError, fn ->
         RouteScopedCacheBodyReader.call(multipart_conn, [])
       end
+    end
+  end
+
+  describe "mount-before-parsers raw body reads" do
+    test "verifies a signature when Plug returns the body in multiple chunks" do
+      split_at = byte_size(@payload) - 1
+      first_chunk = binary_part(@payload, 0, split_at)
+      last_chunk = binary_part(@payload, split_at, 1)
+
+      conn =
+        build_conn(:post, "/webhooks/stripe", @payload, valid_sig_header())
+        |> Map.put(:adapter, {ChunkedReadAdapter, [first_chunk, last_chunk]})
+        |> call_plug(secret: @secret, at: "/webhooks/stripe")
+
+      assert %LatticeStripe.Event{} = conn.assigns.stripe_event
     end
   end
 end

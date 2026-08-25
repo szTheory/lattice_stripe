@@ -283,13 +283,21 @@ if Code.ensure_loaded?(Plug) do
     defp get_raw_body(conn) do
       case conn.private[:raw_body] do
         nil ->
-          case Plug.Conn.read_body(conn) do
+          case read_raw_body(conn, []) do
             {:ok, body, _conn} -> body
-            _ -> ""
+            :error -> ""
           end
 
         body ->
           body
+      end
+    end
+
+    defp read_raw_body(conn, chunks) do
+      case Plug.Conn.read_body(conn) do
+        {:ok, chunk, conn} -> {:ok, IO.iodata_to_binary(Enum.reverse([chunk | chunks])), conn}
+        {:more, chunk, conn} -> read_raw_body(conn, [chunk | chunks])
+        _ -> :error
       end
     end
   end
