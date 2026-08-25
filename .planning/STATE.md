@@ -5,15 +5,15 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 66
 current_phase_name: Product ↔ Feature Attachment
 status: executing
-stopped_at: Completed 66-03-PLAN.md
-last_updated: "2026-08-25T14:33:09.950Z"
+stopped_at: Completed 66-04-PLAN.md
+last_updated: "2026-08-25T14:36:21.814Z"
 last_activity: 2026-08-25
 last_activity_desc: Phase 66 execution started
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 32
-  completed_plans: 30
+  completed_plans: 31
   percent: 83
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 ## Current Position
 
 Phase: 66 (Product ↔ Feature Attachment) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-08-25 — Phase 66 execution started
 
@@ -75,6 +75,7 @@ Last activity: 2026-08-25 — Phase 66 execution started
 | Phase 66-product-feature-attachment P01 | 5min | 2 tasks | 2 files |
 | Phase 66-product-feature-attachment P02 | 4min | 1 tasks | 1 files |
 | Phase 66-product-feature-attachment P03 | 3min | 2 tasks | 3 files |
+| Phase 66-product-feature-attachment P04 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -142,6 +143,9 @@ Last activity: 2026-08-25 — Phase 66 execution started
 - [Phase ?]: [66-02] Product.Feature.stream!/4 page-two coverage decodes exact query values and preserves raw prodft_ cursor, Product/Connect scope, caller filters, laziness, and loud failure semantics through List.stream!/2.
 - [Phase ?]: [66-03] D-09/D-10/D-26 held: Product.features and Product.marketing_features remain independent raw maps in 1.x; typed attachments are Product.Feature only.
 - [Phase ?]: [66-03] D-11/D-27 held: ObjectTypes registers exact product_feature, rejects product.feature byte-for-byte, and adds no map-size lock.
+- [Phase ?]: [66-04] Product.Feature is placed under Entitlements by an exact ExDoc matcher; Product remains under Billing.
+- [Phase ?]: [66-04] Product features and marketing_features remain raw marketing maps; Product.Feature list/4 and stream!/4 are authoritative attachment reads.
+- [Phase ?]: [66-04] API lock admits only the accepted Product.Feature module, type, fields, canonical verbs, default arities, and decoder.
 
 ### Blockers/Concerns
 
@@ -168,8 +172,8 @@ Last activity: 2026-08-25 — Phase 66 execution started
 
 ## Session Continuity
 
-**Last session:** 2026-08-25T14:33:09.942Z
-**Stopped at:** Completed 66-03-PLAN.md
+**Last session:** 2026-08-25T14:36:21.806Z
+**Stopped at:** Completed 66-04-PLAN.md
 **Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
