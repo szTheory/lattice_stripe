@@ -188,8 +188,8 @@ key.
 The `:stripe_webhook` pipeline applies only to `/webhooks/stripe` and accepts JSON only:
 keep it separate from your normal endpoint parser pipeline. It retains another request-body
 copy for the connection lifetime, which can retain PII; never log
-the raw body wholesale. It is not intended for multipart parsing. Do not configure it globally
-as a general raw-body retention mechanism.
+the raw body wholesale. It is not intended for multipart parsing. Do not configure it
+globally as a general raw-body retention mechanism.
 
 ## Troubleshooting
 
