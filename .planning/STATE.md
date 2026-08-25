@@ -5,15 +5,15 @@ milestone_name: Accrue Surface Closure (Hex 1.8.0)
 current_phase: 67
 current_phase_name: DX Hardening & Milestone Doc Close
 status: executing
-stopped_at: Phase 67 context gathered
-last_updated: "2026-08-25T17:45:40.893Z"
+stopped_at: Completed 67-01-PLAN.md
+last_updated: "2026-08-25T17:52:51.637Z"
 last_activity: 2026-08-25
-last_activity_desc: Phase 66 complete, transitioned to Phase 67
+last_activity_desc: Phase 67 execution started
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 37
-  completed_plans: 32
+  completed_plans: 33
   percent: 86
 ---
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (reopened 2026-07-27 — v1.10 "Accrue Surface Closure
 
 ## Current Position
 
-Phase: 67 — DX Hardening & Milestone Doc Close
-Plan: Not started
+Phase: 67 (DX Hardening & Milestone Doc Close) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-08-25 — Phase 66 complete, transitioned to Phase 67
+Last activity: 2026-08-25 — Phase 67 execution started
 
 **Carry-forward for Phase 65 and later:**
 
@@ -77,6 +77,7 @@ Last activity: 2026-08-25 — Phase 66 complete, transitioned to Phase 67
 | Phase 66-product-feature-attachment P03 | 3min | 2 tasks | 3 files |
 | Phase 66-product-feature-attachment P04 | 3min | 2 tasks | 4 files |
 | Phase 66 P05 | 4min | 2 tasks | 4 files |
+| Phase 67 P01 | 5min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,7 @@ Last activity: 2026-08-25 — Phase 66 complete, transitioned to Phase 67
 - [Phase ?]: [66-04] API lock admits only the accepted Product.Feature module, type, fields, canonical verbs, default arities, and decoder.
 - [Phase ?]: [66-05] Catalog reads use Product.Feature.list/4 or stream!/4; Product marketing fields remain display copy.
 - [Phase ?]: [66-05] Entitlement authorization remains local and fail-closed from a complete persisted webhook-reconciled snapshot; no entitled? helper ships.
+- [Phase ?]: [67-01] Error response evidence preserves ordered duplicate headers and strict uncapped decimal Retry-After; scheduling remains adopter-owned.
 
 ### Blockers/Concerns
 
@@ -175,9 +177,9 @@ Last activity: 2026-08-25 — Phase 66 complete, transitioned to Phase 67
 
 ## Session Continuity
 
-**Last session:** 2026-08-25T16:58:35.681Z
-**Stopped at:** Phase 67 context gathered
-**Resume file:** .planning/phases/67-dx-hardening-milestone-doc-close/67-CONTEXT.md
+**Last session:** 2026-08-25T17:52:51.625Z
+**Stopped at:** Completed 67-01-PLAN.md
+**Resume file:** None
 
 Seed: `.planning/seeds/SEED-005-stripe-native-entitlements.md`
 Gap brief: `.planning/research/accrue-gap-brief-2026-07-27.txt`

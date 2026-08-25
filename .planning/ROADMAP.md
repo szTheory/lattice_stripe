@@ -238,12 +238,12 @@ Plans:
   3. Docs state permanently that `Charge.create` is absent by design and `PaymentIntent.create(confirm: true)` is the sanctioned path, with a docs-truth regression lock.
 
 **Build constraints**: `lib/lattice_stripe/error.ex` currently has no `headers`/`retry_after` (Stripe sends `Retry-After` as a header). `lib/lattice_stripe/webhook/cache_body_reader.ex` is `@moduledoc false` at L3 — promotion is a semver contract, so ExDoc registration in `mix.exs` is required. Do not regress SEED-005 §6 contracts.
-**Plans**: 5 plans
+**Plans**: 1/5 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 67-01-PLAN.md — Trace faithful final-response headers and strict Retry-After metadata through `LatticeStripe.Error`
+- [x] 67-01-PLAN.md — Trace faithful final-response headers and strict Retry-After metadata through `LatticeStripe.Error`
 - [ ] 67-02-PLAN.md — Fix exact multi-chunk webhook raw-body accumulation before publication
 - [ ] 67-04-PLAN.md — Lock the permanent PaymentIntent-first Charge creation policy
 
@@ -265,7 +265,7 @@ Plans:
 | 64. Meter Event-Summary Reads | v1.10 | 10/10 | Complete    | 2026-07-28 |
 | 65. Webhook ObjectTypes & Testing Fixtures | v1.10 | 6/6 | Complete    | 2026-07-29 |
 | 66. Product ↔ Feature Attachment | v1.10 | 5/5 | Complete    | 2026-08-25 |
-| 67. DX Hardening & Milestone Doc Close | v1.10 | 0/? | Not started | - |
+| 67. DX Hardening & Milestone Doc Close | v1.10 | 1/5 | In Progress|  |
 
 ## Next Step
 
