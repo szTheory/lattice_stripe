@@ -880,6 +880,16 @@ defmodule LatticeStripe.DocsTruthTest do
     refute source =~ "never directly manipulated"
   end
 
+  test "error handling guide keeps Retry-After evidence policy bounded and non-blocking" do
+    guide = File.read!("guides/error-handling.md")
+
+    assert guide =~ "## Consuming final response evidence"
+    assert guide =~ "Error.get_header/2"
+    assert guide =~ "uncapped"
+    assert guide =~ "do not sleep in a Phoenix request process"
+    assert guide =~ "Avoid logging response headers or `raw_body` wholesale"
+  end
+
   test "flagship guides are published and cross-linked through the docs graph" do
     checkout_recipe = File.read!("guides/checkout-signup-and-portal.md")
     connect_recipe = File.read!("guides/connect-platform-flow.md")
