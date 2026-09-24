@@ -198,6 +198,26 @@ jobs:
         if: matrix.elixir == '1.19' && matrix.otp == '28'
         run: mix test test/lattice_stripe/tax/adoption_contract_test.exs --warnings-as-errors
 
+  adopter:
+    name: Phoenix adopter
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        with:
+          elixir-version: '1.19'
+          otp-version: '28'
+
+      - name: Resolve adopter dependencies
+        working-directory: test_apps/phoenix_adopter
+        run: mix deps.get --check-locked
+
+      - name: Run adopter suite
+        working-directory: test_apps/phoenix_adopter
+        run: mix test --warnings-as-errors
+
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
@@ -445,6 +465,7 @@ jobs:
         compile,
         no_optional_deps,
         test,
+        adopter,
         coverage,
         integration,
         fuse_integration,
@@ -461,6 +482,7 @@ jobs:
           COMPILE: ${{ needs.compile.result }}
           NO_OPTIONAL_DEPS: ${{ needs.no_optional_deps.result }}
           TEST: ${{ needs.test.result }}
+          ADOPTER: ${{ needs.adopter.result }}
           COVERAGE: ${{ needs.coverage.result }}
           INTEGRATION: ${{ needs.integration.result }}
           FUSE_INTEGRATION: ${{ needs.fuse_integration.result }}
@@ -470,7 +492,7 @@ jobs:
         run: |
           set -euo pipefail
           failed=0
-          for lane in ACTIONLINT FORMAT COMPILE NO_OPTIONAL_DEPS TEST COVERAGE INTEGRATION FUSE_INTEGRATION OTEL_INTEGRATION DOCS_TRUTH QUALITY; do
+          for lane in ACTIONLINT FORMAT COMPILE NO_OPTIONAL_DEPS TEST ADOPTER COVERAGE INTEGRATION FUSE_INTEGRATION OTEL_INTEGRATION DOCS_TRUTH QUALITY; do
             result="${!lane}"
             if [[ "$result" != "success" ]]; then
               echo "Required lane $lane: $result"
