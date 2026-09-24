@@ -36,3 +36,7 @@ There is no evidence-qualified selected set to rank. Once evidence gates pass, p
 D-10 review not performed here: a complete intervening changelog analysis; request-semantic compatibility; old/new response-decoding behavior; webhook event/version behavior; supported adopter-flow testing; and package SemVer impact. An official 2026-08-26 **preview** changelog entry also removes writable `payment_method_types` from PaymentIntent and SetupIntent create/update/confirm operations while keeping it readable; this is preview-only context, not a stable migration trigger. Any future default-pin move requires a separate review covering all D-10 evidence, not date freshness or one fixture.
 
 Any Phase 75 implementation considered later must remain additive and optional, preserve existing unknown response keys in `extra`, retain expanded ID/object shapes where applicable, and avoid closing enum-like Stripe values without an explicit stability guarantee.
+
+### Guarded-write verification
+
+The final artifact save uses `.planning/tools/guarded_markdown_write.py`, which compares the inspected SHA-256 immediately before replacement, writes a complete same-directory temporary file, and atomically renames it into place. Its smoke check rejects a stale hash without overwriting the competing edit, then confirms a successful atomic replacement. Re-run with `python3 .planning/tools/guarded_markdown_write.py --self-test`.
