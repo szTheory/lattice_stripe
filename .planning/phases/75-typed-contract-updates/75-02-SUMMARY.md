@@ -78,7 +78,7 @@ coverage:
         status: pass
     human_judgment: true
     rationale: Automated checks validate version prose and successful rendering, but no executable check asserts the endpoint-scope and event-availability wording across both documentation surfaces.
-duration: 8min
+duration: 10min
 completed: 2026-09-24
 status: complete
 plan_head_before: 180ada1619b8d11bb0dbe0af02dbeb23ff687cab
@@ -91,9 +91,9 @@ commits: 3
 
 ## Performance
 
-- **Duration:** 8 min
+- **Duration:** 10 min
 - **Started:** 2026-09-24T12:33:11Z
-- **Completed:** 2026-09-24T12:40:52Z
+- **Completed:** 2026-09-24T12:43:05Z
 - **Tasks:** 2
 - **Files modified:** 4
 
