@@ -31,6 +31,12 @@ green, open pull requests are triaged with dispositions, and all Git worktrees a
 Milestones that change adopter-facing package behavior include a new published package
 release.
 
+## Verification and Automation Default
+
+Default to automation-first, shift-left proof. For each behavior or seam, prefer the smallest honest executable check at the right boundary: unit/property checks for pure invariants; Mox or adapter seam tests for contracts; integration, end-to-end, adopter, smoke, or package checks when they cover a real recurring failure mode. Put recurring high-value checks in CI when runtime and maintenance cost are justified. Keep CI focused: do not add redundant lanes, brittle assertions, broad coverage quotas, or one-off infrastructure without recurring adopter or release value.
+
+Aim for zero human verification and UAT handoffs. Before asking a person to verify something, identify what evidence automation cannot produce, add a truthful test or probe when feasible, and run all relevant local/CI checks. Hand off only an irreducible decision or observation that cannot be safely and credibly automated (for example, a user-owned product choice, private live-service behavior with no safe test seam, or genuinely subjective judgment). Never label an unverified claim as proven to avoid a handoff; preserve explicit unknowns and explain the narrow human-only gap. Apply this posture by default in GSD discussion, planning, execution, and verification.
+
 ## Latest Milestone: v1.11 Reader-First Quality Closure
 
 **Goal achieved:** Turn the already-complete SDK into a clean, trustworthy maintenance
