@@ -16,8 +16,21 @@ defmodule PhoenixAdopter.MixProject do
   end
 
   defp deps do
+    lattice_stripe_dep =
+      case System.get_env("MIX_LATTICE_STRIPE_HEX_VERSION") do
+        nil ->
+          {:lattice_stripe, path: "../../"}
+
+        version ->
+          unless Regex.match?(~r/\A[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?\z/, version) do
+            raise "MIX_LATTICE_STRIPE_HEX_VERSION must be an exact semantic version"
+          end
+
+          {:lattice_stripe, version}
+      end
+
     [
-      {:lattice_stripe, path: "../../"},
+      lattice_stripe_dep,
       {:phoenix, "~> 1.8.0"},
       {:plug, "~> 1.16"},
       {:mox, "~> 1.2", only: :test}
