@@ -11,7 +11,7 @@ affects: [77-adopter-edge-profiles-and-ci]
 actuals:
   tokens: 30000
   tasks: 2
-  commits: 3
+  commits: 4
 tech-stack:
   added: [Phoenix 1.8, Plug, Mox]
   patterns: [isolated nested Mix adopter, ConnTest through supervised Endpoint, explicit Mox transport, raw-body webhook verification]
@@ -77,7 +77,7 @@ Added an isolated Phoenix host app that consumes the checked-out LatticeStripe S
 
 ## Deviations and Issues
 
-- The nested Phoenix config imports environment-specific files; minimal `config/dev.exs` and `config/test.exs` were therefore added beyond the original file list.
+- The nested Phoenix config imports environment-specific files; minimal development and test configuration files were therefore added under `test_apps/phoenix_adopter/config/` beyond the original file list.
 - The GSD executor could not write Git metadata inside its restricted worktree. GSD's commit and worktree cleanup commands performed the commit and manifest-scoped merge after review.
 - The first root CI attempt in the isolated worktree lacked the SDK dependency checkout. Root `mix ci` passed from the main checkout. Hex package cache writes required the authorized environment for the nested dependency fetch.
 

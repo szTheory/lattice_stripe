@@ -16,7 +16,7 @@
     {
       "number": "76",
       "name": "Phoenix Adopter Core Flow",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "77",
@@ -31,8 +31,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step (plan phase 76)",
-    "reason": "Phase 76 of 5 — needs a plan"
+    "label": "Advance to the next step (plan phase 77)",
+    "reason": "Phase 77 of 5 — needs a plan"
   },
-  "updated_at": "2026-09-24T12:52:09.973Z"
+  "updated_at": "2026-09-24T13:45:42.157Z"
 }
