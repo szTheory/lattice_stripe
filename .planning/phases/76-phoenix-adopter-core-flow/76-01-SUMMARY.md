@@ -41,7 +41,7 @@ coverage:
     requirement: ADOPT-01
     verification:
       - kind: integration
-        ref: "cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test — 9 tests, 0 failures; host boots with checked-out dependency"
+        ref: "cd test_apps/phoenix_adopter && mix test — 3 Phase 76 core-flow tests, 0 failures; included in the fresh 9-test adopter-suite rerun"
         status: pass
     human_judgment: false
   - id: ADOPT-02
@@ -49,7 +49,7 @@ coverage:
     requirement: ADOPT-02
     verification:
       - kind: integration
-        ref: "cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test — 9 tests, 0 failures; subscription checkout and signed completion event cross the host boundary; modified webhook body is rejected before handler dispatch"
+        ref: "cd test_apps/phoenix_adopter && mix test — 3 Phase 76 core-flow tests, 0 failures; included in the fresh 9-test adopter-suite rerun"
         status: pass
     human_judgment: false
 duration: 1h
@@ -71,7 +71,8 @@ Added an isolated Phoenix host app that consumes the checked-out LatticeStripe S
 
 ## Verification Evidence
 
-- `cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test` — 9 tests, 0 failures (rerun during Phase 76 verification on 2026-09-24).
+- `cd test_apps/phoenix_adopter && mix deps.get && mix test` — 3 Phase 76 core-flow tests, 0 failures (at phase completion).
+- `cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test` — 9 adopter tests, 0 failures (rerun during verification on 2026-09-24; includes Phase 77 edge-profile tests).
 - `mix ci` — 2,462 tests, 0 failures, 1 skipped, 203 excluded; Credo and public API/version checks passed.
 - `mix format` was run against the adopter app's Mix, config, source, and test files. The app does not define a standalone `.formatter.exs`, so the explicit file patterns were supplied.
 
