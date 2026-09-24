@@ -1,17 +1,16 @@
 ---
-gsd_state_version: 1.0
-milestone: none
-milestone_name: Reader-First Quality Closure
-status: Awaiting next milestone
-stopped_at: v1.11 complete; clean reactive-maintenance handoff
-last_updated: "2026-08-25T21:10:50.290Z"
-last_activity: 2026-08-25
-last_activity_desc: Milestone v1.11 completed and archived
+gsd_state_version: "1.0"
+milestone: v1.12
+milestone_name: API Contract Freshness and Adopter Proof
+status: planning
+last_updated: "2026-09-24T00:28:28.550Z"
+last_activity: 2026-09-23
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 6
-  completed_plans: 6
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,14 +20,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-08-25 for v1.11)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Reactive maintenance on the published 2.2.2 line.
+**Current focus:** v1.12 API Contract Freshness and Adopter Proof on the published 2.2.2 line.
 
 ## Current Position
 
-Phase: Milestone v1.11 complete
+Phase: 74 (Versioned Stripe Drift Triage)
 Plan: —
-Status: Awaiting next milestone
-Last activity: 2026-08-25 — Milestone v1.11 completed and archived
+Status: Roadmap proposed; awaiting approval
+Last activity: 2026-09-23 — Milestone v1.12 started
 
 ## Milestone Metrics
 
@@ -47,6 +46,11 @@ Last activity: 2026-08-25 — Milestone v1.11 completed and archived
 - Internal decomposition remains private: `LatticeStripe.Client` stays the public façade.
 - CI and coverage are ratcheted only where their signal is truthful; no Dialyzer or vanity coverage target is introduced.
 - HexDocs and public API documentation are the adopter-facing interface; no standalone UI or marketing surface is in scope.
+- The quality goal is dependable, idiomatic Stripe coverage across adopter contexts, prioritized by common and costly jobs rather than endpoint count or activity.
+- Maintain near-, mid-, and long-term roadmap horizons and refresh them at every milestone close; keep candidates uncommitted until evidence and acceptance proof are clear.
+- A test-only Phoenix adopter is the preferred model for end-to-end consumer proof; use one shared core with a few distinct profiles, not one application per industry.
+- Property-based tests are selective and justified by invariant risk; they do not create a blanket coverage target.
+- New API-version defaults require an explicit compatibility review; the current pinned version remains unchanged until that review is complete.
 - DateTime conversion, deep `to_map`, a second account-header option, idempotency hooks, fake transports, registries, webhook-error unification, macro/DSL/code generation, and new Stripe resources remain deferred.
 
 ### Deferred / Accepted Debt
@@ -66,4 +70,6 @@ None.
 
 ## Operator Next Steps
 
-No proactive milestone is scheduled. If a confirmed defect, Stripe drift, security need, or demonstrated adopter request crosses the reopen threshold, reassess with `/gsd-new-milestone`.
+No milestone is active. Review `.planning/threads/v1-12-next-milestone-assessment.md` and the
+near-term candidate in `.planning/ROADMAP.md`; use `/gsd-new-milestone` only when its API
+triage, sample-adopter boundary, and compatibility acceptance criteria are ready to plan.
