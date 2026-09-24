@@ -1475,6 +1475,7 @@ LatticeStripe.Invoice field account_name
 LatticeStripe.Invoice field account_tax_ids
 LatticeStripe.Invoice field amount_due
 LatticeStripe.Invoice field amount_paid
+LatticeStripe.Invoice field amount_paid_off_stripe
 LatticeStripe.Invoice field amount_remaining
 LatticeStripe.Invoice field amount_shipping
 LatticeStripe.Invoice field application
