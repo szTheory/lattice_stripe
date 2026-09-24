@@ -1,10 +1,11 @@
 ---
 phase: 75-typed-contract-updates
-verified: 2026-09-24T12:50:06Z
+verified: 2026-09-24T12:53:06Z
 status: passed
 score: 4/4 roadmap truths verified
 covered_files:
   - .planning/REQUIREMENTS.md
+  - .planning/ROADMAP.md
   - .planning/phases/75-typed-contract-updates/75-01-PLAN.md
   - .planning/phases/75-typed-contract-updates/75-01-SUMMARY.md
   - .planning/phases/75-typed-contract-updates/75-02-PLAN.md
@@ -18,7 +19,7 @@ covered_files:
   - test/lattice_stripe/invoice_test.exs
   - test/lattice_stripe/refund_test.exs
   - test/lattice_stripe/typed_contract_docs_test.exs
-covered_digest: "v1:sha256:072bc3218ab0f6549817b943c0e0def4b3966f6f14915463c5e19399191b9543"
+covered_digest: "v1:sha256:bc3cd2cd1b328984ce74eadf27a587884a2ee8332cf903bd5e76a048fc604c5f"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -26,7 +27,7 @@ overrides_applied: 0
 # Phase 75: Typed Contract Updates Verification Report
 
 **Phase Goal:** Adopters can use the selected high-value fields as typed data without losing unknown-field access or changing existing public behavior.
-**Verified:** 2026-09-24T12:50:06Z
+**Verified:** 2026-09-24T12:53:06Z
 **Status:** passed
 **Re-verification:** No — the prior report had no `gaps:` section; this refresh adds evidence for the previously human-routed criterion.
 
@@ -103,7 +104,7 @@ No phase-declared or conventional `scripts/*/tests/probe-*.sh` probe was identif
 | DRIFT-03 | 75-01, 75-02 | Focused tests and compatibility checks preserve existing behavior. | ✓ SATISFIED | Focused tests cover existing values and edge forms; API snapshot checks passed as part of supplied CI evidence and summaries document additive-only review. |
 | DRIFT-04 | 75-01, 75-02 | API version and promoted-field contract are documented; default changes only when justified. | ✓ SATISFIED | The new named docs contract test asserts both minima, response scopes, webhook caveats, and unchanged default across public docs; the test passes. |
 
-No additional requirements mapped to Phase 75 were found beyond DRIFT-02, DRIFT-03, and DRIFT-04.
+No additional requirements mapped to Phase 75 were found beyond DRIFT-02, DRIFT-03, and DRIFT-04. All three are now checked Complete in `.planning/REQUIREMENTS.md`; the Phase 75 roadmap entry is marked completed.
 
 ## Anti-Patterns Found
 
@@ -121,5 +122,5 @@ All four roadmap truths and requirements DRIFT-02, DRIFT-03, and DRIFT-04 are ve
 
 ---
 
-_Verified: 2026-09-24T12:50:06Z_  
+_Verified: 2026-09-24T12:53:06Z_  
 _Verifier: the agent (gsd-verifier)_
