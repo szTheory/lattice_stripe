@@ -32,7 +32,7 @@ and prove the package from one test-only Phoenix application consuming it as a d
 
 ### Phases
 
-- [ ] **Phase 74: Versioned Stripe Drift Triage** — classify drift against stable, versioned Stripe sources and select fields or behaviors by adopter value.
+- [x] **Phase 74: Versioned Stripe Drift Triage** — classify drift against stable, versioned Stripe sources and select fields or behaviors by adopter value. (completed 2026-09-23)
 - [ ] **Phase 75: Typed Contract Updates** — implement and document selected typed fields with compatibility and decoding proof.
 - [ ] **Phase 76: Phoenix Adopter Core Flow** — validate dependency setup and a common Checkout/subscription/webhook flow.
 - [ ] **Phase 77: Adopter Edge Profiles and CI** — prove selected B2B, usage, and Connect contracts and run the complete adopter suite deterministically.
@@ -46,13 +46,16 @@ and prove the package from one test-only Phoenix application consuming it as a d
 **Depends on:** Nothing (first phase of v1.12).
 **Requirements:** DRIFT-01
 **Success Criteria** (what must be TRUE):
+
 1. Candidate changes in already-supported resources link to stable, versioned Stripe sources and are classified by API-version applicability.
 2. Selected and deferred candidates include an adopter job, semantic rationale, and type/decode implications.
 3. The default API-version decision is recorded against explicit compatibility evidence; the pin stays unchanged if a move is not justified.
-**Plans:** 1 plan
+
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 74-01-PLAN.md — evidence-first Stripe drift candidate triage and pin decision
+
+- [x] 74-01-PLAN.md — evidence-first Stripe drift candidate triage and pin decision
 
 #### Phase 75: Typed Contract Updates
 
@@ -60,10 +63,12 @@ Plans:
 **Depends on:** Phase 74
 **Requirements:** DRIFT-02, DRIFT-03, DRIFT-04
 **Success Criteria** (what must be TRUE):
+
 1. Selected fields decode from stable-version fixtures into documented typed values.
 2. Regression coverage proves unknown response fields remain available through `extra`.
 3. Compatibility checks show existing public behavior is preserved and intended additions are reviewed against package SemVer policy.
 4. Adopter documentation identifies the relevant Stripe API-version contract and selected fields.
+
 **Plans:** TBD
 
 #### Phase 76: Phoenix Adopter Core Flow
@@ -72,9 +77,11 @@ Plans:
 **Depends on:** Phase 75
 **Requirements:** ADOPT-01, ADOPT-02
 **Success Criteria** (what must be TRUE):
+
 1. A test-only Phoenix app imports the checked-out LatticeStripe package as a path dependency and starts with its documented host configuration and supervision.
 2. A synthetic Checkout or subscription flow exercises typed Stripe responses and webhook handling from the host app boundary.
 3. The core adopter flow runs without live Stripe credentials or production data.
+
 **Plans:** TBD
 
 #### Phase 77: Adopter Edge Profiles and CI
@@ -83,10 +90,12 @@ Plans:
 **Depends on:** Phase 76
 **Requirements:** ADOPT-03, ADOPT-04, ADOPT-05
 **Success Criteria** (what must be TRUE):
+
 1. Opt-in B2B invoicing, usage reconciliation, and Connect tenant-context profiles each assert the distinct SDK contract they exercise.
 2. Adopter tests cover relevant error, pagination or streaming, idempotency, and webhook-verification boundaries with deterministic synthetic inputs.
 3. CI runs the complete adopter suite deterministically without live credentials or adopter data.
 4. The app remains a contract test harness; business policy, compliance, and durable billing orchestration stay out of scope.
+
 **Plans:** TBD
 
 #### Phase 78: Release and Repository Closeout
@@ -95,17 +104,19 @@ Plans:
 **Depends on:** Phase 77
 **Requirements:** REL-01, REL-02, CLOSE-01, CLOSE-02, CLOSE-03
 **Success Criteria** (what must be TRUE):
+
 1. A new package version consistent with the delivered public API changes is published and verified on Hex, with matching GitHub release and HexDocs content.
 2. All required CI checks are green for the release commit on `main`.
 3. Every open pull request has a recorded triage disposition and any accepted changes have passed their required checks.
 4. The primary checkout and all linked Git worktrees have no uncommitted changes at milestone close.
+
 **Plans:** TBD
 
 ### Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 74. Versioned Stripe Drift Triage | 0/1 | Not started | - |
+| 74. Versioned Stripe Drift Triage | 1/1 | Complete    | 2026-09-23 |
 | 75. Typed Contract Updates | 0/TBD | Not started | - |
 | 76. Phoenix Adopter Core Flow | 0/TBD | Not started | - |
 | 77. Adopter Edge Profiles and CI | 0/TBD | Not started | - |
