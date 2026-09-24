@@ -11,7 +11,7 @@
 
 Refresh attempt on 2026-09-23: `mix lattice_stripe.check_drift` exited 1 before task execution. Mix 1.19.5 failed to start `Mix.PubSub.Subscriber` because opening the TCP socket in `Mix.Sync.PubSub.subscribe/1` returned `:eperm`. No current inventory was produced. Do not infer membership from the dated count or from a changelog resource-family mention. No complete-ledger or exhaustive-coverage claim is made.
 
-The candidate classifications below describe what the dated Stripe changelog says; inventory membership and GA-schema corroboration remain unconfirmed. No lead is selected.
+The candidate classifications below describe what the dated Stripe changelog says; inventory membership and GA-schema corroboration remain unconfirmed. No lead is selected. Status vocabulary: `current stable` means stable evidence applies at the package pin; `later stable` means stable evidence has a later minimum API version; `preview-only` means Stripe labels the change preview; `unconfirmed/schema noise` means stable/versioned or GA evidence is absent or the finding may be a schema-shape artifact. A successful runtime probe can corroborate behavior only after the stable-source and GA gates; it cannot establish GA status or replace versioned provenance. No runtime probe was used.
 
 ## Candidate ledger
 
@@ -29,7 +29,7 @@ Stripe's [OpenAPI repository](https://github.com/stripe/openapi) distinguishes `
 
 ## Ranking and compatibility decision
 
-There is no evidence-qualified selected set to rank. The leads above are retained because they concern reconciliation, refund attribution, dispute operations, invoice-update errors, and conditional B2B payment choice. This is a rationale for further review, not a score, quota, count-based ranking, or assertion that they are present in the drift inventory. No broader candidate ledger can be built from the available count-only source.
+There is no evidence-qualified selected set to rank. Once evidence gates pass, priority should follow the adopter job, operational consequence, and whether related fields form a coherent resource addition, with extra weight for money movement, tax, fulfillment, webhook interpretation, Connect context, and financial reconciliation. The leads above are retained for review because they touch reconciliation, refund attribution, dispute operations, invoice-update errors, and conditional B2B payment choice. This is not a score, quota, count-based or recency ranking, or assertion that they are present in the drift inventory. No broader candidate ledger can be built from the available count-only source.
 
 `LatticeStripe.api_version/0` remains pinned to `2026-03-25.dahlia` in `lib/lattice_stripe.ex`. The pin was confirmed locally; this phase does not change it. The cited later-stable changelogs establish that the five leads have later minimum versions. Stripe's versioned references recommend testing the integration and webhook version when upgrading; that is relevant upgrade guidance, not a compatibility review of this package.
 
