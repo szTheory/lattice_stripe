@@ -6,30 +6,43 @@
 
 ## User Constraints
 
-No phase `CONTEXT.md` exists. These scope and outcome constraints are copied from the roadmap and requirements:
+The following decisions and boundaries are copied verbatim from `76-CONTEXT.md`.
 
-### Locked Decisions
+### Implementation Decisions
 
-> “**Goal:** Maintainers can verify that a host Phoenix application configures and uses LatticeStripe as a dependency across a common SaaS flow.” [VERIFIED: `.planning/ROADMAP.md:83-87`]
->
-> “1. A test-only Phoenix app imports the checked-out LatticeStripe package as a path dependency and starts with its documented host configuration and supervision.  
-> 2. A synthetic Checkout or subscription flow exercises typed Stripe responses and webhook handling from the host app boundary.  
-> 3. The core adopter flow runs without live Stripe credentials or production data.” [VERIFIED: `.planning/ROADMAP.md:88-92`]
->
-> “**ADOPT-01**: Maintainers can run one test-only Phoenix application that imports the checked-out LatticeStripe package as a dependency and verifies host configuration and supervision.  
-> **ADOPT-02**: An adopter test can exercise a common Checkout or subscription flow through typed responses and webhook handling using synthetic data and no live Stripe credentials.” [VERIFIED: `.planning/REQUIREMENTS.md:16-20`]
+#### Host-app shape and dependency boundary
+
+- **D-01:** Use one small, standalone, test-only Phoenix Mix project at `test_apps/phoenix_adopter`, importing the checked-out LatticeStripe package with a relative path dependency. Keep Phoenix/Plug and their host configuration inside the adopter project; do not add Phoenix or Ecto to LatticeStripe's runtime dependencies. — **Reversibility:** costly — moving the proof later changes its dependency resolution, CI entry point, and maintainers' run instructions.
+- **D-02:** Prove normal Phoenix/OTP application boot and the documented Finch/configuration ownership. Let LatticeStripe's application start its existing default pool; do not create a duplicate host pool unless the test specifically demonstrates the documented explicit-pool option. No Ecto Repo is needed for this phase's criteria.
+
+#### Adopter JTBD and integrated flow
+
+- **D-03:** Model the adopter as an Elixir maintainer verifying setup and an application engineer implementing recurring signup: start the host app, request a subscription-mode Checkout Session, receive a typed SDK response, then accept a signed webhook at the host boundary. Keep the route/controller and handler intentionally thin; application entitlements and durable billing state remain app-owned and out of scope.
+- **D-04:** Exercise the host boundary, not only direct library functions: drive the Phoenix endpoint with test connections; stub only the outbound Stripe HTTP transport and assert the request contract and typed response. Do not make network calls to Stripe or bypass the SDK Client/Transport seam with mutable global client state.
+
+#### Webhook trust and deterministic fixtures
+
+- **D-05:** Mount the existing `LatticeStripe.Webhook.Plug` at the host endpoint before body parsing can consume or transform the raw bytes. Use a deterministic synthetic payload, a fixed test-only webhook secret, and the library's supported webhook test-signing helper. Assert signature verification and that the host handler receives the decoded typed event; do not imply this proves Stripe's live delivery or durable duplicate handling.
+- **D-06:** Keep all keys and payloads visibly synthetic and local to tests. No environment credential lookup, production adopter records, persistent database, external service, or live Stripe sandbox is part of the core proof.
+
+#### Proof ergonomics and user experience
+
+- **D-07:** Make one obvious command run the adopter test project, with a short README or adjacent instructions explaining its path dependency and synthetic-only boundary. Prefer conventional Phoenix routes, endpoint tests, ExUnit assertions, and explicit setup over custom generator/DSL abstractions. Reuse or cross-link existing Checkout and webhook guides only if the host proof reveals a concrete documentation gap.
+- **D-08:** Use a separate host lockfile and make the local invocation explicit (`cd test_apps/phoenix_adopter && mix test`). Wire it into root CI only in Phase 77, after the isolated app is deterministic. This keeps local proof easy to discover without pulling consumer-only dependencies into the package project.
+- **D-09:** This library has no visual UI or brand system. Apply UX quality to the maintainer journey instead: clear setup steps, actionable failure output, least-surprise Phoenix conventions, deterministic tests, and no exposure of backend implementation details beyond what is needed to run the proof.
 
 ### The Agent’s Discretion
 
-- Choose the smallest Phoenix host-app shape and test boundary that proves both requirements.
-- Choose fixture and transport-double patterns that remain deterministic and represent public adopter usage.
-- Choose whether persistence, database tooling, a listening HTTP server, or UI components add value to this proof.
+- Choose the smallest supported Phoenix version and exact fixture layout after checking the repository's Elixir/OTP support and dependency policy.
+- Choose an endpoint/controller organization that matches standard Phoenix conventions while keeping the flow minimal.
+- Use the existing MockTransport/Mox and webhook signing helpers where their contracts permit; add narrowly scoped fixture helpers only when they simplify the adopter test without hiding behavior.
+- Add no schema/database, extra profile, broad CI redesign, dependency generator, or user-facing product UI unless research finds a direct requirement-level reason and replanning is requested.
 
 ### Deferred Ideas (OUT OF SCOPE)
 
-- B2B invoicing, usage reconciliation, Connect tenant-context profiles, broader error/pagination/idempotency profiles, and CI integration are assigned to Phase 77, not this phase. [VERIFIED: `.planning/ROADMAP.md:96-110`; `.planning/REQUIREMENTS.md:20-22`]
-- Published Hex-install proof and release work are Phase 78. A path dependency does not prove the published tarball. [VERIFIED: `.planning/ROADMAP.md:112-128`]
-- Business billing policy, production data, live credentials, and a billing engine remain out of scope. [VERIFIED: `.planning/REQUIREMENTS.md:68-77`]
+- Phase 77: opt-in B2B invoicing, usage reconciliation, and Connect tenant-context profiles; expanded error/pagination/streaming/idempotency cases; and the full adopter CI gate.
+- A production example app, deployment setup, Ecto schema/Repo, durable entitlements, retry orchestration, duplicate-event storage, or industry billing policy is outside Phase 76.
+- No visual brand, design-system, or accessible browser UI work applies to this headless SDK proof.
 
 ## Phase Requirements
 
@@ -40,11 +53,11 @@ No phase `CONTEXT.md` exists. These scope and outcome constraints are copied fro
 
 ## Summary
 
-Build one standalone, test-only Phoenix host app in a clearly non-package directory (recommended: `test_apps/phoenix_adopter`). Make its `mix.exs` use a path dependency to the repository root, so Mix compiles the checked-out package as an adopter would consume it. Do not add Phoenix, Ecto, or adopter code to LatticeStripe’s runtime dependency surface. The package currently keeps its published file allow-list to `lib`, `priv/api`, project metadata, README, changelog, and license, which excludes a root-level `test_apps` harness. [VERIFIED: `mix.exs:192-224`]
+Build one standalone, test-only Phoenix host app at `test_apps/phoenix_adopter`, the chosen root-level test/adopter area. Make its `mix.exs` use the relative path dependency `../../` to the repository root, so Mix compiles the checked-out package as an adopter would consume it. Do not add Phoenix, Ecto, or adopter code to LatticeStripe’s runtime dependency surface. The package currently keeps its published file allow-list to `lib`, `priv/api`, project metadata, README, changelog, and license, so the harness remains unpublished. [VERIFIED: `mix.exs:192-224`; proposed directory/path are implementation choices]
 
-The most representative small flow is subscription-mode Checkout creation followed by a synthetic `checkout.session.completed` webhook. Use the host’s test transport double to return a Stripe-shaped JSON response and assert that the public SDK call yields `%LatticeStripe.Checkout.Session{}`. Then generate a signed payload with the existing public test helper and send it through Phoenix.ConnTest to the endpoint-mounted LatticeStripe webhook plug; assert the host handler receives a typed event and the endpoint acknowledges it. This crosses the dependency, client/decoder, endpoint, signature verification, parsing, handler, and supervision boundaries without a Stripe call or persistence layer. The repository already documents this API path and helper. [VERIFIED: `guides/checkout.md:88-111`; `guides/testing.md:29-57,331-378`]
+The most representative small flow is subscription-mode Checkout creation followed by a synthetic `checkout.session.completed` webhook. Use the host’s test transport double to return a Stripe-shaped JSON response and assert that the public SDK call yields `%LatticeStripe.Checkout.Session{}`. Then send a deterministic host-owned raw JSON fixture through Phoenix.ConnTest to the endpoint-mounted LatticeStripe webhook plug; create its valid signature with the package’s public `LatticeStripe.Webhook.generate_test_signature/3` helper and a current timestamp so default replay protection remains enabled. Assert the host handler receives a typed event and the endpoint acknowledges it. This crosses the dependency, client/decoder, endpoint, signature verification, parsing, handler, and supervision boundaries without a Stripe call or persistence layer. The repository already documents this API path and helper. [VERIFIED: `guides/checkout.md:88-111`; `guides/testing.md:29-57,331-378`; `lib/lattice_stripe/webhook.ex:571-584`]
 
-**Primary recommendation:** use Phoenix.ConnTest against an in-process, supervised Endpoint; use an explicit test-only LatticeStripe.Transport double and public signed-webhook helper; keep the host app stateless and omit Ecto/Repo, live server sockets, real Stripe credentials, browser UI, and business billing policy.
+**Primary recommendation:** use Phoenix.ConnTest against an in-process, supervised Endpoint; let the LatticeStripe application start its documented default Finch pool and assert that host startup owns it once; use an explicit host Mox transport double and a fixed raw event fixture signed by the public helper; keep the host app stateless and omit Ecto/Repo, live server sockets, real Stripe credentials, browser UI, and business billing policy.
 
 ## Architectural Responsibility Map
 
@@ -128,14 +141,15 @@ The transport mock isolates only outbound Stripe HTTP. Keep the endpoint and web
 ```text
 test_apps/
 └── phoenix_adopter/
-    ├── mix.exs             # independent host deps; path dep points to repository root
+    ├── README.md            # one run command and synthetic-only/path-dependency boundary
+    ├── mix.exs             # independent host deps; path dep ../../ points to repository root
     ├── mix.lock             # app-local lock for its Phoenix/test dependencies
     ├── config/              # test endpoint/application configuration only
     ├── lib/                  # minimal Application, Endpoint, Router, Checkout flow, handler
     └── test/                 # one end-to-end adopter test and local synthetic response data
 ```
 
-`test_apps/phoenix_adopter` is a recommendation, not an existing repository path. A root-level directory avoids letting the root Mix test discovery treat the nested host app’s `*_test.exs` files as ordinary package tests; confirm the chosen invocation explicitly runs the host project. Keep host fixtures minimal and local so they cannot accidentally depend on private package test support. The current Hex package allow-list excludes this harness from publication. [VERIFIED: `mix.exs:213-224`]
+`test_apps/phoenix_adopter` is the selected directory, consistent with D-01’s test-only adopter area and the root-level isolated Mix-project choice. From that directory, the path dependency to the checkout root is `../../`. A root-level directory also avoids letting the root Mix test discovery treat the nested host app’s `*_test.exs` files as ordinary package tests. Keep host fixtures minimal and local so they cannot depend on private package test support. The current Hex package allow-list excludes this harness from publication. [VERIFIED: `mix.exs:213-224`]
 
 ### Pattern 1: Path dependency as consumer proof
 
@@ -152,7 +166,7 @@ test_apps/
 
 ### Pattern 3: Host-owned outbound transport mock, real inbound webhook
 
-**What:** Mock only `LatticeStripe.Transport.request/1`; allow LatticeStripe to encode the request and decode the returned JSON. Use `LatticeStripe.Testing.generate_webhook_payload/3`, then pass the raw payload and signature header through the endpoint’s actual webhook plug.  
+**What:** Mock only `LatticeStripe.Transport.request/1`; allow LatticeStripe to encode the request and decode the returned JSON. Keep a stable raw synthetic event JSON fixture and sign its exact bytes using `LatticeStripe.Webhook.generate_test_signature/3`; pass that unchanged payload and signature header through the endpoint’s actual webhook plug.  
 **When to use:** Proving the two sides of the HTTP integration boundary while remaining offline.  
 **Tradeoff:** Tests contract plumbing and decoding, not Stripe account behavior, webhook delivery retries, or a payment lifecycle. [VERIFIED: `lib/lattice_stripe/transport.ex:21-50`; `lib/lattice_stripe/testing.ex:327-350`; `guides/testing.md:331-378`]
 
@@ -168,7 +182,7 @@ test_apps/
 
 | Problem | Don’t Build | Use Instead | Why |
 |---------|-------------|-------------|-----|
-| Stripe webhook signature generation | Custom HMAC implementation or fixed signature string | `LatticeStripe.Testing.generate_webhook_payload/3` | Exercises the package’s actual signature format and avoids crypto/header mistakes. [VERIFIED: `lib/lattice_stripe/testing.ex:327-350`] |
+| Stripe webhook signature generation | Custom HMAC implementation or fixed signature string | `LatticeStripe.Webhook.generate_test_signature/3` | Exercises the package’s actual signature format over a stable fixture; omit a fixed old timestamp so default replay protection remains active. [VERIFIED: `lib/lattice_stripe/webhook.ex:571-584`] |
 | Webhook request verification and event decode | Custom host Plug that duplicates SDK verification | `LatticeStripe.Webhook.Plug` and host handler behavior | Proves consumer configuration of the supported integration. [VERIFIED: `guides/webhooks.md:31-53,70-103`] |
 | Stripe HTTP response construction | Mock endpoint server plus mutable remote state | Host-side test transport expectation returning one response fixture | Preserves the real package request/decoder path while avoiding external infrastructure. [VERIFIED: `guides/testing.md:113-193`] |
 | Phoenix request harness | Raw Cowboy listener and handcrafted HTTP client | `Phoenix.ConnTest` | Direct endpoint dispatch keeps the proof fast and isolates TCP as an unneeded variable. [CITED: [Phoenix ConnTest](https://phoenix.hexdocs.pm/1.8.2/Phoenix.ConnTest.html)] |
@@ -226,18 +240,14 @@ assert %LatticeStripe.Checkout.Session{} = session
 
 # Then use the public helper and send the unchanged raw payload through Phoenix.ConnTest.
 {payload, signature} =
-  LatticeStripe.Testing.generate_webhook_payload(
-    "checkout.session.completed",
-    synthetic_session_event,
-    secret: test_webhook_secret,
-    id: test_event_id
-  )
+payload = File.read!(fixture_path)
+signature = LatticeStripe.Webhook.generate_test_signature(payload, test_webhook_secret)
 
 conn = post(conn, webhook_path, payload, [{"stripe-signature", signature}])
 assert conn.status == 200
 ```
 
-`mode: "subscription"`, `success_url`, and `line_items` are the documented create contract. [VERIFIED: `lib/lattice_stripe/checkout/session.ex:35-40,88-107`] The webhook helper accepts `secret` and optional `id`; its signature timestamp defaults to the current time while its event `created` value is also generated at runtime. Set a stable event ID if useful, but do not assert the generated timestamp or serialize the full event as a fixed snapshot. [VERIFIED: `lib/lattice_stripe/testing.ex:327-350`] The event name is documented as the post-Checkout subscription provision event. [VERIFIED: `guides/checkout.md:109-111`] The host variable names/route above are proposed placeholders `[ASSUMED]`; a handler returning `:ok` receives the documented 200 response. [VERIFIED: `lib/lattice_stripe/webhook/plug.ex:78-87`]
+`mode: "subscription"`, `success_url`, and `line_items` are the documented create contract. [VERIFIED: `lib/lattice_stripe/checkout/session.ex:35-40,88-107`] A stable host-owned raw fixture plus `LatticeStripe.Webhook.generate_test_signature/3` keeps event bytes repeatable and uses the package’s supported signer. The helper defaults signature time to the current time, so freshness protection remains enabled without fixing a stale timestamp. [VERIFIED: `lib/lattice_stripe/webhook.ex:571-584`] The event name is documented as the post-Checkout subscription provision event. [VERIFIED: `guides/checkout.md:109-111`] The host variable names/route above are proposed placeholders `[ASSUMED]`; a handler returning `:ok` receives the documented 200 response. [VERIFIED: `lib/lattice_stripe/webhook/plug.ex:78-87`]
 
 The outbound mock should assert a POST to the Checkout Sessions endpoint and return a minimal valid Checkout Session response JSON. Use `LatticeStripe.Transport`’s documented request/response map contract rather than bypassing the client decoder. [VERIFIED: `lib/lattice_stripe/transport.ex:21-50`]
 
@@ -259,7 +269,7 @@ The outbound mock should assert a POST to the Checkout Sessions endpoint and ret
 |----------|-------|
 | Framework | ExUnit; Phoenix.ConnTest for endpoint requests; Mox or a host-owned behavior implementation for outbound HTTP. |
 | Config file | New host app `mix.exs`, endpoint configuration, and test helper. |
-| Quick run command | `cd test_apps/phoenix_adopter && mix test` (proposed path; adjust if implementation selects another root-level test-app directory). |
+| Quick run command | `cd test_apps/phoenix_adopter && mix test` (selected path; explain in the host README). |
 | Full suite command | Same host project test command for Phase 76; root `mix ci` remains the SDK suite and Phase 77 decides CI aggregation. |
 
 ### Phase Requirements → Test Map
@@ -276,8 +286,8 @@ The outbound mock should assert a POST to the Checkout Sessions endpoint and ret
 
 ### Wave 0 Gaps
 
-- [ ] Create the independent Phoenix host project, config, application supervision, endpoint/router, test transport and webhook handler.
-- [ ] Create a small host-owned synthetic Checkout Session response and `checkout.session.completed` payload fixture.
+- [ ] Create the independent Phoenix host project, config, README/run command, application supervision, endpoint/router, test transport and webhook handler.
+- [ ] Create a small host-owned synthetic Checkout Session response and stable raw `checkout.session.completed` payload fixture; sign the unchanged fixture bytes per test with the package helper.
 - [ ] Add an app-local lockfile and direct test dependency entries for framework/test tooling.
 
 ## Security Domain
@@ -323,18 +333,18 @@ No `AGENTS.md` exists at the repository root. Existing project evidence to prese
 
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
-| A1 | The host app should live at `test_apps/phoenix_adopter` and its relative path dependency should target the repository root. | Structure / Stack | Mix root test discovery or task ergonomics may be different than anticipated; adjust path/command while retaining project separation. |
+| A1 | The host app should live at `test_apps/phoenix_adopter` and use `../../` as its path dependency to the repository root. | Structure / Stack | Mix root test discovery or task ergonomics may differ; keep the host project separate and preserve the chosen one-command entry point. |
 | A2 | Phoenix 1.8 is the best host baseline for this project’s current adopter proof. | Standard Stack | A newer or older supported Phoenix line may be the actual maintainer target; maintain a host lockfile and confirm against the repo’s intended compatibility policy. |
 | A3 | A Mox expectation can be consumed synchronously during ConnTest’s direct endpoint dispatch in this flow. | Pitfalls / Code Examples | If application code starts a process, add explicit Mox allowance/signaling or use a deterministic host transport fake. |
 | A4 | An event handler can expose receipt to the test without a database, e.g. by returning an observable response or synchronous test message. | Architecture | If handler contract requires durable work, add only a small test-owned sink, not an Ecto billing model. |
 | A5 | No `plug_cowboy` adapter is needed when the Endpoint is started with server disabled and only used by ConnTest. | Stack | If the chosen generated endpoint requires an adapter dependency to compile/start, include the host-only adapter but keep it from binding a port. |
 | A6 | Elixir 1.19.5 environment availability represents the local planning machine only. | Environment | Does not establish CI/consumer support; Phase 77/78 must verify target CI matrix. |
 
-## Open Questions
+## Planner Discretion
 
-1. **What command should developers use to run the host harness?** Recommended `cd` into the independent test app and run `mix test`; wire it into root CI only in Phase 77.
-2. **Should the synthetic fixture be a JSON file or an inline minimal map?** Prefer inline or a small host-owned fixture module unless the payload is long enough that a JSON fixture materially improves reviewability.
-3. **Should the host test assert its Endpoint process is alive explicitly?** Yes, if the standard test startup reliably starts the host application. Otherwise make a focused application-start assertion and keep the request test’s endpoint process lifecycle standard.
+- Keep synthetic wire fixtures inline or in a small host-owned fixture module; avoid private imports from the package's `test/support` tree.
+- Assert normal Phoenix application/Endpoint startup through the test lifecycle, and add a focused process assertion only where it materially proves ADOPT-01.
+- Do not add a root alias or CI gate in this phase; Phase 77 owns CI integration.
 
 ## Sources
 
