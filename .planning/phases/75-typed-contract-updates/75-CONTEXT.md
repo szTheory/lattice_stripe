@@ -39,6 +39,8 @@ Make evidence-qualified, high-value Stripe response fields on already-supported 
 **Downstream agents MUST read these before planning or implementing.**
 
 ### Phase scope and contract decisions
+- `CLAUDE.md` — current contributor guidance for library architecture, public API conventions, verification, and HexDocs UX.
+- `.agents/skills/lattice-verification-policy/SKILL.md` — project-specific rules for what automated checks may claim and which narrow cases require human judgment.
 - `.planning/ROADMAP.md` §"Phase 75: Typed Contract Updates" — goal, requirements, success criteria, and phase boundary.
 - `.planning/REQUIREMENTS.md` §"Stripe API Contract Freshness" — DRIFT-02 through DRIFT-04 requirements.
 - `.planning/PROJECT.md` §"Maintainer Intent" and §"Verification and Automation Default" — adopter-first scope, preservation goals, and proportionate automated proof.
