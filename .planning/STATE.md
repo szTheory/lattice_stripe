@@ -5,11 +5,11 @@ milestone_name: API Contract Freshness and Adopter Proof
 current_phase: 78
 current_phase_name: Release and Repository Closeout
 status: planning
-stopped_at: Phase 77 complete, ready to plan Phase 78
-last_updated: "2026-09-24T15:37:31.379Z"
+stopped_at: Phase 78 context gathered
+last_updated: "2026-09-24T20:55:26.016Z"
 last_activity: 2026-09-24
 last_activity_desc: Phase 77 complete, transitioned to Phase 78
-state_head: beafb961a33119fba6e83f4ab4fe3e9d1e32d87f
+state_head: 8527696886daaf660ed079c543d7dec913b80416
 progress:
   total_phases: 5
   completed_phases: 4
@@ -50,6 +50,7 @@ Last activity: 2026-09-24 — Phase 77 complete, transitioned to Phase 78
 - Code comments retain invariants and non-obvious tradeoffs, but decorative and planning-history-only noise is removed.
 - Internal decomposition remains private: `LatticeStripe.Client` stays the public façade.
 - CI and coverage are ratcheted only where their signal is truthful; no Dialyzer or vanity coverage target is introduced.
+- Verification is automation-first: use the narrowest credible unit, seam, integration, adopter, or smoke proof; put recurring high-value checks in existing CI lanes; do not ask for blanket UAT confirmation when all scoped deliverables already have passing automated evidence.
 - HexDocs and public API documentation are the adopter-facing interface; no standalone UI or marketing surface is in scope.
 - The quality goal is dependable, idiomatic Stripe coverage across adopter contexts, prioritized by common and costly jobs rather than endpoint count or activity.
 - Maintain near-, mid-, and long-term roadmap horizons and refresh them at every milestone close; keep candidates uncommitted until evidence and acceptance proof are clear.
@@ -70,9 +71,9 @@ None.
 
 ## Session Continuity
 
-**Last session:** 2026-09-24T14:37:39.745Z
-**Stopped at:** Phase 77 complete, ready to plan Phase 78
-**Resume file:** .planning/phases/77-adopter-edge-profiles-and-ci/77-CONTEXT.md
+**Last session:** 2026-09-24T20:55:25.904Z
+**Stopped at:** Phase 78 context gathered
+**Resume file:** .planning/phases/78-release-and-repository-closeout/78-CONTEXT.md
 
 ## Operator Next Steps
 
