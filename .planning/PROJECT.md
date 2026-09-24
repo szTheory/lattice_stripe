@@ -26,6 +26,11 @@ provides Stripe-shaped primitives and reliable HTTP behavior; applications retai
 industry policy, compliance obligations, billing orchestration, and durable workflow state.
 See `.planning/JTBD-MAP.md` for the maintained audience and scenario lens.
 
+Milestone closeout is complete after the scoped release is cut and verified, `main` CI is
+green, open pull requests are triaged with dispositions, and all Git worktrees are clean.
+Milestones that change adopter-facing package behavior include a new published package
+release.
+
 ## Latest Milestone: v1.11 Reader-First Quality Closure
 
 **Goal achieved:** Turn the already-complete SDK into a clean, trustworthy maintenance
@@ -60,6 +65,8 @@ dependency.
   tenant-context contracts in one test-only Phoenix adopter.
 - Preserve existing public behavior and unknown-field handling; change the default Stripe
   API version only if compatibility evidence supports the change.
+- Cut and verify a new package release, leave `main` CI green, triage open pull requests,
+  and finish with clean Git worktrees.
 
 **Scope boundary:** No blanket promotion of all 104 drift candidates, wrappers for all 94
 unmodeled object types, specialist resource-family expansion, live Stripe credentials, or
@@ -298,6 +305,8 @@ None scheduled. Stay in reactive maintenance and open a bounded milestone only f
   typed fields with compatibility proof, and document the supported contract.
 - [ ] **ADOPT-01..05**: Prove dependency configuration and common SaaS plus selected edge
   contracts from one test-only Phoenix adopter without live Stripe credentials.
+- [ ] **REL-01..02 / CLOSE-01..03**: Publish and verify the compatible package release; leave
+  `main` CI green, triage open pull requests, and clean all Git worktrees.
 
 ### Out of Scope
 

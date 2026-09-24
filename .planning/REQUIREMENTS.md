@@ -21,6 +21,14 @@
 - [ ] **ADOPT-04**: The adopter proof covers meaningful integration boundaries, including error handling, pagination or streaming, idempotency, and webhook verification, where relevant to the selected flows.
 - [ ] **ADOPT-05**: CI can run the adopter proof deterministically without live Stripe credentials or production adopter data.
 
+### Release and Milestone Closeout
+
+- [ ] **REL-01**: Maintainers can cut and verify a new package release whose SemVer and published API-version contract reflect the compatibility evidence from this milestone.
+- [ ] **REL-02**: Adopters can install the new release from Hex and access its matching GitHub release and HexDocs documentation.
+- [ ] **CLOSE-01**: Maintainers can confirm that all required CI checks are green on the release commit on `main`.
+- [ ] **CLOSE-02**: Every open pull request is reviewed and left with a recorded triage disposition before milestone close.
+- [ ] **CLOSE-03**: The primary checkout and all Git worktrees are clean when the milestone closes.
+
 ## Future Requirements
 
 - Property-based testing for pure invariants, only if this milestone's triage or adopter proof identifies a high-risk invariant better covered by generated cases.
@@ -50,12 +58,17 @@
 | ADOPT-03 | Phase 77 | Pending |
 | ADOPT-04 | Phase 77 | Pending |
 | ADOPT-05 | Phase 77 | Pending |
+| REL-01 | Phase 78 | Pending |
+| REL-02 | Phase 78 | Pending |
+| CLOSE-01 | Phase 78 | Pending |
+| CLOSE-02 | Phase 78 | Pending |
+| CLOSE-03 | Phase 78 | Pending |
 
 **Coverage:**
-- v1 requirements: 9 total
-- Mapped to phases: 9
+- v1 requirements: 14 total
+- Mapped to phases: 14
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-09-23*
-*Last updated: 2026-09-23 after v1.12 requirement definition*
+*Last updated: 2026-09-23 after v1.12 closeout scope was added*

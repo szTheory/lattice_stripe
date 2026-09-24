@@ -2,11 +2,16 @@
 gsd_state_version: "1.0"
 milestone: v1.12
 milestone_name: API Contract Freshness and Adopter Proof
+current_phase: 74
+current_phase_name: Versioned Stripe Drift Triage
 status: planning
-last_updated: "2026-09-24T00:28:28.550Z"
+stopped_at: v1.12 roadmap updated for release and repository closeout; awaiting final approval
+last_updated: "2026-09-24T00:39:31.804Z"
 last_activity: 2026-09-23
+last_activity_desc: v1.12 release-closeout scope added; revised roadmap awaiting approval
+state_head: 1194203787cab9f47c8e8061273f7ab0ac42e37a
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,7 +22,7 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-08-25 for v1.11)
+See: `.planning/PROJECT.md` (updated 2026-09-23 for v1.12)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
 **Current focus:** v1.12 API Contract Freshness and Adopter Proof on the published 2.2.2 line.
@@ -26,22 +31,22 @@ See: `.planning/PROJECT.md` (updated 2026-08-25 for v1.11)
 
 Phase: 74 (Versioned Stripe Drift Triage)
 Plan: —
-Status: Roadmap proposed; awaiting approval
-Last activity: 2026-09-23 — Milestone v1.12 started
+Status: Roadmap approved; ready to discuss Phase 74
+Last activity: 2026-09-23 — v1.12 roadmap approved with release closeout
 
 ## Milestone Metrics
 
-- Phases: 6 (68-73)
-- Plans: 6/6 complete
-- Requirements: 27/27 complete
+- Phases: 5 (74-78)
+- Plans: 0 planned so far
+- Requirements: 14 pending
 - Published package: 2.2.2
-- Public API contract: exact 3,463-entry snapshot frozen
+- Public API baseline: 3,463 entries at v1.11; additive v1.12 changes require compatibility and SemVer review
 
 ## Accumulated Context
 
 ### Decisions
 
-- This is a bounded quality milestone, not a resource-expansion milestone; the public API snapshot must remain exactly unchanged.
+- This is a bounded quality milestone, not a resource-expansion milestone; preserve existing public behavior and review additive API changes against SemVer.
 - Code comments retain invariants and non-obvious tradeoffs, but decorative and planning-history-only noise is removed.
 - Internal decomposition remains private: `LatticeStripe.Client` stays the public façade.
 - CI and coverage are ratcheted only where their signal is truthful; no Dialyzer or vanity coverage target is introduced.
@@ -51,6 +56,7 @@ Last activity: 2026-09-23 — Milestone v1.12 started
 - A test-only Phoenix adopter is the preferred model for end-to-end consumer proof; use one shared core with a few distinct profiles, not one application per industry.
 - Property-based tests are selective and justified by invariant risk; they do not create a blanket coverage target.
 - New API-version defaults require an explicit compatibility review; the current pinned version remains unchanged until that review is complete.
+- Every milestone closes with its scoped release verified, `main` CI green, open pull requests triaged, and all Git worktrees clean.
 - DateTime conversion, deep `to_map`, a second account-header option, idempotency hooks, fake transports, registries, webhook-error unification, macro/DSL/code generation, and new Stripe resources remain deferred.
 
 ### Deferred / Accepted Debt
@@ -64,12 +70,10 @@ None.
 
 ## Session Continuity
 
-**Last session:** 2026-08-25
-**Stopped at:** v1.11 complete; clean reactive-maintenance handoff
+**Last session:** 2026-09-23
+**Stopped at:** v1.12 roadmap approved; ready to discuss Phase 74
 **Resume file:** None
 
 ## Operator Next Steps
 
-No milestone is active. Review `.planning/threads/v1-12-next-milestone-assessment.md` and the
-near-term candidate in `.planning/ROADMAP.md`; use `/gsd-new-milestone` only when its API
-triage, sample-adopter boundary, and compatibility acceptance criteria are ready to plan.
+Milestone v1.12 is active. Begin with `$gsd-discuss-phase 74` or `$gsd-plan-phase 74`.
