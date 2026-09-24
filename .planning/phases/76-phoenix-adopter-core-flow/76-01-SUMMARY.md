@@ -40,16 +40,16 @@ coverage:
     description: "A Phoenix adopter uses the checked-out SDK through a separate path dependency and starts its Endpoint with the SDK's single Finch pool."
     requirement: ADOPT-01
     verification:
-      - kind: command
-        ref: "cd test_apps/phoenix_adopter && mix test — 3 tests, 0 failures; host boots with checked-out dependency"
+      - kind: integration
+        ref: "cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test — 9 tests, 0 failures; host boots with checked-out dependency"
         status: pass
     human_judgment: false
   - id: ADOPT-02
     description: "A synthetic subscription Checkout returns a typed Session and the Phoenix webhook Plug dispatches a valid signed Event while rejecting a modified body."
     requirement: ADOPT-02
     verification:
-      - kind: command
-        ref: "cd test_apps/phoenix_adopter && mix test — 3 tests, 0 failures; subscription checkout and signed completion event cross the host boundary; modified webhook body is rejected before handler dispatch"
+      - kind: integration
+        ref: "cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test — 9 tests, 0 failures; subscription checkout and signed completion event cross the host boundary; modified webhook body is rejected before handler dispatch"
         status: pass
     human_judgment: false
 duration: 1h
@@ -71,7 +71,7 @@ Added an isolated Phoenix host app that consumes the checked-out LatticeStripe S
 
 ## Verification Evidence
 
-- `cd test_apps/phoenix_adopter && mix deps.get && mix test` — 3 tests, 0 failures.
+- `cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test` — 9 tests, 0 failures (rerun during Phase 76 verification on 2026-09-24).
 - `mix ci` — 2,462 tests, 0 failures, 1 skipped, 203 excluded; Credo and public API/version checks passed.
 - `mix format` was run against the adopter app's Mix, config, source, and test files. The app does not define a standalone `.formatter.exs`, so the explicit file patterns were supplied.
 
