@@ -117,6 +117,13 @@ while IFS= read -r pr; do
   fi
   check_head="$(jq -r '.required_checks.head_sha // empty' <<<"$item")"
   [[ "$check_head" == "$head" ]] || block "PR #$number required_checks.head_sha is missing or stale"
+  actual_check_state="$(jq -r '
+    if any(.statusCheckRollup[]?; ((.status // "") | ascii_upcase) == "IN_PROGRESS" or ((.status // "") | ascii_upcase) == "QUEUED" or ((.state // "") | ascii_upcase) == "PENDING" or ((.state // "") | ascii_upcase) == "EXPECTED") then "pending"
+    elif any(.statusCheckRollup[]?; ((.conclusion // .state // "") | ascii_upcase) != "SUCCESS") then "failure"
+    else "success" end' <<<"$pr")"
+  [[ "$(jq -r '.required_checks.state // empty' <<<"$item")" == "$actual_check_state" ]] || block "PR #$number required_checks.state does not match the live check inventory ($actual_check_state)"
+  actual_ci_gate="$(jq -r '[.statusCheckRollup[]? | select(.name == "ci-gate") | (.conclusion // .state // "")] | last // "missing" | ascii_downcase' <<<"$pr")"
+  [[ "$(jq -r '.required_checks.ci_gate // empty' <<<"$item")" == "$actual_ci_gate" ]] || block "PR #$number recorded ci-gate does not match the live check inventory ($actual_ci_gate)"
   if [[ "$disposition" == merge ]]; then
     [[ "$(jq -r '.required_checks.state // empty' <<<"$item")" == success ]] || block "PR #$number merge disposition lacks successful required checks"
     [[ "$(jq -r '.required_checks.ci_gate // empty' <<<"$item")" == success ]] || block "PR #$number merge disposition lacks successful ci-gate"

@@ -30,7 +30,7 @@ jq -n '[]' >"$TMP/inventory.json"
 jq -n --arg date "2026-09-24T12:00:00Z" '{generated_at:$date,entries:[]}' >"$TMP/ledger.json"
 expect_pass "empty inventory"
 
-jq -n '[{number:7,url:"https://github.com/acme/project/pull/7",headRefOid:"abc123",statusCheckRollup:[{name:"ci-gate",conclusion:"SUCCESS"}]}]' >"$TMP/inventory.json"
+jq -n '[{number:7,url:"https://github.com/acme/project/pull/7",headRefOid:"abc123",statusCheckRollup:[{name:"ci-gate",conclusion:"FAILURE"},{name:"Quality",conclusion:"FAILURE"}]}]' >"$TMP/inventory.json"
 jq -n --arg date "2026-09-24T12:00:00Z" '{generated_at:$date,entries:[{pr_number:7,pr_url:"https://github.com/acme/project/pull/7",head_sha:"abc123",disposition:"defer",rationale:"Pending required checks.",next_action:"Re-run required checks and reassess.",next_action_date:"2026-09-25",required_checks:{head_sha:"abc123",state:"failure",ci_gate:"failure"},timeline:{url:"https://github.com/acme/project/pull/7#issuecomment-70",decision_text:"Disposition: defer"}}]}' >"$TMP/ledger.json"
 jq -n '[{html_url:"https://github.com/acme/project/pull/7#issuecomment-70",body:"Disposition: defer. Pending required checks."}]' >"$TMP/timelines/7.json"
 expect_pass "valid open deferral"
