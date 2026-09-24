@@ -72,8 +72,12 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 75-01-PLAN.md — typed Invoice off-Stripe amount through retrieval, decoder proof, and version guidance
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 75-02-PLAN.md — typed Refund attribution fields, compatibility lock, and complete gate
 
 #### Phase 76: Phoenix Adopter Core Flow
