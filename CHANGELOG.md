@@ -10,6 +10,14 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 > reliability, internal consistency, documentation truth, and release hygiene.
 > The project is now in reactive maintenance; new API breadth remains adopter-driven.
 
+## Unreleased
+
+### Features
+
+- Expose `Invoice.amount_paid_off_stripe` for API request responses using Stripe API version
+  `2026-05-27.dahlia` or later. The package default remains `2026-03-25.dahlia`; webhook event
+  payload availability is not implied.
+
 ## [2.2.2](https://github.com/szTheory/lattice_stripe/compare/v2.2.1...v2.2.2) (2026-08-25)
 
 

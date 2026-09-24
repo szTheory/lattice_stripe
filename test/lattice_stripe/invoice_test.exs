@@ -43,7 +43,7 @@ defmodule LatticeStripe.InvoiceTest do
           })
         )
 
-      assert Map.get(invoice, :amount_paid_off_stripe) == 700
+      assert invoice.amount_paid_off_stripe == 700
       assert invoice.amount_paid == 300
       assert invoice.extra["future_reconciliation_key"] == "retained"
     end
@@ -52,8 +52,8 @@ defmodule LatticeStripe.InvoiceTest do
       omitted = Invoice.from_map(invoice_json())
       explicit_null = Invoice.from_map(invoice_json(%{"amount_paid_off_stripe" => nil}))
 
-      assert Map.get(omitted, :amount_paid_off_stripe) == nil
-      assert Map.get(explicit_null, :amount_paid_off_stripe) == nil
+      assert omitted.amount_paid_off_stripe == nil
+      assert explicit_null.amount_paid_off_stripe == nil
     end
 
     test "atomizes status: draft" do
@@ -332,10 +332,9 @@ defmodule LatticeStripe.InvoiceTest do
         )
       end)
 
-      assert {:ok, %Invoice{amount_paid: 300} = invoice} =
+      assert {:ok, %Invoice{amount_paid: 300, amount_paid_off_stripe: 700} = invoice} =
                Invoice.retrieve(client, "in_test1234567890")
 
-      assert Map.get(invoice, :amount_paid_off_stripe) == 700
       assert invoice.extra["future_reconciliation_key"] == "retained"
     end
 

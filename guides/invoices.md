@@ -9,6 +9,26 @@ For the Stripe object reference, see the
 
 For tax on custom payment flows outside Invoice `automatic_tax`, see [Tax](tax.md).
 
+## Reconciling payments collected outside Stripe
+
+Use `Invoice.amount_paid_off_stripe` to reconcile the portion of an invoice paid
+outside Stripe. The value is an integer in the currency's smallest unit. Stripe
+returns it in API request responses beginning with `2026-05-27.dahlia`; opt into
+that version on the client because LatticeStripe's default remains
+`2026-03-25.dahlia`. This field's documented availability is limited to API
+request responses and does not imply support in webhook event payloads.
+
+```elixir
+client = LatticeStripe.Client.new!(
+  api_key: System.fetch_env!("STRIPE_SECRET_KEY"),
+  finch: MyApp.Finch,
+  api_version: "2026-05-27.dahlia"
+)
+
+{:ok, invoice} = LatticeStripe.Invoice.retrieve(client, "in_...")
+off_stripe_amount = invoice.amount_paid_off_stripe
+```
+
 ## The Invoice Workflow
 
 The canonical workflow for manually managed invoices follows four steps:
