@@ -86,6 +86,20 @@ output=$(run_check "$@")
 grep -Fq 'proposes 2.3.0' <<<"$output" || { printf 'FAIL: valid candidate rejected\n%s\n' "$output" >&2; exit 1; }
 printf 'PASS: accepted valid additive 2.3.0 candidate\n'
 
+workflow="$ROOT/.github/workflows/release-pr-automerge.yml"
+if grep -Fq -- '--admin' "$workflow"; then
+  printf 'FAIL: release auto-merge workflow contains an administrator bypass\n' >&2
+  exit 1
+fi
+# shellcheck disable=SC2016 # Literal workflow snippets, not shell expressions.
+grep -Fq -- '--match-head-commit "$HEAD_SHA"' "$workflow" || { printf 'FAIL: merge is not pinned to the verified PR head\n' >&2; exit 1; }
+# shellcheck disable=SC2016 # Literal workflow snippets, not shell expressions.
+grep -Fq 'current=$(gh pr view "$pr_number" --json state,headRefOid' "$workflow" || { printf 'FAIL: PR head is not rechecked before merge retries\n' >&2; exit 1; }
+# shellcheck disable=SC2016 # Literal workflow snippets, not shell expressions.
+grep -Fq 'conclusion=$(latest_ci_gate)' "$workflow" || { printf 'FAIL: ci-gate is not rechecked before merge retries\n' >&2; exit 1; }
+grep -Fq 'reviewThreads(first:100)' "$workflow" || { printf 'FAIL: protected merge diagnostics omit review conversations\n' >&2; exit 1; }
+printf 'PASS: protected merge workflow has exact-head and fail-closed safeguards\n'
+
 awk '$0 != "LatticeStripe.Invoice field amount_paid"' "$repo/priv/api/current.txt" > "$tmp/current.txt"
 mv "$tmp/current.txt" "$repo/priv/api/current.txt"
 expect_block 'Breaking API lock removals'
