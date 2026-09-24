@@ -108,8 +108,12 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
+**Wave 1**
 
 - [ ] 77-01-PLAN.md — versioned B2B Invoice profile and required adopter CI tracer
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 77-02-PLAN.md — usage summary stream and meter-event idempotency profile
 - [ ] 77-03-PLAN.md — request-scoped Connect Balance profile and complete suite gate
 
