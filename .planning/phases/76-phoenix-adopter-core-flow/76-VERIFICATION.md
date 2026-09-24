@@ -1,6 +1,6 @@
 ---
 phase: 76-phoenix-adopter-core-flow
-verified: 2026-09-24T14:30:22.707Z
+verified: 2026-09-24T20:42:41.149Z
 status: passed
 score: 6/6 must-haves verified
 covered_files:
@@ -20,7 +20,7 @@ covered_files:
   - test_apps/phoenix_adopter/mix.lock
   - test_apps/phoenix_adopter/test/core_flow_test.exs
   - test_apps/phoenix_adopter/test/test_helper.exs
-covered_digest: "v1:sha256:f86ad9f7e4d3d5158df5d68390149d442de98c087d8c2a76e22f71052993e985"
+covered_digest: "v1:sha256:ed07d3bd27cc324efd0bcba92a2450e3689223863bf282979a44fb26e7b978ea"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -28,9 +28,9 @@ overrides_applied: 0
 # Phase 76: Phoenix Adopter Core Flow Verification Report
 
 **Phase Goal:** Maintainers can verify that a host Phoenix application configures and uses LatticeStripe as a dependency across a common SaaS flow.
-**Verified:** 2026-09-24T14:30:22.707Z
+**Verified:** 2026-09-24T20:42:41.149Z
 **Status:** passed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — refreshed against the latest summary evidence and current adopter-suite run; Phase 76 implementation files are unchanged.
 
 ## Goal Achievement
 
@@ -87,9 +87,9 @@ The synthetic Mox response is the planned outbound boundary, not an omitted flow
 | Host boot, SDK path dependency, single Finch supervision, Endpoint dispatch | `HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test test/core_flow_test.exs:17` | 1 test, 0 failures | PASS |
 | Subscription request contract, typed Checkout Session, signed typed webhook | `HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test test/core_flow_test.exs:38` | 1 test, 0 failures | PASS |
 | Modified signed body rejection before handler | `HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test test/core_flow_test.exs:90` | 1 test, 0 failures | PASS |
-| Full nested adopter suite | `HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test` | 3 tests, 0 failures | PASS |
+| Full nested adopter suite | `cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice_stripe_phase76_hex mix test` | 9 tests, 0 failures; includes Phase 76 core flow and Phase 77 edge profiles | PASS |
 
-The isolated Hex cache override avoided writing to the user's global Hex cache. The three named tests and full-suite result were established against the unchanged implementation; this verification refresh rechecked the finalized planning contract and artifact set.
+The isolated Hex cache override avoided writing to the user's global Hex cache. The three Phase 76 core-flow tests remain covered by the full adopter suite; this refresh reran that suite after dependencies were fetched into the temporary Hex cache and reconciled the summary evidence.
 
 ## Probe Execution
 
@@ -102,7 +102,7 @@ No probe-based criteria or probe scripts are declared for this phase.
 | ADOPT-01 | 76-01 | Test-only Phoenix adopter uses checked-out package and verifies host configuration/supervision | SATISFIED | Named boot test plus isolated app config, path dependency and single Finch assertion. |
 | ADOPT-02 | 76-01 | Synthetic Checkout and webhook flow crosses host boundary with typed responses and no live credentials | SATISFIED | Named Checkout/webhook and tampering tests; all three nested tests pass. |
 
-`REQUIREMENTS.md` marks ADOPT-01 and ADOPT-02 Complete and maps both to Phase 76. `STATE.md` and `state.json` record Phase 76 complete and Phase 77 ready to plan; the roadmap records Phase 76 completed with one of one plans complete. The final plan explicitly lists both environment config files, and the summary names those same files without the earlier false-positive reference wording.
+`REQUIREMENTS.md` marks ADOPT-01 and ADOPT-02 Complete and maps both to Phase 76. `STATE.md` and `state.json` record Phase 78 planning after Phase 77 completion; the roadmap records Phase 76 completed with one of one plans complete. The final plan explicitly lists both environment config files, and the summary names those same files without the earlier false-positive reference wording.
 
 ## Anti-Patterns Found
 
@@ -120,5 +120,5 @@ No implementation gaps found. The required Phoenix host path dependency, supervi
 
 ---
 
-_Verified: 2026-09-24T14:30:22.707Z_
+_Verified: 2026-09-24T20:42:41.149Z_
 _Verifier: gsd-verifier_
