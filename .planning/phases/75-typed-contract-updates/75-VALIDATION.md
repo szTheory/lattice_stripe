@@ -1,8 +1,8 @@
 ---
 phase: "75"
 slug: "typed-contract-updates"
-status: planned
-nyquist_compliant: false
+status: validated
+nyquist_compliant: true
 wave_0_complete: true
 created: "2026-09-24"
 ---
@@ -55,6 +55,16 @@ No field-specific human check is planned. The public API lock diff requires comp
 - [x] All planned implementation tasks have executable verification.
 - [x] Wave 0 evidence gate is complete.
 - [x] Sampling continuity is established by 75-01 and 75-02.
-- [ ] `nyquist_compliant: true` set after eligible work has a real validation map.
+- [x] `nyquist_compliant: true` set after eligible work has a real validation map.
 
-**Approval:** evidence-qualified plan; execution checks pending
+**Approval:** automated evidence reviewed 2026-09-24; all requirements covered.
+
+## Validation Audit 2026-09-24
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+The two phase summaries record passing focused tests, API surface and version prose checks, documentation build, and the full `mix ci` gate. The six Phase 75 UAT entries map to these passing automated proofs. No new tests were required.
