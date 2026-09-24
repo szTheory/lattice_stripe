@@ -105,7 +105,13 @@ Plans:
 3. CI runs the complete adopter suite deterministically without live credentials or adopter data.
 4. The app remains a contract test harness; business policy, compliance, and durable billing orchestration stay out of scope.
 
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+
+- [ ] 77-01-PLAN.md — versioned B2B Invoice profile and required adopter CI tracer
+- [ ] 77-02-PLAN.md — usage summary stream and meter-event idempotency profile
+- [ ] 77-03-PLAN.md — request-scoped Connect Balance profile and complete suite gate
 
 #### Phase 78: Release and Repository Closeout
 
