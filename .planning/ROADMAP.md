@@ -49,7 +49,10 @@ and prove the package from one test-only Phoenix application consuming it as a d
 1. Candidate changes in already-supported resources link to stable, versioned Stripe sources and are classified by API-version applicability.
 2. Selected and deferred candidates include an adopter job, semantic rationale, and type/decode implications.
 3. The default API-version decision is recorded against explicit compatibility evidence; the pin stays unchanged if a move is not justified.
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 74-01-PLAN.md — evidence-first Stripe drift candidate triage and pin decision
 
 #### Phase 75: Typed Contract Updates
 
@@ -102,7 +105,7 @@ and prove the package from one test-only Phoenix application consuming it as a d
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 74. Versioned Stripe Drift Triage | 0/TBD | Not started | - |
+| 74. Versioned Stripe Drift Triage | 0/1 | Not started | - |
 | 75. Typed Contract Updates | 0/TBD | Not started | - |
 | 76. Phoenix Adopter Core Flow | 0/TBD | Not started | - |
 | 77. Adopter Edge Profiles and CI | 0/TBD | Not started | - |
