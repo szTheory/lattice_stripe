@@ -1,0 +1,49 @@
+{
+  "repository": "szTheory/lattice_stripe",
+  "generated_at": "2026-09-24T23:47:00Z",
+  "inventory_source": "gh pr list --repo szTheory/lattice_stripe --state open --limit 1000",
+  "status": "draft_pending_human_authorization",
+  "entries": [
+    {
+      "pr_number": 66,
+      "pr_url": "https://github.com/szTheory/lattice_stripe/pull/66",
+      "title": "chore(deps-dev): bump the dev-dependencies group across 1 directory with 3 updates",
+      "head_sha": "9b6d29dcf565cf03a529f8086eb3c3d93d985b27",
+      "disposition": "defer",
+      "proposal_only": true,
+      "rationale": "Exact-head checks on 2026-09-24 show Quality and ci-gate failed, so the PR is currently blocked from protected merge. The update is limited to development dependencies, but its failing quality gate must be understood before acceptance.",
+      "next_action": "Inspect the Quality failure, resolve it or update the branch as appropriate, then rerun required checks and reassess the PR at its current head.",
+      "next_action_date": "2026-09-25",
+      "required_checks": {
+        "head_sha": "9b6d29dcf565cf03a529f8086eb3c3d93d985b27",
+        "state": "failure",
+        "ci_gate": "failure",
+        "failed": [
+          {
+            "name": "Quality",
+            "url": "https://github.com/szTheory/lattice_stripe/actions/runs/35565687653/job/106226925672"
+          },
+          {
+            "name": "ci-gate",
+            "url": "https://github.com/szTheory/lattice_stripe/actions/runs/35565687653/job/106227184251"
+          }
+        ],
+        "successful_count": 16,
+        "failed_count": 2
+      },
+      "review_state": "no maintainer reviews found",
+      "existing_timeline_activity": [
+        {
+          "url": "https://github.com/szTheory/lattice_stripe/pull/66#issuecomment-5755941417",
+          "author": "dependabot[bot]",
+          "note": "Automated comment reports an invalid dependencies label; it does not record a maintainer disposition."
+        }
+      ],
+      "timeline": {
+        "url": null,
+        "decision_text": null,
+        "status": "pending_human_authorization"
+      }
+    }
+  ]
+}
