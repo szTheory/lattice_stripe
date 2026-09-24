@@ -5,10 +5,10 @@ milestone_name: API Contract Freshness and Adopter Proof
 current_phase: 74
 current_phase_name: Versioned Stripe Drift Triage
 status: planning
-stopped_at: v1.12 roadmap updated for release and repository closeout; awaiting final approval
+stopped_at: v1.12 roadmap approved; ready to discuss Phase 74
 last_updated: "2026-09-24T00:39:31.804Z"
 last_activity: 2026-09-23
-last_activity_desc: v1.12 release-closeout scope added; revised roadmap awaiting approval
+last_activity_desc: v1.12 roadmap approved with release closeout
 state_head: 1194203787cab9f47c8e8061273f7ab0ac42e37a
 progress:
   total_phases: 5
