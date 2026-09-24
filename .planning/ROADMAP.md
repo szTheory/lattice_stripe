@@ -69,7 +69,12 @@ Plans:
 3. Compatibility checks show existing public behavior is preserved and intended additions are reviewed against package SemVer policy.
 4. Adopter documentation identifies the relevant Stripe API-version contract and selected fields.
 
-**Plans:** TBD
+**Plans:** 2 plans
+
+Plans:
+
+- [ ] 75-01-PLAN.md — typed Invoice off-Stripe amount through retrieval, decoder proof, and version guidance
+- [ ] 75-02-PLAN.md — typed Refund attribution fields, compatibility lock, and complete gate
 
 #### Phase 76: Phoenix Adopter Core Flow
 
@@ -117,7 +122,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 74. Versioned Stripe Drift Triage | 1/1 | Complete    | 2026-09-23 |
-| 75. Typed Contract Updates | 0/TBD | Not started | - |
+| 75. Typed Contract Updates | 0/2 | Planned | - |
 | 76. Phoenix Adopter Core Flow | 0/TBD | Not started | - |
 | 77. Adopter Edge Profiles and CI | 0/TBD | Not started | - |
 | 78. Release and Repository Closeout | 0/TBD | Not started | - |
