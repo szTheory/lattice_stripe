@@ -74,7 +74,7 @@ run_check() {
 }
 expect_block() {
   local expected=$1 output status=0
-  output=$(run_check 2>&1) || status=$?
+  output=$(run_check "$@" 2>&1) || status=$?
   if [ "$status" -eq 0 ] || ! grep -Fq "$expected" <<<"$output"; then
     printf 'FAIL: expected blocker containing %s (status=%s)\n%s\n' "$expected" "$status" "$output" >&2
     exit 1
@@ -82,7 +82,7 @@ expect_block() {
   printf 'PASS: rejected fixture: %s\n' "$expected"
 }
 
-output=$(run_check)
+output=$(run_check "$@")
 grep -Fq 'proposes 2.3.0' <<<"$output" || { printf 'FAIL: valid candidate rejected\n%s\n' "$output" >&2; exit 1; }
 printf 'PASS: accepted valid additive 2.3.0 candidate\n'
 
