@@ -17,9 +17,9 @@
 
 - [x] **ADOPT-01**: Maintainers can run one test-only Phoenix application that imports the checked-out LatticeStripe package as a dependency and verifies host configuration and supervision.
 - [x] **ADOPT-02**: An adopter test can exercise a common Checkout or subscription flow through typed responses and webhook handling using synthetic data and no live Stripe credentials.
-- [ ] **ADOPT-03**: The adopter can opt into B2B invoicing, usage reconciliation, and Connect tenant-context profiles that exercise distinct SDK contracts without implementing application billing policy.
-- [ ] **ADOPT-04**: The adopter proof covers meaningful integration boundaries, including error handling, pagination or streaming, idempotency, and webhook verification, where relevant to the selected flows.
-- [ ] **ADOPT-05**: CI can run the adopter proof deterministically without live Stripe credentials or production adopter data.
+- [x] **ADOPT-03**: The adopter can opt into B2B invoicing, usage reconciliation, and Connect tenant-context profiles that exercise distinct SDK contracts without implementing application billing policy.
+- [x] **ADOPT-04**: The adopter proof covers meaningful integration boundaries, including error handling, pagination or streaming, idempotency, and webhook verification, where relevant to the selected flows.
+- [x] **ADOPT-05**: CI can run the adopter proof deterministically without live Stripe credentials or production adopter data.
 
 ### Release and Milestone Closeout
 
@@ -55,9 +55,9 @@
 | DRIFT-04 | Phase 75 | Complete |
 | ADOPT-01 | Phase 76 | Complete |
 | ADOPT-02 | Phase 76 | Complete |
-| ADOPT-03 | Phase 77 | Pending |
-| ADOPT-04 | Phase 77 | Pending |
-| ADOPT-05 | Phase 77 | Pending |
+| ADOPT-03 | Phase 77 | Complete |
+| ADOPT-04 | Phase 77 | Complete |
+| ADOPT-05 | Phase 77 | Complete |
 | REL-01 | Phase 78 | Pending |
 | REL-02 | Phase 78 | Pending |
 | CLOSE-01 | Phase 78 | Pending |

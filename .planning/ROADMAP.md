@@ -35,7 +35,7 @@ and prove the package from one test-only Phoenix application consuming it as a d
 - [x] **Phase 74: Versioned Stripe Drift Triage** — classify drift against stable, versioned Stripe sources and select fields or behaviors by adopter value. (completed 2026-09-23)
 - [x] **Phase 75: Typed Contract Updates** — implement and document selected typed fields with compatibility and decoding proof. (completed 2026-09-24)
 - [x] **Phase 76: Phoenix Adopter Core Flow** — validate dependency setup and a common Checkout/subscription/webhook flow.
-- [ ] **Phase 77: Adopter Edge Profiles and CI** — prove selected B2B, usage, and Connect contracts and run the complete adopter suite deterministically.
+- [x] **Phase 77: Adopter Edge Profiles and CI** — prove selected B2B, usage, and Connect contracts and run the complete adopter suite deterministically. (completed 2026-09-24)
 - [ ] **Phase 78: Release and Repository Closeout** — publish and verify the package release, green `main` CI, triaged pull requests, and clean Git worktrees.
 
 ### Phase Details
@@ -105,17 +105,17 @@ Plans:
 3. CI runs the complete adopter suite deterministically without live credentials or adopter data.
 4. The app remains a contract test harness; business policy, compliance, and durable billing orchestration stay out of scope.
 
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 
 Plans:
 **Wave 1**
 
-- [ ] 77-01-PLAN.md — versioned B2B Invoice profile and required adopter CI tracer
+- [x] 77-01-PLAN.md — versioned B2B Invoice profile and required adopter CI tracer
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 77-02-PLAN.md — usage summary stream and meter-event idempotency profile
-- [ ] 77-03-PLAN.md — request-scoped Connect Balance profile and complete suite gate
+- [x] 77-02-PLAN.md — usage summary stream and meter-event idempotency profile
+- [x] 77-03-PLAN.md — request-scoped Connect Balance profile and complete suite gate
 
 #### Phase 78: Release and Repository Closeout
 
@@ -138,7 +138,7 @@ Plans:
 | 74. Versioned Stripe Drift Triage | 1/1 | Complete    | 2026-09-23 |
 | 75. Typed Contract Updates | 2/2 | Complete    | 2026-09-24 |
 | 76. Phoenix Adopter Core Flow | 1/1 | Complete    | 2026-09-24 |
-| 77. Adopter Edge Profiles and CI | 0/TBD | Not started | - |
+| 77. Adopter Edge Profiles and CI | 3/3 | Complete    | 2026-09-24 |
 | 78. Release and Repository Closeout | 0/TBD | Not started | - |
 
 ## Planning Horizons (living, not active commitments)
