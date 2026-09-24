@@ -76,8 +76,10 @@ coverage:
       - kind: other
         ref: mix docs --warnings-as-errors (completed without warnings)
         status: pass
-    human_judgment: true
-    rationale: Automated checks validate version prose and successful rendering, but no executable check asserts the endpoint-scope and event-availability wording across both documentation surfaces.
+      - kind: unit
+        ref: test/lattice_stripe/typed_contract_docs_test.exs#Invoice and Refund docs state their version and response-scope contracts
+        status: pass
+    human_judgment: false
 duration: 10min
 completed: 2026-09-24
 status: complete
@@ -140,7 +142,8 @@ None - plan executed as written.
 - `mix lattice_stripe.api_surface --check` — passed, 3,467 entries. Diff review against the pre-Phase 75 baseline found only the prior Invoice field and three Refund field additions.
 - `mix lattice_stripe.version_prose --check` — passed, version prose matches package version 2.2.2.
 - `mix docs --warnings-as-errors` — passed, generated without warnings.
-- `mix ci` — passed: Credo reported no issues; 2,461 tests, 0 failures, 1 skipped; public API lock, version prose, and docs checks passed. The compiler emitted existing deprecation warnings in Billing Meter and Account Capability tests.
+- `mix test test/lattice_stripe/typed_contract_docs_test.exs` — passed, 1 test, 0 failures; asserts the selected minimum versions, response scopes, webhook caveats, and unchanged package default across public prose.
+- `mix ci` — passed after the documentation contract test was added: Credo reported no issues; 2,462 tests, 0 failures, 1 skipped; public API lock, version prose, and docs checks passed. The compiler emitted existing deprecation warnings in Billing Meter and Account Capability tests.
 - `LatticeStripe.api_version/0` remains `2026-03-25.dahlia`.
 
 ## User Setup Required

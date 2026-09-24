@@ -9,9 +9,9 @@
 ### Stripe API Contract Freshness
 
 - [x] **DRIFT-01**: Maintainers can trace candidate changes in already-supported Stripe resources to stable, versioned Stripe API sources and distinguish applicable changes from preview or OpenAPI-shape noise.
-- [ ] **DRIFT-02**: Adopters can access selected high-value, stable Stripe fields through typed resource fields while unmodeled response fields remain available through the existing `extra` behavior.
-- [ ] **DRIFT-03**: Maintainers can verify promoted field decoding and compatibility through focused tests without removing or changing existing public behavior.
-- [ ] **DRIFT-04**: Adopters can find the supported API-version and promoted-field contract documented; the default API version changes only when compatibility evidence justifies it.
+- [x] **DRIFT-02**: Adopters can access selected high-value, stable Stripe fields through typed resource fields while unmodeled response fields remain available through the existing `extra` behavior.
+- [x] **DRIFT-03**: Maintainers can verify promoted field decoding and compatibility through focused tests without removing or changing existing public behavior.
+- [x] **DRIFT-04**: Adopters can find the supported API-version and promoted-field contract documented; the default API version changes only when compatibility evidence justifies it.
 
 ### Phoenix Adopter Proof
 
@@ -50,9 +50,9 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DRIFT-01 | Phase 74 | Complete |
-| DRIFT-02 | Phase 75 | Pending |
-| DRIFT-03 | Phase 75 | Pending |
-| DRIFT-04 | Phase 75 | Pending |
+| DRIFT-02 | Phase 75 | Complete |
+| DRIFT-03 | Phase 75 | Complete |
+| DRIFT-04 | Phase 75 | Complete |
 | ADOPT-01 | Phase 76 | Pending |
 | ADOPT-02 | Phase 76 | Pending |
 | ADOPT-03 | Phase 77 | Pending |

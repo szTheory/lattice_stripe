@@ -33,7 +33,7 @@ and prove the package from one test-only Phoenix application consuming it as a d
 ### Phases
 
 - [x] **Phase 74: Versioned Stripe Drift Triage** — classify drift against stable, versioned Stripe sources and select fields or behaviors by adopter value. (completed 2026-09-23)
-- [ ] **Phase 75: Typed Contract Updates** — implement and document selected typed fields with compatibility and decoding proof.
+- [x] **Phase 75: Typed Contract Updates** — implement and document selected typed fields with compatibility and decoding proof. (completed 2026-09-24)
 - [ ] **Phase 76: Phoenix Adopter Core Flow** — validate dependency setup and a common Checkout/subscription/webhook flow.
 - [ ] **Phase 77: Adopter Edge Profiles and CI** — prove selected B2B, usage, and Connect contracts and run the complete adopter suite deterministically.
 - [ ] **Phase 78: Release and Repository Closeout** — publish and verify the package release, green `main` CI, triaged pull requests, and clean Git worktrees.
@@ -69,7 +69,7 @@ Plans:
 3. Compatibility checks show existing public behavior is preserved and intended additions are reviewed against package SemVer policy.
 4. Adopter documentation identifies the relevant Stripe API-version contract and selected fields.
 
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 **Wave 1**
@@ -78,7 +78,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 75-02-PLAN.md — typed Refund attribution fields, compatibility lock, and complete gate
+- [x] 75-02-PLAN.md — typed Refund attribution fields, compatibility lock, and complete gate
 
 #### Phase 76: Phoenix Adopter Core Flow
 
@@ -126,7 +126,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 74. Versioned Stripe Drift Triage | 1/1 | Complete    | 2026-09-23 |
-| 75. Typed Contract Updates | 1/2 | In Progress|  |
+| 75. Typed Contract Updates | 2/2 | Complete    | 2026-09-24 |
 | 76. Phoenix Adopter Core Flow | 0/TBD | Not started | - |
 | 77. Adopter Edge Profiles and CI | 0/TBD | Not started | - |
 | 78. Release and Repository Closeout | 0/TBD | Not started | - |

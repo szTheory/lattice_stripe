@@ -67,8 +67,10 @@ coverage:
       - kind: other
         ref: mix docs --warnings-as-errors (completed without warnings)
         status: pass
-    human_judgment: true
-    rationale: The checks prove the docs render and version prose matches the package, but no executable check asserts the exact minimum-version and response-scope statements across these three prose surfaces.
+      - kind: unit
+        ref: test/lattice_stripe/typed_contract_docs_test.exs#Invoice and Refund docs state their version and response-scope contracts
+        status: pass
+    human_judgment: false
 duration: 9min
 completed: 2026-09-24
 status: complete
@@ -132,6 +134,7 @@ None - plan executed exactly as written.
 - `mix lattice_stripe.api_surface --check` — passed, 3464 entries.
 - `mix lattice_stripe.version_prose --check` — passed, version prose matches `mix.exs` 2.2.2.
 - `mix docs --warnings-as-errors` — passed; documentation generated without warnings.
+- `mix test test/lattice_stripe/typed_contract_docs_test.exs` — passed; the test asserts the Invoice minimum API version, API-response scope, webhook caveat, and unchanged package default alongside the Refund prose contract.
 - Reviewed `priv/api/current.txt` diff — one added `LatticeStripe.Invoice field amount_paid_off_stripe` line, no removals or changed entries.
 - Confirmed `lib/lattice_stripe.ex` retains `@stripe_api_version "2026-03-25.dahlia"`.
 
