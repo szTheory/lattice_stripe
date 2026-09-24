@@ -90,6 +90,7 @@ defmodule PhoenixAdopter.UsageReconciliationProfileTest do
       assert request.body =~ "identifier=invoice_line_123%3Ausage_456"
       assert request.body =~ "payload[stripe_customer_id]=cus_test_adopter_usage_123"
       assert request.body =~ "payload[value]=3.25"
+      refute request.body =~ "usage-submit-attempt-789"
       assert {"idempotency-key", "usage-submit-attempt-789"} in request.headers
 
       {:ok,
@@ -107,7 +108,14 @@ defmodule PhoenixAdopter.UsageReconciliationProfileTest do
        }}
     end)
 
-    assert {:ok, %MeterEvent{identifier: "invoice_line_123:usage_456"}} =
+    assert {:ok,
+            %MeterEvent{
+              event_name: "api_call",
+              identifier: "invoice_line_123:usage_456",
+              payload: %{"stripe_customer_id" => @customer_id, "value" => "3.25"},
+              created: 1_753_574_400,
+              livemode: false
+            }} =
              MeterEvent.create(
                client(),
                %{
