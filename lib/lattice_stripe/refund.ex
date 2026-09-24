@@ -12,6 +12,12 @@ defmodule LatticeStripe.Refund do
   - Refunds cannot be deleted. Use `cancel/4` to cancel a pending refund.
   - Updates are limited to the `metadata` field only (Stripe API constraint).
 
+  - Refund responses expose `customer`, `customer_account`, and `payment_method`
+    from Stripe API version `2026-07-29.dahlia`. These fields help attribute a
+    refund to its customer/account and payment method. The package default remains
+    `2026-03-25.dahlia`; set a later client API version to receive them. Availability
+    in webhook event payloads has not been established.
+
   ## Usage
 
       client = LatticeStripe.Client.new!(api_key: "sk_live_...", finch: MyApp.Finch)
@@ -66,9 +72,10 @@ defmodule LatticeStripe.Refund do
   # Used to build the struct and separate known from extra (unknown) fields.
   # String sigil (no `a`) matches Jason's default string-key output.
   @known_fields ~w[
-    id object amount balance_transaction charge created currency destination_details
+    id object amount balance_transaction charge created currency customer customer_account
+    destination_details
     failure_balance_transaction failure_reason instructions_email metadata
-    next_action payment_intent reason receipt_number source_transfer_reversal
+    next_action payment_intent payment_method reason receipt_number source_transfer_reversal
     status transfer_reversal
   ]
 
@@ -79,6 +86,8 @@ defmodule LatticeStripe.Refund do
     :charge,
     :created,
     :currency,
+    :customer,
+    :customer_account,
     :destination_details,
     :failure_balance_transaction,
     :failure_reason,
@@ -86,6 +95,7 @@ defmodule LatticeStripe.Refund do
     :metadata,
     :next_action,
     :payment_intent,
+    :payment_method,
     :reason,
     :receipt_number,
     :source_transfer_reversal,
@@ -99,6 +109,11 @@ defmodule LatticeStripe.Refund do
   A Stripe Refund object.
 
   See the [Stripe Refund API](https://docs.stripe.com/api/refunds/object) for field definitions.
+
+  `customer`, `customer_account`, and `payment_method` are available on Refund API endpoint
+  responses from Stripe API version `2026-07-29.dahlia`. The package default is still
+  `2026-03-25.dahlia`, so configure a later API version to receive these fields. Webhook event
+  availability has not been established.
   """
   @type t :: %__MODULE__{
           id: String.t() | nil,
@@ -108,6 +123,8 @@ defmodule LatticeStripe.Refund do
           charge: LatticeStripe.Charge.t() | String.t() | nil,
           created: integer() | nil,
           currency: String.t() | nil,
+          customer: LatticeStripe.Customer.t() | map() | String.t() | nil,
+          customer_account: String.t() | nil,
           destination_details: map() | nil,
           failure_balance_transaction: String.t() | nil,
           failure_reason: String.t() | nil,
@@ -115,6 +132,7 @@ defmodule LatticeStripe.Refund do
           metadata: map() | nil,
           next_action: map() | nil,
           payment_intent: LatticeStripe.PaymentIntent.t() | String.t() | nil,
+          payment_method: LatticeStripe.PaymentMethod.t() | String.t() | nil,
           reason: String.t() | nil,
           receipt_number: String.t() | nil,
           source_transfer_reversal: String.t() | nil,
@@ -371,6 +389,8 @@ defmodule LatticeStripe.Refund do
       charge: ObjectTypes.maybe_deserialize(known["charge"]),
       created: known["created"],
       currency: known["currency"],
+      customer: ObjectTypes.maybe_deserialize(known["customer"]),
+      customer_account: known["customer_account"],
       destination_details: known["destination_details"],
       failure_balance_transaction: known["failure_balance_transaction"],
       failure_reason: known["failure_reason"],
@@ -378,6 +398,7 @@ defmodule LatticeStripe.Refund do
       metadata: known["metadata"],
       next_action: known["next_action"],
       payment_intent: ObjectTypes.maybe_deserialize(known["payment_intent"]),
+      payment_method: ObjectTypes.maybe_deserialize(known["payment_method"]),
       reason: known["reason"],
       receipt_number: known["receipt_number"],
       source_transfer_reversal: known["source_transfer_reversal"],

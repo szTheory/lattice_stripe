@@ -86,6 +86,41 @@ defmodule LatticeStripe.RefundTest do
                Refund.retrieve(client, "re_test1234567890abc")
     end
 
+    test "retrieves schema-derived attribution fields at their minimum API version" do
+      # Schema-derived, not a live Stripe capture. Stripe OpenAPI GA commit
+      # c8faccbde66b784ea916d3c28f5790d7a9c9aee2, 2026-07-29.dahlia:
+      # /components/schemas/refund/properties/{customer,customer_account,payment_method}
+      client = test_client(api_version: "2026-07-29.dahlia")
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        stripe_version =
+          Enum.find_value(req.headers, fn {key, value} ->
+            if key == "stripe-version", do: value
+          end)
+
+        assert req.method == :get
+        assert stripe_version == "2026-07-29.dahlia"
+
+        ok_response(
+          refund_json(%{
+            "customer" => "cus_refund_123",
+            "customer_account" => "acct_customer_123",
+            "payment_method" => "pm_refund_123",
+            "future_refund_key" => "retained"
+          })
+        )
+      end)
+
+      assert {:ok, refund} = Refund.retrieve(client, "re_test1234567890abc")
+      assert Map.get(refund, :customer) == "cus_refund_123"
+      assert Map.get(refund, :customer_account) == "acct_customer_123"
+      assert Map.get(refund, :payment_method) == "pm_refund_123"
+      assert refund.extra["future_refund_key"] == "retained"
+      assert refund.charge == "ch_test1234567890abc"
+      assert refund.payment_intent == "pi_test1234567890abc"
+      assert refund.status == :succeeded
+    end
+
     test "returns {:error, %Error{}} when not found" do
       client = test_client()
 
@@ -417,6 +452,62 @@ defmodule LatticeStripe.RefundTest do
       refund = Refund.from_map(refund_json(%{"charge" => nil}))
       assert refund.charge == nil
     end
+
+    test "attribution fields are nil when omitted or explicitly null" do
+      # Schema-derived from Stripe OpenAPI GA commit c8faccbde66b784ea916d3c28f5790d7a9c9aee2:
+      # /components/schemas/refund/properties/customer, /customer_account, /payment_method
+      omitted = Refund.from_map(%{"id" => "re_omitted"})
+      assert Map.get(omitted, :customer) == nil
+      assert Map.get(omitted, :customer_account) == nil
+      assert Map.get(omitted, :payment_method) == nil
+
+      refund =
+        Refund.from_map(
+          refund_json(%{"customer" => nil, "customer_account" => nil, "payment_method" => nil})
+        )
+
+      assert Map.get(refund, :customer) == nil
+      assert Map.get(refund, :customer_account) == nil
+      assert Map.get(refund, :payment_method) == nil
+    end
+
+    test "customer expands known customers and preserves deleted_customer maps" do
+      # Schema-derived: Stripe OpenAPI GA commit c8faccbde66b784ea916d3c28f5790d7a9c9aee2,
+      # 2026-07-29.dahlia, /components/schemas/refund/properties/customer.
+      expanded_customer = %{"object" => "customer", "id" => "cus_expanded", "name" => "Ada"}
+
+      expanded_deleted = %{
+        "object" => "deleted_customer",
+        "id" => "cus_deleted",
+        "deleted" => true
+      }
+
+      customer_refund = Refund.from_map(refund_json(%{"customer" => expanded_customer}))
+      deleted_refund = Refund.from_map(refund_json(%{"customer" => expanded_deleted}))
+
+      assert %LatticeStripe.Customer{id: "cus_expanded"} = Map.get(customer_refund, :customer)
+      assert Map.get(deleted_refund, :customer) == expanded_deleted
+    end
+
+    test "payment_method expands known objects and accepts an ID" do
+      # Schema-derived: Stripe OpenAPI GA commit c8faccbde66b784ea916d3c28f5790d7a9c9aee2,
+      # 2026-07-29.dahlia, /components/schemas/refund/properties/payment_method.
+      expanded = %{"object" => "payment_method", "id" => "pm_expanded", "type" => "card"}
+
+      expanded_refund = Refund.from_map(refund_json(%{"payment_method" => expanded}))
+      id_refund = Refund.from_map(refund_json(%{"payment_method" => "pm_by_id"}))
+
+      assert %LatticeStripe.PaymentMethod{id: "pm_expanded"} =
+               Map.get(expanded_refund, :payment_method)
+
+      assert Map.get(id_refund, :payment_method) == "pm_by_id"
+
+      assert Map.get(
+               Refund.from_map(refund_json(%{"customer_account" => "acct_123"})),
+               :customer_account
+             ) ==
+               "acct_123"
+    end
   end
 
   # Inspect
@@ -446,6 +537,23 @@ defmodule LatticeStripe.RefundTest do
       inspected = inspect(refund)
 
       refute inspected =~ "requested_by_customer"
+    end
+
+    test "inspect output does NOT contain attribution fields" do
+      refund =
+        Refund.from_map(
+          refund_json(%{
+            "customer" => "cus_sensitive_attribution",
+            "customer_account" => "acct_sensitive_attribution",
+            "payment_method" => "pm_sensitive_attribution"
+          })
+        )
+
+      inspected = inspect(refund)
+
+      refute inspected =~ "cus_sensitive_attribution"
+      refute inspected =~ "acct_sensitive_attribution"
+      refute inspected =~ "pm_sensitive_attribution"
     end
   end
 end
