@@ -19,7 +19,7 @@ covered_files:
   - test/lattice_stripe/invoice_test.exs
   - test/lattice_stripe/refund_test.exs
   - test/lattice_stripe/typed_contract_docs_test.exs
-covered_digest: "v1:sha256:3cfc475d595f6460f5f2303414139b7b004fa9bef63d42486adf01aa1eff6e4e"
+covered_digest: "v1:sha256:71d702ac80a8a55d683f87a538ea8cd9c960afd804d3af617a92a7b2af10d457"
 behavior_unverified: 0
 overrides_applied: 0
 ---

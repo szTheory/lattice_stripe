@@ -23,11 +23,11 @@
 
 ### Release and Milestone Closeout
 
-- [ ] **REL-01**: Maintainers can cut and verify a new package release whose SemVer and published API-version contract reflect the compatibility evidence from this milestone.
-- [ ] **REL-02**: Adopters can install the new release from Hex and access its matching GitHub release and HexDocs documentation.
-- [ ] **CLOSE-01**: Maintainers can confirm that all required CI checks are green on the release commit on `main`.
-- [ ] **CLOSE-02**: Every open pull request is reviewed and left with a recorded triage disposition before milestone close.
-- [ ] **CLOSE-03**: The primary checkout and all Git worktrees are clean when the milestone closes.
+- [x] **REL-01**: Maintainers can cut and verify a new package release whose SemVer and published API-version contract reflect the compatibility evidence from this milestone.
+- [x] **REL-02**: Adopters can install the new release from Hex and access its matching GitHub release and HexDocs documentation.
+- [x] **CLOSE-01**: Maintainers can confirm that all required CI checks are green on the release commit on `main`.
+- [x] **CLOSE-02**: Every open pull request is reviewed and left with a recorded triage disposition before milestone close.
+- [x] **CLOSE-03**: The primary checkout and all Git worktrees are clean when the milestone closes.
 
 ## Future Requirements
 
@@ -58,11 +58,11 @@
 | ADOPT-03 | Phase 77 | Complete |
 | ADOPT-04 | Phase 77 | Complete |
 | ADOPT-05 | Phase 77 | Complete |
-| REL-01 | Phase 78 | Pending |
-| REL-02 | Phase 78 | Pending |
-| CLOSE-01 | Phase 78 | Pending |
-| CLOSE-02 | Phase 78 | Pending |
-| CLOSE-03 | Phase 78 | Pending |
+| REL-01 | Phase 78 | Complete |
+| REL-02 | Phase 78 | Complete |
+| CLOSE-01 | Phase 78 | Complete |
+| CLOSE-02 | Phase 78 | Complete |
+| CLOSE-03 | Phase 78 | Complete |
 
 **Coverage:**
 

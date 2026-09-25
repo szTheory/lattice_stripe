@@ -1,8 +1,8 @@
 ---
 phase: 78-release-and-repository-closeout
-verified: 2026-09-25T03:00:00Z
-status: gaps_found
-score: 3/4 roadmap truths verified
+verified: 2026-09-25T03:45:08Z
+status: passed
+score: 4/4 roadmap truths verified
 covered_files:
   - .github/workflows/publish-hex.yml
   - .github/workflows/release-pr-automerge.yml
@@ -21,6 +21,7 @@ covered_files:
   - .planning/phases/78-release-and-repository-closeout/78-06-PLAN.md
   - .planning/phases/78-release-and-repository-closeout/78-06-SUMMARY.md
   - .planning/phases/78-release-and-repository-closeout/78-CLOSEOUT.md
+  - .planning/phases/78-release-and-repository-closeout/78-CONTEXT.md
   - .planning/phases/78-release-and-repository-closeout/78-PR-DISPOSITIONS.json
   - docs/maintainer-release.md
   - scripts/maintainer/pr_closeout_check.sh
@@ -32,30 +33,30 @@ covered_files:
   - scripts/maintainer/test_release_evidence_check.sh
   - scripts/maintainer/test_worktree_closeout_check.sh
   - scripts/maintainer/worktree_closeout_check.sh
-  - test_apps/phoenix_adopter/mix.exs
-  - test_apps/phoenix_adopter/test/core_flow_test.exs
-covered_digest: "v1:sha256:d1d16f084a641c4d2ae694740ea6c0520e143c3ec59f0e611ebcd2145616d480"
+covered_digest: "v1:sha256:3411684e54cc3c78c9d7accc75d8c1d4519ad110a932583dc2b0edeecf6026b8"
 behavior_unverified: 0
 overrides_applied: 0
-gaps:
-  - truth: "The primary checkout and all linked worktrees are clean at milestone close."
-    status: failed
-    reason: "The live read-only worktree closeout command found the primary checkout dirty because .planning/milestone.lock is untracked. Its updated_at is 2026-09-24T23:43:02.752Z; at verification it was 196 minutes old, within the GSD four-hour TTL. The lock implementation defines liveness by age and expressly does not use PID liveness. Preserve this active Phase 78 claim; cleanliness cannot pass until GSD releases it or it expires and the final checker is rerun."
-    artifacts:
-      - path: .planning/milestone.lock
-        issue: "Untracked active Phase 78 lock appears in primary worktree porcelain status."
-      - path: scripts/maintainer/worktree_closeout_check.sh
-        issue: "Live final check returned BLOCKED (1 blocker), while confirming primary main and origin/main both equal 629c9a2a69c1c9e38fa842e2b5157b6e64c4904d."
-    missing:
-      - "After GSD releases the lock or its four-hour TTL expires, rerun scripts/maintainer/worktree_closeout_check.sh --owners <owners.json> --final --expected-main-sha <current-main-sha> and obtain PASS with every worktree clean."
+re_verification:
+  previous_status: gaps_found
+  previous_score: 3/4
+  gaps_closed:
+    - "The primary checkout and all linked worktrees are clean at milestone close."
+  gaps_remaining: []
+  regressions: []
+advisory: []
+human_verification: []
+decision_coverage:
+  honored: 6
+  total: 6
+  not_honored: []
 ---
 
 # Phase 78: Release and Repository Closeout — Verification Report
 
 **Phase Goal:** Adopters can install a verified milestone release, and maintainers can close the milestone with healthy `main` CI, triaged pull requests, and a clean repository workspace.
-**Verified:** 2026-09-25T03:00:00Z
-**Status:** gaps_found
-**Re-verification:** No — no prior Phase 78 verification report existed.
+**Verified:** 2026-09-25T03:45:08Z
+**Status:** passed
+**Re-verification:** Yes — the prior worktree cleanliness gap is now closed.
 
 ## Goal Achievement
 
@@ -63,92 +64,102 @@ gaps:
 
 | # | Roadmap truth | Status | Evidence |
 |---|---|---|---|
-| 1 | A new package version consistent with the delivered public API changes is published and verified on Hex, with matching GitHub release and HexDocs content. | VERIFIED | Ran `scripts/maintainer/release_evidence_check.sh --version 2.3.0 --sha 1e83a99029f19c24c97549752adf8f57cabc7dd0`. It passed tag peeling, GitHub Release identity, main ancestry, exact release-SHA `ci-gate` (run 36084155921), Hex checksum `e921209a…cab088`, versioned HexDocs, and the published-Hex Phoenix smoke (3 tests, 0 failures). The smoke resolved `lattice_stripe 2.3.0` from Hex. |
-| 2 | All required CI checks are green for the release commit on `main`. | VERIFIED | The exact-SHA release evidence command passed the release commit's `ci-gate`; the immutable release SHA remains an ancestor of current main `629c9a2a69c1c9e38fa842e2b5157b6e64c4904d`. PR #71's pull-request CI run 36088077120 passed every listed test, integration and `ci-gate` check on head `dfb43de084c831e51a834b30596f7f468a2f9e72`; it merged as current main commit `629c9a2a…`. |
-| 3 | Every open pull request has a recorded triage disposition and any accepted changes have passed their required checks. | VERIFIED | Live `gh pr list --state open` returned `[]`; `scripts/maintainer/pr_closeout_check.sh --ledger .planning/phases/78-release-and-repository-closeout/78-PR-DISPOSITIONS.json` reported all open PRs have current disposition evidence. PRs #66, #69, and #70 were recorded as merged in the closeout summary; PR #71 merged after its exact-head CI passed. |
-| 4 | The primary checkout and all linked Git worktrees have no uncommitted changes at milestone close. | FAILED | Live `scripts/maintainer/worktree_closeout_check.sh --owners /private/tmp/phase78-worktree-owners.json --final --expected-main-sha 629c9a2a69c1c9e38fa842e2b5157b6e64c4904d` inventoried one worktree. It confirmed primary `main` and `origin/main` match the expected current SHA, but reported `.planning/milestone.lock` as an untracked entry and returned `BLOCKED (1 blocker)`. The lock's timestamp is within the four-hour TTL defined in `~/.codex/gsd-core/bin/lib/milestone-lock.cjs`; preserving it is required while active. |
+| 1 | A new package version consistent with the delivered public API changes is published and verified on Hex, with matching GitHub release and HexDocs content. | VERIFIED | Re-ran `bash scripts/maintainer/release_evidence_check.sh --version 2.3.0 --sha 1e83a99029f19c24c97549752adf8f57cabc7dd0`. It verified the GitHub release and tag, release SHA ancestry, exact-SHA `ci-gate`, Hex tarball checksum `e921209af48b4673fab1f39eb210839b41d55497ad456822b78f6f36d4cab088`, versioned HexDocs, and the published-Hex Phoenix smoke (3 tests, 0 failures; dependency resolved from Hex at 2.3.0). |
+| 2 | All required CI checks are green for the release commit on `main`. | VERIFIED | The exact-SHA release evidence check found the release SHA's required `ci-gate` successful (run [36084155921](https://github.com/szTheory/lattice_stripe/actions/runs/36084155921/job/107912495099)). Release SHA `1e83a990…` is an ancestor of current `main` `7f0eb4ba…`. PR #72's merged head CI also passed all required checks, including `ci-gate`, on its exact head; merge commit is current main. |
+| 3 | Every open pull request has a recorded triage disposition and any accepted changes have passed their required checks. | VERIFIED | Fresh `gh pr list --state open` returned `[]`; `pr_closeout_check.sh --ledger .planning/phases/78-release-and-repository-closeout/78-PR-DISPOSITIONS.json` reported all open PRs have current disposition evidence. PR #72 is merged at `7f0eb4ba…`; its PR status rollup shows successful CI test, integration, quality, and `ci-gate` checks. |
+| 4 | The primary checkout and all linked Git worktrees have no uncommitted changes at milestone close. | VERIFIED | `worktree_closeout_check.sh --owners /private/tmp/phase78-worktree-owners.json --final --expected-main-sha 7f0eb4ba75da2e256f4e05bdd10cf64551dd154e` inventoried exactly one path (primary checkout), reported it clean, and confirmed primary `main` and cached `origin/main` both equal `7f0eb4ba…`. The working tree was clean before and after the check. A fetch attempt could not write `.git/FETCH_HEAD` under this environment's filesystem policy; remote state was independently confirmed through GitHub's merged PR #72 and its checks. |
 
-**Score:** 3/4 roadmap truths verified (0 present, behavior-unverified).
+**Score:** 4/4 roadmap truths verified (0 present, behavior-unverified).
 
-The roadmap plan checklist still labels plans 78-05 and 78-06 unchecked even though both summaries exist and both were reviewed here. This is a planning-state bookkeeping mismatch; it does not change the four roadmap success-criteria verdicts above. GSD manager therefore continues to show `roadmap_complete: false` until that checklist is reconciled.
+### Re-verification
+
+The prior report's only gap was the active `.planning/milestone.lock`. It is no longer present. The final read-only inventory now passes with one clean primary checkout and synchronized `main` references. No carried-forward gaps remain and no regressions were found.
+
+### Advisory (New Scope, Unevidenced)
+
+None. Re-verification anti-pattern scan found no unreferenced `TBD`, `FIXME`, or `XXX` markers in the checked phase deliverables and maintainer tooling.
 
 ### Required Artifacts
 
 | Artifact | Expected | Status | Details |
 |---|---|---|---|
-| `scripts/maintainer/release_evidence_check.sh` | Join immutable release SHA, CI, registry, docs and actual Hex consumption | VERIFIED | Live 2.3.0 exact-SHA invocation passed every component and the 3-test published package smoke. |
-| `scripts/maintainer/test_release_evidence_check.sh` | Reject stale/mismatched release evidence | VERIFIED | Fixture command passed valid and negative cases for wrong tag SHA, stale CI, wrong Hex version/source, checksum mismatch, and absent docs. |
-| `scripts/maintainer/release_candidate_check.sh` | Check compatibility and Release Please candidate | VERIFIED | `bash scripts/maintainer/test_release_candidate_check.sh` passed additive candidate, protection and all negative fixtures. |
-| `scripts/maintainer/pr_closeout_check.sh` | Check the live PR inventory against dispositions | VERIFIED | Live checker passed; GitHub open-PR inventory is empty. Fixture suite passed. |
-| `scripts/maintainer/worktree_closeout_check.sh` | Read-only inventory including untracked state, owners and final main synchronization | FAILED at final acceptance | Implementation and fixture suite are substantive; live invocation confirmed one primary worktree and main synchronization but blocked on active untracked lock. |
-| `.planning/phases/78-release-and-repository-closeout/78-CLOSEOUT.md` and `78-PR-DISPOSITIONS.json` | Dated release, PR and worktree evidence | PARTIAL | Release and PR evidence is corroborated. Closeout ledger explicitly leaves worktree cleanliness pending; PR ledger live entries are empty with historical dispositions retained. |
+| `scripts/maintainer/release_evidence_check.sh` | Join release SHA, CI, registry, docs and actual Hex consumption | VERIFIED | Fresh exact-SHA invocation passed all component checks and published-package smoke. |
+| `scripts/maintainer/release_candidate_check.sh` | Check candidate compatibility and protected release path | VERIFIED | Fixture suite passed candidate acceptance and rejection cases. |
+| `scripts/maintainer/pr_closeout_check.sh` | Compare live open PRs with recorded dispositions | VERIFIED | Live inventory is empty; checker passed. |
+| `scripts/maintainer/worktree_closeout_check.sh` | Read-only all-worktree cleanliness and main synchronization check | VERIFIED | Live final-mode check passed for the one inventoried primary path. |
+| `78-CLOSEOUT.md`, `78-PR-DISPOSITIONS.json`, `.planning/RELEASE-TRAIN.md` | Record release identity and closeout evidence | VERIFIED | Release identity is independently rechecked; ledger has no open PR entries; current closeout is corroborated by the live check and current GitHub state. |
 
 ### Key Link Verification
 
 | From | To | Via | Status | Details |
 |---|---|---|---|---|
-| Release workflows | `release_evidence_check.sh` | Resolved version and release SHA passed after publication | WIRED | Workflow fixtures passed; live verifier successfully consumed published 2.3.0 evidence. |
-| Published-Hex smoke | Hex registry package | Isolated Mix resolution plus exact dependency metadata assertion | WIRED | Live run resolved 2.3.0 from Hex and passed all 3 Phoenix host-flow tests. |
-| Live GitHub PR inventory | PR disposition ledger/checker | `gh pr list` and checker ledger input | WIRED | Inventory empty and checker passed. |
-| Worktree closeout command | Every Git worktree status and expected main refs | NUL-delimited `git worktree list` and per-path porcelain status | WIRED | Fixture suite passed; live final-mode check proved main refs synchronized and exposed the lock blocker without modifying the tree. |
+| Release workflows | `release_evidence_check.sh` | Resolve published version and immutable release SHA | WIRED | Workflow fixtures pass; live verifier consumed published 2.3.0 evidence. |
+| Published-Hex smoke | Hex registry package | Isolated Mix resolution and dependency metadata assertion | WIRED | Fresh smoke used `lattice_stripe 2.3.0` from Hex and passed 3 tests. |
+| GitHub open-PR inventory | PR disposition ledger/checker | `gh pr list` and ledger input | WIRED | Live inventory empty and closeout checker passed. |
+| Worktree closeout command | Git worktree status and expected main refs | NUL-delimited worktree inventory and per-path porcelain status | WIRED | Final checker reported one clean path and synchronized main refs. |
 
 ### Data-Flow Trace (Level 4)
 
-Not applicable: Phase 78 produces release and maintainer tooling, not rendered application data. The release verifier reads live GitHub, Hex and HexDocs evidence; its published-package smoke executes the actual Hex dependency.
+Not applicable: this phase delivers release and maintainer tooling, not rendered application data. The release verifier reads GitHub, Hex and HexDocs evidence; its adopter smoke installs and exercises the actual Hex package.
 
 ### Behavioral Spot-Checks
 
 | Behavior | Command | Result | Status |
 |---|---|---|---|
-| Published release evidence and Hex adopter flow | `scripts/maintainer/release_evidence_check.sh --version 2.3.0 --sha 1e83a99029f19c24c97549752adf8f57cabc7dd0` | All remote checks passed; 3 tests, 0 failures; dependency source Hex 2.3.0 | PASS |
-| PR checker fixture behavior | `bash scripts/maintainer/test_pr_closeout_check.sh` | All eight fixture cases passed | PASS |
-| Release candidate fixture behavior | `bash scripts/maintainer/test_release_candidate_check.sh` | Valid candidate and five rejection fixtures passed | PASS |
-| Release evidence negative cases | `bash scripts/maintainer/test_release_evidence_check.sh` | All six fixture/workflow checks passed | PASS |
-| Worktree closeout fixture behavior | `bash scripts/maintainer/test_worktree_closeout_check.sh` | All twelve fixture cases passed | PASS |
-| Final live worktree state | `scripts/maintainer/worktree_closeout_check.sh --owners /private/tmp/phase78-worktree-owners.json --final --expected-main-sha 629c9a2a69c1c9e38fa842e2b5157b6e64c4904d` | One untracked lock; synchronized main refs; exit 1, BLOCKED | FAIL |
+| Published release evidence and adopter flow | `bash scripts/maintainer/release_evidence_check.sh --version 2.3.0 --sha 1e83a99029f19c24c97549752adf8f57cabc7dd0` | Exact release evidence passed; Hex checksum matched; HexDocs available; 3 tests, 0 failures using Hex dependency | PASS |
+| PR closeout behavior | `bash scripts/maintainer/test_pr_closeout_check.sh` | All eight fixtures passed | PASS |
+| Release candidate behavior | `bash scripts/maintainer/test_release_candidate_check.sh` | Candidate and protected path accepted; negative fixtures rejected | PASS |
+| Release evidence behavior | `bash scripts/maintainer/test_release_evidence_check.sh` | All fixtures passed, including wrong SHA, stale CI, checksum, docs and source cases | PASS |
+| Worktree closeout behavior | `bash scripts/maintainer/test_worktree_closeout_check.sh` | All twelve fixtures passed | PASS |
+| Final live worktree state | `bash scripts/maintainer/worktree_closeout_check.sh --owners /private/tmp/phase78-worktree-owners.json --final --expected-main-sha 7f0eb4ba75da2e256f4e05bdd10cf64551dd154e` | One primary path; clean; primary and `origin/main` match; exit 0 | PASS |
+| Merged current-main CI | GitHub PR #72 status rollup on head `2b37f26ce05cfd311f4bdc103970107c2bd47e73` | CI tests, integrations, quality and `ci-gate` all successful; merge commit is `7f0eb4ba…` | PASS |
 
 ### Probe Execution
 
-No phase-declared or conventional migration/tooling probes were specified in the plans. The named shell fixture suites and live release/worktree checks were run directly.
+No phase-declared or conventional migration/tooling probes are specified by the plans. The phase's named maintainer fixture suites and live checks were run directly.
 
 ### Requirements Coverage
 
 | Requirement | Source Plan | Description | Status | Evidence |
 |---|---|---|---|---|
-| REL-01 | 78-02, 78-05, 78-06 | Cut and verify SemVer/API-compatible package release | SATISFIED | Candidate fixtures, exact release verifier, public 2.3.0 package and associated release evidence passed. |
-| REL-02 | 78-01, 78-02, 78-05, 78-06 | Install release from Hex with matching GitHub release and HexDocs | SATISFIED | Exact-SHA verifier and published-Hex smoke passed. |
-| CLOSE-01 | 78-01, 78-02, 78-06 | Required checks green on release commit on main | SATISFIED | Exact release-SHA `ci-gate` passed; release commit is an ancestor of current main. |
-| CLOSE-02 | 78-03, 78-06 | Open PRs reviewed and dispositioned before close | SATISFIED | Live inventory empty; PR checker passed; dispositions and merge/check evidence recorded. |
-| CLOSE-03 | 78-04, 78-06 | Primary and all linked worktrees clean at close | BLOCKED | Current main and origin/main match, but live inventory finds active untracked `.planning/milestone.lock`. |
+| REL-01 | 78-02, 78-05, 78-06 | Cut and verify a SemVer/API-compatible package release | SATISFIED | Candidate fixtures and fresh exact-SHA release verifier pass for public version 2.3.0. |
+| REL-02 | 78-01, 78-02, 78-05, 78-06 | Install release from Hex with matching GitHub release and HexDocs | SATISFIED | Exact-SHA verifier plus 3-test published-Hex smoke and versioned docs check pass. |
+| CLOSE-01 | 78-01, 78-02, 78-06 | Required checks green on release commit on main | SATISFIED | Exact release-SHA `ci-gate` passed; release SHA is on current main. |
+| CLOSE-02 | 78-03, 78-06 | Open PRs reviewed and dispositioned before close | SATISFIED | Current inventory empty; PR closeout checker passed; accepted PR #72 changes passed required checks before merge. |
+| CLOSE-03 | 78-04, 78-06 | Primary and linked worktrees clean at close | SATISFIED | Final live checker passed and inventoried only the clean primary checkout. |
 
-No additional Phase 78 requirement IDs are mapped in `REQUIREMENTS.md`.
+All five requirement IDs mapped to Phase 78 are covered; no additional Phase 78 requirement IDs are orphaned from the plans.
 
 ### Test Quality Audit
 
 | Test File | Linked requirement | Active | Skipped | Circular | Assertion level | Verdict |
 |---|---|---:|---:|---:|---|---|
-| `scripts/maintainer/test_release_evidence_check.sh` | REL-01, REL-02, CLOSE-01 | Yes | 0 found in relevant cases | No circular expected-value generation found | Value/failure-component assertions | PASS |
-| `scripts/maintainer/test_release_candidate_check.sh` | REL-01 | Yes | 0 found in relevant cases | No circular expected-value generation found | Value and rejection assertions | PASS |
-| `scripts/maintainer/test_pr_closeout_check.sh` | CLOSE-02 | Yes | 0 found in relevant cases | No circular expected-value generation found | Current-head and disposition assertions | PASS |
-| `scripts/maintainer/test_worktree_closeout_check.sh` | CLOSE-03 | Yes | 0 found in relevant cases | No circular expected-value generation found | Dirty/clean/final-state assertions | PASS |
+| `scripts/maintainer/test_release_evidence_check.sh` | REL-01, REL-02, CLOSE-01 | Yes | 0 found | No expected-value generation found | Value and failure-component assertions | PASS |
+| `scripts/maintainer/test_release_candidate_check.sh` | REL-01 | Yes | 0 found | No expected-value generation found | Candidate and rejection assertions | PASS |
+| `scripts/maintainer/test_pr_closeout_check.sh` | CLOSE-02 | Yes | 0 found | No expected-value generation found | Inventory, current-head and disposition assertions | PASS |
+| `scripts/maintainer/test_worktree_closeout_check.sh` | CLOSE-03 | Yes | 0 found | No expected-value generation found | Dirty/clean/final-state assertions | PASS |
 
-Disabled tests linked to the requirements: 0 found. Circular expected-value generation: 0 found. Insufficient assertions: 0 found.
+Disabled tests linked to requirements: 0 found. Circular expected-value generation: 0 found. Insufficient assertions: 0 found.
 
 ### Anti-Patterns Found
 
 | File | Line | Pattern | Severity | Impact |
 |---|---:|---|---|---|
-| None | — | No unreferenced `TBD`, `FIXME`, or `XXX` debt markers in the checked phase tooling/docs | — | No blocker |
+| None | — | No unreferenced debt markers or implementation stubs found in checked phase tooling and documents | — | No blocker |
+
+### Decision Coverage
+
+All 6 trackable CONTEXT.md decisions are honored in shipped artifacts (`check.decision-coverage-verify`; non-blocking gate).
 
 ### Human Verification Required
 
-N/A — this is a release/CI/maintainer-tooling phase with no user-facing interaction. Every positive release, PR and checker claim has named executable or exact remote evidence. The remaining issue is a deterministically observed active lock, not a human judgment question.
+N/A — release/CI/maintainer tooling phase with no user-facing interaction. All success criteria have named executable or exact remote evidence; the project verification policy does not require blanket UAT confirmation when that evidence is present.
 
 ### Gaps Summary
 
-Release publication and proof, release-SHA CI, PR triage, and synchronization of primary `main` with `origin/main` are verified. Phase completion is blocked only by the active Phase 78 milestone lock appearing as an untracked worktree entry. The lock is 196 minutes old at verification, within the four-hour TTL; GSD lock code does not use PID liveness. Preserve it, then rerun the final read-only worktree checker after release or expiry. Do not mark this phase or milestone complete while the checker reports dirty state.
+The previous worktree-cleanliness gap is closed. Release publication and exact-SHA proof, release-commit CI, PR triage, and final clean-worktree evidence all pass. All roadmap truths and mapped requirements are verified. This report verifies Phase 78 only; it does not alter roadmap or GSD state or mark the phase/milestone complete.
 
 ---
 
-_Verified: 2026-09-25T03:00:00Z_  
+_Verified: 2026-09-25T03:45:08Z_
 _Verifier: the agent (gsd-verifier)_

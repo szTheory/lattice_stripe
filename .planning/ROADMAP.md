@@ -36,7 +36,7 @@ and prove the package from one test-only Phoenix application consuming it as a d
 - [x] **Phase 75: Typed Contract Updates** — implement and document selected typed fields with compatibility and decoding proof. (completed 2026-09-24)
 - [x] **Phase 76: Phoenix Adopter Core Flow** — validate dependency setup and a common Checkout/subscription/webhook flow.
 - [x] **Phase 77: Adopter Edge Profiles and CI** — prove selected B2B, usage, and Connect contracts and run the complete adopter suite deterministically. (completed 2026-09-24)
-- [ ] **Phase 78: Release and Repository Closeout** — publish and verify the package release, green `main` CI, triaged pull requests, and clean Git worktrees.
+- [x] **Phase 78: Release and Repository Closeout** — publish and verify the package release, green `main` CI, triaged pull requests, and clean Git worktrees. (completed 2026-09-24)
 
 ### Phase Details
 
@@ -129,7 +129,7 @@ Plans:
 3. Every open pull request has a recorded triage disposition and any accepted changes have passed their required checks.
 4. The primary checkout and all linked Git worktrees have no uncommitted changes at milestone close.
 
-**Plans:** 4/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 
@@ -138,7 +138,7 @@ Plans:
 - [x] 78-03-PLAN.md — complete PR dispositions and linked ledger
 - [x] 78-04-PLAN.md — read-only all-worktree closeout probe
 - [x] 78-05-PLAN.md — concrete public-publish decision gate
-- [ ] 78-06-PLAN.md — publish verified release and final repository closeout
+- [x] 78-06-PLAN.md — publish verified release and final repository closeout
 
 ### Progress
 
@@ -148,7 +148,7 @@ Plans:
 | 75. Typed Contract Updates | 2/2 | Complete    | 2026-09-24 |
 | 76. Phoenix Adopter Core Flow | 1/1 | Complete    | 2026-09-24 |
 | 77. Adopter Edge Profiles and CI | 3/3 | Complete    | 2026-09-24 |
-| 78. Release and Repository Closeout | 4/6 | In Progress|  |
+| 78. Release and Repository Closeout | 6/6 | Complete    | 2026-09-24 |
 
 ## Planning Horizons (living, not active commitments)
 

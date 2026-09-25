@@ -26,13 +26,13 @@
     {
       "number": "78",
       "name": "Release and Repository Closeout",
-      "status": "pending"
+      "status": "complete"
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to the next step (plan phase 78)",
-    "reason": "Phase 78 of 5 — needs a plan"
+    "command": "/gsd:new-milestone",
+    "label": "Start a new milestone",
+    "reason": "All phases complete — start a new milestone"
   },
-  "updated_at": "2026-09-24T15:37:31.400Z"
+  "updated_at": "2026-09-25T03:50:31.491Z"
 }

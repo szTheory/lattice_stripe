@@ -1,6 +1,6 @@
 # Phase 78 Closeout — Release Evidence and Remaining Repository Gate
 
-**Last refreshed:** 2026-09-25 02:49 UTC
+**Last refreshed:** 2026-09-25 03:45 UTC
 
 **Repository:** `szTheory/lattice_stripe`
 
@@ -19,17 +19,19 @@
 
 ## PR disposition — refreshed
 
-PRs [#66](https://github.com/szTheory/lattice_stripe/pull/66), [#69](https://github.com/szTheory/lattice_stripe/pull/69), and [#70](https://github.com/szTheory/lattice_stripe/pull/70) have been squash-merged after current-head CI passed. The refreshed open-PR inventory is empty. Current main is `f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3`; required `ci-gate`, tests, and relevant lanes passed in [run 36087583089](https://github.com/szTheory/lattice_stripe/actions/runs/36087583089). No administrator bypass was used.
+PRs [#66](https://github.com/szTheory/lattice_stripe/pull/66), [#69](https://github.com/szTheory/lattice_stripe/pull/69), [#70](https://github.com/szTheory/lattice_stripe/pull/70), [#71](https://github.com/szTheory/lattice_stripe/pull/71), and [#72](https://github.com/szTheory/lattice_stripe/pull/72) have been squash-merged after exact-head CI passed. PR #72 is at current main `7f0eb4ba75da2e256f4e05bdd10cf64551dd154e`; full CI, including `ci-gate`, passed on exact PR head `2b37f26ce05cfd311f4bdc103970107c2bd47e73` in [run 36089067158](https://github.com/szTheory/lattice_stripe/actions/runs/36089067158). The refreshed open-PR inventory is empty. No administrator bypass was used.
 
-## Worktree gate — blocked, user state preserved
+## Worktree gate — passed
 
-The primary checkout is synchronized to current main. The final read-only checker now has one blocker: the active `.planning/milestone.lock` is untracked. Primary HEAD and refreshed `origin/main` both equal `f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3`. The lock is retained while its Phase 78 execution window remains active. Release identity remains `1e83a99029f19c24c97549752adf8f57cabc7dd0`; the closeout helper compares checkout and remote main to an explicit expected current-main SHA, while immutable package artifacts remain independently verified by `release_evidence_check.sh`.
+The 4-hour GSD milestone lock expired and was removed. The final read-only checker inventoried exactly one worktree: the clean primary checkout. Primary `main` and `origin/main` both equal `7f0eb4ba75da2e256f4e05bdd10cf64551dd154e`. The immutable package release remains `1e83a99029f19c24c97549752adf8f57cabc7dd0`; later closeout commits do not alter the release identity. The previous local history is preserved in `/private/tmp/lattice-root-state-backup.bundle`.
 
-1. The primary checkout has one dirty entry: untracked `.planning/milestone.lock`, created for the active Phase 78 GSD session. It is preserved until GSD releases it or the lock expires.
-2. Primary checkout HEAD and refreshed `origin/main` both equal `f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3`.
-3. The user-authored policy and planning changes, Phase 75–77 evidence, and Phase 76 coverage artifact are on main. The expired generated `.gsd/dispatch-isolation-sentinel.json` was removed. The previous 101-commit local history was preserved in `/private/tmp/lattice-root-state-backup.bundle` before synchronizing the primary checkout.
+Final checker command:
 
-The worktree closeout check is read-only and did not modify any tree. Final clean-worktree acceptance remains open only until the active milestone lock is released or expires; main synchronization and PR triage now pass.
+```text
+bash scripts/maintainer/worktree_closeout_check.sh --owners /private/tmp/phase78-worktree-owners.json --final --expected-main-sha 7f0eb4ba75da2e256f4e05bdd10cf64551dd154e
+```
+
+Result: PASS; one clean primary path; primary `main` and `origin/main` match the expected SHA.
 
 ## Verification record
 
@@ -37,6 +39,6 @@ The worktree closeout check is read-only and did not modify any tree. Final clea
 Release Please protected auto-merge: passed (run 36084111513)
 Release workflow and Hex publication: passed (run 36084157667)
 Release evidence exact-SHA verifier: passed (all checks; checksum above)
-Current PR inventory: empty after #66, #69, and #70 squash merges; main CI run 36087583089 passed on f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3
-Final worktree check: blocked only by active .planning/milestone.lock; primary main and origin/main match
+Current PR inventory: empty after #66, #69, #70, #71, and #72 squash merges; run 36089067158 passed on PR #72 exact head 2b37f26ce05cfd311f4bdc103970107c2bd47e73
+Final worktree check: passed; one clean primary worktree, primary main and origin/main match 7f0eb4ba75da2e256f4e05bdd10cf64551dd154e
 ```
