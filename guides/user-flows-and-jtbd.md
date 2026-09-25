@@ -470,7 +470,7 @@ LatticeStripe is already strong where most SaaS teams spend the bulk of their St
 payments, subscriptions, invoices, portal-driven self-service, metering, Connect, tax,
 webhooks (including thin events), and production operator mechanics. The library's center of
 gravity is "typed, idiomatic Elixir access to Stripe, with guards around expensive mistakes."
-For the current 2.2 scope, the remaining depth is application-owned policy on secondary
+For the current mainstream scope, the remaining depth is application-owned policy on secondary
 flows (reason-specific dispute fields, catalog decisions, authorization storage) — not
 missing mainstream payment or billing primitives. Use [Recipes](recipes.md),
 [Entitlements](entitlements.md), and the flagship guides when you need multi-module stories.

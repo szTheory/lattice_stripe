@@ -1,7 +1,7 @@
 # LatticeStripe Scope
 
-LatticeStripe is a production-grade HTTP client SDK for Stripe. The published **2.2** line
-targets mainstream SaaS integrations: payments, billing, usage metering, Connect, tax on
+LatticeStripe is a production-grade HTTP client SDK for Stripe. It targets mainstream SaaS
+integrations: payments, billing, usage metering, Connect, tax on
 custom flows, entitlement reconciliation, webhooks, and operator diagnostics.
 
 ## Intended audience
@@ -33,7 +33,7 @@ For job-to-primitive routing, see [User Flows & JTBD](user-flows-and-jtbd.md).
 
 ## Deferred by design
 
-The 2.2 line is maintenance- and adoption-driven for breadth. New resource families ship
+Further breadth is maintenance- and adoption-driven. New resource families ship
 when an adopter brings a concrete production job, not to chase endpoint-count completeness.
 
 - **Specialist Stripe families:** Identity; Treasury; Issuing; Terminal; Financial
@@ -67,9 +67,9 @@ remain useful across different Elixir architectures.
 
 ## Maintenance and adopter pull
 
-The published release is 2.3.0. It adds typed Invoice and Refund response fields while keeping
-the default Stripe API version at `2026-03-25.dahlia`. Further work is reactive and
-adopter-driven.
+Release-specific changes are recorded in the [CHANGELOG](../CHANGELOG.md). Further work is
+reactive and adopter-driven, while the default Stripe API version remains
+`2026-03-25.dahlia`.
 
 Ongoing maintenance includes bug fixes, Stripe API drift, security and dependency work, and
 narrow additions supported by a real adopter job. There is no promise of speculative endpoint

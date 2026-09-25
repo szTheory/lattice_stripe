@@ -16,10 +16,10 @@ See also [`.planning/RELEASE-TRAIN.md`](../.planning/RELEASE-TRAIN.md) for commi
 
 ## Normal release (fully automated)
 
-For the currently reviewed additive Invoice and Refund fields, Release Please should propose
-**2.3.0**. The final API-lock delta must contain only `Invoice.amount_paid_off_stripe` and
-`Refund.customer`, `Refund.customer_account`, and `Refund.payment_method`; the default Stripe
-API version remains `2026-03-25.dahlia`. Release Please owns the version and changelog edits.
+Review each proposed release's API-lock delta and changelog against the intended release
+scope. Release Please owns the version and changelog edits. Keep the release candidate check
+and this procedure focused on the proposal at the current PR head rather than a particular
+release's contents.
 Before merging a generated Release Please PR, the workflow runs
 `scripts/maintainer/release_candidate_check.sh` from trusted `main` and reads the proposal
 at the current PR head. Maintainers can run that same preflight from a trusted `main`
