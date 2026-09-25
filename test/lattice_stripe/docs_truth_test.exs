@@ -636,13 +636,13 @@ defmodule LatticeStripe.DocsTruthTest do
     refute readme =~ "What's new in v1.1"
   end
 
-  describe "2.2 maintenance posture and scope boundaries" do
-    test "readme publishes the shipped quality-patch posture and deferred scope anchors" do
+  describe "2.x maintenance posture and scope boundaries" do
+    test "readme publishes the current release posture and deferred scope anchors" do
       readme = File.read!("README.md")
 
       assert readme =~ "2.2 baseline is feature-complete"
       assert readme =~ "published release is **`#{current_exact_release()}`**"
-      assert readme =~ "compatibility-preserving quality patch"
+      assert readme =~ "additive typed Invoice and Refund fields"
       assert readme =~ "maintenance- and adoption-driven"
       assert readme =~ "hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html"
       assert readme =~ "hexdocs.pm/lattice_stripe/api_stability.html"
@@ -657,6 +657,8 @@ defmodule LatticeStripe.DocsTruthTest do
     test "guides/scope.md is the canonical deferred-scope contract" do
       scope = File.read!("guides/scope.md")
 
+      assert scope =~ "published release is 2.3.0"
+      assert scope =~ "default Stripe API version at `2026-03-25.dahlia`"
       assert scope =~ "Identity"
       assert scope =~ "Reporting" or scope =~ "Sigma"
       assert scope =~ "adopter pull" or scope =~ "maintenance mode"
@@ -1436,6 +1438,18 @@ defmodule LatticeStripe.DocsTruthTest do
 
     refute header =~ ~r/Phase \d+/
     refute header =~ "docs_truth_test"
+  end
+
+  test "published changelog describes adopter-facing 2.3.0 changes" do
+    changelog = File.read!("CHANGELOG.md")
+    release = String.split(changelog, "## [2.3.0]", parts: 2) |> List.last()
+    prior_releases = String.split(release, "## [2.2.2]", parts: 2) |> hd()
+
+    assert prior_releases =~ "Invoice.amount_paid_off_stripe"
+    assert prior_releases =~ "Refund.customer_account"
+    assert prior_releases =~ "2026-03-25.dahlia"
+    refute prior_releases =~ "milestone review"
+    refute prior_releases =~ "#67"
   end
 
   test "cheatsheet documents list pagination on Response.data" do

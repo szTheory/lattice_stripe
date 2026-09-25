@@ -67,13 +67,13 @@ remain useful across different Elixir architectures.
 
 ## Maintenance and adopter pull
 
-The published release is 2.2.2, the final compatibility-preserving quality patch focused on
-reliability, internal consistency, documentation truth, and release hygiene. It does not
-expand the public resource surface. Further work is reactive and adopter-driven.
+The published release is 2.3.0. It adds typed Invoice and Refund response fields while keeping
+the default Stripe API version at `2026-03-25.dahlia`. Further work is reactive and
+adopter-driven.
 
-Beyond that patch, maintenance includes bug fixes, Stripe API drift, security and dependency
-work, and narrow additions supported by a real adopter job. There is no promise of speculative
-endpoint parity.
+Ongoing maintenance includes bug fixes, Stripe API drift, security and dependency work, and
+narrow additions supported by a real adopter job. There is no promise of speculative endpoint
+parity.
 
 ## Requesting coverage
 

@@ -6,11 +6,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 > **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 2.3"}`.
 
-> **Development status:** `2.2.2` is published. The 2.2.1–2.2.2 closure patches improve
-> reliability, internal consistency, documentation truth, and release hygiene.
+> **Development status:** `2.3.0` is published. It adds typed Invoice and Refund response
+> fields while preserving the existing Stripe API-version default.
 > The project is now in reactive maintenance; new API breadth remains adopter-driven.
 
 ## Unreleased
+
+## [2.3.0](https://github.com/szTheory/lattice_stripe/compare/v2.2.2...v2.3.0) (2026-09-25)
 
 ### Features
 
@@ -18,18 +20,10 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   request responses using Stripe API version `2026-05-27.dahlia` or later.
 - Expose `Refund.customer`, `Refund.customer_account`, and `Refund.payment_method` for refund
   customer/account and payment-method attribution in Refund API endpoint responses using Stripe
-  API version `2026-07-29.dahlia` or later. Webhook event availability for these fields has not
-  been established.
+  API version `2026-07-29.dahlia` or later. Webhook event availability has not been established.
 
 The package default remains `2026-03-25.dahlia`; configure a later API version to receive these
 fields.
-
-## [2.3.0](https://github.com/szTheory/lattice_stripe/compare/v2.2.2...v2.3.0) (2026-09-25)
-
-
-### Features
-
-* complete v1.12 milestone review ([#67](https://github.com/szTheory/lattice_stripe/issues/67)) ([260edf4](https://github.com/szTheory/lattice_stripe/commit/260edf43189e7b180c863e413472d832c6352d00))
 
 ## [2.2.2](https://github.com/szTheory/lattice_stripe/compare/v2.2.1...v2.2.2) (2026-08-25)
 

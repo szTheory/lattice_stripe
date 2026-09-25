@@ -34,28 +34,45 @@ Audit: 14/14 requirements satisfied. Bounded technical debt accepted; see
 
 ## Planning Horizons (living, not active commitments)
 
-The horizons preserve direction without turning speculative ideas into backlog. Re-rank them
-at every milestone close using current Stripe API evidence, adopter feedback, quality signals,
-and the cost of maintaining the proposed proof.
+LatticeStripe is near-done for its intended mainstream Stripe SDK scope. v1.12 delivered the
+previously selected API freshness and Phoenix adopter-proof wedge. Keep the project in
+reactive maintenance; these horizons preserve direction without creating scheduled work.
+Re-rank them at each milestone close or when new evidence arrives.
 
-### Near term — confidence gaps after v1.12
+### Near term — reactive maintenance
 
-Add generated/property-based checks only for important pure invariants that the current
-example-based suite does not already prove. Extend the adopter profiles only where a distinct
-integration contract or operator failure mode appears in evidence. Reassess CI duration,
-dependency and security automation, minimum-version support, error/retry semantics, data
-handling, and observability alongside the code changes.
+- Fix confirmed defects and security issues; follow stable Stripe API changes that affect
+  already-supported, high-value resources.
+- Keep package, docs, and release truth aligned; keep `main` CI green and repository state
+  tidy after any scoped release.
+- Do not start a feature milestone from raw drift counts, coverage goals, or the existence of
+  acknowledged v1.12 edge-case debt alone.
 
-### Long term — evidence-gated Stripe breadth
+### Mid term — targeted confidence or adopter gaps (triggered only by evidence)
 
-Consider specialist Stripe families and industry-specific integration needs only when a
-named adopter job, stable Stripe contract, and testable support path justify their ongoing
-cost. Keep healthcare, gaming, commerce, marketplace, and other industry policy in adopter
-applications; add SDK coverage only for reusable Stripe-shaped contracts.
+- Promote only a demonstrated adopter-blocking contract, material reliability/privacy risk,
+  or recurring CI cost into a bounded milestone.
+- Consider selective property-based tests when a named pure invariant has meaningful cases
+  that examples do not cover; extend the shared Phoenix adopter only for a distinct reusable
+  SDK contract or recurring failure mode.
+- Reassess minimum-version compatibility, dependency/security automation, retry/error
+  semantics, and observability when evidence points to a concrete gap.
 
-### Roadmap refresh rule
+### Long term — specialist Stripe coverage (pull-driven)
 
-At each milestone close, refresh these horizons and the audience/JTBD map against shipped
-behavior, current Stripe changelog and OpenAPI drift, production feedback, and CI/security
-evidence. Promote a candidate to an active milestone only after its user outcome, scope,
-acceptance proof, and compatibility/release implications are clear.
+- Consider specialist resource families only for a named adopter job, stable Stripe contract,
+  clear SDK/application boundary, and maintainable proof path.
+- Keep healthcare, gaming, commerce, marketplace, and other industry policy in adopter
+  applications; expose reusable Stripe-shaped primitives where justified.
+- Admin/operator product UI is outside this headless SDK and belongs in an adopting product
+  (such as Accrue), not on this roadmap.
+
+### Roadmap refresh and done-enough rule
+
+At each milestone close, refresh these horizons and `.planning/JTBD-MAP.md` against shipped
+behavior, current Stripe changelog and versioned schema evidence, adopter feedback,
+CI/security/runtime signals, and the maintenance cost of proposed proof. Promote a candidate
+to an active milestone only when its user outcome, scope, acceptance evidence, and
+compatibility/release implications are clear. Treat the SDK as done enough while common
+adopter jobs remain covered and no evidence-backed gap justifies its ongoing maintenance cost;
+resume feature work only when a concrete trigger fires.
