@@ -8,7 +8,7 @@
 > **Current release:** **`2.3.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see
 > [CHANGELOG](CHANGELOG.md#221) for what shipped since 2.1.0.
 >
-> The published release is **`2.2.2`**, the final compatibility-preserving quality patch.
+> The published release is **`2.3.0`**, the final compatibility-preserving quality patch.
 > Evaluating fit? Start with
 > [User Flows & JTBD][user-flows-and-jtbd].
 
