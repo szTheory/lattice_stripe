@@ -20,7 +20,7 @@ covered_files:
   - test_apps/phoenix_adopter/mix.lock
   - test_apps/phoenix_adopter/test/core_flow_test.exs
   - test_apps/phoenix_adopter/test/test_helper.exs
-covered_digest: "v1:sha256:bbc4621e40dddb5ba77a7ffd4502254c5247ce4af9fa712dbaf88a238294345f"
+covered_digest: "v1:sha256:c699ab8ea84279bfbf5588f0046ec54c89fc4ad23cb79fa4061957e781cff464"
 behavior_unverified: 0
 overrides_applied: 0
 ---

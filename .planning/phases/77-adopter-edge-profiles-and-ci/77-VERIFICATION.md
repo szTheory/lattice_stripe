@@ -18,7 +18,7 @@ covered_files:
   - test_apps/phoenix_adopter/test/connect_context_profile_test.exs
   - test_apps/phoenix_adopter/test/core_flow_test.exs
   - test_apps/phoenix_adopter/test/usage_reconciliation_profile_test.exs
-covered_digest: "v1:sha256:9b7088010e1d812535331b728f5000cd2cfcfe5f05bec1bc6290aafc9d623a50"
+covered_digest: "v1:sha256:df13a61575f74cc4455d89547df79d51206e1d69f116ff7eba08e1f50063da7c"
 behavior_unverified: 0
 overrides_applied: 0
 ---

@@ -41,9 +41,9 @@ Audited against the public remotes on 2026-09-25:
 | Hex | [lattice_stripe 2.3.0](https://hex.pm/packages/lattice_stripe/2.3.0), checksum `e921209af48b4673fab1f39eb210839b41d55497ad456822b78f6f36d4cab088` | verified |
 | HexDocs and adopter smoke | [2.3.0 docs](https://hexdocs.pm/lattice_stripe/2.3.0/); published-Hex Phoenix smoke passed 3 tests, 0 failures | verified |
 | Independent release verifier | `release_evidence_check.sh --version 2.3.0 --sha 1e83a99029f19c24c97549752adf8f57cabc7dd0` passed | verified |
-| Repository closeout | PR #66, #69, and #70 were squash-merged after green current-head CI; fresh open-PR inventory is empty. Primary checkout and `origin/main` match `f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3`; only the active Phase 78 lock remains in the worktree. Later cleanup commits remain separate from the immutable release SHA. | pending |
+| Repository closeout | PR #66, #69, #70, #71, and #72 were squash-merged after exact-head CI passed; fresh open-PR inventory is empty. Primary checkout and `origin/main` match `7f0eb4ba75da2e256f4e05bdd10cf64551dd154e`, and the final one-worktree cleanliness check passed. Later closeout commits remain separate from immutable release SHA. | verified |
 
-The v2.3.0 package and release artifacts are complete. Repository closeout remains open only until the active GSD lock is released or expires and the all-worktree checker passes. See [Phase 78 closeout](./phases/78-release-and-repository-closeout/78-CLOSEOUT.md) for exact evidence and the current blocker.
+The v2.3.0 package and release artifacts are complete. Repository closeout and the all-worktree checker have passed. See [Phase 78 closeout](./phases/78-release-and-repository-closeout/78-CLOSEOUT.md) for exact evidence.
 
 ## Verified final 2.2.2 release
 
