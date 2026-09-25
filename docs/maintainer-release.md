@@ -99,6 +99,44 @@ After manual recovery, close any stale Release Please PR that proposes a bogus m
 - **Required:** `ci-gate` (format, compile, test matrix, integration, docs_truth, quality/credo).
 - **Branch protection:** require **CI / ci-gate**, not the aggregate workflow status alone.
 
+## Final worktree closeout
+
+The release closeout probe reads `git worktree list --porcelain -z` and checks each
+listed tree with NUL-delimited porcelain status including individual untracked files.
+It does not fetch, switch branches, clean, stash, reset, or remove worktrees. Refresh
+the remote-tracking ref as a separate step, then pass the immutable release commit:
+
+```bash
+git fetch origin main
+bash scripts/maintainer/worktree_closeout_check.sh --owners .planning/phases/78-release-and-repository-closeout/78-WORKTREE-OWNERS.json --final --release-sha "$RELEASE_SHA"
+```
+
+Before running the probe, create `78-WORKTREE-OWNERS.json` with an explicit owner
+for every linked worktree path. Paths are absolute, exact keys from the inventory;
+the primary checkout is reported separately and must not be listed as a linked owner.
+For example:
+
+```json
+{
+  "owners": {
+    "/absolute/path/to/linked worktree": "maintainer or agent name"
+  }
+}
+```
+
+An omitted owner, dirty status, missing worktree record, or status inspection error
+blocks closeout. Identify the tree's owner and preserve the worktree. Ask that owner
+to resolve changes through ordinary commits or explicitly dispose of their own work;
+never clean, reset, stash, or force-remove another owner's tree to satisfy the gate.
+Locked and detached worktrees are included in the inventory and reported with their
+state. The final check requires the primary checkout on `main`, with its HEAD equal
+to both the supplied release SHA and freshly fetched `origin/main`.
+
+The research-time checkout was ahead of `origin/main`; that observation is historical
+and its count is not a current closeout fact. Final synchronization is a separate
+release step, followed by a fresh read-only probe. Do not infer current synchronization
+from the earlier inventory.
+
 ## Drift and dependencies
 
 - Stripe OpenAPI drift: `mix lattice_stripe.check_drift` (weekly automation may file issues).
