@@ -1475,6 +1475,7 @@ LatticeStripe.Invoice field account_name
 LatticeStripe.Invoice field account_tax_ids
 LatticeStripe.Invoice field amount_due
 LatticeStripe.Invoice field amount_paid
+LatticeStripe.Invoice field amount_paid_off_stripe
 LatticeStripe.Invoice field amount_remaining
 LatticeStripe.Invoice field amount_shipping
 LatticeStripe.Invoice field application
@@ -2410,6 +2411,8 @@ LatticeStripe.Refund field balance_transaction
 LatticeStripe.Refund field charge
 LatticeStripe.Refund field created
 LatticeStripe.Refund field currency
+LatticeStripe.Refund field customer
+LatticeStripe.Refund field customer_account
 LatticeStripe.Refund field destination_details
 LatticeStripe.Refund field extra
 LatticeStripe.Refund field failure_balance_transaction
@@ -2420,6 +2423,7 @@ LatticeStripe.Refund field metadata
 LatticeStripe.Refund field next_action
 LatticeStripe.Refund field object
 LatticeStripe.Refund field payment_intent
+LatticeStripe.Refund field payment_method
 LatticeStripe.Refund field reason
 LatticeStripe.Refund field receipt_number
 LatticeStripe.Refund field source_transfer_reversal

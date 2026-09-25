@@ -8,6 +8,35 @@ A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is th
 
 Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated across eleven completed GSD milestones and by downstream adopter pull from Accrue.
 
+## Maintainer Intent (2026-09-23)
+
+The long-term aim is to make LatticeStripe the Stripe SDK Elixir teams can depend on
+across common business models and application contexts. Optimize for correct Stripe
+contracts, clear Elixir ergonomics, useful typed coverage, honest proof, safe operation,
+and a codebase that stays understandable. Follow the Pareto principle: solve the most
+common and costly adopter problems first, and do not use endpoint count, activity, or
+coverage percentage as a proxy for quality. Broader work must earn its maintenance cost
+with Stripe API evidence or a concrete adopter job.
+
+The adopter set includes consumer and B2B SaaS teams, usage-priced products, commerce and
+digital-goods businesses, Connect platforms, and teams integrating Stripe in regulated or
+high-sensitivity domains. Their engineers, billing and finance operators, support and
+on-call staff, security reviewers, and library maintainers have different needs. LatticeStripe
+provides Stripe-shaped primitives and reliable HTTP behavior; applications retain their
+industry policy, compliance obligations, billing orchestration, and durable workflow state.
+See `.planning/JTBD-MAP.md` for the maintained audience and scenario lens.
+
+Milestone closeout is complete after the scoped release is cut and verified, `main` CI is
+green, open pull requests are triaged with dispositions, and all Git worktrees are clean.
+Milestones that change adopter-facing package behavior include a new published package
+release.
+
+## Verification and Automation Default
+
+Default to automation-first, shift-left proof. For each behavior or seam, prefer the smallest honest executable check at the right boundary: unit/property checks for pure invariants; Mox or adapter seam tests for contracts; integration, end-to-end, adopter, smoke, or package checks when they cover a real recurring failure mode. Put recurring high-value checks in CI when runtime and maintenance cost are justified. Keep CI focused: do not add redundant lanes, brittle assertions, broad coverage quotas, or one-off infrastructure without recurring adopter or release value.
+
+Aim for zero human verification and UAT handoffs. Before asking a person to verify something, identify what evidence automation cannot produce, add a truthful test or probe when feasible, and run all relevant local/CI checks. Hand off only an irreducible decision or observation that cannot be safely and credibly automated (for example, a user-owned product choice, private live-service behavior with no safe test seam, or genuinely subjective judgment). Never label an unverified claim as proven to avoid a handoff; preserve explicit unknowns and explain the narrow human-only gap. Apply this posture by default in GSD discussion, planning, execution, and verification.
+
 ## Latest Milestone: v1.11 Reader-First Quality Closure
 
 **Goal achieved:** Turn the already-complete SDK into a clean, trustworthy maintenance
@@ -29,17 +58,41 @@ Stripe resource families, public convenience hooks, DSL/code generation,
 provider-shaped abstractions, or speculative API changes are allowed. HexDocs and
 the public Elixir API are the user interface; there is no web UI scope.
 
+## Current Milestone: v1.12 API Contract Freshness and Adopter Proof
+
+**Goal:** Improve typed coverage for high-value changes in already-supported Stripe
+resources and prove the package from a small Phoenix application consuming it as a
+dependency.
+
+**Target features:**
+- Triage Stripe API drift against stable, versioned sources and promote only fields or
+  behaviors with clear adopter value and safe decoding semantics.
+- Exercise a common SaaS flow and selected B2B invoicing, usage reconciliation, and Connect
+  tenant-context contracts in one test-only Phoenix adopter.
+- Preserve existing public behavior and unknown-field handling; change the default Stripe
+  API version only if compatibility evidence supports the change.
+- Cut and verify a new package release, leave `main` CI green, triage open pull requests,
+  and finish with clean Git worktrees.
+
+**Scope boundary:** No blanket promotion of all 104 drift candidates, wrappers for all 94
+unmodeled object types, specialist resource-family expansion, live Stripe credentials, or
+application-owned billing policy.
+
 ## Current State
 
 **Latest shipped milestone:** v1.11 Reader-First Quality Closure completed on
 2026-08-25: 27/27 requirements, 6/6 verified phases, an unchanged 3,463-entry
 public API, and package 2.2.2 verified on GitHub Releases, Hex, and HexDocs.
 
-**Active milestone:** None.
+**Active milestone:** v1.12 API Contract Freshness and Adopter Proof.
 
-**Done estimate:** v1.11 is complete; the repository is at its planned clean pause.
+**Done estimate:** v1.11 is complete; the intended mainstream SDK surface is near done.
+The 2026-09-23 reassessment found a material but bounded Stripe API freshness opportunity;
+it does not justify broad specialist-family expansion.
 
-**Post-v1.x posture:** Reactive maintenance; no broad resource-family expansion and no marketing website.
+**Post-v1.x posture:** Evidence-led maintenance and bounded quality work. The next candidate
+is API freshness for already-supported mainstream resources with representative adopter
+proof. Specialist resource families remain pull-driven; no marketing website.
 
 **Public surface:** [README.md](README.md) + [HexDocs](https://hexdocs.pm/lattice_stripe) + [guides/scope.md](guides/scope.md) — sufficient for an SDK; do not duplicate in a standalone site.
 
@@ -252,6 +305,15 @@ None scheduled. Stay in reactive maintenance and open a bounded milestone only f
 - ✓ Adopter-first SemVer, tenancy, idempotency, streaming, testing, and release documentation
 - ✓ Verified 2.2.2 release and a clean maintenance handoff
 
+### Active
+
+- [ ] **DRIFT-01..04**: Classify supported-resource API drift, promote selected high-value
+  typed fields with compatibility proof, and document the supported contract.
+- [ ] **ADOPT-01..05**: Prove dependency configuration and common SaaS plus selected edge
+  contracts from one test-only Phoenix adopter without live Stripe credentials.
+- [ ] **REL-01..02 / CLOSE-01..03**: Publish and verify the compatible package release; leave
+  `main` CI green, triage open pull requests, and clean all Git worktrees.
+
 ### Out of Scope
 
 - Billing-engine abstractions, entitlement logic, dunning workflows — belong downstream in Accrue or application code
@@ -327,4 +389,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-25 for v1.11 Reader-First Quality Closure.*
+*Last updated: 2026-09-23 for v1.12 API Contract Freshness and Adopter Proof.*

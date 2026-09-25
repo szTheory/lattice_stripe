@@ -10,6 +10,20 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 > reliability, internal consistency, documentation truth, and release hygiene.
 > The project is now in reactive maintenance; new API breadth remains adopter-driven.
 
+## Unreleased
+
+### Features
+
+- Expose `Invoice.amount_paid_off_stripe` for off-Stripe invoice-payment reconciliation in API
+  request responses using Stripe API version `2026-05-27.dahlia` or later.
+- Expose `Refund.customer`, `Refund.customer_account`, and `Refund.payment_method` for refund
+  customer/account and payment-method attribution in Refund API endpoint responses using Stripe
+  API version `2026-07-29.dahlia` or later. Webhook event availability for these fields has not
+  been established.
+
+The package default remains `2026-03-25.dahlia`; configure a later API version to receive these
+fields.
+
 ## [2.2.2](https://github.com/szTheory/lattice_stripe/compare/v2.2.1...v2.2.2) (2026-08-25)
 
 

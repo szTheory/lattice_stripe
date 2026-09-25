@@ -31,6 +31,31 @@ defmodule LatticeStripe.InvoiceTest do
       assert invoice.amount_due == 2000
     end
 
+    test "maps amount_paid_off_stripe while preserving amount_paid and unknown fields" do
+      # Schema-derived from Stripe OpenAPI GA commit c8faccbde66b784ea916d3c28f5790d7a9c9aee2,
+      # /components/schemas/invoice/properties/amount_paid_off_stripe; minimum API version 2026-05-27.dahlia.
+      invoice =
+        Invoice.from_map(
+          invoice_json(%{
+            "amount_paid" => 300,
+            "amount_paid_off_stripe" => 700,
+            "future_reconciliation_key" => "retained"
+          })
+        )
+
+      assert invoice.amount_paid_off_stripe == 700
+      assert invoice.amount_paid == 300
+      assert invoice.extra["future_reconciliation_key"] == "retained"
+    end
+
+    test "amount_paid_off_stripe is nil when omitted or explicitly null" do
+      omitted = Invoice.from_map(invoice_json())
+      explicit_null = Invoice.from_map(invoice_json(%{"amount_paid_off_stripe" => nil}))
+
+      assert omitted.amount_paid_off_stripe == nil
+      assert explicit_null.amount_paid_off_stripe == nil
+    end
+
     test "atomizes status: draft" do
       invoice = Invoice.from_map(invoice_json(%{"status" => "draft"}))
       assert invoice.status == :draft
@@ -285,6 +310,34 @@ defmodule LatticeStripe.InvoiceTest do
   # retrieve/3
 
   describe "retrieve/3" do
+    test "retrieves off-Stripe payment amount with the explicitly selected API version" do
+      # Schema-derived response shape; see pinned GA property provenance in the decoder tests.
+      client = test_client(api_version: "2026-05-27.dahlia")
+
+      expect(LatticeStripe.MockTransport, :request, fn req ->
+        stripe_version =
+          Enum.find_value(req.headers, fn {key, value} ->
+            if key == "stripe-version", do: value
+          end)
+
+        assert req.method == :get
+        assert stripe_version == "2026-05-27.dahlia"
+
+        ok_response(
+          invoice_json(%{
+            "amount_paid" => 300,
+            "amount_paid_off_stripe" => 700,
+            "future_reconciliation_key" => "retained"
+          })
+        )
+      end)
+
+      assert {:ok, %Invoice{amount_paid: 300, amount_paid_off_stripe: 700} = invoice} =
+               Invoice.retrieve(client, "in_test1234567890")
+
+      assert invoice.extra["future_reconciliation_key"] == "retained"
+    end
+
     test "sends GET /v1/invoices/:id and returns {:ok, %Invoice{}}" do
       client = test_client()
 

@@ -27,6 +27,35 @@ When updating this file, review in this order:
 4. `guides/`
 5. newly added public modules and integration tests
 
+## Audience and Domain Lenses
+
+Use these segments to find distinct Stripe contracts and failure modes, not as a promise to
+implement every industry workflow. A domain-neutral sample adopter should cover the common
+SDK path; add a separate profile only when it exercises a meaningfully different contract.
+
+| Adopter context | Typical jobs | Distinct SDK pressure | Boundary |
+| --- | --- | --- | --- |
+| Consumer SaaS / B2C | Hosted checkout, subscriptions, saved payment methods, refunds | Fast onboarding, payment-method variation, webhook correctness, retry/idempotency | Product access and customer lifecycle policy stay in the app |
+| B2B SaaS | Quotes, invoicing, tax, manual collection, subscription changes | Long-lived billing objects, decimal quantities, invoice line-item depth, reconciliation | Contract terms, revenue policy, and collections strategy stay in the app |
+| Usage-priced or AI products | Record, correct, stream, and reconcile usage | High-volume writes, idempotency, asynchronous aggregation and error reports | Usage metering and local ledgers stay app-owned |
+| Commerce and digital goods / games | One-time or recurring purchases, refunds, disputes | Payment-method coverage, latency expectations, retries, and support investigations | Inventory, entitlements, game state, and fulfillment stay in the app |
+| Connect marketplace / platform | Onboard connected accounts and move/reconcile funds | Per-request tenant context, header suppression, account-specific permissions, observability | Marketplace policy, seller risk, and payout orchestration stay in the app |
+| Regulated or high-sensitivity domains | Use Stripe without leaking unrelated domain data into payment metadata | Data minimization, safe inspection/logging, explicit errors, reviewable boundaries | LatticeStripe does not certify compliance or carry clinical, legal, or other domain policy |
+| Finance, support, and on-call operators | Reconcile payments, inspect failures, respond to disputes and webhook incidents | Request IDs, actionable error metadata, safe retries, pagination and partial-failure truth | Case management and operational policy stay in the adopting system |
+| Elixir application and library maintainers | Install, configure, upgrade, test, and extend the SDK | Minimum Elixir/OTP compatibility, predictable public API, supervision and optional-dependency behavior | The SDK owns Stripe HTTP contracts and supported extension points |
+
+### Common denominator and edge-profile rule
+
+The common adopter spine is a server-side Elixir application that creates or retrieves
+Stripe resources, handles API errors and retries, verifies webhook input, and turns typed
+Stripe responses into application-owned state. The preferred confidence model is one small
+Phoenix app importing LatticeStripe as a dependency, with optional profiles for B2B invoicing,
+usage reconciliation, and Connect tenant context. Profiles exist to validate different SDK
+contracts, not to implement sample billing products. Include edge cases when they are shared
+across adopters: unknown fields, pagination boundaries, delayed webhook delivery, invalid
+signatures, retries/idempotency, partial stream failures, tenant override/suppression, and
+secret-safe inspection. Do not create one digital twin per industry.
+
 ## Flow Inventory
 
 ### Payments

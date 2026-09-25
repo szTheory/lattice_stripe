@@ -1,0 +1,48 @@
+{
+  "repository": "szTheory/lattice_stripe",
+  "generated_at": "2026-09-24T23:58:41Z",
+  "inventory_source": "gh pr list --repo szTheory/lattice_stripe --state open --limit 1000",
+  "status": "complete",
+  "entries": [
+    {
+      "pr_number": 66,
+      "pr_url": "https://github.com/szTheory/lattice_stripe/pull/66",
+      "title": "chore(deps-dev): bump the dev-dependencies group across 1 directory with 3 updates",
+      "head_sha": "9b6d29dcf565cf03a529f8086eb3c3d93d985b27",
+      "disposition": "defer",
+      "rationale": "Current-head Quality and ci-gate checks are failing; defer pending investigation and revisit after required checks pass and maintainer review is complete.",
+      "next_action": "Investigate the Quality failure, then revisit after current-head required checks pass and maintainer review is complete.",
+      "next_action_date": "2026-09-25",
+      "required_checks": {
+        "head_sha": "9b6d29dcf565cf03a529f8086eb3c3d93d985b27",
+        "state": "failure",
+        "ci_gate": "failure",
+        "failed": [
+          {
+            "name": "Quality",
+            "url": "https://github.com/szTheory/lattice_stripe/actions/runs/35565687653/job/106226925672"
+          },
+          {
+            "name": "ci-gate",
+            "url": "https://github.com/szTheory/lattice_stripe/actions/runs/35565687653/job/106227184251"
+          }
+        ],
+        "successful_count": 16,
+        "failed_count": 2
+      },
+      "review_state": "no maintainer reviews found",
+      "existing_timeline_activity": [
+        {
+          "url": "https://github.com/szTheory/lattice_stripe/pull/66#issuecomment-5755941417",
+          "author": "dependabot[bot]",
+          "note": "Automated comment reports an invalid dependencies label; it does not record a maintainer disposition."
+        }
+      ],
+      "timeline": {
+        "url": "https://github.com/szTheory/lattice_stripe/pull/66#issuecomment-5824286242",
+        "decision_text": "Disposition: defer pending investigation of the failing Quality and ci-gate checks. Revisit after current-head required checks pass and maintainer review is complete.",
+        "status": "posted_and_verified"
+      }
+    }
+  ]
+}

@@ -1,10 +1,10 @@
 {
   "model_profile": "inherit",
-  "runtime": "claude",
+  "runtime": "codex",
   "resolve_model_ids": "omit",
   "models": {
-    "planning": "inherit",
-    "discuss": "inherit",
+    "planning": "opus",
+    "discuss": "sonnet",
     "research": "haiku",
     "execution": "sonnet",
     "verification": "sonnet"
@@ -14,11 +14,19 @@
       "haiku": "composer-2.5-fast",
       "sonnet": "composer-2.5-fast",
       "opus": "inherit"
+    },
+    "codex": {
+      "opus": "gpt-6-sol",
+      "sonnet": "gpt-6-luna",
+      "haiku": "gpt-6-luna"
     }
   },
   "model_overrides": {
-    "gsd-debugger": "inherit",
-    "gsd-planner": "inherit"
+    "gsd-debugger": "gpt-6-sol",
+    "gsd-planner": "gpt-6-sol",
+    "gsd-roadmapper": "gpt-6-sol",
+    "gsd-pattern-mapper": "gpt-6-sol",
+    "gsd-plan-checker": "gpt-6-sol"
   },
   "commit_docs": true,
   "parallelization": true,
@@ -74,7 +82,8 @@
       "parallel_subagent_research": true,
       "assessment_output_thread": ".planning/threads/v1-{N}-next-milestone-assessment.md"
     },
-    "human_verify_mode": "end-of-phase"
+    "human_verify_mode": "end-of-phase",
+    "use_worktrees": true
   },
   "hooks": {
     "context_warnings": true

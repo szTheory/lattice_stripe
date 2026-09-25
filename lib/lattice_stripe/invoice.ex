@@ -52,6 +52,14 @@ defmodule LatticeStripe.Invoice do
 
   See the [Stripe Invoice API](https://docs.stripe.com/api/invoices) for the full
   object reference and available parameters.
+
+  ## Off-Stripe payments
+
+  `amount_paid_off_stripe` reports invoice payments collected outside Stripe, in
+  the currency's smallest unit. Stripe includes it in API request responses from
+  `2026-05-27.dahlia`; set the client API version explicitly to access it. This
+  does not establish availability in webhook event payloads. The package default
+  remains `2026-03-25.dahlia`.
   """
 
   alias LatticeStripe.{
@@ -74,6 +82,7 @@ defmodule LatticeStripe.Invoice do
   # String sigil (no `a`) matches Jason's default string-key output.
   @known_fields ~w[
     id object account_country account_name account_tax_ids amount_due amount_paid
+    amount_paid_off_stripe
     amount_remaining amount_shipping application application_fee_amount attempt_count
     attempted auto_advance automatic_tax billing_reason charge collection_method
     created currency customer customer_address customer_email customer_name
@@ -99,6 +108,7 @@ defmodule LatticeStripe.Invoice do
     :account_tax_ids,
     :amount_due,
     :amount_paid,
+    :amount_paid_off_stripe,
     :amount_remaining,
     :amount_shipping,
     :application,
@@ -184,6 +194,9 @@ defmodule LatticeStripe.Invoice do
   A Stripe Invoice object.
 
   See the [Stripe Invoice API](https://docs.stripe.com/api/invoices/object) for field definitions.
+  `amount_paid_off_stripe` is an optional integer in the currency's smallest
+  unit, available in API request responses from `2026-05-27.dahlia` when the
+  client opts into that version. The package default remains `2026-03-25.dahlia`.
   """
   @type t :: %__MODULE__{
           id: String.t() | nil,
@@ -193,6 +206,7 @@ defmodule LatticeStripe.Invoice do
           account_tax_ids: list() | nil,
           amount_due: integer() | nil,
           amount_paid: integer() | nil,
+          amount_paid_off_stripe: integer() | nil,
           amount_remaining: integer() | nil,
           amount_shipping: integer() | nil,
           application: String.t() | nil,
@@ -933,6 +947,7 @@ defmodule LatticeStripe.Invoice do
       account_tax_ids: known["account_tax_ids"],
       amount_due: known["amount_due"],
       amount_paid: known["amount_paid"],
+      amount_paid_off_stripe: known["amount_paid_off_stripe"],
       amount_remaining: known["amount_remaining"],
       amount_shipping: known["amount_shipping"],
       application: known["application"],
