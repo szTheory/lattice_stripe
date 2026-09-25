@@ -1,8 +1,8 @@
 {
   "repository": "szTheory/lattice_stripe",
-  "generated_at": "2026-09-24T23:47:00Z",
+  "generated_at": "2026-09-24T23:58:41Z",
   "inventory_source": "gh pr list --repo szTheory/lattice_stripe --state open --limit 1000",
-  "status": "draft_pending_human_authorization",
+  "status": "complete",
   "entries": [
     {
       "pr_number": 66,
@@ -10,9 +10,8 @@
       "title": "chore(deps-dev): bump the dev-dependencies group across 1 directory with 3 updates",
       "head_sha": "9b6d29dcf565cf03a529f8086eb3c3d93d985b27",
       "disposition": "defer",
-      "proposal_only": true,
-      "rationale": "Exact-head checks on 2026-09-24 show Quality and ci-gate failed, so the PR is currently blocked from protected merge. The update is limited to development dependencies, but its failing quality gate must be understood before acceptance.",
-      "next_action": "Inspect the Quality failure, resolve it or update the branch as appropriate, then rerun required checks and reassess the PR at its current head.",
+      "rationale": "Current-head Quality and ci-gate checks are failing; defer pending investigation and revisit after required checks pass and maintainer review is complete.",
+      "next_action": "Investigate the Quality failure, then revisit after current-head required checks pass and maintainer review is complete.",
       "next_action_date": "2026-09-25",
       "required_checks": {
         "head_sha": "9b6d29dcf565cf03a529f8086eb3c3d93d985b27",
@@ -40,9 +39,9 @@
         }
       ],
       "timeline": {
-        "url": null,
-        "decision_text": null,
-        "status": "pending_human_authorization"
+        "url": "https://github.com/szTheory/lattice_stripe/pull/66#issuecomment-5824286242",
+        "decision_text": "Disposition: defer pending investigation of the failing Quality and ci-gate checks. Revisit after current-head required checks pass and maintainer review is complete.",
+        "status": "posted_and_verified"
       }
     }
   ]
