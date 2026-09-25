@@ -1,6 +1,6 @@
 # Maintainer release procedure
 
-This document is for **LatticeStripe maintainers** preparing a patch release on the sustaining train. Adopters should use [Hex](https://hex.pm/packages/lattice_stripe) and the public [CHANGELOG](https://github.com/szTheory/lattice_stripe/blob/main/CHANGELOG.md).
+This document is for **LatticeStripe maintainers** preparing a package release on the sustaining train. Adopters should use [Hex](https://hex.pm/packages/lattice_stripe) and the public [CHANGELOG](https://github.com/szTheory/lattice_stripe/blob/main/CHANGELOG.md).
 
 ## Before you start
 
@@ -14,11 +14,26 @@ Resolve every `[BLOCK]` line before dispatching a manual Hex publish. Use `--ski
 
 See also [`.planning/RELEASE-TRAIN.md`](../.planning/RELEASE-TRAIN.md) for commit-style and cadence rules.
 
-## Normal patch release (fully automated)
+## Normal release (fully automated)
 
-1. Merge maintainer PRs to `main` using `docs:`, `fix:`, or `chore:` prefixes (patch-eligible).
+For the currently reviewed additive Invoice and Refund fields, Release Please should propose
+**2.3.0**. The final API-lock delta must contain only `Invoice.amount_paid_off_stripe` and
+`Refund.customer`, `Refund.customer_account`, and `Refund.payment_method`; the default Stripe
+API version remains `2026-03-25.dahlia`. Release Please owns the version and changelog edits.
+Before merging a generated Release Please PR, the workflow runs
+`scripts/maintainer/release_candidate_check.sh` from trusted `main` and reads the proposal
+at the current PR head. Maintainers can run that same preflight from a trusted `main`
+checkout with:
+
+```bash
+git fetch origin main --tags
+git switch main
+bash scripts/maintainer/release_candidate_check.sh
+```
+
+1. Merge maintainer PRs to `main` after their required checks pass.
 2. Confirm GitHub Actions **CI / ci-gate** is green on `main`.
-3. **Release** workflow runs Release Please and opens/updates a patch Release PR.
+3. **Release** workflow runs Release Please and opens/updates the release PR.
 4. **Bootstrap CI** dispatches `ci.yml` only when a Release PR is open but was **not** just updated (`prs_created` false). Fresh Release Please updates run **pull_request** CI via `RELEASE_PLEASE_TOKEN` — no duplicate dispatch.
 5. When **ci-gate** succeeds, **Release PR Auto-Merge** merges the Release PR, dispatches **CI** on the merge commit, then **Release** (GITHUB_TOKEN merges do not emit push events).
 6. **Release** workflow tags the merge, waits for **ci-gate** on the tag SHA, then publishes to Hex automatically.
@@ -37,6 +52,15 @@ Routine patch releases require **`RELEASE_PLEASE_TOKEN`** (fine-grained PAT with
 | **Release PR Auto-Merge** | After release-branch **CI** completes | Manual retry: **Release PR Auto-Merge** workflow_dispatch. |
 
 A **skipped** Release PR Auto-Merge run after a maintainer push to `main` is expected, not a failed release.
+
+If protected merge fails after `ci-gate` passes, the auto-merge workflow leaves the Release
+Please PR open and reports its current head SHA, merge/review state, check conclusions, and
+available unresolved review-conversation state. Resolve the reported protection requirement,
+then rerun **Release PR Auto-Merge** with `workflow_dispatch` and that same current head SHA.
+The workflow rechecks both the PR head and `ci-gate` before every retry and uses GitHub's
+head-match guard for the merge. Do not use administrator override; if the required policy
+cannot be met, leave the PR open and correct the repository policy through the normal
+maintainer process.
 
 ### Version prose on the Release PR
 

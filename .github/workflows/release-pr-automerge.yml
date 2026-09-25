@@ -63,6 +63,19 @@ jobs:
             echo "branch=${RUN_BRANCH}" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Checkout trusted main for release candidate preflight
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verify Release Please proposal compatibility
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_CANDIDATE_EXPECTED_HEAD: ${{ steps.target.outputs.sha }}
+        run: bash scripts/maintainer/release_candidate_check.sh
+
       - name: Verify ci-gate succeeded on target SHA
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
@@ -136,16 +149,58 @@ jobs:
               --jq '[.check_runs[] | select(.name == "ci-gate")] | sort_by(.started_at) | last | .conclusion // "missing"'
           }
 
+          report_merge_blocker() {
+            local snapshot graphql owner name conversation_state checks merge_state
+            snapshot=$(gh pr view "$pr_number" --json state,headRefOid,mergeable,mergeStateStatus,reviewDecision,isDraft,statusCheckRollup -R "$REPOSITORY" 2>&1) || {
+              echo "PR #$pr_number head=$HEAD_SHA; merge blocker diagnostics unavailable: $snapshot" >&2
+              return
+            }
+            checks=$(jq -r '[.statusCheckRollup[]? | if .__typename == "CheckRun" then "\(.name)=\(.conclusion // .status)" else "\(.context)=\(.state)" end] | join(", ")' <<<"$snapshot")
+            merge_state=$(jq -r '"state=\(.state) head=\(.headRefOid) mergeable=\(.mergeable) mergeStateStatus=\(.mergeStateStatus) reviewDecision=\(.reviewDecision) draft=\(.isDraft) checks=[\(.statusCheckRollup | length)]"' <<<"$snapshot")
+            owner=${REPOSITORY%%/*}
+            name=${REPOSITORY#*/}
+            # shellcheck disable=SC2016 # GraphQL variables are expanded by GitHub, not the shell.
+            graphql=$(gh api graphql \
+              -f query='query($owner:String!, $name:String!, $number:Int!) { repository(owner:$owner, name:$name) { pullRequest(number:$number) { reviewThreads(first:100) { nodes { isResolved } pageInfo { hasNextPage } } } } }' \
+              -F "owner=$owner" -F "name=$name" -F "number=$pr_number" 2>&1) || graphql=''
+            if [ -z "$graphql" ]; then
+              conversation_state='unresolved conversations=unknown (GitHub query unavailable)'
+            elif ! jq -e '.data.repository.pullRequest.reviewThreads' >/dev/null 2>&1 <<<"$graphql"; then
+              conversation_state='unresolved conversations=unknown (GitHub query returned no thread state)'
+            else
+              conversation_state=$(jq -r '([.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false)] | length) as $open | "unresolved conversations=\($open)" + (if .data.repository.pullRequest.reviewThreads.pageInfo.hasNextPage then " (first 100 only; additional threads unknown)" else "" end)' <<<"$graphql")
+            fi
+            echo "Protected merge blocked for PR #$pr_number ($REPOSITORY): $merge_state" >&2
+            echo "Current required/check state: ${checks:-<none reported>}" >&2
+            echo "Review conversation state: $conversation_state" >&2
+            echo "gh pr merge response: ${merge_error:-<no response>}" >&2
+          }
+
           echo "Merging release PR #$pr_number ($title)"
           for attempt in $(seq 1 12); do
+            current=$(gh pr view "$pr_number" --json state,headRefOid -R "$REPOSITORY")
+            current_head=$(jq -r '.headRefOid' <<<"$current")
+            current_state=$(jq -r '.state' <<<"$current")
+            if [ "$current_state" != OPEN ] || [ "$current_head" != "$HEAD_SHA" ]; then
+              echo "Release PR changed during merge wait: PR #$pr_number state=$current_state head=$current_head expected=$HEAD_SHA" >&2
+              merge_error='PR is closed or its current head differs from the verified ci-gate SHA.'
+              report_merge_blocker
+              exit 1
+            fi
+
             conclusion=$(latest_ci_gate)
             if [ "$conclusion" != "success" ]; then
               echo "Latest ci-gate on $HEAD_SHA is $conclusion (attempt ${attempt}/12); waiting 30s..."
+              if [ "$attempt" -eq 12 ]; then
+                merge_error="Latest ci-gate on verified head $HEAD_SHA remained $conclusion after 12 attempts."
+                report_merge_blocker
+                break
+              fi
               sleep 30
               continue
             fi
 
-            if gh pr merge "$pr_number" --squash -R "$REPOSITORY"; then
+            if merge_error=$(gh pr merge "$pr_number" --squash --match-head-commit "$HEAD_SHA" -R "$REPOSITORY" 2>&1); then
               echo "Merged PR #$pr_number"
               merge_sha=$(gh pr view "$pr_number" --json mergeCommit -q '.mergeCommit.oid' -R "$REPOSITORY")
               echo "merge_sha=${merge_sha}" >> "$GITHUB_ENV"
@@ -153,19 +208,16 @@ jobs:
               exit 0
             fi
 
-            if gh pr merge "$pr_number" --squash --admin -R "$REPOSITORY"; then
-              echo "Merged PR #$pr_number with admin override"
-              merge_sha=$(gh pr view "$pr_number" --json mergeCommit -q '.mergeCommit.oid' -R "$REPOSITORY")
-              echo "merge_sha=${merge_sha}" >> "$GITHUB_ENV"
-              echo "merged=true" >> "$GITHUB_ENV"
-              exit 0
+            echo "Protected merge failed (attempt ${attempt}/12): $merge_error" >&2
+            if [ "$attempt" -eq 12 ]; then
+              report_merge_blocker
+              break
             fi
-
-            echo "Merge blocked (attempt ${attempt}/12); waiting for branch protection to catch up..."
+            echo "Rechecking the exact PR head and ci-gate before retrying in 30s..."
             sleep 30
           done
 
-          echo "Failed to merge PR #$pr_number after 12 attempts"
+          echo "Failed to merge PR #$pr_number without bypassing protection; PR remains open." >&2
           exit 1
 
       - name: Bootstrap CI on merge commit
