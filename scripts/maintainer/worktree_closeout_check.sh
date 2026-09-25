@@ -4,16 +4,17 @@ set -euo pipefail
 REMOTE="${WORKTREE_CLOSEOUT_REMOTE:-origin}"
 OWNERS_FILE=""
 FINAL=0
-RELEASE_SHA=""
+EXPECTED_MAIN_SHA=""
 GIT_BIN="${WORKTREE_CLOSEOUT_GIT:-git}"
 
 usage() {
   cat <<'USAGE'
-Usage: worktree_closeout_check.sh --owners <json-file> [--final --release-sha <full-sha>]
+Usage: worktree_closeout_check.sh --owners <json-file> [--final --expected-main-sha <full-sha>]
 
 Read-only inventory of the primary checkout and every linked Git worktree.
 The owner file must contain {"owners":{"<absolute-worktree-path>":"<owner>"}}.
-In --final mode local main, the release SHA, and REMOTE/main must be identical.
+In --final mode local main and REMOTE/main must equal the expected current main SHA.
+Release artifact identity is checked separately by release_evidence_check.sh.
 Fetch REMOTE first; this script never fetches or changes Git state.
 USAGE
 }
@@ -22,7 +23,7 @@ while (($#)); do
   case "$1" in
     --owners) (($# >= 2)) || { usage >&2; exit 2; }; OWNERS_FILE="$2"; shift 2 ;;
     --final) FINAL=1; shift ;;
-    --release-sha) (($# >= 2)) || { usage >&2; exit 2; }; RELEASE_SHA="$2"; shift 2 ;;
+    --expected-main-sha) (($# >= 2)) || { usage >&2; exit 2; }; EXPECTED_MAIN_SHA="$2"; shift 2 ;;
     --remote) (($# >= 2)) || { usage >&2; exit 2; }; REMOTE="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "[BLOCK] unknown argument: $1" >&2; usage >&2; exit 2 ;;
@@ -41,8 +42,8 @@ if ! jq -e '.owners | type == "object"' "$OWNERS_FILE" >/dev/null 2>&1; then
   block "owner mapping must be valid JSON with an owners object"
   exit 1
 fi
-if (( FINAL )) && [[ ! "$RELEASE_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
-  block "--final requires --release-sha with a full 40-character commit SHA"
+if (( FINAL )) && [[ ! "$EXPECTED_MAIN_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+  block "--final requires --expected-main-sha with a full 40-character commit SHA"
   exit 1
 fi
 
@@ -143,13 +144,13 @@ if (( FINAL )); then
     primary_branch="${BRANCHES[$primary_index]}"
     primary_sha="${SHAS[$primary_index]}"
     [[ "$primary_branch" == main ]] || block "primary checkout branch is '$primary_branch', expected main"
-    [[ "$primary_sha" == "$RELEASE_SHA" ]] || block "primary HEAD $primary_sha does not equal release SHA $RELEASE_SHA"
+    [[ "$primary_sha" == "$EXPECTED_MAIN_SHA" ]] || block "primary HEAD $primary_sha does not equal expected main SHA $EXPECTED_MAIN_SHA"
     if ! REMOTE_SHA="$("$GIT_BIN" rev-parse --verify "refs/remotes/$REMOTE/main^{commit}" 2>"$TMP_DIR/remote.err")"; then
       block "could not read freshly fetched $REMOTE/main: $(<"$TMP_DIR/remote.err")"
-    elif [[ "$REMOTE_SHA" != "$RELEASE_SHA" ]]; then
-      block "$REMOTE/main $REMOTE_SHA does not equal release SHA $RELEASE_SHA"
+    elif [[ "$REMOTE_SHA" != "$EXPECTED_MAIN_SHA" ]]; then
+      block "$REMOTE/main $REMOTE_SHA does not equal expected main SHA $EXPECTED_MAIN_SHA"
     else
-      pass "primary main, release SHA, and $REMOTE/main all equal $RELEASE_SHA"
+      pass "primary main and $REMOTE/main both equal expected main SHA $EXPECTED_MAIN_SHA"
     fi
   fi
 fi

@@ -15,6 +15,13 @@ the deliverable.**
 
 If a deliverable cannot be proven by a named, passing, executable check, it stays
 `human_judgment: true`. That is not a failure of this policy — it is the policy working.
+
+Aim for zero avoidable human verification and UAT handoffs. When every deliverable has
+named, passing automated evidence and there is no separate human-only checkpoint, finish
+verification from that evidence without asking for a blanket confirmation. An empty or
+incomplete coverage list is not proof: derive checks from the phase's deliverables and keep
+unproven items visible. When a human check remains, state exactly what evidence automation
+cannot provide and ask only for that decision or observation.
 </objective>
 
 <repo_shape>
@@ -90,6 +97,13 @@ auto-pass — that is enforced mechanically in `gsd-tools`, not by good intentio
 attempt to work around it. If you find yourself wanting to, the honest move is to write the
 missing test.
 
+Choose the narrowest seam that proves the contract: unit or property tests for pure
+invariants, Mox/adapter tests for request and response contracts, and integration, adopter,
+end-to-end, or cold-start smoke checks when they cover a recurring failure mode. Run
+recurring high-value checks in an existing CI lane when practical; create a new lane only
+when its distinct signal justifies ongoing runtime and maintenance cost. Do not add coverage
+quotas or duplicate an existing check for appearance's sake.
+
 **Anti-pattern to avoid, with a real example.** Phase 65 shipped a `COVERAGE.md` opt-out
 claiming OBJ-02 was satisfied "for every fixture that has a `from_map/1` to wrap." Both
 functions it implied were missing actually existed. Nothing checked the rationale, so the
@@ -104,6 +118,11 @@ When writing `must_haves.truths` for a phase plan, each truth should name the be
 test that will prove it. A truth asserting runtime behaviour with no test exercising it is
 recorded as behaviour-unverified and routes to a human — correctly. Naming the test up
 front is what keeps that from happening at the end of the phase, when it is most expensive.
+
+At verification time, do not request a summary-level confirmation when all scoped
+deliverables are already covered by named passing checks. Keep a human checkpoint only for
+an unproven deliverable, a separately injected smoke check without automated evidence, or
+one of the irreducible decisions in `still_needs_a_human`.
 
 Avoid `verification: backstop` where explicit evidence can be supplied; a backstop truth
 abstains and escalates.

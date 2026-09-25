@@ -8,7 +8,7 @@ trap 'rm -rf "$TMP"' EXIT
 
 PRIMARY="$TMP/primary checkout"
 LINKED="$TMP/linked checkout with spaces"
-RELEASE_SHA=0123456789abcdef0123456789abcdef01234567
+EXPECTED_MAIN_SHA=0123456789abcdef0123456789abcdef01234567
 MODE=clean
 mkdir -p "$TMP/bin"
 cat >"$TMP/bin/git" <<'MOCK_GIT'
@@ -33,7 +33,7 @@ case "$1" in
     if [[ "$2" == --path-format=absolute && "$3" == --git-common-dir ]]; then printf '%s/.git\n' "$PRIMARY"
     elif [[ "$2" == --verify ]]; then
       [[ "${MODE:-clean}" != remote_fail ]] || { echo 'synthetic missing remote ref' >&2; exit 20; }
-      printf '%s\n' "${REMOTE_SHA:-$RELEASE_SHA}"
+      printf '%s\n' "${REMOTE_SHA:-$EXPECTED_MAIN_SHA}"
     else exit 2; fi
     ;;
   -C)
@@ -56,8 +56,8 @@ write_owners() {
 }
 run() {
   env PATH="$TMP/bin:$PATH" WORKTREE_CLOSEOUT_GIT="$TMP/bin/git" \
-    PRIMARY="$PRIMARY" LINKED="$LINKED" RELEASE_SHA="$RELEASE_SHA" \
-    MODE="$MODE" REMOTE_SHA="${REMOTE_SHA:-$RELEASE_SHA}" \
+    PRIMARY="$PRIMARY" LINKED="$LINKED" RELEASE_SHA="$EXPECTED_MAIN_SHA" \
+    MODE="$MODE" REMOTE_SHA="${REMOTE_SHA:-$EXPECTED_MAIN_SHA}" \
     bash "$CHECKER" --owners "$TMP/owners.json" "$@"
 }
 expect_pass() {
@@ -74,40 +74,40 @@ expect_block() {
 
 write_owners
 MODE=clean
-expect_pass "clean inventory" --final --release-sha "$RELEASE_SHA"
+expect_pass "clean inventory with release commit behind current main" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 grep -Fq "linked path=$(printf '%q' "$LINKED")" "$TMP/output" || { echo 'FAIL: path with spaces was not reported safely'; exit 1; }
 grep -Fq 'locked=1' "$TMP/output" || { echo 'FAIL: locked worktree metadata was not reported'; exit 1; }
 
 MODE=tracked_dirty
-expect_block "tracked dirty worktree" "dirty worktree" --final --release-sha "$RELEASE_SHA"
+expect_block "tracked dirty worktree" "dirty worktree" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 grep -Fq 'tracked.ex' "$TMP/output" || { echo 'FAIL: tracked status entry missing'; exit 1; }
 MODE=untracked_dirty
-expect_block "untracked worktree file" "dirty worktree" --final --release-sha "$RELEASE_SHA"
+expect_block "untracked worktree file" "dirty worktree" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 grep -Fq 'new' "$TMP/output" || { echo 'FAIL: untracked status entry missing'; exit 1; }
 
 MODE=clean
 write_owners no
-expect_block "missing linked owner" "no owner association" --final --release-sha "$RELEASE_SHA"
+expect_block "missing linked owner" "no owner association" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 write_owners
 MODE=status_fail
-expect_block "uninspectable worktree" "status inspection failed" --final --release-sha "$RELEASE_SHA"
+expect_block "uninspectable worktree" "status inspection failed" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 MODE=inventory_fail
-expect_block "inventory command failure" "synthetic inventory error" --final --release-sha "$RELEASE_SHA"
+expect_block "inventory command failure" "synthetic inventory error" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 MODE=omit_primary
-expect_block "missing primary inventory record" "not present exactly once" --final --release-sha "$RELEASE_SHA"
+expect_block "missing primary inventory record" "not present exactly once" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 MODE=clean
 REMOTE_SHA=ffffffffffffffffffffffffffffffffffffffff
-expect_block "release main mismatch" "does not equal release SHA" --final --release-sha "$RELEASE_SHA"
-REMOTE_SHA="$RELEASE_SHA"
+expect_block "current main mismatch" "does not equal expected main SHA" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
+REMOTE_SHA="$EXPECTED_MAIN_SHA"
 MODE=wrong_branch
-expect_block "primary branch mismatch" "expected main" --final --release-sha "$RELEASE_SHA"
+expect_block "primary branch mismatch" "expected main" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 MODE=wrong_release
-expect_block "primary release SHA mismatch" "does not equal release SHA" --final --release-sha "$RELEASE_SHA"
+expect_block "primary current-main SHA mismatch" "does not equal expected main SHA" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 MODE=remote_fail
-expect_block "missing fetched remote ref" "synthetic missing remote ref" --final --release-sha "$RELEASE_SHA"
+expect_block "missing fetched remote ref" "synthetic missing remote ref" --final --expected-main-sha "$EXPECTED_MAIN_SHA"
 
 DOC="$ROOT/docs/maintainer-release.md"
-grep -Fq "bash scripts/maintainer/worktree_closeout_check.sh --owners .planning/phases/78-release-and-repository-closeout/78-WORKTREE-OWNERS.json --final --release-sha \"\$RELEASE_SHA\"" "$DOC" || {
+grep -Fq "bash scripts/maintainer/worktree_closeout_check.sh --owners .planning/phases/78-release-and-repository-closeout/78-WORKTREE-OWNERS.json --final --expected-main-sha \"\$(git rev-parse HEAD)\"" "$DOC" || {
   echo 'FAIL: maintainer docs command does not match checker interface' >&2; exit 1;
 }
 grep -Fq '"owners"' "$DOC" || { echo 'FAIL: maintainer docs omit owner mapping format'; exit 1; }

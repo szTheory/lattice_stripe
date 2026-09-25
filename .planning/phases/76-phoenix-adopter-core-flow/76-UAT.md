@@ -3,7 +3,7 @@ status: complete
 phase: 76-phoenix-adopter-core-flow
 source: [76-01-SUMMARY.md]
 started: 2026-09-24T20:05:00Z
-updated: 2026-09-25T01:06:49.569Z
+updated: 2026-09-25T02:39:14Z
 ---
 
 ## Current Test
@@ -33,6 +33,10 @@ passed: 2
 issues: 0
 pending: 0
 skipped: 0
+
+## Latest Automated Rerun
+
+- Current main CI run [36085912335] passed on `ad48bd3259a22155fa4f6f4e88b0dfa8d7f54d64`; the Phoenix adopter job and required `ci-gate` both passed. The phase’s existing path-dependency, Checkout, signed-webhook, and tampered-body evidence remains applicable to this unchanged adopter implementation. (https://github.com/szTheory/lattice_stripe/actions/runs/36085912335).
 
 ## Gaps
 

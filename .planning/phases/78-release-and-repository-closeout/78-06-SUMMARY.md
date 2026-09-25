@@ -10,7 +10,7 @@ requires:
     provides: Approved exact 2.3.0 candidate
 provides:
   - Published and independently verified 2.3.0 release evidence
-  - Fresh PR inventory and explicitly recorded remaining repository gate
+  - Refreshed empty PR inventory and explicitly recorded remaining repository gate
   - Read-only evidence of owner changes preventing worktree closeout
 affects: [release-closeout]
 actuals:
@@ -25,7 +25,7 @@ key-files:
   modified: [.planning/RELEASE-TRAIN.md, .planning/phases/78-release-and-repository-closeout/78-CLOSEOUT.md, .planning/phases/78-release-and-repository-closeout/78-PR-DISPOSITIONS.json]
 key-decisions:
   - "The exact-SHA 2.3.0 package release is complete and verified."
-  - "Do not alter user-owned primary checkout changes or merge PR #66 without the maintainer review required by its recorded disposition."
+  - "Retain the verified release SHA independently from later current-main closeout commits."
 patterns-established:
   - "A verified package release does not imply clean repository closeout when PR or owner-state gates remain unresolved."
 requirements-completed: [REL-01, REL-02]
@@ -36,7 +36,7 @@ status: halted
 
 # Phase 78 Plan 06: Release and Repository Closeout Summary
 
-**The 2.3.0 release is published and verified; repository closeout remains halted on an open PR review and preserved dirty primary checkout.**
+**The 2.3.0 release is published and verified; PR triage is complete, while repository closeout remains halted on the preserved dirty primary checkout.**
 
 ## Completed release task
 
@@ -46,17 +46,17 @@ status: halted
 
 ## Remaining closeout gates
 
-- The 02:08 UTC inventory recorded PR #66 at `01a3d655291f65dc02460f57a25a929242485d6a` with all 21 checks passing. After the user authorized squash merges for green CI, PR #66 was squash-merged at 02:16 UTC as `d006a3605a400e1eaf0ca784506d23352bdad31a`. PR #69 at its initial head `905982d6c0e1eb14c8b17bd79891f1603282476a` passed full manually dispatched CI, but the required check did not appear in the PR rollup, so branch protection blocked merge. This closeout update removes the pull-request-only `.planning/**` CI exclusion so the supported PR workflow can publish the required check; push CI still ignores planning-only changes. The 02:08 UTC ledger is retained as a dated snapshot.
-- The read-only final worktree checker reported three blockers: the primary checkout is dirty with user-owned state, its HEAD is `dcb514d14aee41cb7e7e3213a276932f8e33ff74` instead of the release SHA, and cached `origin/main` is stale at `a318624dbcf45546d66a4aaaece19dff42ba13ad`. No owner file was changed or removed.
+- PR #66 was squash-merged as `d006a3605a400e1eaf0ca784506d23352bdad31a`. PR #69's CI visibility fix was then squash-merged as `ad48bd3259a22155fa4f6e4f88b0dfa8d7f54d64` after current-head `ci-gate`, test and relevant workflow checks passed in [run 36085912335](https://github.com/szTheory/lattice_stripe/actions/runs/36085912335). The refreshed open-PR inventory is empty; prior dispositions remain available in the ledger's historical snapshot.
+- The worktree checker now compares primary HEAD and fetched `origin/main` with an explicit expected current-main SHA. The immutable release remains independently checked against tag `v2.3.0`. Its latest primary-checkout result remains blocked because the checkout is dirty, HEAD is `dcb514d14aee41cb7e7e3213a276932f8e33ff74` rather than current main `ad48bd3259a22155fa4f6e4f88b0dfa8d7f54d64`, and cached `origin/main` is stale at `a318624dbcf45546d66a4aaaece19dff42ba13ad`.
 - The primary checkout cannot be declared clean or synchronized. Preserve its state and resume closeout only after its owner changes are resolved and Git metadata can be refreshed safely.
 
 ## Artifacts
 
 - [Dated release, PR, and worktree evidence](./78-CLOSEOUT.md)
-- [Current open-PR disposition ledger](./78-PR-DISPOSITIONS.json)
+- [Current open-PR inventory and historical dispositions](./78-PR-DISPOSITIONS.json)
 - [Updated release train](../../RELEASE-TRAIN.md)
 
-This plan is intentionally halted. The public release requirements are complete; the remaining repository hygiene and closeout criteria still require owner-state resolution and maintainer review.
+This plan is intentionally halted. Release publication and PR triage are complete; repository cleanliness and synchronization remain open until primary checkout state is reconciled and its remote tracking ref can be refreshed.
 
 ---
 *Phase: 78-release-and-repository-closeout*

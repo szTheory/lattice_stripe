@@ -1,9 +1,10 @@
 {
   "repository": "szTheory/lattice_stripe",
-  "generated_at": "2026-09-25T02:08:24Z",
+  "generated_at": "2026-09-25T05:30:00Z",
   "inventory_source": "gh pr list --repo szTheory/lattice_stripe --state open --limit 1000 --json number,url,title,headRefOid,statusCheckRollup",
-  "status": "current_with_deferred_prs",
-  "entries": [
+  "status": "current_no_open_prs",
+  "entries": [],
+  "historical_snapshot": [
     {
       "pr_number": 66,
       "pr_url": "https://github.com/szTheory/lattice_stripe/pull/66",
