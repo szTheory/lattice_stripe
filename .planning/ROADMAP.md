@@ -129,13 +129,13 @@ Plans:
 3. Every open pull request has a recorded triage disposition and any accepted changes have passed their required checks.
 4. The primary checkout and all linked Git worktrees have no uncommitted changes at milestone close.
 
-**Plans:** 6 plans
+**Plans:** 3/6 plans executed
 
 Plans:
 
-- [ ] 78-01-PLAN.md — published-Hex adopter and exact-SHA release evidence
-- [ ] 78-02-PLAN.md — compatibility preflight and protected release merge
-- [ ] 78-03-PLAN.md — complete PR dispositions and linked ledger
+- [x] 78-01-PLAN.md — published-Hex adopter and exact-SHA release evidence
+- [x] 78-02-PLAN.md — compatibility preflight and protected release merge
+- [x] 78-03-PLAN.md — complete PR dispositions and linked ledger
 - [ ] 78-04-PLAN.md — read-only all-worktree closeout probe
 - [ ] 78-05-PLAN.md — concrete public-publish decision gate
 - [ ] 78-06-PLAN.md — publish verified release and final repository closeout
@@ -148,7 +148,7 @@ Plans:
 | 75. Typed Contract Updates | 2/2 | Complete    | 2026-09-24 |
 | 76. Phoenix Adopter Core Flow | 1/1 | Complete    | 2026-09-24 |
 | 77. Adopter Edge Profiles and CI | 3/3 | Complete    | 2026-09-24 |
-| 78. Release and Repository Closeout | 0/TBD | Not started | - |
+| 78. Release and Repository Closeout | 3/6 | In Progress|  |
 
 ## Planning Horizons (living, not active commitments)
 
