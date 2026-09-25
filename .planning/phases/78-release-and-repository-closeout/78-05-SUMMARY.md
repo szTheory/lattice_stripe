@@ -11,50 +11,44 @@ requires:
   - phase: 78-03
     provides: Current open-PR disposition ledger and checker
 provides:
-  - Recorded hold for the unqualified 2.3.0 release candidate
-  - Current evidence and concrete blockers required before a new release decision
+  - Recorded publish decision for the reviewed 2.3.0 candidate
+  - Exact candidate evidence and authorization basis for protected merge
 affects: [release-closeout]
 actuals:
-  tokens: 1500
+  tokens: 900
   tasks: 1
-  commits: 4
+  commits: 0
 tech-stack:
   added: []
-  patterns: [Fail closed on missing candidate, unsynchronized release history, or dirty primary checkout]
+  patterns: [Release decision recorded against the exact preflighted candidate]
 key-files:
   created: [.planning/phases/78-release-and-repository-closeout/78-05-SUMMARY.md]
-  modified: [.planning/STATE.md]
+  modified: [.planning/phases/78-release-and-repository-closeout/78-05-SUMMARY.md]
 key-decisions:
-  - "Hold publication; no concrete Release Please candidate exists to approve."
-  - "Do not push the unreconciled local main history or touch unrelated dirty files as a release workaround."
+  - "Advance only Release Please PR #68 after exact-head candidate preflight and ci-gate succeeded."
+  - "Standing user authorization permits squash merge when CI is green; protected workflow performed the merge."
 patterns-established:
-  - "A release decision is recorded only against a current candidate head after the candidate preflight passes."
-requirements-completed: []
+  - "A one-way release decision is bound to the candidate version, head SHA, preflight, and required CI result."
+requirements-completed: [REL-01, REL-02]
 duration: 9min
 completed: 2026-09-25
-status: halted
+status: complete
 ---
 
 # Phase 78 Plan 05: Release Candidate Decision Summary
 
-**Publication of 2.3.0 is held because the required candidate and synchronized, clean release state are not available.**
+**The reviewed 2.3.0 Release Please candidate was authorized for protected publication after its exact head passed candidate preflight and CI.**
 
-## Decision
+## Decision and evidence
 
-Hold the current release attempt. The requested publish checkpoint could not be satisfied: the candidate preflight failed before a concrete Release Please head could be reviewed. No push, merge, tag, or publication was performed.
+The initial check found no concrete Release Please candidate, so publication was held at that point. After PR #67 was integrated, Release Please opened [PR #68](https://github.com/szTheory/lattice_stripe/pull/68) for `2.3.0`. The exact final candidate head was `eb215b19f035c782dca5edafe1bbb9e8233f5efd`.
 
-## Evidence captured
+- `scripts/maintainer/release_candidate_check.sh` passed on trusted main against the exact PR head. It confirmed the reviewed additive API delta and unchanged Stripe API default.
+- The candidate's complete CI run [36083843184](https://github.com/szTheory/lattice_stripe/actions/runs/36083843184) passed, including `ci-gate`.
+- The user authorized squash merge when CI is green. The protected auto-merge workflow [36084111513](https://github.com/szTheory/lattice_stripe/actions/runs/36084111513) rechecked preflight and exact-head `ci-gate`, then squash-merged PR #68.
+- The merge created release commit `1e83a99029f19c24c97549752adf8f57cabc7dd0`; post-publication proof is recorded in [78-CLOSEOUT.md](./78-CLOSEOUT.md).
 
-- `bash scripts/maintainer/release_candidate_check.sh` blocked: expected one open Release Please PR, found zero.
-- At pre-decision capture after refreshing `origin/main`, local `main` was 95 commits ahead and zero behind; `origin/main` was `a318624dbcf45546d66a4aaaece19dff42ba13ad`, while local `main` was `b88ce4a375fc7b986a15112c8053b1dd19dec7da`. The three hold-record commits already bring local `main` to 98 commits ahead, and this summary update will bring it to 99 ahead of that remote ref.
-- The local API lock delta from `v2.2.2` is the four reviewed additions: `Invoice.amount_paid_off_stripe`, `Refund.customer`, `Refund.customer_account`, and `Refund.payment_method`. The default API version remains `2026-03-25.dahlia`.
-- No local `v2.3.0` tag exists.
-- Open PR #66 at `9b6d29dcf565cf03a529f8086eb3c3d93d985b27` has failing `Quality` and `ci-gate` checks and no maintainer reviews. Open PR #67 at `b88ce4a375fc7b986a15112c8053b1dd19dec7da` is a draft; its `Quality` and `ci-gate` checks also fail.
-- The primary checkout contains unrelated modifications to `.agents/skills/lattice-verification-policy/SKILL.md`, `.planning/PROJECT.md`, `.planning/phases/75-typed-contract-updates/75-VERIFICATION.md`, and `.planning/state.json`, plus untracked `.gsd/`, `.planning/milestone.lock`, and `.planning/phases/76-phoenix-adopter-core-flow/COVERAGE.md`. These files were preserved.
-
-## Issues and next actions
-
-Plan 78-06 remains blocked by its explicit precondition: the exact candidate must first be approved for publication. Revisit only after a new Release Please PR exists, the local release history is integrated through normal protected review, the primary checkout is clean, the PR disposition ledger is current, and candidate preflight passes on the exact head. Then request approval for that concrete one-way transition.
+The earlier hold was superseded when a concrete candidate was available and the user authorization conditions were met. No manual tag, version edit, or registry upload was used.
 
 ---
 *Phase: 78-release-and-repository-closeout*
