@@ -4,9 +4,9 @@ milestone: v1.12
 milestone_name: API Contract Freshness and Adopter Proof
 status: Awaiting next milestone
 stopped_at: Phase 78 complete — all phases complete
-last_updated: "2026-09-25T12:49:59.263Z"
+last_updated: "2026-09-25T14:56:28Z"
 last_activity: 2026-09-25
-last_activity_desc: Milestone v1.12 completed and archived
+last_activity_desc: Refreshed post-v1.12 roadmap horizons and reusable milestone guidance
 state_head: 6c51a1e83968c9dec0cc72b51a7583f0c46cbb5f
 progress:
   total_phases: 5
@@ -24,12 +24,14 @@ current_phase: 78
 See: `.planning/PROJECT.md` (updated 2026-09-25 after v1.12)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Planning next milestone only when new evidence warrants it.
+**Current focus:** Reactive maintenance; select a new milestone only when concrete adopter,
+Stripe API, security, reliability, or CI-cost evidence warrants it.
 
 ## Current Position
 
 v1.12 is complete and archived. No active phase.
-Last activity: 2026-09-25 — release verified, milestone audited, and archive prepared.
+Last activity: 2026-09-25 — release verified, milestone audited and archived; roadmap horizons
+refreshed. No next milestone is scheduled.
 
 ## Milestone Metrics
 
@@ -56,6 +58,7 @@ Last activity: 2026-09-25 — release verified, milestone audited, and archive p
 - Property-based tests are selective and justified by invariant risk; they do not create a blanket coverage target.
 - New API-version defaults require an explicit compatibility review; the current pinned version remains unchanged until that review is complete.
 - Every milestone closes with its scoped release verified, `main` CI green, open pull requests triaged, and all Git worktrees clean.
+- The mainstream SDK is near-done. Keep near/mid/long roadmap horizons as evidence-gated direction, not a recurring feature commitment; admin/operator UI belongs to adopting products, outside this SDK.
 - DateTime conversion, deep `to_map`, a second account-header option, idempotency hooks, fake transports, registries, webhook-error unification, macro/DSL/code generation, and new Stripe resources remain deferred.
 
 ### Deferred / Accepted Debt
@@ -89,9 +92,9 @@ noise from reopening.
 ## Session Continuity
 
 **Last session:** 2026-09-24T20:55:25.904Z
-**Stopped at:** v1.12 archived; next action is evidence-led maintenance
+**Stopped at:** v1.12 archived and roadmap refreshed; next action is evidence-led maintenance
 **Resume file:** none — no active phase
 
 ## Operator Next Steps
 
-- Stay in reactive maintenance. Use $gsd-new-milestone only when concrete evidence warrants new scope.
+- Stay in reactive maintenance. Use $gsd-new-milestone only when concrete adopter, Stripe API, security, reliability, or CI-cost evidence warrants new scope. See `.planning/ROADMAP.md` and `.planning/threads/post-v1-12-roadmap-refresh-2026-09-25.md`.

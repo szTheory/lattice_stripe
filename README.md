@@ -6,9 +6,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **Current release:** **`2.3.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see
-> [CHANGELOG](CHANGELOG.md#221) for what shipped since 2.1.0.
+> [CHANGELOG](CHANGELOG.md#230) for what shipped in this release line.
 >
-> The published release is **`2.3.0`**, the final compatibility-preserving quality patch.
+> The published release is **`2.3.0`**, with additive typed Invoice and Refund fields.
 > Evaluating fit? Start with
 > [User Flows & JTBD][user-flows-and-jtbd].
 

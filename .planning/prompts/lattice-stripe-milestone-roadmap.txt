@@ -1,0 +1,89 @@
+LATTICESTRIPE — MILESTONE AND ROADMAP GUIDANCE
+
+Use this prompt at a milestone boundary or when concrete new evidence suggests the roadmap
+may need to change. Adapt the conclusions to current repository truth; do not treat this text
+as a standing instruction to create work.
+
+PROJECT INTENT
+
+Make LatticeStripe a dependable, idiomatic Elixir SDK for Stripe that teams can use across
+common business models and application contexts. Optimize for correct Stripe contracts,
+clear Elixir ergonomics, useful typed coverage, safe and understandable operations, honest
+proof, readable code, and a maintainable public API. Consider application engineers, billing
+and finance operators, support/on-call staff, platform teams, security/privacy reviewers,
+and library maintainers. Use B2C and B2B SaaS, usage-priced products, commerce/digital goods,
+Connect platforms, and regulated/high-sensitivity domains to discover distinct reusable SDK
+contracts; do not promise to implement every industry's workflow.
+
+LatticeStripe owns Stripe-shaped HTTP resources, typed decoding, errors/retries, telemetry,
+test helpers, and bounded recipes. Adopting applications own billing orchestration, domain
+policy, compliance, entitlement decisions, durable business state, case management, and
+operator/admin product UI. Keep any such UI idea outside this SDK roadmap (for example, in
+Accrue's roadmap).
+
+ASSESS BEFORE PLANNING
+
+1. Read `.planning/PROJECT.md`, `ROADMAP.md`, `REQUIREMENTS.md`, `STATE.md`, `MILESTONES.md`,
+   `JTBD-MAP.md`, recent milestone audits/threads, and relevant seeds.
+2. Compare planning claims with shipped source, tests, adopter-facing docs, CI, and release
+   evidence. Separate missing capability from documentation gaps, accepted debt, and noise.
+3. State how close the library is to done enough for its intended SDK scope. Base that judgment
+   on adopter value and maintenance cost, never phase counts, API endpoint totals, or coverage
+   percentages alone.
+4. Rank only a few serious candidate wedges. For each, describe the adopter job, evidence,
+   “done enough” bar, proof path, compatibility/release impact, and overbuild boundary.
+5. Recommend one next milestone only if evidence warrants it. Otherwise recommend reactive
+   maintenance and clearly say that no milestone is scheduled.
+
+QUALITY AND DELIVERY DEFAULTS
+
+- Prefer the Pareto improvements that prevent real adopter failures. Keep code simple, elegant,
+  self-documenting, idiomatic, and organized; avoid churn, speculative abstractions, generated
+  APIs, and feature breadth without a demonstrated job.
+- Shift verification left. For each behavior or seam, choose the smallest honest valuable
+  check: focused unit/property checks for pure invariants, Mox/adapter tests for contracts,
+  and integration/adopter/e2e/smoke checks for recurring cross-boundary failure modes.
+- Aim for zero human UAT. Automate recurring proof in existing CI when it provides recurring
+  value at a justified runtime and maintenance cost. Keep CI efficient; remove redundant or
+  low-signal checks. Use property-based testing selectively when a named high-risk invariant
+  needs generated cases and shrinking; never adopt it as a blanket goal.
+- Cover valuable success, error, boundary, and integration paths. Keep synthetic data and
+  credentials; never put personal data, secrets, or private adopter information in public Git.
+- Preserve 12-factor principles, compatibility, and explicit error semantics. Change Stripe
+  API-version defaults only after compatibility evidence. Unknown fields and established
+  escape hatches should remain truthful and documented.
+- Release when the scoped adopter value warrants a release; do not force one for activity's
+  sake. Close any milestone with its release verified when applicable, `main` CI green, PRs
+  triaged, and all Git worktrees clean. Keep package version, changelog, docs, and evidence
+  aligned.
+- Keep `.planning/` high-signal and discoverable: preserve decisions with provenance, update
+  stale truth instead of duplicating it, record lessons only when they prevent repeated
+  mistakes, and retain candidates without silently turning them into commitments.
+- Before recommending a next GSD command, make sure the necessary intent, decisions, evidence,
+  and handoff context are durably recorded so clearing session context will not lose them.
+
+LIVING ROADMAP
+
+Maintain near-, mid-, and long-term horizons in `.planning/ROADMAP.md` as evidence-gated
+direction, not scheduled milestones. Re-rank at each milestone close or meaningful new signal.
+For LatticeStripe, use these defaults unless new evidence changes them:
+
+- Near term: reactive maintenance for confirmed bugs, material security needs, and stable
+  Stripe changes affecting supported high-value resources.
+- Mid term: bounded adopter-confidence, reliability, compatibility, or CI-efficiency work
+  only after a concrete recurring need is demonstrated.
+- Long term: specialist Stripe resource families only for a named adopter job, stable Stripe
+  contract, clear SDK boundary, and maintainable proof path. Keep application workflows and
+  operator UI in the adopting product.
+
+Refresh the audience/JTBD map against actual shipped behavior. Define “done enough” as common
+adopter jobs being covered with no evidence-backed gap that justifies its ongoing maintenance
+cost. Prefer a maintenance pause over inventing another milestone.
+
+RECORD AND CLOSE
+
+When an assessment changes planning truth, record its date, decision, alternatives rejected,
+source evidence, and unresolved uncertainty in `.planning/`. Update `STATE.md` and the roadmap;
+change `PROJECT.md` only when project intent, boundary, or milestone selection changes. Keep
+records free of personal and secret data. Verify document consistency, diff cleanliness, and
+any project-specific documentation gates before claiming completion.
