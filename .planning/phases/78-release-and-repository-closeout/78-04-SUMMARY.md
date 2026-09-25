@@ -58,7 +58,7 @@ coverage:
         ref: "bash scripts/maintainer/test_worktree_closeout_check.sh (release-SHA, branch, remote-ref, dirty-tree, missing-owner, and inspection-error cases)"
         status: pass
       - kind: other
-        ref: "bash scripts/maintainer/worktree_closeout_check.sh --owners /private/tmp/78-04-worktree-owners.json (live read-only inventory; primary checkout blocked on pre-existing local changes)"
+        ref: "bash scripts/maintainer/worktree_closeout_check.sh --owners /private/tmp/78-04-worktree-owners.json (live read-only inventory; primary checkout blocked on local and GSD run-state changes)"
         status: pass
     human_judgment: false
 
@@ -111,7 +111,7 @@ None - plan executed exactly as written.
 
 ## Issues Encountered
 
-- The live read-only inventory found the primary checkout dirty with seven pre-existing tracked or untracked entries and therefore blocked. It did not modify those paths. The current Phase 78 worktree was clean after the task commits and had an explicit owner association. The final closeout condition remains unmet until the primary checkout's owner resolves those changes and reruns the gate.
+- The live read-only inventory found seven tracked or untracked status entries in the primary checkout and therefore blocked. These include pre-existing user edits and GSD run-state artifacts created during this execution. The checker did not modify those paths. The current Phase 78 worktree was clean after the task commits and had an explicit owner association. The final closeout condition remains unmet until the primary checkout's owner resolves those changes and reruns the gate.
 - Git index operations required sandbox escalation because this worktree's Git metadata is outside the writable workspace; normal hooks ran for both task commits.
 - `CLOSE-03` is also declared by unfinished plan 78-06, so the requirement checkbox was not updated from this isolated worktree.
 
@@ -121,7 +121,7 @@ None - no external service configuration required.
 
 ## Next Phase Readiness
 
-The checker, fixtures, and maintainer procedure are ready for final closeout. Final release mode must be rerun after refreshing `origin/main`, using the actual release SHA and a current owner map; the current primary checkout is explicitly blocked by pre-existing changes.
+The checker, fixtures, and maintainer procedure are ready for final closeout. Final release mode must be rerun after refreshing `origin/main`, using the actual release SHA and a current owner map; the current primary checkout remains blocked by its dirty status.
 
 ## Self-Check: PASSED
 
