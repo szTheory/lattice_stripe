@@ -50,7 +50,7 @@ Last activity: 2026-09-25 — Phase 78 release candidate held; preflight and syn
 - Code comments retain invariants and non-obvious tradeoffs, but decorative and planning-history-only noise is removed.
 - Internal decomposition remains private: `LatticeStripe.Client` stays the public façade.
 - CI and coverage are ratcheted only where their signal is truthful; no Dialyzer or vanity coverage target is introduced.
-- Verification is automation-first: use the narrowest credible unit, seam, integration, adopter, or smoke proof; put recurring high-value checks in existing CI lanes; do not ask for blanket UAT confirmation when all scoped deliverables already have passing automated evidence.
+- Verification is shift-left and automation-first by default: name the behavioral proof while planning, use the narrowest credible unit, seam, integration, adopter, e2e, cold-start, or smoke check, and run recurring high-value checks in existing CI lanes when their signal justifies the cost. Aim for zero human UAT; accept named passing automated evidence without blanket confirmation, and hand off only irreducible decisions or observations that cannot be credibly automated. Never relabel unproven behavior as covered: add the test when feasible and keep any remaining human-only gap explicit.
 - HexDocs and public API documentation are the adopter-facing interface; no standalone UI or marketing surface is in scope.
 - The quality goal is dependable, idiomatic Stripe coverage across adopter contexts, prioritized by common and costly jobs rather than endpoint count or activity.
 - Maintain near-, mid-, and long-term roadmap horizons and refresh them at every milestone close; keep candidates uncommitted until evidence and acceptance proof are clear.

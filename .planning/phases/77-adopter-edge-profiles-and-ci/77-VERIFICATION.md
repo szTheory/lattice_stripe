@@ -1,6 +1,6 @@
 ---
 phase: 77-adopter-edge-profiles-and-ci
-verified: 2026-09-25T01:14:10Z
+verified: 2026-09-25T02:39:14Z
 status: passed
 score: 12/12 must-haves verified
 covered_files:
@@ -18,7 +18,7 @@ covered_files:
   - test_apps/phoenix_adopter/test/connect_context_profile_test.exs
   - test_apps/phoenix_adopter/test/core_flow_test.exs
   - test_apps/phoenix_adopter/test/usage_reconciliation_profile_test.exs
-covered_digest: "v1:sha256:0d166ae84a0b28d363195aaeceb448d0b82368c3120213fec548ab696da75c89"
+covered_digest: "v1:sha256:9b7088010e1d812535331b728f5000cd2cfcfe5f05bec1bc6290aafc9d623a50"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -26,9 +26,9 @@ overrides_applied: 0
 # Phase 77: Adopter Edge Profiles and CI Verification Report
 
 **Phase Goal:** One adopter app proves a small set of distinct Stripe contracts and provides a repeatable CI gate for the full host-app integration.
-**Verified:** 2026-09-25T01:14:10Z
+**Verified:** 2026-09-25T02:39:14Z
 **Status:** passed
-**Re-verification:** No — initial verification
+**Re-verification:** Yes — refreshed against the current main CI run after the workflow was updated to run CI for planning-only pull requests.
 
 ## Goal Achievement
 

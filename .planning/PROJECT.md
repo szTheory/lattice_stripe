@@ -37,6 +37,8 @@ Default to automation-first, shift-left proof. For each behavior or seam, prefer
 
 Aim for zero human verification and UAT handoffs. Before asking a person to verify something, identify what evidence automation cannot produce, add a truthful test or probe when feasible, and run all relevant local/CI checks. Hand off only an irreducible decision or observation that cannot be safely and credibly automated (for example, a user-owned product choice, private live-service behavior with no safe test seam, or genuinely subjective judgment). Never label an unverified claim as proven to avoid a handoff; preserve explicit unknowns and explain the narrow human-only gap. Apply this posture by default in GSD discussion, planning, execution, and verification.
 
+When every scoped deliverable has named, passing automated evidence and no separate human-only checkpoint remains, complete UAT from that evidence without requesting a blanket confirmation. Empty or malformed coverage is not proof; derive checks for the deliverables and keep uncovered behavior visible.
+
 ## Latest Milestone: v1.11 Reader-First Quality Closure
 
 **Goal achieved:** Turn the already-complete SDK into a clean, trustworthy maintenance
@@ -230,7 +232,9 @@ None scheduled. Stay in reactive maintenance and open a bounded milestone only f
 **Testing philosophy:**
 
 - Integration specs first, with real request-pipeline proof where feasible
-- Shift-left verification by default when a flow can be executed truthfully in CI
+- Shift verification left by default: put recurring, deterministic value checks at the narrowest useful layer and run them in CI, including integration, end-to-end, smoke, and seam checks where they catch real regressions
+- Treat current, passing automated evidence as sufficient for deterministic acceptance criteria; ask for human UAT only when human judgment or an environment CI cannot faithfully reproduce is essential
+- Shift-left verification by default for documentation and example flows when they can be exercised truthfully in CI
 - Unit tests for pure logic and Mox for behaviour contracts
 - Docs-truth assertions are first-class regression coverage, not editorial cleanup
 

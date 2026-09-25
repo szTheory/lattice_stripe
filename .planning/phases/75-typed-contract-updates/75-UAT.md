@@ -3,7 +3,7 @@ status: complete
 phase: 75-typed-contract-updates
 source: [75-01-SUMMARY.md, 75-02-SUMMARY.md]
 started: 2026-09-24T17:44:48Z
-updated: 2026-09-24T19:18:26Z
+updated: 2026-09-25T02:39:14Z
 ---
 
 ## Current Test
@@ -52,6 +52,10 @@ issues: 0
 pending: 0
 skipped: 0
 blocked: 0
+
+## Latest Automated Rerun
+
+- Current main CI run [36085912335] passed on `ad48bd3259a22155fa4f6f4e88b0dfa8d7f54d64` after the 2.3.0 release. The Elixir test matrix, API/docs truth checks, Quality, Phoenix adopter, and required `ci-gate` all passed. This exercises the typed Invoice/Refund tests and their API snapshot/documentation contracts against the current source tree. (https://github.com/szTheory/lattice_stripe/actions/runs/36085912335).
 
 ## Gaps
 

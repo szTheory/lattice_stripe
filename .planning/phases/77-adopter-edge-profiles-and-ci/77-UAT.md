@@ -3,7 +3,7 @@ status: complete
 phase: 77-adopter-edge-profiles-and-ci
 source: 77-01-SUMMARY.md, 77-02-SUMMARY.md, 77-03-SUMMARY.md
 started: 2026-09-25T01:14:10Z
-updated: 2026-09-25T01:14:10Z
+updated: 2026-09-25T02:39:14Z
 ---
 
 ## Current Test
@@ -80,6 +80,10 @@ issues: 0
 pending: 0
 skipped: 0
 blocked: 0
+
+## Latest Automated Rerun
+
+- Current main CI run [36085912335] passed on `ad48bd3259a22155fa4f6f4e88b0dfa8d7f54d64`; the test matrix, Phoenix adopter, docs truth, Quality, and required `ci-gate` all passed. This rechecks the B2B, usage, and Connect profile contracts on the current main tree. (https://github.com/szTheory/lattice_stripe/actions/runs/36085912335).
 
 ## Gaps
 

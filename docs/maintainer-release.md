@@ -108,7 +108,7 @@ the remote-tracking ref as a separate step, then pass the immutable release comm
 
 ```bash
 git fetch origin main
-bash scripts/maintainer/worktree_closeout_check.sh --owners .planning/phases/78-release-and-repository-closeout/78-WORKTREE-OWNERS.json --final --release-sha "$RELEASE_SHA"
+bash scripts/maintainer/worktree_closeout_check.sh --owners .planning/phases/78-release-and-repository-closeout/78-WORKTREE-OWNERS.json --final --expected-main-sha "$(git rev-parse HEAD)"
 ```
 
 Before running the probe, create `78-WORKTREE-OWNERS.json` with an explicit owner

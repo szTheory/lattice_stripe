@@ -41,7 +41,7 @@ Audited against the public remotes on 2026-09-25:
 | Hex | [lattice_stripe 2.3.0](https://hex.pm/packages/lattice_stripe/2.3.0), checksum `e921209af48b4673fab1f39eb210839b41d55497ad456822b78f6f36d4cab088` | verified |
 | HexDocs and adopter smoke | [2.3.0 docs](https://hexdocs.pm/lattice_stripe/2.3.0/); published-Hex Phoenix smoke passed 3 tests, 0 failures | verified |
 | Independent release verifier | `release_evidence_check.sh --version 2.3.0 --sha 1e83a99029f19c24c97549752adf8f57cabc7dd0` passed | verified |
-| Repository closeout | PR #66 remains open with green current-head checks but no maintainer reviews; primary checkout is dirty and behind cached `origin/main` | pending |
+| Repository closeout | PR #66 and #69 were squash-merged after green current-head CI; fresh open-PR inventory is empty. The primary checkout remains dirty and behind cached `origin/main`; later cleanup commits are recorded separately from the immutable release SHA. | pending |
 
 The v2.3.0 package and release artifacts are complete. Repository closeout is still open: preserve the primary checkout's owner changes, obtain the required maintainer review for PR #66, and refresh primary `origin/main` when its Git metadata is writable. See [Phase 78 closeout](./phases/78-release-and-repository-closeout/78-CLOSEOUT.md) for exact evidence and blockers.
 
