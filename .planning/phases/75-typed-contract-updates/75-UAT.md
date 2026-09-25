@@ -55,7 +55,7 @@ blocked: 0
 
 ## Latest Automated Rerun
 
-- Current main CI run [36085912335] passed on `ad48bd3259a22155fa4f6f4e88b0dfa8d7f54d64` after the 2.3.0 release. The Elixir test matrix, API/docs truth checks, Quality, Phoenix adopter, and required `ci-gate` all passed. This exercises the typed Invoice/Refund tests and their API snapshot/documentation contracts against the current source tree. (https://github.com/szTheory/lattice_stripe/actions/runs/36085912335).
+- The full CI run [36088077120] passed on PR #71 head `dfb43de084c831e51a834b30596f7f468a2f9e72`; its tree is identical to merged main `629c9a2a69c1c9e38fa842e2b5157b6e64c4904d`. The Elixir test matrix, API/docs truth checks, Quality, Phoenix adopter, and required `ci-gate` all passed, covering typed Invoice/Refund tests and their API snapshot/documentation contracts. (https://github.com/szTheory/lattice_stripe/actions/runs/36088077120).
 
 ## Gaps
 

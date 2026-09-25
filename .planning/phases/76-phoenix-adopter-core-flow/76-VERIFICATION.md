@@ -1,6 +1,6 @@
 ---
 phase: 76-phoenix-adopter-core-flow
-verified: 2026-09-25T02:39:14Z
+verified: 2026-09-25T03:00:00Z
 status: passed
 score: 6/6 must-haves verified
 covered_files:
@@ -20,7 +20,7 @@ covered_files:
   - test_apps/phoenix_adopter/mix.lock
   - test_apps/phoenix_adopter/test/core_flow_test.exs
   - test_apps/phoenix_adopter/test/test_helper.exs
-covered_digest: "v1:sha256:92094426183e5a1569fbe8fd0434730c2204c5005888cc1c9725f3b3f278b944"
+covered_digest: "v1:sha256:bbc4621e40dddb5ba77a7ffd4502254c5247ce4af9fa712dbaf88a238294345f"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -28,7 +28,7 @@ overrides_applied: 0
 # Phase 76: Phoenix Adopter Core Flow Verification Report
 
 **Phase Goal:** Maintainers can verify that a host Phoenix application configures and uses LatticeStripe as a dependency across a common SaaS flow.
-**Verified:** 2026-09-25T02:39:14Z
+**Verified:** 2026-09-25T03:00:00Z
 **Status:** passed
 **Re-verification:** Yes — refreshed against the current main CI run; the new coverage matrix records the deterministic integration boundary, and the adopter implementation remains unchanged.
 
@@ -120,5 +120,5 @@ No implementation gaps found. The required Phoenix host path dependency, supervi
 
 ---
 
-_Verified: 2026-09-25T01:06:49.569Z_
+_Verified: 2026-09-25T03:00:00Z_
 _Verifier: gsd-verifier_

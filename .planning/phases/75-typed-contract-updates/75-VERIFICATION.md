@@ -1,6 +1,6 @@
 ---
 phase: 75-typed-contract-updates
-verified: 2026-09-25T02:39:14Z
+verified: 2026-09-25T03:00:00Z
 status: passed
 score: 4/4 roadmap truths verified
 covered_files:
@@ -19,7 +19,7 @@ covered_files:
   - test/lattice_stripe/invoice_test.exs
   - test/lattice_stripe/refund_test.exs
   - test/lattice_stripe/typed_contract_docs_test.exs
-covered_digest: "v1:sha256:837c29e449e47904af2eed178249f1cdcb2c467fd41ececb3f446c774d839c88"
+covered_digest: "v1:sha256:3cfc475d595f6460f5f2303414139b7b004fa9bef63d42486adf01aa1eff6e4e"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -27,7 +27,7 @@ overrides_applied: 0
 # Phase 75: Typed Contract Updates Verification Report
 
 **Phase Goal:** Adopters can use the selected high-value fields as typed data without losing unknown-field access or changing existing public behavior.
-**Verified:** 2026-09-25T02:39:14Z
+**Verified:** 2026-09-25T03:00:00Z
 **Status:** passed
 **Re-verification:** Yes — refreshed against current main after the 2.3.0 release; phase implementation tests and documentation contracts are covered by the passing current-main CI run recorded in 75-UAT.md.
 
@@ -122,5 +122,5 @@ All four roadmap truths and requirements DRIFT-02, DRIFT-03, and DRIFT-04 are ve
 
 ---
 
-_Verified: 2026-09-24T12:53:06Z_  
+_Verified: 2026-09-25T03:00:00Z_
 _Verifier: the agent (gsd-verifier)_
