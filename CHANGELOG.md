@@ -24,6 +24,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 The package default remains `2026-03-25.dahlia`; configure a later API version to receive these
 fields.
 
+## [2.3.0](https://github.com/szTheory/lattice_stripe/compare/v2.2.2...v2.3.0) (2026-09-25)
+
+
+### Features
+
+* complete v1.12 milestone review ([#67](https://github.com/szTheory/lattice_stripe/issues/67)) ([260edf4](https://github.com/szTheory/lattice_stripe/commit/260edf43189e7b180c863e413472d832c6352d00))
+
 ## [2.2.2](https://github.com/szTheory/lattice_stripe/compare/v2.2.1...v2.2.2) (2026-08-25)
 
 
