@@ -10,7 +10,7 @@ and observability.
 Add LatticeStripe to your release:
 
 ```elixir
-{:lattice_stripe, "~> 2.2"}
+{:lattice_stripe, "~> 2.3"}
 ```
 
 ## 1. Audience and scope

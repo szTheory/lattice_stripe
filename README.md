@@ -5,10 +5,10 @@
 [![Docs](https://img.shields.io/badge/hex-docs-blue.svg)](https://hexdocs.pm/lattice_stripe)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Current release:** **`2.2.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see
+> **Current release:** **`2.3.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see
 > [CHANGELOG](CHANGELOG.md#221) for what shipped since 2.1.0.
 >
-> The published release is **`2.2.2`**, the final compatibility-preserving quality patch.
+> The published release is **`2.3.0`**, the final compatibility-preserving quality patch.
 > Evaluating fit? Start with
 > [User Flows & JTBD][user-flows-and-jtbd].
 
@@ -73,7 +73,7 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:lattice_stripe, "~> 2.2"}
+    {:lattice_stripe, "~> 2.3"}
   ]
 end
 ```

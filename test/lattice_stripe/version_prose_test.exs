@@ -73,6 +73,19 @@ defmodule LatticeStripe.VersionProseTest do
   end
 
   describe "release-status rewrite" do
+    test "updates the exact published release sentence from mix.exs" do
+      line = "> The published release is **`1.2.3`**, the current package.\n"
+
+      assert VersionProse.render("README.md", line, nil) ==
+               "> The published release is **`#{VersionProse.version()}`**, the current package.\n"
+    end
+
+    test "does not rewrite the published release sentence in guides" do
+      line = "> The published release is **`1.2.3`**, the current package.\n"
+
+      assert VersionProse.render("guides/getting-started.md", line, nil) == line
+    end
+
     test "updates the version and the changelog anchor together" do
       line = "> **Current release:** **`1.7.x`** on Hex — see [CHANGELOG](CHANGELOG.md#170).\n"
       out = VersionProse.render("README.md", line)

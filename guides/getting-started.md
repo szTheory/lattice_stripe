@@ -11,13 +11,13 @@ Add `lattice_stripe` to your dependencies in `mix.exs`:
 ```elixir
 defp deps do
   [
-    {:lattice_stripe, "~> 2.2"},
+    {:lattice_stripe, "~> 2.3"},
     {:finch, "~> 0.21"}
   ]
 end
 ```
 
-> **Current Hex line:** **`2.2.x`** published on Hex — see [README](https://github.com/szTheory/lattice_stripe#readme) and [CHANGELOG](../CHANGELOG.md#220).
+> **Current Hex line:** **`2.3.x`** published on Hex — see [README](https://github.com/szTheory/lattice_stripe#readme) and [CHANGELOG](../CHANGELOG.md#230).
 
 Then fetch your dependencies:
 

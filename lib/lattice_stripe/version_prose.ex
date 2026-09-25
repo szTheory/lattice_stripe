@@ -97,6 +97,7 @@ defmodule LatticeStripe.VersionProse do
     content
     |> rewrite_install_pin(path)
     |> rewrite_release_status(path, previous)
+    |> rewrite_published_release(path)
     |> rewrite_changelog_note(path)
   end
 
@@ -120,6 +121,22 @@ defmodule LatticeStripe.VersionProse do
   end
 
   defp rewrite_release_status(content, _path, _previous), do: content
+
+  defp rewrite_published_release(content, "README.md") do
+    map_lines(content, fn line ->
+      if String.contains?(line, "The published release is") do
+        String.replace(
+          line,
+          ~r/(The published release is \*\*`)\d+\.\d+\.\d+(`\*\*)/,
+          "\\g{1}#{version()}\\g{2}"
+        )
+      else
+        line
+      end
+    end)
+  end
+
+  defp rewrite_published_release(content, _path), do: content
 
   defp rewrite_since(line, nil), do: line
 
