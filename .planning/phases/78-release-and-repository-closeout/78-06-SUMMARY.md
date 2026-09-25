@@ -46,7 +46,7 @@ status: halted
 
 ## Remaining closeout gates
 
-- PR #66 remains open at `01a3d655291f65dc02460f57a25a929242485d6a`. Its complete current-head checks, including Quality and `ci-gate`, pass; there are no maintainer reviews. The verified contributor-visible deferral says to revisit after checks pass **and** maintainer review completes. The disposition remains deferred pending that review. The refreshed ledger passes `pr_closeout_check.sh`.
+- PR #66 remains open at `01a3d655291f65dc02460f57a25a929242485d6a`. All current-head checks pass but it has no maintainer review, so the verified deferral remains in force. PR #69 contains the closeout records; its full manually dispatched CI run passed at `905982d6c0e1eb14c8b17bd79891f1603282476a`, but the required check is absent from the PR rollup, base protection blocks merge, and repository auto-merge is disabled. Its defer decision is recorded in its verified timeline comment. The refreshed ledger passes `pr_closeout_check.sh`.
 - The read-only final worktree checker reported three blockers: the primary checkout is dirty with user-owned state, its HEAD is `dcb514d14aee41cb7e7e3213a276932f8e33ff74` instead of the release SHA, and cached `origin/main` is stale at `a318624dbcf45546d66a4aaaece19dff42ba13ad`. No owner file was changed or removed.
 - The primary checkout cannot be declared clean or synchronized. Preserve its state and resume closeout only after its owner changes are resolved and Git metadata can be refreshed safely.
 

@@ -1,6 +1,6 @@
 # Phase 78 Closeout — Release Evidence and Remaining Repository Gate
 
-**Inventory captured:** 2026-09-25 02:04 UTC
+**Inventory captured:** 2026-09-25 02:08 UTC
 
 **Repository:** `szTheory/lattice_stripe`
 
@@ -19,7 +19,7 @@
 
 ## Current open PR disposition
 
-The fresh authenticated inventory contains one PR: [#66](https://github.com/szTheory/lattice_stripe/pull/66), current head `01a3d655291f65dc02460f57a25a929242485d6a`. Its full status rollup is green, including `Quality` and `ci-gate`; no maintainer reviews are recorded. The existing contributor-visible defer decision remains in force pending maintainer review. The ledger has been refreshed to the current head/check state and preserves the verified decision comment URL.
+The fresh authenticated inventory contains two open PRs. [#66](https://github.com/szTheory/lattice_stripe/pull/66) is at `01a3d655291f65dc02460f57a25a929242485d6a`; all 21 reported checks including `Quality` and `ci-gate` pass, but no maintainer review exists, so its contributor-visible defer decision remains in force. [#69](https://github.com/szTheory/lattice_stripe/pull/69) carries these closeout records at `905982d6c0e1eb14c8b17bd79891f1603282476a`. The full workflow_dispatch CI run 36084846798 passed on that exact SHA, including ci-gate, but GitHub does not expose those workflow_dispatch checks in its PR status rollup. Base branch protection therefore blocks merge; repository auto-merge is disabled. The verified defer comment is [recorded on PR #69](https://github.com/szTheory/lattice_stripe/pull/69#issuecomment-5825513070). No administrator bypass was used. Both current dispositions and timeline evidence are in the ledger.
 
 ## Worktree gate — blocked, user state preserved
 
@@ -37,6 +37,6 @@ The worktree closeout check is read-only and did not modify any tree. Final clea
 Release Please protected auto-merge: passed (run 36084111513)
 Release workflow and Hex publication: passed (run 36084157667)
 Release evidence exact-SHA verifier: passed (all checks; checksum above)
-Current PR inventory: 1 open PR (#66), current disposition retained pending maintainer review
+Current PR inventory: 2 open PRs (#66 deferred for maintainer review; #69 deferred because required check is not visible to branch protection)
 Final worktree check: blocked (3 blockers above; no files changed)
 ```
