@@ -1,6 +1,6 @@
 ---
 phase: 77-adopter-edge-profiles-and-ci
-verified: 2026-09-24T15:35:17Z
+verified: 2026-09-25T01:14:10Z
 status: passed
 score: 12/12 must-haves verified
 covered_files:
@@ -18,7 +18,7 @@ covered_files:
   - test_apps/phoenix_adopter/test/connect_context_profile_test.exs
   - test_apps/phoenix_adopter/test/core_flow_test.exs
   - test_apps/phoenix_adopter/test/usage_reconciliation_profile_test.exs
-covered_digest: "v1:sha256:3c5ea014ec53f91778ec319fc615675366c732be3427ba33cdba0a3d0a678aa8"
+covered_digest: "v1:sha256:0d166ae84a0b28d363195aaeceb448d0b82368c3120213fec548ab696da75c89"
 behavior_unverified: 0
 overrides_applied: 0
 ---
@@ -26,7 +26,7 @@ overrides_applied: 0
 # Phase 77: Adopter Edge Profiles and CI Verification Report
 
 **Phase Goal:** One adopter app proves a small set of distinct Stripe contracts and provides a repeatable CI gate for the full host-app integration.
-**Verified:** 2026-09-24T15:35:17Z
+**Verified:** 2026-09-25T01:14:10Z
 **Status:** passed
 **Re-verification:** No — initial verification
 
@@ -88,7 +88,7 @@ These are deliberately transport contract tests, not production data queries. No
 
 | Behavior | Command | Result | Status |
 |---|---|---|---|
-| Locked deps and complete adopter behavior | `HEX_HOME=/tmp/lattice-stripe-phase77-hex gsd_run run-with-timeout 40 -- sh -lc 'cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice-stripe-phase77-hex mix deps.get --check-locked && HEX_HOME=/tmp/lattice-stripe-phase77-hex mix test --warnings-as-errors'` | Dependency lock resolved unchanged; `9 tests, 0 failures` | ✓ PASS |
+| Locked deps and complete adopter behavior | `HEX_HOME=/tmp/lattice-stripe-phase77-hex gsd_run run-with-timeout 50 -- sh -lc 'cd test_apps/phoenix_adopter && HEX_HOME=/tmp/lattice-stripe-phase77-hex mix deps.get --check-locked && HEX_HOME=/tmp/lattice-stripe-phase77-hex mix test --warnings-as-errors'` | Dependency lock resolved unchanged; `9 tests, 0 failures` | ✓ PASS |
 | CI workflow syntax | `actionlint .github/workflows/ci.yml` | Exit 0, no diagnostics | ✓ PASS |
 
 ### Requirements Coverage
@@ -136,5 +136,5 @@ No implementation gaps found. The complete synthetic adopter suite passes, all r
 
 ---
 
-_Verified: 2026-09-24T15:35:17Z_  
+_Verified: 2026-09-25T01:14:10Z_
 _Verifier: the agent (gsd-verifier)_

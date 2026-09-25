@@ -1,9 +1,9 @@
 ---
 phase: "77"
 slug: "adopter-edge-profiles-and-ci"
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: validated
+nyquist_compliant: true
+wave_0_complete: true
 created: "2026-09-24"
 ---
 
@@ -38,12 +38,12 @@ created: "2026-09-24"
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 77-01-01 | 01 | 1 | ADOPT-03, ADOPT-05 | T-77-01 | Synthetic invoice response and no credential lookup | integration | `cd test_apps/phoenix_adopter && mix deps.get --check-locked && mix test --warnings-as-errors` | ❌ W0 | ⬜ pending |
-| 77-01-02 | 01 | 1 | ADOPT-04 | T-77-01 | Structured SDK error decoded from synthetic response | integration | `cd test_apps/phoenix_adopter && mix test test/b2b_invoice_profile_test.exs` | ❌ W0 | ⬜ pending |
-| 77-02-01 | 02 | 2 | ADOPT-03, ADOPT-04 | T-77-02 | Bounded synthetic stream with cursor continuation | integration | `cd test_apps/phoenix_adopter && mix test test/usage_reconciliation_profile_test.exs` | ❌ W0 | ⬜ pending |
-| 77-02-02 | 02 | 2 | ADOPT-04 | T-77-02 | Body identifier and HTTP idempotency key are independently asserted | integration | `cd test_apps/phoenix_adopter && mix test --warnings-as-errors` | ❌ W0 | ⬜ pending |
-| 77-03-01 | 03 | 2 | ADOPT-03 | T-77-03 | Each request carries only its requested tenant account header | integration | `cd test_apps/phoenix_adopter && mix test test/connect_context_profile_test.exs` | ❌ W0 | ⬜ pending |
-| 77-03-02 | 03 | 2 | ADOPT-04, ADOPT-05 | T-77-03 | Explicit nil suppresses inherited account context; complete suite stays synthetic | integration | `cd test_apps/phoenix_adopter && mix test --warnings-as-errors` | ❌ W0 | ⬜ pending |
+| 77-01-01 | 01 | 1 | ADOPT-03, ADOPT-05 | T-77-01 | Synthetic invoice response and no credential lookup | integration | `cd test_apps/phoenix_adopter && mix deps.get --check-locked && mix test --warnings-as-errors` | ✓ | pass |
+| 77-01-02 | 01 | 1 | ADOPT-04 | T-77-01 | Structured SDK error decoded from synthetic response | integration | `cd test_apps/phoenix_adopter && mix test test/b2b_invoice_profile_test.exs` | ✓ | pass |
+| 77-02-01 | 02 | 2 | ADOPT-03, ADOPT-04 | T-77-02 | Bounded synthetic stream with cursor continuation | integration | `cd test_apps/phoenix_adopter && mix test test/usage_reconciliation_profile_test.exs` | ✓ | pass |
+| 77-02-02 | 02 | 2 | ADOPT-04 | T-77-02 | Body identifier and HTTP idempotency key are independently asserted | integration | `cd test_apps/phoenix_adopter && mix test --warnings-as-errors` | ✓ | pass |
+| 77-03-01 | 03 | 2 | ADOPT-03 | T-77-03 | Each request carries only its requested tenant account header | integration | `cd test_apps/phoenix_adopter && mix test test/connect_context_profile_test.exs` | ✓ | pass |
+| 77-03-02 | 03 | 2 | ADOPT-04, ADOPT-05 | T-77-03 | Explicit nil suppresses inherited account context; complete suite stays synthetic | integration | `cd test_apps/phoenix_adopter && mix test --warnings-as-errors` | ✓ | pass |
 
 ## Wave 0 Requirements
 
@@ -55,11 +55,21 @@ All phase behaviors have automated verification; no live Stripe or manual UI che
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter after verification
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s
+- [x] `nyquist_compliant: true` set in frontmatter after verification
 
-**Approval:** pending
+**Approval:** verified 2026-09-25
+
+## Validation Audit 2026-09-25
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+The required nested locked-dependency check and complete warnings-as-errors suite passed: 9 tests, 0 failures.
