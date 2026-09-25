@@ -35,6 +35,7 @@ fail() { echo "BLOCKED: $1" >&2; exit 1; }
 repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner 2>/dev/null)" || fail "could not identify the GitHub repository"
 [[ -n "$repo" ]] || fail "GitHub repository identity was empty"
 tag="v$version"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/lattice-release-evidence.XXXXXX")"
 cleanup() { rm -rf "$tmp_dir"; }
 trap cleanup EXIT
@@ -102,5 +103,5 @@ fi
 grep -Fq "LatticeStripe v$version — Documentation" "$docs_file" || fail "HexDocs page does not identify version $version"
 echo "PASS: versioned HexDocs identify $version ($docs_url)"
 
-"$(dirname "$0")/published_hex_adopter_smoke.sh" "$version"
+env -u GH_TOKEN -u GITHUB_TOKEN -u HEX_API_KEY "$script_dir/published_hex_adopter_smoke.sh" "$version"
 echo "PASS: release evidence complete for $tag at $sha (Hex checksum $hex_checksum)"

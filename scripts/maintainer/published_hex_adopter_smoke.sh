@@ -7,7 +7,8 @@ if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
   exit 2
 fi
 
-repo_root="$(git rev-parse --show-toplevel)"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd "$script_dir/../.." && pwd)"
 source_app="$repo_root/test_apps/phoenix_adopter"
 if [[ ! -f "$source_app/mix.exs" ]]; then
   echo "BLOCKED: Phoenix adopter project was not found at $source_app." >&2
@@ -29,6 +30,7 @@ if command -v asdf >/dev/null 2>&1 && [[ -f "$repo_root/.tool-versions" ]]; then
   export ASDF_ERLANG_VERSION="$(awk '$1 == "erlang" { print $2; exit }' "$repo_root/.tool-versions")"
 fi
 unset STRIPE_SECRET_KEY STRIPE_API_KEY LATTICE_STRIPE_API_KEY STRIPE_WEBHOOK_SECRET
+unset HEX_API_KEY GH_TOKEN GITHUB_TOKEN
 cd "$tmp_dir"
 
 mix deps.get --only test
