@@ -37,6 +37,6 @@ The worktree closeout check is read-only and did not modify any tree. Final clea
 Release Please protected auto-merge: passed (run 36084111513)
 Release workflow and Hex publication: passed (run 36084157667)
 Release evidence exact-SHA verifier: passed (all checks; checksum above)
-Current PR inventory: 2 open PRs (#66 deferred for maintainer review; #69 deferred because required check is not visible to branch protection)
+Current PR inventory captured at 02:08 UTC: #66 and #69 open; #66 subsequently squash-merged; #69 updated to enable a visible pull_request ci-gate
 Final worktree check: blocked (3 blockers above; no files changed)
 ```

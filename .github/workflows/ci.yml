@@ -7,8 +7,6 @@ on:
     paths-ignore:
       - ".planning/**"
   pull_request:
-    paths-ignore:
-      - ".planning/**"
   workflow_dispatch:
     # Dispatched by release.yml when a Release PR is open but bot pushes skip pull_request CI.
 
