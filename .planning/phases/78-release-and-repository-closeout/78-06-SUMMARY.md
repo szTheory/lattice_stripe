@@ -36,7 +36,7 @@ status: halted
 
 # Phase 78 Plan 06: Release and Repository Closeout Summary
 
-**The 2.3.0 release is published and verified; PR triage is complete, while repository closeout remains halted on the preserved dirty primary checkout.**
+**The 2.3.0 release is published and verified; PR triage and main synchronization are complete, while final worktree cleanliness waits for the active GSD lock to release.**
 
 ## Completed release task
 
@@ -46,9 +46,9 @@ status: halted
 
 ## Remaining closeout gates
 
-- PR #66 was squash-merged as `d006a3605a400e1eaf0ca784506d23352bdad31a`. PR #69's CI visibility fix was then squash-merged as `ad48bd3259a22155fa4f6e4f88b0dfa8d7f54d64` after current-head `ci-gate`, test and relevant workflow checks passed in [run 36085912335](https://github.com/szTheory/lattice_stripe/actions/runs/36085912335). The refreshed open-PR inventory is empty; prior dispositions remain available in the ledger's historical snapshot.
-- The worktree checker now compares primary HEAD and fetched `origin/main` with an explicit expected current-main SHA. The immutable release remains independently checked against tag `v2.3.0`. Its latest primary-checkout result remains blocked because the checkout is dirty, HEAD is `dcb514d14aee41cb7e7e3213a276932f8e33ff74` rather than current main `ad48bd3259a22155fa4f6e4f88b0dfa8d7f54d64`, and cached `origin/main` is stale at `a318624dbcf45546d66a4aaaece19dff42ba13ad`.
-- The primary checkout cannot be declared clean or synchronized. Preserve its state and resume closeout only after its owner changes are resolved and Git metadata can be refreshed safely.
+- PR #66 was squash-merged as `d006a3605a400e1eaf0ca784506d23352bdad31a`, #69 as `ad48bd3259a22155fa4f6e4f88b0dfa8d7f54d64`, and #70 as `f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3`. Current-main CI passed on that final SHA in [run 36087583089](https://github.com/szTheory/lattice_stripe/actions/runs/36087583089), and the refreshed open-PR inventory is empty.
+- The worktree checker compares primary HEAD and refreshed `origin/main` with an explicit expected current-main SHA. The immutable release remains independently checked against tag `v2.3.0`. The primary checkout now matches main; the latest read-only inventory is blocked only by active `.planning/milestone.lock`, preserved until GSD releases it or its window expires.
+- The user-authored policy and planning changes, Phase 75–77 evidence, and Phase 76 coverage are on main. The expired generated dispatch sentinel was removed. The previous local history is backed up at `/private/tmp/lattice-root-state-backup.bundle`.
 
 ## Artifacts
 
@@ -56,7 +56,7 @@ status: halted
 - [Current open-PR inventory and historical dispositions](./78-PR-DISPOSITIONS.json)
 - [Updated release train](../../RELEASE-TRAIN.md)
 
-This plan is intentionally halted. Release publication and PR triage are complete; repository cleanliness and synchronization remain open until primary checkout state is reconciled and its remote tracking ref can be refreshed.
+This plan remains halted on the active GSD lock. Release publication, PR triage, main synchronization, and green current-main CI are complete; the remaining closeout gate is a clean all-worktree inventory after the lock is safely released.
 
 ---
 *Phase: 78-release-and-repository-closeout*

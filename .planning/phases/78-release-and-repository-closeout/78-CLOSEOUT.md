@@ -1,6 +1,6 @@
 # Phase 78 Closeout — Release Evidence and Remaining Repository Gate
 
-**Last refreshed:** 2026-09-25 UTC
+**Last refreshed:** 2026-09-25 02:49 UTC
 
 **Repository:** `szTheory/lattice_stripe`
 
@@ -19,17 +19,17 @@
 
 ## PR disposition — refreshed
 
-PRs [#66](https://github.com/szTheory/lattice_stripe/pull/66) and [#69](https://github.com/szTheory/lattice_stripe/pull/69) have since been squash-merged after current-head CI passed. The refreshed open-PR inventory is empty. Current main is `ad48bd3259a22155fa4f6e4f88b0dfa8d7f54d64`; required `ci-gate`, tests, and relevant lanes passed in [run 36085912335](https://github.com/szTheory/lattice_stripe/actions/runs/36085912335). No administrator bypass was used.
+PRs [#66](https://github.com/szTheory/lattice_stripe/pull/66), [#69](https://github.com/szTheory/lattice_stripe/pull/69), and [#70](https://github.com/szTheory/lattice_stripe/pull/70) have been squash-merged after current-head CI passed. The refreshed open-PR inventory is empty. Current main is `f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3`; required `ci-gate`, tests, and relevant lanes passed in [run 36087583089](https://github.com/szTheory/lattice_stripe/actions/runs/36087583089). No administrator bypass was used.
 
 ## Worktree gate — blocked, user state preserved
 
-The read-only final check still finds the primary checkout dirty and its cached remote ref stale. Release identity remains `1e83a99029f19c24c97549752adf8f57cabc7dd0`; the later current main is `ad48bd3259a22155fa4f6e4f88b0dfa8d7f54d64`. The closeout helper now compares primary HEAD and `origin/main` to an explicit expected current-main SHA, while immutable package artifacts remain verified independently by `release_evidence_check.sh`.
+The primary checkout is synchronized to current main. The final read-only checker now has one blocker: the active `.planning/milestone.lock` is untracked. Primary HEAD and refreshed `origin/main` both equal `f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3`. The lock is retained while its Phase 78 execution window remains active. Release identity remains `1e83a99029f19c24c97549752adf8f57cabc7dd0`; the closeout helper compares checkout and remote main to an explicit expected current-main SHA, while immutable package artifacts remain independently verified by `release_evidence_check.sh`.
 
-1. Primary checkout `/Users/jon/projects/lattice_stripe` is dirty. It contains user-owned modifications to `.agents/skills/lattice-verification-policy/SKILL.md`, `.planning/PROJECT.md`, `.planning/STATE.md`, `.planning/phases/75-typed-contract-updates/75-UAT.md`, `.planning/phases/75-typed-contract-updates/75-VERIFICATION.md`, and `.planning/state.json`, plus untracked `.gsd/dispatch-isolation-sentinel.json`, `.planning/milestone.lock`, and `.planning/phases/76-phoenix-adopter-core-flow/COVERAGE.md`. None were changed or removed for this phase.
-2. Primary checkout HEAD is `dcb514d14aee41cb7e7e3213a276932f8e33ff74`, not current main `ad48bd3259a22155fa4f6e4f88b0dfa8d7f54d64`.
-3. Primary checkout's cached `origin/main` is stale at `a318624dbcf45546d66a4aaaece19dff42ba13ad`. Refreshing it from this checkout was blocked by `.git/FETCH_HEAD` write permission. The isolated recovery clone was used for authenticated remote verification and was not counted as the primary worktree.
+1. The primary checkout has one dirty entry: untracked `.planning/milestone.lock`, created for the active Phase 78 GSD session. It is preserved until GSD releases it or the lock expires.
+2. Primary checkout HEAD and refreshed `origin/main` both equal `f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3`.
+3. The user-authored policy and planning changes, Phase 75–77 evidence, and Phase 76 coverage artifact are on main. The expired generated `.gsd/dispatch-isolation-sentinel.json` was removed. The previous 101-commit local history was preserved in `/private/tmp/lattice-root-state-backup.bundle` before synchronizing the primary checkout.
 
-The worktree closeout check is read-only and did not modify any tree. Final clean/synchronized-worktree acceptance remains open until the owner state is reconciled and the primary checkout can safely refresh its remote ref.
+The worktree closeout check is read-only and did not modify any tree. Final clean-worktree acceptance remains open only until the active milestone lock is released or expires; main synchronization and PR triage now pass.
 
 ## Verification record
 
@@ -37,6 +37,6 @@ The worktree closeout check is read-only and did not modify any tree. Final clea
 Release Please protected auto-merge: passed (run 36084111513)
 Release workflow and Hex publication: passed (run 36084157667)
 Release evidence exact-SHA verifier: passed (all checks; checksum above)
-Current PR inventory: empty after #66 and #69 squash merges; main CI run 36085912335 passed
-Final worktree check: blocked (3 blockers above; no files changed)
+Current PR inventory: empty after #66, #69, and #70 squash merges; main CI run 36087583089 passed on f0dabe20d77f1b85f1f4c4db2650bcb04ac8ecb3
+Final worktree check: blocked only by active .planning/milestone.lock; primary main and origin/main match
 ```
