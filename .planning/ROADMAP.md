@@ -137,7 +137,7 @@ Plans:
 - [x] 78-02-PLAN.md — compatibility preflight and protected release merge
 - [x] 78-03-PLAN.md — complete PR dispositions and linked ledger
 - [x] 78-04-PLAN.md — read-only all-worktree closeout probe
-- [ ] 78-05-PLAN.md — concrete public-publish decision gate
+- [x] 78-05-PLAN.md — concrete public-publish decision gate
 - [ ] 78-06-PLAN.md — publish verified release and final repository closeout
 
 ### Progress

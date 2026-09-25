@@ -36,7 +36,7 @@ skipped: 0
 
 ## Latest Automated Rerun
 
-- Current main CI run [36085912335] passed on `ad48bd3259a22155fa4f6f4e88b0dfa8d7f54d64`; the Phoenix adopter job and required `ci-gate` both passed. The phase’s existing path-dependency, Checkout, signed-webhook, and tampered-body evidence remains applicable to this unchanged adopter implementation. (https://github.com/szTheory/lattice_stripe/actions/runs/36085912335).
+- The full CI run [36088077120] passed on PR #71 head `dfb43de084c831e51a834b30596f7f468a2f9e72`; its tree is identical to merged main `629c9a2a69c1c9e38fa842e2b5157b6e64c4904d`. The Phoenix adopter job and required `ci-gate` passed; existing path-dependency, Checkout, signed-webhook, and tampered-body evidence remains applicable to this unchanged adopter implementation. (https://github.com/szTheory/lattice_stripe/actions/runs/36088077120).
 
 ## Gaps
 
