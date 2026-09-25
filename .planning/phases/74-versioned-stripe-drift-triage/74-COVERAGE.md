@@ -1,1 +1,0 @@
-No external API integration: Phase 74 reviews public Stripe contract evidence and records candidate decisions; it does not build or change an API integration. Typed field implementation is scoped to Phase 75.
