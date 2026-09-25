@@ -1,36 +1,28 @@
 {
   "repository": "szTheory/lattice_stripe",
-  "generated_at": "2026-09-24T23:58:41Z",
-  "inventory_source": "gh pr list --repo szTheory/lattice_stripe --state open --limit 1000",
-  "status": "complete",
+  "generated_at": "2026-09-25T02:04:56Z",
+  "inventory_source": "gh pr list --repo szTheory/lattice_stripe --state open --limit 1000 --json number,url,title,headRefOid,statusCheckRollup",
+  "status": "current",
   "entries": [
     {
       "pr_number": 66,
       "pr_url": "https://github.com/szTheory/lattice_stripe/pull/66",
       "title": "chore(deps-dev): bump the dev-dependencies group across 1 directory with 3 updates",
-      "head_sha": "9b6d29dcf565cf03a529f8086eb3c3d93d985b27",
+      "head_sha": "01a3d655291f65dc02460f57a25a929242485d6a",
       "disposition": "defer",
-      "rationale": "Current-head Quality and ci-gate checks are failing; defer pending investigation and revisit after required checks pass and maintainer review is complete.",
-      "next_action": "Investigate the Quality failure, then revisit after current-head required checks pass and maintainer review is complete.",
-      "next_action_date": "2026-09-25",
+      "rationale": "All current-head required checks, including Quality and ci-gate, pass; defer remains in place because no maintainer review is recorded, as required by the existing contributor-visible disposition.",
+      "next_action": "Obtain and record maintainer review, then reassess this Dependabot update while current-head checks remain green.",
+      "next_action_date": "2026-09-26",
       "required_checks": {
-        "head_sha": "9b6d29dcf565cf03a529f8086eb3c3d93d985b27",
-        "state": "failure",
-        "ci_gate": "failure",
-        "failed": [
-          {
-            "name": "Quality",
-            "url": "https://github.com/szTheory/lattice_stripe/actions/runs/35565687653/job/106226925672"
-          },
-          {
-            "name": "ci-gate",
-            "url": "https://github.com/szTheory/lattice_stripe/actions/runs/35565687653/job/106227184251"
-          }
-        ],
-        "successful_count": 16,
-        "failed_count": 2
+        "head_sha": "01a3d655291f65dc02460f57a25a929242485d6a",
+        "state": "success",
+        "ci_gate": "success",
+        "failed": [],
+        "successful_count": 21,
+        "failed_count": 0,
+        "inventory_captured_at": "2026-09-25T02:04:56Z"
       },
-      "review_state": "no maintainer reviews found",
+      "review_state": "no maintainer reviews found as of 2026-09-25T02:04:56Z",
       "existing_timeline_activity": [
         {
           "url": "https://github.com/szTheory/lattice_stripe/pull/66#issuecomment-5755941417",

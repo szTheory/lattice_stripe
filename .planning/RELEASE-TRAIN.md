@@ -6,7 +6,7 @@ feature work.
 
 ## Current release truth
 
-- Latest released version: `2.2.2`.
+- Latest released version: `2.3.0`.
 - GitHub Release [`v2.2.2`](https://github.com/szTheory/lattice_stripe/releases/tag/v2.2.2),
   tag `v2.2.2`, and Hex 2.2.2 resolve to the release completed on 2026-08-25
   from commit `7f290b11ddc5dcdefc9e6e0aa5cad43e9d734440`. HexDocs was refreshed by
@@ -27,6 +27,23 @@ feature work.
   successful `ci-gate` all identify the same release commit.
 - Live Stripe claims that cannot be proved by source-backed documentation or a
   passing stripe-mock test remain explicit external-verification boundaries.
+
+
+## Verified final 2.3.0 release
+
+Audited against the public remotes on 2026-09-25:
+
+| Surface | Evidence | Status |
+|---------|----------|--------|
+| Release PR | [#68](https://github.com/szTheory/lattice_stripe/pull/68) merged by the protected release auto-merge workflow after exact-head preflight and green `ci-gate` | verified |
+| Release SHA | `1e83a99029f19c24c97549752adf8f57cabc7dd0` (`1e83a99`), tag `v2.3.0` peels to this commit | verified |
+| CI and publication | [Release run 36084157667](https://github.com/szTheory/lattice_stripe/actions/runs/36084157667) passed exact-SHA CI, Hex dry run, publication, and registry verification | verified |
+| Hex | [lattice_stripe 2.3.0](https://hex.pm/packages/lattice_stripe/2.3.0), checksum `e921209af48b4673fab1f39eb210839b41d55497ad456822b78f6f36d4cab088` | verified |
+| HexDocs and adopter smoke | [2.3.0 docs](https://hexdocs.pm/lattice_stripe/2.3.0/); published-Hex Phoenix smoke passed 3 tests, 0 failures | verified |
+| Independent release verifier | `release_evidence_check.sh --version 2.3.0 --sha 1e83a99029f19c24c97549752adf8f57cabc7dd0` passed | verified |
+| Repository closeout | PR #66 remains open with green current-head checks but no maintainer reviews; primary checkout is dirty and behind cached `origin/main` | pending |
+
+The v2.3.0 package and release artifacts are complete. Repository closeout is still open: preserve the primary checkout's owner changes, obtain the required maintainer review for PR #66, and refresh primary `origin/main` when its Git metadata is writable. See [Phase 78 closeout](./phases/78-release-and-repository-closeout/78-CLOSEOUT.md) for exact evidence and blockers.
 
 ## Verified final 2.2.2 release
 

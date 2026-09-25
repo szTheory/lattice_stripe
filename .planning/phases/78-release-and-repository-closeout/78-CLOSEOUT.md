@@ -1,26 +1,42 @@
-# Phase 78 Closeout — PR Triage
+# Phase 78 Closeout — Release Evidence and Remaining Repository Gate
 
-**Inventory captured:** 2026-09-24 23:58 UTC  
-**Repository:** `szTheory/lattice_stripe`  
-**Open PRs:** 1  
+**Inventory captured:** 2026-09-25 02:04 UTC
+
+**Repository:** `szTheory/lattice_stripe`
+
+**Release:** `2.3.0` at `1e83a99029f19c24c97549752adf8f57cabc7dd0`
 **Evidence ledger:** [78-PR-DISPOSITIONS.json](./78-PR-DISPOSITIONS.json)
 
-## Disposition
+## Release evidence — passed
 
-| PR | Current head | Disposition | Required checks | Contributor-visible decision |
-|---|---|---|---|---|
-| [#66](https://github.com/szTheory/lattice_stripe/pull/66) | `9b6d29dcf565cf03a529f8086eb3c3d93d985b27` | Defer pending investigation | `Quality` and `ci-gate` failed; other reported checks succeeded | [Comment #5824286242](https://github.com/szTheory/lattice_stripe/pull/66#issuecomment-5824286242) |
+- Release Please PR [#68](https://github.com/szTheory/lattice_stripe/pull/68) was merged by the protected auto-merge workflow after candidate preflight and successful `ci-gate` on exact candidate `eb215b19f035c782dca5edafe1bbb9e8233f5efd`. The workflow passed: [auto-merge run 36084111513](https://github.com/szTheory/lattice_stripe/actions/runs/36084111513).
+- Release commit: `1e83a99029f19c24c97549752adf8f57cabc7dd0`, parent `260edf43189e7b180c863e413472d832c6352d00`.
+- [Release workflow 36084157667](https://github.com/szTheory/lattice_stripe/actions/runs/36084157667) passed, including `ci-gate` verification on the release SHA and Hex publication.
+- [GitHub Release v2.3.0](https://github.com/szTheory/lattice_stripe/releases/tag/v2.3.0) and tag `v2.3.0` resolve to the same release commit.
+- Exact-SHA verifier `scripts/maintainer/release_evidence_check.sh --version 2.3.0 --sha 1e83a99029f19c24c97549752adf8f57cabc7dd0` passed all checks: tag peeling, GitHub Release, main ancestry, newest exact-SHA `ci-gate` ([CI run 36084155921, job 107912495099](https://github.com/szTheory/lattice_stripe/actions/runs/36084155921/job/107912495099)), Hex registry/tarball SHA-256 parity, versioned HexDocs, and published-Hex Phoenix adopter smoke (3 tests, 0 failures).
+- Hex 2.3.0 checksum: `e921209af48b4673fab1f39eb210839b41d55497ad456822b78f6f36d4cab088`.
+- Versioned docs: [HexDocs 2.3.0](https://hexdocs.pm/lattice_stripe/2.3.0/).
 
-PR #66 is a Dependabot development-dependency update. The live inventory still reports it open and blocked from merging at the recorded head. There is no maintainer review recorded. The only failing checks are `Quality` and `ci-gate`; both remain failed on the current head.
+## Current open PR disposition
 
-The exact authorized disposition was posted to the PR: “Disposition: defer pending investigation of the failing Quality and ci-gate checks. Revisit after current-head required checks pass and maintainer review is complete.” The comment body and URL were verified from GitHub's issue-comment API.
+The fresh authenticated inventory contains one PR: [#66](https://github.com/szTheory/lattice_stripe/pull/66), current head `01a3d655291f65dc02460f57a25a929242485d6a`. Its full status rollup is green, including `Quality` and `ci-gate`; no maintainer reviews are recorded. The existing contributor-visible defer decision remains in force pending maintainer review. The ledger has been refreshed to the current head/check state and preserves the verified decision comment URL.
 
-**Next step:** investigate the Quality failure, then revisit after current-head required checks pass and maintainer review is complete. The ledger records 2026-09-25 as the next-action date.
+## Worktree gate — blocked, user state preserved
 
-## Verification
+The read-only final check `scripts/maintainer/worktree_closeout_check.sh --owners /private/tmp/lattice_phase78_recovery/worktree-owners.json --final --release-sha 1e83a99029f19c24c97549752adf8f57cabc7dd0` reported three blockers:
+
+1. Primary checkout `/Users/jon/projects/lattice_stripe` is dirty. It contains user-owned modifications to `.agents/skills/lattice-verification-policy/SKILL.md`, `.planning/PROJECT.md`, `.planning/STATE.md`, `.planning/phases/75-typed-contract-updates/75-UAT.md`, `.planning/phases/75-typed-contract-updates/75-VERIFICATION.md`, and `.planning/state.json`, plus untracked `.gsd/dispatch-isolation-sentinel.json`, `.planning/milestone.lock`, and `.planning/phases/76-phoenix-adopter-core-flow/COVERAGE.md`. None were changed or removed for this phase.
+2. Primary checkout HEAD is `dcb514d14aee41cb7e7e3213a276932f8e33ff74`, not release SHA `1e83a99029f19c24c97549752adf8f57cabc7dd0`.
+3. Primary checkout's cached `origin/main` is stale at `a318624dbcf45546d66a4aaaece19dff42ba13ad`. Refreshing it from this checkout was previously blocked by `.git/FETCH_HEAD` write permission. The isolated recovery clone was used for authenticated remote verification and was not counted as the primary worktree.
+
+The worktree closeout check is read-only and did not modify any tree. Final clean/synchronized-worktree acceptance remains open until the owner state is reconciled and the primary checkout can safely refresh its remote ref.
+
+## Verification record
 
 ```text
-bash -n scripts/maintainer/pr_closeout_check.sh scripts/maintainer/test_pr_closeout_check.sh — passed
-bash scripts/maintainer/test_pr_closeout_check.sh — passed
-scripts/maintainer/pr_closeout_check.sh --ledger .planning/phases/78-release-and-repository-closeout/78-PR-DISPOSITIONS.json — passed against fresh authenticated inventory
+Release Please protected auto-merge: passed (run 36084111513)
+Release workflow and Hex publication: passed (run 36084157667)
+Release evidence exact-SHA verifier: passed (all checks; checksum above)
+Current PR inventory: 1 open PR (#66), current disposition retained pending maintainer review
+Final worktree check: blocked (3 blockers above; no files changed)
 ```
