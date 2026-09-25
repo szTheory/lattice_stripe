@@ -40,6 +40,7 @@ test-locked rather than merely documented. Items 3 and 4 are unchanged.
   drift is a visible diff rather than a silent one.
 
 ---
+  status: acknowledged
 
 ## 2. `entitlements.active_entitlement_summary` changes the ERROR SHAPE of `Webhook.fetch_related_object/3`
 
@@ -74,6 +75,7 @@ test-locked rather than merely documented. Items 3 and 4 are unchanged.
   `RelatedObject.url` comes verbatim off the wire.
 
 ---
+  status: acknowledged
 
 ## 3. `guides/getting-started.md` `../README.md` relative link is broken on HexDocs
 
@@ -89,6 +91,7 @@ test-locked rather than merely documented. Items 3 and 4 are unchanged.
   `Webhook.check_tolerance` autolinks).
 
 ---
+  status: acknowledged
 
 ## 4. The two pre-existing flaky tests remain open (inherited from Phase 64)
 
@@ -99,3 +102,4 @@ test-locked rather than merely documented. Items 3 and 4 are unchanged.
   suggested fixes.
 - **Neither fired during any Phase 65 run**, across all six plans. No new information; recorded so
   the phase-65 close does not read as having silently resolved them.
+  status: acknowledged

@@ -2,6 +2,53 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.12 — API Contract Freshness and Adopter Proof
+
+**Shipped:** 2026-09-25
+**Phases:** 5 (74–78) | **Plans:** 13 | **Tasks:** 16 | **Requirements:** 14
+
+### What Was Built
+
+- Stable-source triage selected a bounded set of Invoice and Refund fields without changing the default Stripe API version.
+- Typed response decoding preserved unknown fields and additive API compatibility.
+- A reusable synthetic Phoenix adopter proved Checkout/webhooks, B2B invoice behavior, usage pagination and idempotency, and Connect request context.
+- Package 2.3.0 was published and independently verified across exact-SHA CI, GitHub Release, Hex, HexDocs, and a published-package smoke.
+- PR and worktree checkers made closeout evidence repeatable; milestone audit covered all requirements and phase joins.
+
+### What Worked
+
+- Stable Stripe source pointers plus decoder and adopter tests kept drift promotion tied to observable value.
+- The shared Phoenix host made distinct adopter profiles and the published-Hex smoke reuse one realistic consumer boundary.
+- Exact release SHA evidence kept immutable package identity distinct from later repository closeout commits.
+- The read-only worktree gate protected user-owned state while still making final cleanliness measurable.
+
+### What Was Inefficient
+
+- Phase 78 records needed refreshing after PR triage and the GSD lock expiry; a final closeout pass after all remote decisions would reduce truth lag.
+- GSD requirement completion invalidated verification fingerprints across earlier phases, requiring a metadata-only refresh before the milestone audit.
+
+### Patterns Established
+
+- Treat stable API evidence, semantic compatibility, and an adopter job as joint prerequisites for promoting Stripe drift.
+- Reuse one synthetic host application for dependency setup, common flows, and a few distinct SDK contracts.
+- Keep package release SHA, current main SHA, and milestone archive/tag as separate provenance facts.
+
+### Key Lessons
+
+1. A bounded API freshness gap can justify a focused milestone without reopening broad resource coverage.
+2. Passing phase checks are not enough for release closeout; verify the exact published package as a consumer would.
+3. Closeout work should reserve time for live PR/worktree inventory after the final merge and lock expiry.
+4. Preserve optional edge coverage and validation status as explicit debt; do not add a new phase without evidence that the extra cases matter to adopters.
+
+### Cost Observations
+
+- Timeline: 2026-09-23 to 2026-09-25.
+- Scope: 5 phases, 13 plans, 16 tasks, and 14 requirements.
+- CI: PR #73 passed all required lanes and `ci-gate` on exact head before squash merge.
+- Model/session cost was not captured in the milestone artifacts.
+
+---
+
 ## Milestone: v1.11 — Reader-First Quality Closure
 
 **Shipped:** 2026-08-25

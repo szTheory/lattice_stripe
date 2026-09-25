@@ -2,44 +2,43 @@
 gsd_state_version: "1.0"
 milestone: v1.12
 milestone_name: API Contract Freshness and Adopter Proof
-current_phase: 78
-status: completed
+status: Awaiting next milestone
 stopped_at: Phase 78 complete — all phases complete
-last_updated: "2026-09-25T03:50:31.476Z"
+last_updated: "2026-09-25T12:49:59.263Z"
 last_activity: 2026-09-25
-last_activity_desc: Phase 78 complete
-state_head: 7f0eb4ba75da2e256f4e05bdd10cf64551dd154e
+last_activity_desc: Milestone v1.12 completed and archived
+state_head: 6c51a1e83968c9dec0cc72b51a7583f0c46cbb5f
 progress:
   total_phases: 5
   completed_phases: 5
   total_plans: 13
   completed_plans: 13
   percent: 100
+current_phase: 78
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-09-23 for v1.12)
+See: `.planning/PROJECT.md` (updated 2026-09-25 after v1.12)
 
 **Core value:** Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising.
-**Current focus:** Phase 78 — Release and Repository Closeout
+**Current focus:** Planning next milestone only when new evidence warrants it.
 
 ## Current Position
 
-Phase: 78
-Plan: Not started
-Status: All phases complete
-Last activity: 2026-09-24 — Phase 78 complete
+v1.12 is complete and archived. No active phase.
+Last activity: 2026-09-25 — release verified, milestone audited, and archive prepared.
 
 ## Milestone Metrics
 
-- Phases: 5 (74-78)
-- Plans: 4 completed across Phases 74–76
-- Requirements: 12 pending
-- Published package: 2.2.2
-- Public API baseline: 3,463 entries at v1.11; additive v1.12 changes require compatibility and SemVer review
+- Phases: 5 (74–78), all complete and verified
+- Plans: 13 complete
+- Tasks: 16
+- Requirements: 14/14 complete
+- Published package: 2.3.0, independently verified
+- Audit: no requirement or integration blockers; bounded tech debt accepted
 
 ## Accumulated Context
 
@@ -68,12 +67,31 @@ Last activity: 2026-09-24 — Phase 78 complete
 
 None.
 
+## Deferred Items
+
+Items acknowledged at v1.12 close; original records remain in their phase artifacts.
+Four are useful follow-up context (the skipped Stripe Mock integration, two historical
+flaky tests, and the test-locked webhook error-shape boundary); the remaining entries
+are resolved or duplicate historical records acknowledged to prevent stale closeout
+noise from reopening.
+
+| Category | Item | Status | Deferred At | Milestone |
+|----------|------|--------|-------------|-----------|
+| deferred_items | 78/deferred-items.md: Stripe Mock lacks the v2 billing endpoint for one integration spec | acknowledged | 2026-09-25 | v1.12 |
+| deferred_items | 61/deferred-items.md: legacy pre-existing ExDoc warning baseline | acknowledged | 2026-09-25 | v1.12 |
+| deferred_items | 64/deferred-items.md: intermittent client retry telemetry test | acknowledged | 2026-09-25 | v1.12 |
+| deferred_items | 64/deferred-items.md: intermittent batch error-isolation test | acknowledged | 2026-09-25 | v1.12 |
+| deferred_items | 65/deferred-items.md: fixture naming follow-up resolved and semver-locked | acknowledged | 2026-09-25 | v1.12 |
+| deferred_items | 65/deferred-items.md: test-locked webhook related-object return-shape boundary | acknowledged | 2026-09-25 | v1.12 |
+| deferred_items | 65/deferred-items.md: historical HexDocs README link warning | acknowledged | 2026-09-25 | v1.12 |
+| deferred_items | 65/deferred-items.md: duplicate record of the Phase 64 flaky tests | acknowledged | 2026-09-25 | v1.12 |
+
 ## Session Continuity
 
 **Last session:** 2026-09-24T20:55:25.904Z
-**Stopped at:** Phase 78 complete — all phases complete
-**Resume file:** .planning/phases/78-release-and-repository-closeout/78-CONTEXT.md
+**Stopped at:** v1.12 archived; next action is evidence-led maintenance
+**Resume file:** none — no active phase
 
 ## Operator Next Steps
 
-Milestone v1.12 is active. Continue with `$gsd-discuss-phase 77`.
+- Stay in reactive maintenance. Use $gsd-new-milestone only when concrete evidence warrants new scope.

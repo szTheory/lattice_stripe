@@ -1,7 +1,7 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v1.12 — API Contract Freshness and Adopter Proof",
+  "milestone": "v1.12 \u2014 API Contract Freshness and Adopter Proof",
   "phases": [
     {
       "number": "74",
@@ -31,8 +31,8 @@
   ],
   "next": {
     "command": "/gsd:new-milestone",
-    "label": "Start a new milestone",
-    "reason": "All phases complete — start a new milestone"
+    "label": "Start a new milestone when evidence warrants",
+    "reason": "All current phases are complete; no successor milestone is scheduled"
   },
-  "updated_at": "2026-09-25T03:50:31.491Z"
+  "updated_at": "2026-09-25T12:55:00Z"
 }

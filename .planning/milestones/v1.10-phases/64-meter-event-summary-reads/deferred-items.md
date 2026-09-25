@@ -18,6 +18,7 @@ Out-of-scope discoveries logged during execution. Not fixed here.
   captured metadata belongs to a single-attempt call rather than the retried one.
 - **Suggested fix:** scope the handler by a unique per-test telemetry ref/config and filter
   received events by it, rather than asserting on the first event received.
+  status: acknowledged
 
 ## Pre-existing flaky test: Batch error isolation (SECOND, distinct flake)
 
@@ -43,3 +44,4 @@ Out-of-scope discoveries logged during execution. Not fixed here.
   sleep/race rather than by a stubbed error return.
 - **Why out of scope here:** 64-10 is a gate plan and changes no code — "a gate plan that
   also changes code cannot honestly report on itself." Route to a follow-up.
+  status: acknowledged
