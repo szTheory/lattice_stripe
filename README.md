@@ -8,7 +8,7 @@
 > **Current release:** **`2.3.x`** on [Hex](https://hex.pm/packages/lattice_stripe) — see
 > [CHANGELOG](CHANGELOG.md#230) for what shipped in this release line.
 >
-> The published release is **`2.3.0`**, with additive typed Invoice and Refund fields.
+> The published release is **`2.3.0`**. See the changelog for release details.
 > Evaluating fit? Start with
 > [User Flows & JTBD][user-flows-and-jtbd].
 
@@ -21,13 +21,12 @@ If you are evaluating how this fits into a real SaaS billing architecture, start
 
 ## Current scope and maintenance posture
 
-The **2.2 baseline is feature-complete for the library's intended mainstream SaaS scope**:
+The mainstream SaaS surface is feature-complete for the library's intended scope:
 payments, billing, metering, Connect, tax on custom flows, entitlement catalog and access
 reconciliation, webhooks (including thin events), and production operator guides.
 
-The 2.2 line is maintenance- and adoption-driven. Versions 2.2.1–2.2.2 tightened reliability,
-internal consistency, documentation truth, and release hygiene without changing the public
-API. New resource families remain driven by demonstrated adopter need.
+Ongoing work is maintenance- and adoption-driven. New resource families remain driven by
+demonstrated adopter need.
 
 **Not in the current typed scope:**
 

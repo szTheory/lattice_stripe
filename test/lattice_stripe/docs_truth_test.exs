@@ -636,19 +636,21 @@ defmodule LatticeStripe.DocsTruthTest do
     refute readme =~ "What's new in v1.1"
   end
 
-  describe "2.x maintenance posture and scope boundaries" do
+  describe "current maintenance posture and scope boundaries" do
     test "readme publishes the current release posture and deferred scope anchors" do
       readme = File.read!("README.md")
 
-      assert readme =~ "2.2 baseline is feature-complete"
+      assert readme =~ "mainstream SaaS surface is feature-complete"
       assert readme =~ "published release is **`#{current_exact_release()}`**"
-      assert readme =~ "additive typed Invoice and Refund fields"
+      assert readme =~ "See the changelog for release details"
       assert readme =~ "maintenance- and adoption-driven"
       assert readme =~ "hexdocs.pm/lattice_stripe/user-flows-and-jtbd.html"
       assert readme =~ "hexdocs.pm/lattice_stripe/api_stability.html"
       assert readme =~ "## Current scope and maintenance posture"
       assert readme =~ "Identity"
       assert readme =~ "Reporting"
+
+      refute readme =~ ~r/2\.\d+(?:\.\d+)? (?:baseline|line)/
 
       refute readme =~ ~r/complete Stripe SDK/i
       refute readme =~ ~r/all endpoints/i
@@ -657,14 +659,32 @@ defmodule LatticeStripe.DocsTruthTest do
     test "guides/scope.md is the canonical deferred-scope contract" do
       scope = File.read!("guides/scope.md")
 
-      assert scope =~ "published release is 2.3.0"
-      assert scope =~ "default Stripe API version at `2026-03-25.dahlia`"
+      assert scope =~ "Release-specific changes are recorded in the [CHANGELOG]"
+      assert scope =~ "default Stripe API version remains"
+      assert scope =~ "`2026-03-25.dahlia`"
       assert scope =~ "Identity"
       assert scope =~ "Reporting" or scope =~ "Sigma"
       assert scope =~ "adopter pull" or scope =~ "maintenance mode"
       assert scope =~ "Client.request"
       assert scope =~ "entitled?"
       assert scope =~ "entitlements.md"
+
+      refute scope =~ ~r/published \*\*2\.\d+\*\*|2\.\d+ line/
+    end
+
+    test "user flows describe current scope without pinning it to an old release" do
+      user_flows = File.read!("guides/user-flows-and-jtbd.md")
+
+      assert user_flows =~ "For the current mainstream scope"
+      refute user_flows =~ ~r/current 2\.\d+ scope/
+    end
+
+    test "maintainer release procedure stays reusable across releases" do
+      procedure = File.read!("docs/maintainer-release.md")
+
+      assert procedure =~ "Review each proposed release's API-lock delta and changelog"
+      assert procedure =~ "Release Please owns the version and changelog edits"
+      refute procedure =~ ~r/Release Please should propose\s+\*\*\d+\.\d+\.\d+\*\*/
     end
   end
 
