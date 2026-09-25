@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
-> **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 2.2"}`.
+> **Publishing note:** Releases are published automatically via Release Please + Hex CI. Install: `{:lattice_stripe, "~> 2.3"}`.
 
 > **Development status:** `2.2.2` is published. The 2.2.1–2.2.2 closure patches improve
 > reliability, internal consistency, documentation truth, and release hygiene.
