@@ -1,5 +1,29 @@
 # Milestones
 
+## v1.12 API Contract Freshness and Adopter Proof (Shipped: 2026-09-25)
+
+**Phases completed:** 5 phases, 13 plans, 16 tasks
+
+**Key accomplishments:**
+
+- Selected four stable Invoice and Refund fields from versioned Stripe evidence, preserving unknown fields and the existing default API version.
+- Proved the typed response contract with additive compatibility checks and schema-qualified decoding.
+- Built one synthetic Phoenix adopter for Checkout/webhooks, B2B invoice retrieval, usage pagination/idempotency, and Connect account context.
+- Published and verified lattice_stripe 2.3.0 across exact-SHA CI, GitHub Release, Hex checksum, HexDocs, and a published-Hex Phoenix smoke.
+- Closed PR and worktree gates; after PR #73, the primary checkout and `origin/main` were clean and synchronized at `6c51a1e83968c9dec0cc72b51a7583f0c46cbb5f`.
+
+**Audit:** TECH DEBT — 14/14 requirements satisfied, 5/5 phases verified, 8/8 integration links wired, and 4/4 flows complete. Two adopter edge assertions and three Nyquist validation statuses remain documented follow-ups. See [v1.12-MILESTONE-AUDIT.md](milestones/v1.12-MILESTONE-AUDIT.md).
+
+**Known verification overrides:** 8 newly acknowledged, 0 carried forward (see STATE.md Deferred Items). Four historic records are resolved or duplicate; the remaining records preserve the skipped Stripe Mock case, two intermittent tests, and a test-locked webhook boundary.
+
+**Release:** package 2.3.0 at `1e83a99029f19c24c97549752adf8f57cabc7dd0`; exact-SHA release evidence passed, including checksum `e921209af48b4673fab1f39eb210839b41d55497ad456822b78f6f36d4cab088`.
+
+**Closeout PR:** [#73](https://github.com/szTheory/lattice_stripe/pull/73), merged after all required checks and `ci-gate` passed on exact head `61fa219349c8cb45afb535bb3eba151b0ce2b846` in [run 36092442252](https://github.com/szTheory/lattice_stripe/actions/runs/36092442252).
+
+**What's next:** Reactive maintenance. No successor milestone is scheduled. Thirteen older quick-task folders remain outside this archive because their milestone ownership is unknown.
+
+---
+
 ## v1.11 Reader-First Quality Closure (Shipped: 2026-08-25)
 
 **Phases completed:** 6 phases, 6 plans, 0 tasks

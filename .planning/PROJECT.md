@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. GSD milestone v1.11 completed a reader-first quality closure on the published 2.2.2 package line, preserving the complete Payments, Billing, Connect, Tax, webhook, Entitlements, and operator surface while making the repository easier to trust and maintain. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
+A production-grade, idiomatic Elixir SDK for the Stripe API. LatticeStripe is the default Stripe integration for the Elixir ecosystem — reliable enough for production SaaS, ergonomic enough that Elixir developers feel at home immediately. GSD milestone v1.12 completed evidence-led API contract freshness and adopter proof on the published 2.3.0 package line, preserving compatibility while adding typed Invoice and Refund fields and a repeatable Phoenix host-app integration proof. Hex package: `lattice_stripe`, module prefix: `LatticeStripe`.
 
 ## Core Value
 
-Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated across eleven completed GSD milestones and by downstream adopter pull from Accrue.
+Elixir developers can integrate Stripe payments into their applications with confidence — correct, well-documented, and unsurprising. **Still the right priority** — validated across thirteen completed GSD milestones and by downstream adopter pull from Accrue.
 
 ## Maintainer Intent (2026-09-23)
 
@@ -39,7 +39,7 @@ Aim for zero human verification and UAT handoffs. Before asking a person to veri
 
 When every scoped deliverable has named, passing automated evidence and no separate human-only checkpoint remains, complete UAT from that evidence without requesting a blanket confirmation. Empty or malformed coverage is not proof; derive checks for the deliverables and keep uncovered behavior visible.
 
-## Latest Milestone: v1.11 Reader-First Quality Closure
+## Previous Milestone: v1.11 Reader-First Quality Closure
 
 **Goal achieved:** Turn the already-complete SDK into a clean, trustworthy maintenance
 pause: reader-first internals, an exactly preserved public API, honest CI/security
@@ -60,7 +60,7 @@ Stripe resource families, public convenience hooks, DSL/code generation,
 provider-shaped abstractions, or speculative API changes are allowed. HexDocs and
 the public Elixir API are the user interface; there is no web UI scope.
 
-## Current Milestone: v1.12 API Contract Freshness and Adopter Proof
+## Latest Milestone: v1.12 API Contract Freshness and Adopter Proof
 
 **Goal:** Improve typed coverage for high-value changes in already-supported Stripe
 resources and prove the package from a small Phoenix application consuming it as a
@@ -82,25 +82,33 @@ application-owned billing policy.
 
 ## Current State
 
-**Latest shipped milestone:** v1.11 Reader-First Quality Closure completed on
-2026-08-25: 27/27 requirements, 6/6 verified phases, an unchanged 3,463-entry
-public API, and package 2.2.2 verified on GitHub Releases, Hex, and HexDocs.
+**Latest shipped milestone:** v1.12 API Contract Freshness and Adopter Proof completed
+2026-09-25: 14/14 requirements, 5/5 verified phases, and package 2.3.0 verified on
+GitHub Releases, Hex, and HexDocs. The public API additions are limited to the selected
+Invoice and Refund contract fields.
 
-**Active milestone:** v1.12 API Contract Freshness and Adopter Proof.
+**Active milestone:** None. Stay in reactive maintenance until a confirmed defect,
+Stripe API change, security need, or demonstrated adopter pull justifies new scope.
 
-**Done estimate:** v1.11 is complete; the intended mainstream SDK surface is near done.
-The 2026-09-23 reassessment found a material but bounded Stripe API freshness opportunity;
+**Done estimate:** The intended mainstream SDK surface is near complete. v1.12 closed the
+identified API-freshness gap with exact-source evidence and one reusable Phoenix adopter;
 it does not justify broad specialist-family expansion.
 
-**Post-v1.x posture:** Evidence-led maintenance and bounded quality work. The next candidate
-is API freshness for already-supported mainstream resources with representative adopter
-proof. Specialist resource families remain pull-driven; no marketing website.
+**Post-v1.x posture:** Evidence-led maintenance. Specialist resource families remain
+pull-driven; no marketing website or scheduled feature milestone is planned.
 
 **Public surface:** [README.md](README.md) + [HexDocs](https://hexdocs.pm/lattice_stripe) + [guides/scope.md](guides/scope.md) — sufficient for an SDK; do not duplicate in a standalone site.
 
 **Adoption:** Pure maintenance until external pull (no scheduled launch post). See `.planning/threads/post-v1x-maintenance-posture.md`.
 
-**Latest archived milestone:** v1.11 Reader-First Quality Closure (archived 2026-08-25)
+**Latest archived milestone:** v1.12 API Contract Freshness and Adopter Proof (archived 2026-09-25)
+
+**What shipped in v1.12:**
+
+- **Versioned drift triage** — selected four stable Invoice and Refund fields from Stripe source evidence and retained the existing API-version default.
+- **Typed contract updates** — decoded the selected fields while preserving unknown response values and additive SemVer compatibility.
+- **Phoenix adopter proof** — exercised Checkout, signed webhooks, B2B invoicing, usage pagination/idempotency, and Connect account context from one synthetic host application.
+- **Release and closeout** — published and verified 2.3.0 from its immutable release SHA, passed current-head CI, triaged all PRs, and synchronized a clean primary worktree.
 
 **What shipped in v1.10:**
 
@@ -309,14 +317,15 @@ None scheduled. Stay in reactive maintenance and open a bounded milestone only f
 - ✓ Adopter-first SemVer, tenancy, idempotency, streaming, testing, and release documentation
 - ✓ Verified 2.2.2 release and a clean maintenance handoff
 
+### Completed in v1.12
+
+- ✓ Stable-source drift triage and four additive typed Invoice/Refund fields with compatibility, unknown-field, and API-version proof (DRIFT-01..04) — Phases 74–75
+- ✓ One synthetic Phoenix adopter proves dependency setup, Checkout/webhooks, B2B, usage, Connect, and deterministic required CI (ADOPT-01..05) — Phases 76–77
+- ✓ Published and independently verified package 2.3.0; current-head CI, PR triage, and clean synchronized worktree closeout (REL-01..02, CLOSE-01..03) — Phase 78
+
 ### Active
 
-- [ ] **DRIFT-01..04**: Classify supported-resource API drift, promote selected high-value
-  typed fields with compatibility proof, and document the supported contract.
-- [ ] **ADOPT-01..05**: Prove dependency configuration and common SaaS plus selected edge
-  contracts from one test-only Phoenix adopter without live Stripe credentials.
-- [ ] **REL-01..02 / CLOSE-01..03**: Publish and verify the compatible package release; leave
-  `main` CI green, triage open pull requests, and clean all Git worktrees.
+None scheduled. Define new requirements only after concrete adopter or maintenance evidence.
 
 ### Out of Scope
 
@@ -374,6 +383,9 @@ None scheduled. Stay in reactive maintenance and open a bounded milestone only f
 | Keep GSD milestone versions distinct from package versions | Planning advanced through doc-only v1.8/v1.9 while package releases followed SemVer; forcing them into lockstep obscures release truth | ✓ Good (v1.10 close) |
 | Freeze the exact public API during v1.11 quality closure | A maintenance cleanup should reduce reader and operator cost without transferring migration cost to adopters; the existing 3,463-entry snapshot is the hard boundary | ✓ Good (v1.11) |
 | Ratchet quality only where the signal is truthful | Stable 80% coverage, explicit optional-feature lanes, immutable CI inputs, and meaningful adapter tests are more valuable than vanity percentages or redundant tools | ✓ Good (v1.11) |
+| Promote only drift supported by stable API evidence and adopter value | Raw OpenAPI diffs are candidates, not compatibility decisions; preserve the default version when evidence does not justify a move | ✓ Good (v1.12) |
+| Prove integrations from a reusable synthetic Phoenix host | A shared adopter covers library configuration and distinct contracts without transferring billing policy into the SDK | ✓ Good (v1.12) |
+| Join release provenance to package consumption | Exact-SHA CI, GitHub metadata, Hex checksum, HexDocs, and a published-package smoke form the release proof | ✓ Good (v1.12) |
 
 ## Evolution
 
@@ -393,4 +405,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-09-23 for v1.12 API Contract Freshness and Adopter Proof.*
+*Last updated: 2026-09-25 after v1.12 API Contract Freshness and Adopter Proof.*

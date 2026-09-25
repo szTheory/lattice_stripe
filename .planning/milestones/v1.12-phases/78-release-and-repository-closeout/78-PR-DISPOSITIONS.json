@@ -1,0 +1,74 @@
+{
+  "repository": "szTheory/lattice_stripe",
+  "generated_at": "2026-09-25T03:45:00Z",
+  "inventory_source": "gh pr list --repo szTheory/lattice_stripe --state open --limit 1000 --json number,url,title,headRefOid,statusCheckRollup",
+  "status": "current_no_open_prs",
+  "entries": [],
+  "historical_snapshot": [
+    {
+      "pr_number": 66,
+      "pr_url": "https://github.com/szTheory/lattice_stripe/pull/66",
+      "title": "chore(deps-dev): bump the dev-dependencies group across 1 directory with 3 updates",
+      "head_sha": "01a3d655291f65dc02460f57a25a929242485d6a",
+      "disposition": "defer",
+      "rationale": "All current-head required checks, including Quality and ci-gate, pass; defer remains in place because no maintainer review is recorded, as required by the existing contributor-visible disposition.",
+      "next_action": "Obtain and record maintainer review, then reassess this Dependabot update while current-head checks remain green.",
+      "next_action_date": "2026-09-26",
+      "required_checks": {
+        "head_sha": "01a3d655291f65dc02460f57a25a929242485d6a",
+        "state": "success",
+        "ci_gate": "success",
+        "failed": [],
+        "successful_count": 21,
+        "failed_count": 0,
+        "inventory_captured_at": "2026-09-25T02:08:24Z"
+      },
+      "review_state": "no maintainer reviews found as of 2026-09-25T02:08:24Z",
+      "existing_timeline_activity": [
+        {
+          "url": "https://github.com/szTheory/lattice_stripe/pull/66#issuecomment-5755941417",
+          "author": "dependabot[bot]",
+          "note": "Automated comment reports an invalid dependencies label; it does not record a maintainer disposition."
+        }
+      ],
+      "timeline": {
+        "url": "https://github.com/szTheory/lattice_stripe/pull/66#issuecomment-5824286242",
+        "decision_text": "Disposition: defer pending investigation of the failing Quality and ci-gate checks. Revisit after current-head required checks pass and maintainer review is complete.",
+        "status": "posted_and_verified"
+      }
+    },
+    {
+      "pr_number": 69,
+      "pr_url": "https://github.com/szTheory/lattice_stripe/pull/69",
+      "title": "docs(78-06): record verified release and closeout gates",
+      "head_sha": "905982d6c0e1eb14c8b17bd79891f1603282476a",
+      "disposition": "defer",
+      "rationale": "The exact-head full CI workflow_dispatch run passed, including ci-gate, but GitHub does not expose those checks in the PR status rollup; main branch protection blocks the merge and repository auto-merge is disabled. Do not use administrator bypass.",
+      "next_action": "Use a supported pull_request CI path that makes ci-gate visible in the PR rollup, then reassess the exact current head.",
+      "next_action_date": "2026-09-26",
+      "required_checks": {
+        "head_sha": "905982d6c0e1eb14c8b17bd79891f1603282476a",
+        "state": "failure",
+        "ci_gate": "missing",
+        "failed": [
+          {
+            "name": "auto-merge",
+            "conclusion": "SKIPPED",
+            "url": "https://github.com/szTheory/lattice_stripe/actions/runs/36084832730/job/107914297672"
+          }
+        ],
+        "successful_count": 2,
+        "failed_count": 1,
+        "exact_sha_ci_gate": "success",
+        "exact_sha_ci_url": "https://github.com/szTheory/lattice_stripe/actions/runs/36084846798/job/107914575614",
+        "inventory_captured_at": "2026-09-25T02:08:24Z"
+      },
+      "review_state": "no reviews found as of 2026-09-25T02:08:24Z",
+      "timeline": {
+        "url": "https://github.com/szTheory/lattice_stripe/pull/69#issuecomment-5825513070",
+        "decision_text": "Closeout disposition: defer merge because the base branch protection does not recognize the exact-SHA workflow_dispatch ci-gate in the PR status rollup.",
+        "status": "posted_and_verified"
+      }
+    }
+  ]
+}
